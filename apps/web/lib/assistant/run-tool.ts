@@ -32,6 +32,13 @@ import { analyzeCv, atsScore, atsBreakdown } from "@/lib/ats-score";
 import { matchCvToJd, looksLikeJobDescription } from "@/lib/job-match";
 import type { ProvenanceSpan } from "@/lib/provenance";
 import { recordApplicationStatus } from "@/lib/outcomes/events";
+import {
+  execImproveSummary,
+  execTailorCv,
+  execCoverLetter,
+  GenExecError,
+} from "@/lib/assistant/executors/generative";
+import { writeProvenance } from "@/lib/provenance-write";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -84,6 +91,8 @@ export interface RunToolInput {
 interface ExecResult {
   data: unknown;
   provenance?: ProvenanceSpan[];
+  /** Generative executors report which prompt + model produced the output. */
+  meta?: { promptId?: string; promptVersion?: string; model?: string };
 }
 
 type ToolExecutor = (
@@ -122,6 +131,14 @@ const EXECUTORS: Record<string, ToolExecutor> = {
     const jd = String(args.jobDescription ?? "");
     return { data: matchCvToJd(cv, jd) };
   },
+
+  "cv.improveSummary": async (args, { subject, run }) =>
+    execImproveSummary(args, run.cv!, !!subject.sw),
+
+  "cv.tailor": async (args, { run }) => execTailorCv(args, run.cv!),
+
+  "coverLetter.generate": async (args, { subject, run }) =>
+    execCoverLetter(args, run.cv!, !!subject.sw),
 
   "outcome.record": async (args, { subject }) => {
     // The get-hired feedback loop. One-tap: "did you get the interview / offer?"
@@ -210,6 +227,7 @@ async function sampleForEval(
   input: Record<string, unknown>,
   output: unknown,
   rate: number,
+  meta?: { promptId?: string; promptVersion?: string; model?: string },
 ): Promise<void> {
   if (Math.random() >= rate) return;
   try {
@@ -217,8 +235,8 @@ async function sampleForEval(
       id: nanoid(),
       userHash: userHash(userId),
       tool,
-      promptVersion: "",
-      model: "",
+      promptVersion: meta?.promptVersion ?? "",
+      model: meta?.model ?? "",
       input: input as Record<string, unknown>,
       output: (output ?? {}) as Record<string, unknown>,
     });
@@ -356,13 +374,35 @@ export async function runTool(input: RunToolInput): Promise<ToolResult> {
       run: input.context ?? {},
     });
   } catch (err) {
-    const code = err instanceof ToolExecError ? err.code : "exec_failed";
+    const code =
+      err instanceof ToolExecError || err instanceof GenExecError ? err.code : "exec_failed";
     if (quotaCharged && subject.userId) void refundAiUsage(subject.userId);
     emit("failed", code);
     return { status: "error", tool: toolId, code };
   }
 
-  // 9. Telemetry + eval sample.
+  // 9. Provenance write-through — every AI-touched span gets a source on
+  // record (blueprint H8). Needs a doc to attach to: the caller passes
+  // context.extra.docId / docType. Without one the spans still flow back to
+  // the caller for the preview, just aren't persisted yet.
+  const invocationId = nanoid();
+  const docId = input.context?.extra?.docId;
+  const docType = input.context?.extra?.docType;
+  if (exec.provenance?.length && subject.userId && typeof docId === "string" && typeof docType === "string") {
+    await writeProvenance(
+      { userId: subject.userId, docType, docId },
+      exec.provenance.map((s) => ({
+        fieldPath: s.fieldPath,
+        spanStart: s.spanStart,
+        spanEnd: s.spanEnd,
+        sourceKind: s.sourceKind,
+        sourceRef: s.sourceRef,
+      })),
+      invocationId,
+    );
+  }
+
+  // 10. Telemetry + eval sample.
   emit(meta.policy === "preview" ? "previewed" : "executed");
   if (isGenerative(meta.cost)) {
     void sampleForEval(
@@ -371,6 +411,7 @@ export async function runTool(input: RunToolInput): Promise<ToolResult> {
       safeArgs,
       exec.data,
       input.evalSampleRate ?? DEFAULT_EVAL_SAMPLE_RATE,
+      exec.meta,
     );
   }
 

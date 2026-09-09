@@ -105,7 +105,7 @@ describe("runTool — pipeline", () => {
     expect(r.status).toBe("confirm_required");
   });
 
-  it("cv.tailor with confirmed:true gets past the gate (then no_executor here)", async () => {
+  it("cv.tailor with confirmed:true reaches the executor (no AI provider in CI → ai_unavailable)", async () => {
     const r = await runTool({
       toolId: "cv.tailor",
       subject: user,
@@ -114,9 +114,42 @@ describe("runTool — pipeline", () => {
       context: { cv },
       confirmed: true,
     });
-    // No generative executor wired yet — proves the gate opened.
+    // The generative executor ran; callAi returned null with no provider wired.
     expect(r.status).toBe("error");
-    if (r.status === "error") expect(r.code).toBe("no_executor");
+    if (r.status === "error") expect(r.code).toBe("ai_unavailable");
+  });
+
+  it("cv.improveSummary is a preview-policy generative tool (no provider → ai_unavailable)", async () => {
+    const r = await runTool({
+      toolId: "cv.improveSummary",
+      subject: user,
+      caller: "ui",
+      context: { cv },
+    });
+    expect(r.status).toBe("error");
+    if (r.status === "error") expect(r.code).toBe("ai_unavailable");
+  });
+
+  it("coverLetter.generate is confirm-gated then generative", async () => {
+    const gated = await runTool({
+      toolId: "coverLetter.generate",
+      subject: user,
+      caller: "assistant",
+      args: { jobTitle: "Engineer" },
+      context: { cv },
+    });
+    expect(gated.status).toBe("confirm_required");
+
+    const run = await runTool({
+      toolId: "coverLetter.generate",
+      subject: user,
+      caller: "assistant",
+      args: { jobTitle: "Engineer" },
+      context: { cv },
+      confirmed: true,
+    });
+    expect(run.status).toBe("error");
+    if (run.status === "error") expect(run.code).toBe("ai_unavailable");
   });
 
   it("outcome.record (hidden system tool) runs and is account-gated", async () => {
@@ -143,5 +176,8 @@ describe("runTool — pipeline", () => {
     expect(t).toContain("ats.check");
     expect(t).toContain("jobs.match");
     expect(t).toContain("outcome.record");
+    expect(t).toContain("cv.improveSummary");
+    expect(t).toContain("cv.tailor");
+    expect(t).toContain("coverLetter.generate");
   });
 });
