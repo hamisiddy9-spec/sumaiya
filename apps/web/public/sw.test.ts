@@ -13,7 +13,7 @@ const sw = readFileSync(join(process.cwd(), "public", "sw.js"), "utf8");
 
 describe("service worker contract", () => {
   it("uses a versioned cache name", () => {
-    expect(sw).toMatch(/th-cache-v\d+/);
+    expect(sw).toMatch(/su-cache-v\d+/);
   });
 
   it("deletes old cache versions on activate", () => {
