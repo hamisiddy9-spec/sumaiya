@@ -55,17 +55,23 @@ jobs:
     name: native — tsc · test · expo export
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    defaults:
-      run:
-        working-directory: apps/native
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
+      # Root install first: Metro's nodeModulesPaths is [apps/native, repo root],
+      # so transitive deps shared by RN/Expo (semver, …) resolve from the root
+      # tree while apps/native keeps its own React 19 / Expo 57.
+      - run: npm ci
       - run: npm ci --prefer-offline --no-audit
+        working-directory: apps/native
       - run: npm run typecheck
+        working-directory: apps/native
       - run: npm test
+        working-directory: apps/native
       - run: npm run export
+        working-directory: apps/native
         env:
           EXPO_NO_TELEMETRY: "1"
