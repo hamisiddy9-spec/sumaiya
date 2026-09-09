@@ -130,6 +130,22 @@ describe("runTool — pipeline", () => {
     if (r.status === "error") expect(r.code).toBe("ai_unavailable");
   });
 
+  it("career.skillGap runs deterministically (real match engine, no AI)", async () => {
+    const r = await runTool({
+      toolId: "career.skillGap",
+      subject: user,
+      caller: "assistant",
+      args: { jobDescription: REAL_JD },
+      context: { cv },
+    });
+    expect(r.status).toBe("ok");
+    if (r.status === "ok") {
+      const data = r.data as { facts: { strengths: string[]; gaps: string[]; score: number } };
+      expect(typeof data.facts.score).toBe("number");
+      expect(Array.isArray(data.facts.gaps)).toBe(true);
+    }
+  });
+
   it("coverLetter.generate is confirm-gated then generative", async () => {
     const gated = await runTool({
       toolId: "coverLetter.generate",
@@ -179,5 +195,6 @@ describe("runTool — pipeline", () => {
     expect(t).toContain("cv.improveSummary");
     expect(t).toContain("cv.tailor");
     expect(t).toContain("coverLetter.generate");
+    expect(t).toContain("career.skillGap");
   });
 });

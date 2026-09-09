@@ -135,6 +135,13 @@ const EXECUTORS: Record<string, ToolExecutor> = {
     return { data: matchCvToJd(cv, jd) };
   },
 
+  "career.skillGap": async (args, { run }) => {
+    // Deterministic strengths / gaps / learnable gaps / real course links from
+    // the match engine. The AI learning plan stays on the dedicated route.
+    const { analyzeSkillGap } = await import("@/lib/skill-gap");
+    return { data: { facts: analyzeSkillGap(run.cv!, String(args.jobDescription ?? "")), learningPlan: null } };
+  },
+
   "cv.improveSummary": async (args, { subject, run }) =>
     execImproveSummary(args, run.cv!, !!subject.sw),
 
