@@ -487,7 +487,7 @@ export default function LandingPage() {
             {/* Headline */}
             <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-7xl tracking-[-2.5px] leading-[1.05] text-espresso mb-6">
               {lang === "sw" ? (
-                <>Tengeneza <span className="text-ember">CV inayokupa kazi</span></>
+                <>Tengeneza <span className="text-ember">CV inayokupa ajira</span></>
               ) : (
                 <>Make a <span className="text-ember">CV that gets you hired</span></>
               )}
@@ -702,7 +702,7 @@ export default function LandingPage() {
             {lang === "sw" ? "UNACHOWEZA KUTENGENEZA" : "WHAT YOU CAN BUILD"}
           </p>
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
-            {lang === "sw" ? "Kila hati unayohitaji kupata kazi" : "Every document you need to get hired"}
+            {lang === "sw" ? "Kila hati unayohitaji kupata ajira" : "Every document you need to get hired"}
           </h2>
           <p className="text-lg text-text-body max-w-lg">
             {lang === "sw"

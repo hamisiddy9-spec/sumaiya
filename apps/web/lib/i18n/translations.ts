@@ -165,7 +165,7 @@ export const translations = {
       tryFree: "Jaribu bure →",
     },
     features: {
-      title: "Kila kitu unachohitaji kupata kazi",
+      title: "Kila kitu unachohitaji kupata ajira",
       subtitle: "Wasifu mmoja wa kazi → CV, ulinganishaji wa kazi, akili ya ATS, barua za maombi na maandalizi ya usaili — vyote mahali pamoja.",
     },
     pricing: {

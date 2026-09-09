@@ -168,7 +168,7 @@ function SignInForm({ lang }: { lang: string }) {
           </div>
           <div className="space-y-5">
             <h2 className="font-display text-cream text-2xl leading-tight font-extrabold">
-              {sw ? "Kila kitu unachohitaji kupata kazi" : "Everything you need to get hired"}
+              {sw ? "Kila kitu unachohitaji kupata ajira" : "Everything you need to get hired"}
             </h2>
             <ul className="space-y-3 text-cream/80 text-sm">
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Templeti rafiki kwa ATS" : "ATS-friendly templates"}</li>

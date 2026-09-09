@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
     ? "Jukwaa la Kazi lenye AI — Tengeneza CV Bila Malipo | Sumaiya"
     : "Sumaiya — AI Career Platform: CV, Job Match & Interview Prep";
   const description = sw
-    ? "Tengeneza CV ya kitaalamu na barua za maombi ya kazi kwa dakika chache ukiwa na Sumaiya, msaidizi wako wa AI — templeti nzuri, upakuaji bila malipo, na kikagua ATS. Lengo moja: kupata kazi."
+    ? "Tengeneza CV ya kitaalamu na barua za maombi ya kazi kwa dakika chache ukiwa na Sumaiya, msaidizi wako wa AI — templeti nzuri, upakuaji bila malipo, na kikagua ATS. Lengo moja: kupata ajira."
     : "Meet Sumaiya, your AI career assistant. Create a recruiter-ready CV and cover letters in minutes, run a free ATS check, and get matched to jobs. Free CV & resume builder for East Africa.";
   const keywords = sw
     ? ["tengeneza CV", "kutengeneza CV", "jinsi ya kutengeneza CV", "CV bila malipo", "CV bure", "mfano wa CV", "CV ya kazi", "wasifu", "barua ya maombi ya kazi", "template ya CV", "CV builder", "resume builder", "msaidizi wa CV AI"]
