@@ -7,7 +7,7 @@
 import { ApiClient } from "@sumaiya/api-client";
 
 export const apiClient = new ApiClient({
-  baseUrl: process.env.EXPO_PUBLIC_API_URL || "https://sumaiya.pro",
+  baseUrl: process.env.EXPO_PUBLIC_API_URL || "https://sumaiyaai.vercel.app",
   timeout: 30000,
   retryAttempts: 3,
 });

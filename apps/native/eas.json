@@ -10,7 +10,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://sumaiya.pro",
+        "EXPO_PUBLIC_API_URL": "https://sumaiyaai.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho"
       }
@@ -23,7 +23,7 @@
         "simulator": true
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://sumaiya.pro",
+        "EXPO_PUBLIC_API_URL": "https://sumaiyaai.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho"
       }
@@ -33,7 +33,7 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://sumaiya.pro",
+        "EXPO_PUBLIC_API_URL": "https://sumaiyaai.vercel.app",
         "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho"
       }
