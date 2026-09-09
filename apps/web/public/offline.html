@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline — Sumaiya</title>
+  <style>
+    :root {
+      --sand: #F4EEE4;
+      --espresso: #211A15;
+      --ember: #DA4A1C;
+      --cream: #FAF5EE;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--sand);
+      color: var(--espresso);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      max-width: 420px;
+      width: 100%;
+      background: var(--cream);
+      border: 1px solid rgba(33, 26, 21, 0.08);
+      border-radius: 18px;
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: 0 24px 48px -24px rgba(33, 26, 21, 0.28);
+    }
+    .badge {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: var(--ember);
+      box-shadow: 0 3px 0 #A8330F;
+    }
+    .badge svg { width: 30px; height: 30px; }
+    h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+    p { margin-top: 10px; font-size: 14px; line-height: 1.55; color: rgba(33, 26, 21, 0.72); }
+    .note {
+      margin-top: 16px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: rgba(33, 26, 21, 0.55);
+      background: rgba(218, 74, 28, 0.07);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    button {
+      margin-top: 22px;
+      min-height: 44px;
+      padding: 0 22px;
+      border: none;
+      border-radius: 11px;
+      background: var(--ember);
+      color: var(--cream);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #A8330F;
+    }
+    button:active { transform: translateY(1px); box-shadow: 0 1px 0 #A8330F; }
+  </style>
+</head>
+<body>
+  <div class="card" role="status">
+    <div class="badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FAF5EE" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v11M7.5 10 12 14.5 16.5 10M5 19h14" />
+      </svg>
+    </div>
+    <h1 id="title">You're offline</h1>
+    <p id="desc">Sumaiya can't reach the network right now. Check your connection and try again.</p>
+    <p class="note" id="note">Good news: your CV editor works offline — open /editor/cv/try to keep building.</p>
+    <button id="retry" type="button">Retry</button>
+  </div>
+
+  <script>
+    // The SW can't read the lang cookie itself; this static page can.
+    var sw = document.cookie.indexOf("lang=sw") !== -1;
+    if (sw) {
+      document.documentElement.lang = "sw";
+      document.title = "Mtandaoni haupo — Sumaiya";
+      document.getElementById("title").textContent = "Huna mtandao";
+      document.getElementById("desc").textContent =
+        "Sumaiya haiwezi kufikia mtandao kwa sasa. Angalia muunganisho wako kisha jaribu tena.";
+      document.getElementById("note").textContent =
+        "Habari njema: kihariri cha CV kinafanya kazi bila mtandao — fungua /editor/cv/try kuendelea kuunda.";
+      document.getElementById("retry").textContent = "Jaribu tena";
+    }
+    document.getElementById("retry").addEventListener("click", function () {
+      location.reload();
+    });
+  </script>
+</body>
+</html>

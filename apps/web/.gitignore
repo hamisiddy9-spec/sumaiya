@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+
+# Production
+build
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+
+# Local env files
+.env*.local
+.env
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Drizzle
+drizzle/migrations/meta
+.env*
+
+# Local env file
+.env.local
+
+# Claude Code agent worktrees
+.claude/
+
+# E2E smoke-test screenshots
+scripts/e2e-artifacts/
+
+# IDE
+.vscode/
+.idea/
+
+# E2E harness artifacts (visual baselines ARE committed)
+test-results/
+playwright-report/
+e2e/reports/
+.expo/

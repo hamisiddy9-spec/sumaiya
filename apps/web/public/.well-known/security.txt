@@ -1,0 +1,8 @@
+Contact: mailto:neemabackup1@gmail.com
+Expires: 2027-07-12T00:00:00.000Z
+Preferred-Languages: en, sw
+Canonical: https://sumaiya.pro/.well-known/security.txt
+
+# Sumaiya welcomes responsible disclosure. If you've found a security
+# issue, email the contact above with steps to reproduce. Please give us a
+# reasonable window to remediate before any public disclosure. Thank you.

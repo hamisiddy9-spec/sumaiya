@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Stop mobile browsers auto-inflating text and re-flowing layout. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-body), "Hanken Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #211A15;
+    background: #EFE7DA;
+    /* App-like feel: no horizontal drift, no rubber-band / pull-to-refresh. */
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background: #F2A93B;
+    color: #211A15;
+  }
+
+  /* Custom scrollbar for the warm theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #EFE7DA;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #DBD1C2;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C6B6A5;
+  }
+}
+
+@layer utilities {
+  .thub-display {
+    font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
+  }
+
+  .thub-mono {
+    font-family: var(--font-mono), "JetBrains Mono", monospace;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Dynamic viewport height — correct on mobile where 100vh includes the
+     retracting browser chrome (falls back to 100vh where dvh is unsupported). */
+  .min-h-dvh { min-height: 100vh; min-height: 100dvh; }
+  .h-dvh { height: 100vh; height: 100dvh; }
+
+  /* Safe-area insets for standalone PWA (notch / home indicator). */
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+  .safe-bottom-nav { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)); }
+  /* Clears the fixed mobile tab bar (56px + safe area). */
+  .pb-tabbar { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
+
+  .a4-scale {
+    transform-origin: top center;
+  }
+
+  .paper-shadow {
+    box-shadow: 0 2px 8px rgba(33,26,21,0.05), 0 12px 40px rgba(33,26,21,0.10);
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, #EFE7DA 25%, #E9E0D4 50%, #EFE7DA 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+  }
+
+  /* Stagger delays */
+  .delay-100 { animation-delay: 0.1s; }
+  .delay-150 { animation-delay: 0.15s; }
+  .delay-200 { animation-delay: 0.2s; }
+  .delay-300 { animation-delay: 0.3s; }
+  .delay-400 { animation-delay: 0.4s; }
+  .delay-500 { animation-delay: 0.5s; }
+
+  /* ── Route transitions ───────────────────────────────────────────────
+     One consistent treatment everywhere: an honest top progress bar while a
+     segment loads (RouteProgress), and a short fade-rise as the new page
+     mounts (the template.tsx files use .route-enter). Same easing as
+     .reveal / .hero-reveal so the motion language stays uniform. */
+  .route-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 200;
+    background: transparent;
+    overflow: hidden;
+  }
+  .route-progress__bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, #DA4A1C, transparent);
+    animation: route-progress-sweep 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+  @keyframes route-progress-sweep {
+    0% { transform: translateX(-110%); }
+    100% { transform: translateX(320%); }
+  }
+
+  .route-enter {
+    animation: route-enter 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes route-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal.delay-1 { transition-delay: 0.07s; }
+  .reveal.delay-2 { transition-delay: 0.14s; }
+  .reveal.delay-3 { transition-delay: 0.21s; }
+  .reveal.delay-4 { transition-delay: 0.28s; }
+
+  /* Hero copy reveal — the h1 is the LCP element, so it must NOT be hidden
+     pre-hydration (opacity:0 would gate LCP behind JS + IntersectionObserver
+     + a 1.6s fallback, pushing LCP past 4s on mid-range phones). Instead of
+     the JS-gated .reveal, animate a pure transform rise: the text is fully
+     painted on first frame, LCP counts immediately, and the entrance motion
+     is preserved. */
+  .hero-reveal {
+    animation: hero-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes hero-rise {
+    from { transform: translateY(12px); }
+    to { transform: translateY(0); }
+  }
+
+  /* ── The Sumaiya Mark ─────────────────────────────────────────────────
+     Custom AI signature (components/ui/sumaiya-mark.tsx). The <g> and <circle>
+     animate around the 24×24 viewBox centre. */
+  .sumaiya-mark__blades {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .sumaiya-mark__core {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .sumaiya-mark--idle .sumaiya-mark__blades {
+    animation: sumaiya-drift 7s ease-in-out infinite;
+  }
+  .sumaiya-mark--idle .sumaiya-mark__core {
+    animation: sumaiya-pulse 3.5s ease-in-out infinite;
+  }
+  .sumaiya-mark--thinking .sumaiya-mark__blades {
+    animation: sumaiya-spin 1.5s linear infinite;
+  }
+  .sumaiya-mark--thinking .sumaiya-mark__core {
+    animation: sumaiya-pulse 0.9s ease-in-out infinite;
+  }
+  @keyframes sumaiya-drift {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(14deg) scale(1.05); }
+  }
+  @keyframes sumaiya-spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes sumaiya-pulse {
+    0%, 100% { opacity: 0.55; transform: scale(0.82); }
+    50% { opacity: 1; transform: scale(1); }
+  }
+
+  /* Never hide content from users who prefer reduced motion — show it
+     immediately with no fade, regardless of the scroll observer. */
+  @media (prefers-reduced-motion: reduce) {
+    .sumaiya-mark__blades,
+    .sumaiya-mark__core {
+      animation: none !important;
+    }
+
+    .route-enter {
+      animation: none;
+    }
+    .route-progress__bar {
+      animation: none;
+      width: 100%;
+      opacity: 0.35;
+    }
+
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .hero-reveal {
+      animation: none;
+    }
+
+    /* App-wide safety net: collapse every animation/transition/scroll-behaviour
+       to effectively instant. Durations stay non-zero so transitionend/
+       animationend listeners still fire (just immediately) and nothing hangs. */
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Ember focus ring */
+  .focus-ember:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px #FBE9E1;
+    border-color: #DA4A1C;
+  }
+
+  /* Button press effect */
+  .btn-press:active {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* iOS Safari zooms the whole page in whenever a focused text field's font-size
+   is under 16px. Many editor panels use compact (10–13px) inputs, which made
+   every tap-to-edit on iPhone jump-zoom. Force text-entry controls to 16px on
+   mobile only (desktop keeps its compact design). Scoped to text inputs so
+   checkboxes/radios/ranges/colour swatches are unaffected. !important is needed
+   to beat Tailwind's per-element text-[Npx] utilities. */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Chat message / card entrance — new bubbles arrive with a gentle rise so the
+   assistant feels alive, not like a form snapping content into place. */
+@keyframes msg-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.msg-enter { animation: msg-enter 0.28s cubic-bezier(0.4, 0, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) { .msg-enter { animation: none; } }
+
+/* Snap results — the result cards arrive with a gentle staggered rise so the
+   reveal feels choreographed, not pasted (D9 motion pass). Transform/opacity
+   only, so no layout thrash; the app-wide reduced-motion safety net above
+   collapses these to instant. */
+@keyframes snap-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.snap-rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.snap-rise-1 { animation-delay: 0.05s; }
+.snap-rise-2 { animation-delay: 0.1s; }
+.snap-rise-3 { animation-delay: 0.15s; }
+.snap-rise-4 { animation-delay: 0.2s; }
+
+/* RF5 — generic reveal (same language as snap-rise) for non-/snap surfaces:
+   result cards, quick-create tiles, stat rows. `.rise-N` matches the shared
+   motion utility's stagger (riseClass). Reduced-motion collapses these to
+   instant via the app-wide safety net below. */
+.rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.1s; }
+.rise-3 { animation-delay: 0.15s; }
+.rise-4 { animation-delay: 0.2s; }
+
+/* Snap tab panel — the photo capture UI fades in on Paste ⇄ Photo switch. */
+.snap-panel { animation: snap-rise 0.18s ease-out both; }
+
+/* AI Career Copilot landing — sector marquee + demo tap-chips. */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.copilot-marquee { animation: marquee 24s linear infinite; }
+.copilot-chip { transition: transform .15s ease, border-color .15s ease, background .15s ease; }
+.copilot-chip:hover { border-color: #DA4A1C; background: #FBE9E1; transform: scale(1.05); }
+.copilot-chip:active { transform: scale(0.93); }
+@media (prefers-reduced-motion: reduce) {
+  .copilot-marquee { animation: none; }
+  .copilot-chip:hover { transform: none; }
+}

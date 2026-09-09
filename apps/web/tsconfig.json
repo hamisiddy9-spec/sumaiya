@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "incremental": true,
+    "baseUrl": ".",
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./*"],
+      "@sumaiya/types": ["../../packages/types/src/index.ts"],
+      "@sumaiya/core": ["../../packages/core/src/index.ts"],
+      "@sumaiya/analytics": ["../../packages/analytics/src/index.ts"],
+      "@sumaiya/design-tokens": ["../../packages/design-tokens/src/index.ts"],
+      "@sumaiya/api-client": ["../../packages/api-client/src/index.ts"],
+      "@sumaiya/utils": ["../../packages/utils/src/index.ts"],
+      "@sumaiya/hooks": ["../../packages/hooks/src/index.ts"],
+      "@sumaiya/templates": ["../../packages/templates/src/index.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "e2e", "playwright.config.ts"]
+}

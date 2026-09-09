@@ -1,0 +1,41 @@
+name: E2E smoke test (Browserbase)
+
+# Manual trigger ONLY. Running this spins up a Browserbase browser session
+# (uses your Browserbase credits), so it never fires automatically on push —
+# start it from the Actions tab with "Run workflow".
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL to test"
+        required: false
+        default: "https://sumaiya.pro"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Run smoke test
+        env:
+          BROWSERBASE_API_KEY: ${{ secrets.BROWSERBASE_API_KEY }}
+          BROWSERBASE_PROJECT_ID: ${{ secrets.BROWSERBASE_PROJECT_ID }}
+          TARGET_URL: ${{ github.event.inputs.target_url }}
+        run: npm run test:e2e
+
+      # Save failure screenshots so you can see exactly what broke.
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: scripts/e2e-artifacts/
+          if-no-files-found: ignore

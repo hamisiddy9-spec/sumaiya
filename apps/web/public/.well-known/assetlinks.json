@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "pro.sumaiya.app",
+      "sha256_cert_fingerprints": [
+        "40:AE:87:4C:B8:20:CA:D4:5F:94:BD:9E:1C:CE:85:C4:15:7E:82:69:79:08:1A:02:25:34:E8:E9:C7:38:64:78"
+      ]
+    }
+  }
+]

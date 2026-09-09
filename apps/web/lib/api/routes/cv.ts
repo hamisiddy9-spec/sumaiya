@@ -1,0 +1,305 @@
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { getUserId } from "@/lib/api/auth";
+import { z } from "zod";
+import { db, cv } from "@/lib/db";
+import { eq, and, sql } from "drizzle-orm";
+import { downloadLog } from "@/lib/db";
+import { nanoid, customAlphabet } from "nanoid";
+import { createHash } from "node:crypto";
+import { parseCvLoose } from "@/lib/career-profile/mapper";
+import { seedProfileFromCv } from "@/lib/career-profile/sync";
+
+// URL-clean slug suffix — no ambiguous chars (0/o, 1/l), lowercase only. Keeps
+// public links tidy AND unguessable (so /cv/<slug> can't be enumerated).
+const slugSuffix = customAlphabet("23456789abcdefghijkmnpqrstuvwxyz", 6);
+
+async function mintPublicSlug(fullName: string, title: string): Promise<string> {
+  const base = (fullName || title || "cv")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 40)
+    .replace(/^-|-$/g, "") || "cv";
+  for (let i = 0; i < 5; i++) {
+    const slug = `${base}-${slugSuffix()}`;
+    const [clash] = await db.select({ id: cv.id }).from(cv).where(eq(cv.publicSlug, slug)).limit(1);
+    if (!clash) return slug;
+  }
+  return `cv-${slugSuffix()}${slugSuffix()}`;
+}
+
+const cvUpdateSchema = z.object({
+  title: z.string().min(1).max(100).optional(),
+  templateId: z.string().optional(),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  fontFamily: z.string().optional(),
+  data: z.record(z.unknown()).optional(),
+  status: z.enum(["draft", "complete"]).optional(),
+});
+
+const cvCreateSchema = z.object({
+  title: z.string().min(1).max(100).optional(),
+  templateId: z.string().optional(),
+  primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  fontFamily: z.string().optional(),
+  data: z.record(z.unknown()).optional(),
+  // Optional idempotency key from the guest-CV migration flow. When present the
+  // new CV's id is derived deterministically from (userId, clientId), so a
+  // retried migration (lost response, back-nav, double-invoked effect) creates
+  // the CV at most once instead of a duplicate on every attempt.
+  clientId: z.string().min(8).max(64).optional(),
+});
+
+export const cvRoutes = new Hono()
+
+  .post("/", zValidator("json", cvCreateSchema), async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const body = c.req.valid("json");
+
+    // Derive a deterministic id from (userId, clientId) when an idempotency key
+    // is supplied. Hashing in the user id guarantees a client can never target
+    // (and, via the conflict path below, read back) another user's row.
+    const id = body.clientId
+      ? "m_" + createHash("sha256").update(`${userId}:${body.clientId}`).digest("base64url").slice(0, 20)
+      : nanoid();
+
+    const values = {
+      id,
+      userId,
+      title: body.title ?? "My CV",
+      templateId: body.templateId ?? "nakuru",
+      primaryColor: body.primaryColor ?? "#DA4A1C",
+      fontFamily: body.fontFamily ?? "Inter",
+      data: body.data ?? {},
+    };
+
+    // THE SPINE: every CV write seeds the Career Profile (source "cv:<id>").
+    // Non-destructive + provenance-aware; never throws, so a sync failure can
+    // never break the CV save itself.
+    const seed = async (docId: string) => {
+      if (body.data && typeof body.data === "object" && Object.keys(body.data).length) {
+        await seedProfileFromCv(userId, parseCvLoose(body.data), { source: `cv:${docId}`, confidence: 1 });
+      }
+    };
+
+    if (body.clientId) {
+      // Idempotent upsert keyed by (userId, clientId). A repeated write of the
+      // same draft no-ops instead of creating a duplicate — but unlike a plain
+      // insert-only conflict, a NEWER write (mobile sync edit) UPDATES the row
+      // so the offline queue can propagate edits, not just the first create.
+      // On conflict, return the existing row — which is provably this user's,
+      // since the id is derived from their userId.
+      const [inserted] = await db.insert(cv).values(values).onConflictDoNothing({ target: cv.id }).returning();
+      if (inserted) {
+        await seed(inserted.id);
+        return c.json({ success: true, data: inserted }, 201);
+      }
+      const [updated] = await db
+        .update(cv)
+        .set({
+          title: values.title,
+          templateId: values.templateId,
+          primaryColor: values.primaryColor,
+          fontFamily: values.fontFamily,
+          data: values.data,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(cv.id, id), eq(cv.userId, userId)))
+        .returning();
+      if (updated) {
+        await seed(updated.id);
+        return c.json({ success: true, data: updated }, 200);
+      }
+      // Extremely unlikely (hash collision with another user's id): fall back to
+      // a fresh random id so the user still gets their CV.
+      const [fresh] = await db.insert(cv).values({ ...values, id: nanoid() }).returning();
+      await seed(fresh.id);
+      return c.json({ success: true, data: fresh }, 201);
+    }
+
+    const [doc] = await db.insert(cv).values(values).returning();
+    await seed(doc.id);
+    return c.json({ success: true, data: doc }, 201);
+  })
+
+  .get("/", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const docs = await db.select().from(cv).where(eq(cv.userId, userId));
+    return c.json({ success: true, data: docs });
+  })
+
+  .get("/:id", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const [doc] = await db
+      .select()
+      .from(cv)
+      .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
+      .limit(1);
+
+    if (!doc) return c.json({ error: "Not found" }, 404);
+    return c.json({ success: true, data: doc });
+  })
+
+  .patch("/:id", zValidator("json", cvUpdateSchema), async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const body = c.req.valid("json");
+
+    const [existing] = await db
+      .select({ id: cv.id })
+      .from(cv)
+      .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
+      .limit(1);
+
+    if (!existing) return c.json({ error: "Not found" }, 404);
+
+    const [updated] = await db
+      .update(cv)
+      .set({ ...body, updatedAt: new Date() })
+      .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
+      .returning();
+
+    // THE SPINE: a save with CV data re-syncs the Career Profile (same source
+    // family "cv:<id>", newer timestamp wins over the previous CV seed).
+    if (body.data && typeof body.data === "object" && Object.keys(body.data).length) {
+      await seedProfileFromCv(userId, parseCvLoose(body.data), { source: `cv:${existing.id}`, confidence: 1 });
+    }
+
+    return c.json({ success: true, data: updated });
+  })
+
+  .delete("/:id", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const [existing] = await db
+      .select({ id: cv.id })
+      .from(cv)
+      .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
+      .limit(1);
+
+    if (!existing) return c.json({ error: "Not found" }, 404);
+
+    await db.delete(cv).where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)));
+    return c.json({ success: true });
+  })
+
+  // Idempotent delete for the mobile sync queue: the client only knows its
+  // LOCAL cv id, so the server derives the row id from (userId, clientId) the
+  // same way POST / does. Deleting a cv the server never saw is still success —
+  // the desired end state (gone) is already true, so the queue drains instead
+  // of retrying a 404 into the needs-attention state.
+  .delete("/", zValidator("query", z.object({ clientId: z.string().min(8).max(64) })), async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const { clientId } = c.req.valid("query");
+    const id = "m_" + createHash("sha256").update(`${userId}:${clientId}`).digest("base64url").slice(0, 20);
+
+    await db.delete(cv).where(and(eq(cv.id, id), eq(cv.userId, userId)));
+    return c.json({ success: true });
+  })
+
+  .post("/:id/duplicate", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const [source] = await db
+      .select()
+      .from(cv)
+      .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
+      .limit(1);
+
+    if (!source) return c.json({ error: "Not found" }, 404);
+
+    const [copy] = await db.insert(cv).values({
+      id: nanoid(),
+      userId,
+      title: `Copy of ${source.title}`,
+      templateId: source.templateId,
+      primaryColor: source.primaryColor,
+      fontFamily: source.fontFamily,
+      data: source.data ?? {},
+    }).returning();
+
+    return c.json({ success: true, data: copy }, 201);
+  })
+
+  .post("/:id/download", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const cvId = c.req.param("id");
+    const [existing] = await db
+      .select({ id: cv.id })
+      .from(cv)
+      .where(and(eq(cv.id, cvId), eq(cv.userId, userId)))
+      .limit(1);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+
+    await Promise.all([
+      db.update(cv)
+        .set({ downloadCount: sql`${cv.downloadCount} + 1`, updatedAt: new Date() })
+        .where(eq(cv.id, cvId)),
+      db.insert(downloadLog).values({
+        id: nanoid(),
+        userId,
+        documentId: cvId,
+        documentType: "cv",
+        format: "pdf",
+      }),
+    ]);
+
+    return c.json({ success: true });
+  })
+
+  // ── Public share toggle ("CV yako mtandaoni") ──────────────────────────────
+  // Owner-only. Turns the public link on/off and controls whether contact
+  // details show. The slug is minted once (on first enable) and kept when
+  // toggled off, so re-sharing reuses the same URL.
+  .post("/:id/share", zValidator("json", z.object({
+    isPublic: z.boolean().optional(),
+    showContact: z.boolean().optional(),
+  })), async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const cvId = c.req.param("id");
+    const body = c.req.valid("json");
+
+    const [existing] = await db
+      .select({ data: cv.data, title: cv.title, publicSlug: cv.publicSlug })
+      .from(cv)
+      .where(and(eq(cv.id, cvId), eq(cv.userId, userId)))
+      .limit(1);
+    if (!existing) return c.json({ error: "Not found" }, 404);
+
+    const updates: Record<string, unknown> = { updatedAt: new Date() };
+    if (typeof body.showContact === "boolean") updates.publicShowContact = body.showContact;
+    if (typeof body.isPublic === "boolean") {
+      updates.isPublic = body.isPublic;
+      if (body.isPublic && !existing.publicSlug) {
+        const fullName = String((existing.data as { personal?: { fullName?: string } })?.personal?.fullName ?? "");
+        updates.publicSlug = await mintPublicSlug(fullName, existing.title);
+      }
+    }
+
+    const [updated] = await db
+      .update(cv)
+      .set(updates)
+      .where(and(eq(cv.id, cvId), eq(cv.userId, userId)))
+      .returning({ isPublic: cv.isPublic, publicSlug: cv.publicSlug, publicShowContact: cv.publicShowContact });
+
+    return c.json({ success: true, data: updated });
+  });

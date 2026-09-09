@@ -1,0 +1,17 @@
+{
+  "name": "@sumaiya/templates",
+  "version": "1.0.0",
+  "description": "Sumaiya CV templates for mobile and web",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sumaiya/types": "*"
+  },
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

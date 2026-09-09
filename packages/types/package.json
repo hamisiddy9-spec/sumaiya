@@ -1,0 +1,15 @@
+{
+  "name": "@sumaiya/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for web and mobile",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {}
+}

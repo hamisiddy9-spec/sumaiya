@@ -1,0 +1,28 @@
+{
+  "name": "@sumaiya/api-client",
+  "version": "1.0.0",
+  "description": "API client for web and mobile (auth, CV CRUD, templates, sync)",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sumaiya/types": "*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "peerDependenciesOptional": {
+    "react": true
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

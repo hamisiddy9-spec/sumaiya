@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sumaiya Ad — Graduates</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── Instagram square (1080×1080) ── */
+    .ad-square {
+      width: 1080px;
+      height: 1080px;
+      background: #F8F3ED; /* sand */
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative blobs */
+    .blob-1 {
+      position: absolute;
+      top: -160px;
+      right: -120px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, #DA4A1C20 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .blob-2 {
+      position: absolute;
+      bottom: -180px;
+      left: -140px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, #12433D15 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    /* ── Content ── */
+    .content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 920px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #DA4A1C;
+      color: #FFF;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 28px;
+      border-radius: 100px;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 82px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2.5px;
+      color: #211A15;
+      margin-bottom: 20px;
+    }
+    h1 .highlight {
+      color: #DA4A1C;
+    }
+
+    p.sub {
+      font-size: 28px;
+      line-height: 1.4;
+      color: #6B5E55;
+      margin-bottom: 48px;
+      max-width: 780px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Feature pills ── */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .feature {
+      background: #FFF;
+      border: 1px solid #E5DDD4;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #211A15;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(33,26,21,0.04);
+    }
+    .feature .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #DA4A1C;
+      flex-shrink: 0;
+    }
+
+    /* ── CTA ── */
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: #211A15;
+      color: #FFF;
+      font-size: 30px;
+      font-weight: 700;
+      padding: 22px 56px;
+      border-radius: 16px;
+      text-decoration: none;
+      box-shadow: 0 6px 24px rgba(33,26,21,0.20);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(33,26,21,0.25);
+    }
+    .cta .arrow {
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 40px;
+      font-size: 18px;
+      color: #8C7F75;
+      letter-spacing: 0.3px;
+    }
+    .footer strong {
+      color: #211A15;
+    }
+
+    /* ── Responsive (browser preview) ── */
+    @media (max-width: 1200px) {
+      .ad-square { width: 100%; height: auto; aspect-ratio: 1 / 1; padding: 48px 32px; }
+      h1 { font-size: 56px; }
+      p.sub { font-size: 22px; }
+      .cta { font-size: 24px; padding: 18px 40px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ── Square (Instagram / Facebook) ── -->
+  <div class="ad-square">
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+    <div class="content">
+      <div class="badge">🇰🇪 🇹🇿 🇺🇬 East Africa</div>
+      <h1>
+        Land that<br />
+        <span class="highlight">first job</span>
+      </h1>
+      <p class="sub">
+        Build an ATS-friendly CV, cover letter &amp; more —<br />
+        powered by AI, designed for East African grads.
+      </p>
+
+      <div class="features">
+        <div class="feature"><span class="dot"></span> 160+ CV Templates</div>
+        <div class="feature"><span class="dot"></span> AI Writing Assistant</div>
+        <div class="feature"><span class="dot"></span> ATS Checker</div>
+        <div class="feature"><span class="dot"></span> Free to Build</div>
+      </div>
+
+      <a class="cta" href="https://sumaiya.pro/editor/cv/try" target="_blank">
+        Build Your CV Free
+        <span class="arrow">→</span>
+      </a>
+
+      <div class="footer">
+        Pay only when you download · <strong>sumaiya.pro</strong>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
