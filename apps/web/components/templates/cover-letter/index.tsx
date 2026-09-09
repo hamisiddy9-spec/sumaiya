@@ -14,6 +14,8 @@ export interface CoverLetterTemplateProps {
   content: string; // body text, paragraphs separated by \n\n
   primaryColor: string;
   fontFamily: string;
+  /** UI language for the fixed salutation/closing wrapper. Body text is already in the user's language. */
+  lang?: "en" | "sw";
 }
 
 export type CoverLetterTemplateId =
@@ -52,6 +54,16 @@ function splitContent(content: string): string[] {
   return paras.length > 0 ? paras : ["Your cover letter content will appear here."];
 }
 
+/** Fixed salutation — the body is already in the user's language; only this
+ * wrapper line was hardcoded English. */
+function clSalutation(lang: "en" | "sw" | undefined, recipientName?: string): string {
+  if (lang === "sw") return recipientName ? `Kwa ${recipientName},` : "Kwa Meneja wa Ajira,";
+  return recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+}
+function clClosing(lang: "en" | "sw" | undefined): string {
+  return lang === "sw" ? "Wako mwaminifu," : "Sincerely,";
+}
+
 // ─── ClassicCoverLetter ───────────────────────────────────────────────────────
 
 export function ClassicCoverLetter({
@@ -64,9 +76,10 @@ export function ClassicCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -138,7 +151,7 @@ export function ClassicCoverLetter({
 
       {/* Closing block */}
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>
           {senderName}
@@ -165,9 +178,10 @@ export function ModernCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -271,7 +285,7 @@ export function ModernCoverLetter({
 
         {/* Closing block */}
         <div style={{ marginTop: 28 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>
             {senderName}
@@ -299,9 +313,10 @@ export function SidebarCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -396,7 +411,7 @@ export function SidebarCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>
             {senderName}
@@ -422,9 +437,10 @@ export function ExecutiveCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -516,9 +532,10 @@ export function MinimalCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -571,7 +588,7 @@ export function MinimalCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Best regards,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p style={{ fontSize: 14, fontWeight: 700, margin: 0, color: "#111827" }}>{senderName}</p>
       </div>
@@ -591,9 +608,10 @@ export function BoldCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -659,7 +677,7 @@ export function BoldCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 15, fontWeight: 800, margin: "0 0 4px", color: "#111827" }}>
             {senderName}
@@ -685,9 +703,10 @@ export function CreativeCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -780,6 +799,7 @@ export function StartupCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
   const salutation = recipientName ? `Hey ${recipientName},` : "Hey there,";
@@ -864,6 +884,7 @@ export function AcademicCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
   const salutation = recipientName
@@ -946,9 +967,10 @@ export function TechCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
   const monoFont = `"Courier New", Courier, monospace`;
 
   return (
@@ -1026,9 +1048,10 @@ export function CleanCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1075,7 +1098,7 @@ export function CleanCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Kind regards,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
         {senderTitle && (
@@ -1098,9 +1121,10 @@ export function ContemporaryCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1156,7 +1180,7 @@ export function ContemporaryCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
         {senderTitle && (
@@ -1179,9 +1203,10 @@ export function TraditionalCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName}:` : "Dear Hiring Manager:";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1242,7 +1267,7 @@ export function TraditionalCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 56 }} />
         <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 2px", color: "#111827" }}>{senderName}</p>
         {senderTitle && (
@@ -1265,9 +1290,10 @@ export function MagazineCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1321,7 +1347,7 @@ export function MagazineCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Best regards,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p style={{ fontSize: 15, fontWeight: 800, margin: "0 0 4px", color: primaryColor }}>
           {senderName}
@@ -1346,9 +1372,10 @@ export function CompactCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1399,7 +1426,7 @@ export function CompactCoverLetter({
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <p style={{ fontSize: 12, margin: 0, color: "#374151" }}>Sincerely,</p>
+        <p style={{ fontSize: 12, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 36 }} />
         <p style={{ fontSize: 13, fontWeight: 700, margin: "0 0 2px", color: "#111827" }}>{senderName}</p>
         {senderTitle && (
@@ -1422,9 +1449,10 @@ export function ColorBlockCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1483,7 +1511,7 @@ export function ColorBlockCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
           {senderTitle && (
@@ -1507,9 +1535,10 @@ export function StripeCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1561,7 +1590,7 @@ export function StripeCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
           {senderTitle && (
@@ -1585,9 +1614,10 @@ export function ElegantCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1688,9 +1718,10 @@ export function GradientCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1756,7 +1787,7 @@ export function GradientCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
           {senderTitle && (
@@ -1780,9 +1811,10 @@ export function SignatureCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1847,7 +1879,7 @@ export function SignatureCoverLetter({
       </div>
 
       <div style={{ marginTop: 32 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Warm regards,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 48 }} />
         <p
           style={{
@@ -1880,9 +1912,10 @@ export function TimelineCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -1937,7 +1970,7 @@ export function TimelineCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
           {senderTitle && (
@@ -1961,9 +1994,10 @@ export function HeaderSplitCoverLetter({
   content,
   primaryColor,
   fontFamily,
+  lang,
 }: CoverLetterTemplateProps) {
   const paragraphs = splitContent(content);
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
 
   return (
     <div
@@ -2045,7 +2079,7 @@ export function HeaderSplitCoverLetter({
         </div>
 
         <div style={{ marginTop: 32 }}>
-          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+          <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
           <div style={{ height: 48 }} />
           <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 4px", color: "#111827" }}>{senderName}</p>
           {senderTitle && (
@@ -2244,12 +2278,12 @@ const CL_MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
 
 /** Shared recipient + salutation + body + sign-off column for the new letters. */
 function CLBody({
-  recipientName, recipientTitle, recipientCompany, date, paragraphs, senderName, senderTitle, primaryColor, showDate = true,
+  recipientName, recipientTitle, recipientCompany, date, paragraphs, senderName, senderTitle, primaryColor, showDate = true, lang,
 }: {
   recipientName?: string; recipientTitle?: string; recipientCompany?: string; date: string;
-  paragraphs: string[]; senderName: string; senderTitle?: string; primaryColor: string; showDate?: boolean;
+  paragraphs: string[]; senderName: string; senderTitle?: string; primaryColor: string; showDate?: boolean; lang?: "en" | "sw";
 }) {
-  const salutation = recipientName ? `Dear ${recipientName},` : "Dear Hiring Manager,";
+  const salutation = clSalutation(lang, recipientName);
   return (
     <>
       {showDate && <p style={{ fontSize: 12, margin: "0 0 20px", color: "#6b7280" }}>{date}</p>}
@@ -2265,7 +2299,7 @@ function CLBody({
         <p key={i} style={{ fontSize: 12.5, lineHeight: 1.8, color: "#374151", margin: "0 0 15px" }}>{para}</p>
       ))}
       <div style={{ marginTop: 28 }}>
-        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>Sincerely,</p>
+        <p style={{ fontSize: 13, margin: 0, color: "#374151" }}>{clClosing(lang)}</p>
         <div style={{ height: 40 }} />
         <p style={{ fontSize: 14, fontWeight: 700, margin: "0 0 3px", color: "#111827" }}>{senderName}</p>
         {senderTitle && <p style={{ fontSize: 12, margin: 0, color: primaryColor }}>{senderTitle}</p>}
@@ -2369,7 +2403,7 @@ export function ZegeCoverLetter(p: CoverLetterTemplateProps) {
             {p.recipientCompany && <p style={{ fontSize: 12, margin: 0, color: "#333" }}>{p.recipientCompany}</p>}
           </div>
         )}
-        <p style={{ fontSize: 13, margin: "0 0 14px", fontWeight: 700 }}>{p.recipientName ? `Dear ${p.recipientName},` : "Dear Hiring Manager,"}</p>
+        <p style={{ fontSize: 13, margin: "0 0 14px", fontWeight: 700 }}>{clSalutation(p.lang, p.recipientName)}</p>
         {paragraphs.map((para, i) => (
           <p key={i} style={{ fontSize: 12.5, lineHeight: 1.75, color: "#222", margin: "0 0 14px" }}>{para}</p>
         ))}

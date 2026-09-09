@@ -403,6 +403,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       : "Your cover letter content will appear here.\n\nStart writing in the panel on the left."),
     primaryColor,
     fontFamily,
+    lang,
   };
 
   return (
