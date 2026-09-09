@@ -64,8 +64,8 @@ jobs:
         with:
           node-version: "22"
       - run: npm ci --prefer-offline --no-audit
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
       - run: npm test
-      - run: npx expo export --platform android
+      - run: npm run export
         env:
           EXPO_NO_TELEMETRY: "1"

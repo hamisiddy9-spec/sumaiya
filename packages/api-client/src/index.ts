@@ -233,6 +233,41 @@ export class ApiClient {
     return this.request("/api/app/update");
   }
 
+  // ── Capability layer (Hono /api/capabilities) ────────────────────────────
+  // One method for every tool. The web + native UI both call this; the server's
+  // run-tool pipeline does entitlement / quota / policy / audit identically.
+  // A `blocked` / `confirm_required` / `error` outcome comes back as data, not
+  // a thrown error — the caller branches on `result.status`.
+
+  async runCapability(
+    toolId: string,
+    body: {
+      args?: Record<string, unknown>;
+      confirmed?: boolean;
+      cv?: unknown;
+      hasFile?: boolean;
+      context?: Record<string, unknown>;
+    } = {},
+  ): Promise<CapabilityResult> {
+    return this.request<CapabilityResult>(`/api/capabilities/${encodeURIComponent(toolId)}`, {
+      method: "POST",
+      body: JSON.stringify({ caller: "ui", ...body }),
+    });
+  }
+
+  // ── Push registration (Hono /api/mobile/device-token, Bearer) ─────────────
+
+  async registerPushToken(input: {
+    pushToken: string;
+    platform: "ios" | "android" | "web";
+    deviceId: string;
+  }): Promise<{ ok: true }> {
+    return this.request<{ ok: true }>("/api/mobile/device-token", {
+      method: "PUT",
+      body: JSON.stringify(input),
+    });
+  }
+
   // ── Connectivity ─────────────────────────────────────────────────────────
 
   async checkConnectivity(): Promise<boolean> {
@@ -244,5 +279,13 @@ export class ApiClient {
     }
   }
 }
+
+/** Mirrors the ToolResult union in apps/web/lib/assistant/run-tool.ts. */
+export type CapabilityResult =
+  | { status: "ok"; tool: string; data: unknown; provenance?: unknown[] }
+  | { status: "preview"; tool: string; data: unknown; provenance?: unknown[] }
+  | { status: "confirm_required"; tool: string; summary: string }
+  | { status: "blocked"; tool: string; reason: string; detail?: string; retryAfter?: number }
+  | { status: "error"; tool: string; code: string };
 
 export default ApiClient;

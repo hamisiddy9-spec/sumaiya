@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sumaiya/types": "*"
+    "@sumaiya/types": "file:../types"
   },
   "private": true,
   "exports": {

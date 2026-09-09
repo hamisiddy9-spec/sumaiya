@@ -10,6 +10,9 @@ import { resourcesForGaps } from "@/lib/learning-resources";
 import { assembleUserContext, contextToPromptBlock } from "@/lib/assistant/context";
 import { looksLikeJobDescription } from "@/lib/job-match";
 import { TRUTH_CONSTRAINT } from "@/lib/api/ai-guardrails";
+import { nanoid } from "nanoid";
+import { db, deviceToken } from "@/lib/db";
+import { sql } from "drizzle-orm";
 
 // Mobile-specific endpoints that the native app talks to with
 // `Authorization: Bearer <supabase access token>` (see lib/api/auth.ts).
@@ -247,6 +250,40 @@ ${facts.join("\n")}`;
         },
       });
     }
+  )
+
+  // PUT /api/mobile/device-token — register/refresh a push token.
+  // Bearer-authed (the old /api/auth/device-token was cookie-only, so the
+  // native app could never reach it — blueprint handshake H2).
+  .put(
+    "/device-token",
+    zValidator(
+      "json",
+      z.object({
+        pushToken: z.string().min(1).max(512),
+        platform: z.enum(["ios", "android", "web"]),
+        deviceId: z.string().min(1).max(200),
+      }),
+    ),
+    async (c) => {
+      const userId = await getUserId(c);
+      if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+      const { pushToken, platform, deviceId } = c.req.valid("json");
+      try {
+        await db
+          .insert(deviceToken)
+          .values({ id: nanoid(), userId, deviceId, pushToken, platform })
+          .onConflictDoUpdate({
+            target: deviceToken.deviceId,
+            set: { userId, pushToken, platform, updatedAt: sql`now()` },
+          });
+        return c.json({ success: true, data: { ok: true } });
+      } catch (err) {
+        console.error("[mobile] device-token upsert failed:", err);
+        return c.json({ error: "Could not register push token" }, 500);
+      }
+    },
   );
 
 /** Shared CVData-shaped extraction prompt, used by the mobile OCR route below. */

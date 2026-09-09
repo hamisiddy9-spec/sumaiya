@@ -16,7 +16,6 @@ import type { CVData } from "@/types";
 import { getAuthUser } from "@/lib/api/auth";
 import { runTool, executableTools, type ToolCaller } from "@/lib/assistant/run-tool";
 
-const CALLERS: readonly ToolCaller[] = ["ui", "assistant", "cron", "whatsapp", "api"];
 
 const bodySchema = z.object({
   args: z.record(z.unknown()).optional(),
@@ -40,38 +39,37 @@ export const capabilityRoutes = new Hono()
 
   // POST /api/capabilities/:toolId — run one tool through the pipeline.
   .post("/:toolId", zValidator("json", bodySchema), async (c) => {
-    const user = await getAuthUser(c);
     const toolId = c.req.param("toolId");
     const body = c.req.valid("json");
-
     // Language: honour the x-lang header the middleware forwards for the app subtree.
     const sw = c.req.raw.headers.get("x-lang") !== "en";
 
-    const result = await runTool({
-      toolId,
-      args: body.args ?? {},
-      subject: {
-        userId: user?.id ?? null,
-        sw,
-      },
-      caller: (body.caller ?? "ui") as ToolCaller,
-      confirmed: body.confirmed,
-      context: {
-        cv: (body.cv ?? null) as CVData | null,
-        hasFile: body.hasFile,
-        extra: body.context,
-      },
-    });
+    let result;
+    try {
+      const user = await getAuthUser(c);
+      result = await runTool({
+        toolId,
+        args: body.args ?? {},
+        subject: { userId: user?.id ?? null, sw },
+        caller: (body.caller ?? "ui") as ToolCaller,
+        confirmed: body.confirmed,
+        context: {
+          cv: (body.cv ?? null) as CVData | null,
+          hasFile: body.hasFile,
+          extra: body.context,
+        },
+      });
+    } catch (err) {
+      console.error(`[capabilities] ${toolId} faulted:`, err);
+      return c.json({ success: false, data: { status: "error", tool: toolId, code: "pipeline_fault" } }, 500);
+    }
 
-    const httpStatus =
-      result.status === "ok" || result.status === "preview" || result.status === "confirm_required"
-        ? 200
-        : result.status === "blocked"
-          ? (result.reason === "quota" ? 429 : result.reason === "guest_only" || result.reason === "requires_plan" ? 403 : 400)
-          : 500;
-
-    return c.json({ success: result.status === "ok" || result.status === "preview", data: result }, httpStatus);
+    // The capability layer always answers 200 when the transport + pipeline ran:
+    // a `blocked` / `error` / `confirm_required` outcome is DATA the caller acts
+    // on, not an exception. Only a thrown pipeline fault (below) is a 5xx.
+    return c.json(
+      { success: result.status === "ok" || result.status === "preview", data: result },
+      200,
+    );
   });
 
-// (unused export kept for symmetry with other route modules)
-export { CALLERS };

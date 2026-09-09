@@ -495,3 +495,45 @@ export type Provenance = typeof provenance.$inferSelect;
 export type NewProvenance = typeof provenance.$inferInsert;
 export type EvalSample = typeof evalSample.$inferSelect;
 export type NewEvalSample = typeof evalSample.$inferInsert;
+
+// ─── Device tokens (push) — blueprint H2 ────────────────────────────────────
+// One row per (user, device). Written by PUT /api/mobile/device-token, which is
+// Bearer-authed on the Hono API — the older /api/auth/device-token was
+// cookie-only, so the native app could never register. `platform` is
+// ios | android | web (web push subscriptions live in webPushSubscription).
+export const deviceToken = pgTable("device_token", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  deviceId: text("device_id").notNull(),
+  pushToken: text("push_token").notNull(),
+  platform: text("platform").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  deviceUniq: uniqueIndex("device_token_device_uniq").on(t.deviceId),
+  userIdx: index("device_token_user_idx").on(t.userId),
+}));
+
+// ─── Web push subscriptions — blueprint Stage 5 (own the push, no FCM) ──────
+// A PushSubscription from an installed Android/desktop PWA. `endpoint` is the
+// browser's push service URL; keys are the client's p256dh + auth. Sent with
+// the `web-push` library + a VAPID keypair (env: VAPID_PUBLIC_KEY /
+// VAPID_PRIVATE_KEY). Prune 404/410 endpoints on send.
+export const webPushSubscription = pgTable("web_push_subscription", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("user_agent").notNull().default(""),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastSeenAt: timestamp("last_seen_at").notNull().defaultNow(),
+}, (t) => ({
+  endpointUniq: uniqueIndex("web_push_endpoint_uniq").on(t.endpoint),
+  userIdx: index("web_push_user_idx").on(t.userId),
+}));
+
+export type DeviceToken = typeof deviceToken.$inferSelect;
+export type NewDeviceToken = typeof deviceToken.$inferInsert;
+export type WebPushSubscription = typeof webPushSubscription.$inferSelect;
+export type NewWebPushSubscription = typeof webPushSubscription.$inferInsert;

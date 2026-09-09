@@ -12,9 +12,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sumaiya/api-client": "*",
-    "@sumaiya/types": "*",
-    "@sumaiya/utils": "*"
+    "@sumaiya/api-client": "file:../api-client",
+    "@sumaiya/types": "file:../types",
+    "@sumaiya/utils": "file:../utils"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
