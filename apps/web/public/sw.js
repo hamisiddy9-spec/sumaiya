@@ -2,7 +2,7 @@
  * Sumaiya service worker — offline caching.
  *
  * Strategy (careful by design):
- *  - Versioned cache (th-cache-vN); activate() deletes every older cache.
+ *  - Versioned cache (su-cache-vN); activate() deletes every older cache.
  *  - HTML documents: NETWORK-FIRST with cache fallback. Stale HTML is never
  *    served while online — language (lang cookie) and CDN freshness (#238)
  *    must always come from the network; the cache is only the offline
@@ -20,7 +20,7 @@
  * immediately on deploy (auto-update).
  */
 
-const TH_CACHE = "th-cache-v1";
+const SU_CACHE = "su-cache-v1";
 const OFFLINE_URL = "/offline.html";
 
 /** Stable shell assets (no build hashes) precached at install time. */
@@ -77,7 +77,7 @@ async function networkFirstHtml(request, pathname) {
       !isAuthHtmlPath(pathname)
     ) {
       const clone = res.clone();
-      const cache = await caches.open(TH_CACHE);
+      const cache = await caches.open(SU_CACHE);
       cache.put(request, clone).catch(() => {});
     }
     return res;
@@ -95,7 +95,7 @@ async function networkFirstHtml(request, pathname) {
 
 /** Static assets: serve cache instantly, refresh in the background. */
 async function staleWhileRevalidate(request) {
-  const cache = await caches.open(TH_CACHE);
+  const cache = await caches.open(SU_CACHE);
   const cached = await cache.match(request);
   const network = fetch(request)
     .then((res) => {
@@ -111,7 +111,7 @@ async function staleWhileRevalidate(request) {
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(TH_CACHE);
+      const cache = await caches.open(SU_CACHE);
       // Individual adds (allSettled) so one 404 cannot fail the whole precache.
       await Promise.allSettled(PRECACHE.map((url) => cache.add(url)));
       self.skipWaiting();
@@ -123,7 +123,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((k) => k !== TH_CACHE).map((k) => caches.delete(k)));
+      await Promise.all(keys.filter((k) => k !== SU_CACHE).map((k) => caches.delete(k)));
       await self.clients.claim();
     })(),
   );
