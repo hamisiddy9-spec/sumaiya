@@ -18,6 +18,7 @@
     "test:e2e": "node scripts/e2e-smoke.mjs",
     "evals": "vitest run evals",
     "evals:ai": "vitest run evals",
+    "evals:prod": "npx -y tsx@4.19.2 scripts/run-prod-evals.ts",
     "verify": "bash scripts/verify-all.sh",
     "test:e2e:local": "playwright test",
     "lh": "node scripts/lighthouse-audit.cjs",
