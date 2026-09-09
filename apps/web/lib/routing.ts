@@ -87,9 +87,23 @@ export type RouteDecision =
   | { kind: "passthrough" }
   | { kind: "protected" };
 
+/** A file-like path — has an extension on the last segment. These are static
+ * assets from public/ (/sw.js, /manifest.json, /opensearch.xml) or Next file
+ * conventions (/robots.txt, /sitemap.xml from robots.ts / sitemap.ts). They
+ * must pass through untouched — rewriting them into /[locale] 404s them. */
+export function isFileLikePath(pathname: string): boolean {
+  const last = pathname.split("/").pop() ?? "";
+  return /\.[a-z0-9]{1,8}$/i.test(last);
+}
+
 export function classifyRoute(pathname: string, lang: "en" | "sw"): RouteDecision {
   if (isMarketingPath(pathname)) return { kind: "marketing-rewrite", to: `/${lang}${pathname}` };
-  if (!pathname.startsWith("/api/") && !pathname.startsWith("/_next/") && !isAppPath(pathname)) {
+  if (
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/_next/") &&
+    !isFileLikePath(pathname) &&
+    !isAppPath(pathname)
+  ) {
     return { kind: "unknown-rewrite", to: `/${lang}${pathname}` };
   }
   if (isProtectedPath(pathname)) return { kind: "protected" };

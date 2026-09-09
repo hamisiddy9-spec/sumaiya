@@ -33,6 +33,12 @@ describe("route classification", () => {
     }
   });
 
+  it("root static files pass through — NOT rewritten (regression guard)", () => {
+    for (const p of ["/sw.js", "/manifest.json", "/robots.txt", "/sitemap.xml", "/opensearch.xml", "/favicon.ico", "/apple-touch-icon.png"]) {
+      expect(classifyRoute(p, "sw").kind).toBe("passthrough");
+    }
+  });
+
   it("prefix matching is boundary-safe (no /assistantx false positive)", () => {
     expect(isAppPath("/assistantx")).toBe(false);
     expect(isAppPath("/assistant")).toBe(true);

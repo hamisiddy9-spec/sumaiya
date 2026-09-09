@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import {
   isMarketingPath,
   isAppPath,
+  isFileLikePath,
   isProtectedPath,
 } from "@/lib/routing";
 
@@ -72,10 +73,16 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-lang", lang);
 
-  // Unknown bare path (not marketing, not /api, not a known (app) route) →
-  // route through the [locale] tree so it 404s cleanly instead of falling
-  // through with no root layout (→ 500). See APP_PREFIXES comment above.
-  if (!pathname.startsWith("/api/") && !pathname.startsWith("/_next/") && !isAppPath(pathname)) {
+  // Unknown bare path (not marketing, not /api, not a static file, not a known
+  // (app) route) → route through the [locale] tree so it 404s cleanly instead
+  // of falling through with no root layout (→ 500). isFileLikePath keeps
+  // /sw.js, /manifest.json, /robots.txt, /sitemap.xml etc. passing through.
+  if (
+    !pathname.startsWith("/api/") &&
+    !pathname.startsWith("/_next/") &&
+    !isFileLikePath(pathname) &&
+    !isAppPath(pathname)
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = `/${lang}${pathname}`;
     return NextResponse.rewrite(url);
