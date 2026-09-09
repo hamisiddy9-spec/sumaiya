@@ -12,15 +12,18 @@ describe("toolMeta", () => {
     }
   });
 
-  it("defaults read tools to auto and write tools to at least preview", () => {
+  it("defaults read tools to auto and user-facing write tools to at least preview", () => {
     for (const t of ASSISTANT_TOOLS) {
       const m = toolMeta(t.id);
       if (t.sideEffect === "read") {
         // read tools are auto unless explicitly escalated (none currently are)
         expect(m.policy).toBe("auto");
-      } else {
+      } else if (!t.hidden) {
+        // a write the assistant can offer must never be auto
         expect(m.policy === "preview" || m.policy === "confirm").toBe(true);
       }
+      // hidden system tools (outcome.record) set their own policy — the UI tap
+      // is the confirmation.
     }
   });
 

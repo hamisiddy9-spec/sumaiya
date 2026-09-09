@@ -34,6 +34,10 @@ export interface AssistantTool {
   needsCv?: boolean;
   /** Whether this tool needs an attached file (PDF/image) in context to run. */
   needsFile?: boolean;
+  /** Registered capability the assistant should NOT offer unprompted — it's
+   *  driven by the UI or the system (e.g. outcome.record). Still runs through
+   *  the same run-tool guardrail pipeline. */
+  hidden?: boolean;
 }
 
 // ─── Capability-layer metadata (system blueprint) ────────────────────────────
@@ -85,6 +89,9 @@ const TOOL_META: Record<string, Partial<ToolMeta>> = {
   "letter.proposal": { policy: "confirm", cost: "cheap-ai", offline: "online-only", capability: "letter.business" },
   "jobs.track": { policy: "confirm", cost: "none", offline: "queue", capability: "application.track" },
   "application.update": { policy: "confirm", cost: "none", offline: "queue", capability: "application.track" },
+
+  // The tap IS the confirmation — a one-tap "I got the interview" from the UI.
+  "outcome.record": { policy: "auto", cost: "none", offline: "queue", capability: "outcome.record" },
 };
 
 /** Resolve full metadata for a tool, filling gaps from its side-effect. */
@@ -393,6 +400,18 @@ export const ASSISTANT_TOOLS: AssistantTool[] = [
     whenToUse: "The user attached a scanned/image PDF and wants its text. Extracts the embedded text layer; if the file is a pure scan with no text layer, says so honestly.",
     sideEffect: "read", args: "none (uses the attached file)", needsFile: true,
   },
+
+  // ── System / UI-driven capabilities — registered here so they run through the
+  // same run-tool guardrail pipeline, but `hidden` so the assistant never
+  // offers them unprompted.
+  {
+    id: "outcome.record",
+    title: "Record an application outcome",
+    whenToUse: "System/UI only — the get-hired feedback loop. The user taps 'I got the interview / the offer / the job / no'.",
+    sideEffect: "write",
+    args: '{ "applicationId": "<id>", "stage": "interview" | "offer" | "hired" | "no" }',
+    hidden: true,
+  },
 ];
 
 const BY_ID = new Map(ASSISTANT_TOOLS.map((t) => [t.id, t]));
@@ -412,7 +431,7 @@ export function isToolId(id: unknown): id is string {
  */
 export function toolCatalogPrompt(opts: { hasCv: boolean; hasFile?: boolean }): string {
   const available = ASSISTANT_TOOLS.filter((t) =>
-    (t.needsCv ? opts.hasCv : true) && (t.needsFile ? !!opts.hasFile : true)
+    !t.hidden && (t.needsCv ? opts.hasCv : true) && (t.needsFile ? !!opts.hasFile : true)
   );
   if (!available.length) return "";
   const lines = available

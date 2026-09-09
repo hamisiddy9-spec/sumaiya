@@ -46,6 +46,10 @@ export const TOOL_ARG_SCHEMAS = {
     status: z.enum(APP_STATUS),
     notes: z.string().max(2000).optional(),
   }).strict(),
+  "outcome.record": z.object({
+    applicationId: z.string().min(1).max(100),
+    stage: z.enum(["interview", "offer", "hired", "no"]),
+  }).strict(),
   "doc.summarize": z.object({}).strict(),
   "doc.proofread": z.object({}).strict(),
   "doc.compare": z.object({ otherText: z.string().min(1).max(60000) }).strict(),
