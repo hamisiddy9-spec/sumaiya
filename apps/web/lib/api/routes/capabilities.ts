@@ -12,6 +12,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
+import type { CVData } from "@/types";
 import { getAuthUser } from "@/lib/api/auth";
 import { runTool, executableTools, type ToolCaller } from "@/lib/assistant/run-tool";
 
@@ -56,8 +57,7 @@ export const capabilityRoutes = new Hono()
       caller: (body.caller ?? "ui") as ToolCaller,
       confirmed: body.confirmed,
       context: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        cv: (body.cv ?? null) as any,
+        cv: (body.cv ?? null) as CVData | null,
         hasFile: body.hasFile,
         extra: body.context,
       },
