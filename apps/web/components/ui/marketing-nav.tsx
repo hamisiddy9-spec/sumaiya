@@ -36,7 +36,7 @@ export function MarketingNav() {
   const navLinks = [
     { href: "/templates", label: tr.nav.templates },
     { href: "/assistant", label: "Sumaiya" },
-    { href: "/jobs", label: lang === "sw" ? "Kazi" : "Jobs" },
+    { href: "/jobs", label: lang === "sw" ? "Ajira" : "Jobs" },
     { href: "/tools", label: tr.nav.tools },
     { href: "/ats-checker", label: lang === "sw" ? "Kagua ATS" : "ATS Checker" },
     { href: "/snap-to-apply", label: lang === "sw" ? "Snap-to-Apply" : "Snap to Apply" },
@@ -74,7 +74,7 @@ export function MarketingNav() {
           </Link>
 
           <Link href="/jobs" className="flex items-center gap-1.5 text-sm font-medium text-cream/80 hover:text-cream transition-colors duration-150">
-            {lang === "sw" ? "Kazi" : "Jobs"}
+            {lang === "sw" ? "Ajira" : "Jobs"}
           </Link>
 
           {/* Tools — dropdown of the individual PDF tools (opens on hover/focus) */}

@@ -62,7 +62,7 @@ export function DashboardHeader({
     { label: sw ? "Barua za Maombi" : "Cover Letters", href: "/dashboard?tab=cover-letter",  icon: "mail",   match: "/dashboard?tab=cover-letter" },
     { label: sw ? "Kadi za Biashara" : "Business Cards", href: "/dashboard?tab=business-card", icon: "card", match: "/dashboard?tab=business-card" },
     { label: sw ? "Barua Rasmi" : "Formal Letters",   href: "/dashboard?tab=letter",         icon: "letter", match: "/dashboard?tab=letter" },
-    { label: sw ? "Kazi" : "Jobs",                    href: "/jobs",                         icon: "briefcase" },
+    { label: sw ? "Ajira" : "Jobs",                    href: "/jobs",                         icon: "briefcase" },
   ];
   const BOTTOM_NAV: NavItem[] = [{ label: settingsLabel, href: "/settings", icon: "gear" }];
 

@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: { canonical: "/about" },
     title: sw ? "Kuhusu Sisi" : "About",
     description: sw
-      ? "Sumaiya huwasaidia watafuta-kazi kujenga CV za kitaalamu zinazopita ATS, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."
+      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita ATS, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."
       : "Sumaiya helps job seekers build professional, ATS-ready CVs, cover letters, business cards and formal letters — in minutes, with an AI assistant, in English or Kiswahili.",
   };
 }
@@ -68,7 +68,7 @@ export default async function AboutPage({ params }: { params: { locale: string }
           </h1>
           <p className="text-text-muted max-w-2xl mx-auto text-sm md:text-lg leading-relaxed">
             {sw
-              ? "Kutuma maombi ya kazi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inakupa templeti zilizoidhinishwa na waajiri, msaidizi wa kuandika wa AI na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
+              ? "Kutuma maombi ya nafasi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inakupa templeti zilizoidhinishwa na waajiri, msaidizi wa kuandika wa AI na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
               : "Applying for a job shouldn’t mean fighting with a word processor at 1am. Sumaiya gives you recruiter-friendly templates, an AI writing assistant and one-tap PDF export — so you can look your best and get past the screening software that reads your CV first."}
           </p>
         </div>

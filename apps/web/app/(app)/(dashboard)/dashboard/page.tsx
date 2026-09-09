@@ -297,7 +297,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             <div className="bg-espresso rounded-card-lg p-5 border border-espresso-line flex items-center justify-between gap-4 hover:border-gold/30 transition-colors">
               <div className="min-w-0">
                 <p className="text-[11px] font-mono uppercase tracking-wider text-gold/80 mb-2">
-                  {sw ? "Utafutaji wako wa kazi" : "Your job search"}
+                  {sw ? "Utafutaji wako wa ajira" : "Your job search"}
                 </p>
                 {appStatuses.length === 0 ? (
                   <p className="text-cream text-sm">

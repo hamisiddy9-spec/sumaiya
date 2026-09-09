@@ -139,7 +139,7 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
       {/* Header */}
       <div className="mb-6">
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-espresso">
-          {sw ? "Kazi" : "Jobs"}
+          {sw ? "Ajira" : "Jobs"}
         </h1>
         <p className="text-sm text-text-muted mt-1.5 max-w-2xl">
           {signedIn && hasCv
@@ -292,8 +292,8 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
           </div>
           <p className="text-sm font-semibold text-espresso">
             {jobs.length === 0
-              ? sw ? "Bado hakuna kazi zilizoorodheshwa." : "No jobs listed yet."
-              : sw ? "Hakuna kazi zinazolingana na utafutaji wako." : "No jobs match your search."}
+              ? sw ? "Bado hakuna nafasi zilizoorodheshwa." : "No jobs listed yet."
+              : sw ? "Hakuna nafasi zinazolingana na utafutaji wako." : "No jobs match your search."}
           </p>
           <p className="text-xs text-text-muted mt-1">
             {jobs.length === 0

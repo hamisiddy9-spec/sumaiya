@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: { canonical: "/blog" },
     title: sw ? "Blogu" : "Blog",
     description: sw
-      ? "Ushauri wa vitendo kuhusu CV, barua za maombi na kutafuta kazi."
+      ? "Ushauri wa vitendo kuhusu CV, barua za maombi na kutafuta ajira."
       : "Practical advice on CVs, cover letters and job hunting.",
   };
 }

@@ -67,7 +67,7 @@ const STRINGS = {
     doneTitle: "Wasifu umekamilika 🎉",
     doneBody: "Wasifu wako wa Kazi sasa unashikilia ukweli ambao CV zako hujengwa kutoka.",
     viewSettings: "Angalia wasifu",
-    goJobs: "Tafuta kazi zinazolingana",
+    goJobs: "Tafuta nafasi zinazolingana",
     answeredCount: (n: number) => `${n} ${n === 1 ? "swali limejibiwa" : "maswali yamejibiwa"}`,
     of: "kati ya",
     editNote: "Majibu yako yanahifadhiwa unavyoendelea.",

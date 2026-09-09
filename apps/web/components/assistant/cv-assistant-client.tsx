@@ -840,8 +840,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           setMessages((m) => [...m, {
             role: "assistant",
             content: top.length
-              ? (sw ? "Hizi hapa kazi zinazoendana:" : "Here are some matching jobs:")
-              : (sw ? "Sikupata kazi zinazoendana sasa hivi — jaribu tena baadaye au angalia ukurasa wa kazi." : "No matching jobs right now — try again later or browse the jobs page."),
+              ? (sw ? "Hizi hapa nafasi zinazoendana:" : "Here are some matching jobs:")
+              : (sw ? "Sikupata nafasi zinazoendana sasa hivi — jaribu tena baadaye au angalia ukurasa wa Ajira." : "No matching jobs right now — try again later or browse the jobs page."),
             ...(top.length ? { card: { kind: "jobs" as const, query: q, jobs: top } } : {}),
           }]);
           markExecuted({ tool: "jobs.search", args: act.args ?? {} });
@@ -3569,7 +3569,7 @@ function SkillGapCard({ jobTitle, strengths, gaps, score, learningPlan, summary,
       )}
       {gaps.length === 0 && (
         <p className="text-[12px] font-semibold text-pine flex items-center gap-1.5">
-          <Check className="w-4 h-4" /> {sw ? "Hakuna mapungufu makubwa — tayari uko tayari kuomba kazi hii." : "No major gaps — you're ready to apply for this role."}
+          <Check className="w-4 h-4" /> {sw ? "Hakuna mapungufu makubwa — tayari uko tayari kuomba nafasi hii." : "No major gaps — you're ready to apply for this role."}
         </p>
       )}
     </div>

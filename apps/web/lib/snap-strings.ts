@@ -117,7 +117,7 @@ export const STRINGS = {
     tryAnother: "Snap kazi nyingine",
     madeWith: "Imetengenezwa kwa Sumaiya",
     // D4 — viral hook: share the PII-free result card.
-    shareSub: "Shiriki matokeo yako — kila shiriki humsaidia mtafuta kazi mwingine kugundua Sumaiya.",
+    shareSub: "Shiriki matokeo yako — kila shiriki humsaidia mtafuta ajira mwingine kugundua Sumaiya.",
     shareButton: "Shiriki matokeo yangu",
     shareCopied: "Kiungo kimenakiliwa!",
     shareLinkHint:

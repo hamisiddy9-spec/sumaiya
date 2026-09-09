@@ -13,7 +13,7 @@ const productLinks = [
   { href: "/editor/cover-letter/try", label: "Cover letters", labelSw: "Barua za maombi" },
   { href: "/ats-checker", label: "ATS Checker", labelSw: "Kagua ATS" },
   { href: "/tools", label: "PDF tools", labelSw: "Zana za PDF" },
-  { href: "/jobs", label: "Jobs", labelSw: "Kazi" },
+  { href: "/jobs", label: "Jobs", labelSw: "Ajira" },
   // Pricing hidden while everything is free (matches the nav — see lib/features.ts).
   ...(PAYMENTS_ENABLED ? [{ href: "/pricing", label: "Pricing", labelSw: "Bei" }] : []),
 ];

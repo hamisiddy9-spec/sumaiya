@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       ? "Angalia Alama ya ATS ya CV Yako Bila Malipo"
       : "Free ATS Resume Checker — Score Your CV Instantly",
     description: sw
-      ? "Angalia alama ya ATS ya CV yako bila malipo. Pakia CV yako kama PDF na upate alama ya papo hapo pamoja na marekebisho maalum ya kupita Mifumo ya Kufuatilia Maombi (ATS) — imeundwa kwa watafuta-kazi kila mahali."
+      ? "Angalia alama ya ATS ya CV yako bila malipo. Pakia CV yako kama PDF na upate alama ya papo hapo pamoja na marekebisho maalum ya kupita Mifumo ya Kufuatilia Maombi (ATS) — imeundwa kwa watafuta-ajira kila mahali."
       : "Check your CV's ATS score free. Upload your resume as a PDF and get an instant score plus specific fixes to pass Applicant Tracking Systems — built for job seekers everywhere.",
     keywords: sw
       ? ["kuangalia CV ATS", "alama ya ATS", "CV inayopita ATS", "kagua CV", "ATS checker", "cv checker tanzania", "cv checker kenya", "resume checker free"]
