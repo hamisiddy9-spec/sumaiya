@@ -496,7 +496,7 @@ export default function LandingPage() {
             {/* Subcopy — plain language, no jargon */}
             <p className="text-text-body text-base md:text-lg max-w-lg leading-relaxed mb-8">
               {lang === "sw"
-                ? "Chagua muundo, jaza maelezo yako — au acha msaidizi wetu wa Aua, Sumaiya, akuandikie — kisha pakua PDF safi. Ni bure, kwa Kiswahili au Kiingereza."
+                ? "Chagua muundo, jaza maelezo yako — au acha Sumaiya, msaidizi wetu wa AI, akuandikie — kisha pakua PDF safi. Ni bure, kwa Kiswahili au Kiingereza."
                 : "Pick a design, type in your details — or let Sumaiya, our AI assistant, write it for you — then download a clean PDF. Free, in English or Swahili."}
             </p>
 
