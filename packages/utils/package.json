@@ -15,6 +15,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@sumaiya/types": "workspace:*"
+    "@sumaiya/types": "*"
   }
 }
