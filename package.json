@@ -1,0 +1,27 @@
+{
+  "name": "sumaiya",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Sumaiya — get hired with AI. Monorepo: web (Next.js) + native (Expo) + shared packages.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "npm@11.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "web": "npm run dev -w @sumaiya/web",
+    "native": "npm run start -w @sumaiya/native"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.5",
+    "typescript": "^5.9.3"
+  }
+}
