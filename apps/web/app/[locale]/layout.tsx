@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MetaPixel } from "@/components/meta-pixel";
 import { AnalyticsProvider } from "@/lib/analytics/provider";
+import { ReferralCatch } from "@/components/referral/referral-catch";
 import { label } from "@/lib/i18n/labels";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -179,6 +180,7 @@ export default function LocaleRootLayout({
               {label(lang, "skipToContent")}
             </a>
             {children}
+            <ReferralCatch />
             <InstallPrompt />
             <SwRegister />
             <IosInstallHint />

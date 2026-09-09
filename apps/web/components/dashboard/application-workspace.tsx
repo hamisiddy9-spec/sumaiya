@@ -11,6 +11,7 @@ import { matchTone } from "@/lib/match-ui";
 import { classifyRequirements, requirementSummary, type RequirementEvidence } from "@/lib/requirement-evidence";
 import { getCoverLetterForCv } from "@/lib/template-families";
 import { buildCopilotState } from "@/lib/application-copilot";
+import { OutcomeCheck } from "@/components/dashboard/outcome-check";
 
 type Lang = "en" | "sw";
 
@@ -446,6 +447,17 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
         </div>
 
         {/* Follow-up nudge */}
+        {/* The get-hired feedback loop — one-tap outcome capture. */}
+        <OutcomeCheck
+          applicationId={app.id}
+          companyName={app.companyName}
+          status={status}
+          appliedAt={app.appliedAt}
+          createdAt={app.createdAt}
+          sw={sw}
+          onStageChange={setStatus}
+        />
+
         {needsFollowUp && (
           <div className="bg-gold-tint border border-gold/30 rounded-card-lg p-4 mb-4 flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center flex-shrink-0">

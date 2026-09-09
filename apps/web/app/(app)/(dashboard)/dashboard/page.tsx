@@ -20,6 +20,7 @@ import type { Lang } from "@/lib/i18n/translations";
 import type { CV, CoverLetter, BusinessCard, Letter } from "@/lib/db/schema";
 import type { Metadata } from "next";
 import { ApplicationsGrid } from "@/components/dashboard/applications-grid";
+import { ReferralCard } from "@/components/referral/referral-card";
 import { CreateMenu } from "@/components/dashboard/create-menu";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
 import { RecommendedJobsSection } from "@/components/jobs/recommended-jobs-section";
@@ -666,6 +667,11 @@ export default async function DashboardPage({ searchParams }: Props) {
             <ApplicationsGrid lang={lang} />
           </section>
         )}
+
+        {/* ── Invite loop ── */}
+        <section className="mb-12 max-w-md">
+          <ReferralCard sw={sw} />
+        </section>
       </div>
     </main>
   );

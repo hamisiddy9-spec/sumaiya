@@ -9,6 +9,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MetaPixel } from "@/components/meta-pixel";
 import { AnalyticsProvider } from "@/lib/analytics/provider";
+import { ReferralCatch } from "@/components/referral/referral-catch";
 
 // ─── App root layout (authed / dynamic routes) ────────────────────────────────
 // Everything that is NOT public marketing lives here (dashboard, editors, auth,
@@ -149,6 +150,7 @@ export default async function AppRootLayout({ children }: { children: React.Reac
           {lang === "sw" ? "Ruka hadi maudhui" : "Skip to content"}
         </a>
         {children}
+        <ReferralCatch />
         <InstallPrompt />
         <SwRegister />
         <IosInstallHint />
