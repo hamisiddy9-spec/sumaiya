@@ -13,7 +13,7 @@ import { MarketingAuthProvider } from "@/components/ui/marketing-auth-context";
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   const title = sw
-    ? "Jukwaa la Kazi lenye AI — Tengeneza CV Bila Malipo"
+    ? "Jukwaa la Ajira lenye AI — Tengeneza CV Bila Malipo"
     : "Sumaiya — AI Career Platform: CV, Jobs & Interview Prep";
   const description = sw
     ? "Ongea na msaidizi wa AI kwa Kiswahili au Kiingereza akuandikie CV, barua ya kazi, kadi ya biashara au barua rasmi kwa dakika — bila malipo. Templeti zinazopita ATS, upakuaji wa PDF."

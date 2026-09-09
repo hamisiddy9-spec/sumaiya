@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Mail, Loader2 } from "lucide-react";
+import { Mail, Loader2, KeyRound } from "lucide-react";
 import { signIn, getSession } from "@/lib/auth-client";
 import { authErrorMessage } from "@/lib/auth-errors";
 import posthog from "@/lib/analytics";
@@ -65,17 +65,28 @@ function MagicLinkSent({ email, onReset, sw }: { email: string; onReset: () => v
 function SignInForm({ lang }: { lang: string }) {
   const sw = lang === "sw";
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "sent" | "code-sent" | "error">("idle");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [hasDraft, setHasDraft] = useState(false);
+  // "code" = email a 6-digit code the user types here (stays inside an
+  // installed PWA); "link" = classic magic link (fine in a normal browser).
+  const [mode, setMode] = useState<"link" | "code">("link");
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
   const searchParams = useSearchParams();
   const rawCallbackUrl = searchParams.get("callbackUrl");
   const errorParam = searchParams.get("error");
 
   useEffect(() => {
     setHasDraft(!!localStorage.getItem("sumaiya-guest-cv"));
+    // Installed PWA → default to the code flow. A tapped magic link opens the
+    // system browser and the session lands there, never back in the app.
+    const standalone =
+      window.matchMedia?.("(display-mode: standalone)").matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true;
+    if (standalone) setMode("code");
   }, []);
 
   // If a draft exists and no explicit destination was given, send the user to
@@ -143,18 +154,46 @@ function SignInForm({ lang }: { lang: string }) {
     posthog.capture('sign_in_triggered', { source: 'sign_in_page', method: 'email' });
 
     try {
-      const result = await signIn.magicLink({ email, callbackURL: supabaseCallbackURL });
+      const result =
+        mode === "code"
+          ? await signIn.emailCode({ email })
+          : await signIn.magicLink({ email, callbackURL: supabaseCallbackURL });
       if (result.error) {
         // Map Supabase auth error codes to LOCALIZED messages — never leak the
         // raw SDK string (e.g. "Email rate limit exceeded.") into the UI.
         setErrorMsg(authErrorMessage(result.error.code, sw));
         setStatus("error");
       } else {
-        setStatus("sent");
+        setStatus(mode === "code" ? "code-sent" : "sent");
       }
     } catch {
       setErrorMsg(sw ? "Hitilafu ya mtandao. Tafadhali jaribu tena." : "Network error. Please try again.");
       setStatus("error");
+    }
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = code.replace(/\D/g, "");
+    if (token.length < 6) return;
+    setVerifying(true);
+    setErrorMsg("");
+    try {
+      const result = await signIn.verifyEmailCode({ email, token });
+      if (result.error || !result.data?.session) {
+        setErrorMsg(
+          sw
+            ? "Msimbo si sahihi au umeisha muda. Angalia tena au omba mpya."
+            : "That code is wrong or expired. Check it, or request a new one.",
+        );
+        setVerifying(false);
+        return;
+      }
+      posthog.capture("sign_in_completed", { method: "otp", isNew: false });
+      window.location.replace(callbackUrl || "/dashboard");
+    } catch {
+      setErrorMsg(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Try again.");
+      setVerifying(false);
     }
   };
 
@@ -181,7 +220,43 @@ function SignInForm({ lang }: { lang: string }) {
 
         {/* Right panel — sign-in form */}
         <div className="md:col-span-3 bg-card p-8 md:p-10">
-          {status === "sent" ? (
+          {status === "code-sent" ? (
+            <form onSubmit={handleVerifyCode} className="py-4">
+              <div className="w-16 h-16 bg-ember-tint rounded-full flex items-center justify-center mx-auto mb-4">
+                <KeyRound className="w-8 h-8 text-ember" />
+              </div>
+              <h2 className="text-xl font-bold text-espresso mb-2 text-center">
+                {sw ? "Weka msimbo" : "Enter your code"}
+              </h2>
+              <p className="text-text-body text-sm text-center mb-6">
+                {sw ? "Tumetuma msimbo wa tarakimu 6 kwa" : "We sent a 6-digit code to"}{" "}
+                <strong className="text-espresso">{email}</strong>.
+              </p>
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                autoFocus
+                maxLength={6}
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="••••••"
+                className="w-full text-center tracking-[0.5em] text-2xl font-semibold rounded-input-lg border border-border-input bg-sand-2 px-4 py-3 text-espresso placeholder:text-text-muted placeholder:tracking-[0.3em] focus:outline-none focus:ring-[3px] focus:ring-ember-tint focus:border-ember transition"
+              />
+              {errorMsg && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-input-lg px-3 py-2 mt-3">{errorMsg}</p>
+              )}
+              <Button type="submit" variant="primary" className="w-full mt-4" disabled={verifying || code.length < 6}>
+                {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : sw ? "Ingia" : "Sign in"}
+              </Button>
+              <button
+                type="button"
+                onClick={() => { setStatus("idle"); setCode(""); setErrorMsg(""); }}
+                className="block mx-auto mt-4 text-sm text-ember-hover font-semibold hover:underline"
+              >
+                {sw ? "Tumia barua pepe nyingine" : "Use a different email"}
+              </button>
+            </form>
+          ) : status === "sent" ? (
             <MagicLinkSent email={email} onReset={() => setStatus("idle")} sw={sw} />
           ) : (
             <>
@@ -189,7 +264,9 @@ function SignInForm({ lang }: { lang: string }) {
                 {sw ? "Ingia Sumaiya" : "Sign in to Sumaiya"}
               </h2>
               <p className="text-text-body text-sm mb-6">
-                {sw ? "Hakuna nywila — tutakutumia kiungo cha kuingia." : "No password needed — we'll send you a magic link."}
+                {mode === "code"
+                  ? (sw ? "Hakuna nywila — tutakutumia msimbo wa tarakimu 6 kwa barua pepe." : "No password — we'll email you a 6-digit code.")
+                  : (sw ? "Hakuna nywila — tutakutumia kiungo cha kuingia." : "No password needed — we'll send you a magic link.")}
               </p>
 
               {hasDraft && (
@@ -280,6 +357,15 @@ function SignInForm({ lang }: { lang: string }) {
                     sw ? "Endelea na barua pepe" : "Continue with email"
                   )}
                 </Button>
+                <button
+                  type="button"
+                  onClick={() => { setMode((m) => (m === "code" ? "link" : "code")); setStatus("idle"); setErrorMsg(""); }}
+                  className="block mx-auto text-xs text-text-muted hover:text-espresso"
+                >
+                  {mode === "code"
+                    ? (sw ? "Ungependa kiungo cha barua pepe badala yake?" : "Prefer a link by email instead?")
+                    : (sw ? "Ungependa msimbo wa tarakimu 6 badala yake?" : "Prefer a 6-digit code instead?")}
+                </button>
               </form>
 
               <p className="text-center text-sm mt-6">

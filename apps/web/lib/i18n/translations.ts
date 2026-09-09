@@ -157,7 +157,7 @@ export const translations = {
       myAccount: "Akaunti Yangu",
     },
     hero: {
-      badge: "Jukwaa lako la kazi lenye AI",
+      badge: "Jukwaa lako la ajira lenye AI",
       title: "Kutoka CV yako hadi kazini — AI kila hatua",
       subtitle: "Jenga wasifu wako wa kazi mara moja, kisha AI ailenge kwa kila kazi, ikague utayari wa ATS, iandike barua zako za maombi, na ikuandae kwa usaili.",
       cta: "Anza bure",

@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   const sw = params.locale !== "en";
 
   const title = sw
-    ? "Jukwaa la Kazi lenye AI — Tengeneza CV Bila Malipo | Sumaiya"
+    ? "Jukwaa la Ajira lenye AI — Tengeneza CV Bila Malipo | Sumaiya"
     : "Sumaiya — AI Career Platform: CV, Job Match & Interview Prep";
   const description = sw
     ? "Tengeneza CV ya kitaalamu na barua za maombi ya kazi kwa dakika chache ukiwa na Sumaiya, msaidizi wako wa AI — templeti nzuri, upakuaji bila malipo, na kikagua ATS. Lengo moja: kupata ajira."
