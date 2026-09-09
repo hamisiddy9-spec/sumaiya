@@ -1,0 +1,97 @@
+// Pure path classification for middleware.ts — no Next/Supabase imports, so
+// it's unit-testable. middleware.ts re-exports these.
+
+// Routes that REQUIRE an authenticated user.
+export const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/settings",
+  "/import-cv",
+  "/studio",
+  "/admin",
+  "/applications",
+];
+
+export function isProtectedPath(pathname: string): boolean {
+  if (PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    return true;
+  }
+  // Editing a saved document requires auth; guest '/editor/*/try' routes don't.
+  if (pathname.startsWith("/editor/") && !pathname.endsWith("/try")) {
+    return true;
+  }
+  return false;
+}
+
+// Public marketing routes under app/[locale]/(marketing)/. Keep in sync with
+// those folders.
+export const MARKETING_PREFIXES = [
+  "/templates",
+  "/jobs",
+  "/tools",
+  "/blog",
+  "/pricing",
+  "/contact",
+  "/about",
+  "/terms",
+  "/privacy",
+  "/cookies",
+  "/ats-checker",
+  "/snap-to-apply",
+  "/preview",
+  "/app",
+];
+
+export function isMarketingPath(pathname: string): boolean {
+  return (
+    pathname === "/" ||
+    MARKETING_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))
+  );
+}
+
+// First URL segment of every route under app/(app)/. A path that is neither
+// marketing, nor /api, nor one of these is an UNKNOWN path (typo / stale link /
+// a marketing page missing from MARKETING_PREFIXES). There is no root
+// app/layout.tsx (two route-group root layouts instead), so an unknown path
+// falling through renders with no layout → 500. The middleware rewrites it into
+// the [locale] tree so it resolves to a real page or app/[locale]/not-found.tsx.
+export const APP_PREFIXES = [
+  "/admin",
+  "/assistant",
+  "/cv",
+  "/editor",
+  "/interview",
+  "/migrate-guest",
+  "/snap",
+  "/studio",
+  "/voice",
+  "/applications",
+  "/brief",
+  "/career-interview",
+  "/dashboard",
+  "/import-cv",
+  "/settings",
+  "/reset-password",
+  "/sign-in",
+  "/sign-up",
+  "/verify",
+];
+
+export function isAppPath(pathname: string): boolean {
+  return APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
+/** The middleware's routing decision for a path, given the resolved language. */
+export type RouteDecision =
+  | { kind: "marketing-rewrite"; to: string }
+  | { kind: "unknown-rewrite"; to: string }
+  | { kind: "passthrough" }
+  | { kind: "protected" };
+
+export function classifyRoute(pathname: string, lang: "en" | "sw"): RouteDecision {
+  if (isMarketingPath(pathname)) return { kind: "marketing-rewrite", to: `/${lang}${pathname}` };
+  if (!pathname.startsWith("/api/") && !pathname.startsWith("/_next/") && !isAppPath(pathname)) {
+    return { kind: "unknown-rewrite", to: `/${lang}${pathname}` };
+  }
+  if (isProtectedPath(pathname)) return { kind: "protected" };
+  return { kind: "passthrough" };
+}

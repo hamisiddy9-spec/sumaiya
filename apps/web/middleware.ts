@@ -1,84 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-
-// Route prefixes that REQUIRE an authenticated user. Everything else (the whole
-// marketing site, the PDF tools, the guest builders at /editor/*/try, and every
-// /api/* route — which authenticate themselves via a Bearer token, not the
-// cookie session) passes through untouched.
-//
-// This replaces an earlier denylist that gated "everything not public". That
-// list contained "/" and was matched with startsWith(), so it matched EVERY
-// path — the auth gate below it was dead code, and page-level guards were the
-// only real protection. An allowlist is both correct and far safer: it can never
-// accidentally lock a visitor out of a public page or break an API call.
-// NOTE: "/assistant" is intentionally NOT here — it serves guests too. The page
-// itself branches on auth (guest CV builder vs. authed profile-aware assistant),
-// so gating it in middleware would redirect guests to sign-in before that logic
-// ever runs, breaking guest mode.
-const PROTECTED_PREFIXES = ["/dashboard", "/settings", "/import-cv", "/studio", "/admin", "/applications"];
-
-function isProtectedPath(pathname: string): boolean {
-  if (PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
-    return true;
-  }
-  // Editing a saved document requires auth; the guest '/editor/*/try' routes do
-  // not (they build in localStorage and migrate on sign-in).
-  if (pathname.startsWith("/editor/") && !pathname.endsWith("/try")) {
-    return true;
-  }
-  return false;
-}
-
-// Public marketing routes that live under app/[locale]/ — the middleware
-// rewrites them to /[locale]<path> so the language comes from the URL segment
-// (static/ISR pages) instead of per-request headers. MUST stay in sync with
-// the folders under app/[locale]/(marketing)/.
-const MARKETING_PREFIXES = [
-  "/templates",
-  "/jobs",
-  "/tools",
-  "/blog",
-  "/pricing",
-  "/contact",
-  "/about",
-  "/terms",
-  "/privacy",
-  "/cookies",
-  "/ats-checker",
-  "/snap-to-apply",
-  "/preview",
-  // /app — native-app landing page under app/[locale]/(marketing)/app/.
-  // MUST be here or the bare path falls through to the dynamic (app) subtree
-  // (no folder at app/app) → 500, while /sw/app + /en/app (static locale
-  // prerenders, excluded from the matcher) keep working. Live repro 2026-09:
-  // sumaiya.pro/app → 500; /sw/app + /en/app → 200.
-  "/app",
-];
-
-function isMarketingPath(pathname: string): boolean {
-  return (
-    pathname === "/" ||
-    MARKETING_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))
-  );
-}
-
-// First URL segment of every route that actually lives under app/(app)/. A path
-// that is neither marketing, nor /api, nor one of these is an UNKNOWN path — a
-// typo, a stale link, or a marketing page missing from MARKETING_PREFIXES. Next
-// has no root app/layout.tsx (two route-group root layouts instead), so letting
-// an unknown path fall through renders it with no layout → 500. We rewrite it
-// into the [locale] tree instead, which resolves to a real page or a clean 404
-// (app/[locale]/not-found.tsx).
-const APP_PREFIXES = [
-  "/admin", "/assistant", "/cv", "/editor", "/interview", "/migrate-guest",
-  "/snap", "/studio", "/voice", "/applications", "/brief", "/career-interview",
-  "/dashboard", "/import-cv", "/settings", "/reset-password", "/sign-in",
-  "/sign-up", "/verify",
-];
-
-function isAppPath(pathname: string): boolean {
-  return APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
-}
+import {
+  isMarketingPath,
+  isAppPath,
+  isProtectedPath,
+} from "@/lib/routing";
 
 // ─── CDN CACHING — verified against the live site, Aug 2026 ────────────────
 // Vercel does NOT cache HTML responses that pass through middleware when the
