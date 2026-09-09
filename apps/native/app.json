@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F4EEE4"
+      "backgroundColor": "#DA4A1C"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,7 +21,7 @@
       "versionCode": 10602,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#F4EEE4"
+        "backgroundColor": "#DA4A1C"
       },
       "permissions": [
         "INTERNET",
