@@ -281,6 +281,12 @@ export default async function DashboardPage({ searchParams }: Props) {
                 {lang === "sw" ? "Ingiza CV" : "Import CV"}
               </Button>
             </Link>
+            <Link href="/voice">
+              <Button variant="secondary" size="sm">
+                <Icon name="mic" size={14} />
+                {lang === "sw" ? "Sema CV" : "Voice CV"}
+              </Button>
+            </Link>
             <CreateMenu lang={lang} />
           </div>
         </div>
