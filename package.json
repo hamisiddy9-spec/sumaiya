@@ -3,11 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "description": "Sumaiya — get hired with AI. Monorepo: web (Next.js) + native (Expo) + shared packages.",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "packageManager": "npm@11.6.0",
+  "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=22"
   },
