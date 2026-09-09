@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: web — tsc · lint · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Full parallelism on CI (the dev box pins this off — it OOMs).
+      VITEST_PARALLEL: "1"
+      NEXT_TELEMETRY_DISABLED: "1"
+      # NEXT_PUBLIC_* are public by design (they ship in the browser bundle);
+      # provided so build-time page evaluation doesn't crash into the error boundary.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_POSTHOG_KEY: ${{ vars.NEXT_PUBLIC_POSTHOG_KEY }}
+      NEXT_PUBLIC_POSTHOG_HOST: ${{ vars.NEXT_PUBLIC_POSTHOG_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run web:typecheck
+      - run: npm -w @sumaiya/web run lint
+      - run: npm run web:test
+      - run: npm run web:build
+
+  web-evals:
+    name: web — anti-fabrication evals
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITEST_PARALLEL: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm -w @sumaiya/web run evals
+
+  native:
+    name: native — tsc · test · expo export
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: apps/native
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci --prefer-offline --no-audit
+      - run: npx tsc --noEmit
+      - run: npm test
+      - run: npx expo export --platform android
+        env:
+          EXPO_NO_TELEMETRY: "1"
