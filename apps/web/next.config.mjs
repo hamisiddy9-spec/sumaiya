@@ -72,6 +72,13 @@ const nextConfig = {
     ];
   },
   experimental: {
+    // Serialize static page generation. This box has 7.6GB RAM and the default
+    // parallel workers OOM while prerendering the 273 template pages. Slower
+    // build, far lower peak memory. CI can raise this.
+    workerThreads: false,
+    cpus: Number(process.env.NEXT_BUILD_CPUS ?? 1),
+    staticGenerationMaxConcurrency: 1,
+    staticGenerationMinPagesPerWorker: 10000,
     // postgres must not be webpack-bundled (it relies on a runtime require of
     // optional native bits). (pdfjs-dist is now used ONLY client-side for the
     // in-browser CV import, so it must NOT be listed here — externalizing it
