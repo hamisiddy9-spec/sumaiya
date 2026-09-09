@@ -84,45 +84,78 @@ repo) — a report, not a gate.
   `0010` (device_token, web_push_subscription), `0011` (referral_code,
   referral_claim). **Not applied yet** — see below.
 
-## What you do — in order
+## Live now (2026-09-09)
 
-1. **Fix the Vercel card** → upgrade the team to Pro → create a Vercel project
-   from `hamisiddy9-spec/sumaiya`, **root directory `apps/web`**, framework Next.js.
-2. **Env vars** on the new project (same Supabase `ayczgaddnufdxnhizpcr`):
-   `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
-   `RESEND_API_KEY`, `DEEPSEEK_API_KEY`, `CRON_SECRET`, and add
-   `NEXT_PUBLIC_POSTHOG_KEY` (+ `POSTHOG_API_KEY`), `OUTCOME_SALT` (any long
-   random string — the outcome loop no-ops without it), optionally
-   `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`
-   (`npx web-push generate-vapid-keys`).
-   New optional env this cycle (all features no-op without them):
-   - `WHATSAPP_WORKER_SECRET` — shared secret, also set on the worker.
-     `WHATSAPP_AI_PER_DAY` (default 40) caps free replies per sender.
-   - `LITELLM_BASE_URL` + `LITELLM_API_KEY` (+ `LITELLM_MODEL`) — route all AI
-     through a LiteLLM proxy for central spend caps / routing / logging.
-   - `AI_USER_MONTHLY_USD` — per-user monthly AI spend ceiling (e.g. `2`).
-   - `EVAL_FLAG_RATE_ALARM` (repo **variable**, default `0.15`) for the nightly
-     eval job; its `DATABASE_URL` is a repo **secret**.
-3. **Run the new migrations** against the DB:
-   ```
-   cd apps/web
-   node --env-file=.env.local scripts/migrate-ai-system-foundation.mjs   # 0009
-   node --env-file=.env.local scripts/migrate-push-tokens.mjs             # 0010
-   node --env-file=.env.local scripts/migrate-referral-loop.mjs           # 0011
-   ```
-4. **Domains** — buy `sumaiya.pro` + `sumaiya.app`, attach to the project;
-   keep `templatehub.pro` on the same project 301-redirecting to `sumaiya.pro`.
-5. GitHub repo **Settings → Variables** for CI: `NEXT_PUBLIC_SUPABASE_URL`,
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_POSTHOG_KEY`,
-   `NEXT_PUBLIC_POSTHOG_HOST`.
-6. Later: Supabase Pro, Resend sending domain `sumaiya.pro` (SPF/DKIM/DMARC),
-   Google OAuth redirect for `sumaiya.pro`, a new Android keystore for
-   `pro.sumaiya.app`, regenerate the icon/OG PNGs from the three-blade mark.
-7. **WhatsApp** (optional rail) — `apps/whatsapp/README.md`: create the Meta
-   app, deploy the worker, set the webhook, set `WHATSAPP_WORKER_SECRET` on
-   both sides.
-8. **Nightly evals** — add `DATABASE_URL` as a repo **secret** so
-   `nightly-evals.yml` can score `eval_sample`.
+Vercel project **`sumaiya.ai`** (team `hamisiddy9-9360s-projects`), git-connected
+to `main`, root `apps/web`, Node 22. Serving on **`https://sumaiyaai.vercel.app`**
+and **`https://templatehub.pro`** (the domain is attached to this project).
+
+- Env vars set for Production + Development (not Preview — do that in the
+  dashboard if you want PR previews to work): Supabase (`DATABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`),
+  `DEEPSEEK_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`, `CRON_SECRET`,
+  `OUTCOME_SALT`, `SNAP_SHARE_SECRET`, `NEXT_PUBLIC_POSTHOG_KEY/HOST`,
+  `NEXT_PUBLIC_APP_URL`, `BROWSERBASE_*`.
+- Migrations **0009 · 0010 · 0011 applied** to the production DB (verified: all
+  7 tables present).
+- Crons trimmed to 2 daily (`follow-ups`, `jobs`) for Hobby; the every-6h
+  health check moved to `.github/workflows/health-cron.yml` (needs repo
+  secrets `CRON_SECRET` + `PROD_URL`).
+
+### Fixes shipped this session (found by real-use headless testing)
+
+- **CSP was blocking PostHog** — analytics was fully dead in prod; fixed.
+- **Cover-letter templates were English-only** ("Dear Hiring Manager," /
+  "Sincerely,") regardless of language; now bilingual.
+- **Bare unknown URLs returned 500** instead of 404 (no root layout for the
+  fall-through); middleware now routes them through the `[locale]` tree.
+- Brand icons (web favicon/PWA/OG + native icon/adaptive/splash) regenerated
+  from the Sumaiya mark — they were still the old TemplateHub artwork.
+- Swahili copy: "kazi" (work) vs "ajira" (employment) differentiated;
+  "wa Aua" → "wa AI".
+- PWA sign-in: 6-digit **code** flow for installed PWAs (a tapped magic link
+  opens the browser and the session lands there). **Needs one Supabase step**
+  → see below.
+
+## What you still do
+
+1. **Supabase — enable the OTP code.** Authentication → Email Templates →
+   **Magic Link** → add a line with `{{ .Token }}` (e.g. `Your code: {{ .Token }}`).
+   Without it the code sign-in for installed PWAs can't complete.
+2. **Supabase — auth redirect URLs.** Authentication → URL Configuration → add
+   `https://sumaiyaai.vercel.app/**` (and `https://sumaiya.pro/**` once bought)
+   to Redirect URLs.
+3. **GitHub repo → Settings → Secrets and variables → Actions**
+   - Variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+     `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, optionally
+     `EVAL_FLAG_RATE_ALARM`.
+   - Secrets: `DATABASE_URL` (nightly evals), `CRON_SECRET` + `PROD_URL`
+     (health-cron).
+4. **Domains** — buy `sumaiya.pro` (+ `.app`), attach to `sumaiya.ai`, then set
+   `NEXT_PUBLIC_APP_URL` → `https://sumaiya.pro` and redeploy. Keep
+   `templatehub.pro` for its SEO, 301 → sumaiya.pro.
+5. **Vercel Pro** (when the card is fixed) — restores the every-6h health cron
+   (move it back into `apps/web/vercel.json`, delete `health-cron.yml`), lifts
+   cron limits, and unblocks a bigger build container.
+6. **APK** — a debug-signed test build is being produced locally
+   (`apps/native/android/app/build/outputs/apk/release/`). For a proper
+   distributable: `cd apps/native && npx eas login && npx eas init &&
+   npx eas build -p android --profile preview` (your Expo account; the build
+   runs on Expo's cloud). Testers reinstall once — the package id changed.
+7. **Optional infra** (all no-op until set):
+   - `VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT` — web push
+     (`npx web-push generate-vapid-keys`).
+   - `AI_USER_MONTHLY_USD` — per-user monthly AI spend ceiling.
+   - **Model router** — set `LITELLM_BASE_URL` + `LITELLM_API_KEY` (+
+     `LITELLM_MODEL`) to a LiteLLM proxy **or to Vercel AI Gateway**
+     (`https://ai-gateway.vercel.sh/v1`, OpenAI-compatible — the `litellm`
+     provider speaks it directly) for failover, spend caps, and per-request
+     cost logging.
+   - **WhatsApp** — `apps/whatsapp/README.md`: Meta app, deploy the worker,
+     webhook, `WHATSAPP_WORKER_SECRET` on both sides.
+8. Later: Supabase Pro (stop the 7-day idle pause), Resend sending domain
+   `sumaiya.pro` (SPF/DKIM/DMARC), Google OAuth redirect, a real Android
+   release keystore for Play Store, regenerate OG/store screenshots.
 
 ## Engineering left (deliberately not done)
 

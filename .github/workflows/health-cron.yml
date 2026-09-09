@@ -1,0 +1,36 @@
+name: Health check (cron)
+
+# The every-6h /api/cron/health poke — moved here from vercel.json because
+# Vercel Hobby only allows 2 daily crons. It checks the AI provider (an
+# out-of-credit key fails silently), the DB connection, and emails ALERT_EMAIL
+# on any failure. When the project is on Vercel Pro, restore the entry in
+# apps/web/vercel.json and delete this workflow.
+#
+# Needs repo secrets:
+#   CRON_SECRET   — must match the web app's CRON_SECRET env
+#   PROD_URL      — e.g. https://sumaiya.pro (defaults to the vercel URL)
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: health-cron
+  cancel-in-progress: false
+
+jobs:
+  poke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hit /api/cron/health
+        run: |
+          BASE="${{ secrets.PROD_URL || 'https://sumaiyaai.vercel.app' }}"
+          code=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "$BASE/api/cron/health")
+          echo "HTTP $code"; cat /tmp/body; echo
+          # The route itself emails on component failures; fail the job only on
+          # a transport/auth problem so the Actions tab flags a broken cron.
+          test "$code" = "200"
