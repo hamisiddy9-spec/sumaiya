@@ -114,27 +114,3 @@ export const transitions = {
   normal: "200ms ease-out",
   slow: "300ms ease-out",
 } as const;
-
-export const darkColors = {
-  espresso: "#f5f1e8",
-  espresso_dark: "#ede6df",
-  espresso_light: "#d9cfc5",
-  espresso_line: "#c9bfb5",
-  ember: "#ff7a4f",
-  ember_hover: "#ff8f66",
-  ember_tint: "#2a1f18",
-  gold: "#ffc85c",
-  gold_tint: "#1a1410",
-  cream: "#1a1410",
-  sand: "#1f1815",
-  sand_2: "#2a2420",
-  text_body: "#d4c9be",
-  text_muted: "#8b7d75",
-  border: "#3d2f27",
-  border_input: "#4a3f38",
-  card: "#201915",
-  success: "#4ade80",
-  warning: "#fbbf24",
-  error: "#f87171",
-  purple_glow: "#d8b4fe",
-} as const;

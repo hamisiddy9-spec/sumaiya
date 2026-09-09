@@ -121,7 +121,7 @@ export class OfflineStorage {
   async deleteCVOffline(cvId: string): Promise<void> {
     if (!this.db) throw new Error("Database not initialized");
 
-    await this.db.execAsync("DELETE FROM cvs WHERE id = ?", [cvId]);
+    await this.db.runAsync("DELETE FROM cvs WHERE id = ?", [cvId]);
   }
 
   async addToSyncQueue(item: SyncQueueItem): Promise<void> {
@@ -169,7 +169,7 @@ export class OfflineStorage {
   async removeSyncQueueItem(id: string): Promise<void> {
     if (!this.db) throw new Error("Database not initialized");
 
-    await this.db.execAsync("DELETE FROM sync_queue WHERE id = ?", [id]);
+    await this.db.runAsync("DELETE FROM sync_queue WHERE id = ?", [id]);
   }
 
   async updateSyncQueueItem(id: string, updates: Partial<SyncQueueItem>): Promise<void> {
@@ -203,7 +203,7 @@ export class OfflineStorage {
     if (!this.db) throw new Error("Database not initialized");
 
     const now = Date.now();
-    await this.db.execAsync(
+    await this.db.runAsync(
       "UPDATE cvs SET syncedAt = ?, isOfflineOnly = 0 WHERE id = ?",
       [now, cvId]
     );
@@ -213,6 +213,13 @@ export class OfflineStorage {
     if (!this.db) throw new Error("Database not initialized");
 
     await this.db.execAsync("DELETE FROM sync_queue");
+  }
+
+  /** Wipes every offline CV and pending sync operation (Settings > Clear Cache). */
+  async clearAll(): Promise<void> {
+    if (!this.db) throw new Error("Database not initialized");
+
+    await this.db.execAsync("DELETE FROM sync_queue; DELETE FROM cvs;");
   }
 }
 

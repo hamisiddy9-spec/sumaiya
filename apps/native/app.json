@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Sumaiya",
+    "slug": "sumaiya",
+    "version": "1.6.2",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "sumaiya",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4EEE4"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pro.sumaiya.app"
+    },
+    "android": {
+      "package": "pro.sumaiya.app",
+      "versionCode": 10602,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F4EEE4"
+      },
+      "permissions": [
+        "INTERNET",
+        "RECORD_AUDIO"
+      ],
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-font",
+      "expo-sharing",
+      "expo-camera",
+      "expo-image-picker",
+      "expo-document-picker"
+    ]
+  }
+}

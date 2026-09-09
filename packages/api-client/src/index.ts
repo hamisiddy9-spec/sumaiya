@@ -1,12 +1,31 @@
-// API Client — shared across web and mobile
-// Handles auth, CV CRUD, template fetching, and sync coordination
+// API Client — shared across web and mobile.
+//
+// Talks to the Next backend's Hono API (`app/api/[[...route]]/route.ts`), which
+// authenticates via `Authorization: Bearer <supabase access token>` (see
+// `lib/api/auth.ts#getAuthUser`). Auth itself is handled directly against
+// Supabase GoTrue in the mobile app (apps/mobile/src/lib/supabase.ts +
+// contexts/auth-context.tsx); the session's access token is pushed here via
+// setAccessToken() and attached to every request below.
+//
+// The Hono routes wrap their payloads in `{ success: true, data: ... }` — the
+// `request()` helper unwraps that automatically.
 
-import type { CV, CVData, AuthUser, Template, SyncQueueItem, Lang } from "@sumaiya/types";
+import type { CV, CVData, Template, Lang } from "@sumaiya/types";
+import { TEMPLATES } from "@sumaiya/templates";
 
 export interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
   retryAttempts?: number;
+}
+
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
 }
 
 export class ApiClient {
@@ -22,7 +41,7 @@ export class ApiClient {
   }
 
   setAccessToken(token: string) {
-    this.accessToken = token;
+    this.accessToken = token || undefined;
   }
 
   private async request<T>(
@@ -30,125 +49,195 @@ export class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
+    const headers: Record<string, string> = {};
+
+    // Only default to JSON when we're actually sending a JSON string body.
+    const hasStringBody = typeof options.body === "string";
+    if (hasStringBody) headers["Content-Type"] = "application/json";
 
     if (this.accessToken) {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }
-
     if (options.headers) {
-      Object.assign(headers, options.headers);
+      Object.assign(headers, options.headers as Record<string, string>);
     }
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+    let response: Response;
     try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        signal: controller.signal,
-      });
-
+      response = await fetch(url, { ...options, headers, signal: controller.signal });
+    } catch (err) {
       clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+      if (err instanceof Error && err.name === "AbortError") {
+        throw new ApiError(0, "Request timed out. Check your connection.");
       }
-
-      return response.json() as Promise<T>;
-    } catch (error) {
-      clearTimeout(timeoutId);
-      throw error;
+      throw new ApiError(0, "Network error. Check your connection.");
     }
+    clearTimeout(timeoutId);
+
+    const text = await response.text();
+    let payload: unknown = undefined;
+    try {
+      payload = text ? JSON.parse(text) : undefined;
+    } catch {
+      payload = text;
+    }
+
+    if (!response.ok) {
+      const message =
+        (payload && typeof payload === "object" && "error" in payload
+          ? String((payload as { error: unknown }).error)
+          : null) ||
+        (typeof payload === "string" && payload) ||
+        `${response.status} ${response.statusText}`;
+      throw new ApiError(response.status, message);
+    }
+
+    // Unwrap Hono's { success, data } envelope when present.
+    if (payload && typeof payload === "object" && "data" in payload && "success" in payload) {
+      return (payload as { data: T }).data;
+    }
+    return payload as T;
   }
 
-  // Auth
-  async signUp(email: string, password: string): Promise<{ user: AuthUser; token: string }> {
-    return this.request<{ user: AuthUser; token: string }>("/api/auth/signup", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-  }
+  // ── CV CRUD (Hono /api/cv) ─────────────────────────────────────────────────
 
-  async signIn(email: string, password: string): Promise<{ user: AuthUser; token: string }> {
-    return this.request<{ user: AuthUser; token: string }>("/api/auth/signin", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-  }
-
-  async getMe(): Promise<AuthUser> {
-    return this.request<AuthUser>("/api/auth/me");
-  }
-
-  async signOut(): Promise<void> {
-    await this.request<void>("/api/auth/signout", { method: "POST" });
-    this.accessToken = undefined;
-  }
-
-  // CV CRUD
   async listCVs(): Promise<CV[]> {
-    return this.request<CV[]>("/api/cvs");
+    return this.request<CV[]>("/api/cv");
   }
 
   async getCV(id: string): Promise<CV> {
-    return this.request<CV>(`/api/cvs/${id}`);
+    return this.request<CV>(`/api/cv/${id}`);
   }
 
-  async createCV(data: Partial<CV>): Promise<CV> {
-    return this.request<CV>("/api/cvs", {
+  async createCV(data: Partial<CV> & { name?: string; clientId?: string }): Promise<CV> {
+    const body = this.toCvPayload(data);
+    return this.request<CV>("/api/cv", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     });
   }
 
-  async updateCV(id: string, data: Partial<CV>): Promise<CV> {
-    return this.request<CV>(`/api/cvs/${id}`, {
+  async updateCV(id: string, data: Partial<CV> & { name?: string }): Promise<CV> {
+    const body = this.toCvPayload(data);
+    return this.request<CV>(`/api/cv/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(data),
+      body: JSON.stringify(body),
     });
   }
 
   async deleteCV(id: string): Promise<void> {
-    await this.request<void>(`/api/cvs/${id}`, { method: "DELETE" });
+    await this.request<void>(`/api/cv/${id}`, { method: "DELETE" });
   }
 
-  // Templates
+  /** Idempotent delete keyed by the client's local id (mobile sync queue). */
+  async deleteCVByClientId(clientId: string): Promise<void> {
+    await this.request<void>(`/api/cv?clientId=${encodeURIComponent(clientId)}`, {
+      method: "DELETE",
+    });
+  }
+
+  private toCvPayload(data: Partial<CV> & { name?: string; clientId?: string }) {
+    const { name, title, templateId, data: cvData, clientId } = data as Record<string, unknown>;
+    const payload: Record<string, unknown> = {};
+    const resolvedTitle = (title as string) || (name as string);
+    if (resolvedTitle) payload.title = resolvedTitle;
+    if (templateId) payload.templateId = templateId;
+    if (cvData && typeof cvData === "object") payload.data = cvData;
+    if (clientId) payload.clientId = clientId;
+    return payload;
+  }
+
+  // ── Templates ─────────────────────────────────────────────────────────────
+  // The backend has no templates endpoint; the mobile app ships the catalogue
+  // locally (works offline). Kept async so callers don't change.
+
   async getTemplates(lang: Lang = "en"): Promise<Template[]> {
-    return this.request<Template[]>(`/api/templates?lang=${lang}`);
+    return TEMPLATES.filter((t) => !t.languages || t.languages.includes(lang));
   }
 
   async getTemplate(id: string): Promise<Template> {
-    return this.request<Template>(`/api/templates/${id}`);
+    const found = TEMPLATES.find((t) => t.id === id);
+    if (!found) throw new ApiError(404, `Template ${id} not found`);
+    return found;
   }
 
-  // OCR (mobile-specific)
-  async ocrUpload(file: Blob, lang: Lang = "en"): Promise<Partial<CVData>> {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("lang", lang);
+  // ── OCR (mobile-specific, Hono /api/mobile/ocr) ───────────────────────────
+  // Sends the photo as a base64 data URL (what the backend's tesseract route
+  // expects) and returns the parsed CVData fields when AI extraction
+  // succeeded, or just the raw text when it didn't — callers should treat a
+  // missing `fields` as "let the user fill the form in manually", not an error.
 
-    return this.request<Partial<CVData>>("/api/mobile/ocr", {
+  async ocrUpload(imageBase64: string): Promise<{ text: string; data: Partial<CVData> | null }> {
+    const result = await this.request<{ text: string; fields: Record<string, unknown> | null }>(
+      "/api/mobile/ocr",
+      { method: "POST", body: JSON.stringify({ imageBase64 }) }
+    );
+    return { text: result.text, data: (result.fields as Partial<CVData> | null) ?? null };
+  }
+
+  // ── Learning + chat (Hono /api/mobile) ────────────────────────────────────
+
+  async getLearningResources(skills: string[] = []): Promise<
+    { id: string; title: string; platform: string; url: string; free: boolean }[]
+  > {
+    const qs = skills.length ? `?skills=${encodeURIComponent(skills.join(","))}` : "";
+    return this.request(`/api/mobile/learning/resources${qs}`);
+  }
+
+  async sendChatMessage(
+    messages: { role: "user" | "assistant"; content: string }[],
+    conversationId?: string
+  ): Promise<{ message: string; conversationId: string | null }> {
+    return this.request("/api/mobile/chat", {
       method: "POST",
-      body: formData,
-      headers: {}, // Let browser set multipart boundary
+      body: JSON.stringify({ messages, conversationId }),
     });
   }
 
-  // Sync (offline-aware)
-  async syncQueue(items: SyncQueueItem[]): Promise<{ synced: string[]; failed: string[] }> {
-    return this.request<{ synced: string[]; failed: string[] }>("/api/sync", {
+  /** Paste a job description, get a tailored CV and/or a cover letter grounded
+   *  in the user's real profile + CV. */
+  async applyToJob(
+    jobDescription: string,
+    want: "cv" | "letter" | "both",
+    opts: { cvId?: string; lang?: "en" | "sw" } = {}
+  ): Promise<{
+    jobTitle: string;
+    company: string;
+    cvId: string | null;
+    cv: { summary: string; experience: { id: string; description: string }[] } | null;
+    letter: { content: string } | null;
+  }> {
+    return this.request("/api/mobile/apply", {
       method: "POST",
-      body: JSON.stringify(items),
+      body: JSON.stringify({ jobDescription, want, ...opts }),
     });
   }
+
+  // ── Account management (Hono /api/user) ───────────────────────────────────
+
+  /** Permanently deletes the account and every row keyed by the user's id. */
+  async deleteAccount(): Promise<void> {
+    await this.request<void>("/api/user/delete-user", { method: "POST" });
+  }
+
+  // ── App update manifest (public, no auth) ────────────────────────────────
+
+  async getAppUpdate(): Promise<{
+    version?: string | null;
+    url?: string | null;
+    notes?: { en?: string | null; sw?: string | null } | null;
+  }> {
+    return this.request("/api/app/update");
+  }
+
+  // ── Connectivity ─────────────────────────────────────────────────────────
 
   async checkConnectivity(): Promise<boolean> {
     try {
-      await this.request<void>("/api/health", { method: "GET" });
+      await this.request<unknown>("/api/health");
       return true;
     } catch {
       return false;

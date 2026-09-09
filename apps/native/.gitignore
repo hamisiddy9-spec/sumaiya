@@ -1,0 +1,23 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+# android/ IS committed (bare workflow — local APK builds on this machine).
+# Regenerate app-level files with `npx expo prebuild -p android` if needed, but
+# the tuned gradle.properties + local build config are tracked.
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/.cxx/
+android/local.properties
+android/app/release/
+android/**/*.hprof
+ios/
+*.orig.*
+.env*.local
+*.apk
+*.aab
