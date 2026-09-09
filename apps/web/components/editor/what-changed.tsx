@@ -33,6 +33,25 @@ export function WhatChanged({ before, after, sw, isLocal, needsConfirm }: Props)
   const label = sourceLabel(kind, sw);
   const toneCls = TONE_CLS[sourceTone(kind)];
 
+  // Nothing to diff against — this was written from scratch, not a rewrite.
+  if (!before.trim()) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow">
+            {sw ? "Pendekezo" : "Suggested"}
+          </p>
+          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
+            {label}
+          </span>
+        </div>
+        <div className="text-xs leading-relaxed text-espresso bg-ember-tint/20 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">
+          {after}
+        </div>
+      </div>
+    );
+  }
+
   const summary = isLocal
     ? sw
       ? "Usafi mdogo wa maandishi — hakuna maneno mapya yaliyoongezwa."
