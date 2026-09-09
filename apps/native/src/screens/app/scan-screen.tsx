@@ -89,7 +89,7 @@ export function ScanScreen() {
           title="Camera access"
           body={
             canAsk
-              ? "TemplateHub uses your camera to read an existing CV. Nothing is stored — the photo is processed and discarded."
+              ? "Sumaiya uses your camera to read an existing CV. Nothing is stored — the photo is processed and discarded."
               : "Camera access is off. Enable it in Settings to scan a CV with your camera."
           }
           actionLabel={canAsk ? "Allow camera" : "Open Settings"}

@@ -69,7 +69,7 @@ export function SplashScreen() {
 
       <Animated.View style={[wordStyle, { alignItems: "center", gap: 6 }]}>
         <Text style={{ color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: -0.5 }}>
-          TemplateHub
+          Sumaiya
         </Text>
         <Text style={{ color: c.textMuted, fontSize: 13, fontWeight: "600" }}>
           Documents that get you hired

@@ -12,7 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 /**
- * The Sumaiya Mark — TemplateHub's own AI signature (shared with web).
+ * The Sumaiya Mark — Sumaiya's own AI signature (shared with web).
  *
  * Three swept blades around an open core — an aperture / bloom that reads as
  * focus and motion, not a generic sparkle. Used wherever the app speaks as

@@ -35,7 +35,7 @@ import { SplashScreen } from "../screens/splash-screen";
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
 // Key for persisting onboarding completion to secure storage
-const ONBOARDING_KEY = "templatehub_onboarding_seen";
+const ONBOARDING_KEY = "sumaiya_onboarding_seen";
 
 const prefix = Linking.createURL("/");
 
