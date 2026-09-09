@@ -1,0 +1,15 @@
+{
+  "name": "@sumaiya/whatsapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sumaiya WhatsApp worker — Meta Cloud API webhook that relays to the Sumaiya API",
+  "type": "module",
+  "main": "src/index.mjs",
+  "scripts": {
+    "start": "node src/index.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
