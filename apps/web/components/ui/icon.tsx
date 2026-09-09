@@ -17,6 +17,7 @@ export type IconName =
   | "bell" | "globe-lang" | "pdf" | "cursor"
   | "wifi-off" | "briefcase" | "map-pin" | "phone"
   | "alert-triangle" | "x" | "github" | "alert-circle" | "external-link"
+  | "mic"
 
 const ICONS: Record<IconName, string> = {
   cv: `<rect x="4" y="3" width="16" height="18" rx="2.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/>`,
@@ -50,6 +51,7 @@ const ICONS: Record<IconName, string> = {
   layers: `<path d="M12 3.5 L21 8 L12 12.5 L3 8 Z"/><path d="M4 12 L12 16 L20 12 M4 16 L12 20 L20 16"/>`,
   magic: `<path d="M5 19 L15 9 M14 6 L15 4 L16 6 L18 7 L16 8 L15 10 L14 8 L12 7 Z"/><path d="M19.5 13 l0.6 1.4 1.4 0.6 -1.4 0.6 -0.6 1.4 -0.6-1.4 -1.4-0.6 1.4-0.6 Z"/>`,
   share: `<circle cx="6" cy="12" r="2.5"/><circle cx="17" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><path d="M8.2 10.8 L14.8 7.2 M8.2 13.2 L14.8 16.8"/>`,
+  mic: `<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11 a6 6 0 0 0 12 0 M12 17 v4 M9 21 h6"/>`,
   copy: `<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8 V6 a2 2 0 0 0-2-2 H6 a2 2 0 0 0-2 2 v8 a2 2 0 0 0 2 2 h2"/>`,
   trash: `<path d="M4.5 7 h15 M9 7 V5 a1 1 0 0 1 1-1 h4 a1 1 0 0 1 1 1 v2 M6.5 7 l1 12 a1 1 0 0 0 1 1 h7 a1 1 0 0 0 1-1 l1-12"/>`,
   lock: `<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5 V7.5 a4 4 0 0 1 8 0 v3"/>`,

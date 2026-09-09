@@ -25,6 +25,7 @@ import { TEMPLATES, CURATED_CV_TEMPLATES, DEFAULT_SECTION_ORDER, isTemplateId, p
 import { SECTION_TEMPLATES } from "@/lib/data/samples";
 import { ENGINE_PRESETS } from "@/components/templates/engine/presets";
 import { AtsPanel } from "@/components/editor/ats-panel";
+import { WhatChanged } from "@/components/editor/what-changed";
 import { AtsExplain } from "@/components/editor/ats-explain";
 import { AuthenticWritingPanel } from "@/components/editor/authentic-writing-panel";
 import { JobTargetPanel } from "@/components/editor/job-target-panel";
@@ -2672,10 +2673,12 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">{uiLang === "sw" ? "Ya sasa" : "Current"}</p>
                 <div className="text-xs leading-relaxed text-text-body bg-sand-2 border border-border rounded-input px-3 py-2 whitespace-pre-wrap">{enhancePreview.original}</div>
               </div>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow mb-1">{uiLang === "sw" ? "Pendekezo" : "Suggested"}</p>
-                <div className="text-xs leading-relaxed text-espresso bg-ember-tint/30 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">{enhancePreview.enhanced}</div>
-              </div>
+              <WhatChanged
+                before={enhancePreview.original}
+                after={enhancePreview.enhanced}
+                sw={uiLang === "sw"}
+                isLocal={enhancePreview.source === "local"}
+              />
               {enhancePreview.source !== "local" && enhancePreview.refine && (
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{uiLang === "sw" ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>

@@ -72,11 +72,14 @@ interface CallOpts {
   effort?: ThinkingEffort;
 }
 
-export type ProviderName = "deepseek" | "openrouter" | "anthropic" | "openai";
+export type ProviderName = "litellm" | "deepseek" | "openrouter" | "anthropic" | "openai";
 
 /** Providers with a key set, in the order they'll be tried. */
 export function providerOrder(): ProviderName[] {
   const order: ProviderName[] = [];
+  // A LiteLLM proxy, when configured, is the model router: it owns model
+  // selection, fallbacks, central spend caps and request logging. Prefer it.
+  if (process.env.LITELLM_BASE_URL && process.env.LITELLM_API_KEY) order.push("litellm");
   if (process.env.DEEPSEEK_API_KEY) order.push("deepseek");
   if (process.env.OPENROUTER_API_KEY) order.push("openrouter");
   if (process.env.ANTHROPIC_API_KEY) order.push("anthropic");
@@ -137,6 +140,19 @@ async function openAiCompatible(
 
 async function callProvider(provider: ProviderName, cfg: ProviderCall): Promise<string | null> {
   switch (provider) {
+    case "litellm": {
+      // OpenAI-compatible. The proxy maps LITELLM_MODEL (or our effort model)
+      // to whatever upstream it's configured with.
+      const base = (process.env.LITELLM_BASE_URL as string).replace(/\/$/, "");
+      const model = process.env.LITELLM_MODEL || resolveModelForEffort(cfg.effort);
+      return openAiCompatible(
+        `${base}/chat/completions`,
+        process.env.LITELLM_API_KEY as string,
+        model,
+        cfg,
+      );
+    }
+
     case "deepseek": {
       const body: Record<string, unknown> = {
         model: resolveModelForEffort(cfg.effort),

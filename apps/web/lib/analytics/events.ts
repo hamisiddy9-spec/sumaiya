@@ -64,7 +64,7 @@ export interface AnalyticsEventMap {
 
   // ─── Engagement ──────────────────────────────────────────────────────────
   job_target_sample_jd_used: void;
-  assistant_message_sent: { surface: "web" | "native"; hasDoc: boolean };
+  assistant_message_sent: { surface: "web" | "native" | "whatsapp"; hasDoc: boolean };
   daily_brief_opened: { matchCount: number };
   application_logged: { fromJobMatch: boolean };
   application_status_changed: { status: string };

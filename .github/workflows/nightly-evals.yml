@@ -1,0 +1,38 @@
+name: Nightly prod evals
+
+# Re-runs the deterministic anti-fabrication / language-fidelity / repeat suites
+# against the low-rate `eval_sample` of real generative traffic and writes a
+# verdict per row. A REPORT, not a merge gate — it only goes red when the flag
+# rate crosses EVAL_FLAG_RATE_ALARM.
+
+on:
+  schedule:
+    - cron: "17 2 * * *" # 02:17 UTC daily
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max samples to score"
+        required: false
+        default: "500"
+
+concurrency:
+  group: nightly-evals
+  cancel-in-progress: false
+
+jobs:
+  evals:
+    name: score eval_sample
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      EVAL_FLAG_RATE_ALARM: ${{ vars.EVAL_FLAG_RATE_ALARM || '0.15' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Score pending samples
+        run: npm -w @sumaiya/web run evals:prod -- --limit=${{ github.event.inputs.limit || '500' }}

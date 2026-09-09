@@ -537,3 +537,33 @@ export type DeviceToken = typeof deviceToken.$inferSelect;
 export type NewDeviceToken = typeof deviceToken.$inferInsert;
 export type WebPushSubscription = typeof webPushSubscription.$inferSelect;
 export type NewWebPushSubscription = typeof webPushSubscription.$inferInsert;
+
+// ─── Referral loop — blueprint Stage 5 (word-of-mouth is the growth rail) ───
+// One code per referrer (referralCode). Each person who signs up via a
+// ?ref=<code> link gets one referralClaim row. `activatedAt` is stamped lazily
+// (on stats read) once the referred user has actually built something — the
+// metric that matters is activated invites, not raw sign-ups.
+export const referralCode = pgTable("referral_code", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  code: text("code").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  codeUniq: uniqueIndex("referral_code_code_uniq").on(t.code),
+  userUniq: uniqueIndex("referral_code_user_uniq").on(t.userId),
+}));
+
+export const referralClaim = pgTable("referral_claim", {
+  id: text("id").primaryKey(),
+  code: text("code").notNull(),
+  referrerUserId: text("referrer_user_id").notNull(),
+  referredUserId: text("referred_user_id").notNull(),
+  claimedAt: timestamp("claimed_at").notNull().defaultNow(),
+  activatedAt: timestamp("activated_at"),
+}, (t) => ({
+  referredUniq: uniqueIndex("referral_claim_referred_uniq").on(t.referredUserId),
+  referrerIdx: index("referral_claim_referrer_idx").on(t.referrerUserId),
+}));
+
+export type ReferralCode = typeof referralCode.$inferSelect;
+export type ReferralClaim = typeof referralClaim.$inferSelect;

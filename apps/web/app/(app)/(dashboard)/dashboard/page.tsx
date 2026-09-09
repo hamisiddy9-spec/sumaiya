@@ -20,6 +20,7 @@ import type { Lang } from "@/lib/i18n/translations";
 import type { CV, CoverLetter, BusinessCard, Letter } from "@/lib/db/schema";
 import type { Metadata } from "next";
 import { ApplicationsGrid } from "@/components/dashboard/applications-grid";
+import { ReferralCard } from "@/components/referral/referral-card";
 import { CreateMenu } from "@/components/dashboard/create-menu";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
 import { RecommendedJobsSection } from "@/components/jobs/recommended-jobs-section";
@@ -278,6 +279,12 @@ export default async function DashboardPage({ searchParams }: Props) {
               <Button variant="secondary" size="sm">
                 <Icon name="magic" size={14} />
                 {lang === "sw" ? "Ingiza CV" : "Import CV"}
+              </Button>
+            </Link>
+            <Link href="/voice">
+              <Button variant="secondary" size="sm">
+                <Icon name="mic" size={14} />
+                {lang === "sw" ? "Sema CV" : "Voice CV"}
               </Button>
             </Link>
             <CreateMenu lang={lang} />
@@ -666,6 +673,11 @@ export default async function DashboardPage({ searchParams }: Props) {
             <ApplicationsGrid lang={lang} />
           </section>
         )}
+
+        {/* ── Invite loop ── */}
+        <section className="mb-12 max-w-md">
+          <ReferralCard sw={sw} />
+        </section>
       </div>
     </main>
   );

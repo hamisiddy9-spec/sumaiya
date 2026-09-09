@@ -21,7 +21,9 @@
     "native:typecheck": "npm -C apps/native run typecheck",
     "native:test": "npm -C apps/native run test",
     "native:export": "npm -C apps/native run export",
-    "native:install": "npm -C apps/native install"
+    "native:install": "npm -C apps/native install",
+    "whatsapp": "npm -C apps/whatsapp start",
+    "whatsapp:test": "npm -C apps/whatsapp test"
   },
   "devDependencies": {
     "turbo": "^2.5.5",
