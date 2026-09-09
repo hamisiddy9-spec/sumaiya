@@ -101,9 +101,9 @@ test.describe("offline service worker", () => {
   test("precache, offline shell, branded offline page, /api never cached", async ({ page, context }, testInfo) => {
     test.skip(!testInfo.project.name.startsWith("chromium"), "offline flow verified on Chromium");
     // Feature gate: the CACHING SW lands in PR-2. The no-op sw.js exists on
-    // master, so gate on the actual caching marker (th-cache) in the source.
+    // master, so gate on the actual caching marker (su-cache) in the source.
     const swBody = await page.request.get("/sw.js").then((r) => r.text()).catch(() => "");
-    test.skip(!swBody.includes("th-cache"), "caching service worker not present on this branch");
+    test.skip(!swBody.includes("su-cache"), "caching service worker not present on this branch");
 
     await page.goto("/", { waitUntil: "networkidle" });
     await page.evaluate(() => navigator.serviceWorker.ready);
@@ -111,11 +111,11 @@ test.describe("offline service worker", () => {
 
     const swState = await page.evaluate(async () => {
       const keys = await caches.keys();
-      const c = await caches.open(keys.find((k) => k.startsWith("th-cache")) || "");
+      const c = await caches.open(keys.find((k) => k.startsWith("su-cache")) || "");
       const precached = c ? (await c.keys()).map((r) => new URL(r.url).pathname) : [];
       return { caches: keys, precached };
     });
-    expect(swState.caches.some((k) => /^th-cache-v\d+$/.test(k))).toBeTruthy();
+    expect(swState.caches.some((k) => /^su-cache-v\d+$/.test(k))).toBeTruthy();
     expect(swState.precached).toContain("/offline.html");
 
     await page.goto("/editor/cv/try", { waitUntil: "networkidle" });
