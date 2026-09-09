@@ -32,6 +32,8 @@ import { analyzeCv, atsScore, atsBreakdown } from "@/lib/ats-score";
 import { matchCvToJd, looksLikeJobDescription } from "@/lib/job-match";
 import type { ProvenanceSpan } from "@/lib/provenance";
 import { recordApplicationStatus } from "@/lib/outcomes/events";
+import { checkRowOwnership } from "@/lib/assistant/tool-authz";
+import { checkMonthlyBudget } from "@/lib/ai/budget";
 import {
   execImproveSummary,
   execTailorCv,
@@ -67,7 +69,8 @@ export type BlockReason =
   | "requires_plan"
   | "quota"
   | "disabled"
-  | "bad_advert";
+  | "bad_advert"
+  | "not_owner";
 
 export type ToolResult =
   | { status: "ok"; tool: string; data: unknown; provenance?: ProvenanceSpan[] }
@@ -311,6 +314,14 @@ export async function runTool(input: RunToolInput): Promise<ToolResult> {
     return { status: "blocked", tool: toolId, reason, detail: entitlement.detail };
   }
 
+  // 4b. Row ownership — a tool that names an applicationId / existing docId
+  // must not act on another user's record ("RLS as tool authz").
+  const ownership = await checkRowOwnership(subject.userId, safeArgs, input.context?.extra);
+  if (ownership) {
+    emit("blocked_entitlement", ownership);
+    return { status: "blocked", tool: toolId, reason: ownership };
+  }
+
   // 5. Content-boundary sanitize on untrusted pasted strings.
   for (const key of Object.keys(safeArgs)) {
     if (UNTRUSTED_STRING_ARGS.has(key) && typeof safeArgs[key] === "string") {
@@ -328,9 +339,21 @@ export async function runTool(input: RunToolInput): Promise<ToolResult> {
     return { status: "blocked", tool: toolId, reason: "bad_advert" };
   }
 
-  // 6. AI quota — for cost-bearing tools, against the real per-user budget.
+  // 6. AI quota — for cost-bearing tools: the per-day call limiter AND the
+  // per-month spend ceiling (the model-router budget cap; off unless
+  // AI_USER_MONTHLY_USD is set).
   let quotaCharged = false;
   if (isGenerative(meta.cost) && subject.userId) {
+    const budget = await checkMonthlyBudget(subject.userId);
+    if (!budget.ok) {
+      emit("blocked_quota", "quota");
+      return {
+        status: "blocked",
+        tool: toolId,
+        reason: "quota",
+        detail: `Monthly AI budget reached ($${budget.spentUsd.toFixed(2)} of $${budget.ceilingUsd.toFixed(2)}).`,
+      };
+    }
     const quota = await checkAiQuota(subject.userId);
     if (!quota.allowed) {
       emit("blocked_quota", "quota");

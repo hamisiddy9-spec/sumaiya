@@ -53,6 +53,8 @@ describe("OpenRouter models", () => {
 describe("providerOrder", () => {
   it("tries DeepSeek → OpenRouter → Anthropic → OpenAI, skipping unset keys", () => {
     const saved = { ...process.env };
+    delete process.env.LITELLM_BASE_URL;
+    delete process.env.LITELLM_API_KEY;
     delete process.env.DEEPSEEK_API_KEY;
     delete process.env.ANTHROPIC_API_KEY;
     delete process.env.OPENAI_API_KEY;
@@ -61,6 +63,15 @@ describe("providerOrder", () => {
     process.env.DEEPSEEK_API_KEY = "test";
     process.env.OPENAI_API_KEY = "test";
     expect(providerOrder()).toEqual(["deepseek", "openrouter", "openai"]);
+    process.env = saved;
+  });
+
+  it("a configured LiteLLM proxy is tried first (it's the router)", () => {
+    const saved = { ...process.env };
+    process.env.LITELLM_BASE_URL = "https://proxy.example";
+    process.env.LITELLM_API_KEY = "sk-test";
+    process.env.DEEPSEEK_API_KEY = "test";
+    expect(providerOrder()[0]).toBe("litellm");
     process.env = saved;
   });
 });
