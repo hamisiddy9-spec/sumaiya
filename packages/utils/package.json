@@ -16,5 +16,13 @@
   },
   "dependencies": {
     "@sumaiya/types": "*"
+  },
+  "peerDependencies": {
+    "expo-sqlite": "*"
+  },
+  "peerDependenciesMeta": {
+    "expo-sqlite": {
+      "optional": true
+    }
   }
 }

@@ -3,21 +3,51 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "nativewind",
-    "lib": ["es2021", "dom"],
+    "lib": [
+      "es2021",
+      "dom"
+    ],
     "moduleResolution": "bundler",
     "skipLibCheck": true,
     "noImplicitAny": false,
     "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@sumaiya/types": ["../../packages/types/src/index.ts"],
-      "@sumaiya/utils": ["../../packages/utils/src/index.ts"],
-      "@sumaiya/hooks": ["../../packages/hooks/src/index.ts"],
-      "@sumaiya/api-client": ["../../packages/api-client/src/index.ts"],
-      "@sumaiya/templates": ["../../packages/templates/src/index.ts"],
-      "@sumaiya/design-tokens": ["../../packages/design-tokens/src/index.ts"]
+      "@sumaiya/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@sumaiya/utils": [
+        "../../packages/utils/src/index.ts"
+      ],
+      "@sumaiya/hooks": [
+        "../../packages/hooks/src/index.ts"
+      ],
+      "@sumaiya/api-client": [
+        "../../packages/api-client/src/index.ts"
+      ],
+      "@sumaiya/templates": [
+        "../../packages/templates/src/index.ts"
+      ],
+      "@sumaiya/design-tokens": [
+        "../../packages/design-tokens/src/index.ts"
+      ],
+      "expo-sqlite": [
+        "./node_modules/expo-sqlite"
+      ]
     }
   },
-  "include": ["src", "nativewind-env.d.ts", "*.ts", "*.tsx"],
-  "exclude": ["node_modules", "dist", ".expo", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"]
+  "include": [
+    "src",
+    "nativewind-env.d.ts",
+    "*.ts",
+    "*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    ".expo",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
 }
