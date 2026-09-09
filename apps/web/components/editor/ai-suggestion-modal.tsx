@@ -9,6 +9,7 @@ import { useRef } from "react";
 import { Check, X, Sparkles, Loader2 } from "lucide-react";
 import { label } from "@/lib/i18n/labels";
 import { useModalDialog } from "@/components/ui/use-modal-dialog";
+import { WhatChanged } from "@/components/editor/what-changed";
 
 export type RefineDirective = "shorter" | "ats" | "measurable" | "leadership" | "sw" | "en";
 const REFINE_OPTIONS: { id: Exclude<RefineDirective, "sw" | "en">; en: string; sw: string }[] = [
@@ -67,10 +68,14 @@ export function AiSuggestionModal({ open, subtitle, original, suggested, busy, l
               <div className="text-xs leading-relaxed text-text-body bg-sand-2 border border-border rounded-input px-3 py-2 whitespace-pre-wrap">{original}</div>
             </div>
           )}
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
-            <div className="text-xs leading-relaxed text-espresso bg-ember-tint/30 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">{suggested}</div>
-          </div>
+          {original.trim() ? (
+            <WhatChanged before={original} after={suggested} sw={sw} />
+          ) : (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
+              <div className="text-xs leading-relaxed text-espresso bg-ember-tint/30 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">{suggested}</div>
+            </div>
+          )}
           {onRefine && (
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>
