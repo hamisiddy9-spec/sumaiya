@@ -17,3 +17,6 @@ android/.cxx/
 android/.kotlin/
 ios/Pods/
 *.log
+
+# Vercel
+.vercel
