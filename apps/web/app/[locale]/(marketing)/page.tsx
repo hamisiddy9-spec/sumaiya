@@ -10,6 +10,7 @@ import { useLang } from "@/lib/i18n/context";
 import { translations } from "@/lib/i18n/translations";
 import posthog from "@/lib/analytics";
 import { Logo } from "@/components/ui/logo";
+import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { MarketingNav } from "@/components/ui/marketing-nav";
@@ -481,38 +482,35 @@ export default function LandingPage() {
             {/* Eyebrow pill */}
             <div className="inline-flex items-center gap-1.5 bg-ember-tint text-ember-hover font-mono text-[10px] font-semibold uppercase tracking-[2px] px-3 py-1 rounded-pill mb-6">
               <Icon name="bolt" size={12} className="text-ember" />
-              {lang === "sw" ? "IMEJENGWA KWA AFRIKA MASHARIKI" : "BUILT FOR EAST AFRICA"}
+              {lang === "sw" ? "MSAIDIZI WA AJIRA WA AI · AFRIKA MASHARIKI" : "AI CAREER ASSISTANT · EAST AFRICA"}
             </div>
 
-            {/* Headline */}
-            <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-7xl tracking-[-2.5px] leading-[1.05] text-espresso mb-6">
-              {lang === "sw" ? (
-                <>Tengeneza <span className="text-ember">CV inayokupa ajira</span></>
-              ) : (
-                <>Make a <span className="text-ember">CV that gets you hired</span></>
-              )}
+            {/* Headline — Sumaiya IS the product; the CV is what she produces. */}
+            <h1 className="font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5 flex items-center gap-3 flex-wrap">
+              <SumaiyaMark size={56} state="idle" className="text-ember shrink-0" />
+              <span>{lang === "sw" ? "Kutana na " : "Meet "}<span className="text-ember">Sumaiya</span></span>
             </h1>
 
-            {/* Subcopy — plain language, no jargon */}
-            <p className="text-text-body text-base md:text-lg max-w-lg leading-relaxed mb-8">
+            {/* Sub-headline — what she does, plainly */}
+            <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
               {lang === "sw"
-                ? "Chagua muundo, jaza maelezo yako — au acha Sumaiya, msaidizi wetu wa AI, akuandikie — kisha pakua PDF safi. Ni bure, kwa Kiswahili au Kiingereza."
-                : "Pick a design, type in your details — or let Sumaiya, our AI assistant, write it for you — then download a clean PDF. Free, in English or Swahili."}
+                ? "Msaidizi wako wa AI anayekuandikia CV, kuilenga kwa kila kazi, kukagua ATS, na kukuandaa kwa usaili — kwa Kiswahili au Kiingereza."
+                : "Your AI assistant — writes your CV, targets it to every job, checks it against ATS, and preps you for the interview. In English or Swahili."}
             </p>
 
-            {/* One clear primary action */}
+            {/* Primary action = start with Sumaiya. Manual builder is the fallback. */}
             <div className="flex flex-wrap items-center gap-4 mb-3">
-              <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_build' })}>
+              <Link href="/assistant" onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Tengeneza CV yangu — Bure" : "Build my CV — free"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Anza na Sumaiya — Bure" : "Start with Sumaiya — free"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
               <Link
-                href="/assistant"
-                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}
+                href="/editor/cv/try"
+                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_build' })}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
-                {lang === "sw" ? "au ongea na Sumaiya, msaidizi wa AI" : "or chat with Sumaiya, our AI assistant"}
+                {lang === "sw" ? "au tengeneza CV mwenyewe" : "or build a CV yourself"}
                 <Icon name="chevron-right" size={14} />
               </Link>
             </div>
