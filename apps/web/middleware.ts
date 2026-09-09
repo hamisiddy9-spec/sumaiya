@@ -62,6 +62,24 @@ function isMarketingPath(pathname: string): boolean {
   );
 }
 
+// First URL segment of every route that actually lives under app/(app)/. A path
+// that is neither marketing, nor /api, nor one of these is an UNKNOWN path — a
+// typo, a stale link, or a marketing page missing from MARKETING_PREFIXES. Next
+// has no root app/layout.tsx (two route-group root layouts instead), so letting
+// an unknown path fall through renders it with no layout → 500. We rewrite it
+// into the [locale] tree instead, which resolves to a real page or a clean 404
+// (app/[locale]/not-found.tsx).
+const APP_PREFIXES = [
+  "/admin", "/assistant", "/cv", "/editor", "/interview", "/migrate-guest",
+  "/snap", "/studio", "/voice", "/applications", "/brief", "/career-interview",
+  "/dashboard", "/import-cv", "/settings", "/reset-password", "/sign-in",
+  "/sign-up", "/verify",
+];
+
+function isAppPath(pathname: string): boolean {
+  return APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+}
+
 // ─── CDN CACHING — verified against the live site, Aug 2026 ────────────────
 // Vercel does NOT cache HTML responses that pass through middleware when the
 // middleware modifies REQUEST headers. Every public page (bare AND /sw//en/
@@ -127,6 +145,15 @@ export async function middleware(request: NextRequest) {
   // request-header mutation does not cost them static caching.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-lang", lang);
+
+  // Unknown bare path (not marketing, not /api, not a known (app) route) →
+  // route through the [locale] tree so it 404s cleanly instead of falling
+  // through with no root layout (→ 500). See APP_PREFIXES comment above.
+  if (!pathname.startsWith("/api/") && !pathname.startsWith("/_next/") && !isAppPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${lang}${pathname}`;
+    return NextResponse.rewrite(url);
+  }
 
   if (!isProtectedPath(pathname)) {
     return NextResponse.next({ request: { headers: requestHeaders } });
