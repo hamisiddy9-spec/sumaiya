@@ -239,7 +239,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     <Screen
       scroll
       footer={
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        <View style={{ flexDirection: "row", gap: 14 }}>
           <View style={{ flex: 1 }}>
             <Button label={t("Save", "Hifadhi")} onPress={save} loading={saving} />
           </View>
@@ -391,7 +391,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Section>
 
       {/* Skills */}
-      <Section title={`${t("Skills", "Ujuzi")}${skills.length ? ` · ${skills.length}` : ""}`} icon="star" defaultOpen={skills.length > 0}>
+      <Section title={`${t("Skills", "Ujuzi")}${skills.length ? ` · ${skills.length}` : ""}`} icon="award" defaultOpen={skills.length > 0}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
           {skills.map((s) => (
             <Pressable
