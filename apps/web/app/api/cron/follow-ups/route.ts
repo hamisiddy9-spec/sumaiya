@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, application, profile, userProfile } from "@/lib/db";
 import { and, eq, or, isNull, lte, sql, inArray } from "drizzle-orm";
 import { sendFollowUpReminder } from "@/lib/email";
+import { sendExpoPush } from "@/lib/push/expo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -100,6 +101,16 @@ export async function GET(req: NextRequest) {
       await sendFollowUpReminder({ name: p.name ?? "", email: p.email, apps: list });
       usersEmailed++;
       remindedApps += claimed.length;
+      // Native nudge alongside the email — best-effort, never blocks the run.
+      const n = list.length;
+      void sendExpoPush(userId, {
+        title: n === 1 ? "Follow up on your application" : `${n} applications to follow up`,
+        body:
+          n === 1
+            ? `It's been a week since you applied to ${list[0].title}${list[0].company ? " at " + list[0].company : ""}.`
+            : "A quick follow-up message can move a stalled application forward.",
+        data: { screen: "Applications" },
+      }).catch(() => {});
     } catch (err) {
       // Roll the claim back so the next cron tick retries this user's apps.
       console.error("Follow-up email failed; will retry next run:", err);
