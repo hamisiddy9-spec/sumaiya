@@ -65,7 +65,10 @@ export default function MarketingLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const lang = (params.locale ?? "sw") as Lang;
+  // Clamp to a supported locale — a bare non-marketing path like `/editor`
+  // falls through here with locale="editor", and an unclamped cast would make
+  // `translations[lang]` undefined and 500 the whole marketing tree.
+  const lang: Lang = params.locale === "en" ? "en" : "sw";
 
   return (
     <LangProvider lang={lang}>
