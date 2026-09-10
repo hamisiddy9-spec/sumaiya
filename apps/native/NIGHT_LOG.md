@@ -260,3 +260,29 @@ preview` (eas.json already has that profile, apk, env → sumaiyaai.vercel.app).
 
 gradle.properties restored to committed (box-tuned) values. dist/ left in
 place (gitignored).
+
+### 10:00 — LIVE WEBSITE TEST (Playwright vs prod) — 2 serious findings
+Ran a headless-Chromium sweep of sumaiyaai.vercel.app (desktop + Pixel 7).
+
+**P0 — email sign-in is DOWN in production.** POST /auth/v1/otp → 500
+`{"code":"unexpected_failure","message":"Error sending magic link email"}`.
+Supabase auth_logs: **SMTP `535 "Authentication credentials invalid"`**. Hits
+BOTH magic-link and 6-digit-code. Only Google OAuth works (hamisiddy9@ has been
+logging in fine via oidc). Auth config was reloaded 2026-09-09 ~16:00 & ~17:45
+— creds likely broke then. FIX: Supabase → Auth → SMTP settings (wrong user/pass
+or dead API key), or disable custom SMTP to fall back to the built-in sender.
+=> blocked the whole authed test (chat / upload / export / dashboard).
+
+**P1 — 7 public tables, no RLS, anon-key read+write** (Supabase security
+advisor, ERROR): device_token, web_push_subscription, referral_code,
+referral_claim, tool_invocation (leaks rows today), provenance, eval_sample.
+Confirmed: all return 200 to the anon key. Most empty now, but it's a live
+write hole (referral fraud, telemetry poisoning, token injection). Memory says
+Postgres RLS was deferred ("authz is in run-tool") — but PostgREST exposes
+these tables directly, so that reasoning doesn't hold for them.
+
+**P2 — /assistant desktop layout**: big empty band above the greeting bubble on
+≥1024px (content bottom-anchored). Fine on mobile.
+
+**Green:** all public routes 200, no console errors, i18n (sw/en) OK, guest CV
+editor solid, /editor 500 fix confirmed live, start-chooser live, mobile renders.
