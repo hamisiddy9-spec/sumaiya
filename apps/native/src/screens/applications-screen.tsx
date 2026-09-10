@@ -4,10 +4,12 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useApplications } from "../hooks/use-applications";
 import { STATUS_META, type AppStatus } from "../lib/applications-store";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, Screen, ScreenTitle, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, Screen, ScreenTitle, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { ThemeColors } from "../components/ui/theme";
+import type { ApplicationsScreenProps } from "../navigation/types";
 
-const STATUS_TINT: Record<AppStatus, (c: any) => string> = {
+const STATUS_TINT: Record<AppStatus, (c: ThemeColors) => string> = {
   saved: (c) => c.textMuted,
   applied: (c) => c.accent,
   interview: (c) => c.warning,
@@ -24,7 +26,7 @@ function timeAgo(ts: number, sw: boolean): string {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function ApplicationsScreen({ navigation }: any) {
+export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";
@@ -47,7 +49,11 @@ export function ApplicationsScreen({ navigation }: any) {
       </ScreenTitle>
 
       {loading && applications.length === 0 ? (
-        <Text style={{ color: c.textMuted }}>{t("Loading…", "Inapakia…")}</Text>
+        <>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </>
       ) : applications.length === 0 ? (
         <EmptyState
           icon="briefcase"

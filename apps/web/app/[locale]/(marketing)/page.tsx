@@ -236,7 +236,7 @@ function CyclingCell({
           href={"/editor/cv/try?template=" + cur.id}
           className="w-full text-center text-sm font-semibold text-cream bg-ember shadow-ember-hard rounded-[10px] px-4 py-2 hover:bg-ember-hover active:shadow-ember-active active:translate-y-[2px] transition-all duration-150"
         >
-          {lang === "sw" ? "Tumia templeti hii" : "Use this template"}
+          {lang === "sw" ? "Tumia muundo huu" : "Use this look"}
         </Link>
       </div>
     </div>
@@ -277,7 +277,7 @@ const PRODUCTS_EN: ProductItem[] = [
     iconName: "cv",
     title: "CV Builder",
     desc: "47+ curated, ATS-optimized templates with live preview, AI writing suggestions, and one-click PDF download.",
-    count: "47+ curated templates",
+    count: "47+ curated looks",
     href: "/editor/cv/try",
     bgColor: "bg-ember-tint",
     iconColor: "text-ember",
@@ -286,7 +286,7 @@ const PRODUCTS_EN: ProductItem[] = [
     iconName: "mail",
     title: "Cover Letters",
     desc: "Write a cover letter that pairs with your CV. AI-powered content tailored to your job target.",
-    count: "27 templates",
+    count: "27 looks",
     href: "/editor/cover-letter/try",
     bgColor: "bg-pine-tint",
     iconColor: "text-pine",
@@ -304,7 +304,7 @@ const PRODUCTS_EN: ProductItem[] = [
     iconName: "letter",
     title: "Formal Letters",
     desc: "Reference, application, resignation, and formal letters — professionally structured and ready to send.",
-    count: "17 templates",
+    count: "17 looks",
     href: "/editor/letter/try",
     bgColor: "bg-purple-tint",
     iconColor: "text-purple-glow",
@@ -315,8 +315,8 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "cv",
     title: "Kuunda CV",
-    desc: "Templeti za kitaalamu zinazopita ATS. Hakiki ya moja kwa moja, mapendekezo ya AI, PDF kamili.",
-    count: "Templeti 47+",
+    desc: "Miundo ya kitaalamu inayopita ATS. Hakiki ya moja kwa moja, mapendekezo ya AI, PDF kamili.",
+    count: "Miundo 47+",
     href: "/editor/cv/try",
     bgColor: "bg-ember-tint",
     iconColor: "text-ember",
@@ -325,7 +325,7 @@ const PRODUCTS_SW: ProductItem[] = [
     iconName: "mail",
     title: "Barua za Maombi",
     desc: "Barua za maombi zinazovutia zinazolingana na CV yako. Inasaidiwa na AI, imeandikwa kwa ufundi.",
-    count: "Templeti 27",
+    count: "Miundo 27",
     href: "/editor/cover-letter/try",
     bgColor: "bg-pine-tint",
     iconColor: "text-pine",
@@ -343,7 +343,7 @@ const PRODUCTS_SW: ProductItem[] = [
     iconName: "letter",
     title: "Barua Rasmi",
     desc: "Barua za mapendekezo, maombi, kujiuzulu, na barua rasmi 17 — za kitaalamu na ziko tayari kutumwa.",
-    count: "Templeti 17",
+    count: "Miundo 17",
     href: "/editor/letter/try",
     bgColor: "bg-purple-tint",
     iconColor: "text-purple-glow",
@@ -451,10 +451,10 @@ export default function LandingPage() {
   const FAQS = lang === "sw"
     ? [
         { q: "Je, Sumaiya ni bure kweli?", a: "Ndiyo. Unaweza kuunda CV, barua ya maombi, kadi ya biashara au barua rasmi na kupakua PDF bila malipo — bila kadi ya benki." },
-        { q: "Je, CV zenu zinapita mifumo ya ATS?", a: "Ndiyo. Templeti zetu zimeundwa kuwa rahisi kusomwa na mifumo ya waajiri (ATS) — safu moja, vichwa wazi, na PDF yenye maandishi halisi. Pia kuna kikagua-ATSbure cha kupima CV yako." },
+        { q: "Je, CV zenu zinapita mifumo ya ATS?", a: "Ndiyo. Miundo yetu imeundwa kuwa rahisi kusomwa na mifumo ya waajiri (ATS) — safu moja, vichwa wazi, na PDF yenye maandishi halisi. Pia kuna kikagua-ATSbure cha kupima CV yako." },
         { q: "Je, naweza kuitumia kwa Kiswahili?", a: "Ndiyo. Programu nzima inapatikana kwa Kiingereza na Kiswahili — badilisha wakati wowote kwa kitufe cha lugha." },
         { q: "Je, ninahitaji kufungua akaunti?", a: "Unaweza kuanza kuunda CV mara moja bila akaunti. Unahitaji tu kuingia unapotaka kuhifadhi kazi yako mtandaoni au kuipata kwenye kifaa kingine." },
-        { q: "Je, naweza kuitumia popote duniani?", a: "Ndiyo. Imejengwa kwa waombaji kazi popote — templeti zinazopita ATS, ushauri wa msaidizi wa AI, na miundo inayofaa waajiri wa kimataifa." },
+        { q: "Je, naweza kuitumia popote duniani?", a: "Ndiyo. Imejengwa kwa waombaji kazi popote — miundo inayopita ATS, ushauri wa msaidizi wa AI, na miundo inayofaa waajiri wa kimataifa." },
         { q: "Je, naweza kupata faili la Word (DOCX)?", a: "Ndiyo. Mbali na PDF safi, unaweza kupakua CV yako kama faili la Word linalohaririwa." },
       ]
     : [
@@ -462,7 +462,7 @@ export default function LandingPage() {
         { q: "Are your CVs ATS-friendly?", a: "Yes. Every template is built to be read cleanly by Applicant Tracking Systems — single column, clear headings, and a real text-layer PDF. There's also a free ATS checker to score your own CV." },
         { q: "Can I use it in Swahili?", a: "Yes. The whole app is available in English and Swahili — switch any time with the language toggle." },
         { q: "Do I need to create an account?", a: "You can start building a CV instantly with no account. You only sign in when you want to save your work online or pick it up on another device." },
-        { q: "Can I use it anywhere in the world?", a: "Yes. It's built for job seekers everywhere — ATS-friendly templates, AI-assistant guidance, and formats that work for employers worldwide." },
+        { q: "Can I use it anywhere in the world?", a: "Yes. It's built for job seekers everywhere — ATS-friendly designs, AI-assistant guidance, and formats that work for employers worldwide." },
         { q: "Can I get a Word (DOCX) file?", a: "Yes. Alongside a clean PDF, you can download your CV as an editable Word document." },
       ];
 
@@ -620,8 +620,8 @@ export default function LandingPage() {
           {[
             {
               icon: "grid" as const,
-              en: { t: "1. Pick a design", d: "Choose from 47+ ready-made CV templates. You can change it later — your details stay." },
-              sw: { t: "1. Chagua muundo", d: "Chagua kati ya templeti 47+ za CV zilizo tayari. Unaweza kubadilisha baadaye — maelezo yako yanabaki." },
+              en: { t: "1. Pick a design", d: "Sumaiya picks a design that fits — or you pick. Change it any time, your details stay." },
+              sw: { t: "1. Chagua muundo", d: "Sumaiya anachagua muundo unaokufaa — au chagua wewe. Unaweza kubadilisha baadaye, maelezo yako yanabaki." },
             },
             {
               icon: "magic" as const,
@@ -738,19 +738,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CV TEMPLATES GRID ── */}
+      {/* ── CV DESIGNS GRID ── */}
       <section className="px-4 sm:px-6 lg:px-8 py-24 max-w-7xl mx-auto">
         <div className="reveal mb-14">
           <p className="text-xs font-mono uppercase tracking-wider text-ember-hover mb-4">
-            {lang === "sw" ? "TEMPLETI ZA CV" : "CV TEMPLATES"}
+            {lang === "sw" ? "MUONEKANO WA CV" : "THE LOOK"}
           </p>
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
-            {lang === "sw" ? "Templeti za CV zilizoundwa kupendwa na waajiri" : "CV templates built to impress employers"}
+            {lang === "sw" ? "Sumaiya anaipamba CV yako iwapendeze waajiri" : "Sumaiya designs your CV to impress employers"}
           </h2>
           <p className="text-lg text-text-body">
             {lang === "sw"
-              ? "Chagua muundo wowote — maudhui yako yanabaki. Rekebisha template yoyote wakati wowote kwenye kihariri."
-              : "Pick any style — your content carries over. Switch templates anytime inside the editor."}
+              ? "Yeye huchagua muundo unaokufaa — unaweza kuubadilisha wakati wowote, na maudhui yako yanabaki."
+              : "She picks the design that fits you — change it any time, your content stays put."}
           </p>
         </div>
 
@@ -771,7 +771,7 @@ export default function LandingPage() {
         <div className="mt-8 text-center">
           <Link href="/templates">
             <Button variant="secondary" size="lg">
-              {lang === "sw" ? "Angalia templeti zote" : "Browse all CV templates"}
+              {lang === "sw" ? "Ona miundo yote" : "See all the looks"}
               <Icon name="chevron-right" size={16} />
             </Button>
           </Link>

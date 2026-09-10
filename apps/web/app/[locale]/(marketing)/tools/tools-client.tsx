@@ -619,12 +619,12 @@ export default function ToolsClient() {
           </h2>
           <p className="text-text-body mb-8 max-w-md mx-auto">
             {lang === "sw"
-              ? "Templeti za kitaalamu zinazopita ATS, pamoja na msaidizi wa AI."
+              ? "Miundo ya kitaalamu inayopita ATS, pamoja na msaidizi wa AI."
               : "Professional ATS-optimized templates with an AI assistant."}
           </p>
           <a href="/templates"
             className="inline-flex items-center gap-2.5 bg-espresso hover:bg-espresso-2 text-cream font-semibold rounded-input-lg px-8 py-3.5 text-sm shadow-floating hover:shadow-card-hover transition-all duration-200 active:scale-[0.97]">
-            <FileText className="w-4 h-4" /> {lang === "sw" ? "Angalia Templeti" : "Browse Templates"}
+            <FileText className="w-4 h-4" /> {lang === "sw" ? "Ona Miundo" : "See the looks"}
           </a>
         </div>
       </section>

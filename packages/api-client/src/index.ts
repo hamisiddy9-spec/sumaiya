@@ -178,6 +178,21 @@ export class ApiClient {
     return { text: result.text, data: (result.fields as Partial<CVData> | null) ?? null };
   }
 
+  // ── Extract text from an uploaded PDF (Hono /api/tools/extract-text) ───────
+  // Multipart upload. `file` is what RN's FormData accepts: { uri, name, type }.
+  // The backend runs unpdf (serverless pdfjs) and returns merged page text, or
+  // a 4xx when the PDF is image-only / unreadable.
+  async extractPdfText(file: { uri: string; name: string; type?: string }): Promise<{ text: string; pages: number }> {
+    const form = new FormData();
+    // RN FormData file part — cast because DOM's FormData types expect a Blob.
+    form.append("file", { uri: file.uri, name: file.name, type: file.type || "application/pdf" } as unknown as Blob);
+    const result = await this.request<{ text: string; pages: number }>("/api/tools/extract-text", {
+      method: "POST",
+      body: form,
+    });
+    return { text: result.text, pages: result.pages };
+  }
+
   // ── Learning + chat (Hono /api/mobile) ────────────────────────────────────
 
   async getLearningResources(skills: string[] = []): Promise<
@@ -195,6 +210,29 @@ export class ApiClient {
       method: "POST",
       body: JSON.stringify({ messages, conversationId }),
     });
+  }
+
+  /** Turn a chat transcript (what the user told Sumaiya + their profile) into a
+   *  structured CV the app can preview and save. Anti-fabrication enforced
+   *  server-side. */
+  async buildCv(transcript: string, lang?: "en" | "sw"): Promise<{ cv: CVData }> {
+    return this.request("/api/mobile/build-cv", {
+      method: "POST",
+      body: JSON.stringify({ transcript, lang }),
+    });
+  }
+
+  // ── Referral loop (Hono /api/referral, Bearer) ───────────────────────────
+  async getReferral(): Promise<{ code: string; url: string; joined: number; activated: number }> {
+    return this.request("/api/referral");
+  }
+
+  async claimReferral(code: string): Promise<{ ok: boolean; reason?: string }> {
+    return this.request("/api/referral/claim", { method: "POST", body: JSON.stringify({ code }) });
+  }
+
+  async referralShared(channel: "whatsapp" | "link" | "copy"): Promise<void> {
+    await this.request("/api/referral/shared", { method: "POST", body: JSON.stringify({ channel }) }).catch(() => {});
   }
 
   /** Paste a job description, get a tailored CV and/or a cover letter grounded

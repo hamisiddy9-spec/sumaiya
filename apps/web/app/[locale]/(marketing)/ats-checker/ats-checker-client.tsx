@@ -255,7 +255,7 @@ export function AtsCheckerClient() {
             </h3>
             <p className="text-cream/60 text-sm mb-5 max-w-md mx-auto leading-relaxed">
               {sw
-                ? "Jenga upya CV yako kwa templeti rafiki kwa ATS, au rekebisha hii uliyopakia."
+                ? "Jenga upya CV yako kwa muundo rafiki kwa ATS, au rekebisha hii uliyopakia."
                 : "Rebuild your CV on an ATS-friendly template, or fix the one you just uploaded — free."}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

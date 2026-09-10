@@ -204,6 +204,31 @@ function tokens(s: string): string[] {
   return (s.toLowerCase().match(/[a-z][a-z+#.]{2,}/g) ?? []).filter((w) => !STOP.has(w));
 }
 
+/** Crude stem so "managing" / "managed" / "manages" collapse to one form. */
+function stem(w: string): string {
+  return w
+    .replace(/(?:ing|ed|es|s)$/i, "")
+    .replace(/(.)\1$/, "$1"); // "manag" from "managg" edge
+}
+
+/** Single words + the 2-word phrases inside each clause (never across
+ *  punctuation — commas separate list items that shouldn't pair up). */
+function phrases(s: string): string[] {
+  const out: string[] = [];
+  for (const clause of s.toLowerCase().split(/[.,;:!?()/\n]+/)) {
+    const words = (clause.match(/[a-z][a-z+#]{1,}/g) ?? []);
+    for (let i = 0; i < words.length; i++) {
+      const a = words[i];
+      if (!STOP.has(a) && a.length >= 3) out.push(a);
+      const b = words[i + 1];
+      if (b && !STOP.has(a) && !STOP.has(b) && a.length >= 3 && b.length >= 3) {
+        out.push(`${a} ${b}`);
+      }
+    }
+  }
+  return out;
+}
+
 export interface JdMatch {
   score: number; // 0-100
   matched: string[];
@@ -222,15 +247,26 @@ export function matchJd(raw: CVData, jd: string): JdMatch {
     .join(" ")
     .toLowerCase();
 
-  // rank JD keywords by frequency, keep the top distinct ones
+  const cvStems = new Set(tokens(cvText).map(stem));
+
+  // Rank JD terms (single words + 2-word phrases) by frequency; a phrase is
+  // worth more than the words it contains.
   const freq = new Map<string, number>();
-  for (const t of tokens(jd)) freq.set(t, (freq.get(t) ?? 0) + 1);
+  for (const p of phrases(jd)) freq.set(p, (freq.get(p) ?? 0) + (p.includes(" ") ? 2 : 1));
   const ranked = [...freq.entries()].sort((a, b) => b[1] - a[1]).map(([w]) => w);
-  const keywords = ranked.slice(0, 25);
+  // Keep the strongest single words and a few of the strongest phrases.
+  const singles = ranked.filter((w) => !w.includes(" ")).slice(0, 20);
+  const phrasesTop = ranked.filter((w) => w.includes(" ")).slice(0, 6);
+  const keywords = [...singles, ...phrasesTop];
+
+  const hit = (k: string) =>
+    k.includes(" ")
+      ? cvText.includes(k) || k.split(" ").every((w) => cvStems.has(stem(w)))
+      : cvText.includes(k) || cvStems.has(stem(k));
 
   const matched: string[] = [];
   const missing: string[] = [];
-  for (const k of keywords) (cvText.includes(k) ? matched : missing).push(k);
+  for (const k of keywords) (hit(k) ? matched : missing).push(k);
 
   const score = keywords.length ? Math.round((matched.length / keywords.length) * 100) : 0;
   return { score, matched, missing: missing.slice(0, 12) };

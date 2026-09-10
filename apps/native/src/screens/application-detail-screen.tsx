@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, Share, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, Share, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { useCVs } from "@sumaiya/hooks";
 import type { CV } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
+import { useCvs } from "../hooks/use-cvs";
 import {
   createApplication, getApplication, updateApplication, deleteApplication,
   STATUS_ORDER, STATUS_META, type AppStatus, type Application,
@@ -12,15 +12,16 @@ import { matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { ApplicationDetailScreenProps } from "../navigation/types";
 
-export function ApplicationDetailScreen({ route, navigation }: any) {
+export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";
   const id: string | undefined = route?.params?.id;
   const isNew = !id;
 
-  const { cvs } = useCVs(apiClient);
+  const { cvs } = useCvs();
   const [loaded, setLoaded] = useState(isNew);
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
@@ -123,7 +124,9 @@ export function ApplicationDetailScreen({ route, navigation }: any) {
   if (!loaded) {
     return (
       <Screen scroll={false}>
-        <Text style={{ color: c.textMuted, padding: 20 }}>{t("Loading…", "Inapakia…")}</Text>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={c.accent} />
+        </View>
       </Screen>
     );
   }

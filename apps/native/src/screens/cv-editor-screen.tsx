@@ -1,13 +1,20 @@
-import React, { useMemo, useRef, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
+import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { shareCV } from "../services/share";
-import type { CV, CVData, Education, Experience, Skill } from "@sumaiya/types";
+import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
+import type { CvEditorScreenProps } from "../navigation/types";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { useLang } from "../lib/i18n";
+import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
+import { getDefaultTemplate } from "../lib/prefs";
+import { CvPreviewCard } from "../components/cv/cv-preview-card";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -58,25 +65,73 @@ function Section({
   );
 }
 
-export function CvEditorScreen({ route, navigation }: { route: any; navigation: any }) {
+export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const c = useThemeColors();
+  const { t, lang } = useLang();
   const { templateId, cvId: initialCvId, initialData } = route.params || {};
   const { status, queueOperation } = useOfflineSync();
+  const insets = useSafeAreaInsets();
+  const [showPreview, setShowPreview] = useState(false);
+  const knownTemplate = CV_TEMPLATES.some((x) => x.id === templateId);
+  const [template, setTemplate] = useState<CvTemplateId>(
+    knownTemplate ? (templateId as CvTemplateId) : "classic",
+  );
+  // A brand-new CV with no template picked → use the first-run default.
+  useEffect(() => {
+    if (knownTemplate) return;
+    let alive = true;
+    getDefaultTemplate().then((id) => { if (alive) setTemplate(id); });
+    return () => { alive = false; };
+  }, [knownTemplate]);
   const cvIdRef = useRef<string>(initialCvId || uid());
 
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // We have data up front when it's a new CV or the caller passed the CV's
+  // data. Opening an existing CV by id alone means we must fetch it — until
+  // then, show a loader instead of an empty form (the old bug: every saved CV
+  // opened blank).
+  const [loadingCv, setLoadingCv] = useState<boolean>(!!initialCvId && !initialData);
 
-  const [data, setData] = useState<Partial<CVData>>(() => ({
-    personalInfo: initialData?.personalInfo || { fullName: "", email: "", phone: "", location: "" },
-    summary: initialData?.summary || "",
-    experience: initialData?.experience || [],
-    education: initialData?.education || [],
-    skills: initialData?.skills || [],
-    certifications: initialData?.certifications || [],
-    languages: initialData?.languages || [],
-  }));
+  const emptyData = (src?: Partial<CVData>): Partial<CVData> => ({
+    personalInfo: src?.personalInfo || { fullName: "", email: "", phone: "", location: "" },
+    summary: src?.summary || "",
+    experience: src?.experience || [],
+    education: src?.education || [],
+    skills: src?.skills || [],
+    certifications: src?.certifications || [],
+    languages: src?.languages || [],
+  });
+
+  const [data, setData] = useState<Partial<CVData>>(() => emptyData(initialData));
+
+  useEffect(() => {
+    let cancelled = false;
+    if (initialCvId && !initialData) {
+      (async () => {
+        try {
+          // Local cache first (covers a CV made offline / not yet synced),
+          // then the server.
+          const local = await offlineStorage.getCVOffline(initialCvId).catch(() => null);
+          const cv = local ?? (await apiClient.getCV(initialCvId));
+          if (!cancelled && cv?.data) {
+            setData(emptyData(cv.data as Partial<CVData>));
+          }
+        } catch {
+          if (!cancelled) {
+            Alert.alert(t("Couldn't open that CV", "Imeshindwa kufungua CV hiyo"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
+          }
+        } finally {
+          if (!cancelled) setLoadingCv(false);
+        }
+      })();
+    }
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCvId]);
 
   const [skillInput, setSkillInput] = useState("");
 
@@ -84,8 +139,8 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
     setData((d) => ({ ...d, ...p }));
     setDirty(true);
   };
-  const patchPersonal = (k: string, v: string) => {
-    setData((d) => ({ ...d, personalInfo: { ...(d.personalInfo as any), [k]: v } }));
+  const patchPersonal = (k: keyof PersonalInfo, v: string) => {
+    setData((d) => ({ ...d, personalInfo: { ...d.personalInfo, [k]: v } }));
     setDirty(true);
   };
 
@@ -94,15 +149,15 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
   const skills = (data.skills ?? []) as Skill[];
 
   const syncPill = useMemo(() => {
-    if (status?.pendingCount) return { label: `${status.pendingCount} to sync`, color: c.warning, icon: "refresh-cw" };
-    if (dirty) return { label: "Unsaved", color: c.textMuted, icon: "edit" };
-    return { label: "Saved", color: c.success, icon: "check" };
+    if (status?.pendingCount) return { label: t(`${status.pendingCount} to sync`, `${status.pendingCount} kusawazisha`), color: c.warning, icon: "refresh-cw" };
+    if (dirty) return { label: t("Unsaved", "Haijahifadhiwa"), color: c.textMuted, icon: "edit" };
+    return { label: t("Saved", "Imehifadhiwa"), color: c.success, icon: "check" };
   }, [status?.pendingCount, dirty, c]);
 
   async function save() {
     if (!data.personalInfo?.fullName?.trim()) {
       haptics.error();
-      Alert.alert("Add your name", "A CV needs at least a full name.");
+      Alert.alert(t("Add your name", "Weka jina lako"), t("A CV needs at least a full name.", "CV inahitaji angalau jina kamili."));
       return;
     }
     setSaving(true);
@@ -110,18 +165,21 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
       const cv: CV = {
         id: cvIdRef.current,
         userId: "me",
-        templateId: templateId || "nakuru",
+        templateId: template,
         title: data.personalInfo.fullName || "My CV",
         data: data as CVData,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+      // Write to the local cache first so the list/home reflect it immediately
+      // and it survives being offline, then queue the push to the server.
+      await offlineStorage.saveCVOffline(cv).catch(() => {});
       await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
       haptics.success();
       setDirty(false);
     } catch {
       haptics.error();
-      Alert.alert("Couldn't save", "It'll retry automatically when you're online.");
+      Alert.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("It'll retry automatically when you're online.", "Itajaribu tena yenyewe ukipata mtandao."));
     } finally {
       setSaving(false);
     }
@@ -133,18 +191,18 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
       const cv: CV = {
         id: cvIdRef.current,
         userId: "me",
-        templateId: templateId || "nakuru",
+        templateId: template,
         title: data.personalInfo?.fullName || "My CV",
         data: data as CVData,
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const uri = await exportCVAsPDF(cv, "template");
+      const uri = await exportCVAsPDF(cv, { accent: "#DA4A1C", lang, template });
       haptics.success();
       await shareCV(cv, uri);
     } catch {
       haptics.error();
-      Alert.alert("Export failed", "Try again in a moment.");
+      Alert.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
     } finally {
       setExporting(false);
     }
@@ -166,16 +224,27 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
     setSkillInput("");
   };
 
+  if (loadingCv) {
+    return (
+      <Screen>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
+          <ActivityIndicator color={c.accent} />
+          <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Opening your CV…", "Inafungua CV yako…")}</Text>
+        </View>
+      </Screen>
+    );
+  }
+
   return (
     <Screen
       scroll
       footer={
         <View style={{ flexDirection: "row", gap: 8 }}>
           <View style={{ flex: 1 }}>
-            <Button label="Save" onPress={save} loading={saving} />
+            <Button label={t("Save", "Hifadhi")} onPress={save} loading={saving} />
           </View>
           <View style={{ flex: 1 }}>
-            <Button label="Export PDF" variant="secondary" onPress={exportPdf} loading={exporting} />
+            <Button label={t("Export PDF", "Pakua PDF")} variant="secondary" onPress={exportPdf} loading={exporting} />
           </View>
         </View>
       }
@@ -186,16 +255,16 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
           hitSlop={10}
           onPress={() => {
             if (dirty) {
-              Alert.alert("Discard changes?", "Your edits aren't saved.", [
-                { text: "Keep editing", style: "cancel" },
-                { text: "Discard", style: "destructive", onPress: () => navigation.goBack() },
+              Alert.alert(t("Discard changes?", "Utupe mabadiliko?"), t("Your edits aren't saved.", "Mabadiliko yako hayajahifadhiwa."), [
+                { text: t("Keep editing", "Endelea kuhariri"), style: "cancel" },
+                { text: t("Discard", "Tupa"), style: "destructive", onPress: () => navigation.goBack() },
               ]);
             } else navigation.goBack();
           }}
           style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
         >
           <Icon name="arrow-left" size={18} color={c.accent} />
-          <Text style={{ color: c.accent, fontWeight: "700" }}>Back</Text>
+          <Text style={{ color: c.accent, fontWeight: "700" }}>{t("Back", "Rudi")}</Text>
         </Pressable>
 
         <View
@@ -216,33 +285,60 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
 
       <ScreenTitle
         trailing={
-          initialCvId ? (
+          <View style={{ flexDirection: "row", gap: 6 }}>
             <Pressable
-              onPress={() => navigation.navigate("AtsChecker", { cvId: cvIdRef.current })}
+              onPress={() => { haptics.selection(); setShowPreview(true); }}
               style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 9, backgroundColor: c.accent + "16" }}
             >
-              <Icon name="shield-check" size={14} color={c.accent} />
-              <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>ATS</Text>
+              <Icon name="eye" size={14} color={c.accent} />
+              <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>{t("Preview", "Onyesho")}</Text>
             </Pressable>
-          ) : undefined
+            {initialCvId ? (
+              <Pressable
+                onPress={() => navigation.navigate("AtsChecker", { cvId: cvIdRef.current })}
+                style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 9, backgroundColor: c.accent + "16" }}
+              >
+                <Icon name="shield-check" size={14} color={c.accent} />
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>ATS</Text>
+              </Pressable>
+            ) : null}
+          </View>
         }
       >
-        {initialCvId ? "Edit CV" : "New CV"}
+        {initialCvId ? t("Edit CV", "Hariri CV") : t("New CV", "CV mpya")}
       </ScreenTitle>
 
+      <Modal visible={showPreview} animationType="slide" onRequestClose={() => setShowPreview(false)}>
+        <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingTop: insets.top + 8, paddingBottom: 40 }}>
+          <Pressable
+            onPress={() => setShowPreview(false)}
+            hitSlop={10}
+            style={{ flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 14 }}
+          >
+            <Icon name="arrow-left" size={20} color={c.text} />
+            <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("Back to editing", "Rudi kuhariri")}</Text>
+          </Pressable>
+          <CvPreviewCard
+            cv={{ id: cvIdRef.current, userId: "me", templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
+            initialTemplate={template}
+            onTemplateChange={(id) => { setTemplate(id); setDirty(true); }}
+          />
+        </ScrollView>
+      </Modal>
+
       {/* Personal */}
-      <Section title="Personal details" icon="user" defaultOpen>
-        <TextField label="Full name" value={data.personalInfo?.fullName || ""} onChangeText={(t) => patchPersonal("fullName", t)} autoCapitalize="words" />
-        <TextField label="Headline" placeholder="e.g. Software Engineer" value={(data.personalInfo as any)?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
-        <TextField label="Email" value={data.personalInfo?.email || ""} onChangeText={(t) => patchPersonal("email", t)} keyboardType="email-address" autoCapitalize="none" />
-        <TextField label="Phone" value={data.personalInfo?.phone || ""} onChangeText={(t) => patchPersonal("phone", t)} keyboardType="phone-pad" />
-        <TextField label="Location" value={data.personalInfo?.location || ""} onChangeText={(t) => patchPersonal("location", t)} />
+      <Section title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen>
+        <TextField label={t("Full name", "Jina kamili")} value={data.personalInfo?.fullName || ""} onChangeText={(t) => patchPersonal("fullName", t)} autoCapitalize="words" />
+        <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "mf. Mhandisi wa Programu")} value={data.personalInfo?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
+        <TextField label={t("Email", "Barua pepe")} value={data.personalInfo?.email || ""} onChangeText={(t) => patchPersonal("email", t)} keyboardType="email-address" autoCapitalize="none" />
+        <TextField label={t("Phone", "Simu")} value={data.personalInfo?.phone || ""} onChangeText={(t) => patchPersonal("phone", t)} keyboardType="phone-pad" />
+        <TextField label={t("Location", "Eneo")} value={data.personalInfo?.location || ""} onChangeText={(t) => patchPersonal("location", t)} />
       </Section>
 
       {/* Summary */}
-      <Section title="Professional summary" icon="edit" defaultOpen>
+      <Section title={t("Professional summary", "Muhtasari wa kikazi")} icon="edit" defaultOpen>
         <TextField
-          placeholder="2–3 sentences on who you are and what you do best."
+          placeholder={t("2–3 sentences on who you are and what you do best.", "Sentensi 2–3 kuhusu wewe na unachofanya vizuri zaidi.")}
           value={data.summary || ""}
           onChangeText={(t) => patch({ summary: t })}
           multiline
@@ -252,50 +348,50 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
       </Section>
 
       {/* Experience */}
-      <Section title={`Experience${exp.length ? ` · ${exp.length}` : ""}`} icon="briefcase" defaultOpen={exp.length > 0}>
+      <Section title={`${t("Experience", "Uzoefu")}${exp.length ? ` · ${exp.length}` : ""}`} icon="briefcase" defaultOpen={exp.length > 0}>
         {exp.map((e, i) => (
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>ROLE {i + 1}</Text>
+              <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>{t("ROLE", "KAZI")} {i + 1}</Text>
               <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ experience: exp.filter((x) => x.id !== e.id) }); }}>
                 <Icon name="trash-2" size={15} color={c.error} />
               </Pressable>
             </View>
-            <TextField label="Job title" value={e.title} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, title: t } : x)) })} />
-            <TextField label="Company" value={e.company} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, company: t } : x)) })} />
+            <TextField label={t("Job title", "Cheo")} value={e.title} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, title: t } : x)) })} />
+            <TextField label={t("Company", "Kampuni")} value={e.company} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, company: t } : x)) })} />
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <View style={{ flex: 1 }}><TextField label="Start" placeholder="2022-01" value={e.startDate} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, startDate: t } : x)) })} /></View>
-              <View style={{ flex: 1 }}><TextField label="End" placeholder="Present" value={e.endDate || ""} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, endDate: t } : x)) })} /></View>
+              <View style={{ flex: 1 }}><TextField label={t("Start", "Ilianza")} placeholder="2022-01" value={e.startDate} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, startDate: t } : x)) })} /></View>
+              <View style={{ flex: 1 }}><TextField label={t("End", "Iliisha")} placeholder={t("Present", "Sasa")} value={e.endDate || ""} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, endDate: t } : x)) })} /></View>
             </View>
-            <TextField label="What you did" value={e.description} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, description: t } : x)) })} multiline numberOfLines={3} inputStyle={{ minHeight: 74, textAlignVertical: "top" }} />
+            <TextField label={t("What you did", "Ulichofanya")} value={e.description} onChangeText={(t) => patch({ experience: exp.map((x) => (x.id === e.id ? { ...x, description: t } : x)) })} multiline numberOfLines={3} inputStyle={{ minHeight: 74, textAlignVertical: "top" }} />
           </Animated.View>
         ))}
-        <Button label="Add a role" variant="ghost" size="sm" leftIcon={<Icon name="plus" size={15} color={c.accent} />} onPress={addExp} />
+        <Button label={t("Add a role", "Ongeza kazi")} variant="ghost" size="sm" leftIcon={<Icon name="plus" size={15} color={c.accent} />} onPress={addExp} />
       </Section>
 
       {/* Education */}
-      <Section title={`Education${edu.length ? ` · ${edu.length}` : ""}`} icon="edu" defaultOpen={edu.length > 0}>
+      <Section title={`${t("Education", "Elimu")}${edu.length ? ` · ${edu.length}` : ""}`} icon="graduation-cap" defaultOpen={edu.length > 0}>
         {edu.map((e, i) => (
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>SCHOOL {i + 1}</Text>
+              <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>{t("SCHOOL", "SHULE")} {i + 1}</Text>
               <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ education: edu.filter((x) => x.id !== e.id) }); }}>
                 <Icon name="trash-2" size={15} color={c.error} />
               </Pressable>
             </View>
-            <TextField label="Institution" value={e.institution} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, institution: t } : x)) })} />
+            <TextField label={t("Institution", "Taasisi")} value={e.institution} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, institution: t } : x)) })} />
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <View style={{ flex: 1 }}><TextField label="Degree" value={e.degree} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, degree: t } : x)) })} /></View>
-              <View style={{ flex: 1 }}><TextField label="Field" value={e.field} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, field: t } : x)) })} /></View>
+              <View style={{ flex: 1 }}><TextField label={t("Degree", "Shahada")} value={e.degree} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, degree: t } : x)) })} /></View>
+              <View style={{ flex: 1 }}><TextField label={t("Field", "Fani")} value={e.field} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, field: t } : x)) })} /></View>
             </View>
-            <TextField label="Graduated" placeholder="2021-06" value={e.graduationDate} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, graduationDate: t } : x)) })} />
+            <TextField label={t("Graduated", "Ulihitimu")} placeholder="2021-06" value={e.graduationDate} onChangeText={(t) => patch({ education: edu.map((x) => (x.id === e.id ? { ...x, graduationDate: t } : x)) })} />
           </Animated.View>
         ))}
-        <Button label="Add education" variant="ghost" size="sm" leftIcon={<Icon name="plus" size={15} color={c.accent} />} onPress={addEdu} />
+        <Button label={t("Add education", "Ongeza elimu")} variant="ghost" size="sm" leftIcon={<Icon name="plus" size={15} color={c.accent} />} onPress={addEdu} />
       </Section>
 
       {/* Skills */}
-      <Section title={`Skills${skills.length ? ` · ${skills.length}` : ""}`} icon="star" defaultOpen={skills.length > 0}>
+      <Section title={`${t("Skills", "Ujuzi")}${skills.length ? ` · ${skills.length}` : ""}`} icon="star" defaultOpen={skills.length > 0}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
           {skills.map((s) => (
             <Pressable
@@ -310,7 +406,7 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
         </View>
         <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-end" }}>
           <View style={{ flex: 1 }}>
-            <TextField placeholder="Add a skill" value={skillInput} onChangeText={setSkillInput} onSubmitEditing={addSkill} returnKeyType="done" />
+            <TextField placeholder={t("Add a skill", "Ongeza ujuzi")} value={skillInput} onChangeText={setSkillInput} onSubmitEditing={addSkill} returnKeyType="done" />
           </View>
           <Button label="Add" size="sm" fullWidth={false} onPress={addSkill} />
         </View>

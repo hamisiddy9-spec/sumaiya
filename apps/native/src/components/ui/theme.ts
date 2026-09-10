@@ -23,38 +23,40 @@ export interface ThemeColors {
   overlay: string;
 }
 
+// Warm Confidence — the exact values from apps/web/tailwind.config.ts. Web is
+// the reference; the mobile app must render the same brand, not a near-miss.
 const light: ThemeColors = {
-  bg: "#f5ede6", // sand
-  bgElevated: "#faf8f6", // card
-  border: "#e8ddd4",
-  borderStrong: "#d8c9bd",
-  text: "#1a1410", // espresso
-  textBody: "#4a4540",
-  textMuted: "#8b7d75",
-  accent: "#d85c2c", // ember
-  accentPressed: "#c24a1f",
-  accentText: "#fef5f0", // cream
-  onAccentMuted: "#f7e6dd",
-  success: "#1f9d55",
-  warning: "#c77a17",
-  error: "#dc2626",
-  overlay: "rgba(26, 20, 16, 0.45)",
+  bg: "#FAF5EE", // cream
+  bgElevated: "#FFFFFF", // card
+  border: "#E9E0D4",
+  borderStrong: "#9C8D7B", // border-input
+  text: "#211A15", // espresso
+  textBody: "#6B5F54", // text-body
+  textMuted: "#756A5E", // text-muted
+  accent: "#DA4A1C", // ember
+  accentPressed: "#C13E14", // ember-hover
+  accentText: "#FAF5EE", // cream
+  onAccentMuted: "#FBE9E1", // ember-tint
+  success: "#12766A",
+  warning: "#96630F", // gold-text
+  error: "#C13E14",
+  overlay: "rgba(33, 26, 21, 0.45)",
 };
 
 const dark: ThemeColors = {
-  bg: "#0f0a07", // espresso_dark
-  bgElevated: "#1a1410", // espresso
-  border: "#3d2f27", // espresso_line
+  bg: "#171009",
+  bgElevated: "#211A15", // espresso
+  border: "#3A2E25", // espresso-line
   borderStrong: "#52413a",
-  text: "#fef5f0", // cream
-  textBody: "#d6c8bf",
-  textMuted: "#9c8a80",
-  accent: "#e2683a",
-  accentPressed: "#d85c2c",
-  accentText: "#fef5f0",
-  onAccentMuted: "#3a241d",
+  text: "#FAF5EE", // cream
+  textBody: "#D8C9BD",
+  textMuted: "#9C8A80",
+  accent: "#E5734A", // brand-400 — ember lifted for contrast on espresso
+  accentPressed: "#DA4A1C",
+  accentText: "#FAF5EE",
+  onAccentMuted: "#3A241D",
   success: "#4ade80",
-  warning: "#f5b455",
+  warning: "#F2A93B", // gold
   error: "#f87171",
   overlay: "rgba(0, 0, 0, 0.6)",
 };

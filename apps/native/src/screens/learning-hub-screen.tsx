@@ -13,6 +13,11 @@ import {
   useThemeColors,
 } from "../components/ui";
 import { Icon } from "../components/icon";
+import { useLang } from "../lib/i18n";
+import { GUIDES } from "../lib/guides";
+import { useEntitlements } from "../lib/entitlements";
+import { PremiumSheet } from "../components/premium-sheet";
+import type { LearningHubScreenProps } from "../navigation/types";
 
 interface Resource {
   id: string;
@@ -22,8 +27,11 @@ interface Resource {
   free: boolean;
 }
 
-export function LearningHubScreen({ navigation }: { navigation: any }) {
+export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const c = useThemeColors();
+  const { t, lang } = useLang();
+  const { premium } = useEntitlements();
+  const [showPremium, setShowPremium] = useState(false);
   const [query, setQuery] = useState("");
   const [freeOnly, setFreeOnly] = useState(false);
   const [resources, setResources] = useState<Resource[]>([]);
@@ -36,7 +44,7 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
     try {
       setResources(await apiClient.getLearningResources());
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Couldn't load courses.");
+      setError(err instanceof ApiError ? err.message : t("Couldn't load courses.", "Imeshindwa kupakia kozi."));
     } finally {
       setLoading(false);
     }
@@ -66,14 +74,62 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
         style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8, marginBottom: 14 }}
       >
         <Icon name="arrow-left" size={18} color={c.accent} />
-        <Text style={{ color: c.accent, fontWeight: "700" }}>Back</Text>
+        <Text style={{ color: c.accent, fontWeight: "700" }}>{t("Back", "Rudi")}</Text>
       </Pressable>
 
       <Text style={{ color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 }}>
-        Learning hub
+        {t("Learning hub", "Kituo cha kujifunza")}
       </Text>
       <Text style={{ color: c.textBody, fontSize: 14, marginTop: 6, marginBottom: 18 }}>
-        Verified courses to close your skill gaps.
+        {t("Short guides from Sumaiya, plus verified courses to close skill gaps.", "Miongozo mifupi ya Sumaiya, pamoja na kozi za kuziba mapengo ya ujuzi.")}
+      </Text>
+
+      {/* Sumaiya's own guides */}
+      <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase", marginBottom: 10 }}>
+        {t("Guides from Sumaiya", "Miongozo ya Sumaiya")}
+      </Text>
+      <View style={{ gap: 10, marginBottom: 24 }}>
+        {GUIDES.map((g, i) => {
+          const locked = g.tier === "premium" && !premium;
+          return (
+            <Stagger key={g.id} index={i} step={35}>
+              <Pressable
+                onPress={() => {
+                  haptics.selection();
+                  if (locked) setShowPremium(true);
+                  else navigation.navigate("Guide", { id: g.id });
+                }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: 14,
+                  borderRadius: 14,
+                  backgroundColor: c.bgElevated,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  opacity: locked ? 0.7 : 1,
+                }}
+              >
+                <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "16", alignItems: "center", justifyContent: "center" }}>
+                  <Icon name={g.icon} size={18} color={c.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>{g.title[lang]}</Text>
+                  <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
+                    {g.minutes} {t("min", "dakika")}
+                    {g.tier === "premium" ? ` · ${t("Premium", "Premium")}` : ""}
+                  </Text>
+                </View>
+                <Icon name={locked ? "lock" : "chevron-right"} size={16} color={c.textMuted} />
+              </Pressable>
+            </Stagger>
+          );
+        })}
+      </View>
+
+      <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase", marginBottom: 10 }}>
+        {t("Courses", "Kozi")}
       </Text>
 
       {/* Search */}
@@ -94,7 +150,7 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
         <TextInput
           value={query}
           onChangeText={setQuery}
-          placeholder="Search courses"
+          placeholder={t("Search courses", "Tafuta kozi")}
           placeholderTextColor={c.textMuted}
           selectionColor={c.accent}
           style={{ flex: 1, paddingVertical: 12, fontSize: 15, color: c.text }}
@@ -122,7 +178,7 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
       >
         {freeOnly ? <Icon name="check" size={13} color={c.accent} /> : null}
         <Text style={{ color: freeOnly ? c.accent : c.textBody, fontWeight: "700", fontSize: 12.5 }}>
-          Free only
+          {t("Free only", "Za bure tu")}
         </Text>
       </Pressable>
 
@@ -133,13 +189,13 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
           <SkeletonCard />
         </>
       ) : error ? (
-        <EmptyState icon="alert-triangle" title="Couldn't load courses" body={error} actionLabel="Retry" onAction={load} />
+        <EmptyState icon="alert-triangle" title={t("Couldn't load courses", "Imeshindwa kupakia kozi")} body={error} actionLabel={t("Retry", "Jaribu tena")} onAction={load} />
       ) : filtered.length === 0 ? (
-        <EmptyState icon="search" title="Nothing matches" body="Try a different search or turn off the free-only filter." />
+        <EmptyState icon="search" title={t("Nothing matches", "Hakuna kinacholingana")} body={t("Try a different search or turn off the free-only filter.", "Jaribu utafutaji mwingine au zima kichujio cha za bure tu.")} />
       ) : (
         <>
           <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", marginBottom: 10 }}>
-            {filtered.length} course{filtered.length !== 1 ? "s" : ""}
+            {filtered.length} {filtered.length === 1 ? t("course", "kozi") : t("courses", "kozi")}
           </Text>
           {filtered.map((r, i) => (
             <Stagger key={r.id} index={i} step={35}>
@@ -158,12 +214,12 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
                     }}
                   >
                     <Text style={{ color: r.free ? c.success : c.warning, fontSize: 10.5, fontWeight: "700" }}>
-                      {r.free ? "FREE" : "PAID"}
+                      {r.free ? t("FREE", "BURE") : t("PAID", "MALIPO")}
                     </Text>
                   </View>
                 </View>
                 <Button
-                  label="Open course"
+                  label={t("Open course", "Fungua kozi")}
                   variant="secondary"
                   size="sm"
                   rightIcon={<Icon name="external-link" size={14} color={c.text} />}
@@ -177,6 +233,7 @@ export function LearningHubScreen({ navigation }: { navigation: any }) {
           ))}
         </>
       )}
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="courses" />
     </Screen>
   );
 }

@@ -107,4 +107,13 @@ describe("matchJd", () => {
     expect(res.matched).toEqual(expect.arrayContaining(["warehouse", "forklift", "inventory"]));
     expect(res.missing).toEqual(expect.arrayContaining(["sap"]));
   });
+
+  it("matches inflected words and two-word phrases", () => {
+    const jd = "Seeking someone with strong stock control and experience managing dispatch teams.";
+    const res = matchJd(strong, jd);
+    // CV says "Stock control" (phrase) and "running ... dispatch" (managing→manag stem)
+    expect(res.matched).toEqual(expect.arrayContaining(["stock control"]));
+    // no junk phrases spanning the full stop / comma
+    expect(res.matched.concat(res.missing).some((k) => k.includes("."))).toBe(false);
+  });
 });

@@ -8,6 +8,7 @@ import {
   deleteApplication,
   type Application,
 } from "../lib/applications-store";
+import { reportError } from "../lib/reporting";
 
 export function useApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -17,7 +18,7 @@ export function useApplications() {
     try {
       setApplications(await listApplications());
     } catch (e) {
-      console.error("applications load failed", e);
+      reportError(e, { scope: "applications.load" });
     } finally {
       setLoading(false);
     }

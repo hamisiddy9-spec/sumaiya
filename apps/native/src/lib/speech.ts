@@ -19,6 +19,9 @@ export interface UseSpeech {
   stop: () => void;
   speaking: boolean;
   supported: boolean;
+  /** false when this text is Swahili and the device has no Swahili voice —
+   *  the UI can then dim/hide the read-aloud control instead of it no-op'ing. */
+  speakable: (text: string) => boolean;
 }
 
 const SW_MARKERS = [
@@ -82,5 +85,13 @@ export function useSpeech(): UseSpeech {
     [supported, hasSwVoice],
   );
 
-  return { speak, stop, speaking, supported };
+  const speakable = useCallback(
+    (text: string) => {
+      if (!supported || !text.trim()) return false;
+      return looksSwahili(text) ? hasSwVoice : true;
+    },
+    [supported, hasSwVoice],
+  );
+
+  return { speak, stop, speaking, supported, speakable };
 }

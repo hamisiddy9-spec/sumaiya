@@ -7,12 +7,23 @@
 import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
-import * as WebBrowser from "expo-web-browser";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
-// Required once at module load for the Google OAuth browser session to
-// resolve cleanly (no-op on native beyond registering the dismiss handler;
-// matters on web).
-WebBrowser.maybeCompleteAuthSession();
+// The Google Cloud **Web** OAuth client ID (same one configured in Supabase →
+// Auth → Providers → Google). Public by design — safe to ship in the bundle.
+// The native library needs it as `webClientId` to mint an ID token Supabase
+// will accept via signInWithIdToken().
+export const GOOGLE_WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ??
+  "811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com";
+
+// Configure once at module load. No browser, no redirect — signIn() shows the
+// OS account-picker sheet and returns an ID token.
+GoogleSignin.configure({
+  webClientId: GOOGLE_WEB_CLIENT_ID,
+  // We only need identity + email for account creation.
+  scopes: ["email", "profile"],
+});
 
 const supabaseUrl =
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "https://ayczgaddnufdxnhizpcr.supabase.co";

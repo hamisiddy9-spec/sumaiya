@@ -1,148 +1,194 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { useAuthContext } from "../../contexts/auth-context";
 import { Button, Screen, TextField, haptics, useThemeColors } from "../../components/ui";
-import { Icon } from "../../components/icon";
 import { GoogleButton } from "./google-button";
 import { AuthErrorBanner } from "./auth-error-banner";
+import { useLang } from "../../lib/i18n";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "SignIn">;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function SignInScreen({ navigation }: Props) {
+export function SignInScreen(_props: Props) {
   const c = useThemeColors();
-  const { loading, error, signIn, signInWithGoogle, clearError } = useAuthContext();
+  const { t } = useLang();
+  const { loading, error, sendCode, verifyCode, signInWithGoogle, clearError } = useAuthContext();
 
+  const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
-  const passwordRef = useRef<TextInput>(null);
+  const [code, setCode] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const emailError =
-    touched.email && !EMAIL_RE.test(email.trim()) ? "Enter a valid email address" : null;
-  const passwordError =
-    touched.password && password.length === 0 ? "Enter your password" : null;
+    emailTouched && !EMAIL_RE.test(email.trim()) ? t("Enter a valid email address", "Weka barua pepe sahihi") : null;
 
-  async function handleSignIn() {
-    setTouched({ email: true, password: true });
-    if (!EMAIL_RE.test(email.trim()) || password.length === 0) {
+  async function requestCode() {
+    setEmailTouched(true);
+    if (!EMAIL_RE.test(email.trim())) {
+      haptics.error();
+      return;
+    }
+    clearError();
+    setSending(true);
+    try {
+      await sendCode(email.trim());
+      haptics.selection();
+      setStep("code");
+    } catch {
+      /* surfaced via context error */
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function confirmCode() {
+    if (code.replace(/\D/g, "").length < 6) {
       haptics.error();
       return;
     }
     clearError();
     try {
-      await signIn(email.trim(), password);
+      await verifyCode(email.trim(), code);
+      haptics.success();
+      // The root navigator swaps to the app once the session lands.
     } catch {
       /* surfaced via context error */
     }
   }
 
-  return (
-    <Screen
-      footer={
-        <View style={{ flexDirection: "row", justifyContent: "center", gap: 5 }}>
-          <Text style={{ color: c.textBody }}>Don&apos;t have an account?</Text>
-          <Pressable
-            onPress={() => {
-              haptics.selection();
-              clearError();
-              navigation.navigate("SignUp");
-            }}
-            hitSlop={8}
-          >
-            <Text style={{ color: c.accent, fontWeight: "700" }}>Sign up</Text>
-          </Pressable>
-        </View>
-      }
-    >
-      <View style={{ marginTop: 20, marginBottom: 28 }}>
-        <Text style={{ color: c.text, fontSize: 32, fontWeight: "800", letterSpacing: -0.5 }}>
-          Welcome back
-        </Text>
-        <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
-          Sign in to pick up where you left off.
-        </Text>
-      </View>
+  if (step === "code") {
+    return (
+      <Screen>
+        <Animated.View entering={FadeInDown.duration(320)} style={{ marginTop: 20, marginBottom: 28 }}>
+          <Text style={{ color: c.text, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 }}>
+            {t("Enter your code", "Weka msimbo")}
+          </Text>
+          <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
+            {t("We sent a 6-digit code to", "Tumetuma msimbo wa tarakimu 6 kwa")} {email}
+          </Text>
+        </Animated.View>
 
-      <AuthErrorBanner error={error} onDismiss={clearError} />
+        <AuthErrorBanner error={error} onDismiss={clearError} />
 
-      <View style={{ gap: 14 }}>
-        <TextField
-          label="Email"
-          leftIcon="mail"
-          value={email}
-          onChangeText={(t) => {
-            setEmail(t);
-            if (error) clearError();
+        <TextInput
+          value={code}
+          onChangeText={(x) => setCode(x.replace(/\D/g, "").slice(0, 6))}
+          keyboardType="number-pad"
+          autoComplete="one-time-code"
+          textContentType="oneTimeCode"
+          autoFocus
+          maxLength={6}
+          placeholder="••••••"
+          placeholderTextColor={c.textMuted}
+          style={{
+            fontSize: 30,
+            fontWeight: "800",
+            letterSpacing: 12,
+            textAlign: "center",
+            color: c.text,
+            borderWidth: 1,
+            borderColor: c.border,
+            borderRadius: 14,
+            paddingVertical: 14,
+            backgroundColor: c.bg,
+            marginBottom: 18,
           }}
-          onBlur={() => setTouched((s) => ({ ...s, email: true }))}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-          textContentType="emailAddress"
-          returnKeyType="next"
-          onSubmitEditing={() => passwordRef.current?.focus()}
-          editable={!loading}
         />
 
-        <TextField
-          ref={passwordRef}
-          label="Password"
-          leftIcon="lock"
-          password
-          value={password}
-          onChangeText={(t) => {
-            setPassword(t);
-            if (error) clearError();
-          }}
-          onBlur={() => setTouched((s) => ({ ...s, password: true }))}
-          error={passwordError}
-          autoComplete="password"
-          textContentType="password"
-          returnKeyType="go"
-          onSubmitEditing={handleSignIn}
-          editable={!loading}
+        <Button
+          label={t("Sign in", "Ingia")}
+          onPress={confirmCode}
+          loading={loading}
+          size="lg"
+          disabled={code.replace(/\D/g, "").length < 6}
         />
 
         <Pressable
           onPress={() => {
             haptics.selection();
             clearError();
-            navigation.navigate("ForgotPassword");
+            setCode("");
+            setStep("email");
           }}
           hitSlop={8}
-          style={{ alignSelf: "flex-end" }}
+          style={{ alignSelf: "center", marginTop: 18 }}
         >
-          <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "600" }}>
-            Forgot password?
+          <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+            {t("Use a different email", "Tumia barua pepe nyingine")}
           </Text>
         </Pressable>
+      </Screen>
+    );
+  }
 
-        <Button label="Sign in" onPress={handleSignIn} loading={loading} size="lg" />
-      </View>
+  return (
+    <Screen
+      footer={
+        <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
+          {t(
+            "First time? The same code creates your account.",
+            "Ni mara ya kwanza? Msimbo huohuo unatengeneza akaunti yako.",
+          )}
+        </Text>
+      }
+    >
+      <Animated.View entering={FadeInDown.duration(360)} style={{ marginTop: 20, marginBottom: 28 }}>
+        <Text style={{ color: c.text, fontSize: 32, fontWeight: "800", letterSpacing: -0.5 }}>
+          {t("Sign in to Sumaiya", "Ingia Sumaiya")}
+        </Text>
+        <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
+          {t("No password — we'll email you a 6-digit code.", "Hakuna nywila — tutakutumia msimbo wa tarakimu 6.")}
+        </Text>
+      </Animated.View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 22 }}>
-        <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
-        <Text style={{ color: c.textMuted, fontSize: 12.5 }}>or</Text>
-        <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
-      </View>
+      <AuthErrorBanner error={error} onDismiss={clearError} />
 
-      <GoogleButton
-        label="Continue with Google"
-        disabled={loading}
-        onPress={async () => {
-          clearError();
-          try {
-            await signInWithGoogle();
-          } catch {
-            /* surfaced via context */
-          }
-        }}
-      />
+      <Animated.View entering={FadeIn.delay(140).duration(420)} style={{ gap: 14 }}>
+        <TextField
+          label={t("Email", "Barua pepe")}
+          leftIcon="mail"
+          value={email}
+          onChangeText={(x) => {
+            setEmail(x);
+            if (error) clearError();
+          }}
+          onBlur={() => setEmailTouched(true)}
+          error={emailError}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          textContentType="emailAddress"
+          returnKeyType="go"
+          onSubmitEditing={requestCode}
+          editable={!sending}
+        />
+
+        <Button label={t("Send me a code", "Nitumie msimbo")} onPress={requestCode} loading={sending} size="lg" />
+
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 22 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+          <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{t("or", "au")}</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+        </View>
+
+        <GoogleButton
+          label={t("Continue with Google", "Endelea na Google")}
+          disabled={sending}
+          onPress={async () => {
+            clearError();
+            try {
+              await signInWithGoogle();
+            } catch {
+              /* surfaced via context */
+            }
+          }}
+        />
+      </Animated.View>
     </Screen>
   );
 }

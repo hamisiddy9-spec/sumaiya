@@ -1,5 +1,5 @@
 import "../../global.css";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
@@ -8,15 +8,20 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { getSecureItem, offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
+import { reportError } from "../lib/reporting";
 import { AuthProvider } from "../contexts/auth-context";
 import { LangProvider } from "../lib/i18n";
 import { RootNavigator } from "../navigation/root-navigator";
 import { UpdatePrompt } from "../components/update-prompt";
+import { ErrorBoundary } from "../components/error-boundary";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { setColorScheme } = useColorScheme();
+  const [ready, setReady] = useState(false);
+  // Bump to force a full re-mount after an ErrorBoundary reset.
+  const [bootKey, setBootKey] = useState(0);
 
   useEffect(() => {
     async function prepare() {
@@ -35,7 +40,7 @@ export default function RootLayout() {
         try {
           await offlineStorage.init();
         } catch (dbError) {
-          console.error("offlineStorage init failed:", dbError);
+          reportError(dbError, { scope: "offlineStorage.init" });
         }
 
         // Apply an explicit dark-mode choice from Settings before first
@@ -47,6 +52,7 @@ export default function RootLayout() {
       } catch (e) {
         console.warn("Font loading error:", e);
       } finally {
+        setReady(true);
         SplashScreen.hideAsync();
       }
     }
@@ -54,16 +60,23 @@ export default function RootLayout() {
     prepare();
   }, [setColorScheme]);
 
+  // Hold the React tree behind the native splash until the SQLite cache is open
+  // and the theme choice is applied — so no screen queries an uninitialised DB
+  // and there's no light/dark flash on launch.
+  if (!ready) return null;
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AuthProvider apiClient={apiClient}>
-          <LangProvider>
-            <RootNavigator />
-            <UpdatePrompt />
-            <StatusBar />
-          </LangProvider>
-        </AuthProvider>
+        <ErrorBoundary key={bootKey} onReset={() => setBootKey((k) => k + 1)}>
+          <AuthProvider apiClient={apiClient}>
+            <LangProvider>
+              <RootNavigator />
+              <UpdatePrompt />
+              <StatusBar />
+            </LangProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

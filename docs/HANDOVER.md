@@ -142,6 +142,20 @@ and **`https://templatehub.pro`** (the domain is attached to this project).
    distributable: `cd apps/native && npx eas login && npx eas init &&
    npx eas build -p android --profile preview` (your Expo account; the build
    runs on Expo's cloud). Testers reinstall once — the package id changed.
+   **`eas init` also writes the `extra.eas.projectId`** that push registration
+   (`apps/native/src/lib/push.ts`) waits for — until then push is a clean
+   no-op. After that you still need a **sender**: a Vercel cron / event handler
+   that reads the `deviceToken` table and POSTs to
+   `https://exp.host/--/api/v2/push/send`. Decide the triggers first
+   (ATS-passed, job matches, weekly guide — see `docs/RESEARCH_2026-09-10.md`).
+   Native tap-routing already handles `{ data: { screen, params } }`.
+6a. **Deploy the branch `feat/interaction-model`** (after review) — it carries
+   `POST /api/mobile/build-cv` and the assistant prompt fixes; the native
+   chat→CV flow and "Sumaiya's verdict" are dead until the web ships them.
+6b. **Billing** — `apps/native/src/lib/entitlements.ts` gates all premium
+   (templates, deep guides, verdict) on a local flag that's always `false`.
+   Swap it for a server check + Pesapal/M-Pesa checkout. `PremiumSheet`'s
+   "notify me" writes a local waitlist flag only.
 7. **Optional infra** (all no-op until set):
    - `VAPID_PUBLIC_KEY/PRIVATE_KEY/SUBJECT` — web push
      (`npx web-push generate-vapid-keys`).

@@ -63,6 +63,7 @@ export function Button({
     <Animated.View style={[animStyle, fullWidth ? { alignSelf: "stretch" } : { alignSelf: "flex-start" }]}>
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel={label}
         accessibilityState={{ disabled: isDisabled, busy: loading }}
         disabled={isDisabled}
         onPressIn={() => {

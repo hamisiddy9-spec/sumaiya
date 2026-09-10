@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { offlineStorage } from "@sumaiya/utils";
 import { retryAsync, sleep } from "@sumaiya/utils";
-import type { SyncOperation } from "@sumaiya/types";
+import type { CV, SyncOperation } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
+import { reportError } from "../lib/reporting";
 
 interface SyncStatus {
   isSyncing: boolean;
@@ -16,7 +17,7 @@ interface MobileSyncQueueItem {
   id: string;
   cvId: string;
   operation: SyncOperation;
-  data: any;
+  data?: Partial<CV>;
   timestamp: number;
   retries: number;
   lastError?: string;
@@ -36,7 +37,7 @@ export function useOfflineSync() {
         const queue = await offlineStorage.getSyncQueue();
         setStatus(prev => ({ ...prev, pendingCount: queue.length }));
       } catch (err) {
-        console.error('Failed to init pending count:', err);
+        reportError(err, { scope: 'offlineSync.initCount' });
       }
     };
     initPendingCount();
@@ -63,12 +64,21 @@ export function useOfflineSync() {
               // idempotent instead of creating duplicates.
               const op = item.operation as SyncOperation;
 
-              if (op === "create_cv" && item.data) {
-                await apiClient.createCV({ ...item.data, clientId: item.cvId });
-              } else if (op === "update_cv" && item.data) {
-                await apiClient.updateCV(item.cvId, item.data);
+              if ((op === "create_cv" || op === "update_cv") && item.data) {
+                if (item.cvId.startsWith("m_")) {
+                  // Already synced once — it has a real server id. PUT by id.
+                  await apiClient.updateCV(item.cvId, item.data);
+                } else {
+                  // First sync (or an edit before the first sync landed):
+                  // POST /api/cv with the local id as clientId — the server
+                  // treats it as an idempotent upsert keyed by (userId,
+                  // clientId), so a create and a later edit both land on the
+                  // same row instead of the old PUT /api/cv/<local-id> 404.
+                  await apiClient.createCV({ ...item.data, clientId: item.cvId });
+                }
               } else if (op === "delete_cv") {
-                await apiClient.deleteCVByClientId(item.cvId);
+                if (item.cvId.startsWith("m_")) await apiClient.deleteCV(item.cvId);
+                else await apiClient.deleteCVByClientId(item.cvId);
               } else {
                 throw new Error(`Unsupported sync operation: ${op}`);
               }
@@ -89,6 +99,7 @@ export function useOfflineSync() {
           // Give up after 4 retries (total time: 2s + 4s + 8s + 16s = 30s)
           if (item.retries >= 3) {
             await offlineStorage.removeSyncQueueItem(item.id);
+            reportError(error, { scope: "offlineSync.giveUp", op: item.operation, cvId: item.cvId });
             setStatus((prev) => ({
               ...prev,
               errors: [...prev.errors, `Failed to sync: ${msg}`],
@@ -120,7 +131,7 @@ export function useOfflineSync() {
     async (
       operation: SyncOperation,
       itemId: string,
-      data?: any
+      data?: Partial<CV>
     ) => {
       const item: MobileSyncQueueItem = {
         id: `${operation}-${itemId}-${Date.now()}`,
