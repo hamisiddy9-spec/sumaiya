@@ -5,7 +5,7 @@
  *
  *   image      → /api/mobile/ocr (tesseract, same engine as the web scanner)
  *   PDF        → /api/tools/extract-text (unpdf)
- *   .doc/.docx → not supported yet — tell the user to export a PDF
+ *   .docx      → /api/tools/extract-text (mammoth); old .doc → ask for .docx/PDF
  *   link       → left for the server turn to fetch
  */
 // SDK 54+ moved readAsStringAsync to the legacy entrypoint — the new-API
@@ -87,11 +87,23 @@ export async function extractAttachment(a: Attachment): Promise<Partial<Attachme
     }
 
     if (a.kind === "document" && isWord(a)) {
-      return {
-        extractError:
-          "Word files don't extract cleanly on the phone yet. Open it, copy the text and paste it here — or save it as a PDF and resend.",
-        extracting: false,
-      };
+      const isOldDoc = /\.doc$/i.test(a.name) && !/\.docx$/i.test(a.name);
+      if (isOldDoc) {
+        return {
+          extractError:
+            "That's an old .doc file — open it and save it as .docx or a PDF, then resend.",
+          extracting: false,
+        };
+      }
+      const { text } = await apiClient.extractWordText({
+        uri: a.uri,
+        name: a.name,
+        type: a.mimeType,
+      });
+      const clean = (text || "").trim();
+      return clean
+        ? { extractedText: clean.slice(0, MAX_CHARS), extracting: false }
+        : { extractError: "That Word file came through with no readable text — paste it here.", extracting: false };
     }
 
     if (a.kind === "document") {

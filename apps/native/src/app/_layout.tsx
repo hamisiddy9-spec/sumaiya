@@ -1,5 +1,7 @@
 import "../../global.css";
 import React, { useEffect, useState } from "react";
+import { LogBox } from "react-native";
+import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
@@ -16,6 +18,16 @@ import { UpdatePrompt } from "../components/update-prompt";
 import { ErrorBoundary } from "../components/error-boundary";
 
 SplashScreen.preventAutoHideAsync();
+
+// Keep Reanimated's warnings but drop strict render-phase nags — several of our
+// screens legitimately read a shared value to seed initial layout.
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
+
+// Fabric + react-native-screens 4.26 race: during a stack transition Reanimated
+// can briefly target a view that `screens` has already detached, logging
+// "synchronouslyUpdateUIProps failed". The transition still completes correctly;
+// there's nothing to fix on our side while the SDK-57 versions stay pinned.
+LogBox.ignoreLogs(["synchronouslyUpdateUIProps"]);
 
 export default function RootLayout() {
   const { setColorScheme } = useColorScheme();

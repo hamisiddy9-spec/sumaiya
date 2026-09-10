@@ -34,6 +34,15 @@ function isPdfFile(file: File): boolean {
   );
 }
 
+function isWordFile(file: File): boolean {
+  const t = file.type.toLowerCase();
+  return (
+    t === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+    t === "application/msword" ||
+    /\.docx?$/i.test(file.name)
+  );
+}
+
 /**
  * Parse page range strings like "1,3,5-7" into an array of 0-indexed page numbers.
  * Returns sorted unique page numbers.
@@ -454,21 +463,51 @@ writer.write(sys.argv[2])
     }
   })
 
-  // ── Extract Text from PDF ────────────────────────────────────────────────
+  // ── Extract Text from PDF or Word (.doc/.docx) ───────────────────────────
   .post("/extract-text", async (c) => {
     const limited = await rateLimited(c,"extract-text");
     if (limited) return limited;
 
     try {
       const formData = await c.req.parseBody({ all: true }) as Record<string, unknown>;
-      const pdfFile = firstPdf(formData);
-      if (!pdfFile) return c.json({ error: "Please upload a PDF file." }, 400);
+      const files = collectFiles(formData);
+      const pdfFile = files.find(isPdfFile) ?? null;
+      const wordFile = pdfFile ? null : (files.find(isWordFile) ?? null);
 
-      if (pdfFile.size > MAX_PDF_BYTES) {
+      if (!pdfFile && !wordFile) {
+        return c.json({ error: "Please upload a PDF or Word file." }, 400);
+      }
+
+      // Word (.docx): mammoth is pure JS (jszip under the hood) so it runs on
+      // the serverless node runtime. Old binary .doc is not supported.
+      if (wordFile) {
+        if (wordFile.size > MAX_PDF_BYTES) {
+          return c.json({ error: "That file is too large (max 4 MB)." }, 413);
+        }
+        if (/\.doc$/i.test(wordFile.name) && !/\.docx$/i.test(wordFile.name)) {
+          return c.json(
+            { error: "Old .doc files aren't supported — open it and save as .docx or PDF." },
+            422,
+          );
+        }
+        const buffer = Buffer.from(await wordFile.arrayBuffer());
+        const mammoth = await import("mammoth");
+        const lib = (mammoth as { extractRawText?: unknown }).extractRawText
+          ? (mammoth as typeof import("mammoth"))
+          : ((mammoth as { default: typeof import("mammoth") }).default);
+        const { value } = await lib.extractRawText({ buffer });
+        const clean = (value || "").trim();
+        if (!clean) {
+          return c.json({ error: "That Word file has no readable text." }, 422);
+        }
+        return c.json({ success: true, text: clean, pages: 1 });
+      }
+
+      if (pdfFile!.size > MAX_PDF_BYTES) {
         return c.json({ error: "That PDF is too large (max 4 MB). Try a smaller, text-based file." }, 413);
       }
 
-      const bytes = new Uint8Array(await pdfFile.arrayBuffer());
+      const bytes = new Uint8Array(await pdfFile!.arrayBuffer());
 
       // unpdf ships a serverless build of pdfjs — no DOMMatrix stub, no worker.
       const { extractText, getDocumentProxy } = await import("unpdf");

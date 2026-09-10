@@ -216,6 +216,21 @@ export class ApiClient {
     return { text: result.text, pages: result.pages };
   }
 
+  // Same endpoint, Word (.docx) branch — server runs mammoth. Old binary .doc
+  // returns a 422 with a "save as .docx" message.
+  async extractWordText(file: { uri: string; name: string; type?: string }): Promise<{ text: string }> {
+    const form = new FormData();
+    const type =
+      file.type ||
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    form.append("file", { uri: file.uri, name: file.name, type } as unknown as Blob);
+    const result = await this.request<{ text: string }>("/api/tools/extract-text", {
+      method: "POST",
+      body: form,
+    });
+    return { text: result.text };
+  }
+
   // ── Learning + chat (Hono /api/mobile) ────────────────────────────────────
 
   async getLearningResources(skills: string[] = []): Promise<
