@@ -15,6 +15,7 @@ import { AuthProvider } from "../contexts/auth-context";
 import { LangProvider } from "../lib/i18n";
 import { RootNavigator } from "../navigation/root-navigator";
 import { UpdatePrompt } from "../components/update-prompt";
+import { ConnectivityGate } from "../components/connectivity-gate";
 import { ErrorBoundary } from "../components/error-boundary";
 
 SplashScreen.preventAutoHideAsync();
@@ -84,6 +85,7 @@ export default function RootLayout() {
           <AuthProvider apiClient={apiClient}>
             <LangProvider>
               <RootNavigator />
+              <ConnectivityGate />
               <UpdatePrompt />
               <StatusBar />
             </LangProvider>
