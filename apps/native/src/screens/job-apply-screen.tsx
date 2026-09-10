@@ -10,6 +10,7 @@ import { Button, Screen, ScreenTitle, SectionHeader, haptics, useThemeColors } f
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useLang } from "../lib/i18n";
+import type { JobApplyScreenProps } from "../navigation/types";
 
 type Want = "cv" | "letter" | "both";
 type Result = Awaited<ReturnType<typeof apiClient.applyToJob>>;
@@ -20,7 +21,7 @@ const WANT_OPTS: { id: Want; en: string; sw: string; icon: string }[] = [
   { id: "both", en: "Both", sw: "Zote mbili", icon: "layers" },
 ];
 
-export function JobApplyScreen({ navigation, route }: { navigation: any; route?: any }) {
+export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
   const c = useThemeColors();
   const { t } = useLang();
   const { cvs, updateCV } = useCvs();

@@ -6,8 +6,9 @@ import { apiClient } from "../lib/api-client";
 import { useLang } from "../lib/i18n";
 import { Screen, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { InviteScreenProps } from "../navigation/types";
 
-export function InviteScreen({ navigation }: any) {
+export function InviteScreen({ navigation }: InviteScreenProps) {
   const c = useThemeColors();
   const { t } = useLang();
   const [data, setData] = useState<{ code: string; url: string; joined: number; activated: number } | null>(null);

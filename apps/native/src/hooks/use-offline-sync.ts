@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { offlineStorage } from "@sumaiya/utils";
 import { retryAsync, sleep } from "@sumaiya/utils";
-import type { SyncOperation } from "@sumaiya/types";
+import type { CV, SyncOperation } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
 
 interface SyncStatus {
@@ -16,7 +16,7 @@ interface MobileSyncQueueItem {
   id: string;
   cvId: string;
   operation: SyncOperation;
-  data: any;
+  data?: Partial<CV>;
   timestamp: number;
   retries: number;
   lastError?: string;
@@ -129,7 +129,7 @@ export function useOfflineSync() {
     async (
       operation: SyncOperation,
       itemId: string,
-      data?: any
+      data?: Partial<CV>
     ) => {
       const item: MobileSyncQueueItem = {
         id: `${operation}-${itemId}-${Date.now()}`,

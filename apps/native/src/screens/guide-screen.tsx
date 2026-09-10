@@ -5,11 +5,12 @@ import { getGuide } from "../lib/guides";
 import { useLang } from "../lib/i18n";
 import { Screen, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { GuideScreenProps } from "../navigation/types";
 
-export function GuideScreen({ route, navigation }: any) {
+export function GuideScreen({ route, navigation }: GuideScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
-  const guide = getGuide(route?.params?.id);
+  const guide = getGuide(route.params?.id);
 
   if (!guide) {
     return (

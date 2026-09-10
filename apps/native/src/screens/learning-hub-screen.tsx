@@ -17,6 +17,7 @@ import { useLang } from "../lib/i18n";
 import { GUIDES } from "../lib/guides";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
+import type { LearningHubScreenProps } from "../navigation/types";
 
 interface Resource {
   id: string;
@@ -26,7 +27,7 @@ interface Resource {
   free: boolean;
 }
 
-export function LearningHubScreen({ navigation }: { navigation: any }) {
+export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { premium } = useEntitlements();

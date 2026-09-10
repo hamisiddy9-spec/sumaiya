@@ -6,7 +6,8 @@ import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { shareCV } from "../services/share";
-import type { CV, CVData, Education, Experience, Skill } from "@sumaiya/types";
+import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
+import type { CvEditorScreenProps } from "../navigation/types";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
@@ -64,7 +65,7 @@ function Section({
   );
 }
 
-export function CvEditorScreen({ route, navigation }: { route: any; navigation: any }) {
+export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { templateId, cvId: initialCvId, initialData } = route.params || {};
@@ -138,8 +139,8 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
     setData((d) => ({ ...d, ...p }));
     setDirty(true);
   };
-  const patchPersonal = (k: string, v: string) => {
-    setData((d) => ({ ...d, personalInfo: { ...(d.personalInfo as any), [k]: v } }));
+  const patchPersonal = (k: keyof PersonalInfo, v: string) => {
+    setData((d) => ({ ...d, personalInfo: { ...d.personalInfo, [k]: v } }));
     setDirty(true);
   };
 
@@ -328,7 +329,7 @@ export function CvEditorScreen({ route, navigation }: { route: any; navigation: 
       {/* Personal */}
       <Section title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen>
         <TextField label={t("Full name", "Jina kamili")} value={data.personalInfo?.fullName || ""} onChangeText={(t) => patchPersonal("fullName", t)} autoCapitalize="words" />
-        <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "mf. Mhandisi wa Programu")} value={(data.personalInfo as any)?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
+        <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "mf. Mhandisi wa Programu")} value={data.personalInfo?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
         <TextField label={t("Email", "Barua pepe")} value={data.personalInfo?.email || ""} onChangeText={(t) => patchPersonal("email", t)} keyboardType="email-address" autoCapitalize="none" />
         <TextField label={t("Phone", "Simu")} value={data.personalInfo?.phone || ""} onChangeText={(t) => patchPersonal("phone", t)} keyboardType="phone-pad" />
         <TextField label={t("Location", "Eneo")} value={data.personalInfo?.location || ""} onChangeText={(t) => patchPersonal("location", t)} />

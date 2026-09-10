@@ -29,6 +29,7 @@ import { useSpeech } from "../lib/speech";
 import { useLang, greetingFor } from "../lib/i18n";
 import { resolveAttachment, linkAttachment } from "../lib/attachments";
 import { haptics, useThemeColors, PromptModal } from "../components/ui";
+import type { SumaiyaChatScreenProps } from "../navigation/types";
 
 function TypingDot({ i }: { i: number }) {
   const c = useThemeColors();
@@ -49,7 +50,7 @@ function TypingDot({ i }: { i: number }) {
   return <Animated.View style={[style, { width: 7, height: 7, borderRadius: 4, backgroundColor: c.textMuted }]} />;
 }
 
-export function SumaiyaChatScreen({ navigation, route }: any) {
+export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv } =

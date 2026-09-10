@@ -6,6 +6,7 @@ import { STATUS_META, type AppStatus } from "../lib/applications-store";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, Screen, ScreenTitle, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { ApplicationsScreenProps } from "../navigation/types";
 
 const STATUS_TINT: Record<AppStatus, (c: any) => string> = {
   saved: (c) => c.textMuted,
@@ -24,7 +25,7 @@ function timeAgo(ts: number, sw: boolean): string {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function ApplicationsScreen({ navigation }: any) {
+export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";

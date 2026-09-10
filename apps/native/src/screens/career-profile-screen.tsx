@@ -7,8 +7,9 @@ import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { TemplateThumb } from "../components/cv/template-thumb";
 import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import type { CareerProfileScreenProps } from "../navigation/types";
 
-export function CareerProfileScreen({ navigation }: any) {
+export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const [p, setP] = useState<CareerProfile>(EMPTY_PROFILE);

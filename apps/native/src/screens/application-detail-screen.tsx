@@ -12,8 +12,9 @@ import { matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { ApplicationDetailScreenProps } from "../navigation/types";
 
-export function ApplicationDetailScreen({ route, navigation }: any) {
+export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";

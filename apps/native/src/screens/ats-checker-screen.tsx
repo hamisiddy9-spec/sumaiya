@@ -10,6 +10,7 @@ import { PremiumSheet } from "../components/premium-sheet";
 import { apiClient } from "../lib/api-client";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { AtsCheckerScreenProps } from "../navigation/types";
 
 function ScoreRing({ score, color, label }: { score: number; color: string; label: string }) {
   const c = useThemeColors();
@@ -28,7 +29,7 @@ function ScoreRing({ score, color, label }: { score: number; color: string; labe
   );
 }
 
-export function AtsCheckerScreen({ route, navigation }: any) {
+export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";

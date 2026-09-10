@@ -11,6 +11,7 @@ import { apiClient } from "../../lib/api-client";
 import { useLang } from "../../lib/i18n";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { Icon } from "../../components/icon";
+import type { ProfileScreenProps } from "../../navigation/types";
 import {
   Button,
   ListGroupLabel,
@@ -27,7 +28,7 @@ function initials(name?: string | null, email?: string | null): string {
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || src[0].toUpperCase();
 }
 
-export function ProfileScreen({ navigation }: any) {
+export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const c = useThemeColors();
   const { user, signOut } = useAuthContext();
   const { premium } = useEntitlements();

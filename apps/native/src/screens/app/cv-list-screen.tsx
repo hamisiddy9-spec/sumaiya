@@ -16,6 +16,7 @@ import {
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
+import type { CvListScreenProps } from "../../navigation/types";
 
 function relativeDate(d: string | Date, sw: boolean): string {
   const date = new Date(d);
@@ -28,7 +29,7 @@ function relativeDate(d: string | Date, sw: boolean): string {
   return date.toLocaleDateString(sw ? "sw-TZ" : "en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function CvListScreen({ navigation }: any) {
+export function CvListScreen({ navigation }: CvListScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";

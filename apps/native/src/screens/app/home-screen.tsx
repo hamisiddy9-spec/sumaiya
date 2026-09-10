@@ -19,6 +19,7 @@ import {
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
+import type { HomeScreenProps } from "../../navigation/types";
 
 function greeting(lang: Lang): string {
   const h = new Date().getHours();
@@ -50,7 +51,7 @@ function relativeDate(d: string | Date, lang: Lang): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-export function HomeScreen({ navigation }: any) {
+export function HomeScreen({ navigation }: HomeScreenProps) {
   const c = useThemeColors();
   const { user } = useAuthContext();
   const { t, lang } = useLang();
