@@ -269,7 +269,7 @@ export function ScanScreen() {
       >
         <SumaiyaMark size={16} state="static" color={c.accent} />
         <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-          {t("Photos and PDFs are read for you. Word files aren't supported yet — save them as PDF first, or paste the text to Sumaiya.", "Picha na PDF zinasomwa kwa ajili yako. Faili za Word bado hazitumiki — zihifadhi kama PDF kwanza, au bandika maandishi kwa Sumaiya.")}
+          {t("Photos, PDFs and Word (.docx) files are read for you. Old .doc files: open and Save As .docx or PDF first.", "Picha, PDF na faili za Word (.docx) zinasomwa kwa ajili yako. Faili za zamani za .doc: fungua na uhifadhi kama .docx au PDF kwanza.")}
         </Text>
       </Animated.View>
     </Screen>
