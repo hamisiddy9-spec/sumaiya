@@ -231,8 +231,10 @@ export function CvPreviewCard({
               height: 26,
               borderRadius: 13,
               backgroundColor: col,
-              borderWidth: color === col ? 3 : 0,
-              borderColor: c.bgElevated,
+              // a hairline ring so a near-black swatch is still visible on the
+              // dark sheet; thicker ring marks the active one.
+              borderWidth: color === col ? 3 : 1,
+              borderColor: color === col ? c.accent : c.border,
               transform: [{ scale: color === col ? 1.15 : 1 }],
             }}
           />

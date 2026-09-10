@@ -8,12 +8,28 @@ export class OfflineStorage {
   private db: SQLite.SQLiteDatabase | null = null;
 
   async init(): Promise<void> {
-    try {
-      this.db = await SQLite.openDatabaseAsync(DB_NAME);
-      await this.createTables();
-    } catch (error) {
-      console.error("Failed to initialize offline storage:", error);
-      throw error;
+    // expo-sqlite on the New Architecture intermittently rejects the first
+    // execAsync after openDatabaseAsync with a native NullPointerException
+    // (the connection handle isn't ready yet). Retry once with a fresh
+    // connection before giving up.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        this.db = await SQLite.openDatabaseAsync(DB_NAME);
+        await this.createTables();
+        return;
+      } catch (error) {
+        try {
+          await this.db?.closeAsync();
+        } catch {
+          /* ignore */
+        }
+        this.db = null;
+        if (attempt === 1) {
+          console.error("Failed to initialize offline storage:", error);
+          throw error;
+        }
+        await new Promise((r) => setTimeout(r, 200));
+      }
     }
   }
 
