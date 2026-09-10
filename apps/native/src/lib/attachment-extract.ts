@@ -38,6 +38,17 @@ async function toOcrDataUrl(uri: string, mimeType?: string): Promise<string> {
   }
 }
 
+function extForMime(mime?: string): string | null {
+  if (!mime) return null;
+  const m = mime.toLowerCase();
+  if (m.includes("pdf")) return ".pdf";
+  if (m.includes("wordprocessingml")) return ".docx";
+  if (m.includes("msword")) return ".doc";
+  if (m.includes("rtf")) return ".rtf";
+  if (m.startsWith("text/")) return ".txt";
+  return null;
+}
+
 function isImageFile(a: Attachment): boolean {
   return /^image\//.test(a.mimeType ?? "") || /\.(jpe?g|png|webp|heic|heif|bmp|gif)$/i.test(a.name);
 }
@@ -69,10 +80,29 @@ export async function extractAttachment(a: Attachment): Promise<Partial<Attachme
       // (PDF / .docx / RTF / plain text) rather than trusting the name or MIME
       // — a share-sheet file with a junk name still reads. Local UTF-8 read is
       // the offline fallback for obvious text files.
+
+      // Re-materialise the file to a clean local path with an ASCII name before
+      // upload. Two things break the multipart POST otherwise: a filename with
+      // emoji / non-Latin characters (the "Document from Hamis Iddy😎" case —
+      // okhttp can't encode it in Content-Disposition, the server sees no
+      // file), and a content:// URI whose read grant expired after the picker
+      // sheet closed.
+      const ext =
+        (a.name?.match(/\.[A-Za-z0-9]{1,5}$/)?.[0] ?? extForMime(a.mimeType) ?? "").toLowerCase();
+      const safeName = `upload-${Date.now()}${ext || ".bin"}`;
+      let uploadUri = a.uri;
+      try {
+        const dest = `${FileSystem.cacheDirectory ?? ""}${safeName}`;
+        await FileSystem.copyAsync({ from: a.uri, to: dest });
+        uploadUri = dest;
+      } catch {
+        /* a.uri is probably already a readable file:// path — send it as-is */
+      }
+
       try {
         const { text } = await apiClient.extractDocumentText({
-          uri: a.uri,
-          name: a.name,
+          uri: uploadUri,
+          name: safeName,
           type: a.mimeType,
         });
         const clean = (text || "").trim();
@@ -87,7 +117,7 @@ export async function extractAttachment(a: Attachment): Promise<Partial<Attachme
       }
 
       if (isPlainText(a)) {
-        const text = await FileSystem.readAsStringAsync(a.uri, { encoding: "utf8" }).catch(() => "");
+        const text = await FileSystem.readAsStringAsync(uploadUri, { encoding: "utf8" }).catch(() => "");
         const clean = text.trim();
         if (clean.length > 20) return { extractedText: clean.slice(0, MAX_CHARS), extracting: false };
       }

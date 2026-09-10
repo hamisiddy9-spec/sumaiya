@@ -1,6 +1,5 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { Icon } from "../icon";
 import { Button } from "./button";
 import { useThemeColors } from "./theme";
@@ -24,11 +23,10 @@ export function EmptyState({
 }) {
   const c = useThemeColors();
   return (
-    <Animated.View
-      entering={FadeInDown.duration(300)}
-      // A single centred column. The action button stretches to the column's
-      // own width (28px inset each side) so it stays symmetric under the
-      // centred text — no alignSelf/maxWidth fight that left it off-centre.
+    // Plain View — an `entering` animation on the wrapper was leaving the
+    // action Button non-interactive on Fabric (the "buttons do nothing" empty
+    // state). A static empty state doesn't need the entrance anyway.
+    <View
       style={{ alignItems: "center", alignSelf: "stretch", paddingVertical: 40, paddingHorizontal: 28 }}
     >
       <View
@@ -62,6 +60,6 @@ export function EmptyState({
           <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>{secondaryLabel}</Text>
         </Pressable>
       ) : null}
-    </Animated.View>
+    </View>
   );
 }
