@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import type { SkillGap, ActionType } from "./chat-types";
 import { Icon } from "../icon";
 import { SumaiyaMark } from "../sumaiya-mark";
 import { haptics } from "../ui/haptics";
+import { ProgressBar } from "../ui/progress-bar";
 import { useThemeColors } from "../ui/theme";
 
 interface Props {
@@ -17,10 +17,8 @@ function Row({ skill }: { skill: SkillGap }) {
   const c = useThemeColors();
   const pct = Math.round(skill.current * 100);
   const target = Math.round(skill.required * 100);
-  const sev = skill.gap > 0.5 ? c.error : skill.gap > 0.2 ? c.warning : c.success;
-  const w = useSharedValue(0);
-  w.value = withTiming(pct, { duration: 400 });
-  const bar = useAnimatedStyle(() => ({ width: `${w.value}%` }));
+  const sevTone = skill.gap > 0.5 ? "error" : skill.gap > 0.2 ? "warning" : "success";
+  const sev = sevTone === "error" ? c.error : sevTone === "warning" ? c.warning : c.success;
 
   return (
     <View style={{ gap: 5 }}>
@@ -30,9 +28,7 @@ function Row({ skill }: { skill: SkillGap }) {
           {pct}% → {target}%
         </Text>
       </View>
-      <View style={{ height: 6, borderRadius: 3, backgroundColor: c.border, overflow: "hidden" }}>
-        <Animated.View style={[bar, { height: 6, borderRadius: 3, backgroundColor: sev }]} />
-      </View>
+      <ProgressBar value={skill.current} tone={sevTone as "error" | "warning" | "success"} />
     </View>
   );
 }

@@ -11,3 +11,4 @@ export { haptics } from "./haptics";
 export { useThemeColors, useIsDark, type ThemeColors } from "./theme";
 export { ScreenTitle } from "./screen-title";
 export { PromptModal } from "./prompt-modal";
+export { ProgressBar } from "./progress-bar";

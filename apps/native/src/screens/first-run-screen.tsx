@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,14 +9,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  FadeIn,
-  FadeInRight,
-  FadeOutLeft,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { setSecureItem } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
@@ -31,7 +24,7 @@ import {
 } from "../lib/career-fields";
 import { TemplateThumb } from "../components/cv/template-thumb";
 import { SumaiyaMark } from "../components/sumaiya-mark";
-import { Button, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, ProgressBar, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
 
@@ -121,11 +114,6 @@ export function FirstRunScreen({ onDone }: Props) {
     (recent.trim() ? 1 : 0) +
     1; // "look" always has a default
   const pct = Math.min(1, Math.max(0.12, filled / slots));
-  const bar = useSharedValue(pct);
-  useEffect(() => {
-    bar.value = withTiming(pct, { duration: 300 });
-  }, [pct, bar]);
-  const barStyle = useAnimatedStyle(() => ({ width: `${bar.value * 100}%` }));
 
   const suggestedSkills = useMemo(() => skillsForFields(fields), [fields]);
 
@@ -362,8 +350,8 @@ export function FirstRunScreen({ onDone }: Props) {
 
       {/* progress + skip */}
       <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 20, gap: 12 }}>
-        <View style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: c.border, overflow: "hidden" }}>
-          <Animated.View style={[barStyle, { height: 4, borderRadius: 2, backgroundColor: c.accent }]} />
+        <View style={{ flex: 1 }}>
+          <ProgressBar value={pct} />
         </View>
         <Pressable onPress={() => finish(true)} hitSlop={10}>
           <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Skip", "Ruka")}</Text>

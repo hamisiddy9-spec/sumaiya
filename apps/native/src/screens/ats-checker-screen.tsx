@@ -8,7 +8,7 @@ import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
 import { apiClient } from "../lib/api-client";
-import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, ProgressBar, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { AtsCheckerScreenProps } from "../navigation/types";
@@ -90,6 +90,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   };
 
   const scoreColor = (s: number) => (s >= 75 ? c.success : s >= 50 ? c.warning : c.error);
+  const scoreTone = (s: number): "success" | "warning" | "error" => (s >= 75 ? "success" : s >= 50 ? "warning" : "error");
   const statusWord = (s: number) =>
     s >= 75 ? t("ATS-ready", "Tayari kwa ATS") : s >= 50 ? t("Needs work", "Inahitaji kazi") : t("High risk", "Hatari kubwa");
 
@@ -169,6 +170,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                       {p.label}
                     </Text>
                     <Text style={{ color: scoreColor(p.score), fontSize: 20, fontWeight: "800" }}>{p.score}</Text>
+                    <ProgressBar value={p.score / 100} tone={scoreTone(p.score)} height={4} style={{ marginTop: 2 }} />
                   </View>
                 ))}
               </View>
@@ -291,6 +293,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                         {t("of the job's keywords appear on this CV", "ya maneno muhimu ya kazi yapo kwenye CV hii")}
                       </Text>
                     </View>
+                    <ProgressBar value={jdMatch.score / 100} tone={scoreTone(jdMatch.score)} />
                     {jdMatch.missing.length > 0 && (
                       <View style={{ gap: 6 }}>
                         <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700" }}>

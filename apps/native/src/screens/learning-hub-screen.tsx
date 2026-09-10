@@ -9,7 +9,7 @@ import { useCvs } from "../hooks/use-cvs";
 import { loadProfile, saveProfile, type CareerProfile } from "../lib/profile-store";
 import { computeSkillGaps, type GapResult, type SkillGap } from "../lib/skill-gaps";
 import { getSkillProgress, setSkillState, type SkillState } from "../lib/course-progress";
-import { Button, Card, EmptyState, Screen, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, Card, EmptyState, ProgressBar, Screen, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useLang } from "../lib/i18n";
@@ -264,9 +264,10 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
                 </Text>
                 <Text style={{ color: c.text, fontSize: 13, fontWeight: "800" }}>{result.readiness}% {t("ready", "tayari")}</Text>
               </View>
-              <View style={{ height: 6, borderRadius: 3, backgroundColor: c.border, overflow: "hidden" }}>
-                <View style={{ height: 6, width: `${Math.max(4, result.readiness)}%`, backgroundColor: c.accent, borderRadius: 3 }} />
-              </View>
+              <ProgressBar
+                value={Math.max(0.04, result.readiness / 100)}
+                tone={result.readiness >= 60 ? "success" : result.readiness >= 30 ? "warning" : "accent"}
+              />
             </View>
           ) : (
             <Pressable
