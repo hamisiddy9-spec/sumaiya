@@ -46,4 +46,13 @@ describe("toCvData — defensive adapter for unreliable AI parser output", () =>
     expect(cv.projects).toEqual([]);
     expect(cv.certifications).toEqual([]);
   });
+
+  it("drops a credential from skills when it's also a certification", () => {
+    const cv = toCvData({
+      skills: ["Excel", "CPA(K)", "SAP", "acca"],
+      certifications: [{ name: "CPA (K)" }, { name: "ACCA", issuer: "ACCA Global" }],
+    });
+    expect(cv.skills.map((s) => s.name)).toEqual(["Excel", "SAP"]);
+    expect(cv.certifications.map((c) => c.name)).toEqual(["CPA (K)", "ACCA"]);
+  });
 });

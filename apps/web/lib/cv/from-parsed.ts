@@ -106,6 +106,15 @@ export function toCvData(parsed: unknown): CVData {
     hobbies: typeof p.hobbies === "string" ? p.hobbies.trim() : "",
   };
 
+  // The AI sometimes lists a credential (CPA(K), ACCA, PMP…) in BOTH skills and
+  // certifications. Certifications is the right home — drop the skill twin so it
+  // doesn't render in two places.
+  if (built.certifications.length && built.skills.length) {
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const certKeys = new Set(built.certifications.map((c) => norm(c.name)));
+    built.skills = built.skills.filter((sk) => !certKeys.has(norm(sk.name)));
+  }
+
   // Graduate / first-CV: if there's no work history but there is education,
   // projects or skills, lead with those so the CV doesn't open on an empty
   // Work Experience heading. Users can still reorder in the editor.
