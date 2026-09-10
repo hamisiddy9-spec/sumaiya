@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Dimensions, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
-import type { JobRecommendation } from "@sumaiya/api-client";
+import type { JobRecommendation, MobileSignal } from "@sumaiya/api-client";
+import { signalAction, signalText } from "../../lib/signal-actions";
 import { apiClient } from "../../lib/api-client";
 import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
@@ -93,6 +95,18 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     return () => { alive = false; };
   }, []);
 
+  // Proactive nudges from Sumaiya (deterministic signal engine, server-side).
+  // Refreshed every time the tab regains focus so it reflects the latest state.
+  const [signals, setSignals] = useState<MobileSignal[]>([]);
+  useFocusEffect(
+    React.useCallback(() => {
+      let alive = true;
+      apiClient.getSignals().then((s) => { if (alive) setSignals(s); }).catch(() => {});
+      return () => { alive = false; };
+    }, []),
+  );
+  const topSignal = signals[0] ?? null;
+
   const rawName = user?.name?.trim();
   const looksLikeDevice = rawName
     ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
@@ -180,15 +194,30 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         </View>
       </Animated.View>
 
-      {/* Tip of the day — a free guide, rotated daily. */}
+      {/* From Sumaiya — a live proactive nudge when the signal engine has one,
+          otherwise a free guide rotated daily. Same slot, same treatment. */}
       {(() => {
+        const st = topSignal ? signalText(topSignal, lang) : null;
+        const act = topSignal ? signalAction(topSignal) : null;
         const freeGuides = GUIDES.filter((g) => g.tier === "free");
         const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
+
+        const onPress = () => {
+          if (topSignal && act) {
+            (navigation.navigate as (screen: string, params?: Record<string, unknown>) => void)(
+              act.target.screen,
+              act.target.params,
+            );
+          } else {
+            navigation.navigate("Guide", { id: tip.id });
+          }
+        };
+
         return (
           <Animated.View entering={FadeInDown.duration(320).delay(160)}>
             <Card
-              onPress={() => navigation.navigate("Guide", { id: tip.id })}
-              accessibilityLabel={tip.title[lang]}
+              onPress={onPress}
+              accessibilityLabel={st ? st.title : tip.title[lang]}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -203,13 +232,23 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
-                  {t("Tip from Sumaiya", "Kidokezo cha Sumaiya")}
+                  {topSignal ? t("From Sumaiya", "Kutoka kwa Sumaiya") : t("Tip from Sumaiya", "Kidokezo cha Sumaiya")}
                 </Text>
                 <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
-                  {tip.title[lang]}
+                  {st ? st.title : tip.title[lang]}
                 </Text>
+                {st ? (
+                  <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>
+                    {st.detail}
+                  </Text>
+                ) : null}
               </View>
-              <Icon name="chevron-right" size={18} color={c.accent} />
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                {act ? (
+                  <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{act.cta[lang]}</Text>
+                ) : null}
+                <Icon name="chevron-right" size={18} color={c.accent} />
+              </View>
             </Card>
           </Animated.View>
         );
