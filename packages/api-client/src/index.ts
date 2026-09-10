@@ -13,6 +13,29 @@
 import type { CV, CVData, Template, Lang } from "@sumaiya/types";
 import { TEMPLATES } from "@sumaiya/templates";
 
+export interface JobListing {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  category: string;
+  employmentType: string;
+  description: string;
+  applyUrl: string;
+  sourceName?: string;
+  applicationDeadline?: string | null;
+  createdAt?: string;
+}
+
+export interface JobRecommendation {
+  jobId: string;
+  /** 0–100 match against the user's profile / CV. */
+  score: number;
+  reason: string;
+  matchedTerms: string[];
+  job: JobListing;
+}
+
 export interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
@@ -233,6 +256,20 @@ export class ApiClient {
 
   async referralShared(channel: "whatsapp" | "link" | "copy"): Promise<void> {
     await this.request("/api/referral/shared", { method: "POST", body: JSON.stringify({ channel }) }).catch(() => {});
+  }
+
+  // ── Jobs (Hono /api/jobs) ─────────────────────────────────────────────────
+  /** The public live-jobs feed. */
+  async getJobs(): Promise<JobListing[]> {
+    return this.request<JobListing[]>("/api/jobs").catch(() => [] as JobListing[]);
+  }
+
+  /** Jobs matched to the signed-in user's Career Profile / latest CV. `score`
+   *  is the 0–100 match. Returns [] for a guest or an empty profile. */
+  async getJobRecommendations(limit = 8): Promise<JobRecommendation[]> {
+    return this.request<JobRecommendation[]>(`/api/jobs/recommendations?limit=${limit}`).catch(
+      () => [] as JobRecommendation[],
+    );
   }
 
   /** Paste a job description, get a tailored CV and/or a cover letter grounded

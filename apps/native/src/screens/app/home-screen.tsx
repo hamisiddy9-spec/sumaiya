@@ -1,7 +1,9 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Dimensions, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
+import type { JobRecommendation } from "@sumaiya/api-client";
+import { apiClient } from "../../lib/api-client";
 import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
 import { useLang, type Lang } from "../../lib/i18n";
@@ -83,6 +85,14 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     [cvs],
   );
 
+  // Top job matches for the profile — best-effort, silent on failure.
+  const [jobRecs, setJobRecs] = useState<JobRecommendation[]>([]);
+  useEffect(() => {
+    let alive = true;
+    apiClient.getJobRecommendations(3).then((r) => { if (alive) setJobRecs(r); }).catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   const rawName = user?.name?.trim();
   const looksLikeDevice = rawName
     ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
@@ -92,7 +102,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 
   const quickActions = [
     { icon: "sumaiya", label: t("Ask Sumaiya", "Uliza Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
-    { icon: "target", label: t("Tailor to a job", "Lenga kwenye kazi"), tint: "#12433D", onPress: () => navigation.navigate("JobApply") },
+    { icon: "target", label: t("Jobs for you", "Kazi kwako"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
     { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: "#12766A", onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
     { icon: "import", label: t("Import a CV", "Pakia CV"), tint: c.accent, onPress: () => navigation.navigate("ImportTab") },
@@ -213,6 +223,40 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           </Animated.View>
         );
       })()}
+
+      {/* Jobs matched to the profile */}
+      {jobRecs.length > 0 ? (
+        <Animated.View entering={FadeInDown.duration(320).delay(170)}>
+          <SectionHeader
+            title={t("Jobs for you", "Kazi kwako")}
+            actionLabel={t("See all", "Ona zote")}
+            onAction={() => navigation.navigate("Jobs")}
+          />
+          <View style={{ gap: 10 }}>
+            {jobRecs.slice(0, 2).map((r) => {
+              const tone = r.score >= 60 ? c.success : r.score >= 35 ? c.warning : c.textMuted;
+              return (
+                <Pressable
+                  key={r.jobId}
+                  onPress={() => { haptics.light(); navigation.navigate("Jobs"); }}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated }}
+                >
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }} numberOfLines={1}>{r.job.title}</Text>
+                    <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+                      {[r.job.company, r.job.location].filter(Boolean).join(" · ")}
+                    </Text>
+                  </View>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: tone + "1f", borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
+                    <Icon name="target" size={11} color={tone} />
+                    <Text style={{ color: tone, fontSize: 11.5, fontWeight: "800" }}>{r.score}%</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        </Animated.View>
+      ) : null}
 
       {/* Recent CVs */}
       <Animated.View entering={FadeInDown.duration(320).delay(180)}>

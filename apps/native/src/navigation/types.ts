@@ -8,6 +8,7 @@ export type HomeStackParamList = {
   LearningHub: undefined;
   Guide: { id: string };
   Invite: undefined;
+  Jobs: undefined;
   JobApply: { jd?: string } | undefined;
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
@@ -86,6 +87,7 @@ export type AtsCheckerScreenProps = Screen<HomeStackParamList, "AtsChecker">;
 export type LearningHubScreenProps = Screen<HomeStackParamList, "LearningHub">;
 export type GuideScreenProps = Screen<HomeStackParamList, "Guide">;
 export type InviteScreenProps = Screen<HomeStackParamList, "Invite">;
+export type JobsScreenProps = Screen<HomeStackParamList, "Jobs">;
 
 // CV stack
 export type CvListScreenProps = Screen<CvStackParamList, "CvListMain">;
