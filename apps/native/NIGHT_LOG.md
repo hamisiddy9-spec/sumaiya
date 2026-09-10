@@ -219,3 +219,19 @@ crash reporting. Worked it:
 
 **Still not done (needs deploy / device / decisions):** offline-sync
 integration test on a phone, native voice input, push sender, billing.
+
+### 08:40 — DEPLOYED (user said "deploy and build")
+- feat/interaction-model fast-forwarded onto main, pushed. Vercel auto-deployed
+  to production (sumaiyaai.vercel.app) — 2m build, green. Backup tag +
+  branch also pushed.
+- Web verify before push: tsc clean, 408 assistant/api/eval vitest green.
+- Live prod check: new hero "Kutana na Sumaiya" ok; /assistant shows the new
+  start-chooser ok; /api/mobile/build-cv -> 400 bad body / 401 no-auth (wired,
+  LIVE); tools/ats-checker/snap-to-apply 200.
+- Found + fixed a pre-existing 500 (de820e2): bare /editor, /dashboard fell
+  through the marketing layout with locale="editor" -> translations[lang]
+  undefined -> 500 whole marketing tree. Clamped to en|sw like root layout.
+  Live 16h+ (count 9). /editor now 200, no new errors.
+- APK: expo prebuild --clean (kept box-tuned gradle.properties), gradle
+  assembleRelease running, debug-keystore signed (internal/installable).
+- Can't test the authed assistant conversation (no login) — user's session test.
