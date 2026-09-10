@@ -29,6 +29,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AnimatedTabBar } from "../animated-tab-bar";
 import { useThemeColors } from "../../components/ui";
+import { stackScreenOptions } from "../nav-config";
 import type { AppTabParamList, HomeStackParamList, CvStackParamList, ProfileStackParamList } from "../types";
 import { HomeScreen } from "../../screens/app/home-screen";
 import { CvListScreen } from "../../screens/app/cv-list-screen";
@@ -54,7 +55,7 @@ const ProfileStack = createNativeStackNavigator<ProfileStackParamList, undefined
 function HomeStackScreen() {
   const c = useThemeColors();
   return (
-    <HomeStack.Navigator id={undefined} screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 260, contentStyle: { backgroundColor: c.bg } }}>
+    <HomeStack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="JobApply" component={JobApplyScreen} />
       <HomeStack.Screen name="Applications" component={ApplicationsScreen} />
@@ -75,7 +76,7 @@ function HomeStackScreen() {
 function CvStackScreen() {
   const c = useThemeColors();
   return (
-    <CvStack.Navigator id={undefined} screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 260, contentStyle: { backgroundColor: c.bg } }}>
+    <CvStack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <CvStack.Screen name="CvListMain" component={CvListScreen} />
       <CvStack.Screen name="CvEditor" component={CvEditorScreen} />
       <CvStack.Screen name="AtsChecker" component={AtsCheckerScreen} />
@@ -86,7 +87,7 @@ function CvStackScreen() {
 function ProfileStackScreen() {
   const c = useThemeColors();
   return (
-    <ProfileStack.Navigator id={undefined} screenOptions={{ headerShown: false, animation: "slide_from_right", animationDuration: 260, contentStyle: { backgroundColor: c.bg } }}>
+    <ProfileStack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
       <ProfileStack.Screen name="CareerProfile" component={CareerProfileScreen} />
     </ProfileStack.Navigator>

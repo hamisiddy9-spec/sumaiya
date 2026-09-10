@@ -34,7 +34,8 @@ import { AppTabs } from "./stacks/app-tabs";
 import { OnboardingScreen } from "../screens/onboarding-screen";
 import { FirstRunScreen, FIRST_RUN_KEY } from "../screens/first-run-screen";
 import { SplashScreen } from "../screens/splash-screen";
-import { ThemeScope } from "../components/ui";
+import { ThemeScope, useThemeColors } from "../components/ui";
+import { useNavTheme, rootScreenOptions } from "./nav-config";
 
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
@@ -71,6 +72,8 @@ const linking: LinkingOptions<RootStackParamList> = {
 
 export function RootNavigator() {
   const { user, loading } = useAuthContext();
+  const c = useThemeColors();
+  const navTheme = useNavTheme();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
   const [firstRunDone, setFirstRunDone] = useState(true);
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -183,6 +186,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer
       ref={navRef}
+      theme={navTheme}
       linking={linking}
       fallback={
         <ThemeScope mode="light">
@@ -190,16 +194,7 @@ export function RootNavigator() {
         </ThemeScope>
       }
     >
-      <Stack.Navigator
-        id={undefined}
-        screenOptions={{
-          headerShown: false,
-          animation: "fade",
-          // A slower cross-fade so onboarding → sign-in (and the portal bloom
-          // that precedes it) dissolves instead of snapping.
-          animationDuration: 520,
-        }}
-      >
+      <Stack.Navigator id={undefined} screenOptions={rootScreenOptions(c)}>
         {/* Onboarding comes BEFORE auth: a fresh install must never open on a
             bare sign-in screen (reads as a bug, especially in dark mode). New
             users meet Sumaiya first, then hit auth only when they act. */}

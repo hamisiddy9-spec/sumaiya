@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../types";
 import { SignInScreen } from "../../screens/auth/sign-in-screen";
 import { useThemeColors } from "../../components/ui";
+import { stackScreenOptions } from "../nav-config";
 
 const Stack = createNativeStackNavigator<AuthStackParamList, undefined>();
 
@@ -12,15 +13,7 @@ const Stack = createNativeStackNavigator<AuthStackParamList, undefined>();
 export function AuthStack() {
   const c = useThemeColors();
   return (
-    <Stack.Navigator
-      id={undefined}
-      screenOptions={{
-        headerShown: false,
-        animation: "slide_from_right",
-        animationDuration: 260,
-        contentStyle: { backgroundColor: c.bg },
-      }}
-    >
+    <Stack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <Stack.Screen name="SignIn" component={SignInScreen} />
     </Stack.Navigator>
   );
