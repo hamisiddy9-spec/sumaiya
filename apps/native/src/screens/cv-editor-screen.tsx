@@ -72,6 +72,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const { status, queueOperation } = useOfflineSync();
   const insets = useSafeAreaInsets();
   const [showPreview, setShowPreview] = useState(false);
+  const [accent, setAccent] = useState("#DA4A1C");
   const knownTemplate = CV_TEMPLATES.some((x) => x.id === templateId);
   const [template, setTemplate] = useState<CvTemplateId>(
     knownTemplate ? (templateId as CvTemplateId) : "classic",
@@ -197,7 +198,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const uri = await exportCVAsPDF(cv, { accent: "#DA4A1C", lang, template });
+      const uri = await exportCVAsPDF(cv, { accent, lang, template });
       haptics.success();
       await shareCV(cv, uri);
     } catch {
@@ -321,7 +322,9 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           <CvPreviewCard
             cv={{ id: cvIdRef.current, userId: "me", templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
             initialTemplate={template}
+            initialColor={accent}
             onTemplateChange={(id) => { setTemplate(id); setDirty(true); }}
+            onColorChange={(hex) => { setAccent(hex); setDirty(true); }}
           />
         </ScrollView>
       </Modal>

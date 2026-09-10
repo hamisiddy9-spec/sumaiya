@@ -32,6 +32,7 @@ export function CvPreviewCard({
   initialTemplate,
   onOpenEditor,
   onTemplateChange,
+  onColorChange,
   onSave,
 }: {
   cv: CV;
@@ -39,6 +40,7 @@ export function CvPreviewCard({
   initialTemplate?: CvTemplateId;
   onOpenEditor?: () => void;
   onTemplateChange?: (id: CvTemplateId) => void;
+  onColorChange?: (hex: string) => void;
   /** When set, shows a "Save to My CVs" button and calls this with the chosen
    *  template. */
   onSave?: (template: CvTemplateId) => Promise<void> | void;
@@ -225,6 +227,7 @@ export function CvPreviewCard({
             onPress={() => {
               haptics.selection();
               setColor(col);
+              onColorChange?.(col);
             }}
             style={{
               width: 26,
