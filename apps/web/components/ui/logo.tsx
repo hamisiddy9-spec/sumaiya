@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 interface LogoProps {
   className?: string;
   showWordmark?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 // One blade, tip at top, floating clear of the centre — rotated 3× on 120°.
@@ -37,16 +37,19 @@ function Mark({ px }: { px: number }) {
 }
 
 export function Logo({ className, showWordmark = true, size = "md" }: LogoProps) {
-  const box = { sm: 22, md: 30, lg: 40 }[size];
-  const textSize = { sm: "text-sm", md: "text-[17px]", lg: "text-2xl" }[size];
+  const box = { sm: 22, md: 30, lg: 40, xl: 48 }[size];
+  const textSize = { sm: "text-sm", md: "text-[17px]", lg: "text-2xl", xl: "text-[28px]" }[size];
+  const gap = { sm: "gap-2", md: "gap-2.5", lg: "gap-3", xl: "gap-3" }[size];
 
   return (
-    <Link href="/" className={cn("flex items-center gap-2.5", className)}>
+    <Link href="/" className={cn("inline-flex items-center", gap, className)}>
       <Mark px={box} />
       {showWordmark && (
         <span
-          className={cn("font-display font-extrabold tracking-tight", textSize)}
-          style={{ color: "#211A15", letterSpacing: "-0.4px" }}
+          // color via `currentColor` so a dark-panel parent can override it
+          // with `text-cream` (or `[&_span]:!text-cream`); defaults to espresso.
+          className={cn("font-display font-extrabold tracking-tight text-espresso leading-none", textSize)}
+          style={{ letterSpacing: "-0.4px" }}
         >
           Sumaiya
         </span>

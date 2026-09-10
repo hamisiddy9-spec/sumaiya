@@ -201,10 +201,8 @@ function SignInForm({ lang }: { lang: string }) {
     <div className="min-h-screen bg-sand flex items-center justify-center p-4">
       <div className="max-w-4xl w-full grid md:grid-cols-5 rounded-card-lg shadow-floating overflow-hidden">
         {/* Left panel — brand + value props */}
-        <div className="md:col-span-2 bg-espresso p-8 md:p-10 flex flex-col justify-between">
-          <div>
-            <Logo showWordmark={false} />
-          </div>
+        <div className="md:col-span-2 bg-espresso p-8 md:p-10 flex flex-col justify-between gap-10">
+          <Logo size="xl" className="[&_span]:!text-cream" />
           <div className="space-y-5">
             <h2 className="font-display text-cream text-2xl leading-tight font-extrabold">
               {sw ? "Kila kitu unachohitaji kupata ajira" : "Everything you need to get hired"}
