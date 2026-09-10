@@ -70,6 +70,12 @@ export function AttachmentPreviewSheet({
           style={[
             sheetStyle,
             {
+              // Explicit width — a reanimated Animated.View in a Modal collapses
+              // its flex children to zero width on the New Architecture without it.
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: Dimensions.get("window").width,
               maxHeight: "78%",
               backgroundColor: c.bgElevated,
               borderTopLeftRadius: 24,

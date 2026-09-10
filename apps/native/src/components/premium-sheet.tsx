@@ -82,6 +82,12 @@ export function PremiumSheet({
           style={[
             sheet,
             {
+              // Explicit width + absolute-pin: a reanimated Animated.View in a
+              // Modal collapses its flex children to zero width on Fabric.
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: Dimensions.get("window").width,
               backgroundColor: c.bgElevated,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,

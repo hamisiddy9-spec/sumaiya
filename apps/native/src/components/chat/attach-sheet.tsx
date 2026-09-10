@@ -1,13 +1,6 @@
-import React, { useEffect } from "react";
-import { Dimensions, Modal, Pressable, Text, View } from "react-native";
+import React from "react";
+import { Dimensions, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing,
-  runOnJS,
-} from "react-native-reanimated";
 import { Icon } from "../icon";
 import { haptics, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
@@ -32,9 +25,13 @@ const ROWS: Row[] = [
 ];
 
 /**
- * The chat composer's [+] menu. A bottom sheet built on RN Modal — the sheet
- * is a flex child pinned to the bottom (not absolute-positioned), so it always
- * spans the full width on Android. Reanimated slide-up + fade backdrop.
+ * The chat composer's [+] menu.
+ *
+ * Plain RN Modal with `animationType="slide"` and plain Views — no reanimated,
+ * no absolute positioning. On the New Architecture, a reanimated Animated.View
+ * inside a Modal without an explicit width collapses its flex children to zero
+ * width (the "icons stacked in a column, no labels" bug). Every box here has an
+ * explicit width or `alignSelf: "stretch"` so the layout can't collapse.
  */
 export function AttachSheet({
   visible,
@@ -48,102 +45,90 @@ export function AttachSheet({
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
-  const progress = useSharedValue(0);
-  const [mounted, setMounted] = React.useState(visible);
-
-  useEffect(() => {
-    if (visible) {
-      setMounted(true);
-      progress.value = withTiming(1, { duration: 240, easing: Easing.out(Easing.cubic) });
-    } else if (mounted) {
-      progress.value = withTiming(0, { duration: 180, easing: Easing.in(Easing.cubic) }, (done) => {
-        if (done) runOnJS(setMounted)(false);
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible]);
-
-  const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
-  const sheetStyle = useAnimatedStyle(() => ({
-    opacity: 0.4 + progress.value * 0.6,
-    transform: [{ translateY: (1 - progress.value) * 360 }],
-  }));
-
-  if (!mounted) return null;
+  const W = Dimensions.get("window").width;
 
   const choose = (kind: AttachKind) => {
     haptics.selection();
     onClose();
-    // let the close animation start before the picker takes over
-    setTimeout(() => onPick(kind), 140);
+    setTimeout(() => onPick(kind), 160);
   };
 
   return (
-    <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
+    <Modal
+      transparent
+      visible={visible}
+      onRequestClose={onClose}
+      animationType="slide"
+      statusBarTranslucent
+    >
+      {/* Column: a tappable dim area on top, the sheet pinned to the bottom. */}
+      <View style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.45)" }}>
         <Pressable
-          style={{ flex: 1 }}
+          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
           onPress={onClose}
           accessibilityRole="button"
           accessibilityLabel={t("Close", "Funga")}
-        >
-          <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
-        </Pressable>
+        />
 
-        <Animated.View
-          style={[
-            sheetStyle,
-            {
-              backgroundColor: c.bgElevated,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              paddingTop: 8,
-              paddingBottom: insets.bottom + 16,
-              paddingHorizontal: 12,
-              borderTopWidth: 1,
-              borderColor: c.border,
-            },
-          ]}
+        <View
+          style={{
+            width: W,
+            backgroundColor: c.bgElevated,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            paddingTop: 8,
+            paddingBottom: insets.bottom + 16,
+            paddingHorizontal: 12,
+            borderTopWidth: 1,
+            borderColor: c.border,
+          }}
         >
           <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 14 }} />
           <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", marginLeft: 8, marginBottom: 6 }}>
             {t("Add to the chat", "Ongeza kwenye mazungumzo")}
           </Text>
 
-          {ROWS.map((r) => (
-            <Pressable
-              key={r.kind}
-              onPress={() => choose(r.kind)}
-              style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 14,
-                paddingVertical: 12,
-                paddingHorizontal: 8,
-                borderRadius: 14,
-                backgroundColor: pressed ? c.accent + "14" : "transparent",
-              })}
-            >
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 13,
-                  backgroundColor: c.accent + "1f",
+          <ScrollView bounces={false} style={{ alignSelf: "stretch" }}>
+            {ROWS.map((r) => (
+              <Pressable
+                key={r.kind}
+                onPress={() => choose(r.kind)}
+                style={({ pressed }) => ({
+                  alignSelf: "stretch",
+                  flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
-                }}
+                  gap: 14,
+                  paddingVertical: 12,
+                  paddingHorizontal: 8,
+                  borderRadius: 14,
+                  backgroundColor: pressed ? c.accent + "14" : "transparent",
+                })}
               >
-                <Icon name={r.icon} size={20} color={c.accent} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }}>{t(r.en, r.sw)}</Text>
-                <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }}>{t(r.hintEn, r.hintSw)}</Text>
-              </View>
-              <Icon name="chevron-right" size={18} color={c.textMuted} />
-            </Pressable>
-          ))}
-        </Animated.View>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 13,
+                    backgroundColor: c.accent + "1f",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name={r.icon} size={20} color={c.accent} />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }} numberOfLines={1}>
+                    {t(r.en, r.sw)}
+                  </Text>
+                  <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={1}>
+                    {t(r.hintEn, r.hintSw)}
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={18} color={c.textMuted} />
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
       </View>
     </Modal>
   );
