@@ -19,11 +19,21 @@ export const GOOGLE_WEB_CLIENT_ID =
 
 // Configure once at module load. No browser, no redirect — signIn() shows the
 // OS account-picker sheet and returns an ID token.
-GoogleSignin.configure({
-  webClientId: GOOGLE_WEB_CLIENT_ID,
-  // We only need identity + email for account creation.
-  scopes: ["email", "profile"],
-});
+//
+// Guarded: on a device without Google Play Services, or if the native module
+// didn't link, a bare `GoogleSignin.configure()` throws synchronously during
+// this import and takes the whole app down before React mounts ("crashes
+// instantly, never opens"). A missing Google button is survivable; a boot
+// crash is not — email OTP still works.
+try {
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    // We only need identity + email for account creation.
+    scopes: ["email", "profile"],
+  });
+} catch (err) {
+  console.warn("GoogleSignin.configure failed — Google sign-in disabled:", err);
+}
 
 const supabaseUrl =
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "https://ayczgaddnufdxnhizpcr.supabase.co";
