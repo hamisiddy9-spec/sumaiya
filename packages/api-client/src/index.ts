@@ -36,6 +36,35 @@ export interface JobRecommendation {
   job: JobListing;
 }
 
+/** The native app's flat Career Profile — the wire shape for /api/mobile/profile. */
+export interface MobileProfile {
+  fullName: string;
+  headline: string;
+  location: string;
+  phone: string;
+  email: string;
+  summary: string;
+  skills: string;
+  experience: string;
+  education: string;
+  goals: string;
+  languages: string;
+  updatedAt: number;
+}
+
+/** A deterministic proactive nudge (mirrors the web signal engine). */
+export interface MobileSignal {
+  type: string;
+  tool: string;
+  priority: number;
+  title: { en: string; sw: string };
+  detail: { en: string; sw: string };
+  trigger: string;
+  jobId?: string;
+  applicationId?: string;
+  confirmations?: number;
+}
+
 export interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
@@ -199,6 +228,27 @@ export class ApiClient {
       { method: "POST", body: JSON.stringify({ imageBase64 }) }
     );
     return { text: result.text, data: (result.fields as Partial<CVData> | null) ?? null };
+  }
+
+  // ── Career Profile sync (Hono /api/mobile/profile) ───────────────────────
+  // The native app owns a flat Career Profile (AsyncStorage). These push it to
+  // / pull it from the server Spine so it survives reinstalls, reaches other
+  // devices, and feeds job matching + the web assistant.
+
+  async getMobileProfile(): Promise<MobileProfile> {
+    return this.request<MobileProfile>("/api/mobile/profile");
+  }
+
+  async putMobileProfile(profile: MobileProfile): Promise<{ updatedAt: number }> {
+    return this.request<{ updatedAt: number }>("/api/mobile/profile", {
+      method: "PUT",
+      body: JSON.stringify(profile),
+    });
+  }
+
+  // ── Proactive signals (Hono /api/mobile/signals) ─────────────────────────
+  async getSignals(): Promise<MobileSignal[]> {
+    return this.request<MobileSignal[]>("/api/mobile/signals").catch(() => [] as MobileSignal[]);
   }
 
   // ── Extract text from an uploaded PDF (Hono /api/tools/extract-text) ───────

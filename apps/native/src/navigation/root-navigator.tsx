@@ -132,6 +132,26 @@ export function RootNavigator() {
     })();
   }, [user]);
 
+  // Pull the Career Profile from the server Spine once signed in — a returning
+  // user on a new device / after a reinstall keeps their profile, and any
+  // offline local edit gets pushed up. If the server already has a real
+  // profile, the first-run wizard has nothing to collect, so skip it.
+  useEffect(() => {
+    if (!user) return;
+    void (async () => {
+      try {
+        const { syncProfileFromServer, profileIsEmpty } = await import("../lib/profile-store");
+        const profile = await syncProfileFromServer();
+        if (!profileIsEmpty(profile)) {
+          await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
+          setFirstRunDone(true);
+        }
+      } catch {
+        /* offline — first-run stays as-is */
+      }
+    })();
+  }, [user]);
+
   // Register for push once signed in (no-op until an EAS projectId exists).
   usePushRegistration(user?.id);
 

@@ -11,8 +11,17 @@ import { assembleUserContext, contextToPromptBlock } from "@/lib/assistant/conte
 import { looksLikeJobDescription } from "@/lib/job-match";
 import { TRUTH_CONSTRAINT } from "@/lib/api/ai-guardrails";
 import { nanoid } from "nanoid";
-import { db, deviceToken } from "@/lib/db";
-import { sql } from "drizzle-orm";
+import { db, deviceToken, userProfile } from "@/lib/db";
+import { eq, sql } from "drizzle-orm";
+import { parseCareerProfile } from "@/types";
+import { ensureProfileRow } from "@/lib/career-profile/sync";
+import { stampProfileAllFacts } from "@/lib/career-profile/mapper";
+import { computeSignals } from "@/lib/assistant/signals";
+import {
+  nativeProfileToCareer,
+  careerToNativeProfile,
+  EMPTY_NATIVE_PROFILE,
+} from "@/lib/career-profile/mobile-bridge";
 
 // Mobile-specific endpoints that the native app talks to with
 // `Authorization: Bearer <supabase access token>` (see lib/api/auth.ts).
@@ -359,6 +368,96 @@ ${sanitizePromptText(transcript, 12000)}
       return c.json({ success: true, data: { cv } });
     },
   )
+
+  // GET /api/mobile/profile — the user's Career Profile in the native app's
+  // flat shape (mapped from the structured Spine store). Empty shape when the
+  // user has never saved one, so a fresh install can tell "nothing yet" from
+  // "offline".
+  .get("/profile", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+    const [row] = await db
+      .select({ careerProfile: userProfile.careerProfile, updatedAt: userProfile.updatedAt })
+      .from(userProfile)
+      .where(eq(userProfile.id, userId))
+      .limit(1);
+
+    if (!row?.careerProfile) {
+      return c.json({ success: true, data: EMPTY_NATIVE_PROFILE });
+    }
+    const cp = parseCareerProfile(row.careerProfile);
+    const updatedAt = row.updatedAt ? new Date(row.updatedAt).getTime() : 0;
+    return c.json({ success: true, data: careerToNativeProfile(cp, updatedAt) });
+  })
+
+  // PUT /api/mobile/profile — save the Career Profile from the native app.
+  // The native flat shape is mapped to the structured profile and stamped
+  // "interview" (first-run wizard / in-app profile edit is the user authoring
+  // facts directly — same provenance the web Career Interview uses). Wholesale
+  // replace, like the web POST /api/profile { careerProfile }.
+  .put(
+    "/profile",
+    zValidator(
+      "json",
+      z.object({
+        fullName: z.string().max(200).default(""),
+        headline: z.string().max(400).default(""),
+        location: z.string().max(200).default(""),
+        phone: z.string().max(50).default(""),
+        email: z.string().max(200).default(""),
+        summary: z.string().max(4000).default(""),
+        skills: z.string().max(4000).default(""),
+        experience: z.string().max(8000).default(""),
+        education: z.string().max(4000).default(""),
+        goals: z.string().max(2000).default(""),
+        languages: z.string().max(1000).default(""),
+        updatedAt: z.number().nonnegative().optional(),
+      }),
+    ),
+    async (c) => {
+      const userId = await getUserId(c);
+      if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+      const body = c.req.valid("json");
+      await ensureProfileRow(userId);
+
+      const cp = stampProfileAllFacts(
+        nativeProfileToCareer({ ...EMPTY_NATIVE_PROFILE, ...body, updatedAt: body.updatedAt ?? Date.now() }),
+        { source: "interview", confidence: 1 },
+      );
+
+      const [saved] = await db
+        .insert(userProfile)
+        .values({ id: userId, careerProfile: cp, updatedAt: new Date() } as never)
+        .onConflictDoUpdate({
+          target: userProfile.id,
+          set: { careerProfile: cp, updatedAt: new Date() } as never,
+        })
+        .returning({ updatedAt: userProfile.updatedAt });
+
+      return c.json({
+        success: true,
+        data: { updatedAt: saved?.updatedAt ? new Date(saved.updatedAt).getTime() : Date.now() },
+      });
+    },
+  )
+
+  // GET /api/mobile/signals — deterministic proactive nudges for the native
+  // home screen. Same engine (computeSignals) that drives the web dashboard
+  // banner and Sumaiya's proactive opener — one truth everywhere.
+  .get("/signals", async (c) => {
+    const userId = await getUserId(c);
+    if (!userId) return c.json({ error: "Unauthorized" }, 401);
+    try {
+      const ctx = await assembleUserContext(userId);
+      const signals = computeSignals(ctx).slice(0, 5);
+      return c.json({ success: true, data: signals });
+    } catch (err) {
+      console.error("[mobile] signals failed:", err);
+      return c.json({ success: true, data: [] });
+    }
+  })
 
   // PUT /api/mobile/device-token — register/refresh a push token.
   // Bearer-authed (the old /api/auth/device-token was cookie-only, so the
