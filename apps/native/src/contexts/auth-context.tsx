@@ -17,6 +17,7 @@ import type { ApiClient } from "@sumaiya/api-client";
 import type { AuthUser } from "@sumaiya/types";
 import { supabase } from "../lib/supabase";
 import { apiClient as sharedApiClient } from "../lib/api-client";
+import { reportError } from "../lib/reporting";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -84,7 +85,7 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
     supabase.auth
       .getSession()
       .then(({ data }) => applySession(data.session))
-      .catch((err) => console.error("Auth session restore error:", err))
+      .catch((err) => reportError(err, { scope: "auth.restore" }))
       .finally(() => setLoading(false));
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -193,7 +194,7 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
       await supabase.auth.signOut();
       await GoogleSignin.signOut().catch(() => {}); // clear the cached Google account too
     } catch (err) {
-      console.error("Sign out error:", err);
+      reportError(err, { scope: "auth.signOut" });
     } finally {
       applySession(null);
     }

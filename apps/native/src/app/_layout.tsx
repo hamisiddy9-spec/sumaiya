@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { getSecureItem, offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
+import { reportError } from "../lib/reporting";
 import { AuthProvider } from "../contexts/auth-context";
 import { LangProvider } from "../lib/i18n";
 import { RootNavigator } from "../navigation/root-navigator";
@@ -39,7 +40,7 @@ export default function RootLayout() {
         try {
           await offlineStorage.init();
         } catch (dbError) {
-          console.error("offlineStorage init failed:", dbError);
+          reportError(dbError, { scope: "offlineStorage.init" });
         }
 
         // Apply an explicit dark-mode choice from Settings before first

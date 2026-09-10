@@ -3,6 +3,7 @@ import { offlineStorage } from "@sumaiya/utils";
 import { retryAsync, sleep } from "@sumaiya/utils";
 import type { CV, SyncOperation } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
+import { reportError } from "../lib/reporting";
 
 interface SyncStatus {
   isSyncing: boolean;
@@ -36,7 +37,7 @@ export function useOfflineSync() {
         const queue = await offlineStorage.getSyncQueue();
         setStatus(prev => ({ ...prev, pendingCount: queue.length }));
       } catch (err) {
-        console.error('Failed to init pending count:', err);
+        reportError(err, { scope: 'offlineSync.initCount' });
       }
     };
     initPendingCount();
@@ -98,6 +99,7 @@ export function useOfflineSync() {
           // Give up after 4 retries (total time: 2s + 4s + 8s + 16s = 30s)
           if (item.retries >= 3) {
             await offlineStorage.removeSyncQueueItem(item.id);
+            reportError(error, { scope: "offlineSync.giveUp", op: item.operation, cvId: item.cvId });
             setStatus((prev) => ({
               ...prev,
               errors: [...prev.errors, `Failed to sync: ${msg}`],

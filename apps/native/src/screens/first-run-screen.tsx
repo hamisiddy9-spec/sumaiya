@@ -3,7 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } fro
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { setSecureItem } from "@sumaiya/utils";
-import { saveProfile, type CareerProfile } from "../lib/profile-store";
+import { saveProfile, profileIsEmpty, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
 import { setDefaultTemplate } from "../lib/prefs";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { TemplateThumb } from "../components/cv/template-thumb";
@@ -40,13 +40,12 @@ export function FirstRunScreen({ onDone }: Props) {
     setSaving(true);
     haptics.selection();
     try {
-      const { fullName, headline, location, phone, email, skills, experience } = p;
-      // Save whatever they gave — even a name alone helps Sumaiya.
-      if (!skipped || fullName || headline || skills || experience) {
-        await saveProfile({
-          fullName, headline, location, phone, email, skills, experience,
-          summary: "", education: "", goals: "", languages: "",
-        });
+      const next = { ...EMPTY_PROFILE, ...p };
+      // Save whatever they gave — even a name alone helps Sumaiya. On an
+      // explicit Skip with nothing filled, leave the profile untouched.
+      if (!skipped || !profileIsEmpty(next)) {
+        const { updatedAt, ...rest } = next;
+        await saveProfile(rest);
       }
       await setDefaultTemplate(template).catch(() => {});
       await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});

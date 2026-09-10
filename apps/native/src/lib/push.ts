@@ -4,6 +4,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
 import { apiClient } from "./api-client";
+import { reportError } from "./reporting";
 
 /**
  * Push registration.
@@ -77,7 +78,7 @@ export function usePushRegistration(userId: string | undefined) {
           await setSecureItem("push_token", token).catch(() => {});
         }
       } catch (err) {
-        console.error("push registration failed:", err);
+        reportError(err, { scope: "push.register" });
         done.current = false; // allow a retry next mount
       }
     })();

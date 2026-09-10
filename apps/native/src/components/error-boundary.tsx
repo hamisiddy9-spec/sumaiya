@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { SumaiyaMark } from "./sumaiya-mark";
+import { reportError } from "../lib/reporting";
 
 /**
  * Catches a render/lifecycle crash anywhere below it and shows a calm recovery
@@ -25,8 +26,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // Keep it in the console for `adb logcat` / crash tools; no PII.
-    console.error("ErrorBoundary caught:", error?.message, info?.componentStack);
+    // Keep it in the console for `adb logcat`, and hand it to the reporting
+    // seam (a no-op until a crash reporter is provisioned). No PII.
+    reportError(error, { scope: "ErrorBoundary", componentStack: info?.componentStack });
   }
 
   private reset = () => {

@@ -18,6 +18,7 @@ import type {
 } from '../components/chat/chat-types';
 import { extractAttachment, attachmentsContext } from '../lib/attachment-extract';
 import { loadProfile, profilePromptBlock } from '../lib/profile-store';
+import { reportError } from '../lib/reporting';
 import { useLang, greetingFor } from '../lib/i18n';
 
 // The greeting shown before any real turn is now language-aware — see
@@ -193,7 +194,7 @@ export function useSumaiyaChat() {
             ),
           );
         }
-        console.error('Sumaiya chat error:', err);
+        reportError(err, { scope: 'sumaiyaChat.send' });
       } finally {
         setLoading(false);
       }
@@ -293,7 +294,7 @@ export function useSumaiyaChat() {
       } else {
         setError(t("Couldn't build the CV just now. Try again.", "Imeshindwa kutengeneza CV sasa. Jaribu tena."));
       }
-      console.error("buildCvFromChat error:", err);
+      reportError(err, { scope: "sumaiyaChat.buildCv" });
     } finally {
       setBuildingCv(false);
     }
@@ -320,7 +321,7 @@ export function useSumaiyaChat() {
           difficulty: 'beginner',
         }));
       } catch (err) {
-        console.error('Learning resources error:', err);
+        reportError(err, { scope: 'sumaiyaChat.learningResources' });
         return null;
       }
     },
