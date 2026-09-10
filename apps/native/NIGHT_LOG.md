@@ -310,3 +310,24 @@ New bugs (all polish, none blocking):
   it when guest.
 - CPA(K) double-classified as skill + certification; greeting says press "CV"
   but the card is "Nataka CV".
+
+### 11:00 — fixing the live-test findings (while user takes Supabase)
+- `100b3c9` **PDF blank trailing page** — a CV filling the page almost exactly
+  counted as 2 (source PAGE_H a hair over jsPDF's a4-px + full-height sidebar).
+  `computePageCount()` absorbs <2% overflow. +3 tests.
+- `100b3c9` **"Create my CV" bar showed after a guest CV was built** — gated on
+  `!guestCvReady`.
+- `100b3c9` **401 /api/profile/confirmations on every guest load** — skipped for
+  guests (both call sites).
+- `100b3c9` **/assistant desktop dead band** — greeting+chooser centred before
+  the first user turn, bottom-anchored after.
+- `100b3c9` greeting copy: "tap one below" not "tap 'CV'" (card says "Make my CV").
+- `1121d4d` **CPA(K) double-listed** as skill + certification — deduped in
+  `toCvData` (credentials live in Certifications). +1 test.
+- `a012eb5` **target-role question loop** — prompt insisted on "the role you
+  want" and re-asked it every turn; now a stated profession is enough, ask
+  "what job?" at most once.
+Also `8c77039` sign-in logo (bigger + wordmark + cream, verified on prod).
+
+Supabase P0 (SMTP 535) + P1 (RLS on 7 tables) handed to the user with a guide.
+All web changes: tsc 0, targeted vitest green, deployed to prod as pushed.
