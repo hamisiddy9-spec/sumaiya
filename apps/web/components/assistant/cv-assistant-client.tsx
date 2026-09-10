@@ -1012,14 +1012,31 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setError("");
     setAttachState("reading");
     setUploading(sw ? "Inasoma faili yako…" : "Reading your file…");
+    const isPdfOrDoc =
+      /pdf|wordprocessingml|msword/.test(file.type) || /\.(pdf|docx?)$/i.test(file.name);
     try {
-      const { text } = await extractTextFromFile(file, (p) => {
-        setUploading(
-          p.stage === "ocr"
-            ? (sw ? `Inasoma picha… ${p.pct}%` : `Reading image… ${p.pct}%`)
-            : (sw ? "Inasoma faili yako…" : "Reading your file…")
-        );
-      });
+      let text = "";
+      try {
+        ({ text } = await extractTextFromFile(file, (p) => {
+          setUploading(
+            p.stage === "ocr"
+              ? (sw ? `Inasoma picha… ${p.pct}%` : `Reading image… ${p.pct}%`)
+              : (sw ? "Inasoma faili yako…" : "Reading your file…")
+          );
+        }));
+      } catch (clientErr) {
+        // Browser extraction is fragile (pdf.js worker, WASM OCR, mammoth). For
+        // PDFs and Word docs the server has a reliable path (unpdf / mammoth) —
+        // fall back to it before giving up.
+        if (!isPdfOrDoc) throw clientErr;
+        setUploading(sw ? "Inasoma faili yako…" : "Reading your file…");
+        const form = new FormData();
+        form.append("file", file);
+        const res = await fetch("/api/tools/extract-text", { method: "POST", body: form });
+        const json = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
+        if (!res.ok || !json.text) throw clientErr;
+        text = json.text;
+      }
       setUploading(null);
       if (!text || text.replace(/\s/g, "").length < 30) {
         setAttachState("error");
