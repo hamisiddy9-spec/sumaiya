@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 import { Icon } from "../icon";
 import { haptics, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
-import { AttachSheet, type AttachKind } from "./attach-sheet";
+import { type AttachKind } from "./attach-sheet";
 import type { Attachment } from "./chat-types";
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
   loading: boolean;
   attachments: Attachment[];
   onAttach: (kind: AttachKind) => void;
+  onOpenAttach: () => void;
   onRemoveAttachment: (id: string) => void;
   inputRef?: React.RefObject<TextInput | null>;
 }
@@ -75,13 +76,13 @@ export function ChatComposer({
   loading,
   attachments,
   onAttach,
+  onOpenAttach,
   onRemoveAttachment,
   inputRef,
 }: Props) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
-  const [sheet, setSheet] = useState(false);
 
   const canSend = (value.trim().length > 0 || attachments.length > 0) && !loading;
 
@@ -110,7 +111,7 @@ export function ChatComposer({
           <Pressable
             onPress={() => {
               haptics.light();
-              setSheet(true);
+              onOpenAttach();
             }}
             accessibilityLabel={t("Add photo or file", "Ongeza picha au faili")}
             style={{
@@ -172,12 +173,6 @@ export function ChatComposer({
           </Pressable>
         </View>
       </View>
-
-      <AttachSheet
-        visible={sheet}
-        onClose={() => setSheet(false)}
-        onPick={(kind) => onAttach(kind)}
-      />
     </>
   );
 }

@@ -17,6 +17,7 @@ import { useCvs } from "../hooks/use-cvs";
 import { useSumaiyaChat } from "../hooks/use-sumaiya-chat";
 import { ChatMessageComponent } from "../components/chat/chat-message";
 import { AttachmentPreviewSheet } from "../components/chat/attachment-preview-sheet";
+import { AttachSheet } from "../components/chat/attach-sheet";
 import { QuickActionsGrid } from "../components/chat/quick-actions-grid";
 import { ChatComposer } from "../components/chat/chat-composer";
 import { INITIAL_QUICK_ACTIONS } from "../components/chat/chat-types";
@@ -61,6 +62,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [preview, setPreview] = useState<Attachment | null>(null);
   const [linkPrompt, setLinkPrompt] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -453,12 +455,19 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
           loading={loading}
           attachments={attachments}
           onAttach={onAttach}
+          onOpenAttach={() => setAttachOpen(true)}
           onRemoveAttachment={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
           inputRef={inputRef}
         />
       </KeyboardAvoidingView>
 
       <AttachmentPreviewSheet attachment={preview} onClose={() => setPreview(null)} />
+
+      <AttachSheet
+        visible={attachOpen}
+        onClose={() => setAttachOpen(false)}
+        onPick={(kind) => onAttach(kind)}
+      />
 
       <PromptModal
         visible={linkPrompt}
