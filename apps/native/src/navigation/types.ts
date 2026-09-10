@@ -40,7 +40,7 @@ export type AuthStackParamList = {
 export type AppTabParamList = {
   HomeTab: NavigatorScreenParams<HomeStackParamList> | undefined;
   CVsTab: NavigatorScreenParams<CvStackParamList> | undefined;
-  SumaiyaTab: { attachment?: { kind: string; uri: string; name?: string; mimeType?: string } } | undefined;
+  SumaiyaTab: { attachment?: { kind: string; uri: string; name?: string; mimeType?: string }; seed?: string } | undefined;
   ImportTab: NavigatorScreenParams<ScanStackParamList> | undefined;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList> | undefined;
 };

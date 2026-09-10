@@ -87,6 +87,15 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
     setInput((v) => v || t("What can you tell me from this?", "Unaweza kuniambia nini kutoka hapa?"));
   }, [route?.params?.attachment]);
 
+  // A one-tap "practise with Sumaiya" from the Learning Hub lands here as a
+  // seed message we send straight away.
+  useEffect(() => {
+    const seed = route?.params?.seed;
+    if (!seed?.trim()) return;
+    navigation.setParams?.({ seed: undefined });
+    void sendMessage(seed.trim());
+  }, [route?.params?.seed]);
+
   const empty = messages.length === 0;
   const speech = useSpeech();
   const lastReply = (() => {
@@ -430,7 +439,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
               opacity: buildingCv ? 0.7 : 1,
             }}
           >
-            <Icon name={buildingCv ? "loader" : "sparkles"} size={16} color={c.accentText} />
+            <SumaiyaMark size={16} color={c.accentText} state={buildingCv ? "thinking" : "static"} />
             <Text style={{ color: c.accentText, fontSize: 14, fontWeight: "800" }}>
               {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build my CV from this chat", "Tengeneza CV yangu kutoka mazungumzo haya")}
             </Text>

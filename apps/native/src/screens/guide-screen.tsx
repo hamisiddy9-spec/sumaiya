@@ -1,16 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { getGuide } from "../lib/guides";
 import { useLang } from "../lib/i18n";
-import { Screen, useThemeColors } from "../components/ui";
+import { Button, Screen, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { useEntitlements } from "../lib/entitlements";
+import { PremiumSheet } from "../components/premium-sheet";
 import type { GuideScreenProps } from "../navigation/types";
 
 export function GuideScreen({ route, navigation }: GuideScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
+  const { premium } = useEntitlements();
+  const [showPremium, setShowPremium] = useState(false);
   const guide = getGuide(route.params?.id);
+  const walled = !!guide && guide.tier === "premium" && !premium;
+  const visibleSections = walled ? (guide?.sections.slice(0, 1) ?? []) : (guide?.sections ?? []);
 
   if (!guide) {
     return (
@@ -48,7 +54,7 @@ export function GuideScreen({ route, navigation }: GuideScreenProps) {
         {guide.summary[lang]}
       </Text>
 
-      {guide.sections.map((s, i) => (
+      {visibleSections.map((s, i) => (
         <Animated.View key={i} entering={FadeInDown.duration(280).delay(Math.min(i, 5) * 60)} style={{ marginBottom: 22 }}>
           <Text style={{ color: c.text, fontSize: 16.5, fontWeight: "800", marginBottom: 8 }}>
             {s.heading[lang]}
@@ -56,6 +62,23 @@ export function GuideScreen({ route, navigation }: GuideScreenProps) {
           <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 23 }}>{s.body[lang]}</Text>
         </Animated.View>
       ))}
+
+      {walled ? (
+        <View style={{ borderTopWidth: 1, borderTopColor: c.border, paddingTop: 22, gap: 12 }}>
+          <Text style={{ color: c.text, fontSize: 16, fontWeight: "800" }}>
+            {t("The rest of this guide is Premium", "Sehemu iliyobaki ni Premium")}
+          </Text>
+          <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>
+            {t(
+              "The short guides stay free. The deep playbooks — negotiation, changing fields, LinkedIn — come with Premium.",
+              "Miongozo mifupi inabaki bure. Miongozo ya kina — majadiliano, kubadili fani, LinkedIn — inakuja na Premium.",
+            )}
+          </Text>
+          <Button label={t("See Premium", "Ona Premium")} onPress={() => setShowPremium(true)} />
+        </View>
+      ) : null}
+
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="courses" />
     </Screen>
   );
 }
