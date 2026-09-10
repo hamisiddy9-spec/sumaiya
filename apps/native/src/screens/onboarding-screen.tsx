@@ -15,7 +15,6 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated";
 import { Button, haptics, useThemeColors } from "../components/ui";
-import { Icon } from "../components/icon";
 import { SumaiyaMark, type SumaiyaMarkState } from "../components/sumaiya-mark";
 import { OnboardingArt } from "../components/onboarding-art";
 import { PortalTransition } from "../components/portal-transition";
@@ -166,62 +165,56 @@ function WelcomeStage({
       exiting={FadeOut.duration(220)}
       style={{ flex: 1, backgroundColor: c.bg, paddingHorizontal: 28 }}
     >
-      {/* One column, top-weighted: mark → greeting → the two choices, each a
-          comfortable step below the last. No big centred void, no picker
-          stranded at the bottom. */}
-      <View style={{ flex: 1, justifyContent: "center", paddingBottom: insets.bottom + 20, gap: 28 }}>
-        <View style={{ alignItems: "center", gap: 20 }}>
-          <View
-            style={{
-              width: 128,
-              height: 128,
-              borderRadius: 40,
-              backgroundColor: c.accent + "14",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <SumaiyaMark size={72} state={markState} color={c.accent} />
-          </View>
-          <View style={{ alignItems: "center", gap: 8 }}>
-            <Text style={{ color: c.text, fontSize: 29, fontWeight: "800", letterSpacing: -0.6 }}>
-              Karibu · Welcome
-            </Text>
-            <Text style={{ color: c.textBody, fontSize: 15, textAlign: "center", lineHeight: 22, maxWidth: 290 }}>
-              Mimi ni Sumaiya. Chagua lugha yako.{"\n"}I'm Sumaiya. Choose your language.
-            </Text>
-          </View>
+      {/* Hero centred in the space above; the language choices sit low and
+          centred, width-constrained so they read as a deliberate pair — not
+          left-hugging list rows. */}
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 20 }}>
+        <View
+          style={{
+            width: 128,
+            height: 128,
+            borderRadius: 40,
+            backgroundColor: c.accent + "14",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <SumaiyaMark size={72} state={markState} color={c.accent} />
         </View>
+        <View style={{ alignItems: "center", gap: 8 }}>
+          <Text style={{ color: c.text, fontSize: 29, fontWeight: "800", letterSpacing: -0.6 }}>
+            Karibu · Welcome
+          </Text>
+          <Text style={{ color: c.textBody, fontSize: 15, textAlign: "center", lineHeight: 22, maxWidth: 290 }}>
+            Mimi ni Sumaiya. Chagua lugha yako.{"\n"}I'm Sumaiya. Choose your language.
+          </Text>
+        </View>
+      </View>
 
-        <View style={{ gap: 12 }}>
-          {choices.map((ch, i) => (
-            <Animated.View key={ch.lang} entering={FadeInDown.delay(200 + i * 80).duration(360)}>
-              <Pressable
-                onPress={() => {
-                  haptics.selection();
-                  onPick(ch.lang);
-                }}
-                style={({ pressed }) => ({
-                  borderWidth: 1.5,
-                  borderColor: c.accent,
-                  backgroundColor: pressed ? c.accent + "12" : "transparent",
-                  borderRadius: 18,
-                  paddingVertical: 15,
-                  paddingHorizontal: 20,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                })}
-              >
-                <View>
-                  <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
-                  <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }}>{ch.hint}</Text>
-                </View>
-                <Icon name="arrow-right" size={21} color={c.accent} />
-              </Pressable>
-            </Animated.View>
-          ))}
-        </View>
+      <View style={{ width: "100%", maxWidth: 360, alignSelf: "center", gap: 12, paddingBottom: insets.bottom + 52 }}>
+        {choices.map((ch, i) => (
+          <Animated.View key={ch.lang} entering={FadeInDown.delay(200 + i * 80).duration(360)}>
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                onPick(ch.lang);
+              }}
+              style={({ pressed }) => ({
+                borderWidth: 1.5,
+                borderColor: c.accent,
+                backgroundColor: pressed ? c.accent + "12" : "transparent",
+                borderRadius: 18,
+                paddingVertical: 14,
+                paddingHorizontal: 20,
+                alignItems: "center",
+                gap: 2,
+              })}
+            >
+              <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
+              <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
+            </Pressable>
+          </Animated.View>
+        ))}
       </View>
     </Animated.View>
   );

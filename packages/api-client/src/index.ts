@@ -251,34 +251,30 @@ export class ApiClient {
     return this.request<MobileSignal[]>("/api/mobile/signals").catch(() => [] as MobileSignal[]);
   }
 
-  // ── Extract text from an uploaded PDF (Hono /api/tools/extract-text) ───────
+  // ── Extract text from an uploaded document (Hono /api/tools/extract-text) ──
   // Multipart upload. `file` is what RN's FormData accepts: { uri, name, type }.
-  // The backend runs unpdf (serverless pdfjs) and returns merged page text, or
-  // a 4xx when the PDF is image-only / unreadable.
-  async extractPdfText(file: { uri: string; name: string; type?: string }): Promise<{ text: string; pages: number }> {
+  // The server sniffs the bytes (PDF / .docx / RTF / plain text) — it does NOT
+  // trust the name or MIME, so a mislabelled file from a share sheet still
+  // works. Throws ApiError on a 4xx (old .doc, scanned PDF, unknown type) with
+  // a user-facing `.message`.
+  async extractDocumentText(file: { uri: string; name: string; type?: string }): Promise<{ text: string; pages?: number }> {
     const form = new FormData();
     // RN FormData file part — cast because DOM's FormData types expect a Blob.
-    form.append("file", { uri: file.uri, name: file.name, type: file.type || "application/pdf" } as unknown as Blob);
-    const result = await this.request<{ text: string; pages: number }>("/api/tools/extract-text", {
+    form.append(
+      "file",
+      { uri: file.uri, name: file.name || "document", type: file.type || "application/octet-stream" } as unknown as Blob,
+    );
+    const result = await this.request<{ text: string; pages?: number }>("/api/tools/extract-text", {
       method: "POST",
       body: form,
     });
     return { text: result.text, pages: result.pages };
   }
 
-  // Same endpoint, Word (.docx) branch — server runs mammoth. Old binary .doc
-  // returns a 422 with a "save as .docx" message.
-  async extractWordText(file: { uri: string; name: string; type?: string }): Promise<{ text: string }> {
-    const form = new FormData();
-    const type =
-      file.type ||
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    form.append("file", { uri: file.uri, name: file.name, type } as unknown as Blob);
-    const result = await this.request<{ text: string }>("/api/tools/extract-text", {
-      method: "POST",
-      body: form,
-    });
-    return { text: result.text };
+  /** @deprecated use extractDocumentText — kept for callers not yet migrated */
+  async extractPdfText(file: { uri: string; name: string; type?: string }): Promise<{ text: string; pages: number }> {
+    const r = await this.extractDocumentText(file);
+    return { text: r.text, pages: r.pages ?? 1 };
   }
 
   // ── Learning + chat (Hono /api/mobile) ────────────────────────────────────

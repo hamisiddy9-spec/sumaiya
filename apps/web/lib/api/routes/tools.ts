@@ -34,15 +34,6 @@ function isPdfFile(file: File): boolean {
   );
 }
 
-function isWordFile(file: File): boolean {
-  const t = file.type.toLowerCase();
-  return (
-    t === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-    t === "application/msword" ||
-    /\.docx?$/i.test(file.name)
-  );
-}
-
 /**
  * Parse page range strings like "1,3,5-7" into an array of 0-indexed page numbers.
  * Returns sorted unique page numbers.
@@ -463,68 +454,85 @@ writer.write(sys.argv[2])
     }
   })
 
-  // ── Extract Text from PDF or Word (.doc/.docx) ───────────────────────────
+  // ── Extract Text from a document ────────────────────────────────────────
+  // Content-sniffed, not name/MIME-trusted: phones (and share sheets) label
+  // files unreliably. Handles PDF, .docx, RTF and plain text; clear messages
+  // for old binary .doc and image-only PDFs.
   .post("/extract-text", async (c) => {
     const limited = await rateLimited(c,"extract-text");
     if (limited) return limited;
 
     try {
       const formData = await c.req.parseBody({ all: true }) as Record<string, unknown>;
-      const files = collectFiles(formData);
-      const pdfFile = files.find(isPdfFile) ?? null;
-      const wordFile = pdfFile ? null : (files.find(isWordFile) ?? null);
-
-      if (!pdfFile && !wordFile) {
-        return c.json({ error: "Please upload a PDF or Word file." }, 400);
+      const file = collectFiles(formData)[0] ?? null;
+      if (!file) return c.json({ error: "No file uploaded." }, 400);
+      if (file.size > MAX_PDF_BYTES) {
+        return c.json({ error: "That file is too large (max 4 MB). Send a smaller one, or paste the text." }, 413);
       }
 
-      // Word (.docx): mammoth is pure JS (jszip under the hood) so it runs on
-      // the serverless node runtime. Old binary .doc is not supported.
-      if (wordFile) {
-        if (wordFile.size > MAX_PDF_BYTES) {
-          return c.json({ error: "That file is too large (max 4 MB)." }, 413);
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const head = buffer.subarray(0, 8);
+      const isPdf = head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46; // %PDF
+      const isZip = head[0] === 0x50 && head[1] === 0x4b && (head[2] === 0x03 || head[2] === 0x05 || head[2] === 0x07); // PK..
+      const isOle = head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0; // legacy .doc/.xls
+      const asText = buffer.toString("utf8");
+      const isRtf = asText.startsWith("{\\rtf");
+
+      if (isOle) {
+        return c.json(
+          { error: "That's an old Office file — open it and choose Save As → .docx or PDF, then resend." },
+          422,
+        );
+      }
+
+      if (isPdf) {
+        const { extractText, getDocumentProxy } = await import("unpdf");
+        const pdf = await getDocumentProxy(new Uint8Array(buffer));
+        const { totalPages, text } = await extractText(pdf, { mergePages: true });
+        const clean = (typeof text === "string" ? text : (text as string[]).join("\n")).trim();
+        if (!clean) {
+          return c.json({ error: "That PDF has no selectable text — it's a scan. Send a clear photo of it instead." }, 422);
         }
-        if (/\.doc$/i.test(wordFile.name) && !/\.docx$/i.test(wordFile.name)) {
-          return c.json(
-            { error: "Old .doc files aren't supported — open it and save as .docx or PDF." },
-            422,
-          );
-        }
-        const buffer = Buffer.from(await wordFile.arrayBuffer());
+        return c.json({ success: true, text: clean, pages: totalPages });
+      }
+
+      if (isZip && (asText.includes("word/document.xml") || /\.docx$/i.test(file.name))) {
         const mammoth = await import("mammoth");
         const lib = (mammoth as { extractRawText?: unknown }).extractRawText
           ? (mammoth as typeof import("mammoth"))
           : ((mammoth as { default: typeof import("mammoth") }).default);
         const { value } = await lib.extractRawText({ buffer });
         const clean = (value || "").trim();
-        if (!clean) {
-          return c.json({ error: "That Word file has no readable text." }, 422);
-        }
+        if (!clean) return c.json({ error: "That Word file has no readable text." }, 422);
         return c.json({ success: true, text: clean, pages: 1 });
       }
 
-      if (pdfFile!.size > MAX_PDF_BYTES) {
-        return c.json({ error: "That PDF is too large (max 4 MB). Try a smaller, text-based file." }, 413);
+      if (isRtf) {
+        // Strip RTF: drop control words / groups, unescape hex + common escapes.
+        const clean = asText
+          .replace(/\\'[0-9a-fA-F]{2}/g, " ")
+          .replace(/\\par[d]?/g, "\n")
+          .replace(/\\[a-zA-Z]+-?\d* ?/g, "")
+          .replace(/[{}]/g, "")
+          .replace(/\r/g, "")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+        if (clean.length < 20) return c.json({ error: "Couldn't read that RTF file." }, 422);
+        return c.json({ success: true, text: clean, pages: 1 });
       }
 
-      const bytes = new Uint8Array(await pdfFile!.arrayBuffer());
-
-      // unpdf ships a serverless build of pdfjs — no DOMMatrix stub, no worker.
-      const { extractText, getDocumentProxy } = await import("unpdf");
-      const pdf = await getDocumentProxy(bytes);
-      const { totalPages, text } = await extractText(pdf, { mergePages: true });
-
-      const clean = (typeof text === "string" ? text : (text as string[]).join("\n")).trim();
-      if (!clean) {
-        return c.json(
-          { error: "No text found — this looks like a scanned image PDF. Try a text-based PDF." },
-          422
-        );
+      // Plain text? Accept if it decodes clean (few control bytes, mostly printable).
+      const control = (asText.match(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g) || []).length;
+      if (asText.trim().length >= 20 && control / Math.max(asText.length, 1) < 0.02) {
+        return c.json({ success: true, text: asText.trim().slice(0, 60000), pages: 1 });
       }
 
-      return c.json({ success: true, text: clean, pages: totalPages });
+      return c.json(
+        { error: "Couldn't read that file type. Send a PDF, a Word (.docx) file, a photo, or paste the text." },
+        415,
+      );
     } catch (err) {
       console.error("[tools:extract-text] failed:", err);
-      return c.json({ error: "Couldn't read this PDF's text. Try a text-based (not scanned) PDF." }, 500);
+      return c.json({ error: "Couldn't read that file. Try a PDF or paste the text." }, 500);
     }
   });

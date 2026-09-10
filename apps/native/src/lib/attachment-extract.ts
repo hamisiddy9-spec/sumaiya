@@ -38,12 +38,6 @@ async function toOcrDataUrl(uri: string, mimeType?: string): Promise<string> {
   }
 }
 
-function isPdf(a: Attachment): boolean {
-  return a.mimeType === "application/pdf" || /\.pdf$/i.test(a.name);
-}
-function isWord(a: Attachment): boolean {
-  return /officedocument\.wordprocessing|msword/.test(a.mimeType ?? "") || /\.docx?$/i.test(a.name);
-}
 function isImageFile(a: Attachment): boolean {
   return /^image\//.test(a.mimeType ?? "") || /\.(jpe?g|png|webp|heic|heif|bmp|gif)$/i.test(a.name);
 }
@@ -70,44 +64,39 @@ export async function extractAttachment(a: Attachment): Promise<Partial<Attachme
       return await ocrImage(a.uri, a.mimeType);
     }
 
-    if (a.kind === "document" && isPdf(a)) {
-      const { text } = await apiClient.extractPdfText({ uri: a.uri, name: a.name, type: "application/pdf" });
-      const clean = (text || "").trim();
-      return clean
-        ? { extractedText: clean.slice(0, MAX_CHARS), extracting: false }
-        : { extractError: "That PDF looks like a scan (no selectable text). Take a clear photo of it and I'll read that.", extracting: false };
-    }
-
-    if (a.kind === "document" && isPlainText(a)) {
-      const text = await FileSystem.readAsStringAsync(a.uri, { encoding: "utf8" }).catch(() => "");
-      const clean = text.trim();
-      return clean
-        ? { extractedText: clean.slice(0, MAX_CHARS), extracting: false }
-        : { extractError: "That file came through empty — paste the text here.", extracting: false };
-    }
-
-    if (a.kind === "document" && isWord(a)) {
-      const isOldDoc = /\.doc$/i.test(a.name) && !/\.docx$/i.test(a.name);
-      if (isOldDoc) {
-        return {
-          extractError:
-            "That's an old .doc file — open it and save it as .docx or a PDF, then resend.",
-          extracting: false,
-        };
-      }
-      const { text } = await apiClient.extractWordText({
-        uri: a.uri,
-        name: a.name,
-        type: a.mimeType,
-      });
-      const clean = (text || "").trim();
-      return clean
-        ? { extractedText: clean.slice(0, MAX_CHARS), extracting: false }
-        : { extractError: "That Word file came through with no readable text — paste it here.", extracting: false };
-    }
-
     if (a.kind === "document") {
-      return { extractError: "I couldn't read that file type. Paste the text and I'll work from that.", extracting: false };
+      // Server-first for every non-image document. The server sniffs the bytes
+      // (PDF / .docx / RTF / plain text) rather than trusting the name or MIME
+      // — a share-sheet file with a junk name still reads. Local UTF-8 read is
+      // the offline fallback for obvious text files.
+      try {
+        const { text } = await apiClient.extractDocumentText({
+          uri: a.uri,
+          name: a.name,
+          type: a.mimeType,
+        });
+        const clean = (text || "").trim();
+        if (clean) return { extractedText: clean.slice(0, MAX_CHARS), extracting: false };
+      } catch (err) {
+        // A 4xx carries a specific, user-facing reason (old .doc, scanned PDF,
+        // unknown type) — surface it. Anything else falls through to the local
+        // read / generic message.
+        if (err instanceof ApiError && err.status >= 400 && err.status < 500 && err.message) {
+          return { extractError: err.message, extracting: false };
+        }
+      }
+
+      if (isPlainText(a)) {
+        const text = await FileSystem.readAsStringAsync(a.uri, { encoding: "utf8" }).catch(() => "");
+        const clean = text.trim();
+        if (clean.length > 20) return { extractedText: clean.slice(0, MAX_CHARS), extracting: false };
+      }
+
+      return {
+        extractError:
+          "I couldn't read that file — check your connection, or paste the text and I'll work from it.",
+        extracting: false,
+      };
     }
 
     return { extracting: false }; // link / cv — nothing to extract on device
