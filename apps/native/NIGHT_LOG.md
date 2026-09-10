@@ -286,3 +286,27 @@ these tables directly, so that reasoning doesn't hold for them.
 
 **Green:** all public routes 200, no console errors, i18n (sw/en) OK, guest CV
 editor solid, /editor 500 fix confirmed live, start-chooser live, mobile renders.
+
+### 10:45 — LIVE TEST cont'd: full GUEST flow works end-to-end
+Auth P0 blocks logged-in testing, but the assistant has a guest mode — tested
+that fully against prod:
+- multi-turn chat, fact-tracking: GOOD (tracked employers, dates, CPA, skills)
+- anti-fabrication: GOOD — "mwenye famasi yako mwenyewe" not "sales rep";
+  built CV had zero invented facts (all from what the tester said)
+- file upload + text extraction: WORKS ("Nimeona CV yako... historia ya famasi")
+- guest conversation survives a page reload (localStorage)
+- "Nimemaliza — tengeneza sasa" → in-chat CV preview card (template + colour
+  switch) → "Pakua PDF" downloads a real, clean, well-structured CV as a GUEST
+  (no signup wall)
+
+New bugs (all polish, none blocking):
+- **PDF export emits a blank page 2** — CV fits on p1, download is 2 pages.
+- **"Tengeneza CV yangu" build bar still shows AFTER the CV is built** (below
+  the finished preview card).
+- **Assistant re-asks an unanswered question verbatim** — the 1c9cdff
+  anti-loop prompt is unreliable when the user sidesteps a question. Escape
+  hatch (build-now bar) mitigates.
+- **401 /api/profile/confirmations on every guest load** — client should skip
+  it when guest.
+- CPA(K) double-classified as skill + certification; greeting says press "CV"
+  but the card is "Nataka CV".
