@@ -346,3 +346,18 @@ sumaiyaai.vercel.app:
 - CPA(K) dedup: code+test (not re-run live)
 - sign-in logo: verified earlier
 Supabase P0/P1 still with the user.
+
+### 12:35 — APK CRASH FIXED, app launches
+Root cause via adb logcat (Pixel 8 Pro, USB): `NoClassDefFoundError:
+expo.modules.kotlin.types.AnyTypeProvider` at `ClipboardModule.definition` —
+`expo-clipboard@8.0.8` (wrong SDK line) vs SDK 57's expo-modules-core. Crashed
+in `ExpoModulesPackage.createNativeModules` before any JS ran.
+- `aea4e5d`: expo-clipboard 8.0.8 → 57.0.1, webview 13.16.0 → 13.16.1,
+  GoogleSignin.configure() wrapped in try/catch.
+- Rebuilt (12m, incremental), `adb install`, relaunched: **boots to the
+  language-first welcome screen.** `ReactNativeJS: Running "main"`,
+  MainActivity resumed, no FATAL.
+Open (non-blocking): onboarding welcome has the same "dead band" layout gap
+(content top, picker bottom); a `W/Reanimated synchronouslyUpdateUIProps
+failed` during screen transitions (reanimated4 × rn-screens).
+USB keeps dropping — further device testing intermittent.
