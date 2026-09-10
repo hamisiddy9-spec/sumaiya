@@ -324,10 +324,25 @@ New bugs (all polish, none blocking):
 - `100b3c9` greeting copy: "tap one below" not "tap 'CV'" (card says "Make my CV").
 - `1121d4d` **CPA(K) double-listed** as skill + certification — deduped in
   `toCvData` (credentials live in Certifications). +1 test.
-- `a012eb5` **target-role question loop** — prompt insisted on "the role you
+- `a012eb5`+`af8adc4` **target-role question loop** — 2 prompt passes; now VERIFIED
+  on prod: role asked once, then flows role → work → detail → education, no
+  repeats.
   want" and re-asked it every turn; now a stated profession is enough, ask
   "what job?" at most once.
 Also `8c77039` sign-in logo (bigger + wordmark + cream, verified on prod).
 
 Supabase P0 (SMTP 535) + P1 (RLS on 7 tables) handed to the user with a guide.
 All web changes: tsc 0, targeted vitest green, deployed to prod as pushed.
+
+### 11:30 — live-test fixes verified on prod
+All 7 findings from the guest-flow test confirmed fixed against
+sumaiyaai.vercel.app:
+- PDF: 1 page now (was 2 w/ blank trailing) ✓
+- stale "Create my CV" bar after build: gone ✓
+- 401 /api/profile/confirmations: gone (guest) ✓
+- /assistant greeting+chooser: centred, no dead band ✓
+- greeting copy "Gusa kimoja hapa chini" ✓
+- target-role loop: FIXED — asked once, then role→work→detail→education ✓
+- CPA(K) dedup: code+test (not re-run live)
+- sign-in logo: verified earlier
+Supabase P0/P1 still with the user.
