@@ -183,10 +183,10 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   const returning = !!profile?.fullName;
   const greeting = convoSw
     ? (guest
-        ? `Karibu! Mimi ni Sumaiya 😊 Niko hapa kukusaidia kutengeneza CV yako ya kitaalamu — bure, kwa dakika chache. Bonyeza "CV" hapa chini, pakia CV yako ya zamani, au niambie tu jina lako.`
+        ? `Karibu! Mimi ni Sumaiya 😊 Niko hapa kukusaidia kutengeneza CV yako ya kitaalamu — bure, kwa dakika chache. Gusa kimoja hapa chini, pakia CV yako ya zamani, au niambie tu jina lako.`
         : `${returning ? `Karibu tena, ${firstName}!` : `Karibu${firstName ? `, ${firstName}` : ""}!`} Mimi ni Sumaiya 😊 Niko hapa — naweza kutengeneza CV, barua ya kazi, kadi ya biashara au barua rasmi, na pia tupige story tu. Unachotaka leo?`)
     : (guest
-        ? `Welcome! I'm Sumaiya 😊 I'll write your professional CV, free — in minutes. Tap "CV" below, upload your old CV, or just tell me your name.`
+        ? `Welcome! I'm Sumaiya 😊 I'll write your professional CV, free — in minutes. Tap one below, upload your old CV, or just tell me your name.`
         : `${returning ? `Welcome back, ${firstName}!` : `Welcome${firstName ? `, ${firstName}` : ""}!`} I'm Sumaiya 😊 I'm here — I can create a CV, a cover letter, a business card, or a formal letter, and we can also just chat. What would you like today?`);
 
   // Cockpit mode: the assistant opened with a specific CV in hand. It leads —
@@ -568,7 +568,9 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         // elsewhere (editor/Settings). Re-check the live pending list and
         // drop any confirmations surfaces that no longer have pending facts
         // — the count shown must always reflect the DB, not the last save.
+        // Guests have no profile/DB — skip the call (it would just 401).
         void (async () => {
+          if (guest) return;
           try {
             const res = await fetch("/api/profile/confirmations");
             const j = (await res.json().catch(() => ({}))) as { success?: boolean; data?: PendingConfirmation[] };
@@ -1408,6 +1410,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // confirmations opens the shared card; follow-up links to the tracker.
   const runSignal = useCallback(async (sig: Signal) => {
     if (sig.type === "confirmations") {
+      if (guest) return;
       try {
         const res = await fetch("/api/profile/confirmations");
         const j = (await res.json().catch(() => ({}))) as { success?: boolean; data?: PendingConfirmation[] };
@@ -2446,7 +2449,14 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 py-5">
-        <div className="min-h-full max-w-2xl mx-auto flex flex-col justify-end space-y-3" aria-live="polite">
+        {/* Before the first user turn the thread is just the greeting + chooser
+            — centre it so a tall desktop viewport doesn't show a dead band.
+            Once the conversation starts, anchor to the bottom (newest by the
+            composer). */}
+        <div
+          className={`min-h-full max-w-2xl mx-auto flex flex-col space-y-3 ${userTurns === 0 ? "justify-center" : "justify-end"}`}
+          aria-live="polite"
+        >
           {messages.map((m, i) => (
             <div key={i} className="space-y-2 msg-enter">
               {m.content && (
@@ -2806,7 +2816,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               </span>
             </button>
           )}
-          {done ? (
+          {done && !guestCvReady ? (
             <div className="flex flex-col gap-2">
               <button onClick={build} disabled={building || sending}
                 className="w-full flex items-center justify-center gap-2 bg-ember text-cream text-sm font-semibold py-3 rounded-input-lg shadow-ember-hard active:shadow-ember-active active:translate-y-[2px] hover:bg-ember-hover disabled:opacity-60 transition">

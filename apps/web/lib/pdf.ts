@@ -64,6 +64,24 @@ export function resolveExportScale(requested: number, ua: string, deviceMemory?:
 }
 
 /**
+ * How many PDF pages a rasterized document needs.
+ *
+ * `slop` absorbs a fraction of a page of trailing content so a CV that fills
+ * the page almost exactly — a full-height template sidebar, sub-pixel
+ * rounding, or a source PAGE_H a hair taller than jsPDF's a4-in-px — doesn't
+ * spill a few pixels onto a near-blank trailing page. Default 2% ≈ the bottom
+ * margin; genuine second-page content (>2% over) still gets its page.
+ */
+export function computePageCount(
+  canvasHeight: number,
+  pxPerPage: number,
+  slop = 0.02,
+): number {
+  if (!(pxPerPage > 0)) return 1;
+  return Math.max(1, Math.ceil((canvasHeight - pxPerPage * slop) / pxPerPage));
+}
+
+/**
  * Finds a page-break row that no text crosses, so a multi-page slice never
  * shears a line of text in half. A row is "clean" when it looks the same as the
  * rows just above and below it across the full width — true for the blank gap
@@ -221,7 +239,7 @@ async function renderPdfDoc(el: HTMLElement, opts: ExportOptions): Promise<any> 
   // pixels onto an extra, nearly-blank trailing page. We cap at pageCount and
   // only nudge when there's enough slack to still fit the rest of the content in
   // the remaining pages (else we keep the hard cut for that break).
-  const pageCount = Math.max(1, Math.ceil(canvas.height / pxPerPage));
+  const pageCount = computePageCount(canvas.height, pxPerPage);
   let sliceTop = 0;
   for (let pageIndex = 0; pageIndex < pageCount; pageIndex++) {
     const isLast = pageIndex === pageCount - 1;

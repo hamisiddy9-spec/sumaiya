@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isIOSBrowser, resolveExportScale, resolvePdfDelivery } from "./pdf";
+import { computePageCount, isIOSBrowser, resolveExportScale, resolvePdfDelivery } from "./pdf";
 
 const IPHONE_UA =
   "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1";
@@ -70,5 +70,26 @@ describe("resolveExportScale — low-end mobile OOM guard", () => {
   it("never goes below 1", () => {
     expect(resolveExportScale(1, ANDROID_UA, 0.5)).toBe(1);
     expect(resolveExportScale(1, ANDROID_UA, 1)).toBe(1);
+  });
+});
+
+describe("computePageCount — no phantom trailing page", () => {
+  const P = 2245.9; // pxPerPage for an A4 CV rasterized at scale 2
+
+  it("keeps a one-page CV on one page when it spills a sub-pixel over", () => {
+    expect(computePageCount(P + 0.4, P)).toBe(1);   // the Grace-Otieno bug
+    expect(computePageCount(P, P)).toBe(1);
+    expect(computePageCount(P * 1.019, P)).toBe(1); // within the 2% margin
+  });
+
+  it("still paginates genuine second-page content", () => {
+    expect(computePageCount(P * 1.05, P)).toBe(2);
+    expect(computePageCount(P * 2, P)).toBe(2);
+    expect(computePageCount(P * 2.3, P)).toBe(3);
+  });
+
+  it("never returns less than 1, and tolerates a zero pxPerPage", () => {
+    expect(computePageCount(0, P)).toBe(1);
+    expect(computePageCount(5000, 0)).toBe(1);
   });
 });
