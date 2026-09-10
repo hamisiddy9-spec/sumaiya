@@ -122,12 +122,12 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         return;
       }
       const pickCv = (cv: (typeof cvs)[number]) => {
-        const d: any = cv.data ?? {};
+        const d = cv.data;
         const text = [
           `${t("My CV", "CV yangu")}: ${cv.title}`,
-          d.summary,
-          (d.experience ?? []).map((e: any) => `${e.title} — ${e.company} (${e.startDate}–${e.endDate || t("now", "sasa")})`).join("\n"),
-          (d.skills ?? []).length ? `${t("Skills", "Ujuzi")}: ${(d.skills ?? []).map((s: any) => s.name).join(", ")}` : "",
+          d?.summary,
+          (d?.experience ?? []).map((e) => `${e.title} — ${e.company} (${e.startDate}–${e.endDate || t("now", "sasa")})`).join("\n"),
+          (d?.skills ?? []).length ? `${t("Skills", "Ujuzi")}: ${(d?.skills ?? []).map((s) => s.name).join(", ")}` : "",
         ].filter(Boolean).join("\n\n");
         setAttachments((prev) => [
           ...prev,

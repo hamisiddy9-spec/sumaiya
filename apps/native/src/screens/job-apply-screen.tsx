@@ -66,9 +66,10 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     const data = { ...(targetCv.data as CVData) };
     if (result.cv.summary) data.summary = result.cv.summary;
     const byId = new Map(result.cv.experience.map((e) => [e.id, e.description]));
-    data.experience = (data.experience ?? []).map((exp: any) =>
-      byId.has(exp.id) ? { ...exp, description: byId.get(exp.id) } : exp,
-    );
+    data.experience = (data.experience ?? []).map((exp) => {
+      const next = byId.get(exp.id);
+      return next != null ? { ...exp, description: next } : exp;
+    });
     try {
       await updateCV(targetCv.id, { ...targetCv, data, updatedAt: new Date() });
     } catch {

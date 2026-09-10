@@ -16,9 +16,11 @@ import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
 import { CvPreviewCard } from "../../components/cv/cv-preview-card";
+import type { RouteProp } from "@react-navigation/native";
+import type { ScanStackParamList } from "../../navigation/types";
 
 interface Props {
-  route: any;
+  route: RouteProp<ScanStackParamList, "ScanProcessing">;
 }
 
 const STEPS_EN = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];

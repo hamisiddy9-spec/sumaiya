@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
-import type { CV } from "@sumaiya/types";
+import type { CV, CVData } from "@sumaiya/types";
 import { useCvs } from "../hooks/use-cvs";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
@@ -69,13 +69,13 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
     setVerdictBusy(true);
     haptics.light();
     try {
-      const d: any = picked.data ?? {};
-      const failing = analysis.checks.filter((ch: any) => !ch.pass).map((ch: any) => ch.label).join("; ");
+      const d: Partial<CVData> = picked.data ?? {};
+      const failing = analysis.checks.filter((ch) => !ch.pass).map((ch) => ch.label).join("; ");
       const prompt =
         `${sw ? "Jibu kwa Kiswahili." : "Answer in English."} ` +
         `You are Sumaiya reviewing a CV. ATS score ${analysis.score}/100. Failing checks: ${failing || "none"}. ` +
-        `Summary: "${(d.summary ?? "").slice(0, 400)}". Roles: ${(d.experience ?? []).map((e: any) => `${e.title} at ${e.company}`).join(", ") || "none"}. ` +
-        `Skills: ${(d.skills ?? []).map((s: any) => s.name).join(", ") || "none"}. ` +
+        `Summary: "${(d.summary ?? "").slice(0, 400)}". Roles: ${(d.experience ?? []).map((e) => `${e.title} at ${e.company}`).join(", ") || "none"}. ` +
+        `Skills: ${(d.skills ?? []).map((s) => s.name).join(", ") || "none"}. ` +
         `Give a short honest verdict (max 90 words) then the 3 highest-impact fixes as a numbered list. Ground everything in what's above — invent nothing.`;
       const { message } = await apiClient.sendChatMessage([{ role: "user", content: prompt }]);
       setVerdict(message.trim());

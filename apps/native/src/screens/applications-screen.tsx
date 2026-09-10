@@ -6,9 +6,10 @@ import { STATUS_META, type AppStatus } from "../lib/applications-store";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, Screen, ScreenTitle, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import type { ThemeColors } from "../components/ui/theme";
 import type { ApplicationsScreenProps } from "../navigation/types";
 
-const STATUS_TINT: Record<AppStatus, (c: any) => string> = {
+const STATUS_TINT: Record<AppStatus, (c: ThemeColors) => string> = {
   saved: (c) => c.textMuted,
   applied: (c) => c.accent,
   interview: (c) => c.warning,
