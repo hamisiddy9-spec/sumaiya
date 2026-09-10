@@ -361,3 +361,26 @@ Open (non-blocking): onboarding welcome has the same "dead band" layout gap
 (content top, picker bottom); a `W/Reanimated synchronouslyUpdateUIProps
 failed` during screen transitions (reanimated4 × rn-screens).
 USB keeps dropping — further device testing intermittent.
+
+### 14:30 — Learning Hub → skill-gap engine (user's vision + additions)
+Reframed from a course directory to the engine that closes the loop
+CV → Jobs → Gaps → Learning → better CV → better match.
+- `courses.ts` (15 curated skill areas, weighted for East Africa, job-keyword
+  signals, one free course each w/ bilingual "why", fast-path, practice
+  prompts; SKILLS_BY_FIELD map), `skill-gaps.ts` (deterministic engine,
+  +5 tests), `course-progress.ts` (learning vs can-do; only can-do adds to
+  the profile).
+- `learning-hub-screen.tsx` rewritten: readiness bar → YOUR NEXT SKILLS
+  (gap card: priority + real count + the one course + Learn/Practise/"I can
+  do this"/"Mark as learning") → strengths → guides → collapsed Explore.
+- Practise deep-links a seed message to the chat (SumaiyaTab.seed).
+- Premium guides now open + show section 1 then a soft wall.
+- Also: ALL sparkle "AI star" icons gone (→ SumaiyaMark / gem); jobs feed +
+  match score (JobsScreen, Home section); CvPreview blank-webview fix + no
+  "🎉"; EmptyState button centring; DocumentPicker */* + image OCR + image
+  downscale (expo-image-manipulator); attach/premium/preview modals sized to
+  window (new-arch layout collapse).
+
+tsc 0 (native+web), 102 jest. Commits 12d2844 · 2583065 · 8cabdac (+ earlier
+batch 78a389a). No APK built since batch-3 (30b538ea) per user's "stop
+resource-consuming things, we'll talk".
