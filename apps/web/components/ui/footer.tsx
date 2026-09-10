@@ -7,7 +7,7 @@ import { useLang } from "@/lib/i18n/context";
 import { PAYMENTS_ENABLED } from "@/lib/features";
 
 const productLinks = [
-  { href: "/templates", label: "Templates", labelSw: "Templeti" },
+  { href: "/templates", label: "Looks", labelSw: "Miundo" },
   { href: "/assistant", label: "Sumaiya (AI assistant)", labelSw: "Sumaiya (msaidizi wa AI)" },
   { href: "/editor/cv/try", label: "CV builder", labelSw: "Tengeneza CV" },
   { href: "/editor/cover-letter/try", label: "Cover letters", labelSw: "Barua za maombi" },
@@ -46,7 +46,7 @@ export function Footer() {
             <Logo className="text-cream [&_span]:!text-cream" />
             <p className="mt-3 text-sm text-cream/60 leading-relaxed max-w-xs">
               {sw
-                ? "Templeti za kitaalamu za CV, barua za maombi, kadi za biashara na barua rasmi, pamoja na msaidizi wa AI unaokusaidia kupata ajira."
+                ? "Miundo ya kitaalamu ya CV, barua za maombi, kadi za biashara na barua rasmi, pamoja na msaidizi wa AI unaokusaidia kupata ajira."
                 : "Professional CV, cover letter, business card & letter templates, with an AI assistant that helps you get hired."}
             </p>
           </div>

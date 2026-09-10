@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
 import { Pressable, Text, View } from "react-native";
-import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
-import { useCVs } from "@sumaiya/hooks";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
-import { apiClient } from "../../lib/api-client";
+import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
+import { useLang, type Lang } from "../../lib/i18n";
+import { GUIDES } from "../../lib/guides";
 import {
   Card,
   EmptyState,
@@ -19,28 +20,41 @@ import {
 import { Icon } from "../../components/icon";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 
-
-function greeting(): string {
+function greeting(lang: Lang): string {
   const h = new Date().getHours();
+  if (lang === "sw") {
+    if (h < 12) return "Habari za asubuhi";
+    if (h < 16) return "Habari za mchana";
+    if (h < 19) return "Habari za jioni";
+    return "Habari za usiku";
+  }
   if (h < 12) return "Good morning";
   if (h < 18) return "Good afternoon";
   return "Good evening";
 }
 
-function relativeDate(d: string | Date): string {
+function relativeDate(d: string | Date, lang: Lang): string {
   const date = new Date(d);
   const diff = Date.now() - date.getTime();
   const day = 86_400_000;
+  const n = Math.floor(diff / day);
+  if (lang === "sw") {
+    if (diff < day) return "Leo";
+    if (diff < 2 * day) return "Jana";
+    if (diff < 7 * day) return `Siku ${n} zilizopita`;
+    return date.toLocaleDateString("sw-TZ", { month: "short", day: "numeric" });
+  }
   if (diff < day) return "Today";
   if (diff < 2 * day) return "Yesterday";
-  if (diff < 7 * day) return `${Math.floor(diff / day)} days ago`;
+  if (diff < 7 * day) return `${n} days ago`;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function HomeScreen({ navigation }: any) {
   const c = useThemeColors();
   const { user } = useAuthContext();
-  const { cvs, loading, loadCVs } = useCVs(apiClient);
+  const { t, lang } = useLang();
+  const { cvs, loading, loadCVs } = useCvs();
   const [refreshing, setRefreshing] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {
@@ -61,15 +75,18 @@ export function HomeScreen({ navigation }: any) {
     [cvs],
   );
 
-  const name = user?.name || user?.email?.split("@")[0] || "there";
+  const rawName = user?.name?.trim();
+  // Don't greet someone by a device/brand name a browser auto-filled.
+  const looksLikeDevice = rawName ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) || /^[a-z0-9]{1,4}$/i.test(rawName) : false;
+  const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
-    { icon: "sumaiya", label: "Ask Sumaiya", tint: "#7c3aed", onPress: () => navigation.navigate("SumaiyaTab") },
-    { icon: "briefcase", label: "Applications", tint: "#c63f13", onPress: () => navigation.navigate("Applications") },
-    { icon: "shield-check", label: "ATS check", tint: "#0e9488", onPress: () => navigation.navigate("AtsChecker") },
-    { icon: "import", label: "Import a CV", tint: c.accent, onPress: () => navigation.navigate("ImportTab") },
-    { icon: "file-text", label: "My CVs", tint: "#4a5568", onPress: () => navigation.navigate("CVsTab") },
-    { icon: "book-open", label: "Learning", tint: "#c77a17", onPress: () => navigation.navigate("LearningHub") },
+    { icon: "sumaiya", label: t("Ask Sumaiya", "Uliza Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
+    { icon: "target", label: t("Tailor to a job", "Lenga kwenye kazi"), tint: "#12433D", onPress: () => navigation.navigate("JobApply") },
+    { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: "#12766A", onPress: () => navigation.navigate("AtsChecker") },
+    { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
+    { icon: "import", label: t("Import a CV", "Pakia CV"), tint: c.accent, onPress: () => navigation.navigate("ImportTab") },
+    { icon: "book-open", label: t("Learning", "Kujifunza"), tint: "#96630F", onPress: () => navigation.navigate("LearningHub") },
   ];
 
   return (
@@ -80,8 +97,7 @@ export function HomeScreen({ navigation }: any) {
       refreshing={refreshing}
       onRefresh={onRefresh}
     >
-      {/* Greeting */}
-      <ScreenTitle eyebrow={`${greeting()},`}>{name}</ScreenTitle>
+      <ScreenTitle eyebrow={`${greeting(lang)},`}>{name}</ScreenTitle>
 
       {/* Stat row */}
       <Animated.View
@@ -104,7 +120,7 @@ export function HomeScreen({ navigation }: any) {
             {cvs.length}
           </Text>
           <Text style={{ color: c.textMuted, fontSize: 12 }}>
-            {cvs.length === 1 ? "CV created" : "CVs created"}
+            {cvs.length === 1 ? t("CV created", "CV imetengenezwa") : t("CVs created", "CV zimetengenezwa")}
           </Text>
         </Pressable>
         <Pressable
@@ -120,19 +136,19 @@ export function HomeScreen({ navigation }: any) {
             justifyContent: "flex-start",
           }}
         >
-          <Icon name="plus" size={18} color="#ffffff" />
-          <Text style={{ color: "#ffffff", fontSize: 19, fontWeight: "700", marginTop: 8 }}>
-            New CV
+          <Icon name="plus" size={18} color={c.accentText} />
+          <Text style={{ color: c.accentText, fontSize: 19, fontWeight: "700", marginTop: 8 }}>
+            {t("New CV", "CV mpya")}
           </Text>
-          <Text style={{ color: "#ffffff", opacity: 0.9, fontSize: 12, fontWeight: "600" }}>
-            Start from scratch →
+          <Text style={{ color: c.accentText, opacity: 0.9, fontSize: 12, fontWeight: "600" }}>
+            {t("Start from scratch", "Anza upya")} →
           </Text>
         </Pressable>
       </Animated.View>
 
       {/* Quick actions */}
       <Animated.View entering={FadeInDown.duration(320).delay(120)}>
-        <SectionHeader title="Quick actions" />
+        <SectionHeader title={t("Quick actions", "Vitendo vya haraka")} />
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
           {quickActions.map((a, i) => (
             <Stagger key={a.label} index={i} step={45}>
@@ -160,11 +176,47 @@ export function HomeScreen({ navigation }: any) {
         </View>
       </Animated.View>
 
+      {/* Tip of the day — a free guide, rotated daily */}
+      {(() => {
+        const freeGuides = GUIDES.filter((g) => g.tier === "free");
+        const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
+        return (
+          <Animated.View entering={FadeInDown.duration(320).delay(160)}>
+            <Pressable
+              onPress={() => { haptics.light(); navigation.navigate("Guide", { id: tip.id }); }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                padding: 14,
+                borderRadius: 16,
+                backgroundColor: c.accent + "12",
+                borderWidth: 1,
+                borderColor: c.accent + "2a",
+              }}
+            >
+              <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "22", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="sparkles" size={18} color={c.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
+                  {t("Tip from Sumaiya", "Kidokezo cha Sumaiya")}
+                </Text>
+                <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
+                  {tip.title[lang]}
+                </Text>
+              </View>
+              <Icon name="chevron-right" size={18} color={c.accent} />
+            </Pressable>
+          </Animated.View>
+        );
+      })()}
+
       {/* Recent CVs */}
       <Animated.View entering={FadeInDown.duration(320).delay(180)}>
         <SectionHeader
-          title="Recent"
-          actionLabel={cvs.length > 3 ? "View all" : undefined}
+          title={t("Recent", "Za hivi karibuni")}
+          actionLabel={cvs.length > 3 ? t("View all", "Ona zote") : undefined}
           onAction={() => navigation.navigate("CVsTab")}
         />
 
@@ -176,9 +228,12 @@ export function HomeScreen({ navigation }: any) {
         ) : recent.length === 0 ? (
           <EmptyState
             icon="file-text"
-            title="No CVs yet"
-            body="Import an existing CV from a photo or a file, or start a new one."
-            actionLabel="Import a CV"
+            title={t("No CVs yet", "Bado hakuna CV")}
+            body={t(
+              "Import an existing CV from a photo or a file, or start a new one.",
+              "Pakia CV uliyonayo kutoka kwenye picha au faili, au anza mpya.",
+            )}
+            actionLabel={t("Import a CV", "Pakia CV")}
             onAction={() => navigation.navigate("ImportTab")}
           />
         ) : (
@@ -210,7 +265,7 @@ export function HomeScreen({ navigation }: any) {
                     {cv.title}
                   </Text>
                   <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                    {relativeDate(cv.updatedAt)}
+                    {relativeDate(cv.updatedAt, lang)}
                   </Text>
                 </View>
                 <Icon name="chevron-right" size={18} color={c.textMuted} />

@@ -184,11 +184,11 @@ function UpgradeModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
           <Icon name="download" className="text-cream" size={22} />
         </div>
         <h2 className="text-xl font-bold text-espresso mb-2">{sw ? "Boresha ili kupakua" : "Upgrade to download"}</h2>
-        <p className="text-text-muted text-sm mb-6">{sw ? "Pata upakuaji wa PDF bila kikomo, templeti zote, na maboresho ya AI." : "Get unlimited PDF downloads, all templates, and AI-powered enhancements."}</p>
+        <p className="text-text-muted text-sm mb-6">{sw ? "Pata upakuaji wa PDF bila kikomo, miundo yote, na maboresho ya AI." : "Get unlimited PDF downloads, every look, and AI-powered enhancements."}</p>
         <ul className="text-left space-y-2 mb-6">
           {(sw
-            ? ["Upakuaji wa PDF bila kikomo", "Templeti zote za kitaalamu", "Uboreshaji wa maudhui kwa AI", "Zana za kuboresha ATS"]
-            : ["Unlimited PDF downloads", "All professional templates", "AI content enhancement", "ATS optimization tools"]
+            ? ["Upakuaji wa PDF bila kikomo", "Miundo yote ya kitaalamu", "Uboreshaji wa maudhui kwa AI", "Zana za kuboresha ATS"]
+            : ["Unlimited PDF downloads", "Every professional look", "AI content enhancement", "ATS optimization tools"]
           ).map((f) => (
             <li key={f} className="flex items-center gap-2.5 text-sm text-text-body">
               <Icon name="check" className="text-pine" size={16} />
@@ -829,7 +829,7 @@ function TemplateModal({
       <div className="bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-3xl max-h-[92dvh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
           <div>
-            <h2 className="text-lg font-bold text-espresso">{sw ? "Chagua templeti" : "Choose a template"}</h2>
+            <h2 className="text-lg font-bold text-espresso">{sw ? "Chagua muundo" : "Choose a look"}</h2>
             <p className="text-sm text-text-muted mt-0.5">{sw ? "Maudhui yako yanabaki — muundo pekee ndio unabadilika." : "Your content stays — only the design changes."}</p>
           </div>
           <button onClick={onClose} aria-label={label(sw, "close")} className="w-9 h-9 rounded-lg hover:bg-sand flex items-center justify-center transition text-text-muted hover:text-espresso flex-shrink-0">
@@ -2804,7 +2804,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             onClick={() => setShowTemplateModal(true)}
             className="hidden md:flex items-center gap-1.5 text-[11px] font-medium text-cream/80 hover:text-cream bg-espresso-2 hover:bg-espresso-line rounded-lg px-2.5 py-1.5 transition"
           >
-            {TEMPLATES.find((tpl) => tpl.id === templateId)?.name ?? (uiLang === "sw" ? "Templeti" : "Template")}
+            {TEMPLATES.find((tpl) => tpl.id === templateId)?.name ?? (uiLang === "sw" ? "Muundo" : "Look")}
             <Icon name="chevron-down" size={12} className="text-cream/50" />
           </button>
           {/* Color swatches */}
@@ -3084,7 +3084,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 {/* Template */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em]">{uiLang === "sw" ? "Templeti" : "Template"}</h3>
+                    <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em]">{uiLang === "sw" ? "Muundo" : "Look"}</h3>
                   </div>
                   <button
                     onClick={() => setShowTemplateModal(true)}

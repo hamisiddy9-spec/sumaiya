@@ -11,11 +11,16 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { offlineStorage } from "@sumaiya/utils";
+import { apiClient } from "../lib/api-client";
+import { useCvs } from "../hooks/use-cvs";
 import { useSumaiyaChat } from "../hooks/use-sumaiya-chat";
 import { ChatMessageComponent } from "../components/chat/chat-message";
+import { AttachmentPreviewSheet } from "../components/chat/attachment-preview-sheet";
 import { QuickActionsGrid } from "../components/chat/quick-actions-grid";
 import { ChatComposer } from "../components/chat/chat-composer";
 import { INITIAL_QUICK_ACTIONS } from "../components/chat/chat-types";
+import type { CVData } from "@sumaiya/types";
 import type { ActionType, Attachment } from "../components/chat/chat-types";
 import type { AttachKind } from "../components/chat/attach-sheet";
 import { Icon } from "../components/icon";
@@ -23,7 +28,7 @@ import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useSpeech } from "../lib/speech";
 import { useLang, greetingFor } from "../lib/i18n";
 import { resolveAttachment, linkAttachment } from "../lib/attachments";
-import { haptics, useThemeColors } from "../components/ui";
+import { haptics, useThemeColors, PromptModal } from "../components/ui";
 
 function TypingDot({ i }: { i: number }) {
   const c = useThemeColors();
@@ -47,10 +52,14 @@ function TypingDot({ i }: { i: number }) {
 export function SumaiyaChatScreen({ navigation, route }: any) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { messages, loading, error, sendMessage, clearChat, fetchLearningResources } = useSumaiyaChat();
+  const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv } =
+    useSumaiyaChat();
+  const { cvs } = useCvs();
   const { lang, t } = useLang();
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [preview, setPreview] = useState<Attachment | null>(null);
+  const [linkPrompt, setLinkPrompt] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -102,26 +111,37 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
 
   const onAttach = async (kind: AttachKind) => {
     if (kind === "link") {
-      Alert.prompt?.(
-        t("Paste the job link", "Bandika kiungo cha kazi"),
-        t("Sumaiya will read the job description.", "Sumaiya atasoma maelezo ya kazi."),
-        (url?: string) => {
-          if (url && url.trim()) setAttachments((prev) => [...prev, linkAttachment(url)]);
-        },
-      );
-      // Android has no Alert.prompt — fall back to a chat hint.
-      if (Platform.OS === "android") {
-        setInput((v) => (v ? v : t("Here's a job link: ", "Hiki hapa kiungo cha kazi: ")));
-        inputRef.current?.focus();
-      }
+      setLinkPrompt(true);
       return;
     }
     if (kind === "myDoc") {
-      // Attaching one of your own CVs as context needs the CV list to expose a
-      // picker mode + the import endpoint — tracked for the Profile/Applications
-      // phase. For now, point the user at the ask.
-      setInput((v) => v || t("Use my CV \"", "Tumia CV yangu \""));
-      inputRef.current?.focus();
+      if (cvs.length === 0) {
+        setInput((v) => v || t("I don't have a CV yet — help me build one.", "Sina CV bado — nisaidie kutengeneza."));
+        inputRef.current?.focus();
+        return;
+      }
+      const pickCv = (cv: (typeof cvs)[number]) => {
+        const d: any = cv.data ?? {};
+        const text = [
+          `${t("My CV", "CV yangu")}: ${cv.title}`,
+          d.summary,
+          (d.experience ?? []).map((e: any) => `${e.title} — ${e.company} (${e.startDate}–${e.endDate || t("now", "sasa")})`).join("\n"),
+          (d.skills ?? []).length ? `${t("Skills", "Ujuzi")}: ${(d.skills ?? []).map((s: any) => s.name).join(", ")}` : "",
+        ].filter(Boolean).join("\n\n");
+        setAttachments((prev) => [
+          ...prev,
+          { id: `cv-${cv.id}-${Date.now()}`, kind: "cv", uri: cv.id, name: cv.title, status: "ready", extractedText: text.slice(0, 4000) } as Attachment,
+        ]);
+      };
+      if (cvs.length === 1) { pickCv(cvs[0]); return; }
+      Alert.alert(
+        t("Which CV?", "CV ipi?"),
+        undefined,
+        [
+          ...cvs.slice(0, 4).map((cv) => ({ text: cv.title, onPress: () => pickCv(cv) })),
+          { text: t("Cancel", "Ghairi"), style: "cancel" as const },
+        ],
+      );
       return;
     }
     try {
@@ -138,10 +158,7 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
   const onInitialAction = async (actionId: string) => {
     haptics.selection();
     const seed: Record<string, string> = {
-      "cv-builder": t(
-        "I want to build a new CV. Ask me what you need to get started.",
-        "Nataka kutengeneza CV mpya. Niulize unachohitaji ili tuanze.",
-      ),
+      "cv-builder": t("Help me make my CV.", "Nisaidie kutengeneza CV yangu."),
       "job-letter": t(
         "Help me write a cover letter for a job I'm applying to.",
         "Nisaidie kuandika barua ya maombi kwa kazi ninayoomba.",
@@ -167,13 +184,36 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
     haptics.selection();
     switch (action) {
       case "open-cv":
-      case "edit-cv":
+      case "edit-cv": {
         if (data?.section === "jobs") {
-          navigation.navigate("HomeTab", { screen: "HomeMain" });
+          navigation.navigate("HomeTab", { screen: "JobApply" });
+          break;
+        }
+        if (data?.section === "ats") {
+          const cv = cvs[0];
+          navigation.navigate("HomeTab", { screen: "AtsChecker", params: cv ? { cvId: cv.id } : {} });
+          break;
+        }
+        if (data?.template === "letter") {
+          navigation.navigate("HomeTab", { screen: "ApplicationDetail", params: {} });
+          break;
+        }
+        // Open the CV the user actually has — not a blank editor. If they have
+        // none yet, take them to the list (Import / Start new) rather than
+        // dropping them into an empty form.
+        const target = data?.cvId
+          ? cvs.find((cv) => cv.id === data.cvId)
+          : cvs[0];
+        if (target) {
+          navigation.navigate("CVsTab", {
+            screen: "CvEditor",
+            params: { cvId: target.id, templateId: target.templateId },
+          });
         } else {
-          navigation.navigate("CVsTab", { screen: "CvEditor" });
+          navigation.navigate("CVsTab", { screen: "CvListMain" });
         }
         break;
+      }
       case "learn":
         if (data?.skills) {
           fetchLearningResources(data.skills).finally(goLearningHub);
@@ -191,6 +231,33 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
         break;
     }
   };
+
+  // Persist a CV Sumaiya built in the chat — straight to the local store + a
+  // best-effort server push. No trip through the editor needed.
+  const saveCvFromChat = async (cvData: CVData, template: string) => {
+    const now = new Date();
+    const cv = {
+      id: `cv-${Date.now()}`,
+      userId: "me",
+      templateId: template,
+      title: cvData.personalInfo?.fullName || "CV",
+      data: cvData,
+      createdAt: now,
+      updatedAt: now,
+    };
+    await offlineStorage.saveCVOffline(cv).catch(() => {});
+    try {
+      await apiClient.createCV(cv);
+    } catch {
+      /* offline / will reconcile — it's in the local store */
+    }
+  };
+
+  // Offer to build once the user has actually told Sumaiya something, and only
+  // until a CV has been produced in this thread.
+  const substantiveUserTurns = messages.filter((m) => m.author === "user" && m.content.trim().length > 12).length;
+  const alreadyBuilt = messages.some((m) => m.type === "cv-ready");
+  const showBuildBar = !empty && substantiveUserTurns >= 2 && !alreadyBuilt;
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -218,27 +285,27 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
             width: 38,
             height: 38,
             borderRadius: 12,
-            backgroundColor: "#7c3aed",
+            backgroundColor: c.accent,
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <SumaiyaMark size={19} color="#fff" state={loading ? "thinking" : "idle"} />
+          <SumaiyaMark size={19} color={c.accentText} state={loading ? "thinking" : "idle"} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={{ color: c.text, fontSize: 16, fontWeight: "700" }}>Sumaiya</Text>
           <Text style={{ color: c.textMuted, fontSize: 12 }}>
-            {t("Your AI career assistant", "Msaidizi wako wa AI wa kazi")}
+            {t("Your career assistant", "Msaidizi wako wa kazi")}
           </Text>
         </View>
-        {!empty && speech.supported && lastReply ? (
+        {!empty && lastReply && (speech.speaking || speech.speakable(lastReply)) ? (
           <Pressable
             hitSlop={10}
             onPress={() => {
               haptics.selection();
               speech.speaking ? speech.stop() : speech.speak(lastReply);
             }}
-            accessibilityLabel={speech.speaking ? "Stop reading" : "Read Sumaiya's reply aloud"}
+            accessibilityLabel={speech.speaking ? t("Stop reading", "Acha kusoma") : t("Read aloud", "Soma kwa sauti")}
           >
             <Icon name={speech.speaking ? "volume-x" : "volume-2"} size={18} color={speech.speaking ? c.accent : c.textMuted} />
           </Pressable>
@@ -287,7 +354,16 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
           ) : (
             messages.map((m) => (
               <Animated.View key={m.id} entering={FadeInUp.duration(260)}>
-                <ChatMessageComponent message={m} onActionPress={onAction} loading={loading} />
+                <ChatMessageComponent
+                  message={m}
+                  onActionPress={onAction}
+                  loading={loading}
+                  onPreviewAttachment={setPreview}
+                  onOpenCvEditor={(cv) =>
+                    navigation.navigate("CVsTab", { screen: "CvEditor", params: { initialData: cv } })
+                  }
+                  onSaveCv={saveCvFromChat}
+                />
               </Animated.View>
             ))
           )}
@@ -333,6 +409,33 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
           ) : null}
         </ScrollView>
 
+        {showBuildBar ? (
+          <Pressable
+            onPress={() => {
+              haptics.selection();
+              buildCvFromChat();
+            }}
+            disabled={buildingCv}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              marginHorizontal: 12,
+              marginBottom: 8,
+              paddingVertical: 12,
+              borderRadius: 14,
+              backgroundColor: c.accent,
+              opacity: buildingCv ? 0.7 : 1,
+            }}
+          >
+            <Icon name={buildingCv ? "loader" : "sparkles"} size={16} color={c.accentText} />
+            <Text style={{ color: c.accentText, fontSize: 14, fontWeight: "800" }}>
+              {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build my CV from this chat", "Tengeneza CV yangu kutoka mazungumzo haya")}
+            </Text>
+          </Pressable>
+        ) : null}
+
         <ChatComposer
           value={input}
           onChangeText={setInput}
@@ -344,6 +447,24 @@ export function SumaiyaChatScreen({ navigation, route }: any) {
           inputRef={inputRef}
         />
       </KeyboardAvoidingView>
+
+      <AttachmentPreviewSheet attachment={preview} onClose={() => setPreview(null)} />
+
+      <PromptModal
+        visible={linkPrompt}
+        title={t("Paste the job link", "Bandika link ya kazi")}
+        message={t("Sumaiya will read the job description.", "Sumaiya atasoma maelezo ya kazi.")}
+        placeholder="https://…"
+        confirmLabel={t("Add", "Ongeza")}
+        cancelLabel={t("Cancel", "Ghairi")}
+        keyboardType="url"
+        autoCapitalize="none"
+        onCancel={() => setLinkPrompt(false)}
+        onConfirm={(url) => {
+          setLinkPrompt(false);
+          if (url) setAttachments((prev) => [...prev, linkAttachment(url)]);
+        }}
+      />
     </View>
   );
 }

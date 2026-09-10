@@ -8,21 +8,26 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { useAppNavigation } from "../../hooks/use-app-navigation";
 import { apiClient } from "../../lib/api-client";
-import type { CVData } from "@sumaiya/types";
-import { Button, Card, Screen, haptics, useThemeColors } from "../../components/ui";
+import type { CV, CVData } from "@sumaiya/types";
+import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
+import { useLang } from "../../lib/i18n";
+import { CvPreviewCard } from "../../components/cv/cv-preview-card";
 
 interface Props {
   route: any;
 }
 
-const STEPS = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];
+const STEPS_EN = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];
+const STEPS_SW = ["Inasoma maandishi…", "Inatafuta uzoefu wako…", "Inapanga CV yako…"];
 
 export function ScanProcessingScreen({ route }: Props) {
   const c = useThemeColors();
+  const { t, lang } = useLang();
+  const STEPS = lang === "sw" ? STEPS_SW : STEPS_EN;
   const navigation = useAppNavigation();
   const { photoUri } = route.params;
   const [data, setData] = useState<Partial<CVData> | null>(null);
@@ -54,26 +59,23 @@ export function ScanProcessingScreen({ route }: Props) {
     (async () => {
       try {
         const base64 = await FileSystem.readAsStringAsync(photoUri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64",
         });
         const mime = photoUri.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
         const res = await apiClient.ocrUpload(`data:${mime};base64,${base64}`);
         if (cancelled) return;
         if (!res?.data) {
           throw new Error(
-            "We couldn't read details from this photo. You can still start a CV and fill it in.",
+            t("We couldn't read details from this photo. You can still start a CV and fill it in.", "Hatukuweza kusoma maelezo kwenye picha hii. Bado unaweza kuanza CV na kuijaza."),
           );
         }
         haptics.success();
         setData(res.data);
         setPhase("done");
-        setTimeout(() => {
-          if (!cancelled) navigation.navigate("CVEditor", { initialData: res.data });
-        }, 1600);
       } catch (err) {
         if (cancelled) return;
         haptics.error();
-        setErrorMsg(err instanceof Error ? err.message : "Scanning failed. Try again.");
+        setErrorMsg(err instanceof Error ? err.message : t("Scanning failed. Try again.", "Kupiga kumeshindwa. Jaribu tena."));
         setPhase("error");
       } finally {
         if (stepTimer.current) clearInterval(stepTimer.current);
@@ -104,14 +106,19 @@ export function ScanProcessingScreen({ route }: Props) {
             <Icon name="alert-triangle" size={28} color={c.error} />
           </View>
           <Text style={{ color: c.text, fontSize: 20, fontWeight: "800", textAlign: "center" }}>
-            Couldn&apos;t scan that
+            {t("Couldn't scan that", "Imeshindwa kupiga hiyo")}
           </Text>
           <Text style={{ color: c.textMuted, fontSize: 14, textAlign: "center", lineHeight: 20, maxWidth: 300 }}>
             {errorMsg}
           </Text>
           <View style={{ alignSelf: "stretch", gap: 10, marginTop: 12 }}>
-            <Button label="Try another photo" onPress={() => navigation.goBack()} />
-            <Button label="Retry" variant="secondary" onPress={() => setAttempt((a) => a + 1)} />
+            <Button label={t("Try another photo", "Jaribu picha nyingine")} onPress={() => navigation.goBack()} />
+            <Button label={t("Retry", "Jaribu tena")} variant="secondary" onPress={() => setAttempt((a) => a + 1)} />
+            <Button
+              label={t("Start a blank CV instead", "Anza CV tupu badala yake")}
+              variant="ghost"
+              onPress={() => navigation.navigate("CVEditor", {})}
+            />
           </View>
         </View>
       </Screen>
@@ -153,7 +160,7 @@ export function ScanProcessingScreen({ route }: Props) {
           </View>
 
           <View style={{ alignItems: "center", gap: 6 }}>
-            <Text style={{ color: c.text, fontSize: 19, fontWeight: "700" }}>Scanning your CV</Text>
+            <Text style={{ color: c.text, fontSize: 19, fontWeight: "700" }}>{t("Scanning your CV", "Inapiga CV yako")}</Text>
             <Animated.Text key={step} entering={FadeIn.duration(300)} style={{ color: c.textMuted, fontSize: 14 }}>
               {STEPS[step]}
             </Animated.Text>
@@ -165,107 +172,45 @@ export function ScanProcessingScreen({ route }: Props) {
 
   // ── Done / review ───────────────────────────────────────────────────────
   const personal = (data?.personalInfo ?? {}) as Record<string, string>;
-  const experience = data?.experience ?? [];
-  const education = data?.education ?? [];
-  const skills = data?.skills ?? [];
+  const previewCv: CV = {
+    id: "scan-preview",
+    userId: "me",
+    templateId: "default",
+    title: personal.fullName || "CV",
+    data: (data ?? {}) as CVData,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
   return (
     <Screen scroll keyboardAvoiding={false}>
-      <Animated.View entering={FadeIn.duration(300)} style={{ marginTop: 8, marginBottom: 18 }}>
+      <Animated.View entering={FadeIn.duration(300)} style={{ marginTop: 8, marginBottom: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <Icon name="check-circle" size={20} color={c.success} />
           <Text style={{ color: c.text, fontSize: 24, fontWeight: "800", letterSpacing: -0.4 }}>
-            Here&apos;s what we found
+            {t("Here's what we found", "Hivi ndivyo tulivyopata")}
           </Text>
         </View>
-        <Text style={{ color: c.textMuted, fontSize: 14 }}>You can fix anything in the editor.</Text>
+        <Text style={{ color: c.textMuted, fontSize: 14 }}>
+          {t("Check it, pick a colour, then open the editor to fix anything.", "Iangalie, chagua rangi, kisha fungua kihariri kurekebisha chochote.")}
+        </Text>
       </Animated.View>
 
-      {photoUri ? (
-        <Image
-          source={{ uri: photoUri }}
-          style={{ width: "100%", height: 180, borderRadius: 14, marginBottom: 18 }}
-          resizeMode="cover"
+      <Animated.View entering={FadeIn.duration(300).delay(80)}>
+        <CvPreviewCard
+          cv={previewCv}
+          onOpenEditor={() => navigation.navigate("CVEditor", { initialData: data })}
         />
-      ) : null}
+      </Animated.View>
 
-      {personal.fullName || personal.email ? (
-        <Card style={{ marginBottom: 12, gap: 6 }}>
-          <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
-            Contact
-          </Text>
-          {personal.fullName ? <Text style={{ color: c.text, fontSize: 16, fontWeight: "700" }}>{personal.fullName}</Text> : null}
-          {[["mail", personal.email], ["phone", personal.phone], ["map-pin", personal.location]].map(([ic, val]) =>
-            val ? (
-              <View key={ic} style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-                <Icon name={ic as string} size={13} color={c.textMuted} />
-                <Text style={{ color: c.textBody, fontSize: 13 }}>{val}</Text>
-              </View>
-            ) : null,
-          )}
-        </Card>
-      ) : null}
-
-      {experience.length ? (
-        <Card style={{ marginBottom: 12, gap: 8 }}>
-          <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
-            Experience · {experience.length}
-          </Text>
-          {experience.slice(0, 3).map((e: any, i: number) => (
-            <View key={i}>
-              <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>{e.title}</Text>
-              <Text style={{ color: c.textMuted, fontSize: 12.5 }}>
-                {e.company} · {e.startDate}–{e.endDate || "Present"}
-              </Text>
-            </View>
-          ))}
-          {experience.length > 3 ? (
-            <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>
-              +{experience.length - 3} more
-            </Text>
-          ) : null}
-        </Card>
-      ) : null}
-
-      {education.length ? (
-        <Card style={{ marginBottom: 12, gap: 8 }}>
-          <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
-            Education · {education.length}
-          </Text>
-          {education.slice(0, 2).map((e: any, i: number) => (
-            <View key={i}>
-              <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>
-                {e.degree}
-                {e.field ? ` · ${e.field}` : ""}
-              </Text>
-              <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{e.institution}</Text>
-            </View>
-          ))}
-        </Card>
-      ) : null}
-
-      {skills.length ? (
-        <Card style={{ marginBottom: 18, gap: 10 }}>
-          <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.6, textTransform: "uppercase" }}>
-            Skills · {skills.length}
-          </Text>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-            {skills.slice(0, 10).map((s: any, i: number) => (
-              <View key={i} style={{ backgroundColor: c.accent + "14", borderRadius: 8, paddingHorizontal: 9, paddingVertical: 5 }}>
-                <Text style={{ color: c.accent, fontSize: 12, fontWeight: "700" }}>{s.name}</Text>
-              </View>
-            ))}
-          </View>
-        </Card>
-      ) : null}
-
+      <View style={{ height: 12 }} />
       <Button
-        label="Open in editor"
+        label={t("Open in editor", "Fungua kwenye kihariri")}
         size="lg"
         onPress={() => navigation.navigate("CVEditor", { initialData: data })}
       />
       <View style={{ height: 10 }} />
-      <Button label="Scan again" variant="ghost" onPress={() => navigation.goBack()} />
+      <Button label={t("Scan again", "Piga tena")} variant="ghost" onPress={() => navigation.goBack()} />
     </Screen>
   );
 }

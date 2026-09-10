@@ -61,10 +61,12 @@ function Chip({ att, onRemove }: { att: Attachment; onRemove: () => void }) {
 }
 
 /**
- * The Sumaiya chat composer. Adds the [+] attach control the app was missing:
- * a plus (not a paperclip — it adds photos, files, links and your own CVs),
- * attachment chips above the field, and a mic affordance when the field is
- * empty. Modeled on the ChatGPT / Claude mobile composer users already know.
+ * The Sumaiya chat composer: a [+] attach control (photos, files, links, your
+ * own CVs), attachment chips above the field, and send. Modeled on the ChatGPT
+ * / Claude mobile composer users already know.
+ *
+ * TODO: voice input ("tap > speak > type" is core to the low-literacy brief).
+ * Needs a native STT module + a rebuild — see NIGHT_LOG.md.
  */
 export function ChatComposer({
   value,

@@ -210,7 +210,7 @@ function SignInForm({ lang }: { lang: string }) {
               {sw ? "Kila kitu unachohitaji kupata ajira" : "Everything you need to get hired"}
             </h2>
             <ul className="space-y-3 text-cream/80 text-sm">
-              <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Templeti rafiki kwa ATS" : "ATS-friendly templates"}</li>
+              <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Miundo rafiki kwa ATS" : "ATS-friendly designs"}</li>
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Tengeneza na pakua PDF bila malipo" : "Build & download a polished PDF — free"}</li>
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Msaada wa AI kwa muhtasari na uzoefu" : "AI writing help for your summary & experience"}</li>
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Inapatikana kwa Kiingereza na Kiswahili" : "Available in English & Swahili"}</li>

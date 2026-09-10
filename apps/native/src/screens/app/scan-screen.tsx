@@ -7,10 +7,12 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { useAppNavigation } from "../../hooks/use-app-navigation";
 import { Icon } from "../../components/icon";
-import { Button, Card, EmptyState, Screen, ScreenTitle, haptics, useThemeColors } from "../../components/ui";
+import { Card, EmptyState, Screen, ScreenTitle, haptics, useThemeColors } from "../../components/ui";
+import { useLang } from "../../lib/i18n";
 
 export function ScanScreen() {
   const c = useThemeColors();
+  const { t } = useLang();
   const insets = useSafeAreaInsets();
   const navigation = useAppNavigation();
   const cameraRef = useRef<CameraView>(null);
@@ -84,23 +86,24 @@ export function ScanScreen() {
     const canAsk = permission.canAskAgain;
     return (
       <Screen scroll={false} keyboardAvoiding={false}>
-        <EmptyState
-          icon="camera"
-          title="Camera access"
-          body={
-            canAsk
-              ? "Sumaiya uses your camera to read an existing CV. Nothing is stored — the photo is processed and discarded."
-              : "Camera access is off. Enable it in Settings to scan a CV with your camera."
-          }
-          actionLabel={canAsk ? "Allow camera" : "Open Settings"}
-          onAction={async () => {
-            haptics.light();
-            if (canAsk) await requestPermission();
-            else Linking.openSettings();
-          }}
-        />
-        <View style={{ paddingHorizontal: 20 }}>
-          <Button label="Choose from gallery instead" variant="ghost" onPress={pickImage} />
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <EmptyState
+            icon="camera"
+            title={t("Camera access", "Ruhusa ya kamera")}
+            body={
+              canAsk
+                ? t("Sumaiya uses your camera to read an existing CV. Nothing is stored — the photo is processed and discarded.", "Sumaiya anatumia kamera kusoma CV uliyonayo. Hakuna kinachohifadhiwa — picha inatumika kisha inafutwa.")
+                : t("Camera access is off. Enable it in Settings to scan a CV with your camera.", "Ruhusa ya kamera imezimwa. Iwashe kwenye Mipangilio ili kupiga CV kwa kamera.")
+            }
+            actionLabel={canAsk ? t("Allow camera", "Ruhusu kamera") : t("Open Settings", "Fungua Mipangilio")}
+            onAction={async () => {
+              haptics.light();
+              if (canAsk) await requestPermission();
+              else Linking.openSettings();
+            }}
+            secondaryLabel={t("Choose from gallery instead", "Chagua kutoka kwenye picha badala yake")}
+            onSecondary={pickImage}
+          />
         </View>
       </Screen>
     );
@@ -154,7 +157,7 @@ export function ScanScreen() {
             overflow: "hidden",
           }}
         >
-          Fit the whole CV inside the frame
+          {t("Fit the whole CV inside the frame", "Weka CV nzima ndani ya fremu")}
         </Animated.Text>
 
         {/* Controls */}
@@ -220,18 +223,18 @@ export function ScanScreen() {
   return (
     <Screen scroll keyboardAvoiding={false}>
       <Animated.View entering={FadeInDown.duration(300)}>
-        <ScreenTitle>Import your CV</ScreenTitle>
+        <ScreenTitle>{t("Import your CV", "Pakia CV yako")}</ScreenTitle>
         <Text style={{ color: c.textBody, fontSize: 15, marginBottom: 20 }}>
-          From a photo, or a file on your phone or Google Drive.
+          {t("From a photo, or a file on your phone or Google Drive.", "Kutoka picha, au faili kwenye simu yako au Google Drive.")}
         </Text>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(300).delay(70)} style={{ gap: 12 }}>
         {[
-          { icon: "camera", solid: true, title: "Take a photo", sub: "Best for a printed CV", onPress: () => { haptics.light(); setLive(true); } },
-          { icon: "folder-open", solid: false, title: "Import a file", sub: "PDF, Word or image — phone storage, Drive, Downloads…", onPress: pickFile },
-          { icon: "image", solid: false, title: "From gallery", sub: "A screenshot or saved scan", onPress: pickImage },
-          { icon: "file-text", solid: false, title: "Photos to PDF", sub: "Combine certificates or IDs into one file", onPress: () => { haptics.light(); navigation.navigate("PdfTools"); } },
+          { icon: "camera", solid: true, title: t("Take a photo", "Piga picha"), sub: t("Best for a printed CV", "Nzuri kwa CV iliyochapishwa"), onPress: () => { haptics.light(); setLive(true); } },
+          { icon: "folder-open", solid: false, title: t("Import a file", "Pakia faili"), sub: t("PDF, Word or image — phone storage, Drive, Downloads…", "PDF, Word au picha — simu, Drive, Downloads…"), onPress: pickFile },
+          { icon: "image", solid: false, title: t("From gallery", "Kutoka kwenye picha"), sub: t("A screenshot or saved scan", "Picha ya skrini au skani"), onPress: pickImage },
+          { icon: "file-text", solid: false, title: t("Photos to PDF", "Picha kuwa PDF"), sub: t("Combine certificates or IDs into one file", "Unganisha vyeti au vitambulisho kuwa faili moja"), onPress: () => { haptics.light(); navigation.navigate("PdfTools"); } },
         ].map((row) => (
           <Card
             key={row.title}
@@ -258,15 +261,14 @@ export function ScanScreen() {
           marginTop: 24,
           padding: 14,
           borderRadius: 14,
-          backgroundColor: c.warning + "14",
+          backgroundColor: c.accent + "12",
           borderWidth: 1,
-          borderColor: c.warning + "33",
+          borderColor: c.accent + "2a",
         }}
       >
-        <Icon name="sparkles" size={16} color={c.warning} />
+        <Icon name="sparkles" size={16} color={c.accent} />
         <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-          A photo or image is read on the spot. A PDF or Word file goes to Sumaiya —
-          full text extraction from documents lands in the next update.
+          {t("Photos and PDFs are read for you. Word files aren't supported yet — save them as PDF first, or paste the text to Sumaiya.", "Picha na PDF zinasomwa kwa ajili yako. Faili za Word bado hazitumiki — zihifadhi kama PDF kwanza, au bandika maandishi kwa Sumaiya.")}
         </Text>
       </Animated.View>
     </Screen>

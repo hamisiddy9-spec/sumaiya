@@ -54,7 +54,7 @@ export default function NotFound() {
 
       <div className="mt-16 grid grid-cols-3 gap-6 max-w-sm text-sm">
         {[
-          { href: "/templates", label: sw ? "Angalia templeti" : "Browse templates" },
+          { href: "/templates", label: sw ? "Ona miundo" : "See the looks" },
           { href: "/contact", label: sw ? "Pata msaada" : "Get help" },
         ].map(({ href, label }) => (
           <Link key={href} href={href} className="text-ember hover:text-ember-hover font-medium hover:underline">

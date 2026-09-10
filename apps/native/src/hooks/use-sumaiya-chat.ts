@@ -2,7 +2,8 @@
  * Hook for managing Sumaiya AI chat state and logic
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '../contexts/auth-context';
 import { apiClient } from '../lib/api-client';
 import { ApiError } from '@sumaiya/api-client';
@@ -15,7 +16,7 @@ import type {
   SumaiyaResponse,
   Attachment
 } from '../components/chat/chat-types';
-import { describeAttachments } from '../lib/attachments';
+import { extractAttachment, attachmentsContext } from '../lib/attachment-extract';
 import { loadProfile, profilePromptBlock } from '../lib/profile-store';
 import { useLang, greetingFor } from '../lib/i18n';
 
@@ -24,6 +25,8 @@ import { useLang, greetingFor } from '../lib/i18n';
 // so it knows it has already introduced itself (otherwise the user's first
 // real reply — e.g. "Kiswahili" — makes it start over).
 
+const CHAT_KEY = 'sumaiya_chat_v1';
+
 export function useSumaiyaChat() {
   const { user } = useAuthContext();
   const { lang, t } = useLang();
@@ -31,6 +34,36 @@ export function useSumaiyaChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messageIdRef = useRef(0);
+  const hydrated = useRef(false);
+
+  // Restore the last conversation so a backgrounded/killed app doesn't lose it
+  // (it holds the answers "Build my CV from this chat" depends on).
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(CHAT_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as ChatMessage[];
+          if (Array.isArray(parsed) && parsed.length) {
+            setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })));
+          }
+        }
+      } catch {
+        /* fresh start is fine */
+      } finally {
+        hydrated.current = true;
+      }
+    })();
+  }, []);
+
+  // Persist (debounced), last 40 turns.
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const id = setTimeout(() => {
+      AsyncStorage.setItem(CHAT_KEY, JSON.stringify(messages.slice(-40))).catch(() => {});
+    }, 400);
+    return () => clearTimeout(id);
+  }, [messages]);
 
   // Generate unique message ID
   const generateMessageId = useCallback((): string => {
@@ -40,16 +73,12 @@ export function useSumaiyaChat() {
   // Send message to Sumaiya backend
   const sendMessage = useCallback(
     async (userMessage: string, opts?: { attachments?: Attachment[]; context?: Record<string, any> }) => {
-      const attachments = opts?.attachments ?? [];
+      let attachments = opts?.attachments ?? [];
       if ((!userMessage.trim() && attachments.length === 0) || !user) return;
 
       setError(null);
       setLoading(true);
 
-      // Until /api/mobile/import ships, an attachment can't be uploaded — it
-      // rides along as a described context line so Sumaiya can respond usefully
-      // ("I see you attached your old CV — want me to pull your history from it?").
-      const note = describeAttachments(attachments);
       // On the first turn, hand Sumaiya the user's saved Career Profile so she
       // doesn't ask them to re-type their history. (Server-side assembleUserContext
       // still runs too; this covers the device-local profile.)
@@ -57,20 +86,38 @@ export function useSumaiyaChat() {
       if (messages.length === 0) {
         try { profileBlock = profilePromptBlock(await loadProfile()); } catch { /* ignore */ }
       }
-      const outgoing = [profileBlock, userMessage.trim(), note].filter(Boolean).join("\n\n");
 
-      // Add user message to chat
+      const userMsgId = generateMessageId();
+      const readable = attachments.filter((a) => a.kind === "image" || a.kind === "document");
       const userMsg: ChatMessage = {
-        id: generateMessageId(),
+        id: userMsgId,
         type: 'text',
         author: 'user',
-        content: userMessage.trim() || note,
+        content: userMessage.trim(),
         data: {},
         timestamp: new Date(),
-        attachments: attachments.length ? attachments : undefined,
+        attachments: attachments.length
+          ? attachments.map((a) => ({ ...a, extracting: readable.some((r) => r.id === a.id) }))
+          : undefined,
       };
-
       setMessages(prev => [...prev, userMsg]);
+
+      // Read each file's text BEFORE talking to Sumaiya, so she works from what
+      // the document says — not from its name (which is how she used to "quote"
+      // content that was never sent).
+      if (readable.length) {
+        attachments = await Promise.all(
+          attachments.map(async (a) =>
+            readable.some((r) => r.id === a.id) ? { ...a, ...(await extractAttachment(a)) } : a,
+          ),
+        );
+        setMessages(prev =>
+          prev.map(m => (m.id === userMsgId ? { ...m, attachments } : m)),
+        );
+      }
+
+      const note = attachmentsContext(attachments);
+      const outgoing = [profileBlock, userMessage.trim(), note].filter(Boolean).join("\n\n");
 
       try {
         // Real AI reply via the Bearer-authenticated Hono endpoint. Multi-turn:
@@ -125,12 +172,27 @@ export function useSumaiyaChat() {
           });
         }
       } catch (err) {
-        setError(
-          t(
-            "Couldn't reach Sumaiya. Check your connection and try again.",
-            "Imeshindwa kumfikia Sumaiya. Angalia mtandao kisha ujaribu tena.",
-          ),
-        );
+        // Surface what the server actually said (AI not configured, quota hit,
+        // session expired…) instead of a blanket "check your connection" —
+        // status 0 is the only genuine network/timeout case.
+        if (err instanceof ApiError && err.status !== 0) {
+          if (err.status === 401) {
+            setError(t("Your session expired — sign in again.", "Kipindi chako kimeisha — ingia tena."));
+          } else if (err.status === 503) {
+            setError(t("Sumaiya isn't switched on yet. Try again soon.", "Sumaiya bado hajawashwa. Jaribu tena hivi punde."));
+          } else if (err.status === 429) {
+            setError(err.message);
+          } else {
+            setError(err.message || t("Something went wrong. Try again.", "Kuna hitilafu. Jaribu tena."));
+          }
+        } else {
+          setError(
+            t(
+              "Couldn't reach Sumaiya. Check your connection and try again.",
+              "Imeshindwa kumfikia Sumaiya. Angalia mtandao kisha ujaribu tena.",
+            ),
+          );
+        }
         console.error('Sumaiya chat error:', err);
       } finally {
         setLoading(false);
@@ -140,86 +202,40 @@ export function useSumaiyaChat() {
   );
 
   // Generate contextual suggestions based on user message and response
+  // The "one decision per screen, big buttons" idea, applied to the chat:
+  // after each reply we offer up to three concrete next steps, matched on both
+  // sides of the exchange and in either language. Bilingual, and every action
+  // routes somewhere real.
   const generateSuggestions = (
     userMessage: string,
     response: SumaiyaResponse
   ): SuggestionChip[] => {
-    const suggestions: SuggestionChip[] = [];
-    const lowerMessage = userMessage.toLowerCase();
+    const hay = `${userMessage} ${response.content}`.toLowerCase();
+    const has = (...ws: string[]) => ws.some((w) => hay.includes(w));
+    const out: SuggestionChip[] = [];
+    const add = (id: string, en: string, sw: string, emoji: string, action: ActionType, data?: Record<string, unknown>) =>
+      out.push({ id, text: t(en, sw), emoji, action, data });
 
-    // Skill-related keywords
-    if (
-      lowerMessage.includes('skill') ||
-      lowerMessage.includes('gap') ||
-      lowerMessage.includes('weak') ||
-      lowerMessage.includes('improve') ||
-      lowerMessage.includes('learn')
-    ) {
-      suggestions.push({
-        id: 'learn-now',
-        text: 'Learn now',
-        emoji: '📚',
-        action: 'learn',
-        data: { skills: response.data.skills }
-      });
-      suggestions.push({
-        id: 'fix-cv',
-        text: 'Fix my CV',
-        emoji: '🔧',
-        action: 'edit-cv'
-      });
+    if (has('skill', 'ujuzi', 'gap', 'pengo', 'learn', 'jifunze', 'course', 'kozi')) {
+      add('learn', 'Learning hub', 'Kituo cha kujifunza', '📚', 'learn', { skills: response.data.skills });
+    }
+    if (has('interview', 'usaili', 'practice', 'mazoezi')) {
+      add('practice', 'Interview prep', 'Maandalizi ya usaili', '🎤', 'practice', { skills: response.data.skills });
+    }
+    if (has('cv', 'resume', 'wasifu', 'summary', 'muhtasari', 'experience', 'uzoefu')) {
+      add('open-cv', 'Open my CV', 'Fungua CV yangu', '📄', 'open-cv');
+      add('ats', 'Check ATS', 'Kagua ATS', '🛡️', 'edit-cv', { section: 'ats' });
+    }
+    if (has('job', 'kazi', 'apply', 'omba', 'advert', 'tangazo', 'tailor', 'lenga')) {
+      add('tailor', 'Tailor to a job', 'Lenga kwenye kazi', '🎯', 'open-cv', { section: 'jobs' });
+    }
+    if (has('letter', 'barua')) {
+      add('letter', 'Cover letter', 'Barua ya maombi', '✉️', 'edit-cv', { template: 'letter' });
     }
 
-    // CV-related keywords
-    if (
-      lowerMessage.includes('cv') ||
-      lowerMessage.includes('resume') ||
-      lowerMessage.includes('experience') ||
-      lowerMessage.includes('summary')
-    ) {
-      suggestions.push({
-        id: 'open-cv',
-        text: 'Open CV',
-        emoji: '📄',
-        action: 'open-cv'
-      });
-      suggestions.push({
-        id: 'tips',
-        text: 'Show tips',
-        emoji: '💡',
-        action: 'view-resources'
-      });
-    }
-
-    // Job search keywords
-    if (lowerMessage.includes('job') || lowerMessage.includes('apply')) {
-      suggestions.push({
-        id: 'browse-jobs',
-        text: 'Browse jobs',
-        emoji: '💼',
-        action: 'open-cv', // Navigate to jobs section
-        data: { section: 'jobs' }
-      });
-      suggestions.push({
-        id: 'improve-cv',
-        text: 'Improve CV',
-        emoji: '⚡',
-        action: 'edit-cv'
-      });
-    }
-
-    // Practice/practice keywords
-    if (lowerMessage.includes('practice') || lowerMessage.includes('exercise')) {
-      suggestions.push({
-        id: 'practice',
-        text: 'Start practice',
-        emoji: '🚀',
-        action: 'practice',
-        data: { skills: response.data.skills }
-      });
-    }
-
-    return suggestions.slice(0, 3); // Limit to 3 suggestions
+    // de-dup by id, cap at 3
+    const seen = new Set<string>();
+    return out.filter((s) => (seen.has(s.id) ? false : seen.add(s.id))).slice(0, 3);
   };
 
   // Handle action trigger (when user taps a suggestion or button)
@@ -236,7 +252,52 @@ export function useSumaiyaChat() {
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
+    AsyncStorage.removeItem(CHAT_KEY).catch(() => {});
   }, []);
+
+  // Build a structured CV from everything the user told Sumaiya in this chat
+  // (+ their saved profile). Appends a 'cv-ready' message the screen renders as
+  // an interactive preview.
+  const [buildingCv, setBuildingCv] = useState(false);
+  const buildCvFromChat = useCallback(async () => {
+    if (!user || buildingCv) return;
+    setBuildingCv(true);
+    setError(null);
+    try {
+      let profileBlock = "";
+      try { profileBlock = profilePromptBlock(await loadProfile()); } catch { /* ignore */ }
+      const said = messages
+        .filter((m) => m.content?.trim())
+        .map((m) => `${m.author === "user" ? "Me" : "Sumaiya"}: ${m.content.trim()}`)
+        .join("\n");
+      const transcript = [profileBlock, said].filter(Boolean).join("\n\n");
+      if (transcript.trim().length < 20) {
+        setError(t("Tell Sumaiya a bit about yourself first.", "Mwambie Sumaiya kidogo kukuhusu kwanza."));
+        return;
+      }
+      const { cv } = await apiClient.buildCv(transcript, lang);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateMessageId(),
+          type: "cv-ready",
+          author: "sumaiya",
+          content: t("Here's your CV — check it, pick a look, and save it.", "Hii hapa CV yako — iangalie, chagua muonekano, na uihifadhi."),
+          data: { cv },
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (err) {
+      if (err instanceof ApiError && err.status !== 0) {
+        setError(err.message);
+      } else {
+        setError(t("Couldn't build the CV just now. Try again.", "Imeshindwa kutengeneza CV sasa. Jaribu tena."));
+      }
+      console.error("buildCvFromChat error:", err);
+    } finally {
+      setBuildingCv(false);
+    }
+  }, [user, buildingCv, messages, lang, t, generateMessageId]);
 
   // Fetch learning resources for specific skills — real, verified course
   // links (lib/learning-resources.ts on the backend), never AI-invented.
@@ -277,6 +338,8 @@ export function useSumaiyaChat() {
     handleAction,
     clearChat,
     fetchLearningResources,
+    buildCvFromChat,
+    buildingCv,
 
     // Utils
     generateMessageId

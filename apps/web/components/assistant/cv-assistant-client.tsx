@@ -21,6 +21,9 @@ import { micErrorMessage } from "@/lib/assistant/mic-error";
 import { s, errorMsg } from "@/lib/assistant/error-message";
 import { resolveTemplatePreview } from "@/lib/assistant/template-preview";
 import { TemplatePreviewCard } from "@/components/assistant/template-preview-card";
+import { StartChooser, type StartChoice } from "@/components/assistant/start-chooser";
+import { ChatCard } from "@/components/assistant/chat-card";
+import { CvReadyCard } from "@/components/assistant/cv-ready-card";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { exportElementToPdf, buildCvText, exportCvToText, triggerBlobDownload } from "@/lib/pdf";
 import { downloadCvDocx } from "@/lib/docx";
@@ -102,6 +105,19 @@ type CardData =
 // of an uploaded CV) while `content` stays short for display.
 type Msg = { role: "assistant" | "user"; content: string; apiContent?: string; card?: CardData };
 type DocType = "cv" | "cover-letter" | "business-card" | "letter";
+
+/** Write a guest's CV into the guest-editor's localStorage doc. */
+function stashGuestCv(cv: CVData, templateId: string, primaryColor: string, sw: boolean) {
+  try {
+    localStorage.setItem("sumaiya-guest-cv", JSON.stringify({
+      cv,
+      title: cv.personal?.fullName ? `${cv.personal.fullName} — CV` : (sw ? "CV Yangu" : "My CV"),
+      templateId,
+      primaryColor,
+      fontFamily: "Inter",
+    }));
+  } catch { /* private mode — non-fatal */ }
+}
 
 // Per-user conversation storage: the key carries a stable per-user/guest scope
 // so one shared browser never leaks user A's chat into user B's session.
@@ -204,6 +220,9 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     | { kind: "letter"; id: string; editorBase: string; title: string; textContent: string }
     | { kind: "card"; id: string; editorBase: string; title: string; textContent: string };
   const [builtDoc, setBuiltDoc] = useState<BuiltDoc | null>(null);
+  // A guest's freshly-built CV — shown as a preview card in the chat (see it,
+  // pick a colour, download) instead of dropping them into the full editor.
+  const [guestCvReady, setGuestCvReady] = useState<CVData | null>(null);
   const [exporting, setExporting] = useState<null | "pdf" | "docx" | "txt">(null);
   const cvExportRef = useRef<HTMLDivElement>(null);
   const letterExportRef = useRef<HTMLDivElement>(null);
@@ -322,6 +341,12 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // Raw attached files, kept so the AI can run PDF tools on them (server-side).
   const attachedFilesRef = useRef<File[]>([]);
   const [attachedCount, setAttachedCount] = useState(0);
+  // A file the user attached while a turn was in flight — read its text and
+  // feed it in as soon as we're free. Without this the file sat in the chip
+  // "attached" but its contents never reached the AI, so Sumaiya kept asking
+  // for a CV that was right there.
+  const pendingFileRef = useRef<File | null>(null);
+  const [attachState, setAttachState] = useState<"" | "reading" | "waiting" | "read" | "error">("");
   // Shared memory: the last job description seen this thread (from a match or
   // tailor), so cover-letter / tracking can reuse it without re-pasting.
   const lastJdRef = useRef<string>("");
@@ -333,6 +358,9 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // A brief "thinking" beat before instant deterministic cards — so the
   // assistant feels like it's working, not spitting out a form.
   const [analyzing, setAnalyzing] = useState(false);
+  // The "what do you want today?" chooser retires once the user picks a card
+  // or chooses to just type (the "I have a question" card).
+  const [chooserDismissed, setChooserDismissed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -833,15 +861,26 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           const jjson = (await jres.json().catch(() => ({}))) as { data?: { id: string; title: string; company: string; location: string; category?: string; description?: string }[] };
           const all = jjson.data ?? [];
           const q = String((act.args?.query ?? "") as string).toLowerCase().trim();
-          const filtered = q
-            ? all.filter((j) => `${j.title} ${j.company} ${j.category ?? ""} ${j.description ?? ""}`.toLowerCase().includes(q))
-            : all;
-          const top = filtered.slice(0, 4).map((j) => ({ id: j.id, title: j.title, company: j.company, location: j.location }));
+          // Score by how many query words appear in the job — a naive substring
+          // match on the whole phrase returned nothing for "pharmacy sales rep".
+          const qWords = q.split(/[^a-z0-9+#]+/).filter((w) => w.length > 2);
+          const scored = all
+            .map((j) => {
+              const hay = `${j.title} ${j.company} ${j.category ?? ""} ${j.description ?? ""}`.toLowerCase();
+              const score = qWords.length ? qWords.filter((w) => hay.includes(w)).length : 1;
+              return { j, score };
+            })
+            .filter((x) => x.score > 0)
+            .sort((a, b) => b.score - a.score);
+          const top = (scored.length ? scored.map((x) => x.j) : all).slice(0, 4)
+            .map((j) => ({ id: j.id, title: j.title, company: j.company, location: j.location }));
           setMessages((m) => [...m, {
             role: "assistant",
             content: top.length
-              ? (sw ? "Hizi hapa nafasi zinazoendana:" : "Here are some matching jobs:")
-              : (sw ? "Sikupata nafasi zinazoendana sasa hivi — jaribu tena baadaye au angalia ukurasa wa Ajira." : "No matching jobs right now — try again later or browse the jobs page."),
+              ? (sw ? "Hizi hapa nafasi zinazoendana — bofya kuona zote na kuomba:" : "Here are some matching openings — tap through to see all of them and apply:")
+              : all.length === 0
+                ? (sw ? "Hakuna nafasi zilizoorodheshwa bado. Nitakuandalia CV yenye nguvu ili uwe tayari zitakapokuja." : "There aren't any jobs listed yet. Let's get your CV strong so you're ready when they land.")
+                : (sw ? `Sikupata inayoendana na "${q}". Angalia nafasi zote → /jobs` : `Nothing matched "${q}". Browse everything on the jobs page → /jobs`),
             ...(top.length ? { card: { kind: "jobs" as const, query: q, jobs: top } } : {}),
           }]);
           markExecuted({ tool: "jobs.search", args: act.args ?? {} });
@@ -860,6 +899,14 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   }, [sw, profile, cv]);
 
   // Pick a document type from a chip — kicks off the tailored conversation.
+  const handleStartChoice = (choice: StartChoice) => {
+    setChooserDismissed(true);
+    if (choice === "cv") pickDoc("cv");
+    else if (choice === "cover-letter") pickDoc("cover-letter");
+    else if (choice === "apply") router.push("/snap");
+    else setTimeout(() => inputRef.current?.focus(), 0); // "ask" — just type
+  };
+
   const pickDoc = (dt: DocType) => {
     if (sendingRef.current || sending || building) return;
     const userMsg: Msg = { role: "user", content: sw ? DOC_CHIPS.find((d) => d.id === dt)!.sw : DOC_CHIPS.find((d) => d.id === dt)!.en };
@@ -939,23 +986,29 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   };
 
   // Feed extracted content (from a file OR a link) into the conversation. The
-  // assistant decides what it is — the user's own document (→ fill their details)
-  // or a job posting (→ tailor to it). Only extracted text leaves the device.
+  // assistant's intent engine decides what it is and whether a document is
+  // being built — attaching a file no longer force-switches the whole chat
+  // into CV-build mode (that hijacked a "show me jobs" conversation).
+  // Only extracted text leaves the device.
   const feedAttachment = (label: string, text: string, source: string) => {
-    const dt: DocType = docType ?? "cv";
-    const apiContent = `[The user attached ${source}]. Content below — use it correctly for a ${sw ? DOC_LABEL[dt].sw : DOC_LABEL[dt].en}: if it's the user's own CV / certificate / personal details, use it to fill THEIR information (don't re-ask what it shows). If it's a JOB POSTING, tailor the document to that role and its requirements and weave in relevant keywords — but NEVER claim experience the user doesn't have.\n\n"""\n${text.slice(0, 12000)}\n"""`;
+    const apiContent = `[The user attached ${source}]. Content below — read it and use it correctly: if it's the user's own CV / certificate / personal details, use it to fill THEIR information and answer what they actually asked (don't re-ask what the file shows). If it's a JOB POSTING, note the role + company and offer to match/tailor. NEVER claim experience the user doesn't have.\n\n"""\n${text.slice(0, 12000)}\n"""`;
     const userMsg: Msg = { role: "user", content: label, apiContent };
     const history = [...messages, userMsg];
     setMessages(history);
-    if (!docType) setDocType(dt);
-    void send(history, dt);
+    void send(history, docType);
   };
 
   // Upload ANY supported file — PDF, photo/scan, or text — extract its text in
   // the browser (text layer, or OCR for images/scans), then feed it in.
   const onAttachFile = async (file: File) => {
-    if (sending || building || uploading) return;
+    // Busy right now — remember the file and read it the moment we're free.
+    if (sendingRef.current || sending || building || uploading) {
+      pendingFileRef.current = file;
+      setAttachState("waiting");
+      return;
+    }
     setError("");
+    setAttachState("reading");
     setUploading(sw ? "Inasoma faili yako…" : "Reading your file…");
     try {
       const { text } = await extractTextFromFile(file, (p) => {
@@ -967,13 +1020,17 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       setUploading(null);
       if (!text || text.replace(/\s/g, "").length < 30) {
+        setAttachState("error");
         setError(sw ? "Sikuweza kusoma faili hii. Jaribu nyingine, au andika taarifa." : "Couldn't read that file. Try another, or just type the details.");
         return;
       }
+      pendingFileRef.current = null;
+      setAttachState("read");
       const short = file.name.length > 32 ? file.name.slice(0, 30) + "…" : file.name;
       feedAttachment(`📎 ${short}`, text, `a file ("${file.name}")`);
     } catch (e) {
       setUploading(null);
+      setAttachState("error");
       const code = e instanceof ExtractionError ? e.code : "";
       setError(
         code === "TOO_LARGE" ? (sw ? "Faili ni kubwa mno (kiwango 25MB)." : "That file is too large (max 25MB).")
@@ -1009,6 +1066,16 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     }
   };
 
+  // A file was attached mid-turn — read it now that we're free.
+  useEffect(() => {
+    if (sendingRef.current || sending || building || uploading) return;
+    const f = pendingFileRef.current;
+    if (!f) return;
+    const id = setTimeout(() => { if (pendingFileRef.current === f) void onAttachFile(f); }, 150);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sending, building, uploading]);
+
   // Turn the whole conversation into the chosen document, then open its editor.
   const build = useCallback(async () => {
     // Never let build race an in-flight send(): the transcript snapshot could
@@ -1040,17 +1107,16 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       // doc and hand off — the guest editor prompts sign-up only to save/download.
       if (guest) {
         const cvData: CVData = toCvData(d);
-        try {
-          localStorage.setItem("sumaiya-guest-cv", JSON.stringify({
-            cv: cvData,
-            title: cvData.personal.fullName ? `${cvData.personal.fullName} — CV` : (sw ? "CV Yangu" : "My CV"),
-            templateId: "nakuru",
-            primaryColor: "#DA4A1C",
-            fontFamily: "Inter",
-          }));
-          localStorage.removeItem(STORAGE_KEY);
-        } catch { /* non-fatal */ }
-        router.push("/editor/cv/try");
+        stashGuestCv(cvData, "rift", "#DA4A1C", sw);
+        setGuestCvReady(cvData);
+        setDone(true);
+        setBuilding(false);
+        setMessages((msgs) => [...msgs, {
+          role: "assistant",
+          content: sw
+            ? "Nimemaliza! Hii hapa CV yako — chagua rangi, pakua, au fungua kihariri kwa mabadiliko zaidi."
+            : "Done! Here's your CV — pick a colour, download it, or open the editor for more.",
+        }]);
         return;
       }
 
@@ -2409,7 +2475,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                 <JobsResultCard jobs={m.card.jobs} sw={sw} />
               )}
               {m.card?.kind === "ats" && (
-                <AtsResultCard score={m.card.score} checks={m.card.checks} sw={sw} editHref={activeCvId ? `/editor/cv/${activeCvId}` : undefined} />
+                <AtsResultCard score={m.card.score} checks={m.card.checks} sw={sw}
+                  onFix={activeCvId ? () => router.push(`/editor/cv/${activeCvId}`) : undefined} />
               )}
               {m.card?.kind === "match" && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
@@ -2528,6 +2595,19 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
             </div>
           ))}
 
+          {/* A guest's freshly-built CV — see it, recolour it, download it,
+              right here. "Open the editor" carries the chosen look across. */}
+          {guestCvReady && (
+            <CvReadyCard
+              cv={guestCvReady}
+              sw={sw}
+              onOpenEditor={(look, color) => {
+                stashGuestCv(guestCvReady, look, color, sw);
+                router.push("/editor/cv/try");
+              }}
+            />
+          )}
+
           {/* Cockpit chips — shown when an active CV is loaded (/assistant?cv=<id>).
               These run instant, deterministic checks as inline cards. */}
           {showCockpit && (
@@ -2550,49 +2630,29 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
             </div>
           )}
 
-          {/* WS-12 — empty-thread starter suggestions INSIDE the conversation.
-              Shown only on a fresh thread (no doc type picked yet). These read
-              as part of Sumaiya's greeting — they scroll away naturally once
-              the user engages, instead of crowding the composer. Horizontal
-              scroll on mobile keeps them to a single slim row. */}
+          {/* Fresh thread → "what do you want today?" as four big cards
+              (one decision, big targets), then a slim row of extras. Retires
+              once the user picks or chooses to type. */}
+          {showChips && !chooserDismissed && (
+            <StartChooser sw={sw} onPick={handleStartChoice} />
+          )}
           {showChips && (
             <div className="flex gap-2 pt-1 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-1">
-              <button onClick={startMatch}
-                className="inline-flex items-center gap-2 bg-ember text-cream hover:bg-ember-hover text-sm font-semibold rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
-                <Target className="w-4 h-4" />
-                {sw ? "Lenga CV kwa kazi" : "Tailor my CV to a job"}
-              </button>
-              <button onClick={() => pickDoc("cv")}
-                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
-                <FileText className="w-4 h-4 text-ember" />
-                {sw ? "Unda CV" : "Create a CV"}
-              </button>
-              <button onClick={() => pickDoc("cover-letter")}
-                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
-                <Mail className="w-4 h-4 text-ember" />
-                {sw ? "Barua ya maombi" : "Cover letter"}
-              </button>
               <button onClick={() => router.push("/interview")}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
                 <Bolt className="w-4 h-4 text-ember" />
-                {sw ? "Jiandae na mahojiano" : "Interview prep"}
+                {sw ? "Jiandae na usaili" : "Interview prep"}
               </button>
               <button onClick={startJobs}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
                 <Briefcase className="w-4 h-4 text-ember" />
-                {sw ? "Ona kazi zinazofanana" : "Matching jobs"}
+                {sw ? "Ona nafasi zinazofanana" : "Matching jobs"}
               </button>
-              {!guest && (
-                <button
-                  onClick={() => router.push("/snap")}
-                  className="inline-flex items-center gap-2 bg-card border border-ember/30 hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0"
-                >
-                  <Sparkles className="w-4 h-4 text-ember" />
-                  {sw
-                    ? "Snap-to-Apply: tengeneza CV yangu kwa kazi yoyote"
-                    : "Snap-to-Apply: tailor my CV to any job"}
-                </button>
-              )}
+              <button onClick={() => pickDoc("business-card")}
+                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
+                <CreditCard className="w-4 h-4 text-ember" />
+                {sw ? "Kadi ya biashara" : "Business card"}
+              </button>
             </div>
           )}
 
@@ -2762,13 +2822,26 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
             <>
               {attachedCount > 0 && (
                 <div className="mb-2 inline-flex items-center gap-2 text-xs bg-ember-tint/40 border border-ember/20 rounded-full px-3 py-1">
-                  <span className="text-espresso font-medium flex items-center gap-1.5">
-                    <Paperclip className="w-3 h-3 text-ember" />
-                    {attachedCount === 1
-                      ? (sw ? "Faili 1" : "1 file")
-                      : `${attachedCount} ${sw ? "faili" : "files"}`}
+                  <span className="text-espresso font-medium flex items-center gap-1.5 max-w-[220px] truncate">
+                    <Paperclip className="w-3 h-3 text-ember shrink-0" />
+                    {attachedFilesRef.current[0]?.name ?? (sw ? "Faili" : "File")}
+                    {attachState === "reading" || attachState === "waiting" ? (
+                      <span className="text-text-muted">· {sw ? "inasoma…" : "reading…"}</span>
+                    ) : attachState === "read" ? (
+                      <Check className="w-3 h-3 text-pine" />
+                    ) : attachState === "error" ? (
+                      <span className="text-ember-hover">· {sw ? "imeshindwa" : "failed"}</span>
+                    ) : null}
                   </span>
-                  <button onClick={() => { attachedFilesRef.current = []; setAttachedCount(0); }}
+                  {attachState === "error" ? (
+                    <button
+                      onClick={() => { const f = attachedFilesRef.current[0]; if (f) void onAttachFile(f); }}
+                      className="text-ember-hover hover:text-ember font-semibold"
+                    >
+                      {sw ? "Jaribu tena" : "Retry"}
+                    </button>
+                  ) : null}
+                  <button onClick={() => { attachedFilesRef.current = []; setAttachedCount(0); pendingFileRef.current = null; setAttachState(""); }}
                     className="text-text-muted hover:text-espresso font-medium">
                     {sw ? "Ondoa" : "Clear"}
                   </button>
@@ -2934,54 +3007,58 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
 // ── Inline ATS result card ──────────────────────────────────────────────────
 // A deterministic ATS readiness card rendered right in the conversation — the
 // first of the assistant's "cockpit" cards. No AI call; paints instantly.
-function AtsResultCard({ score, checks, sw, editHref }: { score: number; checks: AtsCheck[]; sw: boolean; editHref?: string }) {
-  const tone = score >= 80 ? { ring: "#059669", text: "text-pine" }
-    : score >= 55 ? { ring: "#D97706", text: "text-gold-text" }
-    : { ring: "#EF4444", text: "text-red-600" };
+function AtsResultCard({ score, checks, sw, onFix }: { score: number; checks: AtsCheck[]; sw: boolean; onFix?: () => void }) {
+  const ringColor = score >= 80 ? "#059669" : score >= 55 ? "#D97706" : "#EF4444";
   const label = sw
     ? (score >= 80 ? "Tayari" : score >= 55 ? "Inahitaji kazi" : "Hatari kubwa")
     : (score >= 80 ? "Ready" : score >= 55 ? "Needs work" : "High risk");
   const rank: Record<AtsCheck["severity"], number> = { fail: 0, warn: 1, pass: 2 };
   const sorted = [...checks].sort((a, b) => rank[a.severity] - rank[b.severity]);
   const passed = checks.filter((c) => c.severity === "pass").length;
-  const C = 2 * Math.PI * 21;
+  const problems = checks.length - passed;
+  const C = 2 * Math.PI * 15;
   return (
-    <div className="max-w-[85%] bg-card border border-border rounded-2xl rounded-bl-md p-4 space-y-3">
-      <div className="flex items-center gap-3">
-        <div className="relative flex-shrink-0">
-          <svg width="52" height="52" viewBox="0 0 52 52" className="-rotate-90">
-            <circle cx="26" cy="26" r="21" fill="none" stroke="#EFE7DA" strokeWidth="5" />
-            <circle cx="26" cy="26" r="21" fill="none" stroke={tone.ring} strokeWidth="5" strokeLinecap="round"
-              strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} style={{ transition: "stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)" }} />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-black" style={{ color: tone.ring }}>{score}</span>
-          </div>
-        </div>
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">{sw ? "Utayari wa ATS" : "ATS readiness"}</p>
-          <p className={`text-sm font-bold ${tone.text}`}>{label}</p>
-          <p className="text-[10px] text-text-muted">{passed}/{checks.length} {sw ? "vigezo vimefikiwa" : "checks passed"}</p>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        {sorted.map((c) => (
-          <div key={c.id} className="flex items-start gap-2">
-            {c.severity === "pass" ? <CheckCircle2 className="w-3.5 h-3.5 text-pine shrink-0 mt-0.5" />
-              : c.severity === "warn" ? <AlertTriangle className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
-              : <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />}
-            <div className="min-w-0">
-              <p className={`text-[11px] font-semibold leading-tight ${c.severity === "pass" ? "text-text-muted" : "text-espresso"}`}>{c.label}</p>
-              {c.severity !== "pass" && <p className="text-[10px] text-text-muted leading-snug mt-0.5">{c.tip}</p>}
+    <div className="max-w-[88%]">
+      <ChatCard
+        tone={score >= 80 ? "pine" : score >= 55 ? "neutral" : "ember"}
+        defaultOpen={score < 80}
+        icon={
+          <span className="relative w-9 h-9 flex items-center justify-center">
+            <svg width="36" height="36" viewBox="0 0 36 36" className="-rotate-90 absolute inset-0">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#EFE7DA" strokeWidth="3.5" />
+              <circle cx="18" cy="18" r="15" fill="none" stroke={ringColor} strokeWidth="3.5" strokeLinecap="round"
+                strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} style={{ transition: "stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)" }} />
+            </svg>
+            <span className="text-[11px] font-black" style={{ color: ringColor }}>{score}</span>
+          </span>
+        }
+        summary={
+          <>
+            <span className="font-bold">{sw ? "Utayari wa ATS" : "ATS readiness"}: {label}</span>
+            <span className="block text-xs text-text-muted font-normal">
+              {problems > 0
+                ? sw ? `${problems} vya kurekebisha` : `${problems} to fix`
+                : sw ? "Vyote sawa" : "All good"}
+              {" · "}{passed}/{checks.length}
+            </span>
+          </>
+        }
+        action={onFix && problems > 0 ? { label: sw ? "Rekebisha kwenye kihariri" : "Fix in the editor", onClick: onFix } : undefined}
+      >
+        <div className="space-y-1.5">
+          {sorted.map((c) => (
+            <div key={c.id} className="flex items-start gap-2">
+              {c.severity === "pass" ? <CheckCircle2 className="w-3.5 h-3.5 text-pine shrink-0 mt-0.5" />
+                : c.severity === "warn" ? <AlertTriangle className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" />
+                : <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />}
+              <div className="min-w-0">
+                <p className={`text-[11px] font-semibold leading-tight ${c.severity === "pass" ? "text-text-muted" : "text-espresso"}`}>{c.label}</p>
+                {c.severity !== "pass" && <p className="text-[10px] text-text-muted leading-snug mt-0.5">{c.tip}</p>}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      {editHref && (
-        <Link href={editHref} className="inline-flex items-center gap-1 text-[11px] font-semibold text-ember-hover hover:underline">
-          {sw ? "Fungua kihariri kurekebisha →" : "Open the editor to fix these →"}
-        </Link>
-      )}
+          ))}
+        </div>
+      </ChatCard>
     </div>
   );
 }
@@ -3011,11 +3088,28 @@ function MatchResultCard({ score, matched, missing, composite, explanation, sw, 
   }, [score]);
   const ex = explanation;
   return (
-    <div className="max-w-[85%] bg-card border border-border rounded-2xl rounded-bl-md p-4 space-y-3">
-      <div className="flex items-baseline gap-1.5">
-        <span className={`font-display text-2xl font-extrabold leading-none ${tone}`}>{display}<span className="text-sm">/100</span></span>
-        <span className="text-[11px] text-text-muted">Sumaiya Score</span>
-      </div>
+    <div className="max-w-[88%]">
+      <ChatCard
+        tone={score >= 70 ? "pine" : score >= 40 ? "neutral" : "ember"}
+        defaultOpen={score < 70}
+        icon={<span className={`text-[13px] font-black ${tone}`}>{display}</span>}
+        summary={
+          <>
+            <span className="font-bold">{sw ? "Ulinganifu na kazi hii" : "Match to this job"}: {display}/100</span>
+            {missing.length > 0 && (
+              <span className="block text-xs text-text-muted font-normal">
+                {sw ? `${missing.length} maneno muhimu yanakosekana` : `${missing.length} key words missing`}
+              </span>
+            )}
+          </>
+        }
+        action={{
+          label: tailorBusy ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Lenga CV yangu kwa kazi hii" : "Tailor my CV to this job"),
+          onClick: onTailor,
+          busy: tailorBusy,
+        }}
+      >
+      <div className="space-y-3">
       <div className="w-full h-2 bg-sand rounded-full overflow-hidden">
         <div className={`h-full rounded-full transition-[width] duration-700 ${bar}`} style={{ width: `${score}%` }} />
       </div>
@@ -3058,17 +3152,14 @@ function MatchResultCard({ score, matched, missing, composite, explanation, sw, 
           </div>
         </div>
       )}
-      <div className="flex gap-2">
-        <button onClick={onTailor} disabled={tailorBusy}
-          className="flex-1 flex items-center justify-center gap-2 bg-ember hover:bg-ember-hover text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
-          {tailorBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-          {tailorBusy ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Review & Apply" : "Review changes")}
-        </button>
+      {onDismiss && (
         <button onClick={onDismiss}
-          className="px-3 py-2.5 rounded-input-lg border border-border-input text-text-muted hover:text-ember hover:border-ember text-sm font-medium transition">
-          {sw ? "Acha" : "Keep original"}
+          className="w-full py-2 rounded-input-lg border border-border-input text-text-muted hover:text-ember hover:border-ember text-xs font-medium transition">
+          {sw ? "Acha CV yangu kama ilivyo" : "Keep my CV as it is"}
         </button>
+      )}
       </div>
+      </ChatCard>
     </div>
   );
 }
@@ -3486,17 +3577,25 @@ function SkillGapCard({ jobTitle, strengths, gaps, score, learningPlan, summary,
   resources?: { title: string; provider: string; url: string; free: boolean }[];
 }) {
   return (
-    <div className="max-w-[85%] bg-card border border-border rounded-2xl rounded-bl-md p-4 space-y-2.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wide text-text-muted">
-        {sw ? "Uchambuzi wa mapungufu" : "Skill-gap check"}
-        {jobTitle ? ` — ${jobTitle}` : ""}
-      </p>
-      <div className="flex items-center gap-2">
-        <span className="text-xl font-bold text-espresso">{score}%</span>
-        <span className="text-[11px] text-text-muted">
-          {sw ? "ya maneno muhimu ya kazi yaliyopo kwenye CV" : "of the job's keywords covered by your CV"}
-        </span>
-      </div>
+    <div className="max-w-[88%]">
+      <ChatCard
+        tone={gaps.length === 0 ? "pine" : "neutral"}
+        defaultOpen={gaps.length > 0}
+        icon={<span className="text-[12px] font-black text-espresso">{score}%</span>}
+        summary={
+          <>
+            <span className="font-bold">
+              {sw ? "Mapungufu ya ujuzi" : "Skill-gap check"}{jobTitle ? ` — ${jobTitle}` : ""}
+            </span>
+            <span className="block text-xs text-text-muted font-normal">
+              {gaps.length === 0
+                ? sw ? "Hakuna mapungufu makubwa" : "No major gaps"
+                : sw ? `${gaps.length} ya kujenga · ${score}% ya kazi imefikiwa` : `${gaps.length} to build · ${score}% covered`}
+            </span>
+          </>
+        }
+      >
+      <div className="space-y-2.5">
       {strengths.length > 0 && (
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-pine mb-1">
@@ -3572,6 +3671,8 @@ function SkillGapCard({ jobTitle, strengths, gaps, score, learningPlan, summary,
           <Check className="w-4 h-4" /> {sw ? "Hakuna mapungufu makubwa — tayari uko tayari kuomba nafasi hii." : "No major gaps — you're ready to apply for this role."}
         </p>
       )}
+      </div>
+      </ChatCard>
     </div>
   );
 }
@@ -3586,10 +3687,24 @@ function CvCompareCard({ verdict, onlyA, onlyB, shared, scored, aScore, bScore, 
     : winner === "b" ? (sw ? "CV nyingine" : "The other CV")
     : (sw ? "Sawa" : "Tie");
   return (
-    <div className="max-w-[85%] bg-card border border-border rounded-2xl rounded-bl-md p-4 space-y-2.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wide text-text-muted">
-        {sw ? "Ulinganisho wa CV" : "CV comparison"}
-      </p>
+    <div className="max-w-[88%]">
+      <ChatCard
+        tone="neutral"
+        defaultOpen
+        icon={<span className="text-[10px] font-black text-espresso">VS</span>}
+        summary={
+          <>
+            <span className="font-bold">{sw ? "Ulinganisho wa CV" : "CV comparison"}</span>
+            {scored && (
+              <span className="block text-xs text-text-muted font-normal">
+                {winner === "tie" ? (sw ? "Zina alama sawa" : "Equal") : `${sw ? "Bora" : "Stronger"}: ${winnerLabel}`}
+                {typeof aScore === "number" && typeof bScore === "number" ? ` · ${aScore}% vs ${bScore}%` : ""}
+              </span>
+            )}
+          </>
+        }
+      >
+      <div className="space-y-2.5">
       {scored && typeof aScore === "number" && typeof bScore === "number" && (
         <div className="flex items-center gap-3">
           <div className="flex-1">
@@ -3633,6 +3748,8 @@ function CvCompareCard({ verdict, onlyA, onlyB, shared, scored, aScore, bScore, 
           )}
         </div>
       )}
+      </div>
+      </ChatCard>
     </div>
   );
 }

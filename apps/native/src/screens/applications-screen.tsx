@@ -4,7 +4,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useApplications } from "../hooks/use-applications";
 import { STATUS_META, type AppStatus } from "../lib/applications-store";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, Screen, ScreenTitle, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, Screen, ScreenTitle, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
 const STATUS_TINT: Record<AppStatus, (c: any) => string> = {
@@ -47,7 +47,11 @@ export function ApplicationsScreen({ navigation }: any) {
       </ScreenTitle>
 
       {loading && applications.length === 0 ? (
-        <Text style={{ color: c.textMuted }}>{t("Loading…", "Inapakia…")}</Text>
+        <>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </>
       ) : applications.length === 0 ? (
         <EmptyState
           icon="briefcase"

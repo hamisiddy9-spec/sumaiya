@@ -5,6 +5,7 @@ import type { QuickAction, ActionType } from "./chat-types";
 import { Icon } from "../icon";
 import { haptics } from "../ui/haptics";
 import { useThemeColors } from "../ui/theme";
+import { useLang } from "../../lib/i18n";
 
 interface Props {
   actions: QuickAction[];
@@ -17,6 +18,7 @@ interface Props {
 
 export function QuickActionsGrid({ actions, onActionPress, onSelect, loading = false }: Props) {
   const c = useThemeColors();
+  const { lang } = useLang();
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
       {actions.map((a, i) => (
@@ -45,7 +47,7 @@ export function QuickActionsGrid({ actions, onActionPress, onSelect, loading = f
               <Icon name={a.icon} size={15} color={c.accent} />
             </View>
             <Text style={{ flex: 1, color: c.text, fontSize: 13, fontWeight: "700" }} numberOfLines={1}>
-              {a.label}
+              {lang === "sw" && a.labelSw ? a.labelSw : a.label}
             </Text>
           </Pressable>
         </Animated.View>

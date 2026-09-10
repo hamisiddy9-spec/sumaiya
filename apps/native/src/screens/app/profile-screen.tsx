@@ -5,6 +5,8 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
+import { useEntitlements } from "../../lib/entitlements";
+import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
 import { useLang } from "../../lib/i18n";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
@@ -28,6 +30,8 @@ function initials(name?: string | null, email?: string | null): string {
 export function ProfileScreen({ navigation }: any) {
   const c = useThemeColors();
   const { user, signOut } = useAuthContext();
+  const { premium } = useEntitlements();
+  const [showPremium, setShowPremium] = useState(false);
   const { colorScheme, setColorScheme } = useColorScheme();
   const { lang, setLang, t } = useLang();
 
@@ -95,20 +99,20 @@ export function ProfileScreen({ navigation }: any) {
 
   const clearCache = () => {
     haptics.warning();
-    Alert.alert("Clear offline data?", "Downloaded CVs and cached data will be removed from this device. Your cloud copies are safe.", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("Clear offline data?", "Futa data iliyohifadhiwa?"), t("Downloaded CVs and cached data will be removed from this device. Your cloud copies are safe.", "CV zilizopakuliwa na data iliyohifadhiwa zitaondolewa kwenye simu hii. Nakala zako za wingu ziko salama."), [
+      { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
-        text: "Clear",
+        text: t("Clear", "Futa"),
         style: "destructive",
         onPress: async () => {
           setBusy("cache");
           try {
             await offlineStorage.clearAll();
             haptics.success();
-            Alert.alert("Done", "Offline data cleared.");
+            Alert.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
           } catch {
             haptics.error();
-            Alert.alert("Couldn't clear", "Try again.");
+            Alert.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
           } finally {
             setBusy(null);
           }
@@ -119,10 +123,10 @@ export function ProfileScreen({ navigation }: any) {
 
   const confirmSignOut = () => {
     haptics.warning();
-    Alert.alert("Sign out?", "You can sign back in any time.", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("Sign out?", "Utoke?"), t("You can sign back in any time.", "Unaweza kuingia tena wakati wowote."), [
+      { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
-        text: "Sign out",
+        text: t("Sign out", "Toka"),
         style: "destructive",
         onPress: async () => {
           setBusy("signout");
@@ -139,12 +143,12 @@ export function ProfileScreen({ navigation }: any) {
   const confirmDelete = () => {
     haptics.warning();
     Alert.alert(
-      "Delete your account?",
-      "This permanently removes your CVs, cover letters and account data. It can't be undone.",
+      t("Delete your account?", "Futa akaunti yako?"),
+      t("This permanently removes your CVs, cover letters and account data. It can't be undone.", "Hili linaondoa kabisa CV zako, barua za maombi na taarifa za akaunti. Haliwezi kurudishwa."),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("Cancel", "Ghairi"), style: "cancel" },
         {
-          text: "Delete everything",
+          text: t("Delete everything", "Futa kila kitu"),
           style: "destructive",
           onPress: async () => {
             setBusy("delete");
@@ -154,7 +158,7 @@ export function ProfileScreen({ navigation }: any) {
               await signOut();
             } catch {
               haptics.error();
-              Alert.alert("Couldn't delete", "Contact support@sumaiya.pro.");
+              Alert.alert(t("Couldn't delete", "Imeshindwa kufuta"), "Contact support@sumaiya.pro.");
             } finally {
               setBusy(null);
             }
@@ -169,7 +173,7 @@ export function ProfileScreen({ navigation }: any) {
   return (
     <Screen scroll keyboardAvoiding={false}>
       <Animated.View entering={FadeInDown.duration(300)}>
-        <ScreenTitle>Profile</ScreenTitle>
+        <ScreenTitle>{t("Profile", "Wasifu")}</ScreenTitle>
 
         <View
           style={{
@@ -199,7 +203,7 @@ export function ProfileScreen({ navigation }: any) {
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-              {user?.name || user?.email?.split("@")[0] || "Your account"}
+              {user?.name || user?.email?.split("@")[0] || t("Your account", "Akaunti yako")}
             </Text>
             <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={1}>
               {user?.email}
@@ -281,14 +285,48 @@ export function ProfileScreen({ navigation }: any) {
           />
         </View>
 
+        {/* Invite */}
+        <ListGroupLabel>{t("Share Sumaiya", "Shirikisha Sumaiya")}</ListGroupLabel>
+        <View style={groupBox}>
+          <ListRow
+            first
+            last
+            icon="gift"
+            iconColor={c.accent}
+            label={t("Invite a friend", "Mwalike rafiki")}
+            sublabel={t("It's free — help someone else get hired", "Ni bure — msaidie mtu mwingine apate ajira")}
+            onPress={() => navigation.navigate("HomeTab", { screen: "Invite" })}
+            chevron
+          />
+        </View>
+
+        {/* Premium */}
+        {!premium ? (
+          <>
+            <ListGroupLabel>{t("Sumaiya Premium", "Sumaiya Premium")}</ListGroupLabel>
+            <View style={groupBox}>
+              <ListRow
+                first
+                last
+                icon="sparkles"
+                iconColor={c.accent}
+                label={t("Advanced templates & deep courses", "Miundo ya hali ya juu na kozi za kina")}
+                sublabel={t("Everything essential stays free", "Kila kitu muhimu kinabaki bure")}
+                onPress={() => setShowPremium(true)}
+                chevron
+              />
+            </View>
+          </>
+        ) : null}
+
         {/* Account */}
         <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
         <View style={groupBox}>
-          <ListRow first icon="lock" label={t("Change password", "Badilisha nywila")} onPress={() => navigation.navigate("ChangePassword")} />
           <ListRow
+            first
             icon="trash-2"
             iconColor={c.warning}
-            label={t("Clear offline data", "Futa data ya nje ya mtandao")}
+            label={t("Clear offline data", "Futa data iliyohifadhiwa")}
             disabled={busy === "cache"}
             onPress={clearCache}
             chevron
@@ -315,9 +353,10 @@ export function ProfileScreen({ navigation }: any) {
         </View>
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
-          Sumaiya · Documents that get you hired{"\n"}support@sumaiya.pro
+          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}support@sumaiya.pro
         </Text>
       </Animated.View>
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
     </Screen>
   );
 }

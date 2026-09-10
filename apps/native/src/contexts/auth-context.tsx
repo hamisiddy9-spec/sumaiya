@@ -7,24 +7,28 @@ import React, {
   useRef,
 } from "react";
 import * as Linking from "expo-linking";
-import * as WebBrowser from "expo-web-browser";
+import {
+  GoogleSignin,
+  statusCodes,
+  isErrorWithCode,
+} from "@react-native-google-signin/google-signin";
 import type { Session, User } from "@supabase/supabase-js";
 import type { ApiClient } from "@sumaiya/api-client";
 import type { AuthUser } from "@sumaiya/types";
-import { supabase, EMAIL_REDIRECT_TO } from "../lib/supabase";
+import { supabase } from "../lib/supabase";
 import { apiClient as sharedApiClient } from "../lib/api-client";
 
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  /** Set after sign-up when the user must confirm their email before signing in. */
-  pendingConfirmationEmail: string | null;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  /** Email a 6-digit code. No redirect, no deep link — the code is typed in
+   *  the app and verifyCode sets the session directly. The same code creates
+   *  the account, so there is no separate sign-up. */
+  sendCode: (email: string) => Promise<void>;
+  verifyCode: (email: string, token: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  resendConfirmation: (email: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -49,14 +53,14 @@ function toAuthUser(user: User): AuthUser {
 }
 
 function friendlyError(message: string): string {
-  if (/email not confirmed/i.test(message)) {
-    return "Please confirm your email address first — check your inbox for the confirmation link.";
+  if (/token has expired|expired|otp_expired/i.test(message)) {
+    return "That code has expired — tap “Send me a code” to get a fresh one.";
   }
-  if (/invalid login credentials/i.test(message)) {
-    return "Incorrect email or password.";
+  if (/invalid|incorrect|token/i.test(message) && /otp|code/i.test(message)) {
+    return "That code isn't right. Check the digits and try again.";
   }
-  if (/user already registered/i.test(message)) {
-    return "An account with this email already exists. Try signing in instead.";
+  if (/rate limit|too many/i.test(message)) {
+    return "Too many attempts. Wait a minute, then try again.";
   }
   return message;
 }
@@ -65,7 +69,6 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [pendingConfirmationEmail, setPendingConfirmationEmail] = useState<string | null>(null);
   const initialized = useRef(false);
 
   const applySession = useCallback(
@@ -116,14 +119,12 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
             refresh_token: params.refresh_token,
           });
           if (sessionError) throw sessionError;
-          setPendingConfirmationEmail(null);
         } else if (params.token_hash) {
           const { error: otpError } = await supabase.auth.verifyOtp({
             type: "email",
             token_hash: params.token_hash,
           });
           if (otpError) throw otpError;
-          setPendingConfirmationEmail(null);
         } else if (params.error_description) {
           setError(friendlyError(params.error_description));
         }
@@ -140,109 +141,45 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
     return () => sub.remove();
   }, []);
 
-  const signUp = useCallback(
-    async (email: string, password: string, name: string) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { name }, emailRedirectTo: EMAIL_REDIRECT_TO },
-        });
-        if (signUpError) throw signUpError;
-
-        if (data.session) {
-          // Email confirmation disabled — user is signed in immediately.
-          applySession(data.session);
-        } else {
-          // Confirmation required. Do NOT sign the user in yet.
-          setPendingConfirmationEmail(email);
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Sign up failed";
-        setError(friendlyError(message));
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [applySession]
-  );
-
-  const signIn = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
-      setPendingConfirmationEmail(null);
-      // onAuthStateChange applies the session.
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Sign in failed";
-      setError(friendlyError(message));
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Same Supabase Google provider the web app already uses
-  // (lib/auth-client.ts) — no new Google Cloud Console setup needed. Flow:
-  // ask Supabase for the provider's authorize URL, open it in a browser tab
-  // the OS treats as a trusted user session (openAuthSessionAsync, NOT an
-  // in-app WebView — Google blocks sign-in inside WebViews), and when it
-  // redirects back to EMAIL_REDIRECT_TO the promise resolves with that URL
-  // directly — no need to round-trip through the app's own deep-link
-  // listener the way the email-confirm flow does.
+  // Native Google Sign-In — the OS account-picker sheet, no browser, no
+  // redirect URL involved. GoogleSignin (configured in lib/supabase.ts with the
+  // Web client ID) returns an ID token; Supabase accepts it directly via
+  // signInWithIdToken(). onAuthStateChange then applies the session.
   const signInWithGoogle = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const response = await GoogleSignin.signIn();
+
+      // v13+ returns { type: "success" | "cancelled", data }. Older shape put
+      // the payload at the top level — handle both.
+      const payload =
+        (response as { type?: string; data?: unknown }).type === "cancelled"
+          ? null
+          : ((response as { data?: unknown }).data ?? response);
+      if (!payload) return; // user dismissed the sheet — not an error
+
+      const idToken = (payload as { idToken?: string }).idToken;
+      if (!idToken) throw new Error("Google sign-in didn't return an ID token.");
+
+      const { error: sessionError } = await supabase.auth.signInWithIdToken({
         provider: "google",
-        options: { redirectTo: EMAIL_REDIRECT_TO, skipBrowserRedirect: true },
-      });
-      if (oauthError) throw oauthError;
-      if (!data?.url) throw new Error("Could not start Google sign-in.");
-
-      // Style the auth session so it reads as part of the app, not "a browser":
-      // no title bar, app-coloured chrome, collapsing toolbar, kept out of the
-      // recents switcher. (A fully native Google sheet needs
-      // @react-native-google-signin + a Google Cloud OAuth client — separate.)
-      const result = await WebBrowser.openAuthSessionAsync(data.url, EMAIL_REDIRECT_TO, {
-        showTitle: false,
-        enableBarCollapsing: true,
-        showInRecents: false,
-        toolbarColor: "#1A1310",
-        controlsColor: "#DA4A1C",
-        dismissButtonStyle: "cancel",
-        preferEphemeralSession: false,
-      });
-      if (result.type !== "success" || !result.url) {
-        // User closed the browser / cancelled — not an error to surface.
-        return;
-      }
-
-      const hash = result.url.split("#")[1];
-      const params = hash ? new URLSearchParams(hash) : null;
-      const access_token = params?.get("access_token");
-      const refresh_token = params?.get("refresh_token");
-      if (!access_token || !refresh_token) {
-        throw new Error(
-          params?.get("error_description") || "Google sign-in didn't return a session."
-        );
-      }
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token,
-        refresh_token,
+        token: idToken,
       });
       if (sessionError) throw sessionError;
       // onAuthStateChange applies the session.
     } catch (err) {
+      if (
+        isErrorWithCode(err) &&
+        (err.code === statusCodes.SIGN_IN_CANCELLED || err.code === statusCodes.IN_PROGRESS)
+      ) {
+        return; // silent — cancelled or a double-tap
+      }
+      if (isErrorWithCode(err) && err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        setError("Google Play Services isn't available on this device.");
+        throw err;
+      }
       const message = err instanceof Error ? err.message : "Google sign-in failed";
       setError(friendlyError(message));
       throw err;
@@ -254,24 +191,41 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
+      await GoogleSignin.signOut().catch(() => {}); // clear the cached Google account too
     } catch (err) {
       console.error("Sign out error:", err);
     } finally {
       applySession(null);
-      setPendingConfirmationEmail(null);
     }
   }, [applySession]);
 
-  const resendConfirmation = useCallback(async (email: string) => {
+  const sendCode = useCallback(async (email: string) => {
     setError(null);
-    const { error: resendError } = await supabase.auth.resend({
-      type: "signup",
+    const { error: otpError } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: EMAIL_REDIRECT_TO },
+      options: { shouldCreateUser: true },
     });
-    if (resendError) {
-      setError(friendlyError(resendError.message));
-      throw resendError;
+    if (otpError) {
+      setError(friendlyError(otpError.message));
+      throw otpError;
+    }
+  }, []);
+
+  const verifyCode = useCallback(async (email: string, token: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const { data, error: vErr } = await supabase.auth.verifyOtp({
+        email,
+        token: token.replace(/\D/g, ""),
+        type: "email",
+      });
+      if (vErr || !data.session) {
+        setError(friendlyError(vErr?.message ?? "That code is wrong or expired."));
+        throw vErr ?? new Error("no session");
+      }
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -283,12 +237,10 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
         user,
         loading,
         error,
-        pendingConfirmationEmail,
-        signUp,
-        signIn,
+        sendCode,
+        verifyCode,
         signInWithGoogle,
         signOut,
-        resendConfirmation,
         clearError,
       }}
     >

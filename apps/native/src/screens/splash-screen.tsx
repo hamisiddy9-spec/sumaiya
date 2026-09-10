@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,9 +10,12 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useThemeColors } from "../components/ui/theme";
+import { SumaiyaMark } from "../components/sumaiya-mark";
+import { useLang } from "../lib/i18n";
 
 export function SplashScreen() {
   const c = useThemeColors();
+  const { t } = useLang();
   const logo = useSharedValue(0);
   const word = useSharedValue(0);
   const pulse = useSharedValue(1);
@@ -24,7 +27,7 @@ export function SplashScreen() {
       900,
       withRepeat(
         withSequence(
-          withTiming(1.06, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+          withTiming(1.05, { duration: 900, easing: Easing.inOut(Easing.quad) }),
           withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
         ),
         -1,
@@ -60,11 +63,7 @@ export function SplashScreen() {
           },
         ]}
       >
-        <Image
-          source={require("../../assets/icon.png")}
-          style={{ width: 60, height: 60, borderRadius: 14 }}
-          resizeMode="contain"
-        />
+        <SumaiyaMark size={52} state="thinking" color="#FAF5EE" />
       </Animated.View>
 
       <Animated.View style={[wordStyle, { alignItems: "center", gap: 6 }]}>
@@ -72,7 +71,7 @@ export function SplashScreen() {
           Sumaiya
         </Text>
         <Text style={{ color: c.textMuted, fontSize: 13, fontWeight: "600" }}>
-          Documents that get you hired
+          {t("Your job companion", "Msaidizi wako wa kupata ajira")}
         </Text>
       </Animated.View>
     </View>

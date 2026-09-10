@@ -83,7 +83,7 @@ const STRINGS = {
     website: "Tovuti",
     summary: "Muhtasari Wako",
     emailNotifications: "Arifa za Barua Pepe",
-    emailNotificationsDesc: "Pokea sasisho za barua pepe kuhusu templeti na akaunti yako.",
+    emailNotificationsDesc: "Pokea sasisho za barua pepe kuhusu miundo na akaunti yako.",
     analyticsOptOut: "Takwimu za Matumizi bila Kitambulisho",
     analyticsOptOutDesc: "Saidia kuboresha bidhaa kwa takwimu za matumizi zisizojulikana (hazishirikiwi, hakuna taarifa za kibinafsi).",
     saveChanges: "Hifadhi Mabadiliko",

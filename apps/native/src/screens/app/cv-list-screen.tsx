@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { useCVs } from "@sumaiya/hooks";
 import type { CV } from "@sumaiya/types";
-import { apiClient } from "../../lib/api-client";
+import { useCvs } from "../../hooks/use-cvs";
 import {
   Button,
   Card,
@@ -16,20 +15,24 @@ import {
   useThemeColors,
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
+import { useLang } from "../../lib/i18n";
 
-function relativeDate(d: string | Date): string {
+function relativeDate(d: string | Date, sw: boolean): string {
   const date = new Date(d);
   const diff = Date.now() - date.getTime();
   const day = 86_400_000;
-  if (diff < day) return "Today";
-  if (diff < 2 * day) return "Yesterday";
-  if (diff < 7 * day) return `${Math.floor(diff / day)}d ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  const n = Math.floor(diff / day);
+  if (diff < day) return sw ? "Leo" : "Today";
+  if (diff < 2 * day) return sw ? "Jana" : "Yesterday";
+  if (diff < 7 * day) return sw ? `Siku ${n} zilizopita` : `${n}d ago`;
+  return date.toLocaleDateString(sw ? "sw-TZ" : "en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export function CvListScreen({ navigation }: any) {
   const c = useThemeColors();
-  const { cvs, loading, deleteCV, loadCVs } = useCVs(apiClient);
+  const { t, lang } = useLang();
+  const sw = lang === "sw";
+  const { cvs, loading, deleteCV, loadCVs } = useCvs();
   const [deleting, setDeleting] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -45,10 +48,10 @@ export function CvListScreen({ navigation }: any) {
 
   const confirmDelete = (id: string, title: string) => {
     haptics.warning();
-    Alert.alert("Delete this CV?", `"${title}" will be permanently removed.`, [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("Delete this CV?", "Ufute CV hii?"), t(`"${title}" will be permanently removed.`, `"${title}" itafutwa kabisa.`), [
+      { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
-        text: "Delete",
+        text: t("Delete", "Futa"),
         style: "destructive",
         onPress: async () => {
           setDeleting(id);
@@ -57,7 +60,7 @@ export function CvListScreen({ navigation }: any) {
             haptics.success();
           } catch {
             haptics.error();
-            Alert.alert("Couldn't delete", "Something went wrong. Try again.");
+            Alert.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Something went wrong. Try again.", "Kuna hitilafu. Jaribu tena."));
           } finally {
             setDeleting(null);
           }
@@ -72,12 +75,12 @@ export function CvListScreen({ navigation }: any) {
         trailing={
           cvs.length > 0 ? (
             <View style={{ backgroundColor: c.accent, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 4 }}>
-              <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}>{cvs.length}</Text>
+              <Text style={{ color: c.accentText, fontSize: 13, fontWeight: "700" }}>{cvs.length}</Text>
             </View>
           ) : undefined
         }
       >
-        My CVs
+        {t("My CVs", "CV zangu")}
       </ScreenTitle>
 
       {loading && cvs.length === 0 ? (
@@ -90,11 +93,11 @@ export function CvListScreen({ navigation }: any) {
         <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
           <EmptyState
             icon="file-text"
-            title="Your CVs live here"
-            body="Import an existing CV from a photo or a file, or start a new one — it takes a couple of minutes."
-            actionLabel="Import a CV"
+            title={t("Your CVs live here", "CV zako zipo hapa")}
+            body={t("Import an existing CV from a photo or a file, or start a new one — it takes a couple of minutes.", "Pakia CV uliyonayo kutoka picha au faili, au anza mpya — inachukua dakika chache.")}
+            actionLabel={t("Import a CV", "Pakia CV")}
             onAction={() => navigation.navigate("ImportTab")}
-            secondaryLabel="Start a new CV"
+            secondaryLabel={t("Start a new CV", "Anza CV mpya")}
             onSecondary={() => navigation.navigate("CvEditor")}
           />
         </View>
@@ -123,13 +126,13 @@ export function CvListScreen({ navigation }: any) {
                       {cv.title}
                     </Text>
                     <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                      Updated {relativeDate(cv.updatedAt)}
+                      {t("Updated", "Ilibadilishwa")} {relativeDate(cv.updatedAt, sw)}
                     </Text>
                   </View>
                   {cv.isOfflineOnly ? (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: c.warning + "1f", borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 }}>
                       <Icon name="wifi-off" size={11} color={c.warning} />
-                      <Text style={{ color: c.warning, fontSize: 10.5, fontWeight: "700" }}>Offline</Text>
+                      <Text style={{ color: c.warning, fontSize: 10.5, fontWeight: "700" }}>{t("Offline", "Nje ya mtandao")}</Text>
                     </View>
                   ) : null}
                 </View>
@@ -137,7 +140,7 @@ export function CvListScreen({ navigation }: any) {
                 <View style={{ flexDirection: "row", gap: 8 }}>
                   <View style={{ flex: 1 }}>
                     <Button
-                      label="Edit"
+                      label={t("Edit", "Hariri")}
                       variant="secondary"
                       size="sm"
                       leftIcon={<Icon name="edit" size={15} color={c.text} />}
@@ -148,7 +151,7 @@ export function CvListScreen({ navigation }: any) {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Button
-                      label="Delete"
+                      label={t("Delete", "Futa")}
                       variant="ghost"
                       size="sm"
                       loading={deleting === cv.id}

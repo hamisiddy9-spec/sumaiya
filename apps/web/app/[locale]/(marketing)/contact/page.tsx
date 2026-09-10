@@ -40,7 +40,7 @@ const contactDetails = (sw: boolean) => [
 ];
 
 const faqLinks = (sw: boolean) => [
-  { href: "/templates", label: sw ? "Naweza kubadilisha templeti za CV?" : "Can I switch CV templates?" },
+  { href: "/templates", label: sw ? "Naweza kubadilisha muundo wa CV?" : "Can I change my CV design?" },
   { href: "/ats-checker", label: sw ? "CV yangu itapita mifumo ya ATS?" : "Will my CV pass ATS systems?" },
   { href: "/tools", label: sw ? "Mna zana za PDF bila malipo?" : "Do you have free PDF tools?" },
 ];

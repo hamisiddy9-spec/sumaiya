@@ -2,23 +2,26 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../types";
 import { SignInScreen } from "../../screens/auth/sign-in-screen";
-import { SignUpScreen } from "../../screens/auth/sign-up-screen";
-import { ForgotPasswordScreen } from "../../screens/auth/forgot-password-screen";
+import { useThemeColors } from "../../components/ui";
 
 const Stack = createNativeStackNavigator<AuthStackParamList, undefined>();
 
+// One screen. Auth is a 6-digit email code (or Google) — the same code creates
+// the account, so there is no separate sign-up, and passwordless means there is
+// nothing to "forget" or reset.
 export function AuthStack() {
+  const c = useThemeColors();
   return (
     <Stack.Navigator
       id={undefined}
       screenOptions={{
         headerShown: false,
         animation: "slide_from_right",
+        animationDuration: 260,
+        contentStyle: { backgroundColor: c.bg },
       }}
     >
       <Stack.Screen name="SignIn" component={SignInScreen} />
-      <Stack.Screen name="SignUp" component={SignUpScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }

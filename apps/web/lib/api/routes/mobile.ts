@@ -109,7 +109,7 @@ export const mobileRoutes = new Hono()
         knownBlock = contextToPromptBlock(await assembleUserContext(userId));
       } catch { /* unpersonalised is fine */ }
 
-      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words, in the same language the user is writing in. When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names.
+      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words, in the same language the user is writing in. When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names. Never claim the user "already told you" something that is not written in the exchange below — if it's missing, ask for it plainly. If a message says a file was attached but gives you NO text from it, say you couldn't read the file and ask them to paste the text — never guess or invent its contents. Never ask where the user lives, their neighbourhood, or whether they feel safe — keep every question tied to their work and the job they want. Stay on the one goal they came with; don't drift to a side topic.
 ${knownBlock}
 Conversation so far:
 ${transcript}
@@ -250,6 +250,114 @@ ${facts.join("\n")}`;
         },
       });
     }
+  )
+
+  // POST /api/mobile/build-cv — turn what the user told Sumaiya (chat transcript
+  // + their saved profile) into a structured CV the app can preview and save.
+  // Same anti-fabrication rules as everywhere: nothing invented, "" for missing.
+  .post(
+    "/build-cv",
+    zValidator(
+      "json",
+      z.object({
+        transcript: z.string().min(20).max(12000),
+        lang: z.enum(["en", "sw"]).optional(),
+      }),
+    ),
+    async (c) => {
+      const userId = await getUserId(c);
+      if (!userId) return c.json({ error: "Unauthorized" }, 401);
+      if (!hasAiProvider()) return c.json({ error: "AI is not configured." }, 503);
+
+      const quota = await checkAiQuota(userId);
+      if (!quota.allowed) return c.json({ error: quota.message, retryAfter: quota.retryAfter }, 429);
+
+      const { transcript, lang } = c.req.valid("json");
+
+      // Fold in the server-side profile so the CV is as complete as possible.
+      let knownBlock = "";
+      try {
+        knownBlock = contextToPromptBlock(await assembleUserContext(userId));
+      } catch { /* thin context is fine */ }
+
+      const langLine =
+        lang === "sw"
+          ? "Write the summary and descriptions in Kiswahili."
+          : "Write the summary and descriptions in English.";
+
+      const prompt = `Build a CV as STRICT JSON matching exactly this shape (no extra keys, no commentary, no markdown):
+{"personalInfo":{"fullName":"","email":"","phone":"","location":"","headline":""},"summary":"","experience":[{"company":"","title":"","startDate":"","endDate":"","description":"","keyAchievements":[]}],"education":[{"institution":"","degree":"","field":"","graduationDate":""}],"skills":[{"name":"","level":"intermediate"}],"languages":[{"language":"","proficiency":"professional"}]}
+Rules: base every field ONLY on what the person actually said below — use "" for anything not stated and [] for empty lists. Never invent an employer, title, date, qualification or number. Dates as "YYYY-MM" when known. "level" is one of beginner/intermediate/advanced/expert. "proficiency" is one of elementary/limited/professional/fluent/native. Write a 2–3 sentence summary grounded in their real experience. ${langLine} ${TRUTH_CONSTRAINT}
+Return ONLY the JSON object.
+${knownBlock}
+WHAT THE PERSON TOLD SUMAIYA:
+"""
+${sanitizePromptText(transcript, 12000)}
+"""`;
+
+      const raw = await callAi(prompt, { temperature: 0.3, maxTokens: 2200, jsonMode: true, timeoutMs: 45_000 });
+      if (!raw) {
+        await refundAiUsage(userId);
+        return c.json({ error: "Sumaiya is taking too long. Try again." }, 502);
+      }
+      const parsed = safeParseJson(raw) as Record<string, unknown> | null;
+      if (!parsed || typeof parsed !== "object") {
+        await refundAiUsage(userId);
+        return c.json({ error: "Couldn't build the CV. Tell Sumaiya a bit more and try again." }, 422);
+      }
+
+      const id = () => nanoid(8);
+      const pi = (parsed.personalInfo ?? {}) as Record<string, unknown>;
+      const arr = (v: unknown) => (Array.isArray(v) ? (v as Record<string, unknown>[]) : []);
+      const cv = {
+        personalInfo: {
+          fullName: String(pi.fullName ?? ""),
+          email: String(pi.email ?? ""),
+          phone: String(pi.phone ?? ""),
+          location: String(pi.location ?? ""),
+          headline: String(pi.headline ?? ""),
+        },
+        summary: String(parsed.summary ?? ""),
+        experience: arr(parsed.experience).map((e) => ({
+          id: id(),
+          company: String(e.company ?? ""),
+          title: String(e.title ?? ""),
+          startDate: String(e.startDate ?? ""),
+          endDate: String(e.endDate ?? ""),
+          description: String(e.description ?? ""),
+          keyAchievements: Array.isArray(e.keyAchievements) ? e.keyAchievements.map(String) : [],
+        })),
+        education: arr(parsed.education).map((e) => ({
+          id: id(),
+          institution: String(e.institution ?? ""),
+          degree: String(e.degree ?? ""),
+          field: String(e.field ?? ""),
+          graduationDate: String(e.graduationDate ?? ""),
+        })),
+        skills: arr(parsed.skills).map((s) => ({
+          id: id(),
+          name: String(s.name ?? ""),
+          level: ["beginner", "intermediate", "advanced", "expert"].includes(String(s.level))
+            ? String(s.level)
+            : "intermediate",
+        })),
+        certifications: [],
+        languages: arr(parsed.languages).map((l) => ({
+          id: id(),
+          language: String(l.language ?? ""),
+          proficiency: ["elementary", "limited", "professional", "fluent", "native"].includes(String(l.proficiency))
+            ? String(l.proficiency)
+            : "professional",
+        })),
+      };
+
+      if (!cv.personalInfo.fullName && cv.experience.length === 0 && cv.skills.length === 0) {
+        await refundAiUsage(userId);
+        return c.json({ error: "Not enough to go on yet — tell Sumaiya your name, a job you've done, and your skills." }, 422);
+      }
+
+      return c.json({ success: true, data: { cv } });
+    },
   )
 
   // PUT /api/mobile/device-token — register/refresh a push token.

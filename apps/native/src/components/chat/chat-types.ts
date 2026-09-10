@@ -2,7 +2,7 @@
  * Chat message types and interfaces for Sumaiya AI assistant
  */
 
-export type MessageType = 'text' | 'skill-gap' | 'recommendation' | 'action' | 'learning';
+export type MessageType = 'text' | 'skill-gap' | 'recommendation' | 'action' | 'learning' | 'cv-ready';
 export type ActionType = 'open-cv' | 'learn' | 'practice' | 'chat' | 'edit-cv' | 'view-resources';
 export type MessageAuthor = 'user' | 'sumaiya';
 
@@ -27,6 +27,8 @@ export interface LearningResource {
 export interface QuickAction {
   id: string;
   label: string;
+  /** Swahili label — the grid renders this when the app is in SW. */
+  labelSw?: string;
   icon: string;
   action: ActionType;
   data?: Record<string, any>;
@@ -54,6 +56,9 @@ export interface ChatMessageData {
 
   // Metadata
   confidence?: number; // 0-1 for AI confidence in response
+
+  // A CV Sumaiya built from the conversation (type: 'cv-ready')
+  cv?: import("@sumaiya/types").CVData;
 }
 
 export type AttachmentKind = 'image' | 'document' | 'link' | 'cv';
@@ -69,6 +74,14 @@ export interface Attachment {
   /** upload lifecycle for the chip UI */
   status: 'pending' | 'uploading' | 'ready' | 'error';
   progress?: number; // 0-1
+  /** Text pulled out of the file (OCR for images, unpdf for PDFs) once the
+   *  send flow has read it. Powers the "preview what Sumaiya got" sheet. */
+  extractedText?: string;
+  /** Set instead of extractedText when the file couldn't be read (scanned PDF,
+   *  Word doc, network error). Shown in the preview sheet. */
+  extractError?: string;
+  /** True while extraction is in flight. */
+  extracting?: boolean;
 }
 
 export interface ChatMessage {
@@ -97,31 +110,10 @@ export interface SumaiyaResponse {
 
 // Quick actions available from greeting
 export const INITIAL_QUICK_ACTIONS: QuickAction[] = [
-  {
-    id: 'cv-builder',
-    label: 'Build my CV',
-    icon: 'file-text',
-    action: 'open-cv'
-  },
-  {
-    id: 'job-letter',
-    label: 'Cover letter',
-    icon: 'mail',
-    action: 'edit-cv', // Navigate to letter template
-    data: { template: 'letter' }
-  },
-  {
-    id: 'learn-skills',
-    label: 'Learn a skill',
-    icon: 'briefcase',
-    action: 'learn'
-  },
-  {
-    id: 'free-chat',
-    label: 'Just talk',
-    icon: 'message-circle',
-    action: 'chat'
-  }
+  { id: 'cv-builder', label: 'Build my CV', labelSw: 'Tengeneza CV yangu', icon: 'file-text', action: 'open-cv' },
+  { id: 'job-letter', label: 'Cover letter', labelSw: 'Barua ya maombi', icon: 'mail', action: 'edit-cv', data: { template: 'letter' } },
+  { id: 'learn-skills', label: 'Learn a skill', labelSw: 'Jifunze ujuzi', icon: 'briefcase', action: 'learn' },
+  { id: 'free-chat', label: 'Just talk', labelSw: 'Tuongee tu', icon: 'message-circle', action: 'chat' },
 ];
 
 // Action types and their handlers

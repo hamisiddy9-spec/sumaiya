@@ -205,7 +205,7 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
             </h2>
             <p className="text-cream/60 text-sm leading-relaxed max-w-lg">
               {sw
-                ? "Tengeneza CV ya kitaalamu inayopita ATS bila malipo ukitumia templeti rafiki kwa waajiri na msaidizi wa AI."
+                ? "Tengeneza CV ya kitaalamu inayopita ATS bila malipo ukitumia muundo rafiki kwa waajiri na msaidizi wa AI."
                 : "Build a professional, ATS-friendly CV free with recruiter-friendly templates and an AI assistant."}
             </p>
           </div>
@@ -213,7 +213,7 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
             href="/templates"
             className="shrink-0 inline-flex items-center gap-2 bg-ember text-cream font-semibold rounded-[10px] px-7 py-3.5 text-sm shadow-ember-hard hover:scale-[1.02] active:scale-[0.97] transition"
           >
-            {sw ? "Angalia templeti za CV" : "Browse CV templates"} →
+            {sw ? "Ona miundo ya CV" : "See CV looks"} →
           </Link>
         </section>
       </div>

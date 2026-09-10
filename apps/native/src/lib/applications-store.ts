@@ -44,6 +44,10 @@ let db: SQLite.SQLiteDatabase | null = null;
 async function conn(): Promise<SQLite.SQLiteDatabase> {
   if (db) return db;
   db = await SQLite.openDatabaseAsync("sumaiya.db");
+  // This is a second connection to the same file the offline CV store uses.
+  // WAL + a busy timeout means a transient write lock retries rather than
+  // throwing SQLITE_BUSY.
+  await db.execAsync(`PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 4000;`);
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS applications (
       id TEXT PRIMARY KEY,

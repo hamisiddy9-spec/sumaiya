@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
-import { useCVs } from "@sumaiya/hooks";
 import type { CV } from "@sumaiya/types";
-import { apiClient } from "../lib/api-client";
+import { useCvs } from "../hooks/use-cvs";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
+import { useEntitlements } from "../lib/entitlements";
+import { PremiumSheet } from "../components/premium-sheet";
+import { apiClient } from "../lib/api-client";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
@@ -30,10 +32,14 @@ export function AtsCheckerScreen({ route, navigation }: any) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";
-  const { cvs, loading } = useCVs(apiClient);
+  const { cvs, loading } = useCvs();
+  const { premium } = useEntitlements();
   const preselect: string | undefined = route?.params?.cvId;
   const [pickedId, setPickedId] = useState<string | undefined>(preselect);
   const [jd, setJd] = useState("");
+  const [verdict, setVerdict] = useState<string | null>(null);
+  const [verdictBusy, setVerdictBusy] = useState(false);
+  const [showPremium, setShowPremium] = useState(false);
 
   const picked: CV | undefined = useMemo(
     () => cvs.find((x) => x.id === pickedId) ?? cvs[0],
@@ -55,6 +61,31 @@ export function AtsCheckerScreen({ route, navigation }: any) {
     if (!picked || jd.trim().length < 40) return null;
     return matchJd(picked.data, jd);
   }, [picked, jd]);
+
+  const runVerdict = async () => {
+    if (!premium) { setShowPremium(true); return; }
+    if (!picked || !analysis || verdictBusy) return;
+    setVerdictBusy(true);
+    haptics.light();
+    try {
+      const d: any = picked.data ?? {};
+      const failing = analysis.checks.filter((ch: any) => !ch.pass).map((ch: any) => ch.label).join("; ");
+      const prompt =
+        `${sw ? "Jibu kwa Kiswahili." : "Answer in English."} ` +
+        `You are Sumaiya reviewing a CV. ATS score ${analysis.score}/100. Failing checks: ${failing || "none"}. ` +
+        `Summary: "${(d.summary ?? "").slice(0, 400)}". Roles: ${(d.experience ?? []).map((e: any) => `${e.title} at ${e.company}`).join(", ") || "none"}. ` +
+        `Skills: ${(d.skills ?? []).map((s: any) => s.name).join(", ") || "none"}. ` +
+        `Give a short honest verdict (max 90 words) then the 3 highest-impact fixes as a numbered list. Ground everything in what's above — invent nothing.`;
+      const { message } = await apiClient.sendChatMessage([{ role: "user", content: prompt }]);
+      setVerdict(message.trim());
+      haptics.success();
+    } catch {
+      haptics.error();
+      setVerdict(null);
+    } finally {
+      setVerdictBusy(false);
+    }
+  };
 
   const scoreColor = (s: number) => (s >= 75 ? c.success : s >= 50 ? c.warning : c.error);
   const statusWord = (s: number) =>
@@ -176,6 +207,45 @@ export function AtsCheckerScreen({ route, navigation }: any) {
                 )}
               </View>
 
+              {/* Sumaiya's verdict — premium */}
+              <View
+                style={{
+                  gap: 8,
+                  padding: 14,
+                  borderRadius: 14,
+                  backgroundColor: c.accent + "0e",
+                  borderWidth: 1,
+                  borderColor: c.accent + "2a",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                  <Icon name="sparkles" size={15} color={c.accent} />
+                  <Text style={{ color: c.text, fontSize: 15, fontWeight: "800", flex: 1 }}>
+                    {t("Sumaiya's verdict", "Uamuzi wa Sumaiya")}
+                  </Text>
+                  {!premium ? <Icon name="lock" size={13} color={c.textMuted} /> : null}
+                </View>
+                {verdict ? (
+                  <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 21 }}>{verdict}</Text>
+                ) : (
+                  <>
+                    <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18 }}>
+                      {t(
+                        "A written review — the honest verdict plus your three highest-impact fixes.",
+                        "Mapitio yaliyoandikwa — uamuzi wa kweli pamoja na marekebisho matatu yenye athari kubwa.",
+                      )}
+                    </Text>
+                    <Button
+                      label={verdictBusy ? t("Reviewing…", "Inapitia…") : premium ? t("Get the verdict", "Pata uamuzi") : t("Unlock with Premium", "Fungua na Premium")}
+                      variant="secondary"
+                      size="sm"
+                      loading={verdictBusy}
+                      onPress={runVerdict}
+                    />
+                  </>
+                )}
+              </View>
+
               {/* Line findings */}
               {analysis.findings.length > 0 && (
                 <View style={{ gap: 8 }}>
@@ -248,6 +318,7 @@ export function AtsCheckerScreen({ route, navigation }: any) {
           )}
         </>
       )}
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
     </Screen>
   );
 }

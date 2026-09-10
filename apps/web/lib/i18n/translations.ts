@@ -3,7 +3,7 @@ export type Lang = "en" | "sw";
 export const translations = {
   en: {
     nav: {
-      home: "Home", templates: "Templates", tools: "PDF Tools", pricing: "Pricing",
+      home: "Home", templates: "Looks", tools: "PDF Tools", pricing: "Pricing",
       signIn: "Sign In", getStarted: "Get Started", dashboard: "Dashboard",
       myAccount: "My Account",
     },
@@ -45,7 +45,7 @@ export const translations = {
       downloads: "Downloads",
       premiumActive: "Plan active",
       upgradeTitle: "Upgrade to Premium",
-      upgradeDesc: "Unlock PDF downloads, all templates, and AI enhancement",
+      upgradeDesc: "Unlock PDF downloads, every look, and AI enhancement",
       seePlans: "See plans →",
     },
     editor: {
@@ -56,7 +56,7 @@ export const translations = {
       download: "Download PDF",
       generating: "Generating...",
       downloaded: "Downloaded!",
-      template: "Template",
+      template: "Look",
       color: "Color",
       font: "Font",
       preview: "Preview",
@@ -98,12 +98,12 @@ export const translations = {
       deleteError: "Failed to delete account. Please contact support.",
     },
     templates: {
-      badge: "Templates",
-      title: "Professional Document Templates",
-      subtitle: "Choose from CV templates, business card designs, and professional letter templates. All ATS-optimized and export-ready.",
+      badge: "The look",
+      title: "Sumaiya designs it for you",
+      subtitle: "CV, cover letter, business card or formal letter — every design is ATS-ready. Sumaiya picks one that fits, and you can change it any time.",
       ctaHeading: "Not sure which to pick?",
-      ctaDescription: "Start with Nakuru — our most popular template, with an ATS Score of 97%.",
-      ctaSwitch: "Switch to any template anytime inside the editor with one click — your content carries over instantly.",
+      ctaDescription: "Nakuru is the one most people pick — 97% ATS score.",
+      ctaSwitch: "Change the look any time in the editor with one tap — your content carries over instantly.",
       ctaButton: "Start building for free",
     },
     tools: {
@@ -152,7 +152,7 @@ export const translations = {
   },
   sw: {
     nav: {
-      home: "Nyumbani", templates: "Templeti", tools: "Zana za PDF", pricing: "Bei",
+      home: "Nyumbani", templates: "Miundo", tools: "Zana za PDF", pricing: "Bei",
       signIn: "Ingia", getStarted: "Anza", dashboard: "Dashibodi",
       myAccount: "Akaunti Yangu",
     },
@@ -194,7 +194,7 @@ export const translations = {
       downloads: "Ulizopakua",
       premiumActive: "Mpango unaendelea",
       upgradeTitle: "Pata Premium",
-      upgradeDesc: "Fungua upakuaji wa PDF, templeti zote, na uboreshaji wa AI",
+      upgradeDesc: "Fungua upakuaji wa PDF, miundo yote, na uboreshaji wa AI",
       seePlans: "Ona mipango →",
     },
     editor: {
@@ -205,7 +205,7 @@ export const translations = {
       download: "Pakua PDF",
       generating: "Inatengeneza...",
       downloaded: "Imepakuliwa!",
-      template: "Templeti",
+      template: "Muundo",
       color: "Rangi",
       font: "Fonti",
       preview: "Hakiki",
@@ -247,12 +247,12 @@ export const translations = {
       deleteError: "Imeshindwa kufuta akaunti. Tafadhali wasiliana na msaada.",
     },
     templates: {
-      badge: "Templeti",
-      title: "Templeti za Kitaalamu",
-      subtitle: "Chagua templeti ya CV, kadi ya biashara au barua rasmi — zote ni rafiki kwa ATS na tayari kupakua.",
+      badge: "Muonekano",
+      title: "Sumaiya anaipamba kwa ajili yako",
+      subtitle: "CV, barua ya kazi, kadi au barua rasmi — kila muundo ni rafiki kwa ATS. Sumaiya anachagua unaokufaa, nawe unaweza kuubadilisha wakati wowote.",
       ctaHeading: "Hujui ya kuchagua?",
-      ctaDescription: "Anza na Nakuru — templeti yetu maarufu zaidi, yenye alama ya ATS ya 97%.",
-      ctaSwitch: "Badilisha templeti wakati wowote ndani ya kihariri kwa kubofya moja — maudhui yako yanabaki bila kubadilika.",
+      ctaDescription: "Nakuru ndio wengi huchagua — alama ya ATS 97%.",
+      ctaSwitch: "Badilisha muonekano wakati wowote kwenye kihariri kwa mguso mmoja — maudhui yako yanabaki.",
       ctaButton: "Anza kutengeneza bure",
     },
     tools: {

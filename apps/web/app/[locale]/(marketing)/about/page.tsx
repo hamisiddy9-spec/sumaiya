@@ -44,7 +44,7 @@ const values = (sw: boolean) => [
 ];
 
 const stats = (sw: boolean) => [
-  { value: "120+", label: sw ? "Templeti zilizochaguliwa" : "Curated templates" },
+  { value: "120+", label: sw ? "Miundo iliyochaguliwa" : "Curated looks" },
   { value: "4", label: sw ? "Aina za hati" : "Document types" },
   { value: "2", label: sw ? "Lugha" : "Languages" },
   { value: "PDF", label: sw ? "Uhamishaji salama kwa ATS" : "ATS-safe export" },
@@ -68,7 +68,7 @@ export default async function AboutPage({ params }: { params: { locale: string }
           </h1>
           <p className="text-text-muted max-w-2xl mx-auto text-sm md:text-lg leading-relaxed">
             {sw
-              ? "Kutuma maombi ya nafasi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inakupa templeti zilizoidhinishwa na waajiri, msaidizi wa kuandika wa AI na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
+              ? "Kutuma maombi ya nafasi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inaipamba CV yako kwa muundo unaoidhinishwa na waajiri, msaidizi wa kuandika wa AI na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
               : "Applying for a job shouldn’t mean fighting with a word processor at 1am. Sumaiya gives you recruiter-friendly templates, an AI writing assistant and one-tap PDF export — so you can look your best and get past the screening software that reads your CV first."}
           </p>
         </div>

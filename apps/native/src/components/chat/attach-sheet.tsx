@@ -24,16 +24,17 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { kind: "camera", icon: "camera", en: "Take a photo", sw: "Piga picha", hintEn: "A printed CV or a job advert", hintSw: "CV iliyochapishwa au tangazo la kazi" },
-  { kind: "photo", icon: "image", en: "Photo library", sw: "Maktaba ya picha", hintEn: "A screenshot or saved scan", hintSw: "Picha ya skrini au skani" },
-  { kind: "file", icon: "file-text", en: "Upload a file", sw: "Pakia faili", hintEn: "PDF, Word or text document", hintSw: "PDF, Word au maandishi" },
-  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika kiungo cha kazi", hintEn: "We'll read the job description", hintSw: "Tutasoma maelezo ya kazi" },
-  { kind: "myDoc", icon: "briefcase", en: "One of my CVs", sw: "Moja ya CV zangu", hintEn: "Use it as a starting point", hintSw: "Itumie kama mwanzo" },
+  { kind: "camera", icon: "camera", en: "Take a photo", sw: "Piga picha", hintEn: "A printed CV or a job advert", hintSw: "CV au tangazo la kazi" },
+  { kind: "photo", icon: "image", en: "Photo library", sw: "Toka kwenye picha", hintEn: "A screenshot or a saved scan", hintSw: "Picha ya skrini au skani" },
+  { kind: "file", icon: "file-text", en: "Upload a file", sw: "Pakia faili", hintEn: "PDF, Word or a text file", hintSw: "PDF, Word au maandishi" },
+  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika link ya kazi", hintEn: "I'll read the advert for you", hintSw: "Nitasoma tangazo kwa niaba yako" },
+  { kind: "myDoc", icon: "briefcase", en: "One of my CVs", sw: "CV yangu niliyonayo", hintEn: "Use it as a starting point", hintSw: "Ianzie hapo" },
 ];
 
 /**
- * The chat composer's [+] menu. Custom sheet (no bottom-sheet lib in the
- * project) — reanimated slide-up + fade backdrop, honours the house curve.
+ * The chat composer's [+] menu. A bottom sheet built on RN Modal — the sheet
+ * is a flex child pinned to the bottom (not absolute-positioned), so it always
+ * spans the full width on Android. Reanimated slide-up + fade backdrop.
  */
 export function AttachSheet({
   visible,
@@ -59,12 +60,13 @@ export function AttachSheet({
         if (done) runOnJS(setMounted)(false);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
   const sheetStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
-    transform: [{ translateY: (1 - progress.value) * 320 }],
+    opacity: 0.4 + progress.value * 0.6,
+    transform: [{ translateY: (1 - progress.value) * 360 }],
   }));
 
   if (!mounted) return null;
@@ -73,63 +75,76 @@ export function AttachSheet({
     haptics.selection();
     onClose();
     // let the close animation start before the picker takes over
-    setTimeout(() => onPick(kind), 120);
+    setTimeout(() => onPick(kind), 140);
   };
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <Pressable style={{ flex: 1 }} onPress={onClose}>
-        <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.4)" }]} />
-      </Pressable>
-      <Animated.View
-        style={[
-          sheetStyle,
-          {
-            position: "absolute",
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: c.bgElevated,
-            borderTopLeftRadius: 22,
-            borderTopRightRadius: 22,
-            paddingTop: 10,
-            paddingBottom: insets.bottom + 14,
-            paddingHorizontal: 14,
-            borderWidth: 1,
-            borderColor: c.border,
-          },
-        ]}
-      >
-        <View style={{ alignSelf: "center", width: 38, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 12 }} />
-        <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", marginLeft: 6, marginBottom: 8 }}>
-          {t("Add to the chat", "Ongeza kwenye mazungumzo")}
-        </Text>
-        {ROWS.map((r, i) => (
-          <Pressable
-            key={r.kind}
-            onPress={() => choose(r.kind)}
-            style={({ pressed }) => ({
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 14,
-              paddingVertical: 13,
-              paddingHorizontal: 8,
-              borderRadius: 12,
-              backgroundColor: pressed ? c.accent + "12" : "transparent",
-              borderTopWidth: i === 0 ? 0 : 1,
-              borderTopColor: c.border + "80",
-            })}
-          >
-            <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "16", alignItems: "center", justifyContent: "center" }}>
-              <Icon name={r.icon} size={19} color={c.accent} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: c.text, fontSize: 15, fontWeight: "600" }}>{t(r.en, r.sw)}</Text>
-              <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 1 }}>{t(r.hintEn, r.hintSw)}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </Animated.View>
+      <View style={{ flex: 1 }}>
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("Close", "Funga")}
+        >
+          <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
+        </Pressable>
+
+        <Animated.View
+          style={[
+            sheetStyle,
+            {
+              backgroundColor: c.bgElevated,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 8,
+              paddingBottom: insets.bottom + 16,
+              paddingHorizontal: 12,
+              borderTopWidth: 1,
+              borderColor: c.border,
+            },
+          ]}
+        >
+          <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 14 }} />
+          <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", marginLeft: 8, marginBottom: 6 }}>
+            {t("Add to the chat", "Ongeza kwenye mazungumzo")}
+          </Text>
+
+          {ROWS.map((r) => (
+            <Pressable
+              key={r.kind}
+              onPress={() => choose(r.kind)}
+              style={({ pressed }) => ({
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 14,
+                paddingVertical: 12,
+                paddingHorizontal: 8,
+                borderRadius: 14,
+                backgroundColor: pressed ? c.accent + "14" : "transparent",
+              })}
+            >
+              <View
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 13,
+                  backgroundColor: c.accent + "1f",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name={r.icon} size={20} color={c.accent} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }}>{t(r.en, r.sw)}</Text>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }}>{t(r.hintEn, r.hintSw)}</Text>
+              </View>
+              <Icon name="chevron-right" size={18} color={c.textMuted} />
+            </Pressable>
+          ))}
+        </Animated.View>
+      </View>
     </Modal>
   );
 }

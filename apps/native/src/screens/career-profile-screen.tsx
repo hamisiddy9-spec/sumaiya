@@ -1,19 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { loadProfile, saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
+import { getDefaultTemplate, setDefaultTemplate } from "../lib/prefs";
+import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
+import { TemplateThumb } from "../components/cv/template-thumb";
 import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 
 export function CareerProfileScreen({ navigation }: any) {
   const c = useThemeColors();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [p, setP] = useState<CareerProfile>(EMPTY_PROFILE);
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [template, setTemplate] = useState<CvTemplateId>("classic");
 
   useEffect(() => {
     loadProfile().then((v) => { setP(v); setLoaded(true); });
+    getDefaultTemplate().then(setTemplate);
   }, []);
 
   const set = (k: keyof CareerProfile) => (v: string) => setP((cur) => ({ ...cur, [k]: v }));
@@ -24,6 +29,7 @@ export function CareerProfileScreen({ navigation }: any) {
     try {
       const { updatedAt, ...rest } = p;
       await saveProfile(rest);
+      await setDefaultTemplate(template);
       haptics.success();
       navigation.goBack();
     } finally {
@@ -32,7 +38,13 @@ export function CareerProfileScreen({ navigation }: any) {
   };
 
   if (!loaded) {
-    return <Screen scroll={false}><Text style={{ color: c.textMuted, padding: 20 }}>{t("Loading…", "Inapakia…")}</Text></Screen>;
+    return (
+      <Screen scroll={false}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator color={c.accent} />
+        </View>
+      </Screen>
+    );
   }
 
   return (
@@ -85,6 +97,29 @@ export function CareerProfileScreen({ navigation }: any) {
         multiline numberOfLines={2} inputStyle={{ minHeight: 56, textAlignVertical: "top" }}
         placeholder={t("What kind of role and where you want to be in 2 years.", "Aina ya kazi na unapotaka kuwa baada ya miaka 2.")}
       />
+
+      <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 10 }}>
+        {t("Default CV look", "Muonekano chaguo-msingi wa CV")}
+      </Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 6 }}>
+        {CV_TEMPLATES.filter((tpl) => tpl.tier === "free").map((tpl) => {
+          const active = template === tpl.id;
+          return (
+            <Pressable
+              key={tpl.id}
+              onPress={() => { haptics.selection(); setTemplate(tpl.id); }}
+              style={{ alignItems: "center", gap: 6, width: 70 }}
+            >
+              <View style={{ padding: 3, borderRadius: 8, borderWidth: 2.5, borderColor: active ? c.accent : "transparent" }}>
+                <TemplateThumb id={tpl.id} accent={c.accent} width={60} />
+              </View>
+              <Text style={{ color: active ? c.accent : c.textMuted, fontSize: 11, fontWeight: "700" }}>
+                {lang === "sw" ? tpl.name.sw : tpl.name.en}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
       <Animated.View entering={FadeIn} style={{ marginTop: 6 }}>
         <Button label={saving ? t("Saving…", "Inahifadhi…") : t("Save profile", "Hifadhi wasifu")} onPress={save} loading={saving} />

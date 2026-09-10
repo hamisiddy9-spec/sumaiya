@@ -1,19 +1,32 @@
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
+import type { CV, CVData } from "@sumaiya/types";
 import { SkillGapCard } from "./skill-gap-card";
 import { LearningResources } from "./learning-resources";
 import { SuggestionChips } from "./suggestion-chips";
-import type { ChatMessage, ActionType } from "./chat-types";
+import { CvPreviewCard } from "../cv/cv-preview-card";
+import type { CvTemplateId } from "../../lib/cv-html";
+import type { ChatMessage, ActionType, Attachment } from "./chat-types";
 import { Icon } from "../icon";
 import { useThemeColors } from "../ui/theme";
 
 interface Props {
   message: ChatMessage;
   onActionPress?: (action: ActionType, data?: Record<string, any>) => void;
+  onPreviewAttachment?: (a: Attachment) => void;
+  onOpenCvEditor?: (cv: CVData) => void;
+  onSaveCv?: (cv: CVData, template: CvTemplateId) => Promise<void>;
   loading?: boolean;
 }
 
-export function ChatMessageComponent({ message, onActionPress, loading = false }: Props) {
+export function ChatMessageComponent({
+  message,
+  onActionPress,
+  onPreviewAttachment,
+  onOpenCvEditor,
+  onSaveCv,
+  loading = false,
+}: Props) {
   const c = useThemeColors();
   const isUser = message.author === "user";
 
@@ -39,10 +52,13 @@ export function ChatMessageComponent({ message, onActionPress, loading = false }
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: message.content ? 8 : 0 }}>
             {message.attachments.map((a) =>
               a.kind === "image" ? (
-                <Image key={a.id} source={{ uri: a.uri }} style={{ width: 108, height: 108, borderRadius: 10 }} />
+                <Pressable key={a.id} onPress={() => onPreviewAttachment?.(a)}>
+                  <Image source={{ uri: a.uri }} style={{ width: 108, height: 108, borderRadius: 10 }} />
+                </Pressable>
               ) : (
-                <View
+                <Pressable
                   key={a.id}
+                  onPress={() => onPreviewAttachment?.(a)}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -54,14 +70,21 @@ export function ChatMessageComponent({ message, onActionPress, loading = false }
                   }}
                 >
                   <Icon
-                    name={a.kind === "link" ? "link" : a.kind === "cv" ? "briefcase" : "file-text"}
+                    name={
+                      a.extracting ? "refresh-cw"
+                      : a.extractError ? "alert-triangle"
+                      : a.kind === "link" ? "link"
+                      : a.kind === "cv" ? "briefcase"
+                      : "file-text"
+                    }
                     size={13}
-                    color={isUser ? c.accentText : c.accent}
+                    color={a.extractError ? (isUser ? c.accentText : c.warning) : isUser ? c.accentText : c.accent}
                   />
                   <Text numberOfLines={1} style={{ color: textColor, fontSize: 12, maxWidth: 150 }}>
                     {a.name}
                   </Text>
-                </View>
+                  <Icon name="chevron-right" size={12} color={isUser ? c.accentText : c.textMuted} />
+                </Pressable>
               ),
             )}
           </View>
@@ -85,6 +108,26 @@ export function ChatMessageComponent({ message, onActionPress, loading = false }
 
       {!isUser ? (
         <>
+          {message.type === "cv-ready" && message.data.cv ? (
+            <View style={{ width: "100%" }}>
+              <CvPreviewCard
+                cv={
+                  {
+                    id: "chat-cv",
+                    userId: "me",
+                    templateId: "classic",
+                    title: message.data.cv.personalInfo?.fullName || "CV",
+                    data: message.data.cv,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  } as CV
+                }
+                onOpenEditor={onOpenCvEditor ? () => onOpenCvEditor(message.data.cv!) : undefined}
+                onSave={onSaveCv ? (tpl) => onSaveCv(message.data.cv!, tpl) : undefined}
+              />
+            </View>
+          ) : null}
+
           {message.type === "skill-gap" && message.data.skills ? (
             <View style={{ width: "100%" }}>
               <SkillGapCard

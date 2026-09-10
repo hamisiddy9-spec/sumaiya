@@ -138,8 +138,8 @@ export default async function SnapToApplyPage({ params }: { params: { locale: st
           </h2>
           <p className="text-sm md:text-base text-text-muted max-w-xl mx-auto leading-relaxed">
             {sw
-              ? "Hakuna templeti tupu, hakuna kuandika upya kwa mikono. Snap-to-Apply inafanya kazi ya kulenga kwa ajili yako."
-              : "No blank templates, no rewriting by hand. Snap-to-Apply does the tailoring for you."}
+              ? "Hakuna fomu tupu, hakuna kuandika upya kwa mikono. Snap-to-Apply inafanya kazi ya kulenga kwa ajili yako."
+              : "No blank forms, no rewriting by hand. Snap-to-Apply does the tailoring for you."}
           </p>
         </div>
 

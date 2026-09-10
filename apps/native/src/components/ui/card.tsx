@@ -9,9 +9,11 @@ interface CardProps {
   onPress?: () => void;
   style?: ViewStyle;
   padded?: boolean;
+  /** Spoken label when the whole card is a button (icon/graphic content). */
+  accessibilityLabel?: string;
 }
 
-export function Card({ children, onPress, style, padded = true }: CardProps) {
+export function Card({ children, onPress, style, padded = true, accessibilityLabel }: CardProps) {
   const c = useThemeColors();
   const scale = useSharedValue(1);
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -30,6 +32,8 @@ export function Card({ children, onPress, style, padded = true }: CardProps) {
   return (
     <Animated.View style={animStyle}>
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
         onPressIn={() => (scale.value = withTiming(0.98, { duration: 90 }))}
         onPressOut={() => (scale.value = withTiming(1, { duration: 160 }))}
         onPress={() => {

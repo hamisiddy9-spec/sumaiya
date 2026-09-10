@@ -1,43 +1,48 @@
 // Shared design tokens for web + mobile
 // Single source of truth for colors, spacing, typography
 
+// Mirrors apps/web/tailwind.config.ts exactly. Web is the reference — if these
+// drift, the mobile app renders a different brand.
 export const colors = {
   // Primary palette
-  espresso: "#1a1410",
-  espresso_dark: "#0f0a07",
-  espresso_light: "#2a1f18",
-  espresso_line: "#3d2f27",
+  espresso: "#211A15",
+  espresso_dark: "#171009",
+  espresso_light: "#2C231C",
+  espresso_line: "#3A2E25",
 
   // Accent
-  ember: "#d85c2c",
-  ember_hover: "#c94f23",
-  ember_tint: "#f4ede7",
+  ember: "#DA4A1C",
+  ember_hover: "#C13E14",
+  ember_shadow: "#A8330F",
+  ember_tint: "#FBE9E1",
+
+  // Secondary
+  pine: "#12433D",
+  pine_tint: "#E4EDEA",
 
   // Tertiary
-  gold: "#f2a93b",
-  gold_tint: "#fef3e6",
+  gold: "#F2A93B",
+  gold_text: "#96630F",
+  gold_tint: "#FBF3E2",
 
   // Neutral
-  cream: "#fef5f0",
-  sand: "#f9f3ed",
-  sand_2: "#ede6df",
+  cream: "#FAF5EE",
+  sand: "#EFE7DA",
+  sand_2: "#F4EEE4",
 
   // Text
-  text_body: "#4a3f38",
-  text_muted: "#8b7d75",
+  text_body: "#6B5F54",
+  text_muted: "#756A5E",
 
   // UI
-  border: "#e8ddd4",
-  border_input: "#d4c9be",
-  card: "#fefbf8",
+  border: "#E9E0D4",
+  border_input: "#9C8D7B",
+  card: "#FFFFFF",
 
   // States
-  success: "#22c55e",
-  warning: "#f59e0b",
-  error: "#ef4444",
-
-  // Semantic (Purple for AI)
-  purple_glow: "#a78bfa",
+  success: "#12766A",
+  warning: "#96630F",
+  error: "#C13E14",
 } as const;
 
 export const spacing = {
