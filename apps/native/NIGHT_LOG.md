@@ -197,3 +197,25 @@ full create → sync → edit → delete loop before shipping.
   profile screen, writing the same `prefs.ts` default. Set it once in
   first-run, change it any time from Profile.
 - tsc 0/0, 79 jest.
+
+### 06:30 — code-tightness pass ("is the app tight and well coded")
+Audit found: untyped nav props (~13 screens), CV type drift, thin tests, no
+crash reporting. Worked it:
+- **Navigation fully typed** — every screen takes a real
+  `NativeStackScreenProps` composite; `AppTabParamList` carries
+  `NavigatorScreenParams` so the nested `navigate("CVsTab",{screen,params})`
+  form is checked. tsc caught nothing broken — all cross-stack routes
+  already resolved.
+- **`any` count 33 → 6** (the 6 left: a catch clause, a documented
+  lib-type impedance cast, a raw SQLite row). CV-data reads in
+  job-apply/ats/chat now typed via `CVData`.
+- **`reporting.ts`** — error-reporting seam. Boundary + sync give-up + chat +
+  auth + push + db-init route through `reportError()`; no-op until
+  `setReporter()` wires a real reporter.
+- **+18 tests** (79 → 97): reporting, prefs default/fallback,
+  profileIsEmpty/promptBlock, attachmentsContext anti-fabrication.
+- first-run save decision now uses shared `profileIsEmpty()`.
+- tsc 0/0, 97 jest, expo export exit 0.
+
+**Still not done (needs deploy / device / decisions):** offline-sync
+integration test on a phone, native voice input, push sender, billing.
