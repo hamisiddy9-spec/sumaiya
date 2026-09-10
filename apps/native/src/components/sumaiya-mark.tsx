@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Svg, { Path, Circle, G } from "react-native-svg";
+import Svg, { Path, Circle, G, Defs, LinearGradient, Stop } from "react-native-svg";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -38,9 +38,16 @@ interface Props {
   size?: number;
   state?: SumaiyaMarkState;
   color?: string;
+  /** The core dot. Espresso by default — the dark centre the blades open around. */
+  centerColor?: string;
 }
 
-export function SumaiyaMark({ size = 20, state = "idle", color = "#DA4A1C" }: Props) {
+export function SumaiyaMark({
+  size = 20,
+  state = "idle",
+  color = "#DA4A1C",
+  centerColor = "#211A15",
+}: Props) {
   const angle = useSharedValue(0);
   const dps = useSharedValue(SPEED.idle);
   const breath = useSharedValue(1);
@@ -87,15 +94,35 @@ export function SumaiyaMark({ size = 20, state = "idle", color = "#DA4A1C" }: Pr
     transform: [{ rotate: `${angle.value}deg` }, { scale: breath.value }] as never,
   }));
 
+  // Android rasterises a View to a bitmap to rotate it, so an SVG rendered at
+  // its exact layout size turns into a soft, "low-res" blur while spinning.
+  // Render the SVG at 3× and scale the bitmap back down — same footprint, but
+  // there are enough pixels for the rotation to stay crisp.
+  const SS = 3;
+  const gid = React.useId().replace(/[^a-zA-Z0-9]/g, "");
+  const blade = `smk${gid}`;
   return (
-    <Animated.View style={[{ width: size, height: size }, style]}>
-      <Svg width={size} height={size} viewBox="0 0 24 24">
+    <Animated.View style={[{ width: size, height: size, alignItems: "center", justifyContent: "center" }, style]}>
+      <Svg
+        width={size * SS}
+        height={size * SS}
+        viewBox="0 0 24 24"
+        style={{ transform: [{ scale: 1 / SS }] }}
+      >
+        <Defs>
+          {/* One gradient down each blade's axis — bright at the tip, deepening
+              toward the core. Rotates with the blade (objectBoundingBox). */}
+          <LinearGradient id={blade} x1="0.5" y1="0" x2="0.5" y2="1">
+            <Stop offset="0" stopColor={color} stopOpacity={1} />
+            <Stop offset="1" stopColor={color} stopOpacity={0.74} />
+          </LinearGradient>
+        </Defs>
         <G>
-          <Path d={BLADE} fill={color} />
-          <Path d={BLADE} fill={color} opacity={0.9} transform="rotate(120 12 12)" />
-          <Path d={BLADE} fill={color} opacity={0.8} transform="rotate(240 12 12)" />
+          <Path d={BLADE} fill={`url(#${blade})`} />
+          <Path d={BLADE} fill={`url(#${blade})`} transform="rotate(120 12 12)" />
+          <Path d={BLADE} fill={`url(#${blade})`} transform="rotate(240 12 12)" />
         </G>
-        <Circle cx={12} cy={12} r={2.1} fill={color} />
+        <Circle cx={12} cy={12} r={2.7} fill={centerColor} />
       </Svg>
     </Animated.View>
   );

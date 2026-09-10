@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, Dimensions, Pressable, Text, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -298,13 +299,19 @@ export function OnboardingScreen({ onComplete }: Props) {
   }));
 
   if (stage === "welcome") {
-    return <WelcomeStage markState={markState} onPick={pickLanguage} />;
+    return (
+      <>
+        <StatusBar style="dark" />
+        <WelcomeStage markState={markState} onPick={pickLanguage} />
+      </>
+    );
   }
 
   const isLast = page === SLIDES.length - 1;
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <StatusBar style="dark" />
       {(stage === "slides" || stage === "portal") && (
         <Animated.View
           entering={FadeIn.duration(420)}

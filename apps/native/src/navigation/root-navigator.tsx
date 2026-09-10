@@ -34,6 +34,7 @@ import { AppTabs } from "./stacks/app-tabs";
 import { OnboardingScreen } from "../screens/onboarding-screen";
 import { FirstRunScreen, FIRST_RUN_KEY } from "../screens/first-run-screen";
 import { SplashScreen } from "../screens/splash-screen";
+import { ThemeScope } from "../components/ui";
 
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
@@ -152,11 +153,23 @@ export function RootNavigator() {
   }, []);
 
   if (loading || checkingOnboarding) {
-    return <SplashScreen />;
+    return (
+      <ThemeScope mode="light">
+        <SplashScreen />
+      </ThemeScope>
+    );
   }
 
   return (
-    <NavigationContainer ref={navRef} linking={linking} fallback={<SplashScreen />}>
+    <NavigationContainer
+      ref={navRef}
+      linking={linking}
+      fallback={
+        <ThemeScope mode="light">
+          <SplashScreen />
+        </ThemeScope>
+      }
+    >
       <Stack.Navigator
         id={undefined}
         screenOptions={{
@@ -173,16 +186,28 @@ export function RootNavigator() {
         {!hasSeenOnboarding ? (
           <Stack.Screen name="Onboarding" options={{ animationTypeForReplace: "pop" }}>
             {(props) => (
-              <OnboardingScreen navigation={props.navigation} onComplete={markOnboardingComplete} />
+              <ThemeScope mode="light">
+                <OnboardingScreen navigation={props.navigation} onComplete={markOnboardingComplete} />
+              </ThemeScope>
             )}
           </Stack.Screen>
         ) : !user ? (
-          <Stack.Screen name="Auth" component={AuthStack} />
+          <Stack.Screen name="Auth">
+            {() => (
+              <ThemeScope mode="light">
+                <AuthStack />
+              </ThemeScope>
+            )}
+          </Stack.Screen>
         ) : !firstRunDone ? (
           // First real run after sign-in: a guided profile setup so Sumaiya
           // starts knowing the user (skippable — they can fill it in Profile).
           <Stack.Screen name="FirstRun">
-            {() => <FirstRunScreen onDone={markFirstRunDone} />}
+            {() => (
+              <ThemeScope mode="light">
+                <FirstRunScreen onDone={markFirstRunDone} />
+              </ThemeScope>
+            )}
           </Stack.Screen>
         ) : (
           <Stack.Screen name="App" component={AppTabs} />

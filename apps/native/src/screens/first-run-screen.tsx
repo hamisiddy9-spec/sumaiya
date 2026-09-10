@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { setSecureItem } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
@@ -346,6 +347,7 @@ export function FirstRunScreen({ onDone }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <StatusBar style="dark" />
       <View style={{ height: insets.top + 10 }} />
 
       {/* progress + skip */}

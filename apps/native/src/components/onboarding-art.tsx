@@ -19,6 +19,7 @@ const EMBER = "#DA4A1C";
 const EMBER_DEEP = "#A8330F";
 const PINE = "#12433D";
 const GOLD = "#F2A93B";
+const ESPRESSO = "#211A15"; // the dark core the blades open around
 
 /** A 3-blade rosette centred on (cx,cy) at a given scale + rotation + fill. */
 function Rosette({
@@ -71,7 +72,7 @@ export function OnboardingArt({ variant, size = 148 }: Props) {
         <>
           <Circle cx={mid} cy={mid} r={54} fill={`url(#${halo})`} />
           <Rosette cx={mid} cy={mid} scale={3.1} rotate={-8} fill={`url(#${emberGold})`} />
-          <Circle cx={mid} cy={mid} r={5.5} fill={GOLD} />
+          <Circle cx={mid} cy={mid} r={5.5} fill={ESPRESSO} />
         </>
       );
       break;
@@ -82,7 +83,7 @@ export function OnboardingArt({ variant, size = 148 }: Props) {
           <Circle cx={mid} cy={mid} r={52} fill={`url(#${halo})`} />
           <Rosette cx={mid - 15} cy={mid + 6} scale={2.4} rotate={20} fill={PINE} opacity={0.9} />
           <Rosette cx={mid + 15} cy={mid - 6} scale={2.4} rotate={-20} fill={`url(#${emberGold})`} />
-          <Circle cx={mid} cy={mid} r={4.5} fill={GOLD} />
+          <Circle cx={mid} cy={mid} r={4.5} fill={ESPRESSO} />
         </>
       );
       break;
@@ -94,7 +95,7 @@ export function OnboardingArt({ variant, size = 148 }: Props) {
           <Rosette cx={mid} cy={mid} scale={4.3} rotate={12} fill={EMBER} opacity={0.16} />
           <Rosette cx={mid} cy={mid} scale={3.2} rotate={-6} fill={EMBER} opacity={0.34} />
           <Rosette cx={mid} cy={mid} scale={2.1} rotate={16} fill={`url(#${emberGold})`} />
-          <Circle cx={mid} cy={mid} r={4.5} fill={GOLD} />
+          <Circle cx={mid} cy={mid} r={4.5} fill={ESPRESSO} />
         </>
       );
       break;
@@ -106,14 +107,20 @@ export function OnboardingArt({ variant, size = 148 }: Props) {
           <Rosette cx={mid + 18} cy={mid + 20} scale={1.5} rotate={0} fill={EMBER_DEEP} opacity={0.55} />
           <Rosette cx={mid + 4} cy={mid + 4} scale={2.2} rotate={-14} fill={EMBER} opacity={0.85} />
           <Rosette cx={mid - 14} cy={mid - 16} scale={3.0} rotate={-28} fill={`url(#${goldEmber})`} />
-          <Circle cx={mid - 14} cy={mid - 16} r={5} fill={GOLD} />
+          <Circle cx={mid - 14} cy={mid - 16} r={5} fill={ESPRESSO} />
         </>
       );
   }
 
+  // Supersample: render 2× and scale the bitmap down so the art stays crisp
+  // while the slide's scale/opacity transforms rasterise it on Android.
+  const SS = 2;
   return (
-    <Animated.View entering={FadeIn.duration(420)} style={{ width: size, height: size }}>
-      <Svg width={size} height={size} viewBox={`0 0 ${V} ${V}`}>
+    <Animated.View
+      entering={FadeIn.duration(420)}
+      style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }}
+    >
+      <Svg width={size * SS} height={size * SS} viewBox={`0 0 ${V} ${V}`} style={{ transform: [{ scale: 1 / SS }] }}>
         <Defs>
           <RadialGradient id={halo} cx="50%" cy="50%" r="50%">
             <Stop offset="0" stopColor={EMBER} stopOpacity={0.16} />
@@ -130,6 +137,10 @@ export function OnboardingArt({ variant, size = 148 }: Props) {
             <Stop offset="1" stopColor={GOLD} />
           </LinearGradient>
         </Defs>
+        {/* Soft concentric guide rings — depth under every scene, so the art
+            reads as crafted rather than a flat stamp. */}
+        <Circle cx={mid} cy={mid} r={46} fill="none" stroke={EMBER} strokeWidth={0.6} opacity={0.12} />
+        <Circle cx={mid} cy={mid} r={34} fill="none" stroke={GOLD} strokeWidth={0.6} opacity={0.16} />
         {scene}
       </Svg>
     </Animated.View>

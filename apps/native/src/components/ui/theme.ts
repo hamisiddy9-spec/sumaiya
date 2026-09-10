@@ -1,3 +1,4 @@
+import React from "react";
 import { useColorScheme } from "nativewind";
 
 // Raw color values for the places NativeWind classes can't reach:
@@ -61,12 +62,42 @@ const dark: ThemeColors = {
   overlay: "rgba(0, 0, 0, 0.6)",
 };
 
+/**
+ * Pins a subtree to one palette regardless of the device / in-app dark-mode
+ * setting. The pre-auth funnel — onboarding, sign-in, first-run — is a designed
+ * brand runway in warm cream; dark mode is an in-app preference that only makes
+ * sense once you're inside the app. Without this, a dark phone drops you from
+ * the ember-lit onboarding onto a near-black sign-in screen and the seam shows.
+ */
+const ForcedTheme = React.createContext<"light" | "dark" | null>(null);
+
+export function ThemeScope({
+  mode,
+  children,
+}: {
+  mode: "light" | "dark";
+  children: React.ReactNode;
+}) {
+  return React.createElement(ForcedTheme.Provider, { value: mode }, children);
+}
+
+/** Read the pinned palette name, if any ancestor pinned one. */
+export function useForcedScheme(): "light" | "dark" | null {
+  return React.useContext(ForcedTheme);
+}
+
 export function useThemeColors(): ThemeColors {
+  const forced = React.useContext(ForcedTheme);
   const { colorScheme } = useColorScheme();
-  return colorScheme === "dark" ? dark : light;
+  const scheme = forced ?? colorScheme;
+  return scheme === "dark" ? dark : light;
 }
 
 export function useIsDark(): boolean {
+  const forced = React.useContext(ForcedTheme);
   const { colorScheme } = useColorScheme();
-  return colorScheme === "dark";
+  return (forced ?? colorScheme) === "dark";
 }
+
+/** The raw light palette, for navigator-level style props that can't call a hook. */
+export const brandLight = light;

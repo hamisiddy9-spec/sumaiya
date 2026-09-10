@@ -8,7 +8,7 @@ export { SectionHeader } from "./section-header";
 export { ListRow, ListGroupLabel } from "./list-row";
 export { Stagger } from "./motion";
 export { haptics } from "./haptics";
-export { useThemeColors, useIsDark, type ThemeColors } from "./theme";
+export { useThemeColors, useIsDark, ThemeScope, useForcedScheme, brandLight, type ThemeColors } from "./theme";
 export { ScreenTitle } from "./screen-title";
 export { PromptModal } from "./prompt-modal";
 export { ProgressBar } from "./progress-bar";

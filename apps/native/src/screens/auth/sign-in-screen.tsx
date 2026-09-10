@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
+import { StatusBar } from "expo-status-bar";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { useAuthContext } from "../../contexts/auth-context";
@@ -129,6 +130,8 @@ export function SignInScreen(_props: Props) {
   );
 
   return (
+    <>
+    <StatusBar style="dark" />
     <Screen
       footer={
         step === "email" ? (
@@ -252,5 +255,6 @@ export function SignInScreen(_props: Props) {
         </Animated.View>
       )}
     </Screen>
+    </>
   );
 }
