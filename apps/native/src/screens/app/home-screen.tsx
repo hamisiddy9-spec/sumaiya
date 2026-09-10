@@ -198,7 +198,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               }}
             >
               <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "22", alignItems: "center", justifyContent: "center" }}>
-                <Icon name="sparkles" size={18} color={c.accent} />
+                <SumaiyaMark size={18} state="static" color={c.accent} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>

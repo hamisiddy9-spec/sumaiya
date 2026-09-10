@@ -162,11 +162,9 @@ export function CvPreviewCard({
         gap: 12,
       }}
     >
-      <Text style={{ color: c.text, fontSize: 15, fontWeight: "800" }}>
-        {t("Your CV is ready", "CV yako iko tayari")} 🎉
-      </Text>
-
-      {/* preview */}
+      {/* preview — a real page thumbnail; the viewport meta in cvToHtml scales
+          the 794px page down to fit (no zoom hack, which rendered blank on the
+          Android WebView). Tap to open the full-screen view. */}
       <Pressable
         onPress={() => {
           haptics.selection();
@@ -190,7 +188,6 @@ export function CvPreviewCard({
           pointerEvents="none"
           onLoadEnd={() => setThumbReady(true)}
           style={{ width: thumbW, height: thumbH, backgroundColor: "#fff", opacity: thumbReady ? 1 : 0 }}
-          injectedJavaScript={`document.body.style.zoom='${thumbW / PAGE_W}';true;`}
           androidLayerType="software"
         />
         {!thumbReady ? (
@@ -213,7 +210,7 @@ export function CvPreviewCard({
           }}
         >
           <Icon name="maximize-2" size={11} color="#fff" />
-          <Text style={{ color: "#fff", fontSize: 10.5, fontWeight: "700" }}>{t("Tap to zoom", "Gusa kukuza")}</Text>
+          <Text style={{ color: "#fff", fontSize: 10.5, fontWeight: "700" }}>{t("Tap for full screen", "Gusa kwa skrini kamili")}</Text>
         </View>
       </Pressable>
 

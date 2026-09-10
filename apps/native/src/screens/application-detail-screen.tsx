@@ -12,6 +12,7 @@ import { matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { ApplicationDetailScreenProps } from "../navigation/types";
 
 export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
@@ -221,7 +222,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text style={{ flex: 1, color: c.textMuted, fontSize: 12, fontWeight: "700" }}>{t("COVER LETTER", "BARUA YA MAOMBI")}</Text>
           <Pressable onPress={draftCoverLetter} disabled={drafting} style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
-            <Icon name="sparkles" size={13} color={c.accent} />
+            <SumaiyaMark size={13} state="static" color={c.accent} />
             <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>
               {drafting ? t("Drafting…", "Inaandika…") : t("Draft with Sumaiya", "Andika na Sumaiya")}
             </Text>

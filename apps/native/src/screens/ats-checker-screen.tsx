@@ -10,6 +10,7 @@ import { PremiumSheet } from "../components/premium-sheet";
 import { apiClient } from "../lib/api-client";
 import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { AtsCheckerScreenProps } from "../navigation/types";
 
 function ScoreRing({ score, color, label }: { score: number; color: string; label: string }) {
@@ -220,7 +221,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                 }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-                  <Icon name="sparkles" size={15} color={c.accent} />
+                  <SumaiyaMark size={15} state="static" color={c.accent} />
                   <Text style={{ color: c.text, fontSize: 15, fontWeight: "800", flex: 1 }}>
                     {t("Sumaiya's verdict", "Uamuzi wa Sumaiya")}
                   </Text>

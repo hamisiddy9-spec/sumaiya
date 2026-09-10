@@ -309,7 +309,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               <ListRow
                 first
                 last
-                icon="sparkles"
+                icon="gem"
                 iconColor={c.accent}
                 label={t("Advanced templates & deep courses", "Miundo ya hali ya juu na kozi za kina")}
                 sublabel={t("Everything essential stays free", "Kila kitu muhimu kinabaki bure")}

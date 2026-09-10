@@ -38,12 +38,11 @@ export async function pickFromLibrary(): Promise<Attachment[] | null> {
 
 export async function pickDocument(): Promise<Attachment[] | null> {
   const res = await DocumentPicker.getDocumentAsync({
-    type: [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "text/plain",
-    ],
+    // Accept anything — a CV can be a PDF, a Word doc, an RTF, an ODT, a photo,
+    // a screenshot, a plain-text export. extractAttachment() sorts out what it
+    // can actually read (PDF text / image OCR / plain text) and asks for a
+    // paste when it can't.
+    type: "*/*",
     copyToCacheDirectory: true,
     multiple: false,
   });

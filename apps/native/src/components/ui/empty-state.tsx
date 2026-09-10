@@ -26,7 +26,10 @@ export function EmptyState({
   return (
     <Animated.View
       entering={FadeInDown.duration(300)}
-      style={{ alignItems: "center", paddingVertical: 48, paddingHorizontal: 24 }}
+      // A single centred column. The action button stretches to the column's
+      // own width (28px inset each side) so it stays symmetric under the
+      // centred text — no alignSelf/maxWidth fight that left it off-centre.
+      style={{ alignItems: "center", alignSelf: "stretch", paddingVertical: 40, paddingHorizontal: 28 }}
     >
       <View
         style={{
@@ -41,32 +44,21 @@ export function EmptyState({
       >
         <Icon name={icon} size={30} color={c.accent} />
       </View>
-      <Text
-        style={{ color: c.text, fontSize: 18, fontWeight: "700", textAlign: "center", letterSpacing: -0.3 }}
-      >
+      <Text style={{ color: c.text, fontSize: 18, fontWeight: "700", textAlign: "center", letterSpacing: -0.3 }}>
         {title}
       </Text>
       {body ? (
-        <Text
-          style={{
-            color: c.textMuted,
-            fontSize: 14,
-            textAlign: "center",
-            marginTop: 8,
-            lineHeight: 20,
-            maxWidth: 300,
-          }}
-        >
+        <Text style={{ color: c.textMuted, fontSize: 14, textAlign: "center", marginTop: 8, lineHeight: 20, maxWidth: 320 }}>
           {body}
         </Text>
       ) : null}
       {actionLabel && onAction ? (
-        <View style={{ marginTop: 22, alignSelf: "stretch", maxWidth: 280 }}>
+        <View style={{ marginTop: 24, alignSelf: "stretch" }}>
           <Button label={actionLabel} onPress={onAction} />
         </View>
       ) : null}
       {secondaryLabel && onSecondary ? (
-        <Pressable onPress={onSecondary} hitSlop={8} style={{ marginTop: 14 }}>
+        <Pressable onPress={onSecondary} hitSlop={8} style={{ marginTop: 16, alignSelf: "center" }}>
           <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>{secondaryLabel}</Text>
         </Pressable>
       ) : null}

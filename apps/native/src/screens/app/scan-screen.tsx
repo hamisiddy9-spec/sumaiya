@@ -7,6 +7,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { useAppNavigation } from "../../hooks/use-app-navigation";
 import { Icon } from "../../components/icon";
+import { SumaiyaMark } from "../../components/sumaiya-mark";
 import { Card, EmptyState, Screen, ScreenTitle, haptics, useThemeColors } from "../../components/ui";
 import { useLang } from "../../lib/i18n";
 
@@ -266,7 +267,7 @@ export function ScanScreen() {
           borderColor: c.accent + "2a",
         }}
       >
-        <Icon name="sparkles" size={16} color={c.accent} />
+        <SumaiyaMark size={16} state="static" color={c.accent} />
         <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
           {t("Photos and PDFs are read for you. Word files aren't supported yet — save them as PDF first, or paste the text to Sumaiya.", "Picha na PDF zinasomwa kwa ajili yako. Faili za Word bado hazitumiki — zihifadhi kama PDF kwanza, au bandika maandishi kwa Sumaiya.")}
         </Text>

@@ -96,7 +96,7 @@ export function PremiumSheet({
           <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 16 }} />
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="sparkles" size={19} color={c.accent} />
+              <Icon name="gem" size={19} color={c.accent} />
             </View>
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>{t("Sumaiya Premium", "Sumaiya Premium")}</Text>
           </View>

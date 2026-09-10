@@ -143,7 +143,7 @@ export const GUIDES: Guide[] = [
     id: "no-experience",
     tier: "free",
     minutes: 5,
-    icon: "sparkles",
+    icon: "trending-up",
     title: { en: "\"I have no experience\" — yes you do", sw: "\"Sina uzoefu\" — unao" },
     summary: {
       en: "Attachment, coursework, hustle, volunteering, a family business — all of it counts if you frame it right.",

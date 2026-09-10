@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import type { SkillGap, ActionType } from "./chat-types";
 import { Icon } from "../icon";
+import { SumaiyaMark } from "../sumaiya-mark";
 import { haptics } from "../ui/haptics";
 import { useThemeColors } from "../ui/theme";
 
@@ -103,7 +104,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
             opacity: loading ? 0.5 : 1,
           }}
         >
-          <Icon name="sparkles" size={14} color={c.text} />
+          <SumaiyaMark size={14} state="static" color={c.text} />
           <Text style={{ color: c.text, fontSize: 13, fontWeight: "700" }}>Practice</Text>
         </Pressable>
       </View>
