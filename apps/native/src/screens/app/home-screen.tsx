@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, Pressable, Text, View } from "react-native";
+import { Dimensions, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import type { JobRecommendation } from "@sumaiya/api-client";
@@ -115,18 +115,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Primary row — two equal tiles: the count, and the make-a-CV CTA. */}
       <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
-        <Pressable
-          onPress={() => { haptics.light(); navigation.navigate("CVsTab"); }}
-          style={{
-            width: COL_W,
-            minHeight: 116,
-            backgroundColor: c.bgElevated,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: c.border,
-            padding: 16,
-            justifyContent: "space-between",
-          }}
+        <Card
+          onPress={() => navigation.navigate("CVsTab")}
+          accessibilityLabel={t("View my CVs", "Ona CV zangu")}
+          style={{ width: COL_W, minHeight: 116, justifyContent: "space-between" }}
         >
           <Icon name="file-text" size={18} color={c.accent} />
           <View>
@@ -135,17 +127,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               {cvs.length === 1 ? t("CV created", "CV imetengenezwa") : t("CVs created", "CV zimetengenezwa")}
             </Text>
           </View>
-        </Pressable>
+        </Card>
 
-        <Pressable
-          onPress={() => { haptics.light(); navigation.navigate("CVsTab", { screen: "CvEditor" }); }}
+        <Card
+          onPress={() => navigation.navigate("CVsTab", { screen: "CvEditor" })}
+          accessibilityLabel={t("New CV", "CV mpya")}
           style={{
             width: COL_W,
             minHeight: 116,
-            backgroundColor: c.accent,
-            borderRadius: 16,
-            padding: 16,
             justifyContent: "space-between",
+            backgroundColor: c.accent,
+            borderColor: "transparent",
           }}
         >
           <Icon name="plus" size={18} color={c.accentText} />
@@ -155,7 +147,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               {t("Start from scratch", "Anza upya")} →
             </Text>
           </View>
-        </Pressable>
+        </Card>
       </Animated.View>
 
       {/* Quick actions — a 2-column grid that fills the row exactly. */}
@@ -194,16 +186,15 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
         return (
           <Animated.View entering={FadeInDown.duration(320).delay(160)}>
-            <Pressable
-              onPress={() => { haptics.light(); navigation.navigate("Guide", { id: tip.id }); }}
+            <Card
+              onPress={() => navigation.navigate("Guide", { id: tip.id })}
+              accessibilityLabel={tip.title[lang]}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 gap: 12,
                 padding: 14,
-                borderRadius: 16,
                 backgroundColor: c.accent + "12",
-                borderWidth: 1,
                 borderColor: c.accent + "2a",
               }}
             >
@@ -219,7 +210,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
                 </Text>
               </View>
               <Icon name="chevron-right" size={18} color={c.accent} />
-            </Pressable>
+            </Card>
           </Animated.View>
         );
       })()}
@@ -236,10 +227,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             {jobRecs.slice(0, 2).map((r) => {
               const tone = r.score >= 60 ? c.success : r.score >= 35 ? c.warning : c.textMuted;
               return (
-                <Pressable
+                <Card
                   key={r.jobId}
-                  onPress={() => { haptics.light(); navigation.navigate("Jobs"); }}
-                  style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated }}
+                  onPress={() => navigation.navigate("Jobs")}
+                  accessibilityLabel={r.job.title}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14 }}
                 >
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }} numberOfLines={1}>{r.job.title}</Text>
@@ -251,7 +243,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
                     <Icon name="target" size={11} color={tone} />
                     <Text style={{ color: tone, fontSize: 11.5, fontWeight: "800" }}>{r.score}%</Text>
                   </View>
-                </Pressable>
+                </Card>
               );
             })}
           </View>
