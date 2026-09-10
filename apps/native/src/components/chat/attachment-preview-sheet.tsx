@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Dimensions, Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -61,7 +61,7 @@ export function AttachmentPreviewSheet({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ flex: 1 }}>
+      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
           <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
         </Pressable>

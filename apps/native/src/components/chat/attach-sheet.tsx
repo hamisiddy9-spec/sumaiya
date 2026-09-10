@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Dimensions, Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
@@ -80,7 +80,7 @@ export function AttachSheet({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ flex: 1 }}>
+      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
         <Pressable
           style={{ flex: 1 }}
           onPress={onClose}
@@ -136,7 +136,7 @@ export function AttachSheet({
               >
                 <Icon name={r.icon} size={20} color={c.accent} />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }}>{t(r.en, r.sw)}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }}>{t(r.hintEn, r.hintSw)}</Text>
               </View>

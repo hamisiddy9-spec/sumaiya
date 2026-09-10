@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, Pressable, Text, View } from "react-native";
+import { BackHandler, Dimensions, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -16,6 +16,7 @@ import Animated, {
 import { Button, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark, type SumaiyaMarkState } from "../components/sumaiya-mark";
+import { OnboardingArt } from "../components/onboarding-art";
 import { PortalTransition } from "../components/portal-transition";
 import { useLang, type Lang } from "../lib/i18n";
 
@@ -27,10 +28,9 @@ interface Props {
 }
 
 interface SlideData {
-  /** Slide 0 renders the Sumaiya mark instead of a feature icon. */
+  /** Slide 0 renders the live Sumaiya mark; the rest use branded OnboardingArt. */
   mark?: boolean;
-  icon?: string;
-  tint?: string;
+  art?: 0 | 1 | 2 | 3;
   title: { en: string; sw: string };
   body: { en: string; sw: string };
 }
@@ -45,8 +45,7 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    icon: "sparkles",
-    tint: "#DA4A1C",
+    art: 1,
     title: { en: "I write it with you", sw: "Ninakuandikia" },
     body: {
       en: "Answer a few questions — or just talk to me, in English or Swahili. I build the whole thing.",
@@ -54,8 +53,7 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    icon: "target",
-    tint: "#12433D",
+    art: 2,
     title: { en: "I target every job", sw: "Ninailenga kila kazi" },
     body: {
       en: "Paste a job and I rewrite your CV to match it — truthfully — so it passes the software that reads it first.",
@@ -63,8 +61,7 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    icon: "message-circle",
-    tint: "#B07C1B",
+    art: 3,
     title: { en: "I prep you for the interview", sw: "Ninakuandaa kwa usaili" },
     body: {
       en: "Practice real interview questions with me, then export a clean PDF and apply.",
@@ -115,24 +112,23 @@ function Slide({
   });
 
   return (
-    <View style={{ width, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 28 }}>
-      <Animated.View
-        style={[
-          visualStyle,
-          {
-            width: 132,
-            height: 132,
-            borderRadius: 40,
-            backgroundColor: (item.mark ? c.accent : (item.tint ?? c.accent)) + "1a",
-            alignItems: "center",
-            justifyContent: "center",
-          },
-        ]}
-      >
+    <View style={{ width, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 30 }}>
+      <Animated.View style={[visualStyle, { alignItems: "center", justifyContent: "center" }]}>
         {item.mark ? (
-          <SumaiyaMark size={72} state={markState} color={c.accent} />
+          <View
+            style={{
+              width: 148,
+              height: 148,
+              borderRadius: 44,
+              backgroundColor: c.accent + "14",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <SumaiyaMark size={78} state={markState} color={c.accent} />
+          </View>
         ) : (
-          <Icon name={item.icon ?? "sparkles"} size={56} color={item.tint ?? c.accent} strokeWidth={1.75} />
+          <OnboardingArt variant={item.art ?? 0} size={168} />
         )}
       </Animated.View>
       <Animated.View style={[textStyle, { alignItems: "center", gap: 12 }]}>
@@ -169,57 +165,62 @@ function WelcomeStage({
       exiting={FadeOut.duration(220)}
       style={{ flex: 1, backgroundColor: c.bg, paddingHorizontal: 28 }}
     >
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 26 }}>
-        <View
-          style={{
-            width: 132,
-            height: 132,
-            borderRadius: 40,
-            backgroundColor: c.accent + "1a",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <SumaiyaMark size={72} state={markState} color={c.accent} />
+      {/* One column, top-weighted: mark → greeting → the two choices, each a
+          comfortable step below the last. No big centred void, no picker
+          stranded at the bottom. */}
+      <View style={{ flex: 1, justifyContent: "center", paddingBottom: insets.bottom + 20, gap: 28 }}>
+        <View style={{ alignItems: "center", gap: 20 }}>
+          <View
+            style={{
+              width: 128,
+              height: 128,
+              borderRadius: 40,
+              backgroundColor: c.accent + "14",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <SumaiyaMark size={72} state={markState} color={c.accent} />
+          </View>
+          <View style={{ alignItems: "center", gap: 8 }}>
+            <Text style={{ color: c.text, fontSize: 29, fontWeight: "800", letterSpacing: -0.6 }}>
+              Karibu · Welcome
+            </Text>
+            <Text style={{ color: c.textBody, fontSize: 15, textAlign: "center", lineHeight: 22, maxWidth: 290 }}>
+              Mimi ni Sumaiya. Chagua lugha yako.{"\n"}I'm Sumaiya. Choose your language.
+            </Text>
+          </View>
         </View>
-        <View style={{ alignItems: "center", gap: 8 }}>
-          <Text style={{ color: c.text, fontSize: 30, fontWeight: "800", letterSpacing: -0.6 }}>
-            Karibu · Welcome
-          </Text>
-          <Text style={{ color: c.textBody, fontSize: 15.5, textAlign: "center", lineHeight: 23, maxWidth: 300 }}>
-            Mimi ni Sumaiya. Chagua lugha yako.{"\n"}I'm Sumaiya. Choose your language.
-          </Text>
-        </View>
-      </View>
 
-      <View style={{ gap: 12, paddingBottom: insets.bottom + 24 }}>
-        {choices.map((ch, i) => (
-          <Animated.View key={ch.lang} entering={FadeInDown.delay(220 + i * 90).duration(380)}>
-            <Pressable
-              onPress={() => {
-                haptics.selection();
-                onPick(ch.lang);
-              }}
-              style={({ pressed }) => ({
-                borderWidth: 1.5,
-                borderColor: c.accent,
-                backgroundColor: pressed ? c.accent + "12" : "transparent",
-                borderRadius: 18,
-                paddingVertical: 16,
-                paddingHorizontal: 20,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              })}
-            >
-              <View>
-                <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>{ch.label}</Text>
-                <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }}>{ch.hint}</Text>
-              </View>
-              <Icon name="arrow-right" size={22} color={c.accent} />
-            </Pressable>
-          </Animated.View>
-        ))}
+        <View style={{ gap: 12 }}>
+          {choices.map((ch, i) => (
+            <Animated.View key={ch.lang} entering={FadeInDown.delay(200 + i * 80).duration(360)}>
+              <Pressable
+                onPress={() => {
+                  haptics.selection();
+                  onPick(ch.lang);
+                }}
+                style={({ pressed }) => ({
+                  borderWidth: 1.5,
+                  borderColor: c.accent,
+                  backgroundColor: pressed ? c.accent + "12" : "transparent",
+                  borderRadius: 18,
+                  paddingVertical: 15,
+                  paddingHorizontal: 20,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                })}
+              >
+                <View>
+                  <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
+                  <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }}>{ch.hint}</Text>
+                </View>
+                <Icon name="arrow-right" size={21} color={c.accent} />
+              </Pressable>
+            </Animated.View>
+          ))}
+        </View>
       </View>
     </Animated.View>
   );
@@ -253,6 +254,27 @@ export function OnboardingScreen({ onComplete }: Props) {
     ref.current?.scrollTo({ x: p * width, animated: true });
     setPage(p);
   };
+
+  // Android hardware back: step back through the flow instead of killing the
+  // app. From slide 1+ → previous slide; from slide 0 → back to the language
+  // picker (so it can be re-chosen); from the picker → let the OS exit.
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (stage === "portal") return true; // mid-transition, swallow
+      if (stage === "slides") {
+        if (page > 0) {
+          goTo(page - 1);
+        } else {
+          haptics.selection();
+          setStage("welcome");
+        }
+        return true;
+      }
+      return false; // welcome → default (exit)
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, page]);
 
   const pickLanguage = (l: Lang) => {
     setLang(l);

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Dimensions, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { useCvs } from "../../hooks/use-cvs";
@@ -8,7 +8,6 @@ import { useLang, type Lang } from "../../lib/i18n";
 import { GUIDES } from "../../lib/guides";
 import {
   Card,
-  EmptyState,
   Screen,
   ScreenTitle,
   SectionHeader,
@@ -20,6 +19,14 @@ import {
 import { Icon } from "../../components/icon";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
+
+// One shared horizontal margin (Screen pads 20 each side) → every block on this
+// screen spans exactly the same width. Quick-action cards are sized to fill the
+// row with the 12px gutter, so the grid's right edge lines up with everything
+// else.
+const GUTTER = 12;
+const SIDE = 20;
+const COL_W = (Dimensions.get("window").width - SIDE * 2 - GUTTER) / 2;
 
 function greeting(lang: Lang): string {
   const h = new Date().getHours();
@@ -77,8 +84,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   );
 
   const rawName = user?.name?.trim();
-  // Don't greet someone by a device/brand name a browser auto-filled.
-  const looksLikeDevice = rawName ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) || /^[a-z0-9]{1,4}$/i.test(rawName) : false;
+  const looksLikeDevice = rawName
+    ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
+      /^[a-z0-9]{1,4}$/i.test(rawName)
+    : false;
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
@@ -91,69 +100,61 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   ];
 
   return (
-    <Screen
-      scroll
-      keyboardAvoiding={false}
-      contentContainerStyle={{ gap: 22 }}
-      refreshing={refreshing}
-      onRefresh={onRefresh}
-    >
+    <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 24 }} refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenTitle eyebrow={`${greeting(lang)},`}>{name}</ScreenTitle>
 
-      {/* Stat row */}
-      <Animated.View
-        entering={FadeInDown.duration(320).delay(60)}
-        style={{ flexDirection: "row", alignItems: "stretch", gap: 12 }}
-      >
+      {/* Primary row — two equal tiles: the count, and the make-a-CV CTA. */}
+      <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
         <Pressable
           onPress={() => { haptics.light(); navigation.navigate("CVsTab"); }}
           style={{
-            flex: 1,
+            width: COL_W,
+            minHeight: 116,
             backgroundColor: c.bgElevated,
             borderRadius: 16,
             borderWidth: 1,
             borderColor: c.border,
             padding: 16,
+            justifyContent: "space-between",
           }}
         >
           <Icon name="file-text" size={18} color={c.accent} />
-          <Text style={{ color: c.text, fontSize: 26, fontWeight: "800", marginTop: 8 }}>
-            {cvs.length}
-          </Text>
-          <Text style={{ color: c.textMuted, fontSize: 12 }}>
-            {cvs.length === 1 ? t("CV created", "CV imetengenezwa") : t("CVs created", "CV zimetengenezwa")}
-          </Text>
+          <View>
+            <Text style={{ color: c.text, fontSize: 26, fontWeight: "800" }}>{cvs.length}</Text>
+            <Text style={{ color: c.textMuted, fontSize: 12 }}>
+              {cvs.length === 1 ? t("CV created", "CV imetengenezwa") : t("CVs created", "CV zimetengenezwa")}
+            </Text>
+          </View>
         </Pressable>
+
         <Pressable
-          onPress={() => {
-            haptics.light();
-            navigation.navigate("CVsTab", { screen: "CvEditor" });
-          }}
+          onPress={() => { haptics.light(); navigation.navigate("CVsTab", { screen: "CvEditor" }); }}
           style={{
-            flex: 1,
+            width: COL_W,
+            minHeight: 116,
             backgroundColor: c.accent,
             borderRadius: 16,
             padding: 16,
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
           }}
         >
           <Icon name="plus" size={18} color={c.accentText} />
-          <Text style={{ color: c.accentText, fontSize: 19, fontWeight: "700", marginTop: 8 }}>
-            {t("New CV", "CV mpya")}
-          </Text>
-          <Text style={{ color: c.accentText, opacity: 0.9, fontSize: 12, fontWeight: "600" }}>
-            {t("Start from scratch", "Anza upya")} →
-          </Text>
+          <View>
+            <Text style={{ color: c.accentText, fontSize: 18, fontWeight: "800" }}>{t("New CV", "CV mpya")}</Text>
+            <Text style={{ color: c.accentText, opacity: 0.9, fontSize: 12, fontWeight: "600", marginTop: 1 }}>
+              {t("Start from scratch", "Anza upya")} →
+            </Text>
+          </View>
         </Pressable>
       </Animated.View>
 
-      {/* Quick actions */}
+      {/* Quick actions — a 2-column grid that fills the row exactly. */}
       <Animated.View entering={FadeInDown.duration(320).delay(120)}>
         <SectionHeader title={t("Quick actions", "Vitendo vya haraka")} />
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: GUTTER }}>
           {quickActions.map((a, i) => (
             <Stagger key={a.label} index={i} step={45}>
-              <Card onPress={a.onPress} style={{ width: 156, alignItems: "flex-start", gap: 10 }}>
+              <Card onPress={a.onPress} style={{ width: COL_W, alignItems: "flex-start", gap: 10 }}>
                 <View
                   style={{
                     width: 38,
@@ -177,7 +178,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         </View>
       </Animated.View>
 
-      {/* Tip of the day — a free guide, rotated daily */}
+      {/* Tip of the day — a free guide, rotated daily. */}
       {(() => {
         const freeGuides = GUIDES.filter((g) => g.tier === "free");
         const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
@@ -222,57 +223,65 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         />
 
         {loading && cvs.length === 0 ? (
-          <>
+          <View style={{ gap: 10 }}>
             <SkeletonCard />
             <SkeletonCard />
-          </>
+          </View>
         ) : recent.length === 0 ? (
-          <EmptyState
-            icon="file-text"
-            title={t("No CVs yet", "Bado hakuna CV")}
-            body={t(
-              "Import an existing CV from a photo or a file, or start a new one.",
-              "Pakia CV uliyonayo kutoka kwenye picha au faili, au anza mpya.",
-            )}
-            actionLabel={t("Import a CV", "Pakia CV")}
-            onAction={() => navigation.navigate("ImportTab")}
-          />
+          // Inline, card-shaped, same width and rhythm as everything else — not a
+          // full-screen hero. The "New CV" tile above and the "Import a CV" quick
+          // action already carry the CTAs, so this just names the empty state.
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              padding: 16,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: c.border,
+              borderStyle: "dashed",
+              backgroundColor: c.bgElevated,
+            }}
+          >
+            <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="file-text" size={18} color={c.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>
+                {t("No CVs yet", "Bado hakuna CV")}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={2}>
+                {t("Your CVs will show here once you build or import one.", "CV zako zitaonekana hapa mara utakapotengeneza au kupakia.")}
+              </Text>
+            </View>
+          </View>
         ) : (
-          recent.map((cv: CV, i) => (
-            <Stagger key={cv.id} index={i}>
-              <Card
-                onPress={() =>
-                  navigation.navigate("CVsTab", {
-                    screen: "CvEditor",
-                    params: { templateId: cv.templateId, cvId: cv.id },
-                  })
-                }
-                style={{ marginBottom: 10, flexDirection: "row", alignItems: "center", gap: 12 }}
-              >
-                <View
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 12,
-                    backgroundColor: c.accent + "14",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+          <View style={{ gap: 10 }}>
+            {recent.map((cv: CV, i) => (
+              <Stagger key={cv.id} index={i}>
+                <Card
+                  onPress={() =>
+                    navigation.navigate("CVsTab", { screen: "CvEditor", params: { templateId: cv.templateId, cvId: cv.id } })
+                  }
+                  style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
                 >
-                  <Icon name="file-text" size={19} color={c.accent} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }} numberOfLines={1}>
-                    {cv.title}
-                  </Text>
-                  <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                    {relativeDate(cv.updatedAt, lang)}
-                  </Text>
-                </View>
-                <Icon name="chevron-right" size={18} color={c.textMuted} />
-              </Card>
-            </Stagger>
-          ))
+                  <View style={{ width: 42, height: 42, borderRadius: 12, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
+                    <Icon name="file-text" size={19} color={c.accent} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }} numberOfLines={1}>
+                      {cv.title}
+                    </Text>
+                    <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
+                      {relativeDate(cv.updatedAt, lang)}
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={18} color={c.textMuted} />
+                </Card>
+              </Stagger>
+            ))}
+          </View>
         )}
       </Animated.View>
     </Screen>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Dimensions, Modal, Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
@@ -74,7 +74,7 @@ export function PremiumSheet({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ flex: 1 }}>
+      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
           <Animated.View style={[backdrop, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
         </Pressable>
