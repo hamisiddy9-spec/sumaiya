@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { SumaiyaMark } from "./sumaiya-mark";
 import { reportError } from "../lib/reporting";
+import { getLastKnownLang } from "../lib/i18n";
 
 /**
  * Catches a render/lifecycle crash anywhere below it and shows a calm recovery
@@ -39,6 +40,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (!this.state.error) return this.props.children;
 
+    // A plain function call, not a hook — safe even if the crash came from
+    // inside the language provider itself; see getLastKnownLang's own
+    // comment. Defensively wrapped anyway: this screen must never itself
+    // throw, since there is nothing left to catch it.
+    let sw = false;
+    try {
+      sw = getLastKnownLang() === "sw";
+    } catch { /* stay English */ }
+
     return (
       <View
         style={{
@@ -63,16 +73,18 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <SumaiyaMark size={40} state="static" color="#FAF5EE" />
         </View>
         <Text style={{ color: "#211A15", fontSize: 20, fontWeight: "800", textAlign: "center" }}>
-          Something broke
+          {sw ? "Kuna hitilafu imetokea" : "Something broke"}
         </Text>
         <Text style={{ color: "#6B5F54", fontSize: 14.5, textAlign: "center", lineHeight: 21, maxWidth: 300 }}>
-          Sumaiya hit a problem on this screen. Your CVs and data are safe — nothing was lost.
+          {sw
+            ? "Sumaiya amekutana na tatizo kwenye skrini hii. CV zako na taarifa zako ziko salama — hakuna kilichopotea."
+            : "Sumaiya hit a problem on this screen. Your CVs and data are safe — nothing was lost."}
         </Text>
         <Pressable
           onPress={this.reset}
           style={{ marginTop: 6, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 14, backgroundColor: "#DA4A1C" }}
         >
-          <Text style={{ color: "#FAF5EE", fontSize: 15, fontWeight: "800" }}>Try again</Text>
+          <Text style={{ color: "#FAF5EE", fontSize: 15, fontWeight: "800" }}>{sw ? "Jaribu tena" : "Try again"}</Text>
         </Pressable>
       </View>
     );

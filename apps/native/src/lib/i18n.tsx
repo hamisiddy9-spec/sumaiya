@@ -26,6 +26,17 @@ interface LangContextValue {
 
 const LangContext = createContext<LangContextValue | null>(null);
 
+// A plain module-level mirror of the current language, read by
+// error-boundary.tsx. That component is deliberately dependency-free (a
+// crash could come from this very provider), so it can't use useLang() —
+// but a bare variable read via a plain function call carries none of
+// React's own failure modes, and module state survives even if the
+// LangProvider component itself has crashed and unmounted.
+let lastKnownLang: Lang = "en";
+export function getLastKnownLang(): Lang {
+  return lastKnownLang;
+}
+
 export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
   const [ready, setReady] = useState(false);
@@ -34,7 +45,10 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       try {
         const stored = await getSecureItem("language");
-        if (stored === "en" || stored === "sw") setLangState(stored);
+        if (stored === "en" || stored === "sw") {
+          setLangState(stored);
+          lastKnownLang = stored;
+        }
       } catch {
         /* non-fatal — default en */
       } finally {
@@ -45,6 +59,7 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
+    lastKnownLang = l;
     setSecureItem("language", l).catch(() => {
       /* non-fatal */
     });
