@@ -60,6 +60,23 @@ export function deepLink(s: Signal): Record<string, unknown> {
   }
 }
 
+/**
+ * The web equivalent of deepLink() — a URL path for the browser's
+ * notificationclick handler (public/sw.js reads notification.data.url),
+ * not a React-Navigation screen name. Web has no per-signal-type page the
+ * way native has separate Jobs/AtsChecker/LearningHub tabs — every one of
+ * these (job matches, ATS check, skill gaps, cover-letter drafting,
+ * unconfirmed-facts review) is actually surfaced inside the assistant chat
+ * (SignalsCard/ConfirmationsCard, mounted on /assistant), so that's the
+ * one honest, always-correct destination for every signal type here.
+ * Previously this was never set at all — sendToUser() defaults an unset
+ * url to "/", so every web push notification opened the bare homepage
+ * regardless of what it was actually about.
+ */
+export function webDeepLink(_s: Signal): string {
+  return "/assistant";
+}
+
 /** Dispatch due signals for one user. Returns how many notifications went out. */
 export async function dispatchSignalsForUser(userId: string, now: Date = new Date()): Promise<number> {
   const ctx = await assembleUserContext(userId);
@@ -100,7 +117,16 @@ export async function dispatchSignalsForUser(userId: string, now: Date = new Dat
         set: { sentAt: now, type: s.type },
       });
 
-    const msg = { title: sw ? s.title.sw : s.title.en, body: sw ? s.detail.sw : s.detail.en, data: deepLink(s) };
+    // Two different shapes, one for each channel: sendExpoPush reads
+    // `data` (a React-Navigation screen/params), sendToUser reads `url` (a
+    // browser path) — see webDeepLink's own comment for why they can't
+    // share one value. Each send function ignores the field it doesn't use.
+    const msg = {
+      title: sw ? s.title.sw : s.title.en,
+      body: sw ? s.detail.sw : s.detail.en,
+      data: deepLink(s),
+      url: webDeepLink(s),
+    };
     try {
       const [native, web] = await Promise.all([
         sendExpoPush(userId, msg).catch(() => 0),

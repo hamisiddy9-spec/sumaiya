@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { notifKey, deepLink } from "./dispatch-signals";
+import { notifKey, deepLink, webDeepLink } from "./dispatch-signals";
 import type { Signal } from "@/lib/assistant/signals";
 
 function sig(overrides: Partial<Signal> = {}): Signal {
@@ -42,5 +42,16 @@ describe("deepLink", () => {
   it("job.newMatch and cv.tailor both land on Jobs", () => {
     expect(deepLink(sig({ type: "job.newMatch" })).screen).toBe("Jobs");
     expect(deepLink(sig({ type: "cv.tailor" })).screen).toBe("Jobs");
+  });
+});
+
+describe("webDeepLink", () => {
+  it("returns a real path (never empty/undefined) for every signal type — a web push notification must never fall back to the bare homepage", () => {
+    const types: Signal["type"][] = ["confirmations", "cv.tailor", "coverLetter.generate", "ats.check", "career.skillGap", "application.followUp", "job.newMatch"];
+    for (const type of types) {
+      const url = webDeepLink(sig({ type }));
+      expect(url).toBeTruthy();
+      expect(url.startsWith("/")).toBe(true);
+    }
   });
 });
