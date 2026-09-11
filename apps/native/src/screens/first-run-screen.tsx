@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -16,6 +18,7 @@ import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
 import { setDefaultTemplate } from "../lib/prefs";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
+import { pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
 import {
   CAREER_FIELDS,
   EXPERIENCE_LEVELS,
@@ -35,7 +38,7 @@ interface Props {
   onDone: () => void;
 }
 
-type StepId = "intro" | "name" | "fields" | "experience" | "skills" | "recent" | "look";
+type StepId = "intro" | "name" | "photo" | "fields" | "experience" | "skills" | "recent" | "look";
 
 /** A tappable pill used for every preset choice. */
 function Chip({
@@ -88,6 +91,8 @@ export function FirstRunScreen({ onDone }: Props) {
   const email = user?.email ?? "";
 
   const [name, setName] = useState(prefillName);
+  const [photo, setPhoto] = useState("");
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [fields, setFields] = useState<string[]>([]);
   const [experience, setExperience] = useState<string>("");
   const [skills, setSkills] = useState<string[]>([]);
@@ -98,7 +103,7 @@ export function FirstRunScreen({ onDone }: Props) {
 
   // The name step is skipped entirely when the account already has a real one.
   const STEPS: StepId[] = useMemo(
-    () => ["intro", ...(prefillName ? [] : (["name"] as StepId[])), "fields", "experience", "skills", "recent", "look"],
+    () => ["intro", ...(prefillName ? [] : (["name"] as StepId[])), "photo", "fields", "experience", "skills", "recent", "look"],
     [prefillName],
   );
   const [i, setI] = useState(0);
@@ -113,7 +118,8 @@ export function FirstRunScreen({ onDone }: Props) {
     (experience ? 1 : 0) +
     (skills.length ? 1 : 0) +
     (recent.trim() ? 1 : 0) +
-    1; // "look" always has a default
+    1 + // "look" always has a default
+    1; // "photo" is optional — skipping it still counts as done, same as "look"
   const pct = Math.min(1, Math.max(0.12, filled / slots));
 
   const suggestedSkills = useMemo(() => skillsForFields(fields), [fields]);
@@ -135,6 +141,7 @@ export function FirstRunScreen({ onDone }: Props) {
   const canNext =
     step === "intro" ||
     step === "name" ||
+    step === "photo" ||
     step === "look" ||
     (step === "fields" && fields.length > 0) ||
     (step === "experience" && !!experience) ||
@@ -167,6 +174,7 @@ export function FirstRunScreen({ onDone }: Props) {
         const { updatedAt, ...rest } = next;
         await saveProfile(rest);
       }
+      if (photo) await setPendingOnboardingPhoto(photo);
       await setDefaultTemplate(template).catch(() => {});
       await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
     } finally {
@@ -198,6 +206,45 @@ export function FirstRunScreen({ onDone }: Props) {
             returnKeyType="next"
             onSubmitEditing={() => canNext && setI(i + 1)}
           />
+        );
+      case "photo":
+        return (
+          <View style={{ alignItems: "center", gap: 16, marginTop: 8 }}>
+            <Pressable
+              disabled={photoBusy}
+              onPress={async () => {
+                haptics.light();
+                setPhotoBusy(true);
+                try {
+                  const p = await pickAndCompressPhoto();
+                  if (p) setPhoto(p);
+                } catch {
+                  haptics.error();
+                } finally {
+                  setPhotoBusy(false);
+                }
+              }}
+              style={{
+                width: 116, height: 116, borderRadius: 58, overflow: "hidden",
+                alignItems: "center", justifyContent: "center",
+                backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border,
+              }}
+            >
+              {photoBusy ? (
+                <ActivityIndicator color={c.accent} />
+              ) : photo ? (
+                <Image source={{ uri: photo }} style={{ width: 116, height: 116 }} resizeMode="cover" />
+              ) : (
+                <Icon name="camera" size={30} color={c.textMuted} />
+              )}
+            </Pressable>
+            <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>
+              {photo ? t("Change photo", "Badilisha picha") : t("Add a photo", "Ongeza picha")}
+            </Text>
+            <Text style={{ color: c.textMuted, fontSize: 12.5, textAlign: "center", maxWidth: 260 }}>
+              {t("Totally optional — skip it now and add one later from your CV editor.", "Si lazima kabisa — ruka sasa na uongeze baadaye kwenye kihariri cha CV.")}
+            </Text>
+          </View>
         );
       case "fields":
         return (
@@ -323,6 +370,10 @@ export function FirstRunScreen({ onDone }: Props) {
       },
     },
     name: { title: { en: "What's your name?", sw: "Jina lako ni nani?" } },
+    photo: {
+      title: { en: "Add a profile photo?", sw: "Ongeza picha ya wasifu?" },
+      hint: { en: "Some CV looks show it — you can skip this.", sw: "Baadhi ya miundo ya CV inaonyesha picha — unaweza kuruka hii." },
+    },
     fields: {
       title: { en: "What do you work in?", sw: "Unafanya kazi katika nini?" },
       hint: { en: "Pick up to 3.", sw: "Chagua hadi 3." },

@@ -1,4 +1,5 @@
 import type { CV } from "@sumaiya/types";
+import { toNativeCvData } from "@sumaiya/utils/cv-shape";
 
 /**
  * A CV synced to the server comes back under a server-derived id
@@ -13,7 +14,11 @@ import type { CV } from "@sumaiya/types";
  */
 export function dedupe(list: CV[]): { kept: CV[]; drop: string[] } {
   const drop = new Set<string>();
-  const named = (cv: CV) => (cv.data?.personalInfo?.fullName || "").trim().toLowerCase();
+  // A synced-from-server row can be in the web/stored shape (personal.fullName)
+  // rather than the app's own (personalInfo.fullName) — reading the raw field
+  // directly silently treated those rows as unnamed, so a server-synced CV
+  // never matched its local twin and both stuck around. Normalize first.
+  const named = (cv: CV) => (toNativeCvData(cv.data)?.personalInfo?.fullName || "").trim().toLowerCase();
 
   for (const local of list) {
     if (local.id.startsWith("m_") || drop.has(local.id)) continue;

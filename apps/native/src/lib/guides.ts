@@ -117,7 +117,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 3,
     icon: "mail",
-    title: { en: "Follow up without being annoying", sw: "Fuatilia bila kuudhi" },
+    title: { en: "Follow up without being annoying", sw: "Fuatilia maombi yako bila kuudhi" },
     summary: {
       en: "The line between \"keen\" and \"pest\" is timing. Here it is.",
       sw: "Tofauti kati ya \"mwenye hamu\" na \"kero\" ni wakati. Huu hapa.",
@@ -144,7 +144,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 5,
     icon: "trending-up",
-    title: { en: "\"I have no experience\" — yes you do", sw: "\"Sina uzoefu\" — unao" },
+    title: { en: "\"I have no experience\" — yes you do", sw: "\"Sina uzoefu\" — lakini unao" },
     summary: {
       en: "Attachment, coursework, hustle, volunteering, a family business — all of it counts if you frame it right.",
       sw: "Mafunzo kwa vitendo, masomo, biashara, kujitolea, biashara ya familia — vyote vinahesabika ukiviweka vizuri.",

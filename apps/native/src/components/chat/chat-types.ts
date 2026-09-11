@@ -113,7 +113,7 @@ export const INITIAL_QUICK_ACTIONS: QuickAction[] = [
   { id: 'cv-builder', label: 'Build my CV', labelSw: 'Tengeneza CV yangu', icon: 'file-text', action: 'open-cv' },
   { id: 'job-letter', label: 'Cover letter', labelSw: 'Barua ya maombi', icon: 'mail', action: 'edit-cv', data: { template: 'letter' } },
   { id: 'learn-skills', label: 'Learn a skill', labelSw: 'Jifunze ujuzi', icon: 'briefcase', action: 'learn' },
-  { id: 'free-chat', label: 'Just talk', labelSw: 'Tuongee tu', icon: 'message-circle', action: 'chat' },
+  { id: 'free-chat', label: 'Just talk', labelSw: 'Ongea nami', icon: 'message-circle', action: 'chat' },
 ];
 
 // Action types and their handlers

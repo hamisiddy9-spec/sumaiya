@@ -4,6 +4,7 @@ export * from "./sync-queue";
 export * from "./storage";
 export * from "./secure-storage";
 export * from "./offline-storage";
+export * from "./cv-shape";
 
 /**
  * Utility: cn() - Class Name merger for NativeWind (Tailwind for React Native)

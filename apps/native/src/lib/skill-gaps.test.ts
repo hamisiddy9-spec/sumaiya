@@ -43,6 +43,11 @@ describe("computeSkillGaps", () => {
     expect(r.target).toBe("Finance & Accounting");
   });
 
+  it("target respects the requested language — never leaks an English field name into a Swahili result", () => {
+    const r = computeSkillGaps({ profile: profile({ headline: "Finance & Accounting" }), jobs: [], lang: "sw" });
+    expect(r.target).toBe("Fedha na Uhasibu");
+  });
+
   it("always surfaces interview + job-search once someone is looking", () => {
     const r = computeSkillGaps({ profile: profile({ headline: "Driving" }), jobs: [] });
     expect(r.gaps.map((g) => g.area.id)).toEqual(expect.arrayContaining(["interview", "job-search"]));

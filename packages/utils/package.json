@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./ocr": "./src/ocr.ts",
     "./template-matcher": "./src/template-matcher.ts",
-    "./sync-queue": "./src/sync-queue.ts"
+    "./sync-queue": "./src/sync-queue.ts",
+    "./cv-shape": "./src/cv-shape.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

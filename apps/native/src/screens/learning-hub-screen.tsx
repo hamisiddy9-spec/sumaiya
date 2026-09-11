@@ -23,13 +23,14 @@ const PRIORITY_TONE = (c: ReturnType<typeof useThemeColors>) => ({
   low: c.textMuted,
 });
 
-function Chips({ items, color }: { items: string[]; color: string }) {
+function Chips({ items, color }: { items: { en: string; sw: string }[]; color: string }) {
   const c = useThemeColors();
+  const { lang } = useLang();
   return (
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
       {items.map((s) => (
-        <View key={s} style={{ backgroundColor: color + "16", borderRadius: 7, paddingHorizontal: 8, paddingVertical: 3 }}>
-          <Text style={{ color, fontSize: 11, fontWeight: "700" }}>{s}</Text>
+        <View key={s.en} style={{ backgroundColor: color + "16", borderRadius: 7, paddingHorizontal: 8, paddingVertical: 3 }}>
+          <Text style={{ color, fontSize: 11, fontWeight: "700" }}>{lang === "sw" ? s.sw : s.en}</Text>
         </View>
       ))}
     </View>
@@ -112,7 +113,7 @@ function GapCard({
           </View>
           {area.practice.length ? (
             <View style={{ flex: 1 }}>
-              <Button label={t("Practise", "Fanya mazoezi")} size="sm" onPress={onPractise} />
+              <Button label={t("Practise this skill", "Zoeza ujuzi huu")} size="sm" onPress={onPractise} />
             </View>
           ) : null}
         </View>
@@ -169,8 +170,8 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
 
   const result: GapResult | null = useMemo(() => {
     if (!profile) return null;
-    return computeSkillGaps({ profile, cv: latestCv, jobs });
-  }, [profile, latestCv, jobs]);
+    return computeSkillGaps({ profile, cv: latestCv, jobs, lang });
+  }, [profile, latestCv, jobs, lang]);
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -202,7 +203,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const practise = (gap: SkillGap) => {
     const p = gap.area.practice[0];
     if (!p) return;
-    const seed = (lang === "sw" ? p.sw : p.en).replace("[job]", result?.target || t("this job", "kazi hii"));
+    const seed = (lang === "sw" ? p.sw : p.en).replace("[job]", result?.target || t("this job", "ajira hii"));
     navigation.navigate("SumaiyaTab", { seed });
   };
 
@@ -260,7 +261,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             <View style={{ backgroundColor: c.bgElevated, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 14, gap: 8 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={{ color: c.textMuted, fontSize: 12 }}>
-                  {t("Skills for", "Ujuzi kwa")} <Text style={{ color: c.text, fontWeight: "800" }}>{result.target}</Text>
+                  {t("Skills for", "Ujuzi wa")} <Text style={{ color: c.text, fontWeight: "800" }}>{result.target}</Text>
                 </Text>
                 <Text style={{ color: c.text, fontSize: 13, fontWeight: "800" }}>{result.readiness}% {t("ready", "tayari")}</Text>
               </View>
@@ -304,7 +305,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             <View style={{ flexDirection: "row", gap: 10, alignItems: "center", padding: 14, borderRadius: 12, backgroundColor: c.success + "12", borderWidth: 1, borderColor: c.success + "2a" }}>
               <Icon name="check-circle" size={18} color={c.success} />
               <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5 }}>
-                {t("You're covering the main skills for your target. Keep an eye on new job matches.", "Unashughulikia ujuzi mkuu kwa lengo lako. Endelea kuangalia kazi mpya zinazolingana.")}
+                {t("You're covering the main skills for your target. Keep an eye on new job matches.", "Unashughulikia ujuzi mkuu kwa lengo lako. Endelea kuangalia ajira mpya zinazolingana.")}
               </Text>
             </View>
           ) : null}

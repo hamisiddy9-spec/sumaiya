@@ -43,8 +43,11 @@ export function stackScreenOptions(c: ThemeColors): NativeStackNavigationOptions
 export function rootScreenOptions(c: ThemeColors): NativeStackNavigationOptions {
   return {
     headerShown: false,
+    // 340ms (not 260): the onboarding portal hands off while the screen is a
+    // solid field of accent colour, so this cross-fade *is* the reveal — the
+    // colour has to dissolve into the page, not blink away from it.
     animation: "fade",
-    animationDuration: 260,
+    animationDuration: 340,
     contentStyle: { backgroundColor: c.bg },
   };
 }

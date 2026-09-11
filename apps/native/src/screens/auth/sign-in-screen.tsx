@@ -84,6 +84,10 @@ export function SignInScreen(_props: Props) {
   const [code, setCode] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [sending, setSending] = useState(false);
+  // Lead with one obvious path (Google — zero-friction, proven reliable) rather
+  // than presenting email-OTP and Google as equally-weighted choices; email is
+  // a secondary, opt-in path reached via the link below.
+  const [showEmail, setShowEmail] = useState(false);
 
   const emailError =
     emailTouched && !EMAIL_RE.test(email.trim()) ? t("Enter a valid email address", "Weka barua pepe sahihi") : null;
@@ -122,9 +126,25 @@ export function SignInScreen(_props: Props) {
     }
   }
 
+  // Arriving from the onboarding portal, this screen is revealed by the root
+  // stack's own cross-fade as the flood of accent colour clears — it is
+  // already mounted and at rest underneath. So the screen itself must not
+  // animate in: a logo zooming while the colour field is still dissolving is
+  // two unrelated choreographies finishing at once. The step blocks below keep
+  // their slide, but only for an actual step *change* — never on first mount.
+  const prevStep = useRef(step);
+  const stepChanged = prevStep.current !== step;
+  prevStep.current = step;
+  const stepEntering = stepChanged ? FadeInRight.duration(200) : undefined;
+
+  // Same treatment as the onboarding intro slide's centred icon — a big mark
+  // in a soft circular backdrop — so sign-in reads as a continuation of that
+  // screen, not a smaller, top-pinned afterthought.
   const brand = (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 9, marginTop: 12 }}>
-      <SumaiyaMark size={30} state="static" color={c.accent} />
+    <View style={{ alignItems: "center", gap: 12, marginBottom: 8 }}>
+      <View style={{ width: 92, height: 92, borderRadius: 28, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
+        <SumaiyaMark size={48} state="static" color={c.accent} />
+      </View>
       <Text style={{ color: c.text, fontSize: 20, fontWeight: "800", letterSpacing: -0.3 }}>Sumaiya</Text>
     </View>
   );
@@ -133,6 +153,7 @@ export function SignInScreen(_props: Props) {
     <>
     <StatusBar style="dark" />
     <Screen
+      contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
       footer={
         step === "email" ? (
           <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
@@ -147,7 +168,7 @@ export function SignInScreen(_props: Props) {
       {brand}
 
       {step === "code" ? (
-        <Animated.View key="code" entering={FadeInRight.duration(240)} exiting={FadeOutLeft.duration(140)}>
+        <Animated.View key="code" entering={stepEntering} exiting={FadeOutLeft.duration(140)}>
           <Pressable
             onPress={() => {
               haptics.selection();
@@ -199,46 +220,19 @@ export function SignInScreen(_props: Props) {
           </Pressable>
         </Animated.View>
       ) : (
-        <Animated.View key="email" entering={FadeInRight.duration(240)} exiting={FadeOutLeft.duration(140)}>
+        <Animated.View key="email" entering={stepEntering} exiting={FadeOutLeft.duration(140)}>
           <View style={{ marginTop: 26, marginBottom: 26 }}>
             <Text style={{ color: c.text, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 }}>
               {t("Sign in to Sumaiya", "Ingia Sumaiya")}
             </Text>
             <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
-              {t("No password — we'll email you a 6-digit code.", "Hakuna nywila — tutakutumia msimbo wa tarakimu 6.")}
+              {t("One tap, no password.", "Mgusiko mmoja, hakuna nywila.")}
             </Text>
           </View>
 
           <AuthErrorBanner error={error} onDismiss={clearError} />
 
-          <Animated.View entering={FadeIn.delay(120).duration(360)} style={{ gap: 14 }}>
-            <TextField
-              label={t("Email", "Barua pepe")}
-              leftIcon="mail"
-              value={email}
-              onChangeText={(x) => {
-                setEmail(x);
-                if (error) clearError();
-              }}
-              onBlur={() => setEmailTouched(true)}
-              error={emailError}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoComplete="email"
-              textContentType="emailAddress"
-              returnKeyType="go"
-              onSubmitEditing={requestCode}
-              editable={!sending}
-            />
-
-            <Button label={t("Send me a code", "Nitumie msimbo")} onPress={requestCode} loading={sending} size="lg" />
-
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 22 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
-              <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{t("or", "au")}</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
-            </View>
-
+          <Animated.View entering={FadeIn.duration(240)} style={{ gap: 14 }}>
             <GoogleButton
               label={t("Continue with Google", "Endelea na Google")}
               disabled={sending}
@@ -251,6 +245,44 @@ export function SignInScreen(_props: Props) {
                 }
               }}
             />
+
+            {showEmail ? (
+              <Animated.View entering={FadeIn.duration(200)} style={{ gap: 14, marginTop: 8 }}>
+                <TextField
+                  label={t("Email", "Barua pepe")}
+                  leftIcon="mail"
+                  value={email}
+                  onChangeText={(x) => {
+                    setEmail(x);
+                    if (error) clearError();
+                  }}
+                  onBlur={() => setEmailTouched(true)}
+                  error={emailError}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  returnKeyType="go"
+                  onSubmitEditing={requestCode}
+                  editable={!sending}
+                  autoFocus
+                />
+                <Button label={t("Send me a code", "Nitumie msimbo")} onPress={requestCode} loading={sending} size="lg" />
+              </Animated.View>
+            ) : (
+              <Pressable
+                onPress={() => {
+                  haptics.selection();
+                  setShowEmail(true);
+                }}
+                hitSlop={8}
+                style={{ alignItems: "center", marginTop: 8, paddingVertical: 8 }}
+              >
+                <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>
+                  {t("Use email instead", "Tumia barua pepe badala yake")}
+                </Text>
+              </Pressable>
+            )}
           </Animated.View>
         </Animated.View>
       )}

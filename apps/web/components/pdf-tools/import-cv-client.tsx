@@ -71,7 +71,7 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
   const router = useRouter();
 
   const t = {
-    back: sw ? "Dashibodi" : "Dashboard",
+    back: sw ? "Nyumbani" : "Dashboard",
     title: sw ? "Pakia CV yako ya zamani" : "Import your old CV",
     subtitle: sw
       ? "Pakia CV yoyote ya PDF — hata iliyotengenezwa hapa au iliyoskaniwa — tuibadilishe kuwa CV inayoharirika, tayari kubadili mtindo na taarifa."
@@ -95,9 +95,9 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
       : "We couldn't read any text, even with OCR. Make sure the PDF is clear and legible (not blank or blurry).",
     madeHereTitle: sw ? "Njia ya haraka: uliitengeneza hapa?" : "Faster: made your CV here already?",
     madeHereBody: sw
-      ? "Kama CV ipo kwenye akaunti yako, gusa \"⋯\" kwenye kadi yake dashibodi kisha Duplicate — ni papo hapo. Au endelea kuipakia hapa chini."
+      ? "Kama CV ipo kwenye akaunti yako, gusa \"⋯\" kwenye kadi yake kwenye ukurasa wa nyumbani kisha Duplicate — ni papo hapo. Au endelea kuipakia hapa chini."
       : "If the CV is in your account, tap \"⋯\" on its dashboard card, then Duplicate — it's instant. Otherwise, upload it below.",
-    madeHereCta: sw ? "Nenda dashibodi" : "Go to dashboard",
+    madeHereCta: sw ? "Nenda nyumbani" : "Go to dashboard",
     readFail: sw
       ? "Tumeshindwa kusoma maandishi ya PDF hii. Hakikisha si iliyoskaniwa."
       : "We couldn't read this PDF's text. Make sure it isn't a scan.",

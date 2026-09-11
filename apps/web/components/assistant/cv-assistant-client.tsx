@@ -2734,7 +2734,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                     {sw ? "Jaribu tena" : "Try again"}
                   </button>
                   <Link href={guest ? "/" : "/dashboard"} className="text-xs font-semibold text-text-muted hover:text-espresso">
-                    {guest ? (sw ? "Nenda mwanzo" : "Go home") : (sw ? "Nenda dashibodi" : "Go to dashboard")}
+                    {guest ? (sw ? "Nenda mwanzo" : "Go home") : (sw ? "Nenda nyumbani" : "Go to dashboard")}
                   </Link>
                 </div>
               </div>

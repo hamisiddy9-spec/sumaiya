@@ -359,6 +359,27 @@ export const templateSubmission = pgTable("template_submission", {
   statusIdx: index("template_submission_status_idx").on(t.status),
 }));
 
+// ─── Signal Notifications (dispatch ledger) ───────────────────────────────────
+// The proactive signal engine (lib/assistant/signals.ts) computes nudges but,
+// on its own, only reaches a user who happens to open the app. This is the
+// claim/cooldown ledger for the dispatcher (cron/signals) that pushes the
+// other signal types out — same mark-before-send pattern as the older
+// follow-up reminder, generalized: one row per (user, notifKey), notifKey =
+// `${type}|${jobId ?? applicationId ?? "profile"}` (coarser than the
+// in-thread signalKey, which embeds day-counts and would re-notify daily).
+export const signalNotification = pgTable("signal_notification", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  notifKey: text("notif_key").notNull(),
+  type: text("type").notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+}, (t) => ({
+  userKeyUniq: uniqueIndex("signal_notification_user_key_uniq").on(t.userId, t.notifKey),
+}));
+
+export type SignalNotification = typeof signalNotification.$inferSelect;
+export type NewSignalNotification = typeof signalNotification.$inferInsert;
+
 // ─── Job Recommendations (per-user, cached) ───────────────────────────────────
 // Top matches between a user's most recent CV and the live job feed, computed by
 // the heuristic scorer (lib/job-match.ts) and cached so the dashboard and feed

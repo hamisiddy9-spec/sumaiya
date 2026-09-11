@@ -234,7 +234,7 @@ export function InterviewClient({ lang, cvContext = "", jobTitle = "", hasCv = f
                     </Link>
                   )}
                   <Link href="/dashboard" className="text-xs font-semibold text-pine hover:underline">
-                    {sw ? "Maliza — nenda dashibodi" : "Finish — go to dashboard"}
+                    {sw ? "Maliza — nenda nyumbani" : "Finish — go to dashboard"}
                   </Link>
                 </div>
               )}

@@ -4,7 +4,8 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "crons": [
-    { "path": "/api/cron/follow-ups", "schedule": "0 8 * * *" },
-    { "path": "/api/cron/jobs", "schedule": "0 6 * * *" }
+    { "path": "/api/cron/jobs", "schedule": "0 6 * * *" },
+    { "path": "/api/cron/signals", "schedule": "0 7 * * *" },
+    { "path": "/api/cron/follow-ups", "schedule": "0 8 * * *" }
   ]
 }

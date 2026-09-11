@@ -18,10 +18,12 @@ import {
   CURATED_CV_TEMPLATES,
   BUSINESS_CARD_TEMPLATES,
   LETTER_TEMPLATES,
+  isPremiumTemplate,
   type CVData,
   type BusinessCardData,
   type LetterData,
 } from "@/types";
+import { PremiumTemplateModal } from "@/components/premium-template-modal";
 
 // The gallery offers the curated, genuinely-distinct CV layouts (not every
 // recolor variant). Existing documents still render via the full registry.
@@ -208,11 +210,23 @@ function PopularPill() {
   );
 }
 
+function PremiumPill() {
+  const sw = useLang() === "sw";
+  return (
+    <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-pill uppercase tracking-wide bg-espresso text-cream">
+      <Icon name="lock" size={9} />
+      {sw ? "Premium" : "Premium"}
+    </span>
+  );
+}
+
 function PreviewCard({ template, cardScale }: { template: typeof TEMPLATES[0]; cardScale: number }) {
   const sw = useLang() === "sw";
   const lang = sw ? "sw" : "en";
   const Component = TEMPLATE_COMPONENTS[template.id] ?? NakuruTemplate;
   const previewH = Math.round(1123 * cardScale);
+  const locked = isPremiumTemplate(template.id);
+  const [showLock, setShowLock] = useState(false);
 
   return (
     <div className="group flex flex-col bg-card rounded-card overflow-hidden border border-border shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5">
@@ -238,15 +252,25 @@ function PreviewCard({ template, cardScale }: { template: typeof TEMPLATES[0]; c
 
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/20 md:bg-black/0 md:group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-          <CreateEntryButton
-            docType="cv"
-            lang={lang}
-            templateId={template.id}
-            as="div"
-            className="opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-200 bg-card text-espresso font-semibold text-sm px-5 py-2.5 rounded-input-lg shadow-floating hover:bg-cream"
-          >
-            {sw ? "Tumia templeti hii" : "Use this template"}
-          </CreateEntryButton>
+          {locked ? (
+            <button
+              onClick={() => setShowLock(true)}
+              className="opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-200 bg-card text-espresso font-semibold text-sm px-5 py-2.5 rounded-input-lg shadow-floating hover:bg-cream inline-flex items-center gap-1.5"
+            >
+              <Icon name="lock" size={13} />
+              {sw ? "Templeti ya Premium" : "Premium template"}
+            </button>
+          ) : (
+            <CreateEntryButton
+              docType="cv"
+              lang={lang}
+              templateId={template.id}
+              as="div"
+              className="opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-200 bg-card text-espresso font-semibold text-sm px-5 py-2.5 rounded-input-lg shadow-floating hover:bg-cream"
+            >
+              {sw ? "Tumia templeti hii" : "Use this template"}
+            </CreateEntryButton>
+          )}
         </div>
       </div>
 
@@ -256,11 +280,13 @@ function PreviewCard({ template, cardScale }: { template: typeof TEMPLATES[0]; c
           <p className="font-display font-bold text-espresso text-sm truncate">{template.name}</p>
           <div className="mt-1.5 flex items-center gap-1.5">
             <StyleChip style={template.style} />
-            {template.popular && <PopularPill />}
+            {locked ? <PremiumPill /> : template.popular ? <PopularPill /> : null}
           </div>
         </div>
         <div className="w-4 h-4 rounded-full shrink-0 ring-1 ring-border/50" style={{ backgroundColor: template.previewColor }} />
       </div>
+
+      {showLock && <PremiumTemplateModal onClose={() => setShowLock(false)} />}
     </div>
   );
 }

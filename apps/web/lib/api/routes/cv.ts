@@ -9,6 +9,17 @@ import { nanoid, customAlphabet } from "nanoid";
 import { createHash } from "node:crypto";
 import { parseCvLoose } from "@/lib/career-profile/mapper";
 import { seedProfileFromCv } from "@/lib/career-profile/sync";
+import { toStoredCvData } from "@sumaiya/utils/cv-shape";
+
+// The native app's api-client normalizes to the stored (web) shape before
+// writing, but a row written by an older/unpatched client — or anything that
+// ever calls this API directly — can still be in the app's own shape
+// (personalInfo/headline/title instead of personal/jobTitle/position). Web
+// reads it as blank rather than erroring, so it looks like the CV lost all
+// its content. Normalize on the way out so either shape renders correctly.
+function withStoredShape<T extends { data: unknown }>(doc: T): T {
+  return { ...doc, data: toStoredCvData(doc.data) };
+}
 
 // URL-clean slug suffix — no ambiguous chars (0/o, 1/l), lowercase only. Keeps
 // public links tidy AND unguessable (so /cv/<slug> can't be enumerated).
@@ -133,7 +144,14 @@ export const cvRoutes = new Hono()
     if (!userId) return c.json({ error: "Unauthorized" }, 401);
 
     const docs = await db.select().from(cv).where(eq(cv.userId, userId));
-    return c.json({ success: true, data: docs });
+    // TEMP diagnostic (remove once the intermittent-empty-list bug is caught):
+    // a 200 with zero rows for an account known to have CVs looks identical
+    // to "no CVs" on the client, so log it here where we can see the actual
+    // resolved userId instead of guessing from the device.
+    if (docs.length === 0) {
+      console.log(`[cv-list-diag] GET /api/cv resolved userId=${userId} rows=0`);
+    }
+    return c.json({ success: true, data: docs.map(withStoredShape) });
   })
 
   .get("/:id", async (c) => {
@@ -147,7 +165,7 @@ export const cvRoutes = new Hono()
       .limit(1);
 
     if (!doc) return c.json({ error: "Not found" }, 404);
-    return c.json({ success: true, data: doc });
+    return c.json({ success: true, data: withStoredShape(doc) });
   })
 
   .patch("/:id", zValidator("json", cvUpdateSchema), async (c) => {

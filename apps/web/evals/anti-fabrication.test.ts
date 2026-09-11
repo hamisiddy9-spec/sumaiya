@@ -180,6 +180,18 @@ describe("eval: anti-fabrication pack — AI→CV write-path gates stay in place
     expect(src).toMatch(/"Karibu!" when replying in Swahili, "Welcome!" when replying in English/);
   });
 
+  it("assistant-turn prompt carries Swahili noun-class agreement rules for the -a connective", () => {
+    // Live QA 2026-09: the app's own UI shipped "Ujuzi kwa Mauzo" instead of
+    // the grammatically correct "Ujuzi wa Mauzo" — "kwa" means for/by/with,
+    // not "of". Without this block the model has no reason to know "ujuzi"
+    // (U-class) takes "wa", not "kwa", and can make the same mistake in any
+    // CV, cover letter or chat reply it writes.
+    const src = aiRoute();
+    expect(src).toMatch(/SWAHILI GRAMMAR/);
+    expect(src).toMatch(/U-class nouns \(ujuzi, uzoefu, wakati, uongozi, umahiri\) → wa/);
+    expect(src).toMatch(/"Kwa" is NOT an of-connective/);
+  });
+
   it("no fabrication-bait fixture file went missing (fixtures are load-bearing)", () => {
     expect(existsSync(resolve(ROOT, "evals/fixtures/golden-pairs.ts"))).toBe(true);
   });

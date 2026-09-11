@@ -26,7 +26,7 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
   const inviteText = (url: string) =>
     t(
       `I'm using Sumaiya to build my CV and find work — it's free. Try it: ${url}`,
-      `Natumia Sumaiya kutengeneza CV yangu na kutafuta kazi — ni bure. Ijaribu: ${url}`,
+      `Natumia Sumaiya kutengeneza CV yangu na kutafuta ajira — ni bure. Ijaribu: ${url}`,
     );
 
   const share = async () => {
@@ -70,7 +70,7 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
         <Text style={{ color: c.textBody, fontSize: 14.5, textAlign: "center", lineHeight: 21, maxWidth: 300 }}>
           {t(
             "Sumaiya is free. Share it with someone job-hunting — the more people using it, the better it gets for everyone.",
-            "Sumaiya ni bure. Mshirikishe mtu anayetafuta kazi — watu wengi wanaotumia, ndivyo inavyokuwa bora kwa wote.",
+            "Sumaiya ni bure. Mshirikishe mtu anayetafuta ajira — watu wengi wanaotumia, ndivyo inavyokuwa bora kwa wote.",
           )}
         </Text>
       </Animated.View>

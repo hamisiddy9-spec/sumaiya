@@ -153,7 +153,7 @@ export const translations = {
   sw: {
     nav: {
       home: "Nyumbani", templates: "Miundo", tools: "Zana za PDF", pricing: "Bei",
-      signIn: "Ingia", getStarted: "Anza", dashboard: "Dashibodi",
+      signIn: "Ingia", getStarted: "Anza", dashboard: "Nyumbani",
       myAccount: "Akaunti Yangu",
     },
     hero: {
@@ -198,7 +198,7 @@ export const translations = {
       seePlans: "Ona mipango →",
     },
     editor: {
-      back: "Dashibodi",
+      back: "Nyumbani",
       save: "Hifadhi",
       saving: "Inahifadhi...",
       saved: "Imehifadhiwa",

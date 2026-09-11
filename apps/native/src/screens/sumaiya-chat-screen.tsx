@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -29,7 +29,7 @@ import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useSpeech } from "../lib/speech";
 import { useLang, greetingFor } from "../lib/i18n";
 import { resolveAttachment, linkAttachment } from "../lib/attachments";
-import { haptics, useThemeColors, PromptModal } from "../components/ui";
+import { dialog, haptics, useThemeColors, PromptModal } from "../components/ui";
 import type { SumaiyaChatScreenProps } from "../navigation/types";
 
 function TypingDot({ i }: { i: number }) {
@@ -146,7 +146,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         ]);
       };
       if (cvs.length === 1) { pickCv(cvs[0]); return; }
-      Alert.alert(
+      dialog.alert(
         t("Which CV?", "CV ipi?"),
         undefined,
         [
@@ -173,7 +173,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       "cv-builder": t("Help me make my CV.", "Nisaidie kutengeneza CV yangu."),
       "job-letter": t(
         "Help me write a cover letter for a job I'm applying to.",
-        "Nisaidie kuandika barua ya maombi kwa kazi ninayoomba.",
+        "Nisaidie kuandika barua ya maombi kwa ajira ninayoomba.",
       ),
       "learn-skills": t(
         "What skills should I focus on learning to be more competitive for jobs?",
@@ -471,8 +471,8 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
 
       <PromptModal
         visible={linkPrompt}
-        title={t("Paste the job link", "Bandika link ya kazi")}
-        message={t("Sumaiya will read the job description.", "Sumaiya atasoma maelezo ya kazi.")}
+        title={t("Paste the job link", "Bandika link ya ajira")}
+        message={t("Sumaiya will read the job description.", "Sumaiya atasoma maelezo ya ajira.")}
         placeholder="https://…"
         confirmLabel={t("Add", "Ongeza")}
         cancelLabel={t("Cancel", "Ghairi")}

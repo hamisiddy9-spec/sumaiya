@@ -21,7 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/lib/stores/editor-store";
 import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
 import { NakuruTemplate } from "@/components/templates/nakuru";
-import { TEMPLATES, CURATED_CV_TEMPLATES, DEFAULT_SECTION_ORDER, isTemplateId, parseCVData, type TemplateId, type CVData } from "@/types";
+import { TEMPLATES, CURATED_CV_TEMPLATES, DEFAULT_SECTION_ORDER, isTemplateId, isPremiumTemplate, parseCVData, type TemplateId, type CVData } from "@/types";
 import { SECTION_TEMPLATES } from "@/lib/data/samples";
 import { ENGINE_PRESETS } from "@/components/templates/engine/presets";
 import { AtsPanel } from "@/components/editor/ats-panel";
@@ -43,6 +43,7 @@ import posthog from "@/lib/analytics";
 import { renderElementToPdfBlob, exportCvToText, buildCvText, triggerBlobDownload } from "@/lib/pdf";
 import { AutoTextarea } from "@/components/ui/auto-textarea";
 import { Icon } from "@/components/ui/icon";
+import { PremiumTemplateModal } from "@/components/premium-template-modal";
 import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
 import { haptics } from "@/lib/haptics";
 import { Share2, FileType2, Globe } from "lucide-react";
@@ -821,6 +822,7 @@ function TemplateModal({
   currentTemplateId: TemplateId; primaryColor: string;
   onSelect: (id: TemplateId) => void; onClose: () => void; sw: boolean;
 }) {
+  const [lockedTemplate, setLockedTemplate] = useState<TemplateId | null>(null);
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-6"
@@ -843,10 +845,11 @@ function TemplateModal({
               : [...TEMPLATES.filter((t) => t.id === currentTemplateId), ...CURATED_CV_TEMPLATES]
             ).map((tpl) => {
               const isActive = tpl.id === currentTemplateId;
+              const locked = isPremiumTemplate(tpl.id) && !isActive;
               return (
                 <button
                   key={tpl.id}
-                  onClick={() => { onSelect(tpl.id); onClose(); }}
+                  onClick={() => { if (locked) { setLockedTemplate(tpl.id); return; } onSelect(tpl.id); onClose(); }}
                   className={`group rounded-xl overflow-hidden border-2 transition-all text-left ${
                     isActive ? "border-ember shadow-md shadow-ember-tint" : "border-border hover:border-ember/50 hover:shadow-md"
                   }`}
@@ -858,11 +861,16 @@ function TemplateModal({
                         <Check className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}
-                    {tpl.popular && !isActive && (
+                    {locked ? (
+                      <div className="absolute top-2 left-2 bg-espresso text-cream text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none flex items-center gap-1">
+                        <Icon name="lock" size={8} />
+                        Premium
+                      </div>
+                    ) : tpl.popular && !isActive ? (
                       <div className="absolute top-2 left-2 bg-gold text-espresso text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
                         {sw ? "Maarufu" : "Popular"}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                   <div className={`px-3 py-2.5 border-t ${isActive ? "bg-ember-tint/40 border-ember/20" : "border-border bg-card"}`}>
                     <p className={`text-xs font-semibold truncate ${isActive ? "text-ember-hover" : "text-text-body"}`}>{tpl.name}</p>
@@ -878,6 +886,7 @@ function TemplateModal({
           </div>
         </div>
       </div>
+      {lockedTemplate && <PremiumTemplateModal onClose={() => setLockedTemplate(null)} />}
     </div>
   );
 }
@@ -891,12 +900,17 @@ function formatTimeAgo(iso: string, lang: Lang): string {
   if (Number.isNaN(then)) return "";
   const secs = Math.max(0, Math.floor((Date.now() - then) / 1000));
   if (secs < 60) return sw ? "sekunde chache zilizopita" : "just now";
+  // Noun-class agreement: "zilizopita" is plural — a count of exactly one
+  // takes the singular "iliyopita" (dakika/saa/siku are all N-class nouns,
+  // same singular/plural form but different relative-verb agreement). The
+  // English side already handles its own singular/plural ("1 hr" vs "2 hrs");
+  // the Swahili side was missing the equivalent.
   const mins = Math.floor(secs / 60);
-  if (mins < 60) return sw ? `dakika ${mins} zilizopita` : `${mins} min ago`;
+  if (mins < 60) return sw ? `dakika ${mins} ${mins === 1 ? "iliyopita" : "zilizopita"}` : `${mins} min ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return sw ? `saa ${hrs} zilizopita` : `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
+  if (hrs < 24) return sw ? `saa ${hrs} ${hrs === 1 ? "iliyopita" : "zilizopita"}` : `${hrs} hr${hrs > 1 ? "s" : ""} ago`;
   const days = Math.floor(hrs / 24);
-  if (days < 30) return sw ? `siku ${days} zilizopita` : `${days} day${days > 1 ? "s" : ""} ago`;
+  if (days < 30) return sw ? `siku ${days} ${days === 1 ? "iliyopita" : "zilizopita"}` : `${days} day${days > 1 ? "s" : ""} ago`;
   return new Date(iso).toLocaleDateString(sw ? "sw" : "en", { day: "numeric", month: "short" });
 }
 

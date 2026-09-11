@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { useCvs } from "../../hooks/use-cvs";
@@ -16,24 +16,14 @@ import {
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
+import { relativeDate } from "../../lib/relative-date";
+import { dialog } from "../../components/ui";
 import type { CvListScreenProps } from "../../navigation/types";
-
-function relativeDate(d: string | Date, sw: boolean): string {
-  const date = new Date(d);
-  const diff = Date.now() - date.getTime();
-  const day = 86_400_000;
-  const n = Math.floor(diff / day);
-  if (diff < day) return sw ? "Leo" : "Today";
-  if (diff < 2 * day) return sw ? "Jana" : "Yesterday";
-  if (diff < 7 * day) return sw ? `Siku ${n} zilizopita` : `${n}d ago`;
-  return date.toLocaleDateString(sw ? "sw-TZ" : "en-US", { month: "short", day: "numeric", year: "numeric" });
-}
 
 export function CvListScreen({ navigation }: CvListScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
-  const sw = lang === "sw";
-  const { cvs, loading, deleteCV, loadCVs } = useCvs();
+  const { cvs, loading, error, storageBlocked, deleteCV, loadCVs } = useCvs();
   const [deleting, setDeleting] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -49,7 +39,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
 
   const confirmDelete = (id: string, title: string) => {
     haptics.warning();
-    Alert.alert(t("Delete this CV?", "Ufute CV hii?"), t(`"${title}" will be permanently removed.`, `"${title}" itafutwa kabisa.`), [
+    dialog.alert(t("Delete this CV?", "Ufute CV hii?"), t(`"${title}" will be permanently removed.`, `"${title}" itafutwa kabisa.`), [
       { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
         text: t("Delete", "Futa"),
@@ -61,7 +51,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
             haptics.success();
           } catch {
             haptics.error();
-            Alert.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Something went wrong. Try again.", "Kuna hitilafu. Jaribu tena."));
+            dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Something went wrong. Try again.", "Kuna hitilafu. Jaribu tena."));
           } finally {
             setDeleting(null);
           }
@@ -84,22 +74,46 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         {t("My CVs", "CV zangu")}
       </ScreenTitle>
 
+      {storageBlocked && cvs.length > 0 ? (
+        <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18 }}>
+          {t(
+            "These are the copies from your account. This device couldn't cache them, so offline access may be limited.",
+            "Hizi ni nakala kutoka akaunti yako. Kifaa hiki hakikuweza kuzihifadhi, hivyo matumizi bila mtandao yanaweza kuwa machache.",
+          )}
+        </Text>
+      ) : null}
+
       {loading && cvs.length === 0 ? (
         <>
           <SkeletonCard />
           <SkeletonCard />
           <SkeletonCard />
         </>
+      ) : error && cvs.length === 0 ? (
+        /* Never claim the user has no CVs when the real problem is that we
+           couldn't reach the server — that is indistinguishable from data loss. */
+        <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
+          <EmptyState
+            icon="alert-circle"
+            title={t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
+            body={t(
+              "Your CVs are safe on your account — we just couldn't reach the server. Check your connection and try again.",
+              "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server. Angalia mtandao kisha ujaribu tena.",
+            )}
+            actionLabel={t("Try again", "Jaribu tena")}
+            onAction={onRefresh}
+          />
+        </View>
       ) : cvs.length === 0 ? (
         <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
           <EmptyState
             icon="file-text"
-            title={t("Your CVs live here", "CV zako zipo hapa")}
-            body={t("Import an existing CV from a photo or a file, or start a new one — it takes a couple of minutes.", "Pakia CV uliyonayo kutoka picha au faili, au anza mpya — inachukua dakika chache.")}
-            actionLabel={t("Import a CV", "Pakia CV")}
-            onAction={() => navigation.navigate("ImportTab")}
-            secondaryLabel={t("Start a new CV", "Anza CV mpya")}
-            onSecondary={() => navigation.navigate("CvEditor")}
+            title={t("You have no CVs yet", "Huna CV bado")}
+            body={t("No CVs yet, draft or completed. Talk to Sumaiya to build one, or upload a CV you already have to start.", "Huna CV, rasimu wala iliyokamilika. Ongea na Sumaiya ili kutengeneza moja, au pakia CV uliyonayo ili kuanza.")}
+            actionLabel={t("Talk to Sumaiya", "Ongea na Sumaiya")}
+            onAction={() => navigation.navigate("SumaiyaTab")}
+            secondaryLabel={t("Upload a CV", "Pakia CV")}
+            onSecondary={() => navigation.navigate("ImportTab")}
           />
         </View>
       ) : (
@@ -127,7 +141,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
                       {cv.title}
                     </Text>
                     <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                      {t("Updated", "Ilibadilishwa")} {relativeDate(cv.updatedAt, sw)}
+                      {t("Updated", "Ilibadilishwa")} {relativeDate(cv.updatedAt, lang)}
                     </Text>
                   </View>
                   {cv.isOfflineOnly ? (

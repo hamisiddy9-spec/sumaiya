@@ -35,7 +35,7 @@ export default function EditorError({
       </h1>
       <p className="text-lg text-text-body max-w-md mb-10">
         {sw
-          ? "Kitu ndani ya hati hii kimeshindwa kupakia. Hati zako nyingine ziko salama — jaribu tena, au rudi kwenye dashibodi."
+          ? "Kitu ndani ya hati hii kimeshindwa kupakia. Hati zako nyingine ziko salama — jaribu tena, au rudi nyumbani."
           : "Something in this document failed to load. Your other documents are safe — try again, or head back to your dashboard."}
       </p>
 
@@ -47,7 +47,7 @@ export default function EditorError({
           href="/dashboard"
           className="inline-flex items-center justify-center gap-2 border border-border bg-white text-espresso font-semibold px-6 py-3 rounded-[10px] transition-all duration-150 hover:bg-cream hover:border-[#C6B6A5]"
         >
-          {sw ? "Nenda Dashibodi" : "Go to Dashboard"}
+          {sw ? "Nenda Nyumbani" : "Go to Dashboard"}
         </Link>
       </div>
 

@@ -55,8 +55,10 @@ export function computeSkillGaps(input: {
   profile: CareerProfile;
   cv?: CVData | null;
   jobs?: JobRecommendation[];
+  /** Defaults to "en" for existing callers that don't pass it. */
+  lang?: "en" | "sw";
 }): GapResult {
-  const { profile, cv, jobs = [] } = input;
+  const { profile, cv, jobs = [], lang = "en" } = input;
 
   // What the user already DEMONSTRATES — skills, summary, experience, CV.
   // NOT the headline: first-run stores field labels there ("Finance &
@@ -133,9 +135,15 @@ export function computeSkillGaps(input: {
   const denom = gaps.length + strengths.length;
   const readiness = denom ? Math.round((strengths.length / denom) * 100) : 0;
 
+  // Prefer the matched field's OWN label in the current language — the raw
+  // headline substring can carry whichever language it was written in
+  // (first-run stores the UI language at the time), so reusing it verbatim
+  // used to leak an English field name into an otherwise-Swahili sentence
+  // ("Ujuzi wa Sales" instead of "Ujuzi wa Mauzo"). The even-older fallback
+  // hardcoded ".label.en" unconditionally, so it had the same bug on its own.
   const target =
+    (fieldIds[0] && CAREER_FIELDS.find((f) => f.id === fieldIds[0])?.label[lang]) ||
     profile.headline?.split(" · ")[0]?.trim() ||
-    (fieldIds[0] && CAREER_FIELDS.find((f) => f.id === fieldIds[0])?.label.en) ||
     "";
 
   return { target, readiness, gaps, strengths };

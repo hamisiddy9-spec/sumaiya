@@ -26,7 +26,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
   const { t } = useLang();
   const { cvs, updateCV } = useCvs();
   const [jd, setJd] = useState<string>(route?.params?.jd ?? "");
-  const [want, setWant] = useState<Want>("both");
+  const [want, setWant] = useState<Want>(route?.params?.want ?? "both");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -53,7 +53,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
       setResult(r);
     } catch (e: any) {
       haptics.error();
-      setError(e?.message || t("Couldn't tailor to this job. Try again.", "Imeshindwa kulenga kazi hii. Jaribu tena."));
+      setError(e?.message || t("Couldn't tailor to this job. Try again.", "Imeshindwa kulenga ajira hii. Jaribu tena."));
     } finally {
       setLoading(false);
     }
@@ -128,7 +128,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <Icon name="file-text" size={16} color={c.accent} />
-              <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("CV, retuned for this job", "CV, imerekebishwa kwa kazi hii")}</Text>
+              <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("CV, retuned for this job", "CV, imerekebishwa kwa ajira hii")}</Text>
             </View>
             <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>{t("NEW SUMMARY", "MUHTASARI MPYA")}</Text>
             <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 21, marginBottom: 12 }}>{result.cv.summary}</Text>
@@ -171,7 +171,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
           onPress={() => { haptics.selection(); setResult(null); setJd(""); }}
           style={{ paddingVertical: 14, alignItems: "center" }}
         >
-          <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>{t("Tailor to another job", "Lenga kazi nyingine")}</Text>
+          <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>{t("Tailor to another job", "Lenga ajira nyingine")}</Text>
         </Pressable>
       </Screen>
     );
@@ -182,12 +182,12 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     <Screen
       scroll
       footer={
-        <Button label={loading ? t("Tailoring…", "Inalenga…") : t("Tailor to this job", "Lenga kazi hii")} onPress={generate} loading={loading} disabled={loading} />
+        <Button label={loading ? t("Tailoring…", "Inalenga…") : t("Tailor to this job", "Lenga ajira hii")} onPress={generate} loading={loading} disabled={loading} />
       }
     >
       <ScreenTitle trailing={<SumaiyaMark size={24} color={c.accent} />}>{t("Apply smarter", "Omba kwa ujanja")}</ScreenTitle>
       <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 21, marginBottom: 18 }}>
-        {t("Paste a job description. Sumaiya retunes your CV and writes a matching cover letter — grounded in what she already knows about you.", "Bandika maelezo ya kazi. Sumaiya anarekebisha CV yako na kuandika barua ya maombi inayolingana — kwa kutumia anachokifahamu kukuhusu.")}
+        {t("Paste a job description. Sumaiya retunes your CV and writes a matching cover letter — grounded in what she already knows about you.", "Bandika maelezo ya ajira. Sumaiya anarekebisha CV yako na kuandika barua ya maombi inayolingana — kwa kutumia anachokifahamu kukuhusu.")}
       </Text>
 
       <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", letterSpacing: 0.3, marginBottom: 8 }}>{t("WHAT DO YOU WANT?", "UNATAKA NINI?")}</Text>
@@ -229,7 +229,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
         value={jd}
         onChangeText={setJd}
         multiline
-        placeholder={t("Paste the full job posting here…\n\nRole, responsibilities, requirements — the more, the better.", "Bandika tangazo lote la kazi hapa…\n\nCheo, majukumu, masharti — zaidi, bora.")}
+        placeholder={t("Paste the full job posting here…\n\nRole, responsibilities, requirements — the more, the better.", "Bandika tangazo lote la ajira hapa…\n\nCheo, majukumu, masharti — zaidi, bora.")}
         placeholderTextColor={c.textMuted}
         style={{
           minHeight: 220,
@@ -253,7 +253,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
       {loading ? (
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 20 }}>
           <ActivityIndicator color={c.accent} />
-          <Text style={{ color: c.textBody, fontSize: 13 }}>{t("Reading the job and your profile…", "Inasoma kazi na wasifu wako…")}</Text>
+          <Text style={{ color: c.textBody, fontSize: 13 }}>{t("Reading the job and your profile…", "Inasoma ajira na wasifu wako…")}</Text>
         </View>
       ) : null}
     </Screen>

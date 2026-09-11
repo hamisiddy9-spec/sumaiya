@@ -29,17 +29,29 @@ interface JobsFeedProps {
 }
 
 
+// Calendar-day diff, not a raw 24h ms diff — a raw diff misreads anything
+// near a midnight boundary (e.g. posted 23:00 yesterday, viewed 01:00 today:
+// only 2h ago but a different calendar day, so it must read "Jana"/"Yesterday",
+// never "Leo"/"Today"). Same fix as the native app's relative-date helper.
 function timeAgo(iso: string, sw: boolean): string {
-  const then = new Date(iso).getTime();
-  const now = Date.now();
-  const days = Math.floor((now - then) / 86_400_000);
+  const then = new Date(iso);
+  const now = new Date();
+  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((startOfDay(now) - startOfDay(then)) / 86_400_000);
   if (days <= 0) return sw ? "Leo" : "Today";
   if (days === 1) return sw ? "Jana" : "Yesterday";
   if (days < 7) return sw ? `Siku ${days} zilizopita` : `${days} days ago`;
   const weeks = Math.floor(days / 7);
-  if (weeks < 5) return sw ? `Wiki ${weeks} zilizopita` : `${weeks}w ago`;
+  // Noun-class agreement: "wiki 1 zilizopita" is wrong — zilizopita is plural. swahili-lint-ignore
+  // one week instead takes the singular "iliyopita".
+  if (weeks < 5) return sw ? `Wiki ${weeks} ${weeks === 1 ? "iliyopita" : "zilizopita"}` : `${weeks}w ago`;
   const months = Math.floor(days / 30);
-  return sw ? `Miezi ${months} iliyopita` : `${months}mo ago`;
+  // Same agreement issue, and the noun itself changes number: "mwezi" is
+  // singular (class 3, "uliopita"), "miezi" is plural (class 4, "iliyopita") —
+  // "Miezi 1 iliyopita" mixes a plural noun with a count of one. swahili-lint-ignore
+  return sw
+    ? months === 1 ? "Mwezi 1 uliopita" : `Miezi ${months} iliyopita`
+    : `${months}mo ago`;
 }
 
 /** "Deadline: 25 Aug" — localized-ish short format. */

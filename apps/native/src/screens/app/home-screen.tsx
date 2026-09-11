@@ -10,6 +10,7 @@ import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
 import { useLang, type Lang } from "../../lib/i18n";
 import { GUIDES } from "../../lib/guides";
+import { relativeDate } from "../../lib/relative-date";
 import {
   Card,
   Screen,
@@ -32,34 +33,32 @@ const GUTTER = 12;
 const SIDE = 20;
 const COL_W = (Dimensions.get("window").width - SIDE * 2 - GUTTER) / 2;
 
+// A few natural variants per time-of-day bucket instead of one fixed phrase
+// repeated on every single visit — the same phrase every evening, forever,
+// reads robotic rather than like a warm greeting. The pick is stable for the
+// whole day (keyed on the date, not random per render) so it never flickers
+// between variants on a re-render or a pull-to-refresh within the same day.
+const GREETINGS: Record<Lang, string[][]> = {
+  sw: [
+    ["Habari za asubuhi", "Habari za leo asubuhi"], // < 12:00
+    ["Habari za mchana", "Habari za leo"], // < 16:00
+    ["Habari za jioni", "Karibu jioni hii"], // < 21:00
+    ["Habari za usiku", "Karibu tena"], // >= 21:00
+  ],
+  en: [
+    ["Good morning", "Morning"],
+    ["Good afternoon", "Afternoon"],
+    ["Good evening", "Evening"],
+    ["Good evening", "Welcome back"],
+  ],
+};
+
 function greeting(lang: Lang): string {
   const h = new Date().getHours();
-  if (lang === "sw") {
-    if (h < 12) return "Habari za asubuhi";
-    if (h < 16) return "Habari za mchana";
-    if (h < 19) return "Habari za jioni";
-    return "Habari za usiku";
-  }
-  if (h < 12) return "Good morning";
-  if (h < 18) return "Good afternoon";
-  return "Good evening";
-}
-
-function relativeDate(d: string | Date, lang: Lang): string {
-  const date = new Date(d);
-  const diff = Date.now() - date.getTime();
-  const day = 86_400_000;
-  const n = Math.floor(diff / day);
-  if (lang === "sw") {
-    if (diff < day) return "Leo";
-    if (diff < 2 * day) return "Jana";
-    if (diff < 7 * day) return `Siku ${n} zilizopita`;
-    return date.toLocaleDateString("sw-TZ", { month: "short", day: "numeric" });
-  }
-  if (diff < day) return "Today";
-  if (diff < 2 * day) return "Yesterday";
-  if (diff < 7 * day) return `${n} days ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const bucket = h < 12 ? 0 : h < 16 ? 1 : h < 21 ? 2 : 3;
+  const variants = GREETINGS[lang][bucket];
+  const pick = new Date().getDate() % variants.length;
+  return variants[pick];
 }
 
 export function HomeScreen({ navigation }: HomeScreenProps) {
@@ -115,12 +114,19 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
-    { icon: "sumaiya", label: t("Ask Sumaiya", "Uliza Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
-    { icon: "target", label: t("Jobs for you", "Kazi kwako"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
+    { icon: "sumaiya", label: t("Ask Sumaiya", "Muulize Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
+    { icon: "target", label: t("New openings", "Nafasi mpya"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
     { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: "#12766A", onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
-    { icon: "import", label: t("Import a CV", "Pakia CV"), tint: c.accent, onPress: () => navigation.navigate("ImportTab") },
-    { icon: "book-open", label: t("Learning", "Kujifunza"), tint: "#96630F", onPress: () => navigation.navigate("LearningHub") },
+    // Cover letters were only reachable buried inside the job-tailor flow or a
+    // chat quick-action seed — no direct entry point at all. This opens the
+    // same generator (JobApply) with its cv/letter/both toggle pre-set to
+    // "letter" instead of the generic default, so tapping this feels like a
+    // purpose-built cover-letter feature, not a detour through job matching.
+    { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: "#96630F", onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
+    // Import already has its own dedicated tab — a Home tile duplicated it.
+    // Removing it also brings the grid to a clean 6 tiles (2x3/3x2), not 7.
+    { icon: "book-open", label: t("Add skills", "Ongeza ujuzi"), tint: "#96630F", onPress: () => navigation.navigate("LearningHub") },
   ];
 
   return (
@@ -137,14 +143,12 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           <Icon name="file-text" size={18} color={c.accent} />
           <View>
             <Text style={{ color: c.text, fontSize: 26, fontWeight: "800" }}>{cvs.length}</Text>
-            <Text style={{ color: c.textMuted, fontSize: 12 }}>
-              {cvs.length === 1 ? t("CV created", "CV imetengenezwa") : t("CVs created", "CV zimetengenezwa")}
-            </Text>
+            <Text style={{ color: c.textMuted, fontSize: 12 }}>{t("Your CVs", "CV zako")}</Text>
           </View>
         </Card>
 
         <Card
-          onPress={() => navigation.navigate("CVsTab", { screen: "CvEditor" })}
+          onPress={() => navigation.navigate("CVsTab", { screen: "CvEditor", params: { nonce: String(Date.now()) } })}
           accessibilityLabel={t("New CV", "CV mpya")}
           style={{
             width: COL_W,
@@ -166,7 +170,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 
       {/* Quick actions — a 2-column grid that fills the row exactly. */}
       <Animated.View entering={FadeInDown.duration(320).delay(120)}>
-        <SectionHeader title={t("Quick actions", "Vitendo vya haraka")} />
+        <SectionHeader title={t("Quick actions", "Shughuli za haraka")} />
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: GUTTER }}>
           {quickActions.map((a, i) => (
             <Stagger key={a.label} index={i} step={45}>
@@ -258,7 +262,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       {jobRecs.length > 0 ? (
         <Animated.View entering={FadeInDown.duration(320).delay(170)}>
           <SectionHeader
-            title={t("Jobs for you", "Kazi kwako")}
+            title={t("New openings", "Nafasi mpya")}
             actionLabel={t("See all", "Ona zote")}
             onAction={() => navigation.navigate("Jobs")}
           />

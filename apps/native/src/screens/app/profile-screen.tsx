@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Linking, Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
@@ -9,6 +9,7 @@ import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
 import { useLang } from "../../lib/i18n";
+import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { Icon } from "../../components/icon";
 import type { ProfileScreenProps } from "../../navigation/types";
@@ -75,11 +76,11 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
       const perm = await Notifications.requestPermissionsAsync();
       if (!perm.granted) {
         setNotifications(false);
-        Alert.alert(
+        dialog.alert(
           t("Notifications are off", "Arifa zimezimwa"),
           t(
             "Turn on notifications for Sumaiya in your phone's Settings to get job matches and updates.",
-            "Washa arifa za Sumaiya kwenye Mipangilio ya simu yako ili upate kazi zinazokufaa na taarifa.",
+            "Washa arifa za Sumaiya kwenye Mipangilio ya simu yako ili upate ajira zinazokufaa na taarifa.",
           ),
           [
             { text: t("Not now", "Si sasa"), style: "cancel" },
@@ -100,7 +101,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const clearCache = () => {
     haptics.warning();
-    Alert.alert(t("Clear offline data?", "Futa data iliyohifadhiwa?"), t("Downloaded CVs and cached data will be removed from this device. Your cloud copies are safe.", "CV zilizopakuliwa na data iliyohifadhiwa zitaondolewa kwenye simu hii. Nakala zako za wingu ziko salama."), [
+    dialog.alert(t("Clear offline data?", "Futa data iliyohifadhiwa?"), t("Downloaded CVs and cached data will be removed from this device. Your cloud copies are safe.", "CV zilizopakuliwa na data iliyohifadhiwa zitaondolewa kwenye simu hii. Nakala zako za wingu ziko salama."), [
       { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
         text: t("Clear", "Futa"),
@@ -110,10 +111,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           try {
             await offlineStorage.clearAll();
             haptics.success();
-            Alert.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
+            dialog.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
           } catch {
             haptics.error();
-            Alert.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
+            dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
           } finally {
             setBusy(null);
           }
@@ -124,7 +125,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const confirmSignOut = () => {
     haptics.warning();
-    Alert.alert(t("Sign out?", "Utoke?"), t("You can sign back in any time.", "Unaweza kuingia tena wakati wowote."), [
+    dialog.alert(t("Sign out?", "Unataka kutoka?"), t("You can sign back in any time.", "Unaweza kuingia tena wakati wowote."), [
       { text: t("Cancel", "Ghairi"), style: "cancel" },
       {
         text: t("Sign out", "Toka"),
@@ -143,8 +144,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const confirmDelete = () => {
     haptics.warning();
-    Alert.alert(
-      t("Delete your account?", "Futa akaunti yako?"),
+    dialog.alert(
+      t("Delete your account?", "Ufute akaunti yako?"),
       t("This permanently removes your CVs, cover letters and account data. It can't be undone.", "Hili linaondoa kabisa CV zako, barua za maombi na taarifa za akaunti. Haliwezi kurudishwa."),
       [
         { text: t("Cancel", "Ghairi"), style: "cancel" },
@@ -159,7 +160,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               await signOut();
             } catch {
               haptics.error();
-              Alert.alert(t("Couldn't delete", "Imeshindwa kufuta"), "Contact support@sumaiya.pro.");
+              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), "Contact support@sumaiya.pro.");
             } finally {
               setBusy(null);
             }
@@ -281,7 +282,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             last
             icon="bell"
             label={t("Push notifications", "Arifa za simu")}
-            sublabel={t("Job matches, sync updates", "Kazi zinazofaa, taarifa za usawazishaji")}
+            sublabel={t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")}
             toggle={{ value: notifications, onValueChange: setNotif }}
           />
         </View>

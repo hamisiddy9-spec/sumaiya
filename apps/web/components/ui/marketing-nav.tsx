@@ -22,7 +22,7 @@ export function MarketingNav() {
   const lang = useLang();
   const tr = translations[lang];
   const authed = useMarketingAuthed();
-  const dashboardLabel = lang === "sw" ? "Dashibodi" : "Dashboard";
+  const dashboardLabel = lang === "sw" ? "Nyumbani" : "Dashboard";
 
   // Keep the page from scrolling behind the open mobile menu.
   useBodyScrollLock(mobileOpen);

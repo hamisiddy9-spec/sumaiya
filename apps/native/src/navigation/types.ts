@@ -9,7 +9,7 @@ export type HomeStackParamList = {
   Guide: { id: string };
   Invite: undefined;
   Jobs: undefined;
-  JobApply: { jd?: string } | undefined;
+  JobApply: { jd?: string; want?: "cv" | "letter" | "both" } | undefined;
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
   AtsChecker: { cvId?: string } | undefined;
@@ -17,7 +17,16 @@ export type HomeStackParamList = {
 
 export type CvStackParamList = {
   CvListMain: undefined;
-  CvEditor: { cvId?: string; templateId?: string | null; initialData?: unknown } | undefined;
+  CvEditor:
+    | {
+        cvId?: string;
+        templateId?: string | null;
+        initialData?: unknown;
+        /** Changes on every "New CV" tap so a re-used screen instance resets
+         *  to a blank form instead of showing the CV that was open before. */
+        nonce?: string;
+      }
+    | undefined;
   AtsChecker: { cvId?: string } | undefined;
 };
 
@@ -49,7 +58,7 @@ export type ScanStackParamList = {
   ScanMain: undefined;
   PdfTools: undefined;
   ScanProcessing: { photoUri: string };
-  CVEditor: { templateId?: string | null; initialData?: unknown } | undefined;
+  CVEditor: { templateId?: string | null; initialData?: unknown; nonce?: string } | undefined;
 };
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

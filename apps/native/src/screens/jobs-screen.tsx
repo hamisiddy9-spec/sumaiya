@@ -99,7 +99,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
-      <ScreenTitle eyebrow={t("Jobs", "Kazi")}>{t("Openings for you", "Nafasi kwako")}</ScreenTitle>
+      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings for you", "Nafasi kwako")}</ScreenTitle>
 
       {loading ? (
         <View style={{ gap: 10 }}>
@@ -111,8 +111,8 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
         <EmptyState
           icon="briefcase"
           title={t("No openings right now", "Hakuna nafasi kwa sasa")}
-          body={t("New listings are pulled in daily. Check back soon, or paste a job link in Sumaiya to tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika link ya kazi kwa Sumaiya ulenge CV yako.")}
-          actionLabel={t("Ask Sumaiya", "Uliza Sumaiya")}
+          body={t("New listings are pulled in daily. Check back soon, or paste a job link in Sumaiya to tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika link ya ajira kwa Sumaiya ulenge CV yako.")}
+          actionLabel={t("Ask Sumaiya", "Muulize Sumaiya")}
           onAction={() => navigation.navigate("JobApply")}
         />
       ) : (

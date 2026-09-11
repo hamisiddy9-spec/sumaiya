@@ -12,3 +12,4 @@ export { useThemeColors, useIsDark, ThemeScope, useForcedScheme, brandLight, typ
 export { ScreenTitle } from "./screen-title";
 export { PromptModal } from "./prompt-modal";
 export { ProgressBar } from "./progress-bar";
+export { dialog, DialogHost, type DialogButton, type DialogOptions } from "./dialog";

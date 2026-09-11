@@ -21,6 +21,6 @@ export const APP_RELEASE: AppReleaseManifest = {
   url: "https://sumaiya.pro/downloads/sumaiya.apk",
   notes: {
     en: "New: paste a job description and Sumaiya retunes your CV and writes a matching cover letter. She's a first-class tab now, remembers the whole conversation, knows what you told the web app, and reads her replies aloud. Fixed: the keyboard hiding the chat box, dashboard shortcuts, and the chat's quick-start buttons.",
-    sw: "Mpya: bandika maelezo ya kazi na Sumaiya atarekebisha CV yako na kuandika barua ya maombi inayolingana. Sasa ana kichupo chake, anakumbuka mazungumzo yote, anajua uliyoiambia tovuti, na anasoma majibu kwa sauti. Marekebisho: kibodi iliyokuwa ikificha sanduku la mazungumzo, njia za mkato za dashibodi, na vitufe vya kuanza haraka.",
+    sw: "Mpya: bandika maelezo ya kazi na Sumaiya atarekebisha CV yako na kuandika barua ya maombi inayolingana. Sasa ana kichupo chake, anakumbuka mazungumzo yote, anajua uliyoiambia tovuti, na anasoma majibu kwa sauti. Marekebisho: kibodi iliyokuwa ikificha sanduku la mazungumzo, njia za mkato za nyumbani, na vitufe vya kuanza haraka.",
   },
 };

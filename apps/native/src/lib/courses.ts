@@ -26,7 +26,7 @@ export interface Course {
   whyEn: string;
   whySw: string;
   /** 2–4 things this course actually builds — shown as chips. */
-  improves: string[];
+  improves: { en: string; sw: string }[];
   lastVerified: string; // YYYY-MM
 }
 
@@ -64,7 +64,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Excel turns up in most admin, operations, retail and finance adverts — and it's the fastest skill to make visible on a CV.",
       whySw: "Excel inaonekana kwenye matangazo mengi ya utawala, oparesheni, duka na fedha — na ni ujuzi wa haraka zaidi kuuonyesha kwenye CV.",
-      improves: ["Excel", "Reporting", "Data handling"],
+      improves: [
+        { en: "Excel", sw: "Excel" },
+        { en: "Reporting", sw: "Kuripoti" },
+        { en: "Data handling", sw: "Kushughulikia data" },
+      ],
       lastVerified: V,
     },
     fastPath: { label: { en: "15-min Excel basics (video)", sw: "Excel ya msingi dakika 15 (video)" }, url: "https://www.youtube.com/watch?v=Vl0H-qTclOg" },
@@ -88,7 +92,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Almost every advert lists communication. Employers read it as: can you be clear on the phone, in an email, and in a meeting.",
       whySw: "Karibu kila tangazo linataja mawasiliano. Waajiri wanamaanisha: unaweza kuwa wazi kwa simu, kwenye barua pepe, na kwenye mkutano.",
-      improves: ["Clarity", "Email", "Persuasion"],
+      improves: [
+        { en: "Clarity", sw: "Uwazi" },
+        { en: "Email", sw: "Barua pepe" },
+        { en: "Persuasion", sw: "Ushawishi" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -111,7 +119,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Retail, hospitality, banking and telecoms all screen for this. It also directly helps your interview answers.",
       whySw: "Duka, ukarimu, benki na mawasiliano yote yanaangalia hili. Pia linasaidia majibu yako ya usaili moja kwa moja.",
-      improves: ["Complaint handling", "Client relations", "Patience"],
+      improves: [
+        { en: "Complaint handling", sw: "Kushughulikia malalamiko" },
+        { en: "Client relations", sw: "Uhusiano na wateja" },
+        { en: "Patience", sw: "Uvumilivu" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -125,15 +137,19 @@ export const SKILL_AREAS: SkillArea[] = [
     jobKeywords: ["sales", "selling", "targets", "revenue", "upsell", "pipeline", "quota", "business development", "closing"],
     cvKeywords: ["sales", "sold", "targets", "revenue", "clients", "closing", "upsell"],
     course: {
-      title: "Sales Training for High Performing Teams",
+      title: "Sales Training: Techniques for a Human-Centric Sales Process",
       provider: "Coursera · HubSpot Academy",
-      url: "https://www.coursera.org/learn/hubspot-sales-representative-course",
+      url: "https://www.coursera.org/learn/sales-process-techniques-training",
       free: true,
-      durationWeeks: 3,
+      durationWeeks: 2,
       language: "en",
       whyEn: "Sales roles are the most-advertised entry jobs in the region and the easiest to grow from. This is practical, not theory.",
       whySw: "Kazi za mauzo ndizo zinazotangazwa zaidi kwa waanzao katika ukanda huu na rahisi kupanda. Hii ni ya vitendo, si nadharia.",
-      improves: ["Prospecting", "Objection handling", "Closing"],
+      improves: [
+        { en: "Prospecting", sw: "Kutafuta wateja" },
+        { en: "Objection handling", sw: "Kushughulikia pingamizi" },
+        { en: "Closing", sw: "Kufunga mauzo" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -155,7 +171,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "A recognised free certificate. Opens marketing-assistant, social-media and content roles, and useful if you run your own business.",
       whySw: "Cheti cha bure kinachotambulika. Kinafungua kazi za msaidizi wa masoko, mitandao ya kijamii na maudhui, na kinasaidia ukiwa na biashara yako.",
-      improves: ["Social media", "Ads", "Analytics"],
+      improves: [
+        { en: "Social media", sw: "Mitandao ya kijamii" },
+        { en: "Ads", sw: "Matangazo" },
+        { en: "Analytics", sw: "Uchambuzi" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -177,7 +197,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Opens accounts-assistant and cashier roles across every sector, and lets you handle your own business's books.",
       whySw: "Kinafungua kazi za msaidizi wa hesabu na keshia katika kila sekta, na kinakuwezesha kushika hesabu za biashara yako.",
-      improves: ["Ledgers", "Reconciliation", "Invoicing"],
+      improves: [
+        { en: "Ledgers", sw: "Leja" },
+        { en: "Reconciliation", sw: "Upatanisho wa hesabu" },
+        { en: "Invoicing", sw: "Ankara" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -199,7 +223,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "The vocabulary alone — scope, milestones, stakeholders — makes a CV read like a coordinator's, not just a doer's.",
       whySw: "Msamiati wenyewe — wigo, hatua muhimu, wadau — hufanya CV isomeke kama ya mratibu, si tu mtekelezaji.",
-      improves: ["Planning", "Coordination", "Tracking"],
+      improves: [
+        { en: "Planning", sw: "Upangaji" },
+        { en: "Coordination", sw: "Uratibu" },
+        { en: "Tracking", sw: "Ufuatiliaji" },
+      ],
       lastVerified: V,
     },
     practice: [],
@@ -219,7 +247,13 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "A soft entry into a fast-growing, better-paid track. Pairs well with Excel.",
       whySw: "Mlango laini wa njia inayokua haraka na yenye malipo bora. Inaenda vizuri na Excel.",
-      improves: ["Spreadsheets", "Dashboards", "Insight"],
+      improves: [
+        { en: "Spreadsheets", sw: "Majedwali" },
+        // "Dashibodi" was rejected as a loanword elsewhere in the app —
+        // "muhtasari" (overview board) says the same thing without it.
+        { en: "Dashboards", sw: "Mbao za muhtasari" },
+        { en: "Insight", sw: "Maarifa" },
+      ],
       lastVerified: V,
     },
     practice: [],
@@ -239,7 +273,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "First course of the Google IT Support certificate — a real path from no experience to a helpdesk job.",
       whySw: "Kozi ya kwanza ya cheti cha Google IT Support — njia halisi kutoka bila uzoefu hadi kazi ya helpdesk.",
-      improves: ["Troubleshooting", "Networking", "Hardware"],
+      improves: [
+        { en: "Troubleshooting", sw: "Utatuzi wa matatizo" },
+        { en: "Networking", sw: "Mitandao" },
+        { en: "Hardware", sw: "Vifaa vya kompyuta" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -261,7 +299,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Short. Being the person on the team who uses AI well is now a hiring signal in itself — in any role.",
       whySw: "Fupi. Kuwa mtu kwenye timu anayetumia AI vizuri sasa ni ishara ya kuajiriwa yenyewe — katika kazi yoyote.",
-      improves: ["Prompting", "Drafting", "Speed"],
+      improves: [
+        { en: "Prompting", sw: "Kuandika maagizo" },
+        { en: "Drafting", sw: "Kuandaa rasimu" },
+        { en: "Speed", sw: "Kasi" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -270,20 +312,24 @@ export const SKILL_AREAS: SkillArea[] = [
   },
   {
     id: "job-search",
-    skill: { en: "Job search & LinkedIn", sw: "Kutafuta kazi na LinkedIn" },
+    skill: { en: "Job search & LinkedIn profile", sw: "Kutafuta kazi na wasifu wa LinkedIn" },
     weight: 5,
     jobKeywords: [],
     cvKeywords: [],
     course: {
-      title: "Finding Your Professional Voice",
-      provider: "Coursera · University of London",
-      url: "https://www.coursera.org/learn/professional-voice",
+      title: "Successful Career Development",
+      provider: "Coursera · Kennesaw State University",
+      url: "https://www.coursera.org/learn/career-advancement",
       free: true,
-      durationWeeks: 3,
+      durationWeeks: 2,
       language: "en",
       whyEn: "Not job-specific — this is about being found. Most jobs here are filled through referrals and a clean profile.",
       whySw: "Si ya kazi maalum — hii ni kuhusu kuonekana. Kazi nyingi hapa zinajazwa kupitia mapendekezo na wasifu safi.",
-      improves: ["Profile", "Networking", "Confidence"],
+      improves: [
+        { en: "Profile", sw: "Wasifu" },
+        { en: "Networking", sw: "Kujenga mahusiano" },
+        { en: "Confidence", sw: "Kujiamini" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -297,15 +343,19 @@ export const SKILL_AREAS: SkillArea[] = [
     jobKeywords: [],
     cvKeywords: [],
     course: {
-      title: "Interviewing and Resume Writing in English",
+      title: "Interview Research and Preparation",
       provider: "Coursera · University of Maryland",
-      url: "https://www.coursera.org/learn/interviewing-english",
+      url: "https://www.coursera.org/learn/interview-preparation",
       free: true,
-      durationWeeks: 4,
+      durationWeeks: 3,
       language: "en",
       whyEn: "The gap between a callback and an offer is almost always interview delivery, not the CV. Practise it before you need it.",
       whySw: "Pengo kati ya kuitwa na kupewa kazi karibu kila mara ni jinsi unavyofanya usaili, si CV. Fanya mazoezi kabla ya kuihitaji.",
-      improves: ["STAR answers", "Confidence", "Follow-up"],
+      improves: [
+        { en: "STAR answers", sw: "Majibu ya mtindo wa STAR" },
+        { en: "Confidence", sw: "Kujiamini" },
+        { en: "Follow-up", sw: "Ufuatiliaji baada ya usaili" },
+      ],
       lastVerified: V,
     },
     practice: [
@@ -327,7 +377,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "Useful for admin, HR, comms and any role that writes reports or emails to clients.",
       whySw: "Inasaidia utawala, rasilimali watu, mawasiliano na kazi yoyote inayoandika ripoti au barua pepe kwa wateja.",
-      improves: ["Emails", "Reports", "Proposals"],
+      improves: [
+        { en: "Emails", sw: "Barua pepe" },
+        { en: "Reports", sw: "Ripoti" },
+        { en: "Proposals", sw: "Mapendekezo" },
+      ],
       lastVerified: V,
     },
     practice: [],
@@ -347,7 +401,11 @@ export const SKILL_AREAS: SkillArea[] = [
       language: "en",
       whyEn: "For the step from doing the work to running a shift or a team — supervisor and team-lead roles.",
       whySw: "Kwa hatua kutoka kufanya kazi hadi kusimamia zamu au timu — kazi za msimamizi na kiongozi wa timu.",
-      improves: ["Delegation", "Feedback", "Motivation"],
+      improves: [
+        { en: "Delegation", sw: "Ugawaji wa majukumu" },
+        { en: "Feedback", sw: "Maoni" },
+        { en: "Motivation", sw: "Kuhamasisha" },
+      ],
       lastVerified: V,
     },
     practice: [],

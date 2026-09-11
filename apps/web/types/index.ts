@@ -911,6 +911,21 @@ export const CURATED_CV_TEMPLATES: Template[] = CURATED_CV_TEMPLATE_IDS
   .map((id) => TEMPLATES.find((t) => t.id === id))
   .filter((t): t is Template => Boolean(t));
 
+// The "Premium flagships" grouping above was hand-curated but never actually
+// gated anything — every template has been free since launch. This turns
+// that curation into a real, enforced free/premium split: the 7 flagships
+// (the most visually distinctive layouts — colour sidebars, photo rings,
+// timelines) are premium; every other curated template, and everything
+// outside the curated set (the recolor/rename variants), stays free. Checked
+// the same way native already gates its own templates (entitlements.ts).
+export const PREMIUM_TEMPLATE_IDS: ReadonlySet<TemplateId> = new Set([
+  "rift", "zahabu", "nuru", "pemba", "malachite", "coral", "kioo",
+] as const);
+
+export function isPremiumTemplate(id: string): boolean {
+  return PREMIUM_TEMPLATE_IDS.has(id as TemplateId);
+}
+
 const VALID_TEMPLATE_IDS = new Set<string>(TEMPLATES.map(t => t.id));
 
 export function isTemplateId(id: string): id is TemplateId {

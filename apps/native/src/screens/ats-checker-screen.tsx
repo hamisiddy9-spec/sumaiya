@@ -2,13 +2,14 @@ import React, { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import type { CV, CVData } from "@sumaiya/types";
+import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { useCvs } from "../hooks/use-cvs";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
 import { apiClient } from "../lib/api-client";
-import { Button, ProgressBar, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, ProgressBar, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { AtsCheckerScreenProps } from "../navigation/types";
@@ -34,7 +35,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";
-  const { cvs, loading } = useCvs();
+  const { cvs, loading, error, loadCVs } = useCvs();
   const { premium } = useEntitlements();
   const preselect: string | undefined = route?.params?.cvId;
   const [pickedId, setPickedId] = useState<string | undefined>(preselect);
@@ -58,6 +59,8 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
       findings: lineFindings(picked.data, sw),
     };
   }, [picked, sw]);
+
+  const cvIsEmpty = useMemo(() => isEmptyCv(picked?.data), [picked]);
 
   const jdMatch = useMemo(() => {
     if (!picked || jd.trim().length < 40) return null;
@@ -100,12 +103,25 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
 
       {loading && cvs.length === 0 ? (
         <Text style={{ color: c.textMuted }}>{t("Loading your CVs…", "Inapakia CV zako…")}</Text>
+      ) : error && cvs.length === 0 ? (
+        /* Never claim the user has no CVs when the real problem is that we
+           couldn't reach the server — that is indistinguishable from data loss. */
+        <EmptyState
+          icon="alert-circle"
+          title={t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
+          body={t(
+            "Your CVs are safe on your account — we just couldn't reach the server. Check your connection and try again.",
+            "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server. Angalia mtandao kisha ujaribu tena.",
+          )}
+          actionLabel={t("Try again", "Jaribu tena")}
+          onAction={loadCVs}
+        />
       ) : cvs.length === 0 ? (
         <View style={{ gap: 12 }}>
           <Text style={{ color: c.textBody }}>
             {t("You need a CV to check. Create one first.", "Unahitaji CV ili ukague. Tengeneza moja kwanza.")}
           </Text>
-          <Button label={t("New CV", "CV mpya")} onPress={() => navigation.navigate("CVsTab", { screen: "CvEditor" })} />
+          <Button label={t("New CV", "CV mpya")} onPress={() => navigation.navigate("CVsTab", { screen: "CvEditor", params: { nonce: String(Date.now()) } })} />
         </View>
       ) : (
         <>
@@ -135,6 +151,24 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
 
           {analysis && (
             <Animated.View entering={FadeIn.duration(240)} style={{ gap: 18 }}>
+              {cvIsEmpty && (
+                <View
+                  style={{
+                    padding: 16, borderRadius: 16, borderWidth: 1,
+                    borderColor: c.warning + "55", backgroundColor: c.warning + "12", gap: 6,
+                  }}
+                >
+                  <Text style={{ color: c.warning, fontSize: 15, fontWeight: "800" }}>
+                    {t("This CV is still blank", "CV hii bado ni tupu")}
+                  </Text>
+                  <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>
+                    {t(
+                      "The score below only measures what's written on the CV — right now that is just your name. Add your contacts, a short summary, one job and a few skills, then check again.",
+                      "Alama hapa chini hupima kilichomo kwenye CV — kwa sasa ni jina lako pekee. Jaza mawasiliano, muhtasari mfupi, kazi moja na ujuzi kadhaa, kisha ukague tena.",
+                    )}
+                  </Text>
+                </View>
+              )}
               {/* Overall */}
               <View
                 style={{
@@ -273,10 +307,10 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
               {/* JD match */}
               <View style={{ gap: 8 }}>
                 <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>
-                  {t("Match against a job", "Linganisha na kazi")}
+                  {t("Match against a job", "Linganisha na ajira")}
                 </Text>
                 <TextField
-                  placeholder={t("Paste the job description here…", "Bandika maelezo ya kazi hapa…")}
+                  placeholder={t("Paste the job description here…", "Bandika maelezo ya ajira hapa…")}
                   value={jd}
                   onChangeText={setJd}
                   multiline
@@ -290,7 +324,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                         {jdMatch.score}%
                       </Text>
                       <Text style={{ color: c.textMuted, fontSize: 12, flex: 1 }}>
-                        {t("of the job's keywords appear on this CV", "ya maneno muhimu ya kazi yapo kwenye CV hii")}
+                        {t("of the job's keywords appear on this CV", "ya maneno muhimu ya ajira yapo kwenye CV hii")}
                       </Text>
                     </View>
                     <ProgressBar value={jdMatch.score / 100} tone={scoreTone(jdMatch.score)} />

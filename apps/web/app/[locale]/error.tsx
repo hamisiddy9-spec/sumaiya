@@ -43,7 +43,7 @@ export default function GlobalError({
       </h1>
       <p className="text-lg text-text-body max-w-md mb-10">
         {sw
-          ? "Tumepata tatizo. Kazi yako imehifadhiwa moja kwa moja — jaribu kupakua upya au rudi kwenye dashibodi."
+          ? "Tumepata tatizo. Kazi yako imehifadhiwa moja kwa moja — jaribu kupakua upya au rudi nyumbani."
           : "We hit a snag. Your work is auto-saved — try refreshing or go back to your dashboard."}
       </p>
 
@@ -55,7 +55,7 @@ export default function GlobalError({
           href="/dashboard"
           className="inline-flex items-center justify-center gap-2 border border-border bg-white text-espresso font-semibold px-6 py-3 rounded-[10px] transition-all duration-150 hover:bg-cream hover:border-[#C6B6A5]"
         >
-          {sw ? "Nenda Dashibodi" : "Go to Dashboard"}
+          {sw ? "Nenda Nyumbani" : "Go to Dashboard"}
         </Link>
       </div>
 

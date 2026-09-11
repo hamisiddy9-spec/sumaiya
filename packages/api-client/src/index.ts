@@ -12,6 +12,9 @@
 
 import type { CV, CVData, Template, Lang } from "@sumaiya/types";
 import { TEMPLATES } from "@sumaiya/templates";
+// Subpath import on purpose: the package barrel pulls in offline-storage
+// (expo-sqlite), which neither the web build nor jest can resolve.
+import { toNativeCvData, toStoredCvData } from "@sumaiya/utils/cv-shape";
 
 export interface JobListing {
   id: string;
@@ -157,27 +160,43 @@ export class ApiClient {
   // ── CV CRUD (Hono /api/cv) ─────────────────────────────────────────────────
 
   async listCVs(): Promise<CV[]> {
-    return this.request<CV[]>("/api/cv");
+    const rows = await this.request<CV[]>("/api/cv");
+    return (Array.isArray(rows) ? rows : []).map((cv) => this.fromCvResponse(cv));
   }
 
   async getCV(id: string): Promise<CV> {
-    return this.request<CV>(`/api/cv/${id}`);
+    return this.fromCvResponse(await this.request<CV>(`/api/cv/${id}`));
+  }
+
+  /**
+   * Rows in `cv.data` are written by two different apps with two different
+   * field names (`personal`/`jobTitle`/`position` from the web,
+   * `personalInfo`/`headline`/`title` from here). Everything that reads a CV
+   * goes through this so a web-made CV doesn't arrive looking blank.
+   */
+  private fromCvResponse(cv: CV): CV {
+    if (!cv || typeof cv !== "object") return cv;
+    return { ...cv, data: toNativeCvData<CVData>((cv as unknown as { data?: unknown }).data) };
   }
 
   async createCV(data: Partial<CV> & { name?: string; clientId?: string }): Promise<CV> {
     const body = this.toCvPayload(data);
-    return this.request<CV>("/api/cv", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    return this.fromCvResponse(
+      await this.request<CV>("/api/cv", {
+        method: "POST",
+        body: JSON.stringify(body),
+      }),
+    );
   }
 
   async updateCV(id: string, data: Partial<CV> & { name?: string }): Promise<CV> {
     const body = this.toCvPayload(data);
-    return this.request<CV>(`/api/cv/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
+    return this.fromCvResponse(
+      await this.request<CV>(`/api/cv/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      }),
+    );
   }
 
   async deleteCV(id: string): Promise<void> {
@@ -197,7 +216,7 @@ export class ApiClient {
     const resolvedTitle = (title as string) || (name as string);
     if (resolvedTitle) payload.title = resolvedTitle;
     if (templateId) payload.templateId = templateId;
-    if (cvData && typeof cvData === "object") payload.data = cvData;
+    if (cvData && typeof cvData === "object") payload.data = toStoredCvData(cvData);
     if (clientId) payload.clientId = clientId;
     return payload;
   }

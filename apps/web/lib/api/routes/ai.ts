@@ -20,6 +20,8 @@ import { type PendingConfirmation } from "@/lib/career-profile/confirmations";
 import { guardReplyAgainstRepeat, replySimilarity, REPEAT_SIMILARITY_THRESHOLD } from "@/lib/assistant/repeat-guard";
 import { guardGreetingLanguage } from "@/lib/assistant/greeting-guard";
 import { assembleUserContext, contextToPromptBlock } from "@/lib/assistant/context";
+import { detectConversationTone } from "@/lib/assistant/conversation-tone";
+import { roleTaxonomyPromptBlock } from "@/lib/role-taxonomy";
 import { computeSignals, filterSeenSignals, type Signal } from "@/lib/assistant/signals";
 import { nonEmptyMessages } from "@/lib/assistant/messages";
 import { analyzeConversation, buildConversationGuidance } from "@/lib/assistant/intent";
@@ -159,7 +161,8 @@ export const aiRoutes = new Hono()
 
     const { summary, jobTitle, jobDescription } = c.req.valid("json");
     const cleanJd = sanitizePromptText(jobDescription, 8000);
-    const prompt = `You are an expert CV writer. Rewrite the candidate's professional summary to target the specific job below. Naturally weave in the most relevant skills, keywords and requirements from the job description, but stay strictly truthful to the candidate's existing experience. ${TRUTH_CONSTRAINT} Keep it to 3–4 concise sentences in a confident, professional tone. Return ONLY the rewritten summary, with no preamble or quotes.
+    const roleBlock = roleTaxonomyPromptBlock(`${jobTitle || ""} ${cleanJd}`);
+    const prompt = `You are an expert CV writer. Rewrite the candidate's professional summary to target the specific job below. Naturally weave in the most relevant skills, keywords and requirements from the job description, but stay strictly truthful to the candidate's existing experience. ${TRUTH_CONSTRAINT} Keep it to 3–4 concise sentences in a confident, professional tone.${roleBlock} Return ONLY the rewritten summary, with no preamble or quotes.
 
 TARGET ROLE: ${jobTitle || "(not specified)"}
 
@@ -209,8 +212,9 @@ ${summary}
     const cleanJd = sanitizePromptText(jobDescription, 8000);
     const L = lang === "en" ? "English" : lang === "sw" ? "Swahili" : "the SAME language as the CV content";
     const expBlock = experience.map((e) => `[${e.id}] ${e.position || ""}${e.company ? " @ " + e.company : ""}\n${e.description || "(no description)"}`).join("\n\n");
+    const roleBlock = roleTaxonomyPromptBlock(`${jobTitle || ""} ${cleanJd}`);
 
-    const prompt = `You are an expert CV writer tailoring a candidate's CV to a SPECIFIC job. Rewrite their professional summary AND each work-experience entry's bullet points to (1) emphasise the experience most relevant to THIS job and (2) naturally weave in the job's real keywords and requirements — but ONLY where it is truthful to what the candidate actually did. Don't drop important real content. Keep each experience's bullets concise, each starting with "- ". Write in ${L}. ${TRUTH_CONSTRAINT}
+    const prompt = `You are an expert CV writer tailoring a candidate's CV to a SPECIFIC job. Rewrite their professional summary AND each work-experience entry's bullet points to (1) emphasise the experience most relevant to THIS job and (2) naturally weave in the job's real keywords and requirements — but ONLY where it is truthful to what the candidate actually did. Don't drop important real content. Keep each experience's bullets concise, each starting with "- ". Write in ${L}. ${TRUTH_CONSTRAINT}${roleBlock}
 
 Return STRICT JSON (no extra keys, no commentary, no markdown), matching exactly:
 {"summary":"","experience":[{"id":"","description":""}]}
@@ -322,7 +326,8 @@ ${expBlock || "(none)"}
     // The letter is written in the user's UI language — the model flips to
     // English by default when no language is given.
     const langName = lang === "en" ? "English" : "Swahili";
-    const prompt = `Write a compelling, professional cover letter body for the job below, in ${langName}. Use a confident but warm tone, 3–4 short paragraphs. Do NOT include the address block, date, "Dear..." greeting, or sign-off — return ONLY the body paragraphs. Ground every claim in the candidate's highlights. If the candidate is a student or recent graduate with little work history, write a confident entry-level letter that leads with motivation, education and relevant skills (academic projects, an attachment/internship or volunteering) and eagerness to contribute — without apologising for inexperience. ${TRUTH_CONSTRAINT}
+    const roleBlock = roleTaxonomyPromptBlock(`${jobTitle || ""} ${cleanJd || ""}`);
+    const prompt = `Write a compelling, professional cover letter body for the job below, in ${langName}. Use a confident but warm tone, 3–4 short paragraphs. Do NOT include the address block, date, "Dear..." greeting, or sign-off — return ONLY the body paragraphs. Ground every claim in the candidate's highlights. If the candidate is a student or recent graduate with little work history, write a confident entry-level letter that leads with motivation, education and relevant skills (academic projects, an attachment/internship or volunteering) and eagerness to contribute — without apologising for inexperience. ${TRUTH_CONSTRAINT}${roleBlock}
 
 CANDIDATE: ${fullName || "(the applicant)"}
 TARGET ROLE: ${jobTitle || "(not specified)"}
@@ -576,6 +581,13 @@ ${cleanText}
       m.role === "user" ? { ...m, content: sanitizePromptText(m.content, 16000) } : m,
     );
     const langName = lang === "en" ? "English" : "Swahili";
+    // Conservative register detection — only distinguishes formal vs. casual,
+    // and only ever DIALS UP formality; the default voice is already warm and
+    // casual, so a casual/null read changes nothing. See conversation-tone.ts.
+    const tone = detectConversationTone(cleanMessages);
+    const toneBlock = tone === "formal"
+      ? `\nTONE: this user is writing FORMALLY — match that. Use complete, respectful sentences, no slang ("Mambo", "Poa", "yo", "gonna"), no exclamation-point spam. In Swahili, address them respectfully (Bwana/Bibi where a name is used) rather than a casual "kaka/dada". Stay warm, just more measured — don't become stiff or robotic.\n`
+      : "";
     // CONVERSATIONAL INTELLIGENCE (companion-first): classify the user's
     // latest message and the whole thread state — whether a document is being
     // built, whether the user has refused/ignored career prompts (lockout) —
@@ -677,7 +689,16 @@ How you work:
 Golden rule: you are not an AI that happens to be inside Sumaiya — you are the intelligence that connects the whole ecosystem. The user tells you what they're trying to accomplish; you figure out the best way to get them there.
 
 LANGUAGE: the user's UI language is ${langName} — reply ONLY in ${langName} unless the user writes MOST of their latest message in a different language (then match that). Never flip Swahili→English on your own: if the UI is Swahili or the user writes Swahili, ALWAYS reply in Swahili. GREETING WORDS MUST MATCH: if you open with a greeting/acknowledgement word, it must be in the SAME language you are replying in — "Karibu"/"Mambo" when replying in Swahili, "Welcome"/"Hello"/"Hi" when replying in English. NEVER open an English reply with "Karibu" or a Swahili reply with "Welcome".
-${knownBlock}${tentativeBlock}${signalsBlock}${jobTargetBlock}
+
+SWAHILI GRAMMAR — noun-class agreement on the "-a" connective ("of"/possessive): the connective word changes form to match the CLASS of the noun it follows, not the noun after it. Get this right every time you write Swahili — pairing "ujuzi" with "kwa" instead of "wa" (only "ujuzi wa mauzo" is correct) reads as a clear grammar mistake to a native speaker. Reference, by class:
+  • U-class nouns (ujuzi, uzoefu, wakati, uongozi, umahiri) → wa — "ujuzi wa kompyuta", "uzoefu wa miaka mitatu", "wakati wa mahojiano".
+  • M-/WA-class, people (mtu, watu, mwajiri, mfanyakazi) → wa — "mfanyakazi wa kampuni", "watu wa idara".
+  • N-class, invariant singular/plural (kazi, ajira, kampuni, nafasi, elimu, taaluma) → ya (singular) / za (plural) — "kazi ya ofisi", "kazi za ujenzi", "elimu ya biashara".
+  • KI-/VI-class (kitu, chombo, vitu, vyombo) → cha (singular) / vya (plural) — "kitu cha thamani", "vitu vya lazima".
+  • (JI-)/MA-class (gari, jina, magari, majina) → la (singular) / ya (plural) — "gari la kampuni", "majina ya waajiriwa".
+  • "Kwa" is NOT an of-connective — it means "for"/"by"/"with"/"to" (purpose or means): "fanya mazoezi kwa bidii" (practise with effort), "tuma barua kwa mwajiri" (send a letter to the employer). Never substitute it for wa/ya/za/cha/vya/la.
+When unsure of a noun's class, default to the N-class pattern (ya/za) — it covers most job/CV vocabulary (kazi, ajira, elimu, taaluma, nafasi) and is the safer guess.
+${knownBlock}${tentativeBlock}${signalsBlock}${jobTargetBlock}${toneBlock}
 This is a CONVERSATION, not a questionnaire. Your single most important rule: FOLLOW THE USER'S LEAD.
 • If they start telling you things before you asked, WELCOME it warmly, remember it, react to it specifically (mention what they actually said), and build on it. Ask a natural follow-up about THAT.
 • NEVER block them or make them wait. Do NOT say things like "first tell me your name" or "before we get into that, I need X". You can pick up their name, contact, etc. at any natural moment later, even at the very end.

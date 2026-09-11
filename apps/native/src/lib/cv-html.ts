@@ -49,7 +49,7 @@ function esc(text: unknown): string {
 
 interface Parts {
   L: typeof LABELS.en;
-  p: { fullName?: string; email?: string; phone?: string; location?: string; headline?: string };
+  p: { fullName?: string; email?: string; phone?: string; location?: string; headline?: string; profilePhoto?: string };
   d: Partial<CVData>;
   experience: NonNullable<CVData["experience"]>;
   education: NonNullable<CVData["education"]>;
@@ -58,6 +58,16 @@ interface Parts {
 }
 
 const contactLine = ({ p }: Parts) => [p.email, p.phone, p.location].filter(Boolean).map(esc).join(" &nbsp;•&nbsp; ");
+
+// A CV's data can come from a synced/imported source, not just this app's own
+// picker — validate the value actually looks like an image src before it goes
+// into an HTML attribute, rather than trusting it's always our own base64
+// output.
+const PHOTO_SRC_RE = /^(data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+|https:\/\/\S+)$/;
+function photoTag({ p }: Parts, className = "photo"): string {
+  if (!p.profilePhoto || !PHOTO_SRC_RE.test(p.profilePhoto)) return "";
+  return `<img class="${className}" src="${p.profilePhoto}" alt="" />`;
+}
 
 const summaryBlock = ({ L, d }: Parts) =>
   d.summary ? `<div class="section"><div class="section-title">${L.summary}</div><p class="summary">${esc(d.summary)}</p></div>` : "";
@@ -115,7 +125,17 @@ const BASE_CSS = `
   .entry-desc { color: #4a4a4a; margin-top: 3px; }
   .summary { color: #4a4a4a; }
   .skills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .photo { border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
+  .head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 `;
+
+/** Wraps the name/headline block with the photo (if any) in a flex row — no
+ *  layout change at all when there's no photo, so the common case is untouched. */
+function withPhoto(nameHeadlineHtml: string, photoHtml: string, align: "start" | "center" = "start"): string {
+  if (!photoHtml) return nameHeadlineHtml;
+  if (align === "center") return `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;">${photoHtml}${nameHeadlineHtml}</div>`;
+  return `<div class="head-row"><div style="flex:1;min-width:0;">${nameHeadlineHtml}</div>${photoHtml}</div>`;
+}
 
 function templateCss(id: CvTemplateId, accent: string): string {
   switch (id) {
@@ -126,6 +146,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .head .name { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
         .head .headline { font-weight: 600; opacity: 0.92; font-size: 13.5px; margin-top: 2px; }
         .head .contact { font-size: 11px; opacity: 0.9; margin-top: 8px; }
+        .head .photo { width: 76px; height: 76px; border: 3px solid #ffffff55; }
         .body { padding: 24px 44px; }
         .section-title { font-size: 12px; font-weight: 800; color: ${accent}; letter-spacing: 0.7px; text-transform: uppercase; margin-bottom: 8px; }
         .entry-title { font-size: 13px; }
@@ -136,6 +157,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .name { font-size: 27px; font-weight: 700; letter-spacing: -0.3px; }
         .headline { color: #555; font-size: 13px; margin: 2px 0 4px; }
         .contact { font-size: 10.5px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 20px; }
+        .photo { width: 64px; height: 64px; }
         .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: #999; margin-bottom: 9px; }
         .entry-title { font-size: 12.5px; }
         .skill { border: 1px solid #ccc; color: #555; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; }`;
@@ -144,6 +166,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 12px; line-height: 1.5; }
         .grid { display: flex; min-height: 100%; }
         .aside { width: 33%; background: ${accent}12; padding: 34px 24px; }
+        .aside .photo { width: 88px; height: 88px; margin: 0 auto 16px; border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .aside .name { font-size: 22px; font-weight: 800; color: #211A15; letter-spacing: -0.4px; }
         .aside .headline { color: ${accent}; font-weight: 700; font-size: 12px; margin: 3px 0 14px; }
         .aside .contact { font-size: 10.5px; color: #555; line-height: 1.9; }
@@ -156,6 +179,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
       return `${BASE_CSS}
         body { font-family: Georgia, "Times New Roman", serif; font-size: 12.5px; line-height: 1.6; padding: 46px 56px; color: #2b2b2b; }
         .head { text-align: center; border-bottom: 2px solid ${accent}; padding-bottom: 16px; margin-bottom: 20px; }
+        .photo { width: 92px; height: 92px; margin: 0 auto; border: 3px solid ${accent}44; }
         .name { font-size: 30px; font-weight: 700; letter-spacing: 0.5px; }
         .headline { font-style: italic; color: ${accent}; font-size: 13.5px; margin-top: 3px; }
         .contact { font-size: 11px; color: #666; margin-top: 8px; }
@@ -169,6 +193,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .name { font-size: 22px; font-weight: 800; color: #211A15; letter-spacing: -0.4px; }
         .headline { color: ${accent}; font-weight: 700; font-size: 11px; }
         .contact { font-size: 9.5px; color: #666; border-bottom: 2px solid ${accent}; padding-bottom: 8px; margin-bottom: 12px; }
+        .photo { width: 44px; height: 44px; }
         .section { margin-bottom: 10px; }
         .section-title { font-size: 10px; font-weight: 800; color: ${accent}; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 5px; }
         .entry { margin-bottom: 6px; }
@@ -181,6 +206,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .name { font-size: 30px; font-weight: 800; color: #211A15; letter-spacing: -0.5px; margin-bottom: 3px; }
         .headline { color: ${accent}; font-weight: 700; font-size: 13.5px; margin-bottom: 6px; }
         .contact { font-size: 11px; color: #6b6b6b; border-bottom: 3px solid ${accent}; padding-bottom: 14px; margin-bottom: 18px; }
+        .photo { width: 72px; height: 72px; border: 3px solid ${accent}33; }
         .section-title { font-size: 12.5px; font-weight: 800; color: ${accent}; letter-spacing: 0.6px; text-transform: uppercase; border-bottom: 1px solid #e6e6e6; padding-bottom: 5px; margin-bottom: 10px; }
         .entry-title { font-size: 13px; }
         .skill { background: ${accent}1f; color: ${accent}; padding: 3px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 700; }`;
@@ -193,9 +219,10 @@ function templateBody(id: CvTemplateId, parts: Parts): string {
   const headline = p.headline ? `<div class="headline">${esc(p.headline)}</div>` : "";
   const contact = `<div class="contact">${contactLine(parts)}</div>`;
   const main = [summaryBlock(parts), experienceBlock(parts), educationBlock(parts), skillsBlock(parts), languagesBlock(parts)].join("");
+  const photo = photoTag(parts);
 
   if (id === "modern") {
-    return `<div class="head">${name}${headline}<div class="contact">${contactLine(parts)}</div></div><div class="body">${main}</div>`;
+    return `<div class="head">${withPhoto(`${name}${headline}<div class="contact">${contactLine(parts)}</div>`, photo)}</div><div class="body">${main}</div>`;
   }
   if (id === "sidebar") {
     const asideSkills = parts.skills.length
@@ -205,14 +232,14 @@ function templateBody(id: CvTemplateId, parts: Parts): string {
       ? `<div class="section-title">${L.languages}</div>${parts.languages.map((l) => `<div class="entry"><span class="entry-title">${esc(l.language)}</span> <span class="entry-sub">(${esc(l.proficiency)})</span></div>`).join("")}`
       : "";
     return `<div class="grid">
-      <div class="aside">${name}${headline}<div class="contact">${[p.email, p.phone, p.location].filter(Boolean).map(esc).join("<br/>")}</div>${asideSkills}${asideLangs}</div>
+      <div class="aside">${photo}${name}${headline}<div class="contact">${[p.email, p.phone, p.location].filter(Boolean).map(esc).join("<br/>")}</div>${asideSkills}${asideLangs}</div>
       <div class="main">${summaryBlock(parts)}${experienceBlock(parts)}${educationBlock(parts)}</div>
     </div>`;
   }
   if (id === "executive") {
-    return `<div class="head">${name}${headline}${contact}</div>${main}`;
+    return `<div class="head">${withPhoto(`${name}${headline}${contact}`, photo, "center")}</div>${main}`;
   }
-  return `${name}${headline}${contact}${main}`;
+  return `${withPhoto(`${name}${headline}${contact}`, photo)}${main}`;
 }
 
 export function cvToHtml(cv: CV, opts: CvHtmlOptions = {}): string {

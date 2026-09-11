@@ -138,14 +138,22 @@ export function RootNavigator() {
   // Pull the Career Profile from the server Spine once signed in — a returning
   // user on a new device / after a reinstall keeps their profile, and any
   // offline local edit gets pushed up. If the server already has a real
-  // profile, the first-run wizard has nothing to collect, so skip it.
+  // profile OR the account already has CVs, the first-run wizard has nothing
+  // to collect, so skip it. Checking CVs too matters because profileIsEmpty
+  // only looks at the wizard's own fields — a returning user who built CVs
+  // but never happened to complete the wizard would otherwise see it resurface
+  // on every reinstall / new device despite clearly not being new.
   useEffect(() => {
     if (!user) return;
     void (async () => {
       try {
         const { syncProfileFromServer, profileIsEmpty } = await import("../lib/profile-store");
-        const profile = await syncProfileFromServer();
-        if (!profileIsEmpty(profile)) {
+        const { apiClient } = await import("../lib/api-client");
+        const [profile, cvs] = await Promise.all([
+          syncProfileFromServer(),
+          apiClient.listCVs().catch(() => []),
+        ]);
+        if (!profileIsEmpty(profile) || cvs.length > 0) {
           await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
           setFirstRunDone(true);
         }

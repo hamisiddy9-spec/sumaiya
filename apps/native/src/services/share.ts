@@ -1,12 +1,12 @@
 import * as Sharing from "expo-sharing";
-import { Alert } from "react-native";
+import { dialog } from "../components/ui";
 import type { CV } from "@sumaiya/types";
 
 export async function shareCV(cv: CV, pdfUri: string): Promise<void> {
   try {
     const isAvailable = await Sharing.isAvailableAsync();
     if (!isAvailable) {
-      Alert.alert("Not Available", "Sharing is not available on your device");
+      dialog.alert("Not Available", "Sharing is not available on your device");
       return;
     }
 
@@ -18,7 +18,7 @@ export async function shareCV(cv: CV, pdfUri: string): Promise<void> {
     });
   } catch (error) {
     console.error("Share failed:", error);
-    Alert.alert("Error", "Failed to share CV");
+    dialog.alert("Error", "Failed to share CV");
   }
 }
 
@@ -26,7 +26,7 @@ export async function openPDFPreview(pdfUri: string): Promise<void> {
   try {
     const isAvailable = await Sharing.isAvailableAsync();
     if (!isAvailable) {
-      Alert.alert("Not Available", "PDF preview not available on your device");
+      dialog.alert("Not Available", "PDF preview not available on your device");
       return;
     }
 
@@ -36,6 +36,6 @@ export async function openPDFPreview(pdfUri: string): Promise<void> {
     });
   } catch (error) {
     console.error("PDF preview failed:", error);
-    Alert.alert("Error", "Failed to open PDF preview");
+    dialog.alert("Error", "Failed to open PDF preview");
   }
 }

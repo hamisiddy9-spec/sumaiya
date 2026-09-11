@@ -22,7 +22,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const lang = (h.get("x-lang") ?? "sw") as Lang;
 
   const nav = {
-    dashboardLabel: lang === "sw" ? "Dashibodi" : "Dashboard",
+    dashboardLabel: lang === "sw" ? "Nyumbani" : "Dashboard",
     settingsLabel:  lang === "sw" ? "Mipangilio" : "Settings",
     userEmail: user?.email,
     userAvatarUrl: user?.user_metadata?.avatar_url as string | undefined,

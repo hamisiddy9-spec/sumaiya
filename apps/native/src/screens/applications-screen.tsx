@@ -17,13 +17,18 @@ const STATUS_TINT: Record<AppStatus, (c: ThemeColors) => string> = {
   closed: (c) => c.textMuted,
 };
 
+// Calendar-day diff, not a raw 24h ms diff — a raw diff misreads anything
+// near a midnight boundary (e.g. updated 23:00 yesterday, viewed 01:00 today:
+// only 2h ago but a different calendar day, so it must read "Jana"/"Yesterday").
 function timeAgo(ts: number, sw: boolean): string {
-  const d = Date.now() - ts;
-  const day = 86_400_000;
-  if (d < day) return sw ? "Leo" : "Today";
-  if (d < 2 * day) return sw ? "Jana" : "Yesterday";
-  if (d < 7 * day) return `${Math.floor(d / day)}${sw ? " siku" : "d"}`;
-  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const date = new Date(ts);
+  const now = new Date();
+  const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const dayDiff = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000);
+  if (dayDiff <= 0) return sw ? "Leo" : "Today";
+  if (dayDiff === 1) return sw ? "Jana" : "Yesterday";
+  if (dayDiff < 7) return `${dayDiff}${sw ? " siku" : "d"}`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
@@ -57,12 +62,12 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
       ) : applications.length === 0 ? (
         <EmptyState
           icon="briefcase"
-          title={t("Track every job here", "Fuatilia kila kazi hapa")}
+          title={t("Track every job here", "Fuatilia kila ajira hapa")}
           body={t(
             "Add a job you're applying to. Keep the description, your tailored CV, the cover letter and where it stands — all in one place, on your phone.",
-            "Ongeza kazi unayoomba. Weka maelezo, CV yako, barua ya maombi na hali yake — mahali pamoja, kwenye simu yako.",
+            "Ongeza ajira unayoomba. Weka maelezo, CV yako, barua ya maombi na hali yake — mahali pamoja, kwenye simu yako.",
           )}
-          actionLabel={t("Add a job", "Ongeza kazi")}
+          actionLabel={t("Add a job", "Ongeza ajira")}
           onAction={() => navigation.navigate("ApplicationDetail", {})}
         />
       ) : (

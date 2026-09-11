@@ -38,7 +38,12 @@ export default function MigrateGuestPage() {
           return;
         }
 
-        const parsed = JSON.parse(guestData) as {
+        // A parse failure here (corrupted localStorage) can never be fixed by
+        // retrying — the generic retryable-error path below would loop
+        // forever. Clear the unreadable draft and route to the same
+        // "nothing to migrate" state a missing draft gets, instead of
+        // stranding the user on a retry that can never succeed.
+        let parsed: {
           cv?: Record<string, unknown>;
           title?: string;
           templateId?: string;
@@ -47,6 +52,13 @@ export default function MigrateGuestPage() {
           migrationId?: string;
           downloadIntent?: string;
         };
+        try {
+          parsed = JSON.parse(guestData);
+        } catch {
+          localStorage.removeItem("sumaiya-guest-cv");
+          setNotFound(true);
+          return;
+        }
 
         // A stable idempotency key for this draft. Persist it back so that if the
         // POST succeeds but its response is lost (mobile drop, tab killed) and
@@ -108,14 +120,14 @@ export default function MigrateGuestPage() {
           </h1>
           <p className="text-text-body text-sm mb-6">
             {sw
-              ? "Huenda CV yako ya mgeni ilianzishwa kwenye kivinjari kingine au tayari imehifadhiwa. Unaweza kuanza mpya kutoka dashibodi yako."
+              ? "Huenda CV yako ya mgeni ilianzishwa kwenye kivinjari kingine au tayari imehifadhiwa. Unaweza kuanza mpya kuanzia nyumbani."
               : "Your guest CV may have been started in a different browser or already saved. You can start a new one from your dashboard."}
           </p>
           <a
             href="/dashboard"
             className="inline-flex items-center justify-center bg-ember text-cream font-semibold px-5 py-2.5 rounded-card-lg transition text-sm shadow-ember-hard hover:bg-ember-hover active:shadow-ember-active"
           >
-            {sw ? "Nenda Dashibodi" : "Go to Dashboard"}
+            {sw ? "Nenda Nyumbani" : "Go to Dashboard"}
           </a>
         </div>
       </div>
@@ -131,7 +143,7 @@ export default function MigrateGuestPage() {
             href="/dashboard"
             className="inline-flex items-center justify-center bg-ember text-cream font-semibold px-5 py-2.5 rounded-card-lg transition text-sm shadow-ember-hard hover:bg-ember-hover active:shadow-ember-active"
           >
-            {sw ? "Nenda Dashibodi" : "Go to Dashboard"}
+            {sw ? "Nenda Nyumbani" : "Go to Dashboard"}
           </a>
         </div>
       </div>

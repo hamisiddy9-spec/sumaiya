@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Share, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Share, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
@@ -10,7 +10,7 @@ import {
 } from "../lib/applications-store";
 import { matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
-import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { ApplicationDetailScreenProps } from "../navigation/types";
@@ -74,7 +74,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
       navigation.goBack();
     } catch {
       haptics.error();
-      Alert.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("Try again.", "Jaribu tena."));
+      dialog.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("Try again.", "Jaribu tena."));
     } finally {
       setSaving(false);
     }
@@ -82,8 +82,8 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
 
   const confirmDelete = () => {
     haptics.warning();
-    Alert.alert(
-      t("Delete this application?", "Futa ombi hili?"),
+    dialog.alert(
+      t("Delete this application?", "Ufute ombi hili?"),
       t("This removes it from your phone. It can't be undone.", "Hili linaliondoa kwenye simu yako. Haliwezi kurudishwa."),
       [
         { text: t("Cancel", "Ghairi"), style: "cancel" },
@@ -97,7 +97,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
 
   const draftCoverLetter = async () => {
     if (!role.trim() || !company.trim()) {
-      Alert.alert(t("Add the role and company first", "Ongeza cheo na kampuni kwanza"));
+      dialog.alert(t("Add the role and company first", "Ongeza cheo na kampuni kwanza"));
       return;
     }
     setDrafting(true);
@@ -116,7 +116,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
       haptics.success();
     } catch {
       haptics.error();
-      Alert.alert(t("Couldn't draft", "Imeshindwa kuandika"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
+      dialog.alert(t("Couldn't draft", "Imeshindwa kuandika"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
     } finally {
       setDrafting(false);
     }
@@ -139,7 +139,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
       <TextField label={t("Role / job title", "Cheo / jina la kazi")} value={role} onChangeText={setRole} placeholder="Warehouse Supervisor" />
       <TextField label={t("Company", "Kampuni")} value={company} onChangeText={setCompany} placeholder="Brookside" />
       <TextField label={t("Location", "Eneo")} value={location} onChangeText={setLocation} placeholder="Nairobi" />
-      <TextField label={t("Job link (optional)", "Kiungo cha kazi (si lazima)")} value={jobUrl} onChangeText={setJobUrl} autoCapitalize="none" keyboardType="url" />
+      <TextField label={t("Job link (optional)", "Kiungo cha ajira (si lazima)")} value={jobUrl} onChangeText={setJobUrl} autoCapitalize="none" keyboardType="url" />
 
       {/* Status */}
       <View style={{ gap: 6 }}>
@@ -167,7 +167,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
 
       {/* JD */}
       <TextField
-        label={t("Job description", "Maelezo ya kazi")}
+        label={t("Job description", "Maelezo ya ajira")}
         value={jd}
         onChangeText={setJd}
         multiline
@@ -206,7 +206,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={{ color: fitScore >= 60 ? c.success : c.warning, fontSize: 18, fontWeight: "800" }}>{fitScore}%</Text>
             <Text style={{ color: c.textMuted, fontSize: 12, flex: 1 }}>
-              {t("keyword match with the job description", "ulinganifu wa maneno na maelezo ya kazi")}
+              {t("keyword match with the job description", "ulinganifu wa maneno na maelezo ya ajira")}
             </Text>
             {linkedCv && (
               <Pressable onPress={() => navigation.navigate("AtsChecker", { cvId: linkedCv.id })}>
@@ -234,7 +234,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
           multiline
           numberOfLines={8}
           inputStyle={{ minHeight: 160, textAlignVertical: "top" }}
-          placeholder={t("Write it, or let Sumaiya draft it from the job + your CV.", "Iandike, au acha Sumaiya aiandike kutoka kazi + CV yako.")}
+          placeholder={t("Write it, or let Sumaiya draft it from the job + your CV.", "Iandike, au acha Sumaiya aiandike kutoka ajira + CV yako.")}
         />
         {coverLetter.trim().length > 0 && (
           <Pressable

@@ -17,10 +17,10 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { kind: "camera", icon: "camera", en: "Take a photo", sw: "Piga picha", hintEn: "A printed CV or a job advert", hintSw: "CV au tangazo la kazi" },
+  { kind: "camera", icon: "camera", en: "Take a photo", sw: "Piga picha", hintEn: "A printed CV or a job advert", hintSw: "CV au tangazo la ajira" },
   { kind: "photo", icon: "image", en: "Photo library", sw: "Toka kwenye picha", hintEn: "A screenshot or a saved scan", hintSw: "Picha ya skrini au skani" },
   { kind: "file", icon: "file-text", en: "Upload a file", sw: "Pakia faili", hintEn: "PDF, Word or a text file", hintSw: "PDF, Word au maandishi" },
-  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika link ya kazi", hintEn: "I'll read the advert for you", hintSw: "Nitasoma tangazo kwa niaba yako" },
+  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika link ya ajira", hintEn: "I'll read the advert for you", hintSw: "Nitasoma tangazo kwa niaba yako" },
   { kind: "myDoc", icon: "briefcase", en: "One of my CVs", sw: "CV yangu niliyonayo", hintEn: "Use it as a starting point", hintSw: "Ianzie hapo" },
 ];
 

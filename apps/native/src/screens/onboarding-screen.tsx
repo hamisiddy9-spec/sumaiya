@@ -41,7 +41,7 @@ const SLIDES: SlideData[] = [
     title: { en: "Meet Sumaiya", sw: "Karibu — mimi ni Sumaiya" },
     body: {
       en: "Your job companion. I write your CV, target it to the job, check it against employer screening, and get you ready for the interview.",
-      sw: "Msaidizi wako wa kupata ajira. Ninakuandikia CV, ninailenga kwa kazi, ninaikagua dhidi ya mifumo ya waajiri, na ninakuandaa kwa usaili.",
+      sw: "Msaidizi wako wa kupata ajira. Ninakuandikia CV, ninailenga kwa ajira, ninaikagua dhidi ya mifumo ya waajiri, na ninakuandaa kwa usaili.",
     },
   },
   {
@@ -54,10 +54,10 @@ const SLIDES: SlideData[] = [
   },
   {
     art: 2,
-    title: { en: "I target every job", sw: "Ninailenga kila kazi" },
+    title: { en: "I target every job", sw: "Ninailenga kila ajira" },
     body: {
       en: "Paste a job and I rewrite your CV to match it — truthfully — so it passes the software that reads it first.",
-      sw: "Bandika kazi nami nabadilisha CV yako iendane nayo — kwa ukweli — ipite programu inayoisoma kwanza.",
+      sw: "Bandika ajira nami nabadilisha CV yako iendane nayo — kwa ukweli — ipite programu inayoisoma kwanza.",
     },
   },
   {
@@ -87,11 +87,13 @@ function Slide({
   index,
   scrollX,
   markState,
+  artRef,
 }: {
   item: SlideData;
   index: number;
   scrollX: SharedValue<number>;
   markState: SumaiyaMarkState;
+  artRef?: React.Ref<View>;
 }) {
   const c = useThemeColors();
   const { lang } = useLang();
@@ -113,7 +115,11 @@ function Slide({
 
   return (
     <View style={{ width, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 30 }}>
-      <Animated.View style={[visualStyle, { alignItems: "center", justifyContent: "center" }]}>
+      <Animated.View
+        ref={artRef}
+        collapsable={false}
+        style={[visualStyle, { alignItems: "center", justifyContent: "center" }]}
+      >
         {item.mark ? (
           <View
             style={{
@@ -279,11 +285,40 @@ export function OnboardingScreen({ onComplete }: Props) {
   };
 
   const collapse = useSharedValue(0); // 0 = slides at rest, 1 = sucked into the mark
+  const artRefs = useRef<(View | null)[]>([]);
+  // Where the portal's bloom should originate — the actual on-screen centre of
+  // whichever slide's art was showing when the user hit Start/Skip, not the
+  // screen's geometric centre. Slide art sits above centre (it's grouped with
+  // the title/body below it, vertically centred as a pair), so blooming from
+  // true centre visibly jumped away from where the art actually was — read as
+  // the transition "appearing out of nowhere" rather than growing out of it.
+  const [portalOrigin, setPortalOrigin] = useState<{ x: number; y: number } | null>(null);
   const finish = () => {
-    haptics.selection();
+    // No haptic here — PortalTransition fires its own opening beat the
+    // instant it mounts (this call), so a tap-acknowledgment tick here would
+    // double up with it almost simultaneously.
     setMarkState("thinking");
-    collapse.value = withTiming(1, { duration: 460, easing: Easing.in(Easing.cubic) });
-    setStage("portal");
+    collapse.value = withTiming(1, { duration: 320, easing: Easing.in(Easing.cubic) });
+    // Measure *before* mounting the portal. The origin is applied to the
+    // flood's static left/top, so committing it a frame late made the field
+    // visibly jump position mid-bloom. Collapse already started, so the one
+    // frame the measurement costs is invisible; the timeout is the floor in
+    // case measureInWindow never calls back (detached node) — without it the
+    // portal would never mount and the flow would dead-end here.
+    const node = artRefs.current[page];
+    let committed = false;
+    const commit = (o: { x: number; y: number } | null) => {
+      if (committed) return;
+      committed = true;
+      setPortalOrigin(o);
+      setStage("portal");
+    };
+    if (node) {
+      node.measureInWindow((x, y, w, h) => commit({ x: x + w / 2, y: y + h / 2 }));
+      setTimeout(() => commit(null), 150);
+    } else {
+      commit(null);
+    }
   };
 
   const slidesStyle = useAnimatedStyle(() => ({
@@ -328,11 +363,27 @@ export function OnboardingScreen({ onComplete }: Props) {
             showsHorizontalScrollIndicator={false}
             onScroll={onScroll}
             scrollEventThrottle={16}
-            onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}
+            onMomentumScrollEnd={(e) => {
+              const settled = Math.round(e.nativeEvent.contentOffset.x / width);
+              setPage(settled);
+              // Snap to the exact expected offset — the raw contentOffset at rest
+              // can land a fraction of a pixel off (e.g. 1007.6 instead of 1008),
+              // which leaves the dot interpolation's shared boundary between two
+              // dots ambiguous and paints both as partially active (seen on the
+              // last slide, where there's no further slide to mask it).
+              scrollX.value = settled * width;
+            }}
             style={{ flex: 1 }}
           >
             {SLIDES.map((item, i) => (
-              <Slide key={i} item={item} index={i} scrollX={scrollX} markState={markState} />
+              <Slide
+                key={i}
+                item={item}
+                index={i}
+                scrollX={scrollX}
+                markState={markState}
+                artRef={(node) => { artRefs.current[i] = node; }}
+              />
             ))}
           </Animated.ScrollView>
 
@@ -361,7 +412,7 @@ export function OnboardingScreen({ onComplete }: Props) {
         </Animated.View>
       )}
 
-      {stage === "portal" && <PortalTransition onDone={() => onComplete?.()} />}
+      {stage === "portal" && <PortalTransition origin={portalOrigin} onDone={() => onComplete?.()} />}
     </View>
   );
 }

@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, BackHandler, Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { pickAndCompressPhoto, consumePendingOnboardingPhoto } from "../lib/pick-photo";
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
+import { useIsFocused } from "@react-navigation/native";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
@@ -8,9 +10,10 @@ import { exportCVAsPDF } from "../services/pdf-export";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
-import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
+import { reportError } from "../lib/reporting";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { getDefaultTemplate } from "../lib/prefs";
 import { CvPreviewCard } from "../components/cv/cv-preview-card";
@@ -89,6 +92,77 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dirty, setDirty] = useState(false);
+
+  /**
+   * Unsaved-work guard for EVERY way out of this screen.
+   *
+   * This used to live only on the in-app "Back" link, so the Android system
+   * back gesture — the way most people actually leave a screen — walked
+   * straight past it and threw away a CV that had never been saved, with no
+   * prompt. `beforeRemove` covers the in-app back link, a swipe-back and any
+   * programmatic pop; the BackHandler below covers the hardware key.
+   */
+  /**
+   * Set once the user has actually chosen "Discard", so the two guards below
+   * stand down and let the screen go. Without it, the hardware-back path would
+   * ask a second time: `goBack()` builds a fresh action, and a fresh action
+   * re-triggers `beforeRemove`.
+   */
+  const leavingRef = useRef(false);
+
+  /** One prompt, shared by every exit path. */
+  const confirmDiscard = useCallback(
+    (leave: () => void) => {
+      leavingRef.current = false;
+      dialog.alert(
+        t("Discard changes?", "Utupe mabadiliko?"),
+        t("Your edits aren't saved.", "Mabadiliko yako hayajahifadhiwa."),
+        [
+          { text: t("Keep editing", "Endelea kuhariri"), style: "cancel" },
+          {
+            text: t("Discard", "Tupa"),
+            style: "destructive",
+            onPress: () => {
+              leavingRef.current = true;
+              leave();
+            },
+          },
+        ],
+      );
+    },
+    [t],
+  );
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
+      if (!dirty || leavingRef.current) return;
+      e.preventDefault();
+      confirmDiscard(() => navigation.dispatch(e.data.action));
+    });
+    return unsubscribe;
+  }, [navigation, dirty, confirmDiscard]);
+
+  /**
+   * The Android hardware back key / back gesture.
+   *
+   * A native-stack never raises `beforeRemove` for it, so the guard above was
+   * blind to the single most-used way of leaving a screen: swipe back and an
+   * unsaved CV vanished with no prompt. We claim the event here instead — but
+   * only while this screen is the focused one, and never while a dialog is
+   * already on screen (the dialog's own Modal handles back itself, and must not
+   * be short-circuited).
+   */
+  const focused = useIsFocused();
+  useEffect(() => {
+    if (!focused) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (!dirty || leavingRef.current || dialog.isOpen()) return false;
+      haptics.warning();
+      confirmDiscard(() => navigation.goBack());
+      return true;
+    });
+    return () => sub.remove();
+  }, [focused, dirty, confirmDiscard, navigation]);
   // We have data up front when it's a new CV or the caller passed the CV's
   // data. Opening an existing CV by id alone means we must fetch it — until
   // then, show a loader instead of an empty form (the old bug: every saved CV
@@ -121,7 +195,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           }
         } catch {
           if (!cancelled) {
-            Alert.alert(t("Couldn't open that CV", "Imeshindwa kufungua CV hiyo"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
+            dialog.alert(t("Couldn't open that CV", "Imeshindwa kufungua CV hiyo"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
           }
         } finally {
           if (!cancelled) setLoadingCv(false);
@@ -134,6 +208,40 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCvId]);
 
+  /**
+   * Reset the form when the *identity* of what we're editing changes.
+   *
+   * React Navigation reuses a screen instance when you navigate to the route
+   * that is already on top of the stack, so params can change underneath a
+   * mounted component and its state survives. That is why tapping "New CV"
+   * while a CV was already open showed the previous CV's content instead of a
+   * blank form. `nonce` is bumped by every "New CV" entry point, so a fresh
+   * tap is always a fresh form; opening a saved CV by id re-enters the loader.
+   */
+  const openKey = [
+    initialCvId ?? "new",
+    initialData ? "inline" : "none",
+    route.params?.nonce ?? "",
+  ].join(":");
+
+  useEffect(() => {
+    cvIdRef.current = initialCvId || uid();
+    leavingRef.current = false;
+    setDirty(false);
+    setShowPreview(false);
+    setSaving(false);
+    setExporting(false);
+    if (initialCvId && !initialData) {
+      // Filled in by the fetch effect above; show the loader, never stale text.
+      setData(emptyData());
+      setLoadingCv(true);
+    } else {
+      setData(emptyData(initialData));
+      setLoadingCv(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openKey]);
+
   const [skillInput, setSkillInput] = useState("");
 
   const patch = (p: Partial<CVData>) => {
@@ -144,6 +252,45 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     setData((d) => ({ ...d, personalInfo: { ...d.personalInfo, [k]: v } }));
     setDirty(true);
   };
+
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const pickPhoto = async () => {
+    haptics.light();
+    setPhotoBusy(true);
+    try {
+      // A raw phone photo can be several MB — the CV document (synced,
+      // rendered, PDF-exported) needs to stay small, so resize + compress
+      // before embedding as base64, same shape web's editor already writes
+      // to personalInfo.profilePhoto (mapped to/from web's "photo" field by
+      // @sumaiya/utils' cv-shape converter).
+      const photo = await pickAndCompressPhoto();
+      if (photo) patchPersonal("profilePhoto", photo);
+    } catch {
+      haptics.error();
+      dialog.alert(t("Couldn't use that photo", "Imeshindwa kutumia picha hiyo"), t("Try a different one.", "Jaribu nyingine."));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
+  const removePhoto = () => {
+    haptics.selection();
+    patchPersonal("profilePhoto", "");
+  };
+
+  // A photo captured during first-run (before any CV existed to hold it)
+  // waits in local storage until the user's first real CV is created — seed
+  // it in here, once, only for a genuinely new/blank CV.
+  useEffect(() => {
+    if (initialCvId || initialData) return;
+    let cancelled = false;
+    consumePendingOnboardingPhoto().then((photo) => {
+      if (!cancelled && photo) patchPersonal("profilePhoto", photo);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const exp = (data.experience ?? []) as Experience[];
   const edu = (data.education ?? []) as Education[];
@@ -158,29 +305,71 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   async function save() {
     if (!data.personalInfo?.fullName?.trim()) {
       haptics.error();
-      Alert.alert(t("Add your name", "Weka jina lako"), t("A CV needs at least a full name.", "CV inahitaji angalau jina kamili."));
+      dialog.alert(t("Add your name", "Weka jina lako"), t("A CV needs at least a full name.", "CV inahitaji angalau jina kamili."));
       return;
     }
     setSaving(true);
+    const cv: CV = {
+      id: cvIdRef.current,
+      userId: "me",
+      templateId: template,
+      title: data.personalInfo.fullName || "My CV",
+      data: data as CVData,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    // The local cache is the write that must not fail: once the CV is in it,
+    // the list and home show it and it survives being offline or force-quit.
+    // It used to be `.catch(() => {})`-swallowed, which is why a failing save
+    // showed a generic "Couldn't save" with no way to tell what broke.
+    let storedLocally = false;
     try {
-      const cv: CV = {
-        id: cvIdRef.current,
-        userId: "me",
-        templateId: template,
-        title: data.personalInfo.fullName || "My CV",
-        data: data as CVData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      await offlineStorage.saveCVOffline(cv);
+      storedLocally = true;
+    } catch (error) {
+      reportError(error, { scope: "cvEditor.save.local", cvId: cv.id });
+    }
+
+    try {
       // Write to the local cache first so the list/home reflect it immediately
       // and it survives being offline, then queue the push to the server.
-      await offlineStorage.saveCVOffline(cv).catch(() => {});
       await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
       haptics.success();
       setDirty(false);
-    } catch {
-      haptics.error();
-      Alert.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("It'll retry automatically when you're online.", "Itajaribu tena yenyewe ukipata mtandao."));
+    } catch (error) {
+      reportError(error, { scope: "cvEditor.save.queue", cvId: cv.id });
+      if (storedLocally) {
+        // The CV is on the device and will be pushed by the next sync pass —
+        // not worth interrupting the user for.
+        haptics.success();
+        setDirty(false);
+      } else {
+        // Last resort: the local cache itself is unavailable (SQLite failed to
+        // open on this device), so the queue can't help either. Push straight to
+        // the server so the CV the user just wrote isn't lost, and only fall
+        // through to the error dialog if THAT fails too.
+        try {
+          if (initialCvId) await apiClient.updateCV(initialCvId, { ...cv });
+          else await apiClient.createCV({ ...cv, clientId: cvIdRef.current });
+          haptics.success();
+          setDirty(false);
+        } catch (apiError) {
+          reportError(apiError, { scope: "cvEditor.save.server", cvId: cv.id });
+          haptics.error();
+          dialog.alert(
+            t("Couldn't save this CV", "Imeshindwa kuhifadhi CV hii"),
+            t(
+              "Nothing was written to this device, so your edits are still here and nothing is lost. Try again.",
+              "Hakuna kilichoandikwa kwenye kifaa hiki, kwa hivyo mabadiliko yako bado yapo na hakuna kilichopotea. Jaribu tena.",
+            ),
+            [
+              { text: t("Keep editing", "Endelea kuhariri"), style: "cancel" },
+              { text: t("Try again", "Jaribu tena"), onPress: () => void save() },
+            ],
+          );
+        }
+      }
     } finally {
       setSaving(false);
     }
@@ -203,7 +392,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       await shareCV(cv, uri);
     } catch {
       haptics.error();
-      Alert.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
+      dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
     } finally {
       setExporting(false);
     }
@@ -254,14 +443,9 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8, marginBottom: 16 }}>
         <Pressable
           hitSlop={10}
-          onPress={() => {
-            if (dirty) {
-              Alert.alert(t("Discard changes?", "Utupe mabadiliko?"), t("Your edits aren't saved.", "Mabadiliko yako hayajahifadhiwa."), [
-                { text: t("Keep editing", "Endelea kuhariri"), style: "cancel" },
-                { text: t("Discard", "Tupa"), style: "destructive", onPress: () => navigation.goBack() },
-              ]);
-            } else navigation.goBack();
-          }}
+          // The unsaved-work prompt lives in the beforeRemove listener above, so
+          // this path and the system back gesture behave identically.
+          onPress={() => navigation.goBack()}
           style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
         >
           <Icon name="arrow-left" size={18} color={c.accent} />
@@ -331,6 +515,31 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
 
       {/* Personal */}
       <Section title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 4 }}>
+          <Pressable onPress={pickPhoto} disabled={photoBusy} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}>
+            {photoBusy ? (
+              <ActivityIndicator color={c.accent} />
+            ) : data.personalInfo?.profilePhoto ? (
+              <Image source={{ uri: data.personalInfo.profilePhoto }} style={{ width: 64, height: 64 }} resizeMode="cover" />
+            ) : (
+              <Icon name="camera" size={22} color={c.textMuted} />
+            )}
+          </Pressable>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Pressable onPress={pickPhoto} disabled={photoBusy} hitSlop={6}>
+              <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+                {data.personalInfo?.profilePhoto ? t("Change photo", "Badilisha picha") : t("Add profile photo", "Ongeza picha ya wasifu")}
+              </Text>
+            </Pressable>
+            {data.personalInfo?.profilePhoto ? (
+              <Pressable onPress={removePhoto} hitSlop={6}>
+                <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{t("Remove", "Ondoa")}</Text>
+              </Pressable>
+            ) : (
+              <Text style={{ color: c.textMuted, fontSize: 12 }}>{t("Optional — only some templates show it.", "Si lazima — kwenye baadhi ya miundo tu.")}</Text>
+            )}
+          </View>
+        </View>
         <TextField label={t("Full name", "Jina kamili")} value={data.personalInfo?.fullName || ""} onChangeText={(t) => patchPersonal("fullName", t)} autoCapitalize="words" />
         <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "mf. Mhandisi wa Programu")} value={data.personalInfo?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
         <TextField label={t("Email", "Barua pepe")} value={data.personalInfo?.email || ""} onChangeText={(t) => patchPersonal("email", t)} keyboardType="email-address" autoCapitalize="none" />

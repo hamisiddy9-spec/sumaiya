@@ -4,6 +4,7 @@ import type { CV } from "@sumaiya/types";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { dedupe } from "../lib/cv-dedupe";
+import { useAuthContext } from "../contexts/auth-context";
 
 /**
  * Offline-first CV list for the mobile app.
@@ -16,13 +17,26 @@ import { dedupe } from "../lib/cv-dedupe";
  * Same return shape as the shared hook so screens swap the import and nothing
  * else changes.
  */
-const LOCAL_USER = "me";
-
 export function useCvs() {
+  const { user } = useAuthContext();
+  // Scope the on-device cache to the actual signed-in account. This used to be
+  // the constant "me" — fine for a single-account phone, but on a shared
+  // device (or this QA phone, signed in/out across 3 test accounts) every
+  // account read and wrote the same cache rows, so one account's CVs could
+  // show up under another's session.
+  const LOCAL_USER = user?.id ?? "signed-out";
   const [cvs, setCvs] = useState<CV[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // True when the server gave us rows but they could not be cached on the
+  // device. The list still renders them; we just say so instead of pretending
+  // local storage is fine.
+  const [storageBlocked, setStorageBlocked] = useState(false);
   const mounted = useRef(true);
+  // Mirrors of cvs/error for the focus effect, so it can decide whether a
+  // cheap local re-read is enough or a real re-sync is needed.
+  const latest = useRef<{ count: number; error: string | null }>({ count: 0, error: null });
+  latest.current = { count: cvs.length, error };
 
   const readLocal = useCallback(async (): Promise<CV[]> => {
     try {
@@ -35,18 +49,38 @@ export function useCvs() {
     } catch {
       return [];
     }
-  }, []);
+  }, [LOCAL_USER]);
 
   const loadCVs = useCallback(async () => {
     setLoading(true);
     await readLocal(); // show what's on the device right away
     try {
       const server = await apiClient.listCVs();
+      // Best-effort persist — but a storage failure must NEVER hide rows the
+      // server just handed us. That combination is exactly how a returning user
+      // on a fresh install ended up staring at "CV zako zipo hapa" while six
+      // CVs sat on the server: the write threw, the re-read returned [], and
+      // nothing said so.
+      let persistFailed = false;
       for (const cv of server) {
-        await offlineStorage.saveCVOffline({ ...cv, userId: LOCAL_USER }).catch(() => {});
+        // One failed write means the local store is unusable — stop trying.
+        // Waiting on every row here is what froze the UI for ~10 s (624 skipped
+        // frames) once the SQLite layer started failing: six sequential writes,
+        // each with its own retry, all blocking the list from rendering.
+        if (persistFailed) break;
+        try {
+          await offlineStorage.saveCVOffline({ ...cv, userId: LOCAL_USER });
+        } catch {
+          persistFailed = true;
+        }
       }
-      await readLocal();
-      if (mounted.current) setError(null);
+      const local = await readLocal();
+      if (mounted.current) {
+        const storageUnusable = local.length === 0 && server.length > 0;
+        if (storageUnusable) setCvs(server);
+        setStorageBlocked(persistFailed || storageUnusable);
+        setError(null);
+      }
     } catch (e) {
       // Offline / not signed in — the local list still stands.
       if (mounted.current) {
@@ -55,7 +89,7 @@ export function useCvs() {
     } finally {
       if (mounted.current) setLoading(false);
     }
-  }, [readLocal]);
+  }, [readLocal, LOCAL_USER]);
 
   const deleteCV = useCallback(async (id: string) => {
     await offlineStorage.deleteCVOffline(id).catch(() => {});
@@ -109,7 +143,7 @@ export function useCvs() {
       }
       return merged;
     },
-    [cvs, readLocal],
+    [cvs, readLocal, LOCAL_USER],
   );
 
   useEffect(() => {
@@ -122,13 +156,18 @@ export function useCvs() {
 
   // Coming back to a screen (e.g. from the editor) — re-read the local cache so
   // a just-saved CV shows immediately. Cheap: SQLite read, no network.
+  //
+  // But if we have nothing to show, or the last sync failed, a local read can
+  // never help: the rows were never cached. Go back to the server instead, so a
+  // returning user is not stuck on "huna CV" while their CVs sit on the server.
   useFocusEffect(
     useCallback(() => {
       mounted.current = true;
-      readLocal();
+      if (latest.current.count === 0 || latest.current.error) loadCVs();
+      else readLocal();
       return () => {};
-    }, [readLocal]),
+    }, [loadCVs, readLocal]),
   );
 
-  return { cvs, loading, error, loadCVs, deleteCV, updateCV };
+  return { cvs, loading, error, storageBlocked, loadCVs, deleteCV, updateCV };
 }

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Alert, Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useLang } from "../lib/i18n";
-import { Button, Screen, ScreenTitle, haptics, useThemeColors } from "../components/ui";
+import { Button, Screen, ScreenTitle, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
 interface Pic {
@@ -61,11 +61,11 @@ export function PdfToolsScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: t("Save or share PDF", "Hifadhi au shiriki PDF") });
       } else {
-        Alert.alert(t("PDF ready", "PDF tayari"), uri);
+        dialog.alert(t("PDF ready", "PDF tayari"), uri);
       }
     } catch {
       haptics.error();
-      Alert.alert(t("Couldn't make the PDF", "Imeshindwa kutengeneza PDF"), t("Try again.", "Jaribu tena."));
+      dialog.alert(t("Couldn't make the PDF", "Imeshindwa kutengeneza PDF"), t("Try again.", "Jaribu tena."));
     } finally {
       setBusy(false);
     }

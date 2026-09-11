@@ -6,8 +6,30 @@ const DB_VERSION = 1;
 
 export class OfflineStorage {
   private db: SQLite.SQLiteDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
+  private lastError: unknown = null;
 
+  /**
+   * Open the database. Idempotent and concurrency-safe: the first caller opens
+   * (with the NPE retry), everyone else awaits the same promise. A failed open
+   * no longer poisons the process — the next call retries, so a transient
+   * native failure at boot can't leave every CV save broken for the whole
+   * session (which is exactly what used to happen: the one init() in _layout
+   * threw, `db` stayed null, and every write threw "Database not initialized"
+   * forever — surfacing to the user as "Couldn't save").
+   */
   async init(): Promise<void> {
+    if (this.db) return;
+    if (this.initPromise) return this.initPromise;
+    this.initPromise = this.openWithRetry();
+    try {
+      await this.initPromise;
+    } finally {
+      this.initPromise = null;
+    }
+  }
+
+  private async openWithRetry(): Promise<void> {
     // expo-sqlite on the New Architecture intermittently rejects the first
     // execAsync after openDatabaseAsync with a native NullPointerException
     // (the connection handle isn't ready yet). Retry once with a fresh
@@ -16,8 +38,10 @@ export class OfflineStorage {
       try {
         this.db = await SQLite.openDatabaseAsync(DB_NAME);
         await this.createTables();
+        this.lastError = null;
         return;
       } catch (error) {
+        this.lastError = error;
         try {
           await this.db?.closeAsync();
         } catch {
@@ -30,6 +54,20 @@ export class OfflineStorage {
         }
         await new Promise((r) => setTimeout(r, 200));
       }
+    }
+  }
+
+  /**
+   * Every read/write funnels through here, so any method called on a cold or
+   * half-opened instance opens it first instead of throwing.
+   */
+  private async ensure(): Promise<void> {
+    if (this.db) return;
+    await this.init();
+    if (!this.db) {
+      throw new Error(
+        `Offline storage unavailable: ${this.lastError instanceof Error ? this.lastError.message : String(this.lastError ?? "unknown")}`,
+      );
     }
   }
 
@@ -66,6 +104,7 @@ export class OfflineStorage {
   }
 
   async saveCVOffline(cv: CV): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const stmt = await this.db.prepareAsync(`
@@ -91,6 +130,7 @@ export class OfflineStorage {
   }
 
   async getCVOffline(cvId: string): Promise<CV | null> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const result = await this.db.getFirstAsync<any>(
@@ -114,6 +154,7 @@ export class OfflineStorage {
   }
 
   async getCVsOffline(userId: string): Promise<CV[]> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const results = await this.db.getAllAsync<any>(
@@ -135,12 +176,14 @@ export class OfflineStorage {
   }
 
   async deleteCVOffline(cvId: string): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     await this.db.runAsync("DELETE FROM cvs WHERE id = ?", [cvId]);
   }
 
   async addToSyncQueue(item: SyncQueueItem): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const stmt = await this.db.prepareAsync(`
@@ -165,6 +208,7 @@ export class OfflineStorage {
   }
 
   async getSyncQueue(): Promise<SyncQueueItem[]> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const results = await this.db.getAllAsync<any>(
@@ -183,12 +227,14 @@ export class OfflineStorage {
   }
 
   async removeSyncQueueItem(id: string): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     await this.db.runAsync("DELETE FROM sync_queue WHERE id = ?", [id]);
   }
 
   async updateSyncQueueItem(id: string, updates: Partial<SyncQueueItem>): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const item = await this.db.getFirstAsync<any>(
@@ -216,6 +262,7 @@ export class OfflineStorage {
   }
 
   async markCVSynced(cvId: string): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     const now = Date.now();
@@ -226,6 +273,7 @@ export class OfflineStorage {
   }
 
   async clearSyncQueue(): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     await this.db.execAsync("DELETE FROM sync_queue");
@@ -233,6 +281,7 @@ export class OfflineStorage {
 
   /** Wipes every offline CV and pending sync operation (Settings > Clear Cache). */
   async clearAll(): Promise<void> {
+    await this.ensure();
     if (!this.db) throw new Error("Database not initialized");
 
     await this.db.execAsync("DELETE FROM sync_queue; DELETE FROM cvs;");
