@@ -24,7 +24,7 @@ function job(overrides: Partial<UnifiedContext["matchedJobs"][number]> = {}) {
   return {
     id: "j1", title: "Backend Engineer", company: "NMB Bank", location: "Dar",
     employmentType: "full-time", category: "tech", applicationDeadline: null,
-    score: 80, reason: "matched React", postedAt: "2026-01-01T00:00:00Z", ...overrides,
+    score: 80, reason: "matched React", postedAt: "2026-01-01T00:00:00Z", description: "", ...overrides,
   };
 }
 
@@ -124,6 +124,29 @@ describe("computeSignals", () => {
     ctx.matchedJobs = [job({ score: 55 })];
     const sigs = computeSignals(ctx, NOW);
     expect(sigs.some((s) => s.type === "career.skillGap")).toBe(true);
+  });
+
+  it("career.skillGap names the actual missing skill when it can be determined — the Learning Hub join", () => {
+    const ctx = baseCtx();
+    ctx.activeCv = {
+      id: "cv1", title: "My CV",
+      data: { personal: { fullName: "", jobTitle: "", email: "", phone: "", location: "" }, summary: "Retail assistant with strong teamwork.", experience: [], education: [], skills: [], certifications: [], languages: [], projects: [], referees: [] } as never,
+    };
+    ctx.matchedJobs = [job({ score: 55, description: "Must know excel and inventory management for this storekeeper role." })];
+    const sigs = computeSignals(ctx, NOW);
+    const gap = sigs.find((s) => s.type === "career.skillGap")!;
+    expect(gap.missingSkills).toContain("excel");
+    expect(gap.detail.en).toContain("Excel");
+    expect(gap.trigger).toContain("missing:");
+  });
+
+  it("career.skillGap stays generic (no missingSkills) when there's no CV or no JD text to diff against", () => {
+    const ctx = baseCtx();
+    ctx.matchedJobs = [job({ score: 55, description: "" })]; // no activeCv either
+    const sigs = computeSignals(ctx, NOW);
+    const gap = sigs.find((s) => s.type === "career.skillGap")!;
+    expect(gap.missingSkills).toBeUndefined();
+    expect(gap.detail.en).toContain("see exactly which skills");
   });
 
   it("application.followUp fires for an application stale > 7 days, citing the days", () => {

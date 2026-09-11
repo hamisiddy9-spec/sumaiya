@@ -43,6 +43,10 @@ export interface ContextJob {
   reason: string;
   /** When the job listing itself was ingested — drives the "new match" signal. */
   postedAt: string;
+  /** Full JD text — internal only, for the deterministic skill-gap keyword
+   *  diff in signals.ts. Never put this into contextToPromptBlock's output —
+   *  see that function's own "never dumps full job descriptions" guarantee. */
+  description: string;
 }
 
 export interface RecentActivity {
@@ -116,6 +120,7 @@ export async function assembleUserContext(
       applicationDeadline: job.applicationDeadline,
       updatedAt: jobRecommendation.updatedAt,
       postedAt: job.createdAt,
+      description: job.description,
     })
       .from(jobRecommendation)
       .innerJoin(job, eq(jobRecommendation.jobId, job.id))
@@ -160,6 +165,7 @@ export async function assembleUserContext(
     score: r.score,
     reason: r.reason,
     postedAt: iso(r.postedAt) ?? new Date(0).toISOString(),
+    description: r.description ?? "",
   }));
 
   // Recent activity — the last few things that happened, across every surface.

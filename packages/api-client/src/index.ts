@@ -66,6 +66,8 @@ export interface MobileSignal {
   jobId?: string;
   applicationId?: string;
   confirmations?: number;
+  /** career.skillGap only — specific missing skill keywords, lowercase. */
+  missingSkills?: string[];
 }
 
 export interface ApiClientConfig {

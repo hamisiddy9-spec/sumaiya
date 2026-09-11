@@ -6,6 +6,21 @@
  */
 import type { MobileSignal } from "@sumaiya/api-client";
 import type { Lang } from "./i18n";
+import { SKILL_AREAS } from "./courses";
+
+/** Matches a raw missing-skill keyword from the server (e.g. "excel") to this
+ *  catalogue's own labelled skill area, so the CTA can name it the way the
+ *  Learning Hub itself does ("Excel") rather than a bare capitalised keyword.
+ *  Falls back to the raw keyword, capitalised, when nothing in the curated
+ *  14 areas covers it — the signal is still real, just not yet catalogued. */
+function skillLabel(keyword: string, lang: Lang): string {
+  const k = keyword.toLowerCase();
+  const area = SKILL_AREAS.find(
+    (a) => a.id === k || a.jobKeywords.includes(k) || a.cvKeywords.includes(k) || a.skill.en.toLowerCase() === k,
+  );
+  if (area) return area.skill[lang];
+  return keyword.charAt(0).toUpperCase() + keyword.slice(1);
+}
 
 export interface SignalAction {
   /** Button copy, e.g. "Tailor my CV". */
@@ -39,11 +54,15 @@ export function signalAction(s: MobileSignal): SignalAction {
         cta: { en: "Check my CV", sw: "Kagua CV yangu" },
         target: { screen: "AtsChecker" },
       };
-    case "career.skillGap":
+    case "career.skillGap": {
+      const skill = s.missingSkills?.[0];
       return {
-        cta: { en: "See what to learn", sw: "Ona cha kujifunza" },
+        cta: skill
+          ? { en: `Learn ${skillLabel(skill, "en")}`, sw: `Jifunze ${skillLabel(skill, "sw")}` }
+          : { en: "See what to learn", sw: "Ona cha kujifunza" },
         target: { screen: "LearningHub" },
       };
+    }
     case "application.followUp":
       return {
         cta: { en: "Open applications", sw: "Fungua maombi" },

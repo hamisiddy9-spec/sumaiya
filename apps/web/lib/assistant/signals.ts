@@ -13,6 +13,8 @@
  */
 import type { UnifiedContext, ContextApplication, ContextJob } from "./context";
 import { analyzeCv, atsScore } from "@/lib/ats-score";
+import { analyzeJob } from "@/lib/job-analysis";
+import { getCVTerms } from "@/lib/job-match";
 
 export type SignalType =
   | "cv.tailor"
@@ -36,6 +38,11 @@ export interface Signal {
   jobId?: string;
   applicationId?: string;
   confirmations?: number;
+  /** career.skillGap only — the specific known skills the job asks for that
+   *  don't show up on the CV yet, so the nudge can name them instead of
+   *  staying vague. Deterministic (job-analysis's known-tool lexicon diffed
+   *  against the CV's own terms), never AI-guessed. */
+  missingSkills?: string[];
 }
 
 /**
@@ -81,6 +88,11 @@ export const SIGNAL_THRESHOLDS = {
 
 function norm(s: string): string {
   return s.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/** "excel" -> "Excel" — job-analysis's skill lexicon is all lowercase. */
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** An application is "for" a job when title + company match (jobs aren't FK-linked to applications). */
@@ -232,20 +244,45 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
   }
 
   // 6. Matched job with a real (but not strong) score → skill-gap check.
+  // Names the actual missing skills when they can be determined (the JD's
+  // known-tool lexicon diffed against the CV's own terms — both already
+  // deterministic, both already used elsewhere) instead of staying vague.
+  // This is the join the skill-gap signal and the Learning Hub's course
+  // catalogue were missing: a nudge that names "Excel" can be matched by the
+  // client to the exact course that teaches it, rather than only pointing at
+  // the Learning Hub in general.
+  const cvTerms = context.activeCv ? getCVTerms(context.activeCv.data) : null;
   for (const job of jobs) {
     if (appliedFor(context.applications, job)) continue;
     if (job.score < SIGNAL_THRESHOLDS.skillGapMinScore || job.score >= SIGNAL_THRESHOLDS.skillGapMaxScore) continue;
+
+    let missing: string[] = [];
+    if (cvTerms && job.description) {
+      try {
+        missing = analyzeJob(job.description, job.title).skills.filter((s) => !cvTerms.has(s)).slice(0, 3);
+      } catch { /* keep the generic nudge below if analysis fails on odd JD text */ }
+    }
+    const named = missing.length ? missing.map(cap).join(", ") : null;
+
     signals.push({
       type: "career.skillGap",
       tool: "career.skillGap",
       priority: 50,
       jobId: job.id,
       title: { en: "Close the gap for this role", sw: "Funga pengo la kazi hii" },
-      detail: {
-        en: `You match "${job.title}" at ${job.company} at ${job.score}% — see exactly which skills it expects that you're missing.`,
-        sw: `Unaendana na "${job.title}" katika ${job.company} kwa ${job.score}% — ona ujuzi gani unaokosekana.`,
-      },
-      trigger: `match score ${job.score}% in [${SIGNAL_THRESHOLDS.skillGapMinScore}..${SIGNAL_THRESHOLDS.skillGapMaxScore})`,
+      detail: named
+        ? {
+            en: `You match "${job.title}" at ${job.company} at ${job.score}% — it also asks for ${named}, which isn't on your CV yet.`,
+            sw: `Unaendana na "${job.title}" katika ${job.company} kwa ${job.score}% — pia inahitaji ${named}, ambayo haiko kwenye CV yako bado.`,
+          }
+        : {
+            en: `You match "${job.title}" at ${job.company} at ${job.score}% — see exactly which skills it expects that you're missing.`,
+            sw: `Unaendana na "${job.title}" katika ${job.company} kwa ${job.score}% — ona ujuzi gani unaokosekana.`,
+          },
+      trigger: named
+        ? `match score ${job.score}%, missing: ${missing.join(",")}`
+        : `match score ${job.score}% in [${SIGNAL_THRESHOLDS.skillGapMinScore}..${SIGNAL_THRESHOLDS.skillGapMaxScore})`,
+      missingSkills: missing.length ? missing : undefined,
     });
   }
 
