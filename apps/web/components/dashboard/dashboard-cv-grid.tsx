@@ -73,7 +73,17 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
   // pure and already used by the ATS Checker panel, so every CV gets an
   // at-a-glance score here even if its owner never explicitly ran a check
   // on it. Same score bands as the checker (>=80 ready, >=55 needs work).
-  const ats = useMemo(() => atsScore(analyzeCv(data, sw)), [data, sw]);
+  // Defensively wrapped: lib/assistant/signals.ts's own ATS check treats a
+  // CV analyzeCv can't handle as "no signal", not a hard failure — a badge
+  // on a dashboard card is even less of a place to let one bad CV's data
+  // crash the whole grid instead of just quietly not showing a score.
+  const ats = useMemo(() => {
+    try {
+      return atsScore(analyzeCv(data, sw));
+    } catch {
+      return null;
+    }
+  }, [data, sw]);
 
   const { confirming, trigger: triggerDelete } = useDeleteConfirm(() => {
     setMenuOpen(false);
@@ -115,13 +125,15 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
             <Globe className="w-3 h-3" /> {sw ? "Inaonekana" : "Live"}
           </span>
         )}
-        <span
-          className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm ${
-            ats >= 80 ? "bg-pine text-cream" : ats >= 55 ? "bg-gold text-espresso" : "bg-red-500 text-white"
-          }`}
-        >
-          ATS {ats}
-        </span>
+        {ats !== null && (
+          <span
+            className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm ${
+              ats >= 80 ? "bg-pine text-cream" : ats >= 55 ? "bg-gold text-espresso" : "bg-red-500 text-white"
+            }`}
+          >
+            ATS {ats}
+          </span>
+        )}
       </Link>
 
       {/* Footer */}
