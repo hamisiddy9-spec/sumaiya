@@ -13,6 +13,15 @@ export function LangToggle() {
     // Refresh server components (which read the lang cookie via headers) instead
     // of a full page reload — keeps client state, scroll position and bundles.
     router.refresh();
+    // Best-effort, fire-and-forget: persist server-side too, so anything
+    // composed OUTSIDE this request (a cron job's push notification) can be
+    // written in the right language. 401s silently for a guest — the cookie
+    // still applies locally either way.
+    fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lang: next }),
+    }).catch(() => {});
   }
 
   return (

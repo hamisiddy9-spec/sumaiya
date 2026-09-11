@@ -267,6 +267,17 @@ export class ApiClient {
     });
   }
 
+  // Persists the UI language choice server-side so push notifications (sent
+  // from a cron job, with no access to this device's local setting) can be
+  // composed in the right language. Best-effort — the caller should swallow
+  // failures, same as the local setSecureItem write it accompanies.
+  async setLangPreference(lang: "en" | "sw"): Promise<void> {
+    await this.request<{ success: boolean }>("/api/profile", {
+      method: "PATCH",
+      body: JSON.stringify({ lang }),
+    });
+  }
+
   // ── Proactive signals (Hono /api/mobile/signals) ─────────────────────────
   async getSignals(): Promise<MobileSignal[]> {
     return this.request<MobileSignal[]>("/api/mobile/signals").catch(() => [] as MobileSignal[]);

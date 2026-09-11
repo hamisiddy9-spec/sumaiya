@@ -213,6 +213,9 @@ export function SettingsForm({
               ...(profileLoaded ? { jobTitle, phone, location, linkedin, website, summary } : {}),
               emailNotifications: emailNotif,
               analyticsOptOut,
+              // Persisted so server-composed messages (push notifications
+              // from a cron job) can be written in the right language.
+              lang: preferredLang,
             }),
           }),
         ]);

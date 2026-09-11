@@ -20,6 +20,9 @@ const profileUpdateSchema = z.object({
   photo: z.string().max(500).optional(),
   summary: z.string().max(2000).optional(),
   emailNotifications: z.boolean().optional(),
+  // Persisted so server-composed messages (push notifications from a cron
+  // job) can be written in the right language — see schema.ts's comment.
+  lang: z.enum(["en", "sw"]).optional(),
   // Privacy control for the feedback flywheel: true = record no outcome events.
   analyticsOptOut: z.boolean().optional(),
   // Career Profile — the full structured fact-set (source of truth). When

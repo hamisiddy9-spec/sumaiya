@@ -206,6 +206,14 @@ export const userProfile = pgTable("user_profile", {
   // untouched (NULL = empty profile). Shape: CareerProfile in types/index.ts.
   careerProfile: jsonb("career_profile").$type<import("@/types").CareerProfile | null>().default(null),
   emailNotifications: boolean("email_notifications").notNull().default(true),
+  // The user's chosen UI language ("en" | "sw"), persisted server-side so
+  // anything composed OUTSIDE a request from their own device — push
+  // notifications from a cron job, an email — can be written in the right
+  // language. Before this, every server-composed message defaulted to
+  // English regardless of the device-local language the person actually
+  // uses, because there was nowhere to read it back from. NULL = unknown,
+  // callers fall back to English.
+  lang: text("lang"),
   // Privacy control for the feedback flywheel: when true, NO outcome events
   // are recorded for this user (the write path checks this flag per event).
   analyticsOptOut: boolean("analytics_opt_out").notNull().default(false),

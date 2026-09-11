@@ -13,6 +13,7 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
+import { apiClient } from "./api-client";
 
 export type Lang = "en" | "sw";
 
@@ -61,6 +62,12 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
     setLangState(l);
     lastKnownLang = l;
     setSecureItem("language", l).catch(() => {
+      /* non-fatal */
+    });
+    // Best-effort — server-composed messages (push notifications from a
+    // cron job) have no access to this device's local setting otherwise.
+    // Silently ignored offline/signed-out; the local choice still applies.
+    apiClient.setLangPreference(l).catch(() => {
       /* non-fatal */
     });
   }, []);

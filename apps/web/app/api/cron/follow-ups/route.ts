@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
       continue;
     }
     // Respect the user's notification preference (defaults to on).
-    const [up] = await db.select({ on: userProfile.emailNotifications }).from(userProfile).where(eq(userProfile.id, userId)).limit(1);
+    const [up] = await db.select({ on: userProfile.emailNotifications, lang: userProfile.lang }).from(userProfile).where(eq(userProfile.id, userId)).limit(1);
     if (up && up.on === false) {
       await db.update(application).set({ followUpRemindedAt: null }).where(inArray(application.id, ids));
       continue;
@@ -102,13 +102,23 @@ export async function GET(req: NextRequest) {
       usersEmailed++;
       remindedApps += claimed.length;
       // Native nudge alongside the email — best-effort, never blocks the run.
+      // The email itself (sendFollowUpReminder above) is still English-only —
+      // a larger, separate piece of work (every template in lib/email.ts),
+      // not attempted here. The push text is small enough to do properly now
+      // that userProfile.lang exists to read.
       const n = list.length;
+      const sw = up?.lang === "sw";
       void sendExpoPush(userId, {
-        title: n === 1 ? "Follow up on your application" : `${n} applications to follow up`,
-        body:
-          n === 1
-            ? `It's been a week since you applied to ${list[0].title}${list[0].company ? " at " + list[0].company : ""}.`
-            : "A quick follow-up message can move a stalled application forward.",
+        title: sw
+          ? (n === 1 ? "Fuatilia ombi lako" : `Maombi ${n} yanahitaji ufuatiliaji`)
+          : (n === 1 ? "Follow up on your application" : `${n} applications to follow up`),
+        body: sw
+          ? (n === 1
+              ? `Imepita wiki tangu uombe ${list[0].title}${list[0].company ? " katika " + list[0].company : ""}.`
+              : "Ujumbe mfupi wa kufuatilia unaweza kusogeza mbele ombi lililokwama.")
+          : (n === 1
+              ? `It's been a week since you applied to ${list[0].title}${list[0].company ? " at " + list[0].company : ""}.`
+              : "A quick follow-up message can move a stalled application forward."),
         data: { screen: "Applications" },
       }).catch(() => {});
     } catch (err) {

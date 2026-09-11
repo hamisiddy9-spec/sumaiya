@@ -17,7 +17,7 @@
  * that to `${type}|${jobId ?? applicationId ?? "profile"}` with a fixed
  * per-type cooldown — a real reminder cadence, not spam.
  */
-import { db, cv, signalNotification, type NewSignalNotification } from "@/lib/db";
+import { db, cv, userProfile, signalNotification, type NewSignalNotification } from "@/lib/db";
 import { desc, eq, and } from "drizzle-orm";
 import { assembleUserContext } from "@/lib/assistant/context";
 import { computeSignals, type Signal, type SignalType } from "@/lib/assistant/signals";
@@ -66,6 +66,14 @@ export async function dispatchSignalsForUser(userId: string, now: Date = new Dat
   const all = computeSignals(ctx, now).filter((s) => s.type !== "application.followUp");
   if (!all.length) return 0;
 
+  // Best-effort — a lookup failure just falls back to English, same as an
+  // unset preference. Never let this block the actual notification send.
+  let sw = false;
+  try {
+    const [row] = await db.select({ lang: userProfile.lang }).from(userProfile).where(eq(userProfile.id, userId)).limit(1);
+    sw = row?.lang === "sw";
+  } catch { /* default English */ }
+
   let sent = 0;
   for (const s of all) {
     if (sent >= MAX_SIGNALS_PER_USER) break;
@@ -92,7 +100,7 @@ export async function dispatchSignalsForUser(userId: string, now: Date = new Dat
         set: { sentAt: now, type: s.type },
       });
 
-    const msg = { title: s.title.en, body: s.detail.en, data: deepLink(s) };
+    const msg = { title: sw ? s.title.sw : s.title.en, body: sw ? s.detail.sw : s.detail.en, data: deepLink(s) };
     try {
       const [native, web] = await Promise.all([
         sendExpoPush(userId, msg).catch(() => 0),
