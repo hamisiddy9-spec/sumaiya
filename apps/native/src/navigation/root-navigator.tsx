@@ -36,6 +36,7 @@ import { FirstRunScreen, FIRST_RUN_KEY } from "../screens/first-run-screen";
 import { SplashScreen } from "../screens/splash-screen";
 import { ThemeScope, useThemeColors } from "../components/ui";
 import { useNavTheme, rootScreenOptions } from "./nav-config";
+import { resolveNotificationTarget } from "../lib/notification-route";
 
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
@@ -166,16 +167,14 @@ export function RootNavigator() {
   // Register for push once signed in (no-op until an EAS projectId exists).
   usePushRegistration(user?.id);
 
-  // Route a notification tap. Payload: { screen: "Applications" | "Guide" | ... , params?: {} }
+  // Route a notification tap — see resolveNotificationTarget's own comment
+  // for the two payload shapes this has to handle correctly.
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((res) => {
       const data = res.notification.request.content.data as { screen?: string; params?: Record<string, unknown> };
       if (!data?.screen || !navRef.isReady()) return;
       try {
-        (navRef.navigate as (n: string, p: unknown) => void)("App", {
-          screen: "HomeTab",
-          params: { screen: data.screen, params: data.params },
-        });
+        (navRef.navigate as (n: string, p: unknown) => void)("App", resolveNotificationTarget(data.screen, data.params));
       } catch {
         /* stale nav */
       }
