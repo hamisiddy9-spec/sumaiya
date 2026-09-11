@@ -37,7 +37,7 @@ describe("contextToPromptBlock", () => {
         { id: "a1", title: "App1", companyName: "Zuri", jobTitle: "Engineer", status: "applied", appliedAt: "2026-08-01", createdAt: "2026-08-01", updatedAt: "2026-08-02" },
       ],
       matchedJobs: [
-        { id: "j1", title: "Backend Dev", company: "NMB", location: "Dar", employmentType: "full-time", category: "tech", applicationDeadline: "2026-09-01", score: 82, reason: "matched React" },
+        { id: "j1", title: "Backend Dev", company: "NMB", location: "Dar", employmentType: "full-time", category: "tech", applicationDeadline: "2026-09-01", score: 82, reason: "matched React", postedAt: "2026-08-01T00:00:00Z" },
       ],
       unconfirmed: [
         { key: "summary", section: "summary", field: "summary", label: { en: "Professional summary", sw: "Muhtasari" }, value: "AI text", source: "conversation" },
@@ -72,7 +72,7 @@ describe("contextToPromptBlock", () => {
   it("never dumps full job descriptions into the prompt", () => {
     const block = contextToPromptBlock(ctx({
       matchedJobs: [
-        { id: "j1", title: "Backend Dev", company: "NMB", location: "Dar", employmentType: "full-time", category: "tech", applicationDeadline: null, score: 80, reason: "matched React" },
+        { id: "j1", title: "Backend Dev", company: "NMB", location: "Dar", employmentType: "full-time", category: "tech", applicationDeadline: null, score: 80, reason: "matched React", postedAt: "2026-08-01T00:00:00Z" },
       ],
     }));
     expect(block).not.toContain("description");

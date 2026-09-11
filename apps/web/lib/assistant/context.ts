@@ -41,6 +41,8 @@ export interface ContextJob {
   applicationDeadline: string | null;
   score: number;
   reason: string;
+  /** When the job listing itself was ingested — drives the "new match" signal. */
+  postedAt: string;
 }
 
 export interface RecentActivity {
@@ -113,6 +115,7 @@ export async function assembleUserContext(
       category: job.category,
       applicationDeadline: job.applicationDeadline,
       updatedAt: jobRecommendation.updatedAt,
+      postedAt: job.createdAt,
     })
       .from(jobRecommendation)
       .innerJoin(job, eq(jobRecommendation.jobId, job.id))
@@ -156,6 +159,7 @@ export async function assembleUserContext(
     applicationDeadline: r.applicationDeadline ? iso(r.applicationDeadline) : null,
     score: r.score,
     reason: r.reason,
+    postedAt: iso(r.postedAt) ?? new Date(0).toISOString(),
   }));
 
   // Recent activity — the last few things that happened, across every surface.

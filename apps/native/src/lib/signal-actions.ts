@@ -49,6 +49,11 @@ export function signalAction(s: MobileSignal): SignalAction {
         cta: { en: "Open applications", sw: "Fungua maombi" },
         target: { screen: "Applications" },
       };
+    case "job.newMatch":
+      return {
+        cta: { en: "See the job", sw: "Ona kazi" },
+        target: { screen: "Jobs" },
+      };
     default:
       return {
         cta: { en: "Open", sw: "Fungua" },

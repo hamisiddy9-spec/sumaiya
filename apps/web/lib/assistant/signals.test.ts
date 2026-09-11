@@ -24,7 +24,7 @@ function job(overrides: Partial<UnifiedContext["matchedJobs"][number]> = {}) {
   return {
     id: "j1", title: "Backend Engineer", company: "NMB Bank", location: "Dar",
     employmentType: "full-time", category: "tech", applicationDeadline: null,
-    score: 80, reason: "matched React", ...overrides,
+    score: 80, reason: "matched React", postedAt: "2026-01-01T00:00:00Z", ...overrides,
   };
 }
 
@@ -82,6 +82,29 @@ describe("computeSignals", () => {
     const sigs = computeSignals(ctx, NOW);
     expect(sigs.some((s) => s.type === "coverLetter.generate")).toBe(true);
     expect(sigs.find((s) => s.type === "coverLetter.generate")!.trigger).toContain("84%");
+  });
+
+  it("job.newMatch fires for a fresh, well-scored listing not applied to", () => {
+    const ctx = baseCtx();
+    ctx.matchedJobs = [job({ postedAt: "2026-08-18T00:00:00Z", score: 55 })]; // 1 day old
+    const sigs = computeSignals(ctx, NOW);
+    const sig = sigs.find((s) => s.type === "job.newMatch");
+    expect(sig).toBeDefined();
+    expect(sig!.jobId).toBe("j1");
+    expect(sig!.trigger).toContain("1d old");
+  });
+
+  it("no job.newMatch once the listing ages past the window, is low-score, or already applied to", () => {
+    const stale = baseCtx(); stale.matchedJobs = [job({ postedAt: "2026-08-01T00:00:00Z" })];
+    expect(computeSignals(stale, NOW).some((s) => s.type === "job.newMatch")).toBe(false);
+
+    const weak = baseCtx(); weak.matchedJobs = [job({ postedAt: "2026-08-18T00:00:00Z", score: 30 })];
+    expect(computeSignals(weak, NOW).some((s) => s.type === "job.newMatch")).toBe(false);
+
+    const appliedCtx = baseCtx();
+    appliedCtx.matchedJobs = [job({ postedAt: "2026-08-18T00:00:00Z" })];
+    appliedCtx.applications = [app()];
+    expect(computeSignals(appliedCtx, NOW).some((s) => s.type === "job.newMatch")).toBe(false);
   });
 
   it("ats.check fires when the active CV scores below threshold", () => {

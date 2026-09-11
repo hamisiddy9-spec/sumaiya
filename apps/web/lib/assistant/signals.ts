@@ -20,7 +20,8 @@ export type SignalType =
   | "confirmations"
   | "ats.check"
   | "career.skillGap"
-  | "application.followUp";
+  | "application.followUp"
+  | "job.newMatch";
 
 export interface Signal {
   type: SignalType;
@@ -72,6 +73,10 @@ export const SIGNAL_THRESHOLDS = {
   atsMinScore: 70,
   /** Days an application can sit in "applied" before a follow-up is useful. */
   followUpDays: 7,
+  /** A job listing this fresh, freshly matched, is a "new opportunity" nudge — not backlog noise. */
+  newMatchDays: 3,
+  /** Matched-job score at/above which a fresh posting is worth interrupting for. */
+  newMatchMinScore: 40,
 } as const;
 
 function norm(s: string): string {
@@ -120,6 +125,30 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
       },
       trigger: `${context.unconfirmed.length} needs-confirmation facts`,
       confirmations: context.unconfirmed.length,
+    });
+  }
+
+  // 1b. A genuinely new listing (ingested within newMatchDays) landed in this
+  //     user's top matches — recommendations are recomputed nightly but were
+  //     never surfaced until now. Freshness is judged on the JOB's own post
+  //     date, not the recommendation row (which is deleted+reinserted every
+  //     refresh, so its own createdAt can't tell "new to you" from "recomputed").
+  for (const job of jobs) {
+    if (appliedFor(context.applications, job)) continue;
+    if (job.score < SIGNAL_THRESHOLDS.newMatchMinScore) continue;
+    const ageDays = (now.getTime() - new Date(job.postedAt).getTime()) / 86_400_000;
+    if (ageDays < 0 || ageDays > SIGNAL_THRESHOLDS.newMatchDays) continue;
+    signals.push({
+      type: "job.newMatch",
+      tool: "jobs.search",
+      priority: 85,
+      jobId: job.id,
+      title: { en: "New job matched you", sw: "Kazi mpya imekuendana" },
+      detail: {
+        en: `"${job.title}" at ${job.company} was just posted and matches you at ${job.score}% — worth a look.`,
+        sw: `"${job.title}" katika ${job.company} imetangazwa hivi karibuni na inaendana nawe kwa ${job.score}% — angalia.`,
+      },
+      trigger: `postedAt ${job.postedAt} (${Math.floor(ageDays)}d old), score ${job.score}%`,
     });
   }
 
@@ -191,7 +220,7 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
           type: "ats.check",
           tool: "ats.check",
           priority: 60,
-          title: { en: "Your CV may miss ATS filters", sw: "CV yako inaweza kukosa vichujio vya ATS" },
+          title: { en: "Your CV may miss ATS filters", sw: "CV yako inaweza kukosa vigezo vya ATS" },
           detail: {
             en: `"${context.activeCv.title}" scores ${score}/100 on ATS readability — a quick check shows the exact fixes.`,
             sw: `"${context.activeCv.title}" ina alama ${score}/100 kwenye ATS — ukaguzi wa haraka unaonyesha marekebisho sahihi.`,
