@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
-import { db, cv } from "@/lib/db";
+import { db, cv, debugEvent } from "@/lib/db";
 import { eq, and, sql } from "drizzle-orm";
 import { downloadLog } from "@/lib/db";
 import { nanoid, customAlphabet } from "nanoid";
@@ -161,10 +161,24 @@ export const cvRoutes = new Hono()
     const docs = await db.select().from(cv).where(eq(cv.userId, userId));
     // TEMP diagnostic (remove once the intermittent-empty-list bug is caught):
     // a 200 with zero rows for an account known to have CVs looks identical
-    // to "no CVs" on the client, so log it here where we can see the actual
-    // resolved userId instead of guessing from the device.
+    // to "no CVs" on the client. console.log alone isn't enough to catch a
+    // RARE, intermittent case — this plan's runtime-log retention is 1h/1day,
+    // so by the time anyone notices and goes looking, the log is long gone.
+    // Write a durable row instead (best-effort — a write failure here must
+    // never break the actual response). Awaited, not fire-and-forget: a
+    // serverless function can be frozen the instant the response is sent,
+    // which would silently drop an un-awaited insert before it completes.
     if (docs.length === 0) {
-      console.log(`[cv-list-diag] GET /api/cv resolved userId=${userId} rows=0`);
+      try {
+        await db.insert(debugEvent).values({
+          id: `dbg_${nanoid()}`,
+          kind: "cv-list-empty",
+          userId,
+          detail: { path: "/api/cv", method: "GET" },
+        });
+      } catch (e) {
+        console.error("[cv-list-diag] durable log write failed:", e);
+      }
     }
     return c.json({ success: true, data: docs.map(withStoredShape) });
   })

@@ -385,6 +385,29 @@ export const signalNotification = pgTable("signal_notification", {
 export type SignalNotification = typeof signalNotification.$inferSelect;
 export type NewSignalNotification = typeof signalNotification.$inferInsert;
 
+// ─── Debug events (durable diagnostics) ────────────────────────────────────────
+// Vercel's own runtime-log retention on this plan is 1h/1day — far too short
+// to ever catch an intermittent, rare bug after the fact. This is a tiny,
+// generic durable log for exactly that situation: write one row here instead
+// of (or alongside) console.log when chasing something that might not
+// reproduce again for days. `kind` namespaces the situation being diagnosed
+// (e.g. "cv-list-empty"); `detail` carries whatever's useful for that kind.
+// Meant to be temporary per-investigation — delete the rows (or the whole
+// call site) once a bug is caught and fixed, this isn't meant to accumulate
+// forever.
+export const debugEvent = pgTable("debug_event", {
+  id: text("id").primaryKey(),
+  kind: text("kind").notNull(),
+  userId: text("user_id"),
+  detail: jsonb("detail").notNull().default({}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  kindIdx: index("debug_event_kind_idx").on(t.kind, t.createdAt),
+}));
+
+export type DebugEvent = typeof debugEvent.$inferSelect;
+export type NewDebugEvent = typeof debugEvent.$inferInsert;
+
 // ─── Job Recommendations (per-user, cached) ───────────────────────────────────
 // Top matches between a user's most recent CV and the live job feed, computed by
 // the heuristic scorer (lib/job-match.ts) and cached so the dashboard and feed
