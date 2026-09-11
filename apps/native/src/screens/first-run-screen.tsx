@@ -28,7 +28,7 @@ import {
 } from "../lib/career-fields";
 import { TemplateThumb } from "../components/cv/template-thumb";
 import { SumaiyaMark } from "../components/sumaiya-mark";
-import { Button, ProgressBar, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, ProgressBar, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
 
@@ -220,6 +220,7 @@ export function FirstRunScreen({ onDone }: Props) {
                   if (p) setPhoto(p);
                 } catch {
                   haptics.error();
+                  dialog.alert(t("Couldn't use that photo", "Imeshindwa kutumia picha hiyo"), t("Try a different one — or skip this for now.", "Jaribu nyingine — au ruka kwa sasa."));
                 } finally {
                   setPhotoBusy(false);
                 }

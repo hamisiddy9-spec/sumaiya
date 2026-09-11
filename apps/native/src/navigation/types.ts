@@ -58,7 +58,7 @@ export type ScanStackParamList = {
   ScanMain: undefined;
   PdfTools: undefined;
   ScanProcessing: { photoUri: string };
-  CVEditor: { templateId?: string | null; initialData?: unknown; nonce?: string } | undefined;
+  CvEditor: { templateId?: string | null; initialData?: unknown; nonce?: string } | undefined;
 };
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

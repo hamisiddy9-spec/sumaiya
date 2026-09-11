@@ -817,10 +817,14 @@ function TemplateLargePreview({ templateId, color }: { templateId: TemplateId; c
 }
 
 function TemplateModal({
-  currentTemplateId, primaryColor, onSelect, onClose, sw,
+  currentTemplateId, primaryColor, onSelect, onClose, sw, templateHistory,
 }: {
   currentTemplateId: TemplateId; primaryColor: string;
   onSelect: (id: TemplateId) => void; onClose: () => void; sw: boolean;
+  /** Every template id this CV has ever been saved with — exempts them from
+   *  the premium lock so switching away and back never paywalls a template
+   *  the owner already used for free. */
+  templateHistory: string[];
 }) {
   const [lockedTemplate, setLockedTemplate] = useState<TemplateId | null>(null);
   return (
@@ -845,7 +849,7 @@ function TemplateModal({
               : [...TEMPLATES.filter((t) => t.id === currentTemplateId), ...CURATED_CV_TEMPLATES]
             ).map((tpl) => {
               const isActive = tpl.id === currentTemplateId;
-              const locked = isPremiumTemplate(tpl.id) && !isActive;
+              const locked = isPremiumTemplate(tpl.id) && !isActive && !templateHistory.includes(tpl.id);
               return (
                 <button
                   key={tpl.id}
@@ -2750,6 +2754,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           onSelect={(id) => { setTemplate(id); triggerAutoSave(); track("template_changed", { templateId: id }); }}
           onClose={() => setShowTemplateModal(false)}
           sw={uiLang === "sw"}
+          templateHistory={Array.isArray(initialDoc.templateHistory) ? (initialDoc.templateHistory as string[]) : []}
         />
       )}
 

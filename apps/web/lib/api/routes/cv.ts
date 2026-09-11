@@ -17,6 +17,16 @@ import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 // (personalInfo/headline/title instead of personal/jobTitle/position). Web
 // reads it as blank rather than erroring, so it looks like the CV lost all
 // its content. Normalize on the way out so either shape renders correctly.
+/** Appends a template id to a CV's usage history if it isn't already there.
+ *  Never mutates the input; a jsonb column can come back as `unknown`, so
+ *  a non-array value (a stale row from before this column existed, or a
+ *  malformed one) is treated as empty rather than thrown on. */
+export function withTemplateInHistory(history: unknown, templateId: string | undefined): string[] {
+  const ids = Array.isArray(history) ? (history as string[]) : [];
+  if (!templateId || ids.includes(templateId)) return ids;
+  return [...ids, templateId];
+}
+
 function withStoredShape<T extends { data: unknown }>(doc: T): T {
   return { ...doc, data: toStoredCvData(doc.data) };
 }
@@ -80,14 +90,17 @@ export const cvRoutes = new Hono()
       ? "m_" + createHash("sha256").update(`${userId}:${body.clientId}`).digest("base64url").slice(0, 20)
       : nanoid();
 
+    const initialTemplateId = body.templateId ?? "nakuru";
     const values = {
       id,
       userId,
       title: body.title ?? "My CV",
-      templateId: body.templateId ?? "nakuru",
+      templateId: initialTemplateId,
       primaryColor: body.primaryColor ?? "#DA4A1C",
       fontFamily: body.fontFamily ?? "Inter",
       data: body.data ?? {},
+      // Grandfather fix — see the PATCH handler below for the full reasoning.
+      templateHistory: [initialTemplateId],
     };
 
     // THE SPINE: every CV write seeds the Career Profile (source "cv:<id>").
@@ -111,6 +124,7 @@ export const cvRoutes = new Hono()
         await seed(inserted.id);
         return c.json({ success: true, data: inserted }, 201);
       }
+      const [existingRow] = await db.select({ templateHistory: cv.templateHistory }).from(cv).where(eq(cv.id, id)).limit(1);
       const [updated] = await db
         .update(cv)
         .set({
@@ -119,6 +133,7 @@ export const cvRoutes = new Hono()
           primaryColor: values.primaryColor,
           fontFamily: values.fontFamily,
           data: values.data,
+          templateHistory: withTemplateInHistory(existingRow?.templateHistory, values.templateId),
           updatedAt: new Date(),
         })
         .where(and(eq(cv.id, id), eq(cv.userId, userId)))
@@ -175,16 +190,22 @@ export const cvRoutes = new Hono()
     const body = c.req.valid("json");
 
     const [existing] = await db
-      .select({ id: cv.id })
+      .select({ id: cv.id, templateHistory: cv.templateHistory })
       .from(cv)
       .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
       .limit(1);
 
     if (!existing) return c.json({ error: "Not found" }, 404);
 
+    // Grandfather fix: a template that was ever saved on this CV stays
+    // unlocked for it even if it becomes premium later (lib/types "Premium
+    // flagships"). Without this, switching templates away and back could
+    // paywall something the owner already made for free.
+    const nextHistory = withTemplateInHistory(existing.templateHistory, body.templateId);
+
     const [updated] = await db
       .update(cv)
-      .set({ ...body, updatedAt: new Date() })
+      .set({ ...body, templateHistory: nextHistory, updatedAt: new Date() })
       .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
       .returning();
 

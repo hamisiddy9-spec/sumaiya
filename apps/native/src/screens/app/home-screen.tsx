@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, Text, View } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
@@ -31,7 +31,6 @@ import type { HomeScreenProps } from "../../navigation/types";
 // else.
 const GUTTER = 12;
 const SIDE = 20;
-const COL_W = (Dimensions.get("window").width - SIDE * 2 - GUTTER) / 2;
 
 // A few natural variants per time-of-day bucket instead of one fixed phrase
 // repeated on every single visit — the same phrase every evening, forever,
@@ -67,6 +66,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const { t, lang } = useLang();
   const { cvs, loading, loadCVs } = useCvs();
   const [refreshing, setRefreshing] = React.useState(false);
+  // Live, not a module-level Dimensions.get() snapshot — a foldable's window
+  // width changes on fold/unfold without an app restart, and a stale value
+  // here would keep laying out phone-width tiles on a now-tablet-width screen.
+  const { width: winWidth } = useWindowDimensions();
+  const COL_W = (winWidth - SIDE * 2 - GUTTER) / 2;
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);

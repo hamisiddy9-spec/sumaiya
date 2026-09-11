@@ -16,7 +16,7 @@ export function ScanStack() {
     <Stack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <Stack.Screen name="ScanMain" component={ScanScreen} />
       <Stack.Screen name="ScanProcessing" component={ScanProcessingScreen} />
-      <Stack.Screen name="CVEditor" component={CvEditorScreen} />
+      <Stack.Screen name="CvEditor" component={CvEditorScreen} />
       <Stack.Screen name="PdfTools" component={PdfToolsScreen} />
     </Stack.Navigator>
   );

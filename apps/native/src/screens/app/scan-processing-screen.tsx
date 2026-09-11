@@ -119,7 +119,7 @@ export function ScanProcessingScreen({ route }: Props) {
             <Button
               label={t("Start a blank CV instead", "Anza CV tupu badala yake")}
               variant="ghost"
-              onPress={() => navigation.navigate("CVEditor", { nonce: String(Date.now()) })}
+              onPress={() => navigation.navigate("CvEditor", { nonce: String(Date.now()) })}
             />
           </View>
         </View>
@@ -201,7 +201,7 @@ export function ScanProcessingScreen({ route }: Props) {
       <Animated.View entering={FadeIn.duration(300).delay(80)}>
         <CvPreviewCard
           cv={previewCv}
-          onOpenEditor={() => navigation.navigate("CVEditor", { initialData: data, nonce: String(Date.now()) })}
+          onOpenEditor={() => navigation.navigate("CvEditor", { initialData: data, nonce: String(Date.now()) })}
         />
       </Animated.View>
 
@@ -209,7 +209,7 @@ export function ScanProcessingScreen({ route }: Props) {
       <Button
         label={t("Open in editor", "Fungua kwenye kihariri")}
         size="lg"
-        onPress={() => navigation.navigate("CVEditor", { initialData: data, nonce: String(Date.now()) })}
+        onPress={() => navigation.navigate("CvEditor", { initialData: data, nonce: String(Date.now()) })}
       />
       <View style={{ height: 10 }} />
       <Button label={t("Scan again", "Piga tena")} variant="ghost" onPress={() => navigation.goBack()} />

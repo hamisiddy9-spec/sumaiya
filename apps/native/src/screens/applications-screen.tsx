@@ -45,6 +45,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
             onPress={() => { haptics.light(); navigation.navigate("ApplicationDetail", {}); }}
             style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.accent, alignItems: "center", justifyContent: "center" }}
             accessibilityLabel={t("Add application", "Ongeza ombi")}
+            hitSlop={8}
           >
             <Icon name="plus" size={20} color={c.accentText} />
           </Pressable>

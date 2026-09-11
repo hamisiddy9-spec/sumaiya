@@ -39,6 +39,11 @@ export const cv = pgTable("cv", {
   userId: text("user_id").notNull(),
   title: text("title").notNull().default("My CV"),
   templateId: text("template_id").notNull().default("nakuru"),
+  // Every template id this CV has ever been saved with (jsonb string[]).
+  // Lets a premium-tier template stay usable for a CV that already used it
+  // before the tier existed — without this, switching away and back paywalls
+  // something the owner made for free. See lib/db/templates-used.ts.
+  templateHistory: jsonb("template_history").notNull().default([]),
   primaryColor: text("primary_color").notNull().default("#2563EB"),
   fontFamily: text("font_family").notNull().default("Inter"),
   data: jsonb("data").notNull().default({}),

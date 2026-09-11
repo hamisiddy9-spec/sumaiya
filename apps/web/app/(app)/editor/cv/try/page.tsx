@@ -44,6 +44,7 @@ export default async function GuestEditorPage({
     title: "My CV",
     data: createEmptyCVData(),
     templateId,
+    templateHistory: [templateId],
     primaryColor: "#DA4A1C",
     fontFamily: "Inter",
     downloadCount: 0,

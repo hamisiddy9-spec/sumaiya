@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -39,15 +39,6 @@ import { haptics } from "./ui/haptics";
  * 3.4× while the field grew on another (two centres of expansion for the eye),
  * and a destination screen re-animating its logo on top of all of it.
  */
-const { width, height } = Dimensions.get("window");
-const DIAG = Math.hypot(width, height);
-// The flooding disc must fully cover the screen at full bloom regardless of
-// where it starts from. DIAG/2 only guarantees that from dead-centre — once
-// the origin can be anywhere on screen (see `origin` prop), the worst case
-// (origin near one corner, farthest point the opposite corner) approaches the
-// full diagonal, so the disc's own diameter needs to be DIAG*2 (radius DIAG).
-const COVER = DIAG * 2;
-
 // The single clock. COVER_AT is the moment the field is opaque everywhere —
 // everything else in this file is expressed relative to it.
 const IGNITE_MS = 180;
@@ -80,6 +71,16 @@ export function PortalTransition({
   origin?: { x: number; y: number } | null;
 }) {
   const c = useThemeColors();
+  // Live, not a module-level Dimensions.get() snapshot taken once at bundle
+  // load — a fold/unfold changes the window size without an app restart.
+  const { width, height } = useWindowDimensions();
+  const DIAG = Math.hypot(width, height);
+  // The flooding disc must fully cover the screen at full bloom regardless of
+  // where it starts from. DIAG/2 only guarantees that from dead-centre — once
+  // the origin can be anywhere on screen (see `origin` prop), the worst case
+  // (origin near one corner, farthest point the opposite corner) approaches the
+  // full diagonal, so the disc's own diameter needs to be DIAG*2 (radius DIAG).
+  const COVER = DIAG * 2;
   const ox = origin?.x ?? width / 2;
   const oy = origin?.y ?? height / 2;
 

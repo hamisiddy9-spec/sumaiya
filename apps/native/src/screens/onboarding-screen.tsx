@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BackHandler, Dimensions, Pressable, Text, View } from "react-native";
+import { BackHandler, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
@@ -19,8 +19,6 @@ import { SumaiyaMark, type SumaiyaMarkState } from "../components/sumaiya-mark";
 import { OnboardingArt } from "../components/onboarding-art";
 import { PortalTransition } from "../components/portal-transition";
 import { useLang, type Lang } from "../lib/i18n";
-
-const { width } = Dimensions.get("window");
 
 interface Props {
   navigation: unknown;
@@ -72,6 +70,7 @@ const SLIDES: SlideData[] = [
 
 function Dot({ index, scrollX }: { index: number; scrollX: SharedValue<number> }) {
   const c = useThemeColors();
+  const { width } = useWindowDimensions();
   const style = useAnimatedStyle(() => {
     const input = [(index - 1) * width, index * width, (index + 1) * width];
     return {
@@ -97,6 +96,7 @@ function Slide({
 }) {
   const c = useThemeColors();
   const { lang } = useLang();
+  const { width } = useWindowDimensions();
 
   const visualStyle = useAnimatedStyle(() => {
     const input = [(index - 1) * width, index * width, (index + 1) * width];
@@ -232,6 +232,7 @@ export function OnboardingScreen({ onComplete }: Props) {
   const c = useThemeColors();
   const { t, setLang } = useLang();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
   const scrollX = useSharedValue(0);
   const ref = useRef<Animated.ScrollView>(null);
   const [stage, setStage] = useState<Stage>("welcome");
