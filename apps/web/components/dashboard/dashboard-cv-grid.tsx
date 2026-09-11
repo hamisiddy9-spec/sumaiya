@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Edit2, MoreHorizontal, Trash2, Copy, AlertCircle, Globe, Check, Link2, EyeOff, MessageSquareText } from "lucide-react";
@@ -10,6 +10,7 @@ import { useDeleteConfirm } from "@/components/dashboard/use-delete-confirm";
 import { ScaledPreview } from "@/components/dashboard/scaled-preview";
 import { TEMPLATES, parseCVData, isTemplateId, type CVData } from "@/types";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
+import { analyzeCv, atsScore } from "@/lib/ats-score";
 
 interface CVRecord {
   id: string;
@@ -68,6 +69,11 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
     TEMPLATE_COMPONENTS[isTemplateId(doc.templateId) ? doc.templateId : "nakuru"] ??
     TEMPLATE_COMPONENTS.nakuru;
   const data = parseCVData(doc.data);
+  // Live-computed, not read from a saved snapshot — analyzeCv/atsScore are
+  // pure and already used by the ATS Checker panel, so every CV gets an
+  // at-a-glance score here even if its owner never explicitly ran a check
+  // on it. Same score bands as the checker (>=80 ready, >=55 needs work).
+  const ats = useMemo(() => atsScore(analyzeCv(data, sw)), [data, sw]);
 
   const { confirming, trigger: triggerDelete } = useDeleteConfirm(() => {
     setMenuOpen(false);
@@ -109,6 +115,13 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
             <Globe className="w-3 h-3" /> {sw ? "Inaonekana" : "Live"}
           </span>
         )}
+        <span
+          className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm ${
+            ats >= 80 ? "bg-pine text-cream" : ats >= 55 ? "bg-gold text-espresso" : "bg-red-500 text-white"
+          }`}
+        >
+          ATS {ats}
+        </span>
       </Link>
 
       {/* Footer */}
