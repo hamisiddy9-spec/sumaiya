@@ -97,6 +97,7 @@ export const STARTER_STEPS: CourseUnit[] = [
       sw: "Umeona nafasi ya kazi sehemu yoyote? Niletee — bandika maneno yake, tuma kiungo, au piga picha ya ukurasa. Nitakuambia kazi inahitaji nini, ujuzi upi wako unafaa, na cha kubadilisha.",
     },
     cta: { en: "Send me the advert", sw: "Nitumie tangazo" },
+    seed: { en: "I have a job advert to look at. I am sending it now.", sw: "Nina tangazo la kazi la kuchambua. Nitalituma sasa." },
   },
   {
     id: "step:apply",
@@ -247,6 +248,10 @@ export const EXPERIENCE_COURSE: ShortCourse = {
         sw: "Jibu maswali yangu — mafunzo kwa vitendo, miradi ya darasa, kibanda, kujitolea, biashara ya familia — na mimi hubadilisha kila kimoja kuwa uzoefu ambao mwajiri anaweza kuusoma.",
       },
       cta: { en: "Start with Sumaiya", sw: "Anza na Sumaiya" },
+      seed: {
+        en: "I want to list everything I've done that could count as experience — attachment, class projects, volunteering, helping in a family business. Ask me questions.",
+        sw: "Nataka kuorodhesha kila nilichowahi kufanya kinachoweza kuhesabika kama uzoefu — mafunzo kwa vitendo, miradi ya darasa, kujitolea, kusaidia kwenye biashara ya familia. Niulize maswali.",
+      },
     },
     {
       id: "exp:numbers",
@@ -280,6 +285,10 @@ export const EXPERIENCE_COURSE: ShortCourse = {
         sw: "Fanya mazoezi nami: jinsi ya kujibu bila kujitetea, kwa kutumia kazi moja halisi uliyoifanya na ulichojifunza.",
       },
       cta: { en: "Practise the answer", sw: "Fanya mazoezi ya jibu" },
+      seed: {
+        en: "Help me practise answering \"you have no experience?\" using one real thing I've done.",
+        sw: "Nisaidie kufanya mazoezi ya kujibu \"huna uzoefu?\" nikitumia jambo moja halisi nililowahi kufanya.",
+      },
     },
     {
       id: "exp:apply",

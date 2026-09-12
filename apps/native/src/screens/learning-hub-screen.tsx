@@ -7,7 +7,7 @@ import type { CVData } from "@sumaiya/types";
 import type { JobRecommendation } from "@sumaiya/api-client";
 import { CourseCard } from "../components/learning/course-card";
 import { LessonSheet } from "../components/learning/lesson-sheet";
-import { APP_TOUR_COURSE, APP_TOUR_KEY, JOB_SEARCH_COURSE, JOB_SEARCH_KEY } from "../lib/short-courses";
+import { APP_TOUR_COURSE, APP_TOUR_KEY, EXPERIENCE_COURSE, EXPERIENCE_KEY, JOB_SEARCH_COURSE, JOB_SEARCH_KEY } from "../lib/short-courses";
 import {
   EMPTY_COURSE,
   getCourseProgress,
@@ -178,7 +178,6 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const [loading, setLoading] = useState(true);
   const [exploreOpen, setExploreOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [freeOnly, setFreeOnly] = useState(false);
   const [catalogue, setCatalogue] = useState<{ id: string; title: string; platform: string; url: string; free: boolean }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -187,8 +186,12 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   // stopped instead of starting from zero every visit.
   const [courseProgress, setCourseProgress] = useState<Record<string, CourseProgress>>({});
   const reloadCourses = useCallback(async () => {
-    const [job, tour] = await Promise.all([getCourseProgress(JOB_SEARCH_KEY), getCourseProgress(APP_TOUR_KEY)]);
-    setCourseProgress({ [JOB_SEARCH_KEY]: job, [APP_TOUR_KEY]: tour });
+    const [job, tour, exp] = await Promise.all([
+      getCourseProgress(JOB_SEARCH_KEY),
+      getCourseProgress(APP_TOUR_KEY),
+      getCourseProgress(EXPERIENCE_KEY),
+    ]);
+    setCourseProgress({ [JOB_SEARCH_KEY]: job, [APP_TOUR_KEY]: tour, [EXPERIENCE_KEY]: exp });
   }, []);
   useFocusEffect(useCallback(() => { void reloadCourses(); }, [reloadCourses]));
 
@@ -200,7 +203,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
       switch (action) {
         case "sumaiya":
           navigation.navigate("SumaiyaTab", {
-            seed: t("Nina tangazo la kazi la kuchambua. Nitalituma sasa.", "I have a job advert to look at. I am sending it now."),
+            seed: unit.seed ? t(unit.seed.en, unit.seed.sw) : undefined,
           });
           break;
         case "cvs": navigation.navigate("CVsTab"); break;
@@ -413,6 +416,13 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               onOpenLesson={(u) => openLesson(APP_TOUR_KEY, APP_TOUR_COURSE, u)}
               onReset={() => void resetCourse(APP_TOUR_KEY).then((p) => setCourseProgress((s) => ({ ...s, [APP_TOUR_KEY]: p })))}
             />
+            <CourseCard
+              course={EXPERIENCE_COURSE}
+              progress={courseProgress[EXPERIENCE_KEY] ?? EMPTY_COURSE}
+              onUnit={(u, a) => void runCourseUnit(EXPERIENCE_KEY, EXPERIENCE_COURSE, u, a)}
+              onOpenLesson={(u) => openLesson(EXPERIENCE_KEY, EXPERIENCE_COURSE, u)}
+              onReset={() => void resetCourse(EXPERIENCE_KEY).then((p) => setCourseProgress((s) => ({ ...s, [EXPERIENCE_KEY]: p })))}
+            />
           </View>
 
           {/* YOUR NEXT SKILLS */}
@@ -517,13 +527,6 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
                   style={{ flex: 1, paddingVertical: 11, fontSize: 15, color: c.text }}
                 />
               </View>
-              <Pressable
-                onPress={() => { haptics.selection(); setFreeOnly((v) => !v); }}
-                style={{ alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 5, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, borderWidth: 1.5, borderColor: freeOnly ? c.accent : c.border, backgroundColor: freeOnly ? c.accent + "14" : "transparent" }}
-              >
-                {freeOnly ? <Icon name="check" size={13} color={c.accent} /> : null}
-                <Text style={{ color: freeOnly ? c.accent : c.textBody, fontWeight: "700", fontSize: 12.5 }}>{t("Free only", "Za bure tu")}</Text>
-              </Pressable>
               {exploreFiltered.length === 0 ? (
                 <EmptyState icon="search" title={t("Nothing here yet", "Bado hakuna")} body={t("Try a different search.", "Jaribu utafutaji mwingine.")} />
               ) : (
@@ -533,7 +536,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>{r.platform}</Text>
                       <View style={{ backgroundColor: (r.free ? c.success : c.warning) + "1f", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                        <Text style={{ color: c.success, fontSize: 10, fontWeight: "800" }}>{t("FREE", "BURE")}</Text>
+                        <Text style={{ color: r.free ? c.success : c.warning, fontSize: 10, fontWeight: "800" }}>{r.free ? t("FREE", "BURE") : t("PAID", "INALIPWA")}</Text>
                       </View>
                     </View>
                     <Button label={t("Open course", "Fungua kozi")} variant="secondary" size="sm" rightIcon={<Icon name="external-link" size={13} color={c.text} />} onPress={() => confirmAndOpenUrl(r.url, t)} />

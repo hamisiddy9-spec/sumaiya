@@ -56,6 +56,13 @@ export interface CourseUnit {
   url?: string;
   /** kind === "task", and the lesson's closing practice step. */
   action?: CourseAction;
+  /**
+   * action === "sumaiya" only — the message pre-filled in chat. Every unit
+   * that opens Sumaiya asks for a different thing (a job advert to analyze,
+   * a day-1 experience list, interview practice), so this can't be one
+   * message shared across units. Omit to open chat with nothing pre-filled.
+   */
+  seed?: Bilingual;
   /** kind === "lesson" */
   lesson?: Lesson;
 }

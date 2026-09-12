@@ -20,7 +20,7 @@ const ROWS: Row[] = [
   { kind: "camera", icon: "camera", en: "Take a photo", sw: "Piga picha", hintEn: "A printed CV or a job advert", hintSw: "CV au tangazo la ajira" },
   { kind: "photo", icon: "image", en: "Photo library", sw: "Toka kwenye picha", hintEn: "A screenshot or a saved scan", hintSw: "Picha ya skrini au skani" },
   { kind: "file", icon: "file-text", en: "Upload a file", sw: "Pakia faili", hintEn: "PDF, Word or a text file", hintSw: "PDF, Word au maandishi" },
-  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika link ya ajira", hintEn: "I'll keep it as context — paste the advert text too if you can", hintSw: "Nitaihifadhi kama muktadha — bandika pia maandishi ya tangazo ukiweza" },
+  { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika link ya ajira", hintEn: "I'll use it as context, not read the page", hintSw: "Nitatumia kama muktadha, sitasoma ukurasa" },
   { kind: "myDoc", icon: "briefcase", en: "One of my CVs", sw: "CV yangu niliyonayo", hintEn: "Use it as a starting point", hintSw: "Ianzie hapo" },
 ];
 
