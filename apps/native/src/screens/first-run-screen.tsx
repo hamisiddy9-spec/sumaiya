@@ -177,6 +177,11 @@ export function FirstRunScreen({ onDone }: Props) {
       if (photo) await setPendingOnboardingPhoto(photo);
       await setDefaultTemplate(template).catch(() => {});
       await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
+    } catch {
+      // onDone() below still runs either way (finally) — first-run is a
+      // one-shot flow and the user should never get stuck here over a rare
+      // AsyncStorage fault. This only stops that fault from being an
+      // unhandled rejection, since neither call site below catches finish().
     } finally {
       onDone();
     }
