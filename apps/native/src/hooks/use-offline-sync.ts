@@ -155,8 +155,19 @@ export function useOfflineSync() {
       // Cast to SyncQueueItem for storage (operation types compatible)
       await offlineStorage.addToSyncQueue(item as any);
       setStatus((prev) => ({ ...prev, pendingCount: prev.pendingCount + 1 }));
+
+      // Try to sync right away instead of waiting on the 30s interval below.
+      // That interval only runs while this hook is mounted — and it's only
+      // ever mounted by the CV editor screen — so the common "edit, save,
+      // immediately go back" flow used to unmount the timer before it ever
+      // fired once, leaving an online-and-syncable edit sitting untried
+      // until the editor happened to be reopened and left open 30+ seconds.
+      // Fire-and-forget: this runs in the background even if the screen
+      // unmounts right after save() returns, and processSyncQueue's own
+      // per-item retry/backoff logic still applies if it's actually offline.
+      void processSyncQueue();
     },
-    []
+    [processSyncQueue]
   );
 
   // Auto-sync every 30 seconds
