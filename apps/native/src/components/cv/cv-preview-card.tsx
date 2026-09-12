@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
+import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { cvToHtml, CV_TEMPLATES, type CvTemplateId } from "../../lib/cv-html";
 import { useEntitlements } from "../../lib/entitlements";
 import { getDefaultTemplate } from "../../lib/prefs";
@@ -68,6 +69,12 @@ export function CvPreviewCard({
   const [dlError, setDlError] = useState(false);
 
   const html = useMemo(() => cvToHtml(cv, { accent: color, lang, template }), [cv, color, lang, template]);
+  // cvToHtml() renders a bare "&nbsp;" name line and skips every section
+  // with no data — a CV this sparse (a short chat that gave Sumaiya little
+  // to work with, a scan that mis-read) previews as a genuinely blank white
+  // page with zero explanation, right above "Download PDF"/"Save". The ATS
+  // checker already warns for exactly this case; this card didn't.
+  const cvIsEmpty = useMemo(() => isEmptyCv(cv.data), [cv.data]);
   const { width: screenW } = useWindowDimensions();
   const thumbW = Math.min(screenW - 64, 300);
   const thumbH = Math.round(thumbW * PAGE_RATIO);
@@ -164,6 +171,20 @@ export function CvPreviewCard({
         gap: 12,
       }}
     >
+      {cvIsEmpty ? (
+        <View style={{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.warning + "55", backgroundColor: c.warning + "12", gap: 4 }}>
+          <Text style={{ color: c.warning, fontSize: 13.5, fontWeight: "800" }}>
+            {t("This CV is still blank", "CV hii bado ni tupu")}
+          </Text>
+          <Text style={{ color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
+            {t(
+              "The preview below will look empty — there isn't enough here yet. Open the full editor to add your contacts, a job and some skills.",
+              "Muhtasari hapa chini utaonekana mtupu — bado hakuna vya kutosha. Fungua kihariri kamili ili kuongeza mawasiliano, kazi na ujuzi.",
+            )}
+          </Text>
+        </View>
+      ) : null}
+
       {/* preview — a real page thumbnail; the viewport meta in cvToHtml scales
           the 794px page down to fit (no zoom hack, which rendered blank on the
           Android WebView). Tap to open the full-screen view. */}
