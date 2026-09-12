@@ -7,6 +7,7 @@ import { Icon } from "./icon";
 import { apiClient } from "../lib/api-client";
 import { APP_VERSION } from "../lib/app-version";
 import { shouldShowPrompt, type UpdateManifest } from "../lib/update-check";
+import { useLang } from "../lib/i18n";
 
 /**
  * On launch, ask the web backend (GET /api/app/update) for the latest released
@@ -25,6 +26,7 @@ interface Info {
 
 export function UpdatePrompt() {
   const c = useThemeColors();
+  const { t, lang } = useLang();
   const [info, setInfo] = useState<Info | null>(null);
   const ran = useRef(false);
 
@@ -42,14 +44,17 @@ export function UpdatePrompt() {
           setInfo({
             version: latest,
             url: manifest?.url || DEFAULT_URL,
-            note: manifest?.notes?.en || manifest?.notes?.sw || null,
+            // Was always .en first regardless of the user's actual app
+            // language — a Swahili-language user with a manifest carrying
+            // both notes would still see the English release notes.
+            note: (lang === "sw" ? manifest?.notes?.sw : manifest?.notes?.en) ?? manifest?.notes?.en ?? manifest?.notes?.sw ?? null,
           });
         }
       } catch {
         /* silent */
       }
     })();
-  }, []);
+  }, [lang]);
 
   const dismiss = useCallback(() => {
     const v = info?.version;
@@ -74,20 +79,23 @@ export function UpdatePrompt() {
             <Icon name="download" size={26} color={c.accent} />
           </View>
           <Text style={{ color: c.text, fontSize: 19, fontWeight: "700", textAlign: "center", marginBottom: 8 }}>
-            Update available
+            {t("Update available", "Sasisho linapatikana")}
           </Text>
           <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 21, textAlign: "center", marginBottom: info.note ? 14 : 20 }}>
-            Sumaiya v{info.version} is ready. Update to get the latest fixes and features.
+            {t(
+              `Sumaiya v${info.version} is ready. Update to get the latest fixes and features.`,
+              `Sumaiya v${info.version} iko tayari. Sasisha ili upate marekebisho na vipengele vipya.`,
+            )}
           </Text>
           {info.note ? (
             <View style={{ backgroundColor: c.bg, borderRadius: 12, padding: 12, marginBottom: 20 }}>
-              <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>What's new</Text>
+              <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>{t("What's new", "Kilicho kipya")}</Text>
               <Text style={{ color: c.text, fontSize: 13.5, lineHeight: 19 }}>{info.note}</Text>
             </View>
           ) : null}
-          <Button label="Update now" onPress={updateNow} />
+          <Button label={t("Update now", "Sasisha sasa")} onPress={updateNow} />
           <Pressable onPress={dismiss} hitSlop={8} style={{ paddingVertical: 12, alignItems: "center", marginTop: 4 }}>
-            <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>Later</Text>
+            <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>{t("Later", "Baadaye")}</Text>
           </Pressable>
         </View>
       </View>
