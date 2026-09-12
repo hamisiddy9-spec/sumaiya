@@ -14,6 +14,7 @@ import Animated, {
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useCvs } from "../hooks/use-cvs";
+import { useOfflineSync } from "../hooks/use-offline-sync";
 import { useSumaiyaChat } from "../hooks/use-sumaiya-chat";
 import { ChatMessageComponent } from "../components/chat/chat-message";
 import { AttachmentPreviewSheet } from "../components/chat/attachment-preview-sheet";
@@ -57,6 +58,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv } =
     useSumaiyaChat();
   const { cvs } = useCvs();
+  const { queueOperation } = useOfflineSync();
   const { lang, t } = useLang();
   const [input, setInput] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -261,7 +263,14 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
     try {
       await apiClient.createCV(cv);
     } catch {
-      /* offline / will reconcile — it's in the local store */
+      // Unlike cv-editor-screen.tsx's save(), this used to just comment "will
+      // reconcile" without actually queuing anything — nothing was ever
+      // retried, so a CV built here while offline (or during any transient
+      // failure) would sit local-only forever with no sync-queue entry, no
+      // "N to sync" pill, and the button below still confirming "Saved to My
+      // CVs" as if it had reached the server. Route it through the same
+      // queue the editor uses so it's retried like every other unsynced edit.
+      await queueOperation("create_cv", cv.id, cv).catch(() => {});
     }
   };
 
