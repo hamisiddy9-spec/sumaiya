@@ -12,7 +12,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.4.0",
+  version: "1.6.4",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -20,7 +20,7 @@ export const APP_RELEASE: AppReleaseManifest = {
   // (that's where /downloads/sumaiya.apk redirects to `latest`).
   url: "https://sumaiya.pro/downloads/sumaiya.apk",
   notes: {
-    en: "New: paste a job description and Sumaiya retunes your CV and writes a matching cover letter. She's a first-class tab now, remembers the whole conversation, knows what you told the web app, and reads her replies aloud. Fixed: the keyboard hiding the chat box, dashboard shortcuts, and the chat's quick-start buttons.",
-    sw: "Mpya: bandika maelezo ya kazi na Sumaiya atarekebisha CV yako na kuandika barua ya maombi inayolingana. Sasa ana kichupo chake, anakumbuka mazungumzo yote, anajua uliyoiambia tovuti, na anasoma majibu kwa sauti. Marekebisho: kibodi iliyokuwa ikificha sanduku la mazungumzo, njia za mkato za nyumbani, na vitufe vya kuanza haraka.",
+    en: "Fixed: CVs and edits made offline now sync reliably instead of silently getting lost. Foldable and large-screen devices no longer get locked to portrait. Push notifications and the update screen now show in your language. A blank CV preview now tells you why instead of just looking broken.",
+    sw: "Marekebisho: CV na mabadiliko yaliyofanywa nje ya mtandao sasa yanasawazishwa kwa uhakika badala ya kupotea kimya kimya. Vifaa vinavyokunjika na vyenye skrini kubwa havifungiwi tena kwenye mwelekeo wima. Arifa na skrini ya sasisho sasa zinaonyesha kwa lugha yako. Muhtasari mtupu wa CV sasa unaeleza sababu badala ya kuonekana kama hitilafu.",
   },
 };
