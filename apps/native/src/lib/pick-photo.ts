@@ -25,12 +25,34 @@ export async function consumePendingOnboardingPhoto(): Promise<string | null> {
 }
 
 /**
- * Opens the system image picker, then resizes + compresses the result to a
- * small square JPEG and returns it as a base64 data URI ready to drop into
- * CVData.personalInfo.profilePhoto. Shared by the CV editor's own photo
- * control and the first-run wizard's optional photo step, so both produce
- * the exact same shape — no separate "onboarding photo" format to reconcile
- * later.
+ * Resizes + compresses any image URI (a local picker result or a remote
+ * http(s) URL — expo-image-manipulator fetches remote URIs itself) to a
+ * small square-ish JPEG and returns it as a base64 data URI ready to drop
+ * into CVData.personalInfo.profilePhoto. The shared compress step behind
+ * both pickAndCompressPhoto() and the first-run wizard's Google-avatar
+ * prefill, so every source produces the exact same shape.
+ *
+ * Returns null if the manipulator failed (including a network failure
+ * fetching a remote URI).
+ */
+export async function compressPhotoUri(uri: string): Promise<string | null> {
+  try {
+    const out = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 400 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true },
+    );
+    return out.base64 ? `data:image/jpeg;base64,${out.base64}` : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Opens the system image picker, then compresses the result via
+ * compressPhotoUri(). Shared by the CV editor's own photo control and the
+ * first-run wizard's optional photo step, so both produce the exact same
+ * shape — no separate "onboarding photo" format to reconcile later.
  *
  * Returns null if the user cancelled or the picker/manipulator failed.
  */
@@ -42,11 +64,5 @@ export async function pickAndCompressPhoto(): Promise<string | null> {
     quality: 0.85,
   });
   if (res.canceled || !res.assets[0]?.uri) return null;
-
-  const out = await ImageManipulator.manipulateAsync(
-    res.assets[0].uri,
-    [{ resize: { width: 400 } }],
-    { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true },
-  );
-  return out.base64 ? `data:image/jpeg;base64,${out.base64}` : null;
+  return compressPhotoUri(res.assets[0].uri);
 }

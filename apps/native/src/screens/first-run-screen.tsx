@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -18,7 +18,7 @@ import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
 import { setDefaultTemplate } from "../lib/prefs";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
-import { pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
+import { compressPhotoUri, pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
 import {
   CAREER_FIELDS,
   EXPERIENCE_LEVELS,
@@ -100,6 +100,24 @@ export function FirstRunScreen({ onDone }: Props) {
   const [recent, setRecent] = useState("");
   const [template, setTemplate] = useState<CvTemplateId>("classic");
   const [saving, setSaving] = useState(false);
+
+  // Google sign-in already gives us an avatar (user.photoUrl, from Supabase's
+  // user_metadata.avatar_url) — the photo step used to ignore it entirely and
+  // make everyone tap through the picker manually, even people who already
+  // have a perfectly good profile photo. Prefill once, silently; the user can
+  // still tap through to change or remove it exactly as before. Skips
+  // quietly (stays on the camera-icon empty state) if the fetch/compress
+  // fails or there's no avatar — this was never a required step.
+  useEffect(() => {
+    if (!user?.photoUrl || photo) return;
+    let cancelled = false;
+    compressPhotoUri(user.photoUrl).then((p) => {
+      if (!cancelled && p) setPhoto(p);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.photoUrl]);
 
   // The name step is skipped entirely when the account already has a real one.
   const STEPS: StepId[] = useMemo(
@@ -371,8 +389,8 @@ export function FirstRunScreen({ onDone }: Props) {
     intro: {
       title: { en: "Let's set you up", sw: "Tukuandae" },
       hint: {
-        en: "Six quick taps so Sumaiya starts knowing you — no typing your whole history.",
-        sw: "Migusiko sita mifupi ili Sumaiya akufahamu — bila kuandika historia yote.",
+        en: "Six quick taps so I start knowing you — no typing your whole history.",
+        sw: "Migusiko sita mifupi ili nianze kukufahamu — bila kuandika historia yote.",
       },
     },
     name: { title: { en: "What's your name?", sw: "Jina lako ni nani?" } },
