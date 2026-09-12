@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import type { CV } from "@sumaiya/types";
+import type { CV, SyncQueueItem } from "@sumaiya/types";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { dedupe } from "../lib/cv-dedupe";
@@ -23,6 +23,13 @@ import { useAuthContext } from "../contexts/auth-context";
  *  without mocking the whole hook/SQLite stack. */
 export function cvsSafeToPersist(server: CV[], queuedCvIds: Set<string>): CV[] {
   return server.filter((cv) => !queuedCvIds.has(cv.id));
+}
+
+/** Sync-queue item ids to drop when a CV is deleted — any create/update still
+ *  queued for that CV id is now moot, and left alone would resurrect the CV
+ *  on a later sync (its op goes through the idempotent-by-clientId upsert). */
+export function queueItemIdsToDropOnDelete(queue: SyncQueueItem[], deletedCvId: string): string[] {
+  return queue.filter((item) => item.cvId === deletedCvId).map((item) => item.id);
 }
 
 export function useCvs() {
@@ -116,6 +123,20 @@ export function useCvs() {
   const deleteCV = useCallback(async (id: string) => {
     await offlineStorage.deleteCVOffline(id).catch(() => {});
     if (mounted.current) setCvs((prev) => prev.filter((cv) => cv.id !== id));
+    // Drop any create/update already queued for this id — otherwise an edit
+    // made offline, followed by an online delete (which bypasses the queue
+    // entirely on success), leaves a stale queued update behind. It fires on
+    // a later sync pass and, since a non-synced id's queued op goes through
+    // apiClient.createCV's idempotent-by-clientId upsert, resurrects the exact
+    // CV that was just deleted.
+    try {
+      const queue = await offlineStorage.getSyncQueue();
+      for (const itemId of queueItemIdsToDropOnDelete(queue, id)) {
+        await offlineStorage.removeSyncQueueItem(itemId).catch(() => {});
+      }
+    } catch {
+      /* best-effort */
+    }
     try {
       // A synced CV has a server id (m_…) — delete it directly. A local-only
       // row is keyed by its id as clientId.
