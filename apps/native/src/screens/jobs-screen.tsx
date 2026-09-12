@@ -51,10 +51,13 @@ function JobCard({
       {reason ? <Text style={{ color: c.textBody, fontSize: 12.5 }} numberOfLines={2}>{reason}</Text> : null}
       <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
         <View style={{ flex: 1 }}>
-          <Button label={t("Tailor my CV", "Lenga CV yangu")} size="sm" variant="secondary" onPress={onTailor} />
+          {/* Tailoring is the app's real value-add over just browsing a
+              listing, so it gets the filled primary treatment; opening the
+              advert is the secondary action here. */}
+          <Button label={t("Tailor my CV", "Lenga CV yangu")} size="sm" onPress={onTailor} />
         </View>
         <View style={{ flex: 1 }}>
-          <Button label={t("Open the advert", "Fungua tangazo")} size="sm" onPress={onApply} />
+          <Button label={t("Open the advert", "Fungua tangazo")} size="sm" variant="secondary" onPress={onApply} />
         </View>
       </View>
     </View>
