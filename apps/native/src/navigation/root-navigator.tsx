@@ -124,14 +124,20 @@ export function RootNavigator() {
   useEffect(() => {
     if (!user) return;
     (async () => {
+      const code = await getSecureItem("pending_referral").catch(() => null);
+      if (!code) return;
       try {
-        const code = await getSecureItem("pending_referral");
-        if (!code) return;
-        await import("../lib/api-client").then(({ apiClient }) => apiClient.claimReferral(code));
-      } catch {
-        /* best-effort */
-      } finally {
+        const { apiClient } = await import("../lib/api-client");
+        await apiClient.claimReferral(code);
+        // Only clear on actual success — this used to clear in a `finally`
+        // regardless of outcome, so a claim that failed because the user
+        // happened to sign in offline (or hit a transient server error) lost
+        // the referral permanently on the very first attempt, contradicting
+        // the "once, ever" comment above (which only makes sense if a failed
+        // attempt is retried, not silently discarded).
         await setSecureItem("pending_referral", "").catch(() => {});
+      } catch {
+        /* offline / transient — left in place, retried on the next sign-in */
       }
     })();
   }, [user]);
