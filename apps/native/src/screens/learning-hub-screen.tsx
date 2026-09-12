@@ -149,6 +149,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const [freeOnly, setFreeOnly] = useState(false);
   const [catalogue, setCatalogue] = useState<{ id: string; title: string; platform: string; url: string; free: boolean }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const latestCv: CVData | null = useMemo(() => {
     const sorted = [...cvs].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -161,6 +162,13 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
       setProfile(p);
       setJobs(j);
       setProgress(pr);
+      setLoadError(false);
+    } catch {
+      // No catch here used to mean an offline getJobRecommendations() left
+      // `profile` at its initial null — which renders the "Finish your
+      // profile" prompt below, falsely telling a user with a complete
+      // profile that it's incomplete when the real problem was the fetch.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -257,7 +265,17 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
       ) : (
         <>
           {/* target + readiness */}
-          {result?.target ? (
+          {loadError && !result ? (
+            <Pressable
+              onPress={() => void load()}
+              style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.error + "10", borderWidth: 1, borderColor: c.error + "24", borderRadius: 12, padding: 14 }}
+            >
+              <Icon name="alert-circle" size={18} color={c.error} />
+              <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
+                {t("Couldn't load your skill gaps. Check your connection and tap to retry.", "Imeshindwa kupakia mapungufu ya ujuzi wako. Angalia mtandao kisha ugusa ili ujaribu tena.")}
+              </Text>
+            </Pressable>
+          ) : result?.target ? (
             <View style={{ backgroundColor: c.bgElevated, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 14, gap: 8 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={{ color: c.textMuted, fontSize: 12 }}>
