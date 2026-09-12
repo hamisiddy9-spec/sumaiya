@@ -13,7 +13,11 @@
  * navigate for the second shape — "ProfileTab" isn't a screen inside
  * HomeStackParamList, so React Navigation had nowhere to put it.
  */
-const TOP_LEVEL_TABS = new Set(["HomeTab", "CVsTab", "SumaiyaTab", "ProfileTab"]);
+// Must mirror AppTabs' actual tab names (stacks/app-tabs.tsx) — missing one
+// here reintroduces exactly the silent-dead-end bug this file exists to fix,
+// just for that tab. ImportTab was missing until this was checked directly
+// against the navigator; no signal targets it today, but the gap was live.
+const TOP_LEVEL_TABS = new Set(["HomeTab", "CVsTab", "SumaiyaTab", "ImportTab", "ProfileTab"]);
 
 export function resolveNotificationTarget(
   screen: string,

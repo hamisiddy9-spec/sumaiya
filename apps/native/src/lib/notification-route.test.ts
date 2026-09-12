@@ -27,4 +27,14 @@ describe("resolveNotificationTarget", () => {
       expect(resolveNotificationTarget(screen).screen).toBe("HomeTab");
     }
   });
+
+  it("recognizes every real AppTabs tab as top-level, not just the ones a signal happens to target today", () => {
+    // A regression test for its own sake: ImportTab was missing from
+    // TOP_LEVEL_TABS despite being a real sibling tab in app-tabs.tsx — no
+    // live signal targets it yet, but the gap would have silently failed to
+    // navigate the moment one did, exactly like the bug this file fixes.
+    for (const tab of ["HomeTab", "CVsTab", "SumaiyaTab", "ImportTab", "ProfileTab"]) {
+      expect(resolveNotificationTarget(tab, { x: 1 })).toEqual({ screen: tab, params: { x: 1 } });
+    }
+  });
 });
