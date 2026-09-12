@@ -34,7 +34,7 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
     haptics.light();
     try {
       const res = await Share.share({ message: inviteText(data.url) });
-      if (res.action === Share.sharedAction) apiClient.referralShared("link");
+      if (res.action === Share.sharedAction) apiClient.referralShared("link").catch(() => {});
     } catch {
       /* dismissed */
     }
@@ -45,7 +45,7 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
     haptics.selection();
     await Clipboard.setStringAsync(data.url);
     setCopied(true);
-    apiClient.referralShared("copy");
+    apiClient.referralShared("copy").catch(() => {});
     setTimeout(() => setCopied(false), 1800);
   };
 

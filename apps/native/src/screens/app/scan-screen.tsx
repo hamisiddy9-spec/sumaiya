@@ -42,13 +42,17 @@ export function ScanScreen() {
 
   const pickImage = async () => {
     haptics.light();
-    const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      quality: 0.85,
-    });
-    if (!res.canceled && res.assets[0]?.uri) {
-      setLive(false);
-      navigation.navigate("ScanProcessing", { photoUri: res.assets[0].uri });
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        quality: 0.85,
+      });
+      if (!res.canceled && res.assets[0]?.uri) {
+        setLive(false);
+        navigation.navigate("ScanProcessing", { photoUri: res.assets[0].uri });
+      }
+    } catch {
+      haptics.error();
     }
   };
 
@@ -56,30 +60,34 @@ export function ScanScreen() {
   // has: local storage, Downloads, Google Drive, OneDrive, etc.
   const pickFile = async () => {
     haptics.light();
-    const res = await DocumentPicker.getDocumentAsync({
-      type: [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain",
-        "image/*",
-      ],
-      copyToCacheDirectory: true,
-      multiple: false,
-    });
-    if (res.canceled || !res.assets?.length) return;
-    const f = res.assets[0];
-    setLive(false);
-    if (f.mimeType?.startsWith("image/")) {
-      // an image reads the same as a camera scan
-      navigation.navigate("ScanProcessing", { photoUri: f.uri });
-      return;
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "text/plain",
+          "image/*",
+        ],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (res.canceled || !res.assets?.length) return;
+      const f = res.assets[0];
+      setLive(false);
+      if (f.mimeType?.startsWith("image/")) {
+        // an image reads the same as a camera scan
+        navigation.navigate("ScanProcessing", { photoUri: f.uri });
+        return;
+      }
+      // PDF / Word / text — real extraction lands with /api/mobile/import.
+      // Until then, hand it to Sumaiya so she can still work with it.
+      navigation.navigate("SumaiyaTab", {
+        attachment: { kind: "document", uri: f.uri, name: f.name, mimeType: f.mimeType },
+      });
+    } catch {
+      haptics.error();
     }
-    // PDF / Word / text — real extraction lands with /api/mobile/import.
-    // Until then, hand it to Sumaiya so she can still work with it.
-    navigation.navigate("SumaiyaTab", {
-      attachment: { kind: "document", uri: f.uri, name: f.name, mimeType: f.mimeType },
-    });
   };
 
   // ── Permission gates ────────────────────────────────────────────────────
