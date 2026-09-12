@@ -397,7 +397,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}support@sumaiya.pro
         </Text>
       </Animated.View>
-      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="general" />
     </Screen>
   );
 }

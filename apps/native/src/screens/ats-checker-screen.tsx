@@ -357,7 +357,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
           )}
         </>
       )}
-      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
+      <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="verdict" />
     </Screen>
   );
 }

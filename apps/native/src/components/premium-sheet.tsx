@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Dimensions, Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
@@ -13,7 +13,7 @@ import { useLang } from "../lib/i18n";
  * flag is stored locally and surfaces in the profile ("You're on the list").
  * When billing lands, this sheet gets the real CTA.
  */
-type Feature = "templates" | "courses";
+type Feature = "templates" | "courses" | "verdict" | "general";
 
 const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   templates: {
@@ -23,6 +23,14 @@ const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   courses: {
     en: ["Deep courses: interview mastery, salary negotiation", "Step-by-step, built for East Africa", "The short guides stay free"],
     sw: ["Kozi za kina: umahiri wa usaili, majadiliano ya mshahara", "Hatua kwa hatua, kwa Afrika Mashariki", "Miongozo mifupi inabaki bure"],
+  },
+  verdict: {
+    en: ["A written verdict on your CV, in plain language", "Your 3 highest-impact fixes, ranked", "The deterministic ATS score stays free"],
+    sw: ["Uamuzi ulioandikwa kuhusu CV yako, kwa lugha rahisi", "Marekebisho matatu yenye athari kubwa, yaliyopangwa", "Alama ya ATS ya uhakika inabaki bure"],
+  },
+  general: {
+    en: ["The Executive and Compact templates", "Deep courses: interview mastery, salary negotiation", "Everything essential stays free"],
+    sw: ["Miundo ya Executive na Compact", "Kozi za kina: umahiri wa usaili, majadiliano ya mshahara", "Kila kitu muhimu kinabaki bure"],
   },
 };
 
@@ -39,6 +47,7 @@ export function PremiumSheet({
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const { t, lang } = useLang();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(visible);
@@ -74,7 +83,7 @@ export function PremiumSheet({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
+      <View style={{ width, height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
           <Animated.View style={[backdrop, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
         </Pressable>
@@ -87,7 +96,7 @@ export function PremiumSheet({
               position: "absolute",
               bottom: 0,
               left: 0,
-              width: Dimensions.get("window").width,
+              width,
               backgroundColor: c.bgElevated,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
