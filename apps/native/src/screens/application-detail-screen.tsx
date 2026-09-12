@@ -103,8 +103,15 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
     setDrafting(true);
     haptics.light();
     try {
+      // .skills/.experience are typed as required arrays, but the underlying
+      // data is server-stored JSONB — a CV that didn't go through this app's
+      // own editor (synced from web, or a partially-filled scan) isn't
+      // guaranteed to have them. A throw here used to be swallowed by the
+      // catch below and misreported as a connection problem.
+      const cvSkills = linkedCv?.data.skills ?? [];
+      const cvExperience = linkedCv?.data.experience ?? [];
       const cvBlock = linkedCv
-        ? `\n\nMy CV summary: ${linkedCv.data.summary ?? ""}\nSkills: ${linkedCv.data.skills.map((s) => s.name).join(", ")}\nMost recent role: ${linkedCv.data.experience[0]?.title ?? ""} at ${linkedCv.data.experience[0]?.company ?? ""}`
+        ? `\n\nMy CV summary: ${linkedCv.data.summary ?? ""}\nSkills: ${cvSkills.map((s) => s.name).join(", ")}\nMost recent role: ${cvExperience[0]?.title ?? ""} at ${cvExperience[0]?.company ?? ""}`
         : "";
       const prompt =
         `Write a concise, professional cover letter (max 200 words) for the role of "${role}" at "${company}". ` +
