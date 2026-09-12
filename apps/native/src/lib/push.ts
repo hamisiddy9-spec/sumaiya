@@ -44,43 +44,63 @@ async function deviceId(): Promise<string> {
   return id;
 }
 
-/** Call once from a component that has the signed-in user. */
+/**
+ * Does the actual work: checks permission, sets up the Android channel,
+ * fetches an Expo push token and registers it with the backend. Returns
+ * true if a token is registered (either just now or already, unchanged) —
+ * false if permission isn't granted or no EAS project is provisioned.
+ *
+ * Exported (not just called from the hook below) so an explicit,
+ * user-initiated permission grant — e.g. the Profile notifications toggle,
+ * which calls Notifications.requestPermissionsAsync() itself — can trigger
+ * a real registration attempt immediately. The hook's own effect only ever
+ * runs once per mount; if permission wasn't granted YET at that moment (the
+ * common case — a fresh install's permission prompt is easy to dismiss or
+ * defer), nothing would otherwise ever retry until the next full app
+ * restart, even after the user turns the toggle on.
+ */
+export async function registerForPush(userId: string): Promise<boolean> {
+  const pid = projectId();
+  if (!pid || !userId) return false; // not provisioned yet — no-op
+
+  try {
+    const perm = await Notifications.getPermissionsAsync();
+    if (!perm.granted) return false;
+
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Sumaiya",
+        importance: Notifications.AndroidImportance.DEFAULT,
+        lightColor: "#DA4A1C",
+      });
+    }
+
+    const token = (await Notifications.getExpoPushTokenAsync({ projectId: pid })).data;
+    const stored = await getSecureItem("push_token").catch(() => null);
+    if (token && token !== stored) {
+      await apiClient.registerPushToken({
+        pushToken: token,
+        platform: Platform.OS === "ios" ? "ios" : "android",
+        deviceId: await deviceId(),
+      });
+      await setSecureItem("push_token", token).catch(() => {});
+    }
+    return !!token;
+  } catch (err) {
+    reportError(err, { scope: "push.register" });
+    return false;
+  }
+}
+
+/** Call once from a component that has the signed-in user — the passive,
+ *  automatic attempt on mount. See registerForPush for the explicit,
+ *  user-triggered path (used by the Profile notifications toggle). */
 export function usePushRegistration(userId: string | undefined) {
   const done = useRef(false);
 
   useEffect(() => {
     if (!userId || done.current) return;
-    const pid = projectId();
-    if (!pid) return; // not provisioned yet — no-op
-
     done.current = true;
-    (async () => {
-      try {
-        const perm = await Notifications.getPermissionsAsync();
-        if (!perm.granted) return; // user hasn't opted in; the Profile toggle asks
-
-        if (Platform.OS === "android") {
-          await Notifications.setNotificationChannelAsync("default", {
-            name: "Sumaiya",
-            importance: Notifications.AndroidImportance.DEFAULT,
-            lightColor: "#DA4A1C",
-          });
-        }
-
-        const token = (await Notifications.getExpoPushTokenAsync({ projectId: pid })).data;
-        const stored = await getSecureItem("push_token").catch(() => null);
-        if (token && token !== stored) {
-          await apiClient.registerPushToken({
-            pushToken: token,
-            platform: Platform.OS === "ios" ? "ios" : "android",
-            deviceId: await deviceId(),
-          });
-          await setSecureItem("push_token", token).catch(() => {});
-        }
-      } catch (err) {
-        reportError(err, { scope: "push.register" });
-        done.current = false; // allow a retry next mount
-      }
-    })();
+    void registerForPush(userId);
   }, [userId]);
 }

@@ -5,6 +5,7 @@ import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
+import { registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
@@ -74,6 +75,14 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const setNotif = async (v: boolean) => {
     if (v) {
       const perm = await Notifications.requestPermissionsAsync();
+      if (perm.granted && user?.id) {
+        // Permission was JUST granted via this explicit toggle — the
+        // mount-time hook (usePushRegistration) already ran once, possibly
+        // before permission existed, and won't retry on its own. Without
+        // this, the toggle would show "on" with no token ever registered
+        // until the app is fully restarted.
+        void registerForPush(user.id);
+      }
       if (!perm.granted) {
         setNotifications(false);
         dialog.alert(
