@@ -17,6 +17,14 @@ import { useAuthContext } from "../contexts/auth-context";
  * Same return shape as the shared hook so screens swap the import and nothing
  * else changes.
  */
+/** CVs from a fresh server fetch that are safe to persist into local offline
+ *  storage — i.e. not sitting in `queuedCvIds` with an edit that hasn't
+ *  synced yet. Exported standalone so the skip logic is unit-testable
+ *  without mocking the whole hook/SQLite stack. */
+export function cvsSafeToPersist(server: CV[], queuedCvIds: Set<string>): CV[] {
+  return server.filter((cv) => !queuedCvIds.has(cv.id));
+}
+
 export function useCvs() {
   const { user } = useAuthContext();
   // Scope the on-device cache to the actual signed-in account. This used to be
@@ -61,8 +69,22 @@ export function useCvs() {
       // on a fresh install ended up staring at "CV zako zipo hapa" while six
       // CVs sat on the server: the write threw, the re-read returned [], and
       // nothing said so.
+      //
+      // Skip any CV that still has an unsynced edit queued (use-offline-sync's
+      // sync_queue). Without this, a screen-focus refresh right after an edit
+      // — before the queue has actually flushed to the server — overwrites the
+      // just-made local edit with the server's stale pre-edit copy. The edit
+      // itself isn't lost (it's still queued and will eventually sync), but
+      // the user would see it vanish from the list until the sync completes.
+      let queuedCvIds: Set<string>;
+      try {
+        const queue = await offlineStorage.getSyncQueue();
+        queuedCvIds = new Set(queue.map((item) => item.cvId));
+      } catch {
+        queuedCvIds = new Set();
+      }
       let persistFailed = false;
-      for (const cv of server) {
+      for (const cv of cvsSafeToPersist(server, queuedCvIds)) {
         // One failed write means the local store is unusable — stop trying.
         // Waiting on every row here is what froze the UI for ~10 s (624 skipped
         // frames) once the SQLite layer started failing: six sequential writes,
