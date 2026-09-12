@@ -8,4 +8,4 @@ import Constants from "expo-constants";
 export const APP_VERSION: string =
   Constants.expoConfig?.version ??
   (Constants as { manifest?: { version?: string } }).manifest?.version ??
-  "1.6.4";
+  "1.6.10";

@@ -1,9 +1,23 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { confirmAndOpenUrl } from "../lib/external-link";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CVData } from "@sumaiya/types";
 import type { JobRecommendation } from "@sumaiya/api-client";
+import { CourseCard } from "../components/learning/course-card";
+import { LessonSheet } from "../components/learning/lesson-sheet";
+import { APP_TOUR_COURSE, APP_TOUR_KEY, JOB_SEARCH_COURSE, JOB_SEARCH_KEY } from "../lib/short-courses";
+import {
+  EMPTY_COURSE,
+  getCourseProgress,
+  markCourseUnit,
+  resetCourse,
+  type CourseAction,
+  type CourseProgress,
+  type CourseUnit,
+  type ShortCourse,
+} from "../lib/short-course";
 import { apiClient } from "../lib/api-client";
 import { useCvs } from "../hooks/use-cvs";
 import { loadProfile, saveProfile, type CareerProfile } from "../lib/profile-store";
@@ -43,14 +57,12 @@ function GapCard({
   onLearn,
   onPractise,
   onCanDo,
-  onLearning,
 }: {
   gap: SkillGap;
   state?: SkillState;
   onLearn: () => void;
   onPractise: () => void;
   onCanDo: () => void;
-  onLearning: () => void;
 }) {
   const c = useThemeColors();
   const { lang, t } = useLang();
@@ -58,9 +70,10 @@ function GapCard({
   const { area } = gap;
   const co = area.course;
   const priLabel = { high: t("High", "Juu"), medium: t("Medium", "Kati"), low: t("Low", "Chini") }[gap.priority];
+  const question = area.practice[0]?.[lang];
 
   return (
-    <Card style={{ gap: 12 }}>
+    <Card style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: tone }} />
         <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800", flex: 1 }}>{area.skill[lang]}</Text>
@@ -79,57 +92,76 @@ function GapCard({
         )}
       </View>
 
+      {/* ONE explanation. This card used to carry two — `reason` and the
+          course's own `why` — saying the same thing in different words, which
+          is most of why it read as heavy. The reason wins: it comes from this
+          person's actual job matches ("3 of the 5 jobs you match ask for this")
+          and the course blurb never could. */}
       <Text style={{ color: c.textBody, fontSize: 13, lineHeight: 19 }}>{gap.reason[lang]}</Text>
 
-      {/* the one course */}
-      <View style={{ backgroundColor: c.bg, borderRadius: 12, borderWidth: 1, borderColor: c.border, padding: 12, gap: 8 }}>
+      {/* The course, demoted to metadata. It is a link out of the app, so it
+          does not get to compete with the free thing that happens right here. */}
+      <View style={{ backgroundColor: c.bg, borderRadius: 12, borderWidth: 1, borderColor: c.border, padding: 12, gap: 7 }}>
         <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>{co.title}</Text>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <Text style={{ color: c.accent, fontSize: 12, fontWeight: "700" }}>{co.provider}</Text>
           <View style={{ backgroundColor: c.success + "1f", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-            <Text style={{ color: c.success, fontSize: 10, fontWeight: "800" }}>{co.free ? t("FREE", "BURE") : t("PAID", "MALIPO")}</Text>
+            <Text style={{ color: c.success, fontSize: 10, fontWeight: "800" }}>{t("FREE", "BURE")}</Text>
           </View>
           <Text style={{ color: c.textMuted, fontSize: 11.5 }}>~{co.durationWeeks} {t("wks", "wiki")}</Text>
+          <Pressable
+            onPress={onLearn}
+            hitSlop={8}
+            accessibilityRole="link"
+            accessibilityLabel={t(`Open ${co.title}`, `Fungua ${co.title}`)}
+            style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+          >
+            <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800", textDecorationLine: "underline" }}>
+              {t("Learn", "Jifunze")}
+            </Text>
+            <Icon name="external-link" size={12} color={c.accent} />
+          </Pressable>
         </View>
-        <Text style={{ color: c.textMuted, fontSize: 12, lineHeight: 17 }}>
-          <Text style={{ fontWeight: "800" }}>{t("Why", "Kwa nini")}: </Text>
-          {lang === "sw" ? co.whySw : co.whyEn}
-        </Text>
         <Chips items={co.improves} color={c.accent} />
-      </View>
-
-      {area.fastPath ? (
-        <Pressable onPress={() => Linking.openURL(area.fastPath!.url).catch(() => {})} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Icon name="play-circle" size={14} color={c.accent} />
-          <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>{area.fastPath.label[lang]}</Text>
-        </Pressable>
-      ) : null}
-
-      {/* actions */}
-      <View style={{ gap: 8 }}>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1 }}>
-            <Button label={t("Learn", "Jifunze")} size="sm" variant="secondary" rightIcon={<Icon name="external-link" size={13} color={c.text} />} onPress={onLearn} />
-          </View>
-          {area.practice.length ? (
-            <View style={{ flex: 1 }}>
-              <Button label={t("Practise this skill", "Zoeza ujuzi huu")} size="sm" onPress={onPractise} />
-            </View>
-          ) : null}
-        </View>
-        {state !== "can-do" ? (
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Pressable onPress={onCanDo} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderRadius: 10, borderWidth: 1, borderColor: c.success + "55" }}>
-              <Text style={{ color: c.success, fontSize: 12, fontWeight: "800" }}>{t("I can do this — add", "Naweza — ongeza")}</Text>
-            </Pressable>
-            {state !== "learning" ? (
-              <Pressable onPress={onLearning} style={{ flex: 1, paddingVertical: 9, alignItems: "center", borderRadius: 10, borderWidth: 1, borderColor: c.border }}>
-                <Text style={{ color: c.textBody, fontSize: 12, fontWeight: "700" }}>{t("Mark as learning", "Weka ninajifunza")}</Text>
-              </Pressable>
-            ) : null}
-          </View>
+        {area.fastPath ? (
+          <Pressable
+            onPress={() => confirmAndOpenUrl(area.fastPath!.url, t)}
+            hitSlop={8}
+            accessibilityRole="link"
+            accessibilityLabel={area.fastPath.label[lang]}
+            style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+          >
+            <Icon name="play-circle" size={13} color={c.textMuted} />
+            <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700" }}>{area.fastPath.label[lang]}</Text>
+          </Pressable>
         ) : null}
       </View>
+
+      {state !== "can-do" ? (
+        <>
+          {/* One thing to do, and it says what it will do. The preview line
+              lives inside the button instead of in a paragraph underneath
+              labelled "What the button does" — same information, one glance,
+              and the label no longer needs an apology. */}
+          {area.practice.length ? (
+            <Button
+              size="sm"
+              label={t("Practise this skill", "Fanya mazoezi ya ujuzi huu")}
+              sublabel={question ? `“${question}”` : undefined}
+              onPress={onPractise}
+            />
+          ) : null}
+
+          {/* The one thing the app genuinely cannot infer. Tapping either action
+              above already means "I'm working on this", so there is no separate
+              "Mark as learning" button any more. */}
+          <Pressable onPress={onCanDo} hitSlop={8} style={{ alignSelf: "flex-start" }}>
+            <Text style={{ color: c.success, fontSize: 12.5, fontWeight: "700", textDecorationLine: "underline" }}>
+              {t("I can do this — add", "Naweza — ongeza")}
+            </Text>
+          </Pressable>
+        </>
+      ) : null}
     </Card>
   );
 }
@@ -150,6 +182,63 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const [catalogue, setCatalogue] = useState<{ id: string; title: string; platform: string; url: string; free: boolean }[]>([]);
   const [toast, setToast] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
+
+  // Short courses. Progress lives on the device, so the hub can say where you
+  // stopped instead of starting from zero every visit.
+  const [courseProgress, setCourseProgress] = useState<Record<string, CourseProgress>>({});
+  const reloadCourses = useCallback(async () => {
+    const [job, tour] = await Promise.all([getCourseProgress(JOB_SEARCH_KEY), getCourseProgress(APP_TOUR_KEY)]);
+    setCourseProgress({ [JOB_SEARCH_KEY]: job, [APP_TOUR_KEY]: tour });
+  }, []);
+  useFocusEffect(useCallback(() => { void reloadCourses(); }, [reloadCourses]));
+
+  const runCourseUnit = useCallback(
+    async (courseId: string, course: typeof JOB_SEARCH_COURSE, unit: CourseUnit, action: CourseAction) => {
+      const next = await markCourseUnit(courseId, course, unit.id);
+      setCourseProgress((p) => ({ ...p, [courseId]: next }));
+      if (unit.kind === "link" && unit.url) confirmAndOpenUrl(unit.url, t);
+      switch (action) {
+        case "sumaiya":
+          navigation.navigate("SumaiyaTab", {
+            seed: t("Nina tangazo la kazi la kuchambua. Nitalituma sasa.", "I have a job advert to look at. I am sending it now."),
+          });
+          break;
+        case "cvs": navigation.navigate("CVsTab"); break;
+        case "import": navigation.navigate("ImportTab"); break;
+        case "ats": navigation.navigate("AtsChecker", {}); break;
+        case "profile": navigation.navigate("ProfileTab"); break;
+        case "letter": navigation.navigate("JobApply", { want: "letter" }); break;
+        case "jobs": navigation.navigate("Jobs"); break;
+        case "applications": navigation.navigate("Applications"); break;
+        default: break;
+      }
+    },
+    [navigation, t],
+  );
+
+  // The lesson being read. Held here rather than inside CourseCard so there is
+  // one sheet on the screen instead of one per card.
+  const [lesson, setLesson] = useState<{ courseId: string; course: ShortCourse; unit: CourseUnit } | null>(null);
+
+  const openLesson = useCallback((courseId: string, course: ShortCourse, unit: CourseUnit) => {
+    haptics.light();
+    setLesson({ courseId, course, unit });
+  }, []);
+
+  /**
+   * A lesson was finished. The sheet knows nothing about progress, so the tick
+   * happens here — through the same door the task units use, which means a
+   * lesson's practice step opens exactly where that action already pointed.
+   */
+  const finishLesson = useCallback(
+    (action: CourseAction | null) => {
+      const open = lesson;
+      setLesson(null);
+      if (!open) return;
+      void runCourseUnit(open.courseId, open.course, open.unit, action ?? "mark");
+    },
+    [lesson, runCourseUnit],
+  );
 
   const latestCv: CVData | null = useMemo(() => {
     const sorted = [...cvs].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -227,8 +316,10 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
 
   const exploreFiltered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return catalogue.filter((r) => (freeOnly ? r.free : true) && (!q || r.title.toLowerCase().includes(q) || r.platform.toLowerCase().includes(q)));
-  }, [catalogue, query, freeOnly]);
+    // Free is not a filter any more, it's the rule: we never show a paid course,
+    // ours or anyone else's. Someone looking for work has no money to spare.
+    return catalogue.filter((r) => r.free && (!q || r.title.toLowerCase().includes(q) || r.platform.toLowerCase().includes(q)));
+  }, [catalogue, query]);
 
   const gaps = (result?.gaps ?? []).filter((g) => progress[g.area.id] !== "can-do").slice(0, 5);
   const strengths = result?.strengths ?? [];
@@ -295,10 +386,34 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             >
               <SumaiyaMark size={18} state="static" color={c.accent} />
               <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-                {t("Finish your profile and Sumaiya will show the exact skills to build for the jobs you want.", "Kamilisha wasifu wako na Sumaiya atakuonyesha ujuzi hasa wa kujenga kwa kazi unazotaka.")}
+                {t("Finish your profile and I'll show you the exact skills to build for the jobs you want.", "Kamilisha wasifu wako nami nikuonyeshe ujuzi hasa wa kujenga kwa kazi unazotaka.")}
               </Text>
             </Pressable>
           )}
+
+          {/* SHORT COURSES — free, step-tracked, and every step ends somewhere
+              real in the app. The first one answers the question that comes
+              before a good CV: where do I even find a job to apply for? The
+              second one is the app itself, so nobody has to guess what it does. */}
+          <View style={{ gap: 12 }}>
+            <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
+              {t("Short courses — free", "Kozi fupi — bure")}
+            </Text>
+            <CourseCard
+              course={JOB_SEARCH_COURSE}
+              progress={courseProgress[JOB_SEARCH_KEY] ?? EMPTY_COURSE}
+              onUnit={(u, a) => void runCourseUnit(JOB_SEARCH_KEY, JOB_SEARCH_COURSE, u, a)}
+              onOpenLesson={(u) => openLesson(JOB_SEARCH_KEY, JOB_SEARCH_COURSE, u)}
+              onReset={() => void resetCourse(JOB_SEARCH_KEY).then((p) => setCourseProgress((s) => ({ ...s, [JOB_SEARCH_KEY]: p })))}
+            />
+            <CourseCard
+              course={APP_TOUR_COURSE}
+              progress={courseProgress[APP_TOUR_KEY] ?? EMPTY_COURSE}
+              onUnit={(u, a) => void runCourseUnit(APP_TOUR_KEY, APP_TOUR_COURSE, u, a)}
+              onOpenLesson={(u) => openLesson(APP_TOUR_KEY, APP_TOUR_COURSE, u)}
+              onReset={() => void resetCourse(APP_TOUR_KEY).then((p) => setCourseProgress((s) => ({ ...s, [APP_TOUR_KEY]: p })))}
+            />
+          </View>
 
           {/* YOUR NEXT SKILLS */}
           {gaps.length > 0 ? (
@@ -311,10 +426,18 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
                   <GapCard
                     gap={g}
                     state={progress[g.area.id]}
-                    onLearn={() => { haptics.light(); Linking.openURL(g.area.course.url).catch(() => {}); }}
-                    onPractise={() => practise(g)}
+                    onLearn={() => {
+                      haptics.light();
+                      // Engaging with the skill IS the signal — no second tap
+                      // needed to record it.
+                      void markLearning(g.area.id);
+                      confirmAndOpenUrl(g.area.course.url, t);
+                    }}
+                    onPractise={() => {
+                      void markLearning(g.area.id);
+                      practise(g);
+                    }}
                     onCanDo={() => void addSkillToCv(g.area.skill.en, g.area.id)}
-                    onLearning={() => void markLearning(g.area.id)}
                   />
                 </Stagger>
               ))}
@@ -410,10 +533,10 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>{r.platform}</Text>
                       <View style={{ backgroundColor: (r.free ? c.success : c.warning) + "1f", borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 }}>
-                        <Text style={{ color: r.free ? c.success : c.warning, fontSize: 10, fontWeight: "800" }}>{r.free ? t("FREE", "BURE") : t("PAID", "MALIPO")}</Text>
+                        <Text style={{ color: c.success, fontSize: 10, fontWeight: "800" }}>{t("FREE", "BURE")}</Text>
                       </View>
                     </View>
-                    <Button label={t("Open course", "Fungua kozi")} variant="secondary" size="sm" rightIcon={<Icon name="external-link" size={13} color={c.text} />} onPress={() => Linking.openURL(r.url).catch(() => {})} />
+                    <Button label={t("Open course", "Fungua kozi")} variant="secondary" size="sm" rightIcon={<Icon name="external-link" size={13} color={c.text} />} onPress={() => confirmAndOpenUrl(r.url, t)} />
                   </Card>
                 ))
               )}
@@ -421,6 +544,9 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
           )}
         </>
       )}
+
+      {/* Read, then answer, then practise. Mounted once, at screen level. */}
+      <LessonSheet unit={lesson?.unit ?? null} onClose={() => setLesson(null)} onComplete={finishLesson} />
 
     </Screen>
   );

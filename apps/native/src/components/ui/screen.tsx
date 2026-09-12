@@ -1,13 +1,13 @@
 import React from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
   RefreshControl,
   ScrollView,
   View,
   type ScrollViewProps,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { keyboardAvoidingBehavior } from "../../lib/keyboard-avoiding";
 import { useThemeColors } from "./theme";
 
 interface ScreenProps {
@@ -83,11 +83,7 @@ export function Screen({
   );
 
   const content = keyboardAvoiding ? (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardAvoidingBehavior()}>
       {body}
     </KeyboardAvoidingView>
   ) : (

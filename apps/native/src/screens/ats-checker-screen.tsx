@@ -259,7 +259,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
                   <SumaiyaMark size={15} state="static" color={c.accent} />
                   <Text style={{ color: c.text, fontSize: 15, fontWeight: "800", flex: 1 }}>
-                    {t("Sumaiya's verdict", "Uamuzi wa Sumaiya")}
+                    {t("My verdict", "Uamuzi wangu")}
                   </Text>
                   {!premium ? <Icon name="lock" size={13} color={c.textMuted} /> : null}
                 </View>

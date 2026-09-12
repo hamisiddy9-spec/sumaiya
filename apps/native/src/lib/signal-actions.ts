@@ -38,7 +38,7 @@ export function signalAction(s: MobileSignal): SignalAction {
       };
     case "coverLetter.generate":
       return {
-        cta: { en: "Draft it with Sumaiya", sw: "Iandike na Sumaiya" },
+        cta: { en: "Draft it with me", sw: "Iandike nami" },
         target: {
           screen: "SumaiyaTab",
           params: { seed: "Help me write a cover letter for the job I'm applying to." },
@@ -82,6 +82,8 @@ export function signalAction(s: MobileSignal): SignalAction {
 }
 
 export const signalText = (s: MobileSignal, lang: Lang) => ({
-  title: s.title[lang] ?? s.title.en,
-  detail: s.detail[lang] ?? s.detail.en,
+  // `detail` is typed as required but is not guaranteed at runtime — an
+  // unguarded lookup here threw during render and took the screen down.
+  title: s.title?.[lang] ?? s.title?.en ?? "",
+  detail: s.detail?.[lang] ?? s.detail?.en ?? "",
 });

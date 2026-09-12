@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Text, useWindowDimensions, View } from "react-native";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
@@ -64,7 +64,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const c = useThemeColors();
   const { user } = useAuthContext();
   const { t, lang } = useLang();
-  const { cvs, loading, loadCVs } = useCvs();
+  const { cvs, loading, error, loadCVs } = useCvs();
   const [refreshing, setRefreshing] = React.useState(false);
   // Live, not a module-level Dimensions.get() snapshot — a foldable's window
   // width changes on fold/unfold without an app restart, and a stale value
@@ -118,19 +118,19 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
-    { icon: "sumaiya", label: t("Ask Sumaiya", "Muulize Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
+    { icon: "sumaiya", label: t("Ask me", "Niulize"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
     { icon: "target", label: t("New openings", "Nafasi mpya"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
-    { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: "#12766A", onPress: () => navigation.navigate("AtsChecker") },
+    { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: c.success, onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
     // Cover letters were only reachable buried inside the job-tailor flow or a
     // chat quick-action seed — no direct entry point at all. This opens the
     // same generator (JobApply) with its cv/letter/both toggle pre-set to
     // "letter" instead of the generic default, so tapping this feels like a
     // purpose-built cover-letter feature, not a detour through job matching.
-    { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: "#96630F", onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
+    { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: c.warning, onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
     // Import already has its own dedicated tab — a Home tile duplicated it.
     // Removing it also brings the grid to a clean 6 tiles (2x3/3x2), not 7.
-    { icon: "book-open", label: t("Add skills", "Ongeza ujuzi"), tint: "#96630F", onPress: () => navigation.navigate("LearningHub") },
+    { icon: "book-open", label: t("Add skills", "Ongeza ujuzi"), tint: c.warning, onPress: () => navigation.navigate("LearningHub") },
   ];
 
   return (
@@ -240,7 +240,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
-                  {topSignal ? t("From Sumaiya", "Kutoka kwa Sumaiya") : t("Tip from Sumaiya", "Kidokezo cha Sumaiya")}
+                  {topSignal ? t("From me", "Kutoka kwangu") : t("A tip from me", "Kidokezo changu")}
                 </Text>
                 <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
                   {st ? st.title : tip.title[lang]}
@@ -309,6 +309,46 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           <View style={{ gap: 10 }}>
             <SkeletonCard />
             <SkeletonCard />
+          </View>
+        ) : error && cvs.length === 0 ? (
+          // The CV list screen was fixed to stop claiming "no CVs" when the real
+          // problem is an unreachable server — this screen kept the data-loss
+          // illusion. On a fresh install, offline, it told a user with CVs on the
+          // server that they had none.
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              padding: 16,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: c.border,
+              backgroundColor: c.bgElevated,
+            }}
+          >
+            <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.warning + "14", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="alert-circle" size={18} color={c.warning} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>
+                {t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={2}>
+                {t(
+                  "Your CVs are safe on your account — we just couldn't reach the server.",
+                  "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server.",
+                )}
+              </Text>
+            </View>
+            <Pressable
+              onPress={onRefresh}
+              accessibilityRole="button"
+              accessibilityLabel={t("Try again", "Jaribu tena")}
+              hitSlop={10}
+            >
+              <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Try again", "Jaribu tena")}</Text>
+            </Pressable>
           </View>
         ) : recent.length === 0 ? (
           // Inline, card-shaped, same width and rhythm as everything else — not a

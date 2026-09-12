@@ -88,8 +88,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         dialog.alert(
           t("Notifications are off", "Arifa zimezimwa"),
           t(
-            "Turn on notifications for Sumaiya in your phone's Settings to get job matches and updates.",
-            "Washa arifa za Sumaiya kwenye Mipangilio ya simu yako ili upate ajira zinazokufaa na taarifa.",
+            "Turn on notifications in your phone's Settings so I can send you job matches and updates.",
+            "Washa arifa kwenye Mipangilio ya simu yako ili nikutumie ajira zinazokufaa na taarifa.",
           ),
           [
             { text: t("Not now", "Si sasa"), style: "cancel" },
@@ -263,7 +263,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             icon="user"
             iconColor={c.accent}
             label={t("Career profile", "Wasifu wa kazi")}
-            sublabel={t("Skills, experience, goals — Sumaiya uses these", "Ujuzi, uzoefu, malengo — Sumaiya anatumia haya")}
+            sublabel={t("Skills, experience, goals — I use these", "Ujuzi, uzoefu, malengo — ninatumia haya")}
             onPress={() => navigation.navigate("CareerProfile")}
             chevron
           />

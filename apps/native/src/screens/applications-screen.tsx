@@ -73,7 +73,9 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
         />
       ) : (
         applications.map((a, i) => {
-          const tint = STATUS_TINT[a.status](c);
+          // A status outside the known set (older/newer schema) made this
+          // lookup undefined and threw for the entire list.
+          const tint = (STATUS_TINT[a.status] ?? STATUS_TINT.applied)(c);
           return (
             <Stagger key={a.id} index={i}>
               <Pressable

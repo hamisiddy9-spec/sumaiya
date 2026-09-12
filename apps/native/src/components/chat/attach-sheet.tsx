@@ -57,7 +57,7 @@ export function AttachSheet({
   return (
     <View style={[StyleSheet.absoluteFill, { justifyContent: "flex-end", zIndex: 1000, elevation: 1000 }]}>
       <Pressable
-        style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.45)" }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: c.overlay }]}
         onPress={onClose}
         accessibilityRole="button"
         accessibilityLabel={t("Close", "Funga")}
@@ -82,42 +82,54 @@ export function AttachSheet({
         </Text>
 
         <ScrollView bounces={false}>
-          {ROWS.map((r) => (
-            <Pressable
-              key={r.kind}
-              onPress={() => choose(r.kind)}
-              style={({ pressed }) => ({
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 14,
-                paddingVertical: 12,
-                paddingHorizontal: 8,
-                borderRadius: 14,
-                backgroundColor: pressed ? c.accent + "14" : "transparent",
-              })}
-            >
-              <View
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 13,
-                  backgroundColor: c.accent + "1f",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+          {ROWS.map((r, i) => (
+            <View key={r.kind}>
+              <Pressable
+                onPress={() => choose(r.kind)}
+                accessibilityRole="button"
+                accessibilityLabel={`${t(r.en, r.sw)}. ${t(r.hintEn, r.hintSw)}`}
+                style={({ pressed }) => ({
+                  backgroundColor: pressed ? c.accent + "14" : "transparent",
+                  borderRadius: 14,
+                })}
               >
-                <Icon name={r.icon} size={20} color={c.accent} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }} numberOfLines={1}>
-                  {t(r.en, r.sw)}
-                </Text>
-                <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={1}>
-                  {t(r.hintEn, r.hintSw)}
-                </Text>
-              </View>
-              <Icon name="chevron-right" size={18} color={c.textMuted} />
-            </Pressable>
+                {/*
+                 * The row layout lives on a plain View, NOT on the Pressable.
+                 * With the row style on the Pressable itself, Android's New
+                 * Architecture dropped `flexDirection: "row"` and every row
+                 * collapsed into a vertical stack — icon over label over
+                 * chevron — which is exactly how it shipped. A plain View has
+                 * never been observed to lose its flex props, and the Pressable
+                 * having a single child means its own direction is irrelevant.
+                 */}
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 14, paddingVertical: 13, paddingHorizontal: 8, minHeight: 56 }}>
+                  <View
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 13,
+                      backgroundColor: c.accent + "1f",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name={r.icon} size={20} color={c.accent} />
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "600" }} numberOfLines={1}>
+                      {t(r.en, r.sw)}
+                    </Text>
+                    <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={1}>
+                      {t(r.hintEn, r.hintSw)}
+                    </Text>
+                  </View>
+                  <Icon name="chevron-right" size={18} color={c.textMuted} />
+                </View>
+              </Pressable>
+              {i < ROWS.length - 1 ? (
+                <View style={{ height: 1, backgroundColor: c.border, marginLeft: 66 }} />
+              ) : null}
+            </View>
           ))}
         </ScrollView>
       </View>

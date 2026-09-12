@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { JobListing, JobRecommendation } from "@sumaiya/api-client";
@@ -7,6 +7,8 @@ import { apiClient } from "../lib/api-client";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { confirmAndOpenUrl } from "../lib/external-link";
+import { isExpiredListing } from "../lib/job-listing";
 import type { JobsScreenProps } from "../navigation/types";
 
 function MatchBadge({ score }: { score: number }) {
@@ -52,7 +54,7 @@ function JobCard({
           <Button label={t("Tailor my CV", "Lenga CV yangu")} size="sm" variant="secondary" onPress={onTailor} />
         </View>
         <View style={{ flex: 1 }}>
-          <Button label={t("Apply", "Omba")} size="sm" onPress={onApply} />
+          <Button label={t("Open the advert", "Fungua tangazo")} size="sm" onPress={onApply} />
         </View>
       </View>
     </View>
@@ -71,8 +73,11 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   const load = useCallback(async () => {
     try {
       const [r, j] = await Promise.all([apiClient.getJobRecommendations(8), apiClient.getJobs()]);
-      setRecs(r);
-      setJobs(j);
+      // A listing past its own applicationDeadline was still being
+      // recommended, and the CTA walked the user straight to a dead advert
+      // (confirmed on device: HTTP 410 "Applications closed").
+      setRecs(r.filter((rec) => !isExpiredListing(rec.job.applicationDeadline)));
+      setJobs(j.filter((job) => !isExpiredListing(job.applicationDeadline)));
       setError(false);
     } catch {
       // The old code had no catch here at all: an offline/API failure was an
@@ -102,8 +107,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
     navigation.navigate("JobApply", { jd: `${job.title}\n${job.company}\n\n${job.description}`.slice(0, 6000) });
   };
   const apply = (job: JobListing) => {
-    haptics.selection();
-    if (job.applyUrl) Linking.openURL(job.applyUrl).catch(() => {});
+    if (job.applyUrl) confirmAndOpenUrl(job.applyUrl, t);
   };
 
   return (
@@ -128,8 +132,8 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
         <EmptyState
           icon="briefcase"
           title={t("No openings right now", "Hakuna nafasi kwa sasa")}
-          body={t("New listings are pulled in daily. Check back soon, or paste a job link in Sumaiya to tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika link ya ajira kwa Sumaiya ulenge CV yako.")}
-          actionLabel={t("Ask Sumaiya", "Muulize Sumaiya")}
+          body={t("New listings are pulled in daily. Check back soon, or paste a job link and I'll tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika link ya ajira nikutengenezee CV iliyolengwa.")}
+          actionLabel={t("Ask me", "Niulize")}
           onAction={() => navigation.navigate("JobApply")}
         />
       ) : (
@@ -155,7 +159,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
             <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}>
               <Icon name="target" size={16} color={c.accent} />
               <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-                {t("Finish your profile and Sumaiya will match you to the closest openings — with a fit score.", "Kamilisha wasifu wako na Sumaiya atakuunganisha na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
+                {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
               </Text>
             </View>
           )}

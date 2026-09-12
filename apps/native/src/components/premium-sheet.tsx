@@ -85,7 +85,7 @@ export function PremiumSheet({
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
       <View style={{ width, height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
-          <Animated.View style={[backdrop, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
+          <Animated.View style={[backdrop, { flex: 1, backgroundColor: c.overlay }]} />
         </Pressable>
         <Animated.View
           style={[

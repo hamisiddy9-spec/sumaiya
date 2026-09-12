@@ -91,7 +91,7 @@ export const SKILL_AREAS: SkillArea[] = [
       durationWeeks: 4,
       language: "en",
       whyEn: "Almost every advert lists communication. Employers read it as: can you be clear on the phone, in an email, and in a meeting.",
-      whySw: "Karibu kila tangazo linataja mawasiliano. Waajiri wanamaanisha: unaweza kuwa wazi kwa simu, kwenye barua pepe, na kwenye mkutano.",
+      whySw: "Karibu kila tangazo linataja mawasiliano. Waajiri wanamaanisha: unawasilisha wazi kwa simu, kwa barua pepe, na kwenye mkutano.",
       improves: [
         { en: "Clarity", sw: "Uwazi" },
         { en: "Email", sw: "Barua pepe" },

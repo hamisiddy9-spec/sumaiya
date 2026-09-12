@@ -6,9 +6,12 @@ import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import type { CVData } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
 import { useCvs } from "../hooks/use-cvs";
-import { Button, Screen, ScreenTitle, SectionHeader, haptics, useThemeColors } from "../components/ui";
+import { Button, Screen, ScreenTitle, SectionHeader, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
+import { letterIsEmpty, letterToHtml } from "../lib/letter-html";
+import { letterFileName, renamePdf } from "../services/pdf-export";
+import { reportExport } from "../services/export-ledger";
 import { useLang } from "../lib/i18n";
 import type { JobApplyScreenProps } from "../navigation/types";
 
@@ -23,7 +26,7 @@ const WANT_OPTS: { id: Want; en: string; sw: string; icon: string }[] = [
 
 export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
   const c = useThemeColors();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { cvs, updateCV } = useCvs();
   const [jd, setJd] = useState<string>(route?.params?.jd ?? "");
   const [want, setWant] = useState<Want>(route?.params?.want ?? "both");
@@ -48,7 +51,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     setResult(null);
     setApplied(false);
     try {
-      const r = await apiClient.applyToJob(jd.trim(), want, targetCv ? { cvId: targetCv.id } : {});
+      const r = await apiClient.applyToJob(jd.trim(), want, { ...(targetCv ? { cvId: targetCv.id } : {}), lang });
       haptics.success();
       setResult(r);
     } catch (e: any) {
@@ -61,11 +64,13 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
 
   async function applyCvChanges() {
     if (!result?.cv || !targetCv) return;
+    if (applied) return; // in-flight/double-tap guard — this used to write twice and push twice
     setApplied(true);
     haptics.success();
     const data = { ...(targetCv.data as CVData) };
     if (result.cv.summary) data.summary = result.cv.summary;
-    const byId = new Map(result.cv.experience.map((e) => [e.id, e.description]));
+    const tailored = Array.isArray(result.cv.experience) ? result.cv.experience : [];
+    const byId = new Map(tailored.map((e) => [e.id, e.description]));
     data.experience = (data.experience ?? []).map((exp) => {
       const next = byId.get(exp.id);
       return next != null ? { ...exp, description: next } : exp;
@@ -86,22 +91,40 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
 
   async function letterToPdf() {
     if (!result?.letter) return;
+    const content = result.letter.content ?? "";
+
+    // The reported bug: when the letter body came back empty this still printed
+    // a page holding nothing but the job title and the company name. A blank PDF
+    // that opens fine is worse than an error — it can be sent to an employer.
+    // So: refuse, and say why.
+    if (letterIsEmpty(content)) {
+      haptics.error();
+      dialog.alert(
+        t("The letter is empty", "Barua haina maandishi"),
+        t(
+          "Nothing was written for this job, so there is nothing to export. Go back and try again.",
+          "Hakuna kilichoandikwa kwa kazi hii, kwa hivyo hakuna cha kupakua. Rudi nyuma na ujaribu tena.",
+        ),
+      );
+      return;
+    }
+
     haptics.light();
-    const body = result.letter.content
-      .split(/\n{2,}/)
-      .map((para) => `<p>${para.replace(/\n/g, "<br/>").replace(/</g, "&lt;")}</p>`)
-      .join("");
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-      body{font-family:Georgia,'Times New Roman',serif;line-height:1.6;color:#222;padding:56px 60px;font-size:12pt}
-      h1{font-size:15pt;margin:0 0 4px}.sub{color:#666;font-size:10.5pt;margin-bottom:28px}p{margin:0 0 14px}
-    </style></head><body>
-      <h1>${(result.jobTitle || "Cover letter").replace(/</g, "&lt;")}</h1>
-      <div class="sub">${(result.company || "").replace(/</g, "&lt;")}</div>
-      ${body}
-    </body></html>`;
     try {
-      const { uri } = await Print.printToFileAsync({ html });
-      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { mimeType: "application/pdf" });
+      const { uri } = await Print.printToFileAsync({
+        html: letterToHtml({ jobTitle: result.jobTitle, company: result.company, content }),
+      });
+      // Without this the file keeps expo-print's UUID name and lands in WhatsApp
+      // as "54abcd12-d5ef-47ae-8fb4-cae2774c3185.pdf".
+      const named = await renamePdf(uri, letterFileName(result.jobTitle, result.company));
+      // The ledger carries the same readable name the file got, so the assistant
+      // can say which letter was sent — and this letter has no stored row, so the
+      // title is the only identity it will ever have.
+      await reportExport({
+        documentType: "cover-letter",
+        title: result.jobTitle,
+      });
+      if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(named, { mimeType: "application/pdf" });
     } catch {
       /* ignore */
     }
@@ -132,9 +155,9 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
             </View>
             <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", marginBottom: 4 }}>{t("NEW SUMMARY", "MUHTASARI MPYA")}</Text>
             <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 21, marginBottom: 12 }}>{result.cv.summary}</Text>
-            {result.cv.experience.length ? (
+            {(result.cv.experience ?? []).length ? (
               <Text style={{ color: c.textMuted, fontSize: 12 }}>
-                + {result.cv.experience.length} {result.cv.experience.length === 1 ? t("experience entry rewritten", "kipengele cha uzoefu kimeandikwa upya") : t("experience entries rewritten", "vipengele vya uzoefu vimeandikwa upya")}
+                + {(result.cv.experience ?? []).length} {(result.cv.experience ?? []).length === 1 ? t("experience entry rewritten", "kipengele cha uzoefu kimeandikwa upya") : t("experience entries rewritten", "vipengele vya uzoefu vimeandikwa upya")}
               </Text>
             ) : null}
             <View style={{ marginTop: 14 }}>
@@ -147,24 +170,42 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
         ) : null}
 
         {result.letter ? (
-          <Animated.View
-            entering={FadeInDown.duration(280).delay(60)}
-            style={{ backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, borderRadius: 16, padding: 16, marginBottom: 14 }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Icon name="mail" size={16} color={c.accent} />
-              <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("Cover letter", "Barua ya maombi")}</Text>
-            </View>
-            <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 22 }}>{result.letter.content}</Text>
-            <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
-              <View style={{ flex: 1 }}>
-                <Button label={t("Export PDF", "Pakua PDF")} variant="secondary" onPress={letterToPdf} />
+          letterIsEmpty(result.letter.content) ? (
+            /* An empty letter is a failure, not a document. It gets an
+               explanation and NO export button — a blank PDF that opens fine is
+               worse than an error, because it can be sent to an employer. */
+            <Animated.View
+              entering={FadeInDown.duration(280).delay(60)}
+              style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.error + "12", borderWidth: 1, borderColor: c.error + "2a", borderRadius: 16, padding: 16, marginBottom: 14 }}
+            >
+              <Icon name="alert-circle" size={18} color={c.error} />
+              <Text style={{ flex: 1, color: c.textBody, fontSize: 13, lineHeight: 19 }}>
+                {t(
+                  "Nothing was written for this job. Go back and try again.",
+                  "Hakuna kilichoandikwa kwa kazi hii. Rudi nyuma na ujaribu tena.",
+                )}
+              </Text>
+            </Animated.View>
+          ) : (
+            <Animated.View
+              entering={FadeInDown.duration(280).delay(60)}
+              style={{ backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, borderRadius: 16, padding: 16, marginBottom: 14 }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                <Icon name="mail" size={16} color={c.accent} />
+                <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("Cover letter", "Barua ya maombi")}</Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Button label={t("Share", "Sambaza")} variant="secondary" onPress={shareLetter} />
+              <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 22 }}>{result.letter.content}</Text>
+              <View style={{ flexDirection: "row", gap: 8, marginTop: 14 }}>
+                <View style={{ flex: 1 }}>
+                  <Button label={t("Export PDF", "Pakua PDF")} variant="secondary" onPress={letterToPdf} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button label={t("Share", "Sambaza")} variant="secondary" onPress={shareLetter} />
+                </View>
               </View>
-            </View>
-          </Animated.View>
+            </Animated.View>
+          )
         ) : null}
 
         <Pressable
@@ -187,7 +228,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     >
       <ScreenTitle trailing={<SumaiyaMark size={24} color={c.accent} />}>{t("Apply smarter", "Omba kwa ujanja")}</ScreenTitle>
       <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 21, marginBottom: 18 }}>
-        {t("Paste a job description. Sumaiya retunes your CV and writes a matching cover letter — grounded in what she already knows about you.", "Bandika maelezo ya ajira. Sumaiya anarekebisha CV yako na kuandika barua ya maombi inayolingana — kwa kutumia anachokifahamu kukuhusu.")}
+        {t("Paste a job description. I retune your CV and write a matching cover letter — grounded in what I already know about you.", "Bandika maelezo ya ajira. Narekebisha CV yako na kuandika barua ya maombi inayolingana — kwa kutumia ninachokifahamu kukuhusu.")}
       </Text>
 
       <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", letterSpacing: 0.3, marginBottom: 8 }}>{t("WHAT DO YOU WANT?", "UNATAKA NINI?")}</Text>

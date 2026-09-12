@@ -130,11 +130,17 @@ export function ChatComposer({
             ref={inputRef}
             value={value}
             onChangeText={onChangeText}
-            placeholder={t("Message Sumaiya…", "Andika kwa Sumaiya…")}
+            placeholder={t("Message me…", "Niandikie…")}
             placeholderTextColor={c.textMuted}
             selectionColor={c.accent}
             editable={!loading}
             multiline
+            // Enter must NEVER send. Most people type a job advert or a paragraph
+            // into this box, and losing a half-written message to a stray Return
+            // is worse than one extra tap — sending is the button's job alone.
+            // `submitBehavior` is the RN 0.86 replacement for blurOnSubmit.
+            submitBehavior="newline"
+            returnKeyType="default"
             maxLength={2000}
             style={{
               flex: 1,

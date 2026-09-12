@@ -24,12 +24,14 @@ export interface CareerProfile {
   education: string;
   goals: string;
   languages: string;
+  /** Compressed data URL of the headshot (400px JPEG), or "" when unset. */
+  photo: string;
   updatedAt: number;
 }
 
 export const EMPTY_PROFILE: CareerProfile = {
   fullName: "", headline: "", location: "", phone: "", email: "",
-  summary: "", skills: "", experience: "", education: "", goals: "", languages: "",
+  summary: "", skills: "", experience: "", education: "", goals: "", languages: "", photo: "",
   updatedAt: 0,
 };
 

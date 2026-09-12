@@ -19,6 +19,7 @@ import { SumaiyaMark, type SumaiyaMarkState } from "../components/sumaiya-mark";
 import { OnboardingArt } from "../components/onboarding-art";
 import { PortalTransition } from "../components/portal-transition";
 import { useLang, type Lang } from "../lib/i18n";
+import { track } from "../lib/telemetry";
 
 interface Props {
   navigation: unknown;
@@ -254,6 +255,7 @@ export function OnboardingScreen({ onComplete }: Props) {
     haptics.selection();
     ref.current?.scrollTo({ x: p * width, animated: true });
     setPage(p);
+    track("onboarding.slide", { i: p, of: SLIDES.length });
   };
 
   // Android hardware back: step back through the flow instead of killing the
@@ -279,6 +281,11 @@ export function OnboardingScreen({ onComplete }: Props) {
 
   const pickLanguage = (l: Lang) => {
     setLang(l);
+    // Where the funnel actually starts. Nothing was recorded between "installed
+    // the app" and "signed in" before this, so every claim about first-run
+    // drop-off was an educated guess.
+    track("onboarding.start", { lang: l });
+    track("onboarding.slide", { i: 0, of: SLIDES.length });
     // brief "thinking" pulse as she "hears" the choice, then reveal the slides
     setMarkState("thinking");
     setStage("slides");
@@ -294,7 +301,12 @@ export function OnboardingScreen({ onComplete }: Props) {
   // true centre visibly jumped away from where the art actually was — read as
   // the transition "appearing out of nowhere" rather than growing out of it.
   const [portalOrigin, setPortalOrigin] = useState<{ x: number; y: number } | null>(null);
-  const finish = () => {
+  const finish = (via: "skip" | "start" = "skip") => {
+    // The slide someone was on when they left IS the answer to "do the four
+    // slides cost us people before they even sign up?" — and it is the cheapest
+    // point in the whole funnel to lose someone, because they have no account
+    // to abandon yet.
+    track("onboarding.done", { via, i: page, of: SLIDES.length });
     // No haptic here — PortalTransition fires its own opening beat the
     // instant it mounts (this call), so a tap-acknowledgment tick here would
     // double up with it almost simultaneously.
@@ -350,7 +362,7 @@ export function OnboardingScreen({ onComplete }: Props) {
           <View style={{ height: insets.top + 8 }} />
 
           <Pressable
-            onPress={finish}
+            onPress={() => finish("skip")}
             hitSlop={10}
             style={{ alignSelf: "flex-end", paddingHorizontal: 20, paddingVertical: 8 }}
           >
@@ -401,7 +413,7 @@ export function OnboardingScreen({ onComplete }: Props) {
                 size="lg"
                 onPress={() => {
                   if (isLast) {
-                    finish();
+                    finish("start");
                   } else {
                     haptics.selection();
                     goTo(page + 1);

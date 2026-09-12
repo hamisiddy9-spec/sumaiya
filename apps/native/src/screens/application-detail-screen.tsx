@@ -231,7 +231,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
           <Pressable onPress={draftCoverLetter} disabled={drafting} style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
             <SumaiyaMark size={13} state="static" color={c.accent} />
             <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>
-              {drafting ? t("Drafting…", "Inaandika…") : t("Draft with Sumaiya", "Andika na Sumaiya")}
+              {drafting ? t("I'm drafting…", "Naandika…") : t("Draft it with me", "Andika nami")}
             </Text>
           </Pressable>
         </View>
@@ -241,7 +241,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
           multiline
           numberOfLines={8}
           inputStyle={{ minHeight: 160, textAlignVertical: "top" }}
-          placeholder={t("Write it, or let Sumaiya draft it from the job + your CV.", "Iandike, au acha Sumaiya aiandike kutoka ajira + CV yako.")}
+          placeholder={t("Write it, or let me draft it from the job + your CV.", "Iandike, au niandikie kutoka ajira + CV yako.")}
         />
         {coverLetter.trim().length > 0 && (
           <Pressable

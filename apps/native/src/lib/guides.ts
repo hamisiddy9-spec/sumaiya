@@ -24,6 +24,55 @@ export interface Guide {
 
 export const GUIDES: Guide[] = [
   {
+    id: "where-to-find-jobs",
+    tier: "free",
+    minutes: 5,
+    icon: "map-pin",
+    title: { en: "Where the vacancies actually are", sw: "Nafasi za kazi ziko wapi hasa" },
+    summary: {
+      en: "The places that really list Tanzanian jobs — plus the adverts you'll only find on a wall near you.",
+      sw: "Sehemu zinazoorodhesha kazi za Tanzania kikweli — pamoja na matangazo ya ukutani karibu nawe.",
+    },
+    sections: [
+      {
+        heading: { en: "Government: start with Ajira Portal", sw: "Serikali: anza na Ajira Portal" },
+        body: {
+          en: "portal.ajira.go.tz is the official Public Service Recruitment Secretariat portal — government vacancies land there first. Read the whole advert: the deadline, the exact qualifications, and whether you apply online.",
+          sw: "portal.ajira.go.tz ni tovuti rasmi ya Sekretarieti ya Ajira (Utumishi) — nafasi za serikali zinatangazwa hapo kwanza. Soma tangazo lote: mwisho wa kuomba, sifa halisi zinazotakiwa, na kama unaomba mtandaoni.",
+        },
+      },
+      {
+        heading: { en: "Private sector: the big boards", sw: "Sekta binafsi: bodi kubwa" },
+        body: {
+          en: "BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com) and Fuzu (fuzu.com) carry most private-sector adverts. Mabumbe (mabumbe.com/ajira) gathers government adverts in one place, and ReliefWeb (reliefweb.int/jobs) is where UN, NGO and humanitarian roles appear.",
+          sw: "BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com) na Fuzu (fuzu.com) zina matangazo mengi ya sekta binafsi. Mabumbe (mabumbe.com/ajira) hukusanya matangazo ya serikali pamoja, na ReliefWeb (reliefweb.int/jobs) ni mahali pa nafasi za UN, NGO na misaada.",
+        },
+      },
+      {
+        heading: { en: "Offline — the ones near you", sw: "Nje ya mtandao — zile zilizo karibu nawe" },
+        body: {
+          en: "Many jobs are never put online. Go and look at the notice board at these places: the district council and the ward office, VETA and colleges, churches and mosques, and the job pages of Mwananchi, Uhuru and The Guardian. Or you can try searching the sites above. Most people still hear about a job from someone.",
+          sw: "Kazi nyingi haziwekwi mtandaoni. Pitia kwenye ubao wa matangazo wa sehemu zifuatazo: halmashauri ya wilaya na ofisi ya kata, VETA na vyuo, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru na The Guardian. Au unaweza kujaribu kutafuta kwenye tovuti zilizotajwa hapo juu. Watu wengi bado husikia kazi kwa mtu mwingine.",
+        },
+      },
+      {
+        heading: { en: "Ninety seconds, not a whole afternoon", sw: "Sekunde 90, si mchana mzima" },
+        body: {
+          en: "Pick two sources, set a 90-second stopwatch, and only open adverts whose title matches what you can already do. Applying properly to three adverts beats skimming thirty.",
+          sw: "Chagua vyanzo viwili, weka kipima muda cha sekunde 90, na fungua tu matangazo yenye cheo kinacholingana na unachoweza kufanya. Kuomba vizuri kwa matangazo matatu ni bora kuliko kudurusu thelathini.",
+        },
+      },
+      {
+        heading: { en: "Then bring the advert to me", sw: "Kisha niletee tangazo hilo" },
+        body: {
+          en: "Paste the advert text, send the link, or send a photo of the page. I'll read it and tell you what it really wants, which of your skills matter most, what's missing, and what to fix — then I'll tailor your CV to it and write the cover letter, using only what's true about you.",
+          sw: "Bandika maandishi ya tangazo, tuma kiungo, au tuma picha ya ukurasa. Nitaisoma na kukuambia linataka nini hasa, ujuzi upi wako unahitajika zaidi, kinachokosekana, na cha kurekebisha — kisha nitalenga CV yako kwa tangazo hilo na kuandika barua ya maombi, kwa kutumia yale ya kweli kukuhusu.",
+        },
+      },
+    ],
+  },
+
+  {
     id: "ats-basics",
     tier: "free",
     minutes: 4,
@@ -37,15 +86,15 @@ export const GUIDES: Guide[] = [
       {
         heading: { en: "Use a plain layout", sw: "Tumia muundo sahili" },
         body: {
-          en: "No tables, no text boxes, no photo, no columns the software can't follow. One clear column, normal headings: Summary, Experience, Education, Skills. Sumaiya's Classic and Minimal templates are built for this.",
-          sw: "Hakuna jedwali, hakuna visanduku vya maandishi, hakuna picha, hakuna safu ambazo programu haiwezi kufuata. Safu moja wazi, vichwa vya kawaida: Muhtasari, Uzoefu, Elimu, Ujuzi. Miundo ya Sumaiya ya Classic na Minimal imejengwa kwa hili.",
+          en: "No tables, no text boxes, no photo, no columns the software can't follow. One clear column, normal headings: Summary, Experience, Education, Skills. My Classic and Minimal templates are built for this.",
+          sw: "Hakuna jedwali, hakuna visanduku vya maandishi, hakuna picha, hakuna safu ambazo programu haiwezi kufuata. Safu moja wazi, vichwa vya kawaida: Muhtasari, Uzoefu, Elimu, Ujuzi. Miundo yangu ya Classic na Minimal imejengwa kwa hili.",
         },
       },
       {
         heading: { en: "Mirror the advert's words", sw: "Rudia maneno ya tangazo" },
         body: {
-          en: "If the advert says \"stock control\" and you wrote \"inventory\", the software may not connect them. Read the advert, list the exact skills and tools it names, and use those exact words where they're true for you. Sumaiya's \"Tailor to a job\" does this for you.",
-          sw: "Kama tangazo linasema \"udhibiti wa bidhaa\" na wewe uliandika \"inventory\", programu inaweza isiunganishe. Soma tangazo, orodhesha ujuzi na zana halisi inazotaja, tumia maneno hayo pale yanapokuwa kweli kwako. \"Lenga kwenye kazi\" ya Sumaiya inafanya hivi.",
+          en: "If the advert says \"stock control\" and you wrote \"inventory\", the software may not connect them. Read the advert, list the exact skills and tools it names, and use those exact words where they're true for you. Ask me to \"Tailor to a job\" and I do this for you.",
+          sw: "Kama tangazo linasema \"udhibiti wa bidhaa\" na wewe uliandika \"inventory\", programu inaweza isiunganishe. Soma tangazo, orodhesha ujuzi na zana halisi inazotaja, tumia maneno hayo pale yanapokuwa kweli kwako. Niambie \"Lenga kwenye kazi\" nafanya hivi kwa ajili yako.",
         },
       },
       {
@@ -144,10 +193,10 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 5,
     icon: "trending-up",
-    title: { en: "\"I have no experience\" — yes you do", sw: "\"Sina uzoefu\" — lakini unao" },
+    title: { en: "From \"I have no experience\" to \"I have experience\"", sw: "Kutoka \"Sina uzoefu\" hadi \"Nina uzoefu\"" },
     summary: {
-      en: "Attachment, coursework, hustle, volunteering, a family business — all of it counts if you frame it right.",
-      sw: "Mafunzo kwa vitendo, masomo, biashara, kujitolea, biashara ya familia — vyote vinahesabika ukiviweka vizuri.",
+      en: "Attachment, coursework, a hustle, volunteering, a family business — none of it is nothing. This is how it becomes experience an employer can read.",
+      sw: "Mafunzo kwa vitendo, masomo, biashara ndogo, kujitolea, biashara ya familia — hakuna kisichokuwa kitu. Hivi ndivyo inakuwa uzoefu ambao mwajiri anaweza kuusoma.",
     },
     sections: [
       {

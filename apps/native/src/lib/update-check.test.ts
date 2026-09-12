@@ -59,4 +59,18 @@ describe("shouldShowPrompt", () => {
     expect(shouldShowPrompt("1.1.0", "latest", null)).toBe(false);
     expect(shouldShowPrompt("1.1.0", "", null)).toBe(false);
   });
+
+  // The reported bug: the sheet reappeared the moment the person had updated,
+  // because the manifest still pointed at the build they had just installed.
+  it("stays silent for a version already handed to the installer", () => {
+    expect(shouldShowPrompt("1.1.0", "1.1.1", null, "1.1.1")).toBe(false);
+    expect(shouldShowPrompt("1.1.0", "1.1.2", null, "1.1.2")).toBe(false);
+  });
+  it("still surfaces a genuinely newer release after an install", () => {
+    expect(shouldShowPrompt("1.1.0", "1.1.2", null, "1.1.1")).toBe(true);
+  });
+  it("treats a missing delivery record as no record", () => {
+    expect(shouldShowPrompt("1.1.0", "1.1.1", null, null)).toBe(true);
+    expect(shouldShowPrompt("1.1.0", "1.1.1", null, undefined)).toBe(true);
+  });
 });

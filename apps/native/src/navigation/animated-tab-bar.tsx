@@ -13,6 +13,7 @@ import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { haptics } from "../components/ui/haptics";
 import { useThemeColors } from "../components/ui/theme";
+import { useLang } from "../lib/i18n";
 
 const ICONS: Record<string, string> = {
   HomeTab: "home",
@@ -92,6 +93,17 @@ function TabItem({
 export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { t } = useLang();
+
+  // The navigator's static `title` options are English-only, so in Swahili mode
+  // the app's primary navigation rendered untranslated. Translate here instead.
+  const TAB_LABELS: Record<string, string> = {
+    HomeTab: t("Home", "Nyumbani"),
+    CVsTab: t("My CVs", "CV zangu"),
+    SumaiyaTab: t("Sumaiya", "Sumaiya"),
+    ImportTab: t("Import", "Pakia"),
+    ProfileTab: t("Profile", "Wasifu"),
+  };
 
   return (
     <View
@@ -108,10 +120,14 @@ export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarP
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const focused = state.index === index;
+        // The tab labels come from the navigator's static `title` options, which
+        // are English-only — so in Swahili mode the app's PRIMARY navigation was
+        // left untranslated. Translate at the render point instead.
         const label =
-          typeof options.tabBarLabel === "string"
+          TAB_LABELS[route.name] ??
+          (typeof options.tabBarLabel === "string"
             ? options.tabBarLabel
-            : options.title ?? route.name;
+            : options.title ?? route.name);
 
         const onPress = () => {
           const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });

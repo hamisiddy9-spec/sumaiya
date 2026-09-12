@@ -217,6 +217,17 @@ export function useSumaiyaChat() {
     const add = (id: string, en: string, sw: string, emoji: string, action: ActionType, data?: Record<string, unknown>) =>
       out.push({ id, text: t(en, sw), emoji, action, data });
 
+    // "Where do I even find vacancies?" comes BEFORE anyone has an advert to
+    // bring — and it's the one answer they can act on tonight. When the user's
+    // OWN message is a search question this chip takes the first slot: the list
+    // is capped at three, and a sources chip that gets cut helps nobody. Only
+    // the user's words count here — her reply mentions jobs constantly.
+    const jobSearch = ['find', 'tafuta', 'search', 'vacancy', 'vacancies', 'nafasi', 'where', 'wapi', 'site', 'tovuti', 'nearby', 'karibu']
+      .some((w) => userMessage.toLowerCase().includes(w));
+    if (jobSearch) {
+      add('find-jobs', 'Where to find jobs', 'Wapi kupata kazi', '🧭', 'learn', { section: 'sources' });
+    }
+
     if (has('skill', 'ujuzi', 'gap', 'pengo', 'learn', 'jifunze', 'course', 'kozi')) {
       add('learn', 'Learning hub', 'Kituo cha kujifunza', '📚', 'learn', { skills: response.data.skills });
     }
@@ -328,6 +339,61 @@ export function useSumaiyaChat() {
     [user]
   );
 
+  /**
+   * Try a failed file read again.
+   *
+   * A failed read used to be a dead end: the chip said it couldn't be read and
+   * the only way forward was to re-attach the file. Now the user taps retry, we
+   * re-read that one attachment, and on success we hand the recovered text
+   * straight to Sumaiya as the next turn — so the thing they actually asked for
+   * gets finished instead of them having to re-explain it.
+   */
+  const retryAttachment = useCallback(
+    async (messageId: string, attachmentId: string) => {
+      const target = messages
+        .find((m) => m.id === messageId)
+        ?.attachments?.find((a) => a.id === attachmentId);
+      if (!target) return;
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id !== messageId
+            ? m
+            : {
+                ...m,
+                attachments: m.attachments?.map((a) =>
+                  a.id === attachmentId
+                    ? { ...a, extracting: true, extractError: undefined, extractErrorCode: undefined }
+                    : a,
+                ),
+              },
+        ),
+      );
+
+      const patch = await extractAttachment(target);
+      const merged: Attachment = { ...target, ...patch };
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id !== messageId
+            ? m
+            : { ...m, attachments: m.attachments?.map((a) => (a.id === attachmentId ? merged : a)) },
+        ),
+      );
+
+      if (!merged.extractedText) return;
+
+      const line = t(
+        `I read "${merged.name}" again and it worked this time. Please continue with it.`,
+        `Nimeisoma "${merged.name}" tena na imefanikiwa. Tafadhali endelea nayo.`,
+      );
+      // Inline the recovered text rather than re-attaching the file: a real
+      // attachment would be re-extracted (another upload) for no gain.
+      await sendMessage(`${line}\n\n${attachmentsContext([merged])}`, { attachments: [] });
+    },
+    [messages, t, sendMessage],
+  );
+
   return {
     // State
     messages,
@@ -341,6 +407,7 @@ export function useSumaiyaChat() {
     fetchLearningResources,
     buildCvFromChat,
     buildingCv,
+    retryAttachment,
 
     // Utils
     generateMessageId

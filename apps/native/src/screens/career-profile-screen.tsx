@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { loadProfile, saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
+import { pickAndCompressPhoto } from "../lib/pick-photo";
+import { Icon } from "../components/icon";
 import { getDefaultTemplate, setDefaultTemplate } from "../lib/prefs";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { TemplateThumb } from "../components/cv/template-thumb";
@@ -16,6 +18,24 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [template, setTemplate] = useState<CvTemplateId>("classic");
+
+  // A profile photo is the one field everyone expects to set once and then see
+  // everywhere. Compressed on device (400px JPEG — see pick-photo.ts) so the
+  // profile stays small enough to sync on a slow connection.
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const pickPhoto = async () => {
+    haptics.light();
+    setPhotoBusy(true);
+    try {
+      const photo = await pickAndCompressPhoto();
+      if (photo) setP((s) => ({ ...s, photo }));
+    } catch {
+      haptics.error();
+      dialog.alert(t("Couldn't use that photo", "Imeshindwa kutumia picha hiyo"), t("Try a different one.", "Jaribu nyingine."));
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
 
   useEffect(() => {
     loadProfile().then((v) => { setP(v); setLoaded(true); });
@@ -59,10 +79,46 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       <ScreenTitle>{t("Career profile", "Wasifu wa kazi")}</ScreenTitle>
       <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 20, marginBottom: 4 }}>
         {t(
-          "Fill this once. Sumaiya reads it so you never have to repeat your history in the chat.",
-          "Jaza mara moja. Sumaiya anaisoma ili usirudie historia yako kwenye mazungumzo.",
+          "Fill this once. I read it so you never have to repeat your history in the chat.",
+          "Jaza mara moja. Naisoma ili usirudie historia yako kwenye mazungumzo.",
         )}
       </Text>
+
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+        {p.photo ? (
+          <Image
+            source={{ uri: p.photo }}
+            style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.bg, borderWidth: 1, borderColor: c.border }}
+            accessibilityLabel={t("Your photo", "Picha yako")}
+          />
+        ) : (
+          <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
+            <Icon name="user" size={28} color={c.accent} />
+          </View>
+        )}
+        <View style={{ flex: 1, gap: 6 }}>
+          <Button
+            size="sm"
+            variant="secondary"
+            loading={photoBusy}
+            label={p.photo ? t("Change photo", "Badilisha picha") : t("Add your photo", "Weka picha yako")}
+            onPress={pickPhoto}
+          />
+          {p.photo ? (
+            <Pressable onPress={() => { haptics.selection(); setP((s) => ({ ...s, photo: "" })); }}>
+              <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", textDecorationLine: "underline" }}>
+                {t("Remove photo", "Ondoa picha")}
+              </Text>
+            </Pressable>
+          ) : null}
+          <Text style={{ color: c.textMuted, fontSize: 11.5, lineHeight: 16 }}>
+            {t(
+              "It shows next to your name and on your CVs. Photos are compressed on your phone before saving.",
+              "Inaonekana kando ya jina lako na kwenye CV zako. Picha husafishwa kwenye simu yako kabla kuhifadhi.",
+            )}
+          </Text>
+        </View>
+      </View>
 
       <TextField label={t("Full name", "Jina kamili")} value={p.fullName} onChangeText={set("fullName")} autoCapitalize="words" />
       <TextField label={t("Headline / target role", "Kichwa / cheo lengwa")} value={p.headline} onChangeText={set("headline")} placeholder="Warehouse Supervisor" />

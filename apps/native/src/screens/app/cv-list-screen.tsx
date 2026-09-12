@@ -18,6 +18,9 @@ import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
 import { relativeDate } from "../../lib/relative-date";
 import { dialog } from "../../components/ui";
+import { exportCVAsPDF } from "../../services/pdf-export";
+import type { CvTemplateId } from "../../lib/cv-html";
+import { shareCV } from "../../services/share";
 import type { CvListScreenProps } from "../../navigation/types";
 
 export function CvListScreen({ navigation }: CvListScreenProps) {
@@ -25,7 +28,30 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
   const { t, lang } = useLang();
   const { cvs, loading, error, storageBlocked, deleteCV, loadCVs } = useCvs();
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Export used to live only inside the editor and the preview card — a CV
+  // the user just wants to grab a copy of, without editing it, had no path
+  // to a download button at all. Reuses the exact same export+share call the
+  // editor's own "Export PDF" button makes.
+  const downloadCV = async (cv: CV) => {
+    setDownloading(cv.id);
+    haptics.light();
+    try {
+      // cvToHtml validates the template id itself and falls back to "classic"
+      // for anything unrecognised, so this cast is safe even for a stray
+      // stored id from an older template set.
+      const uri = await exportCVAsPDF(cv, { lang, template: cv.templateId as CvTemplateId });
+      haptics.success();
+      await shareCV(cv, uri);
+    } catch {
+      haptics.error();
+      dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -109,8 +135,8 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           <EmptyState
             icon="file-text"
             title={t("You have no CVs yet", "Huna CV bado")}
-            body={t("No CVs yet, draft or completed. Talk to Sumaiya to build one, or upload a CV you already have to start.", "Huna CV, rasimu wala iliyokamilika. Ongea na Sumaiya ili kutengeneza moja, au pakia CV uliyonayo ili kuanza.")}
-            actionLabel={t("Talk to Sumaiya", "Ongea na Sumaiya")}
+            body={t("No CVs yet, draft or completed. Talk to me and I'll build one with you, or upload a CV you already have to start.", "Huna CV, rasimu wala iliyokamilika. Ongea nami nikutengenezee moja, au pakia CV uliyonayo ili kuanza.")}
+            actionLabel={t("Talk to me", "Ongea nami")}
             onAction={() => navigation.navigate("SumaiyaTab")}
             secondaryLabel={t("Upload a CV", "Pakia CV")}
             onSecondary={() => navigation.navigate("ImportTab")}
@@ -162,6 +188,16 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
                       onPress={() =>
                         navigation.navigate("CvEditor", { templateId: cv.templateId, cvId: cv.id })
                       }
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Button
+                      label={t("Download", "Pakua")}
+                      variant="secondary"
+                      size="sm"
+                      loading={downloading === cv.id}
+                      leftIcon={<Icon name="download" size={15} color={c.text} />}
+                      onPress={() => void downloadCV(cv)}
                     />
                   </View>
                   <View style={{ flex: 1 }}>

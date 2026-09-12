@@ -9,6 +9,15 @@ type Size = "sm" | "md" | "lg";
 
 interface ButtonProps extends Omit<PressableProps, "style" | "children"> {
   label: string;
+  /**
+   * A second line under the label that says what pressing this actually does.
+   *
+   * Exists because some actions need one line of specificity that a short label
+   * cannot carry without turning into a sentence. The alternative — a paragraph
+   * elsewhere on the screen explaining the button — reads as an apology for a
+   * vague label. Put the specificity in the thing being tapped.
+   */
+  sublabel?: string;
   variant?: Variant;
   size?: Size;
   loading?: boolean;
@@ -28,6 +37,7 @@ const SIZES: Record<Size, { padY: number; padX: number; text: number; gap: numbe
 
 export function Button({
   label,
+  sublabel,
   variant = "primary",
   size = "md",
   loading = false,
@@ -45,7 +55,7 @@ export function Button({
   const isDisabled = disabled || loading;
 
   const palette = {
-    primary: { bg: c.accent, bgPressed: c.accentPressed, fg: c.accentText, border: "transparent" },
+    primary: { bg: c.accentFill, bgPressed: c.accentFillPressed, fg: c.accentText, border: "transparent" },
     secondary: { bg: c.bgElevated, bgPressed: c.border, fg: c.text, border: c.borderStrong },
     ghost: { bg: "transparent", bgPressed: c.onAccentMuted, fg: c.accent, border: "transparent" },
     danger: { bg: c.error, bgPressed: c.error, fg: "#fff", border: "transparent" },
@@ -63,7 +73,7 @@ export function Button({
     <Animated.View style={[animStyle, fullWidth ? { alignSelf: "stretch" } : { alignSelf: "flex-start" }]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={label}
+        accessibilityLabel={sublabel ? `${label}. ${sublabel}` : label}
         accessibilityState={{ disabled: isDisabled, busy: loading }}
         disabled={isDisabled}
         onPressIn={() => {
@@ -105,9 +115,22 @@ export function Button({
           ) : (
             <>
               {leftIcon ? <View>{leftIcon}</View> : null}
-              <Text style={{ color: palette.fg, fontSize: s.text, fontWeight: "700", letterSpacing: 0.1 }}>
-                {label}
-              </Text>
+              {sublabel ? (
+                // Left-aligned preview, because a second line reads as a
+                // sentence rather than a label.
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={{ color: palette.fg, fontSize: s.text, fontWeight: "700", letterSpacing: 0.1 }}>
+                    {label}
+                  </Text>
+                  <Text style={{ color: palette.fg, fontSize: 12, lineHeight: 16, opacity: 0.85 }} numberOfLines={2}>
+                    {sublabel}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={{ color: palette.fg, fontSize: s.text, fontWeight: "700", letterSpacing: 0.1 }}>
+                  {label}
+                </Text>
+              )}
               {rightIcon ? <View>{rightIcon}</View> : null}
             </>
           )}

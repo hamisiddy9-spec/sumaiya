@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { useAuthContext } from "../../contexts/auth-context";
+import { track } from "../../lib/telemetry";
 import { Button, Screen, TextField, haptics, useThemeColors } from "../../components/ui";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import { Icon } from "../../components/icon";
@@ -102,6 +103,7 @@ export function SignInScreen(_props: Props) {
     setSending(true);
     try {
       await sendCode(email.trim());
+      track("auth.code.sent", {});
       haptics.selection();
       setStep("code");
     } catch {
@@ -119,6 +121,9 @@ export function SignInScreen(_props: Props) {
     clearError();
     try {
       await verifyCode(email.trim(), code);
+      // Only on success: a failed code is surfaced in the UI, and counting it
+      // as a sign-in would flatter the funnel.
+      track("auth.signin", { method: "email" });
       haptics.success();
       // The root navigator swaps to the app once the session lands.
     } catch {
@@ -239,6 +244,9 @@ export function SignInScreen(_props: Props) {
               onPress={async () => {
                 clearError();
                 try {
+                  // Which door people actually use. Google is meant to be the
+                  // led path; this says whether it is.
+                  track("auth.signin", { method: "google" });
                   await signInWithGoogle();
                 } catch {
                   /* surfaced via context */

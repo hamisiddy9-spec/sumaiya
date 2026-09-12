@@ -63,6 +63,23 @@ export interface ChatMessageData {
 
 export type AttachmentKind = 'image' | 'document' | 'link' | 'cv';
 
+/**
+ * Why a file couldn't be read. Every failure carries one of these so the UI can
+ * say the real reason in the user's language, and Sumaiya can relay it instead
+ * of guessing. See lib/attachment-extract.ts for the copy + classification.
+ */
+export type ExtractFailure =
+  | 'too_big'
+  | 'timeout'
+  | 'network'
+  | 'auth'
+  | 'server'
+  | 'scanned_pdf'
+  | 'unsupported'
+  | 'empty'
+  | 'unreadable'
+  | 'device_file';
+
 export interface Attachment {
   id: string;
   kind: AttachmentKind;
@@ -80,6 +97,8 @@ export interface Attachment {
   /** Set instead of extractedText when the file couldn't be read (scanned PDF,
    *  Word doc, network error). Shown in the preview sheet. */
   extractError?: string;
+  /** Cause of the failure — drives the localised copy + the retry affordance. */
+  extractErrorCode?: ExtractFailure;
   /** True while extraction is in flight. */
   extracting?: boolean;
 }

@@ -16,9 +16,14 @@ interface Props {
 
 function Row({ skill }: { skill: SkillGap }) {
   const c = useThemeColors();
-  const pct = Math.round(skill.current * 100);
-  const target = Math.round(skill.required * 100);
-  const sevTone = skill.gap > 0.5 ? "error" : skill.gap > 0.2 ? "warning" : "success";
+  // Defensive: the server can omit these, and a missing value rendered the
+  // literal "NaN% → NaN%" (and made the sort order unstable).
+  const cur = Number.isFinite(skill.current) ? skill.current : 0;
+  const req = Number.isFinite(skill.required) ? skill.required : 0;
+  const gap = Number.isFinite(skill.gap) ? skill.gap : 0;
+  const pct = Math.round(cur * 100);
+  const target = Math.round(req * 100);
+  const sevTone = gap > 0.5 ? "error" : gap > 0.2 ? "warning" : "success";
   const sev = sevTone === "error" ? c.error : sevTone === "warning" ? c.warning : c.success;
 
   return (
@@ -29,7 +34,7 @@ function Row({ skill }: { skill: SkillGap }) {
           {pct}% → {target}%
         </Text>
       </View>
-      <ProgressBar value={skill.current} tone={sevTone as "error" | "warning" | "success"} />
+      <ProgressBar value={cur} tone={sevTone as "error" | "warning" | "success"} />
     </View>
   );
 }
@@ -37,7 +42,7 @@ function Row({ skill }: { skill: SkillGap }) {
 export function SkillGapCard({ skills, onActionPress, loading = false }: Props) {
   const c = useThemeColors();
   const { t } = useLang();
-  const sorted = useMemo(() => [...(skills ?? [])].sort((a, b) => b.gap - a.gap), [skills]);
+  const sorted = useMemo(() => [...(skills ?? [])].sort((a, b) => (b.gap || 0) - (a.gap || 0)), [skills]);
   if (!sorted.length) return null;
 
   return (

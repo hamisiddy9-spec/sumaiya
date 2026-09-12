@@ -49,15 +49,27 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
 export function isUpdateAvailable(current: string, latest: string): boolean {
   return compareVersions(latest, current) > 0;
 }
-
 /**
  * Whether the update prompt should appear for this launch:
  * - the advertised version is genuinely newer than the installed build, AND
- * - the user has not already dismissed THIS exact version ("Baadaye").
+ * - the user has not already dismissed THIS exact version ("Baadaye"), AND
+ * - we have not already downloaded and handed that version to the installer.
  * A dismissed older version never suppresses a NEWER release.
  */
-export function shouldShowPrompt(current: string, latest: string, skippedVersion: string | null): boolean {
+export function shouldShowPrompt(
+  current: string,
+  latest: string,
+  skippedVersion: string | null,
+  /**
+   * The newest version we have already downloaded and passed to the system
+   * installer. Being asked to update again the moment you HAVE updated is the
+   * single thing that makes an updater feel broken — and it genuinely happens
+   * while the manifest still advertises the build the user just installed.
+   */
+  deliveredVersion?: string | null,
+): boolean {
   if (!isUpdateAvailable(current, latest)) return false;
   if (skippedVersion && skippedVersion === latest) return false;
+  if (deliveredVersion && compareVersions(deliveredVersion, latest) >= 0) return false;
   return true;
 }

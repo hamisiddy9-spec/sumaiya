@@ -61,7 +61,7 @@ export function PromptModal({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onCancel} animationType="none" statusBarTranslucent>
-      <Animated.View style={[backdrop, { width, height, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", padding: 28 }]}>
+      <Animated.View style={[backdrop, { width, height, backgroundColor: c.overlay, alignItems: "center", justifyContent: "center", padding: 28 }]}>
         <Animated.View style={[card, { width: "100%", maxWidth: 400, backgroundColor: c.bgElevated, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: c.border }]}>
           <Text style={{ color: c.text, fontSize: 17, fontWeight: "800", marginBottom: message ? 4 : 12 }}>{title}</Text>
           {message ? <Text style={{ color: c.textMuted, fontSize: 13.5, lineHeight: 19, marginBottom: 12 }}>{message}</Text> : null}

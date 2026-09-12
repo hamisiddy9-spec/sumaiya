@@ -11,6 +11,7 @@ import Animated, {
 import { Icon } from "../icon";
 import { haptics, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
+import { extractFailureMessage } from "../../lib/attachment-extract";
 import type { Attachment } from "./chat-types";
 
 /**
@@ -22,14 +23,18 @@ import type { Attachment } from "./chat-types";
 export function AttachmentPreviewSheet({
   attachment,
   onClose,
+  onRetry,
 }: {
   attachment: Attachment | null;
   onClose: () => void;
+  /** Re-read this attachment. Shown as a button only when the read failed —
+   *  a failed read used to be a dead end. */
+  onRetry?: () => void;
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = React.useState(!!attachment);
 
@@ -64,7 +69,7 @@ export function AttachmentPreviewSheet({
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
       <View style={{ width, height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
-          <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
+          <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: c.overlay }]} />
         </Pressable>
 
         <Animated.View
@@ -118,14 +123,53 @@ export function AttachmentPreviewSheet({
               <Text style={{ color: c.textMuted, fontSize: 14 }}>{t("Reading the file…", "Ninasoma faili…")}</Text>
             </View>
           ) : a?.extractError ? (
-            <View style={{ flexDirection: "row", gap: 10, backgroundColor: c.warning + "14", borderRadius: 12, padding: 12 }}>
-              <Icon name="alert-triangle" size={16} color={c.warning} />
-              <Text style={{ flex: 1, color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>{a.extractError}</Text>
+            <View style={{ backgroundColor: c.warning + "14", borderRadius: 12, padding: 12, gap: 12 }}>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <Icon name="alert-triangle" size={16} color={c.warning} />
+                <Text style={{ flex: 1, color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>
+                  {/* The reason, in the user's language. `extractError` holds an
+                      English sentence for the transcript; the code is the
+                      display source so a Kiswahili user isn't shown English. */}
+                  {a.extractErrorCode
+                    ? extractFailureMessage(a.extractErrorCode, lang)
+                    : a.extractError}
+                </Text>
+              </View>
+              {onRetry ? (
+                <Pressable
+                  onPress={() => {
+                    haptics.selection();
+                    onRetry();
+                  }}
+                  disabled={a.extracting}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("Try reading it again", "Jaribu kuisoma tena")}
+                  style={({ pressed }) => ({
+                    alignSelf: "flex-start",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 7,
+                    paddingVertical: 9,
+                    paddingHorizontal: 14,
+                    borderRadius: 10,
+                    backgroundColor: pressed ? c.accentPressed : c.accentFill,
+                    minHeight: 40,
+                    opacity: a.extracting ? 0.6 : 1,
+                  })}
+                >
+                  <Icon name="refresh-cw" size={15} color={c.accentText} />
+                  <Text style={{ color: c.accentText, fontSize: 14, fontWeight: "700" }}>
+                    {a.extracting
+                      ? t("Reading…", "Inasoma…")
+                      : t("Try again", "Jaribu tena")}
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           ) : a?.extractedText ? (
             <>
               <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.4, marginBottom: 8, textTransform: "uppercase" }}>
-                {t("What Sumaiya read", "Sumaiya alichosoma")}
+                {t("What I read", "Nilichosoma")}
               </Text>
               <ScrollView style={{ maxHeight: 360 }} contentContainerStyle={{ paddingBottom: 8 }}>
                 <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>{a.extractedText}</Text>

@@ -77,8 +77,8 @@ export class ErrorBoundary extends React.Component<Props, State> {
         </Text>
         <Text style={{ color: "#6B5F54", fontSize: 14.5, textAlign: "center", lineHeight: 21, maxWidth: 300 }}>
           {sw
-            ? "Sumaiya amekutana na tatizo kwenye skrini hii. CV zako na taarifa zako ziko salama — hakuna kilichopotea."
-            : "Sumaiya hit a problem on this screen. Your CVs and data are safe — nothing was lost."}
+            ? "Nimekutana na tatizo kwenye skrini hii. CV zako na taarifa zako ziko salama — hakuna kilichopotea."
+            : "I hit a problem on this screen. Your CVs and data are safe — nothing was lost."}
         </Text>
         <Pressable
           onPress={this.reset}

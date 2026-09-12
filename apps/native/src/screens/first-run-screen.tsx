@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -17,6 +16,7 @@ import { setSecureItem } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
 import { setDefaultTemplate } from "../lib/prefs";
+import { keyboardAvoidingBehavior } from "../lib/keyboard-avoiding";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { compressPhotoUri, pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
 import {
@@ -31,6 +31,7 @@ import { SumaiyaMark } from "../components/sumaiya-mark";
 import { Button, ProgressBar, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
+import { track } from "../lib/telemetry";
 
 export const FIRST_RUN_KEY = "sumaiya_first_run_done";
 
@@ -133,6 +134,37 @@ export function FirstRunScreen({ onDone }: Props) {
   const [i, setI] = useState(0);
   const step = STEPS[i];
 
+  // ── Funnel instrumentation ────────────────────────────────────────────────
+  // Nothing recorded a first-run before this, so "people probably stall at
+  // skills and recent work" was an educated guess and a redesign pass would
+  // have been spent on it blind. These events make it a fact: how many installs
+  // reach each step, how long each one takes, and — for anyone who never
+  // finished — which step they last saw.
+  //
+  // No PII: step names, positions, counts and durations. Never the name, the
+  // photo, or anything typed into a field.
+  const openedAt = useRef(Date.now());
+  const stepAt = useRef(Date.now());
+  const announced = useRef(false);
+
+  useEffect(() => {
+    if (announced.current || !STEPS.length) return;
+    announced.current = true;
+    track("firstrun.start", { steps: STEPS.length, prefilled_name: prefillName });
+  }, [STEPS.length, prefillName]);
+
+  useEffect(() => {
+    // Runs after the effect above on mount, so `announced` is already true.
+    if (!announced.current) return;
+    // `prev_seconds` is the time spent on the step just left, which is what
+    // turns "people leave at skills" into "people spend 40 seconds on skills and
+    // 3 seconds everywhere else".
+    track("firstrun.step", { step, i, of: STEPS.length, prev_seconds: spentSeconds() });
+    stepAt.current = Date.now();
+  }, [step, i, STEPS.length]);
+
+  const spentSeconds = () => Math.round((Date.now() - stepAt.current) / 1000);
+
   // ── Progress. Everything after "intro" is a slot; the account already filled
   // one (name/email) so we open at ~1/n instead of zero.
   const slots = STEPS.length - 1;
@@ -175,11 +207,25 @@ export function FirstRunScreen({ onDone }: Props) {
   const back = () => {
     haptics.selection();
     if (i > 0) setI(i - 1);
-    else onDone(); // skipping from the very first screen
+    else {
+      // Leaving from the very first screen — the cheapest place in the whole
+      // funnel to lose someone, because they haven't created an account yet.
+      track("firstrun.leave", { step, i, of: STEPS.length, via: "back", seconds: spentSeconds() });
+      onDone();
+    }
   };
 
   const finish = async (skipped: boolean) => {
     if (saving) return;
+    // Fired before the save, on purpose: a save that throws must still leave a
+    // record that this person reached the end of the wizard.
+    track("firstrun.finish", {
+      skipped,
+      completed: filled,
+      of: slots,
+      at_step: step,
+      seconds: Math.round((Date.now() - openedAt.current) / 1000),
+    });
     setSaving(true);
     haptics.selection();
     try {
@@ -436,12 +482,21 @@ export function FirstRunScreen({ onDone }: Props) {
         <View style={{ flex: 1 }}>
           <ProgressBar value={pct} />
         </View>
-        <Pressable onPress={() => finish(true)} hitSlop={10}>
+        <Pressable
+          onPress={() => {
+            // "Skip" is a legitimate, well-placed exit — but it is also the
+            // clearest signal we get that the step it was pressed on was one
+            // step too many.
+            track("firstrun.leave", { step, i, of: STEPS.length, via: "skip", seconds: spentSeconds() });
+            void finish(true);
+          }}
+          hitSlop={10}
+        >
           <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Skip", "Ruka")}</Text>
         </Pressable>
       </View>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={insets.top + 44}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardAvoidingBehavior()} keyboardVerticalOffset={insets.top + 44}>
         <ScrollView
           contentContainerStyle={{ padding: 24, paddingTop: 28, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"

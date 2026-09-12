@@ -101,7 +101,7 @@ export function ScanScreen() {
             title={t("Camera access", "Ruhusa ya kamera")}
             body={
               canAsk
-                ? t("Sumaiya uses your camera to read an existing CV. Nothing is stored — the photo is processed and discarded.", "Sumaiya anatumia kamera kusoma CV uliyonayo. Hakuna kinachohifadhiwa — picha inatumika kisha inafutwa.")
+                ? t("I use your camera to read an existing CV. Nothing is stored — the photo is processed and discarded.", "Natumia kamera kusoma CV uliyonayo. Hakuna kinachohifadhiwa — picha inatumika kisha inafutwa.")
                 : t("Camera access is off. Enable it in Settings to scan a CV with your camera.", "Ruhusa ya kamera imezimwa. Iwashe kwenye Mipangilio ili kupiga CV kwa kamera.")
             }
             actionLabel={canAsk ? t("Allow camera", "Ruhusu kamera") : t("Open Settings", "Fungua Mipangilio")}

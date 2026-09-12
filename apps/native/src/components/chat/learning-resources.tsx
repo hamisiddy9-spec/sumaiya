@@ -1,7 +1,8 @@
 import React from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useThemeColors } from "../ui/theme";
 import { useLang } from "../../lib/i18n";
+import { confirmAndOpenUrl } from "../../lib/external-link";
 import type { LearningResource } from "./chat-types";
 
 interface LearningResourcesProps {
@@ -44,7 +45,7 @@ export function LearningResources({ resources, onResourcePress, compact = false 
             resource={resource}
             onPress={() => {
               onResourcePress?.(resource);
-              if (resource.url) Linking.openURL(resource.url).catch(() => {});
+              if (resource.url) confirmAndOpenUrl(resource.url, t);
             }}
             compact={compact}
           />
@@ -79,7 +80,12 @@ function LearningResourceCard({ resource, onPress, compact = false }: LearningRe
     intermediate: t("Intermediate", "Kati"),
     advanced: t("Advanced", "Juu"),
   }[resource.difficulty];
-  const emoji = PLATFORM_EMOJI[resource.platform.toLowerCase()] ?? "📚";
+  // The server KB does not reliably carry platform / rating / duration /
+  // difficulty. `resource.platform.toLowerCase()` and `resource.rating.toFixed(1)`
+  // used to throw here, which dropped the whole chat into the error boundary.
+  // Render what exists, omit what does not.
+  const platform = typeof resource.platform === "string" ? resource.platform : "";
+  const emoji = PLATFORM_EMOJI[platform.toLowerCase()] ?? "📚";
 
   return (
     <Pressable
@@ -99,11 +105,13 @@ function LearningResourceCard({ resource, onPress, compact = false }: LearningRe
           <Text numberOfLines={compact ? 1 : 2} style={{ color: c.text, fontSize: 13.5, fontWeight: "700" }}>
             {emoji} {resource.name}
           </Text>
-          <Text style={{ color: c.textMuted, fontSize: 11.5, marginTop: 2 }}>{resource.platform}</Text>
+          {platform ? <Text style={{ color: c.textMuted, fontSize: 11.5, marginTop: 2 }}>{platform}</Text> : null}
         </View>
-        <View style={{ backgroundColor: difficultyTone + "1f", borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 }}>
-          <Text style={{ color: difficultyTone, fontSize: 10.5, fontWeight: "800" }}>{difficultyLabel}</Text>
-        </View>
+        {difficultyLabel ? (
+          <View style={{ backgroundColor: difficultyTone + "1f", borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 }}>
+            <Text style={{ color: difficultyTone, fontSize: 10.5, fontWeight: "800" }}>{difficultyLabel}</Text>
+          </View>
+        ) : null}
       </View>
 
       {!compact && resource.description ? (
@@ -114,8 +122,10 @@ function LearningResourceCard({ resource, onPress, compact = false }: LearningRe
 
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: compact ? 4 : 0 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⏱ {resource.duration}</Text>
-          <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⭐ {resource.rating.toFixed(1)}</Text>
+          {resource.duration ? <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⏱ {resource.duration}</Text> : null}
+          {typeof resource.rating === "number" && Number.isFinite(resource.rating) ? (
+            <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⭐ {resource.rating.toFixed(1)}</Text>
+          ) : null}
         </View>
         <Text style={{ color: c.accent, fontSize: 11.5, fontWeight: "700" }}>{t("Open →", "Fungua →")}</Text>
       </View>

@@ -1,6 +1,7 @@
 import * as Sharing from "expo-sharing";
 import { dialog } from "../components/ui";
 import type { CV } from "@sumaiya/types";
+import { reportExport } from "./export-ledger";
 
 export async function shareCV(cv: CV, pdfUri: string): Promise<void> {
   try {
@@ -11,6 +12,10 @@ export async function shareCV(cv: CV, pdfUri: string): Promise<void> {
     }
 
     const name = cv.data.personalInfo?.fullName?.trim();
+    // The CV has left the device — tell the server, so the assistant's library
+    // knows. Both call sites of shareCV hand over a freshly printed PDF, so this
+    // is the one place that sees every CV export without double-counting.
+    await reportExport({ documentType: "cv", documentId: cv.id, title: cv.title });
     await Sharing.shareAsync(pdfUri, {
       mimeType: "application/pdf",
       dialogTitle: name ? `Share ${name}'s CV` : "Share your CV",

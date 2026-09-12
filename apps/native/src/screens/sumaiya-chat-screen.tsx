@@ -55,7 +55,7 @@ function TypingDot({ i }: { i: number }) {
 export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv } =
+  const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv, retryAttachment } =
     useSumaiyaChat();
   const { cvs } = useCvs();
   const { queueOperation } = useOfflineSync();
@@ -67,6 +67,12 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   const [attachOpen, setAttachOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
+
+  // The tapped attachment, resolved live from the transcript so the preview
+  // sheet always reflects the CURRENT read state (a retry mutates the message).
+  const previewLive = preview
+    ? messages.flatMap((m) => m.attachments ?? []).find((a) => a.id === preview.id) ?? preview
+    : null;
 
   // A file handed in from the Import tab lands here as a pending attachment.
   useEffect(() => {
@@ -470,7 +476,21 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         />
       </KeyboardAvoidingView>
 
-      <AttachmentPreviewSheet attachment={preview} onClose={() => setPreview(null)} />
+      {/* The sheet renders the LIVE attachment, not the snapshot that was
+          tapped: a retry updates the message, and a stale copy would keep
+          showing the old failure after it had already succeeded. */}
+      <AttachmentPreviewSheet
+        attachment={previewLive}
+        onClose={() => setPreview(null)}
+        onRetry={
+          previewLive && (previewLive.extractError || previewLive.extracting)
+            ? () => {
+                const owner = messages.find((m) => m.attachments?.some((a) => a.id === previewLive.id));
+                if (owner) void retryAttachment(owner.id, previewLive.id);
+              }
+            : undefined
+        }
+      />
 
       <AttachSheet
         visible={attachOpen}
@@ -481,7 +501,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       <PromptModal
         visible={linkPrompt}
         title={t("Paste the job link", "Bandika link ya ajira")}
-        message={t("Sumaiya will read the job description.", "Sumaiya atasoma maelezo ya ajira.")}
+        message={t("I'll read the job description.", "Nitasoma maelezo ya ajira.")}
         placeholder="https://…"
         confirmLabel={t("Add", "Ongeza")}
         cancelLabel={t("Cancel", "Ghairi")}
