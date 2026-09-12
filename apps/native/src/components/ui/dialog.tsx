@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Dimensions, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import Animated, {
   Easing,
   runOnJS,
@@ -103,6 +103,7 @@ export const dialog = {
 export function DialogHost() {
   const c = useThemeColors();
   const { t } = useLang();
+  const { width, height } = useWindowDimensions();
   const [req, setReq] = useState<DialogRequest | null>(null);
   // Held so the exit animation has something to render after the queue pops.
   const [shown, setShown] = useState<DialogRequest | null>(null);
@@ -170,8 +171,8 @@ export function DialogHost() {
         style={[
           backdrop,
           {
-            width: Dimensions.get("window").width,
-            height: Dimensions.get("window").height,
+            width,
+            height,
             backgroundColor: c.overlay,
             alignItems: "center",
             justifyContent: "center",

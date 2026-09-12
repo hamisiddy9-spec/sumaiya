@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Dimensions, Image, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   Easing,
@@ -28,6 +28,7 @@ export function AttachmentPreviewSheet({
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const { t } = useLang();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = React.useState(!!attachment);
@@ -61,7 +62,7 @@ export function AttachmentPreviewSheet({
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
-      <View style={{ width: Dimensions.get("window").width, height: Dimensions.get("window").height }}>
+      <View style={{ width, height }}>
         <Pressable style={{ flex: 1 }} onPress={onClose}>
           <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: "rgba(0,0,0,0.45)" }]} />
         </Pressable>
@@ -75,7 +76,7 @@ export function AttachmentPreviewSheet({
               position: "absolute",
               bottom: 0,
               left: 0,
-              width: Dimensions.get("window").width,
+              width,
               maxHeight: "78%",
               backgroundColor: c.bgElevated,
               borderTopLeftRadius: 24,

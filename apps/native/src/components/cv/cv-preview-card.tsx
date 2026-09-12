@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Dimensions, Modal, Pressable, ScrollView, Text, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -68,7 +68,7 @@ export function CvPreviewCard({
   const [dlError, setDlError] = useState(false);
 
   const html = useMemo(() => cvToHtml(cv, { accent: color, lang, template }), [cv, color, lang, template]);
-  const screenW = Dimensions.get("window").width;
+  const { width: screenW } = useWindowDimensions();
   const thumbW = Math.min(screenW - 64, 300);
   const thumbH = Math.round(thumbW * PAGE_RATIO);
 
