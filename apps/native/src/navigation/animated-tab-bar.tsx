@@ -37,7 +37,7 @@ function TabItem({
   onLongPress: () => void;
 }) {
   const c = useThemeColors();
-  const progress = useDerivedValue(() => withSpring(focused ? 1 : 0, { damping: 15, stiffness: 180 }));
+  const progress = useDerivedValue(() => withSpring(focused ? 1 : 0, { damping: 20, stiffness: 180, mass: 0.8 }));
 
   const iconStyle = useAnimatedStyle(() => {
     const translateY: number = withTiming(focused ? -2 : 0, { duration: 160 });

@@ -98,7 +98,10 @@ export function Screen({
           style={{
             paddingHorizontal: px,
             paddingTop: 10,
-            paddingBottom: (edges.bottom ? insets.bottom : 0) + 10,
+            // A floor, not just the raw inset: some Android devices report a
+            // near-zero bottom inset even with gesture nav, which put the
+            // footer buttons close enough to the nav bar to cause mis-taps.
+            paddingBottom: Math.max(edges.bottom ? insets.bottom : 0, 16) + 8,
             borderTopWidth: 1,
             borderTopColor: c.border,
             backgroundColor: bg,
