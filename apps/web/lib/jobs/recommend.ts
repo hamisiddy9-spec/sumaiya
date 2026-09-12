@@ -15,6 +15,7 @@ import { parseCVData, parseCareerProfile } from "../../types";
 import { getCVTerms, extractTerms, scoreTerms } from "../job-match";
 import { profileToCvData } from "../career-profile/mapper";
 import { LIVE_STATUSES } from "./constants";
+import { locationRelevance } from "./location-relevance";
 
 export const RECOMMENDATION_TTL_MS = 12 * 60 * 60 * 1000; // 12h
 const MIN_SCORE = 20; // below this a "match" is noise — don't recommend
@@ -66,9 +67,12 @@ export async function computeRecommendations(userId: string, limit = DEFAULT_LIM
     .limit(1);
 
   let cvTerms: Set<string>;
+  let userLocation = "";
   if (c) {
     try {
-      cvTerms = getCVTerms(parseCVData(c.data));
+      const parsed = parseCVData(c.data);
+      cvTerms = getCVTerms(parsed);
+      userLocation = parsed.personal?.location ?? "";
     } catch {
       return [];
     }
@@ -83,6 +87,7 @@ export async function computeRecommendations(userId: string, limit = DEFAULT_LIM
     const derived = profileToCvData(profile);
     if (!derived.summary?.trim() && !derived.skills?.length && !derived.experience?.length) return [];
     cvTerms = getCVTerms(derived);
+    userLocation = derived.personal?.location ?? "";
   }
   if (!cvTerms.size) return [];
 
@@ -108,7 +113,12 @@ export async function computeRecommendations(userId: string, limit = DEFAULT_LIM
     // "Unaendana na: React, Engineer" reads like a real fit, not noise.
     const titleTerms = extractTerms(j.title).filter((t) => cvTerms.has(t));
     const reasonTerms = [...new Set([...titleTerms, ...m.matched])];
-    const score = Math.min(100, m.score + titleTerms.length * TITLE_BOOST);
+    const rawScore = Math.min(100, m.score + titleTerms.length * TITLE_BOOST);
+    // Demote (never remove) a specific, non-remote location that shares
+    // nothing with the user's own — see location-relevance.ts. Keyword
+    // overlap alone was ranking location-locked foreign postings above
+    // genuinely reachable local/remote ones.
+    const score = Math.round(rawScore * locationRelevance(userLocation, j.location));
     if (score >= MIN_SCORE) scored.push({ jobId: j.id, score, matched: reasonTerms });
   }
   scored.sort((a, b) => b.score - a.score);
