@@ -9,6 +9,7 @@ import type { CvTemplateId } from "../../lib/cv-html";
 import type { ChatMessage, ActionType, Attachment } from "./chat-types";
 import { Icon } from "../icon";
 import { useThemeColors } from "../ui/theme";
+import { useLang } from "../../lib/i18n";
 
 interface Props {
   message: ChatMessage;
@@ -28,6 +29,7 @@ export function ChatMessageComponent({
   loading = false,
 }: Props) {
   const c = useThemeColors();
+  const { t } = useLang();
   const isUser = message.author === "user";
 
   const bubbleBg = isUser ? c.accent : c.bgElevated;
@@ -95,7 +97,7 @@ export function ChatMessageComponent({
         ) : null}
 
         {message.sending ? (
-          <Text style={{ color: isUser ? c.accentText : c.textMuted, fontSize: 12, marginTop: 4 }}>Sending…</Text>
+          <Text style={{ color: isUser ? c.accentText : c.textMuted, fontSize: 12, marginTop: 4 }}>{t("Sending…", "Inatuma…")}</Text>
         ) : null}
 
         {message.error ? (

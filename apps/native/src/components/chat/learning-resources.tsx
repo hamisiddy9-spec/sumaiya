@@ -1,12 +1,8 @@
-/**
- * Learning resources display for skill development
- * Shows recommended courses, tutorials, and learning paths
- */
-
-import React from 'react';
-import { Linking, Pressable, Text, View } from 'react-native';
-import { cn } from '@sumaiya/utils';
-import type { LearningResource } from './chat-types';
+import React from "react";
+import { Linking, Pressable, Text, View } from "react-native";
+import { useThemeColors } from "../ui/theme";
+import { useLang } from "../../lib/i18n";
+import type { LearningResource } from "./chat-types";
 
 interface LearningResourcesProps {
   resources: LearningResource[];
@@ -14,51 +10,54 @@ interface LearningResourcesProps {
   compact?: boolean;
 }
 
-export function LearningResources({
-  resources,
-  onResourcePress,
-  compact = false
-}: LearningResourcesProps) {
+const PLATFORM_EMOJI: Record<string, string> = {
+  freecodecamp: "🎓",
+  coursera: "📖",
+  udemy: "🎯",
+  youtube: "📹",
+  linkedin: "💼",
+  skillshare: "🎨",
+  datacamp: "📊",
+  pluralsight: "🔧",
+  codecademy: "💻",
+  edx: "🏫",
+};
+
+export function LearningResources({ resources, onResourcePress, compact = false }: LearningResourcesProps) {
+  const c = useThemeColors();
+  const { t } = useLang();
   if (!resources || resources.length === 0) return null;
 
   return (
-    <View className={cn('mx-4 my-3', compact && 'gap-2')}>
-      {/* Header */}
-      {!compact && (
-        <View className="mb-3 flex-row items-center gap-2">
-          <Text className="text-2xl">📚</Text>
-          <Text className="text-lg font-bold text-gray-900">Learning Resources</Text>
+    <View style={{ gap: compact ? 8 : 12 }}>
+      {!compact ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Text style={{ fontSize: 20 }}>📚</Text>
+          <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }}>{t("Learning Resources", "Rasilimali za Kujifunza")}</Text>
         </View>
-      )}
+      ) : null}
 
-      {/* Resources List */}
-      <View className="gap-2">
-        {resources.slice(0, compact ? 3 : resources.length).map(resource => (
+      <View style={{ gap: 8 }}>
+        {resources.slice(0, compact ? 3 : resources.length).map((resource) => (
           <LearningResourceCard
             key={resource.id}
             resource={resource}
             onPress={() => {
               onResourcePress?.(resource);
-              // Open link
-              if (resource.url) {
-                Linking.openURL(resource.url).catch(err =>
-                  console.error('Failed to open URL:', err)
-                );
-              }
+              if (resource.url) Linking.openURL(resource.url).catch(() => {});
             }}
             compact={compact}
           />
         ))}
       </View>
 
-      {/* Show more button if truncated */}
-      {compact && resources.length > 3 && (
-        <Pressable className="mt-2 py-2 active:bg-gray-100">
-          <Text className="text-center text-sm font-semibold text-indigo-600">
-            +{resources.length - 3} more resources
+      {compact && resources.length > 3 ? (
+        <Pressable style={{ paddingVertical: 8, alignItems: "center" }}>
+          <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>
+            {t(`+${resources.length - 3} more resources`, `+${resources.length - 3} rasilimali zaidi`)}
           </Text>
         </Pressable>
-      )}
+      ) : null}
     </View>
   );
 }
@@ -69,86 +68,56 @@ interface LearningResourceCardProps {
   compact?: boolean;
 }
 
-function LearningResourceCard({
-  resource,
-  onPress,
-  compact = false
-}: LearningResourceCardProps) {
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
+function LearningResourceCard({ resource, onPress, compact = false }: LearningResourceCardProps) {
+  const c = useThemeColors();
+  const { t } = useLang();
 
-  const getPlatformEmoji = (platform: string) => {
-    const emojis: Record<string, string> = {
-      freecodecamp: '🎓',
-      coursera: '📖',
-      udemy: '🎯',
-      youtube: '📹',
-      linkedin: '💼',
-      skillshare: '🎨',
-      datacamp: '📊',
-      pluralsight: '🔧',
-      codecademy: '💻',
-      edx: '🏫'
-    };
-    return emojis[platform.toLowerCase()] || '📚';
-  };
+  const difficultyTone =
+    resource.difficulty === "beginner" ? c.success : resource.difficulty === "advanced" ? c.error : c.warning;
+  const difficultyLabel = {
+    beginner: t("Beginner", "Mwanzo"),
+    intermediate: t("Intermediate", "Kati"),
+    advanced: t("Advanced", "Juu"),
+  }[resource.difficulty];
+  const emoji = PLATFORM_EMOJI[resource.platform.toLowerCase()] ?? "📚";
 
   return (
     <Pressable
       onPress={onPress}
-      className={cn(
-        'rounded-lg px-3 py-3 bg-white border border-gray-200',
-        'active:bg-gray-50'
-      )}
+      style={{
+        borderRadius: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        backgroundColor: c.bgElevated,
+        borderWidth: 1,
+        borderColor: c.border,
+        gap: compact ? 0 : 8,
+      }}
     >
-      <View className={cn(!compact && 'gap-2')}>
-        {/* Title and platform */}
-        <View className="flex-row items-start justify-between">
-          <View className="flex-1">
-            <Text
-              numberOfLines={compact ? 1 : 2}
-              className="font-semibold text-gray-900 text-sm"
-            >
-              {getPlatformEmoji(resource.platform)} {resource.name}
-            </Text>
-            <Text className="text-xs text-gray-600 mt-0.5">{resource.platform}</Text>
-          </View>
-          <View
-            className={cn(
-              'px-2 py-1 rounded-full',
-              getDifficultyColor(resource.difficulty)
-            )}
-          >
-            <Text className="text-xs font-medium capitalize">
-              {resource.difficulty}
-            </Text>
-          </View>
-        </View>
-
-        {!compact && resource.description && (
-          <Text numberOfLines={2} className="text-xs text-gray-600">
-            {resource.description}
+      <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+        <View style={{ flex: 1 }}>
+          <Text numberOfLines={compact ? 1 : 2} style={{ color: c.text, fontSize: 13.5, fontWeight: "700" }}>
+            {emoji} {resource.name}
           </Text>
-        )}
-
-        {/* Metadata: duration and rating */}
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-xs text-gray-600">⏱ {resource.duration}</Text>
-            <Text className="text-xs text-gray-600">⭐ {resource.rating.toFixed(1)}</Text>
-          </View>
-          <Text className="text-xs font-semibold text-indigo-600">Open →</Text>
+          <Text style={{ color: c.textMuted, fontSize: 11.5, marginTop: 2 }}>{resource.platform}</Text>
         </View>
+        <View style={{ backgroundColor: difficultyTone + "1f", borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 }}>
+          <Text style={{ color: difficultyTone, fontSize: 10.5, fontWeight: "800" }}>{difficultyLabel}</Text>
+        </View>
+      </View>
+
+      {!compact && resource.description ? (
+        <Text numberOfLines={2} style={{ color: c.textMuted, fontSize: 12 }}>
+          {resource.description}
+        </Text>
+      ) : null}
+
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: compact ? 4 : 0 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⏱ {resource.duration}</Text>
+          <Text style={{ color: c.textMuted, fontSize: 11.5 }}>⭐ {resource.rating.toFixed(1)}</Text>
+        </View>
+        <Text style={{ color: c.accent, fontSize: 11.5, fontWeight: "700" }}>{t("Open →", "Fungua →")}</Text>
       </View>
     </Pressable>
   );

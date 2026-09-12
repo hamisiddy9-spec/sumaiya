@@ -6,6 +6,7 @@ import { SumaiyaMark } from "../sumaiya-mark";
 import { haptics } from "../ui/haptics";
 import { ProgressBar } from "../ui/progress-bar";
 import { useThemeColors } from "../ui/theme";
+import { useLang } from "../../lib/i18n";
 
 interface Props {
   skills: SkillGap[];
@@ -35,6 +36,7 @@ function Row({ skill }: { skill: SkillGap }) {
 
 export function SkillGapCard({ skills, onActionPress, loading = false }: Props) {
   const c = useThemeColors();
+  const { t } = useLang();
   const sorted = useMemo(() => [...(skills ?? [])].sort((a, b) => b.gap - a.gap), [skills]);
   if (!sorted.length) return null;
 
@@ -50,7 +52,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8, padding: 14, borderBottomWidth: 1, borderBottomColor: c.border }}>
         <Icon name="target" size={16} color={c.accent} />
-        <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>Your skill gaps</Text>
+        <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>{t("Your skill gaps", "Mapungufu yako ya ujuzi")}</Text>
       </View>
 
       <View style={{ padding: 14, gap: 12 }}>
@@ -79,7 +81,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
           }}
         >
           <Icon name="briefcase" size={14} color={c.accentText} />
-          <Text style={{ color: c.accentText, fontSize: 13, fontWeight: "700" }}>Learn</Text>
+          <Text style={{ color: c.accentText, fontSize: 13, fontWeight: "700" }}>{t("Learn", "Jifunze")}</Text>
         </Pressable>
         <Pressable
           disabled={loading}
@@ -101,7 +103,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
           }}
         >
           <SumaiyaMark size={14} state="static" color={c.text} />
-          <Text style={{ color: c.text, fontSize: 13, fontWeight: "700" }}>Practice</Text>
+          <Text style={{ color: c.text, fontSize: 13, fontWeight: "700" }}>{t("Practice", "Fanya mazoezi")}</Text>
         </Pressable>
       </View>
     </View>
