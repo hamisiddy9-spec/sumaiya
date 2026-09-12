@@ -29,7 +29,7 @@ export interface SignalAction {
   target: { screen: string; params?: Record<string, unknown> };
 }
 
-export function signalAction(s: MobileSignal): SignalAction {
+export function signalAction(s: MobileSignal, lang: Lang): SignalAction {
   switch (s.type) {
     case "cv.tailor":
       return {
@@ -41,7 +41,12 @@ export function signalAction(s: MobileSignal): SignalAction {
         cta: { en: "Draft it with me", sw: "Iandike nami" },
         target: {
           screen: "SumaiyaTab",
-          params: { seed: "Help me write a cover letter for the job I'm applying to." },
+          params: {
+            seed:
+              lang === "sw"
+                ? "Nisaidie kuandika barua ya maombi kwa kazi ninayoiomba."
+                : "Help me write a cover letter for the job I'm applying to.",
+          },
         },
       };
     case "confirmations":

@@ -244,10 +244,11 @@ export function SignInScreen(_props: Props) {
               onPress={async () => {
                 clearError();
                 try {
-                  // Which door people actually use. Google is meant to be the
-                  // led path; this says whether it is.
-                  track("auth.signin", { method: "google" });
                   await signInWithGoogle();
+                  // Only on success: a cancelled picker or a failed sign-in is
+                  // surfaced via context, and counting it as a sign-in would
+                  // flatter the funnel (see confirmCode() above).
+                  track("auth.signin", { method: "google" });
                 } catch {
                   /* surfaced via context */
                 }

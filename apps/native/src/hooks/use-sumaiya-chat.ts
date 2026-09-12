@@ -328,7 +328,7 @@ export function useSumaiyaChat() {
           platform: r.platform,
           duration: '',
           rating: 0,
-          description: r.free ? 'Free' : 'Paid',
+          description: r.free ? t('Free', 'Bure') : t('Paid', 'Inalipwa'),
           difficulty: 'beginner',
         }));
       } catch (err) {
@@ -336,7 +336,7 @@ export function useSumaiyaChat() {
         return null;
       }
     },
-    [user]
+    [user, t]
   );
 
   /**

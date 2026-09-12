@@ -206,7 +206,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           otherwise a free guide rotated daily. Same slot, same treatment. */}
       {(() => {
         const st = topSignal ? signalText(topSignal, lang) : null;
-        const act = topSignal ? signalAction(topSignal) : null;
+        const act = topSignal ? signalAction(topSignal, lang) : null;
         const freeGuides = GUIDES.filter((g) => g.tier === "free");
         const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
 

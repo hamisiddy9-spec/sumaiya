@@ -199,7 +199,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               await signOut();
             } catch {
               haptics.error();
-              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), "Contact support@sumaiya.pro.");
+              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Contact support@sumaiya.pro.", "Wasiliana na support@sumaiya.pro."));
             } finally {
               setBusy(null);
             }

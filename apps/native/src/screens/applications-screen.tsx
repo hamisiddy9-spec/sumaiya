@@ -76,6 +76,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
           // A status outside the known set (older/newer schema) made this
           // lookup undefined and threw for the entire list.
           const tint = (STATUS_TINT[a.status] ?? STATUS_TINT.applied)(c);
+          const statusMeta = STATUS_META[a.status] ?? STATUS_META.applied;
           return (
             <Stagger key={a.id} index={i}>
               <Pressable
@@ -97,7 +98,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 2 }}>
                   <View style={{ paddingVertical: 3, paddingHorizontal: 9, borderRadius: 7, backgroundColor: tint + "22" }}>
                     <Text style={{ color: tint, fontSize: 11, fontWeight: "700" }}>
-                      {sw ? STATUS_META[a.status].sw : STATUS_META[a.status].en}
+                      {sw ? statusMeta.sw : statusMeta.en}
                     </Text>
                   </View>
                   {typeof a.fitScore === "number" && (
