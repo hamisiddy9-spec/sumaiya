@@ -6,7 +6,7 @@ import { getDefaultTemplate, setDefaultTemplate } from "../lib/prefs";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { TemplateThumb } from "../components/cv/template-thumb";
 import { useLang } from "../lib/i18n";
-import { Button, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import type { CareerProfileScreenProps } from "../navigation/types";
 
 export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
@@ -33,6 +33,12 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       await setDefaultTemplate(template);
       haptics.success();
       navigation.goBack();
+    } catch {
+      // saveProfile's AsyncStorage.setItem can throw (disk full, rare storage
+      // faults). This had no catch at all: the button would just silently
+      // re-enable with the edits unsaved and no indication anything failed.
+      haptics.error();
+      dialog.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("Try again.", "Jaribu tena."));
     } finally {
       setSaving(false);
     }
