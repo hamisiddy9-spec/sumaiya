@@ -12,7 +12,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.4",
+  version: "1.6.5",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -20,7 +20,7 @@ export const APP_RELEASE: AppReleaseManifest = {
   // (that's where /downloads/sumaiya.apk redirects to `latest`).
   url: "https://sumaiya.pro/downloads/sumaiya.apk",
   notes: {
-    en: "Fixed: CVs and edits made offline now sync reliably instead of silently getting lost. Foldable and large-screen devices no longer get locked to portrait. Push notifications and the update screen now show in your language. A blank CV preview now tells you why instead of just looking broken.",
-    sw: "Marekebisho: CV na mabadiliko yaliyofanywa nje ya mtandao sasa yanasawazishwa kwa uhakika badala ya kupotea kimya kimya. Vifaa vinavyokunjika na vyenye skrini kubwa havifungiwi tena kwenye mwelekeo wima. Arifa na skrini ya sasisho sasa zinaonyesha kwa lugha yako. Muhtasari mtupu wa CV sasa unaeleza sababu badala ya kuonekana kama hitilafu.",
+    en: "Sending Sumaiya a file works now. PDFs and Word documents picked from your phone were never actually reaching her — the upload failed before it left the device — which is why every file came back as unreadable. Files now travel a route that works, a second attempt happens automatically if the first is interrupted, a genuine failure states the real reason (a scanned PDF now says so and asks for a photo), and there's a Try again button instead of a dead end. Also fixed: the + menu rows were squashed into a stack, and text on buttons is easier to read.",
+    sw: "Kutuma faili kwa Sumaiya sasa kunafanya kazi. PDF na Word unazochagua kwenye simu yako zilikuwa hazimfikii kabisa — kupakia kulishindwa kabla kuondoka kwenye kifaa — ndiyo maana kila faili lilirudi kama lisilosomeka. Sasa faili zinasafiri kwa njia inayofanya kazi, kunajaribu tena kiotomatiki ikiwa kumekatizwa, kushindwa kwa kweli kunaeleza sababu halisi (PDF ya picha sasa inasema hivyo na inakuomba tuma picha), na unapata kitufe cha 'Jaribu tena' badala ya kufungwa. Pia tumerekebisha: safu za menyu ya '+' zilikuwa zimebanwa, na maandishi kwenye vitufe yanaonekana wazi zaidi.",
   },
 };

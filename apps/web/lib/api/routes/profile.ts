@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
+import { MAX_PHOTO_CHARS } from "@/lib/api/photo-limits";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 import { db, userProfile, cv } from "@/lib/db";
@@ -17,7 +18,7 @@ const profileUpdateSchema = z.object({
   location: z.string().max(200).optional(),
   linkedin: z.string().max(500).optional(),
   website: z.string().max(500).optional(),
-  photo: z.string().max(500).optional(),
+  photo: z.string().max(MAX_PHOTO_CHARS).optional(),
   summary: z.string().max(2000).optional(),
   emailNotifications: z.boolean().optional(),
   // Persisted so server-composed messages (push notifications from a cron

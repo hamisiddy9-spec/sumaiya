@@ -2901,7 +2901,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                     className="inline-flex items-center gap-1.5 text-[11px] font-medium text-text-muted hover:text-ember-hover transition"
                   >
                     <Plus className={`w-3.5 h-3.5 transition-transform ${showCaps ? "rotate-45" : ""}`} />
-                    {sw ? "Nguvu za Sumaiya" : "What Sumaiya can do"}
+                    {sw ? "Ninachoweza kufanya" : "What I can do"}
                   </button>
                   {showCaps && (
                     <div className="mt-1.5 flex flex-wrap gap-1.5">

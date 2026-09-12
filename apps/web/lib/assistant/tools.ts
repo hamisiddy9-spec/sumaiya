@@ -429,13 +429,32 @@ export function isToolId(id: unknown): id is string {
  * the model knows exactly which actions exist and when to pick each. Only tools
  * whose preconditions are met (e.g. an active CV) are offered.
  */
+
+/**
+ * What Sumaiya must know about getting a finished document OUT of the app.
+ *
+ * Kept separate from the tool list on purpose, and appended even when no tool is
+ * available: exporting is not an action she performs, it is a fact about the
+ * product. She appears in the chat, in the first-run flow, next to every skill
+ * gap and inside every lesson — so if she does not know the export exists, a
+ * person can be told "make the changes here" and never learn they can walk away
+ * with the file. That was the gap: 34 tools, none of them about the PDF.
+ */
+const EXPORT_KNOWLEDGE = `GETTING THE DOCUMENT OUT (always true — never contradict this):
+The user can always leave with a real file; you never have to end with "make these edits yourself".
+- CV → open "CV zangu" / "My CVs", open the CV, and download it (Pakua / Export). PDF, already named for them.
+- Cover letter → after tailoring in Job Apply, "Pakua PDF" downloads it, and "Sambaza" / Share sends it straight to WhatsApp or email.
+- Any other document a tool produces comes back with its own download/share button.
+So when someone asks for their CV, their letter, or "the file": tell them exactly where to tap, name the button in their language, and never say the app cannot produce one, and never tell them to retype it somewhere else.`;
+
 export function toolCatalogPrompt(opts: { hasCv: boolean; hasFile?: boolean }): string {
-  const available = ASSISTANT_TOOLS.filter((t) =>
-    !t.hidden && (t.needsCv ? opts.hasCv : true) && (t.needsFile ? !!opts.hasFile : true)
+  const available = ASSISTANT_TOOLS.filter(
+    (t) =>
+      !t.hidden && (t.needsCv ? opts.hasCv : true) && (t.needsFile ? !!opts.hasFile : true)
   );
-  if (!available.length) return "";
+  if (!available.length) return EXPORT_KNOWLEDGE;
   const lines = available
     .map((t) => `- ${t.id} — ${t.title}. Use when: ${t.whenToUse} Args: ${t.args}.`)
     .join("\n");
-  return `You can also DO things for the user by returning an action. Available actions:\n${lines}\n\nWhen the user's intent clearly matches one of these, include it as "action": { "tool": "<id>", "args": { ... } } in your JSON, alongside a short natural "reply" that tells them what you're doing. If no action fits, omit "action" and just reply. Never invent a tool id that isn't listed.`;
+  return `You can also DO things for the user by returning an action. Available actions:\n${lines}\n\nWhen the user's intent clearly matches one of these, include it as "action": { "tool": "<id>", "args": { ... } } in your JSON, alongside a short natural "reply" that tells them what you're doing. If no action fits, omit "action" and just reply. Never invent a tool id that isn't listed.\n\n${EXPORT_KNOWLEDGE}`;
 }

@@ -1,0 +1,15 @@
+# Anything a build produces on this machine — the web deploy only needs source.
+# Without this, `vercel --prod` walks into Gradle's output tree (50 MB of APKs,
+# dex archives, intermediates) and fails when a native build is writing to it at
+# the same time: ENOENT on a .jar that existed a second earlier.
+apps/native/android/app/build
+apps/native/android/build
+apps/native/android/.gradle
+apps/native/android/.cxx
+apps/native/ios/Pods
+apps/native/.expo
+**/.next
+**/dist
+**/coverage
+**/*.apk
+**/*.aab

@@ -21,6 +21,7 @@ import { versionRoutes } from "@/lib/api/routes/versions";
 import { jobRoutes } from "@/lib/api/routes/jobs";
 import { mobileOcrRoutes } from "@/lib/api/routes/mobile-ocr";
 import { mobileRoutes } from "@/lib/api/routes/mobile";
+import { appTelemetryRoutes } from "@/lib/api/routes/app-telemetry";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 import { reportError } from "@/lib/observability/report-error";
 
@@ -87,6 +88,9 @@ app.route("/versions", versionRoutes);
 app.route("/jobs", jobRoutes);
 app.route("/mobile", mobileOcrRoutes);
 app.route("/mobile", mobileRoutes);
+// Anonymous native telemetry — signed-out installs included, so it can't live
+// behind the user-keyed outcome-event path. Never rejects the client.
+app.route("/app", appTelemetryRoutes);
 
 app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
 

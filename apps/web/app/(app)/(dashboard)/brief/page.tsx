@@ -39,8 +39,8 @@ export default async function BriefPage() {
           </h1>
           <p className="text-sm text-text-body mb-5">
             {sw
-              ? "Ingia ili Sumaiya ikupe nafasi mpya za kazi, maombi ya kufuatilia, na CV tayari kulengwa."
-              : "Sign in so Sumaiya can surface new roles, applications to follow up on, and ready-to-tailor CVs."}
+              ? "Ingia ili nikupe nafasi mpya za kazi, maombi ya kufuatilia, na CV tayari kulengwa."
+              : "Sign in so I can surface new roles, applications to follow up on, and ready-to-tailor CVs."}
           </p>
           <Link
             href="/sign-in?callbackUrl=/brief"
@@ -142,8 +142,8 @@ export default async function BriefPage() {
           </p>
           <p className="text-xs text-text-body mb-3">
             {sw
-              ? "Sumaiya inahitaji wasifu wako (au CV) ili ikupe nafasi zinazokufaa kweli."
-              : "Sumaiya needs your profile (or a CV) to match you to roles that genuinely fit."}
+              ? "Ninahitaji wasifu wako (au CV) ili nikupe nafasi zinazokufaa kweli."
+              : "I need your profile (or a CV) to match you to roles that genuinely fit."}
           </p>
           <Link
             href="/career-interview"

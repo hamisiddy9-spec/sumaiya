@@ -1,18 +1,23 @@
-import { NextResponse } from "next/server";
-import { APP_RELEASE } from "@/lib/app-release";
+import { NextRequest, NextResponse } from "next/server";
+import { liveRelease } from "@/lib/app-update";
 
 // Public app-update manifest for the NATIVE app (and anyone else who asks).
-// The mobile app checks this endpoint on launch: if `version` is newer than
-// the installed build it prompts the user to update (see
-// mobile/src/components/UpdatePrompt.tsx). No auth, no user data — a plain
-// tiny JSON. `url` points at the site's /downloads link which 308-redirects to
-// the public releases repo asset, so the manifest never hard-codes GitHub.
-// Release cadence: bump lib/app-release.ts after each verified APK publish.
+//
+// The app checks this on launch, prompts when the version is newer than the
+// installed build (native/src/components/update-prompt.tsx), downloads the APK
+// in-app and hands it to the system installer. Resolution lives in
+// lib/app-update.ts — GitHub releases are the source of truth.
 export const runtime = "nodejs";
+export const revalidate = 300;
 
-export async function GET() {
-  return NextResponse.json(APP_RELEASE, {
+export async function GET(req: NextRequest) {
+  // "stable" unless a build explicitly opts into a testing channel.
+  const requested = req.nextUrl.searchParams.get("channel");
+  const channel = requested === "test" ? "test" : "stable";
+  const body = await liveRelease(channel);
+  return NextResponse.json(body, {
     headers: {
+      // Short cache: publishing a release must reach users within minutes.
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       "Access-Control-Allow-Origin": "*",
     },

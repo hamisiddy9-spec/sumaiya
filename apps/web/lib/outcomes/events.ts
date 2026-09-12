@@ -13,7 +13,7 @@
 //     generate nothing.
 
 import { createHash } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { DB } from "./db-type";
 import { userProfile, outcomeEvent } from "@/lib/db";
@@ -107,7 +107,12 @@ export async function recordOutcomeEvent(
       id: nanoid(),
       userHash: hashUserId(input.userId),
       type: input.type,
-      payload: sanitizePayload(input.payload),
+      // The `::jsonb` cast is load-bearing, not decoration. Without it drizzle
+      // hands postgres-js a plain object, which arrives double-encoded: the
+      // column holds a JSON *string* and every `payload->>'key'` read returns
+      // NULL. That silently blanked the admin Insights page for real users —
+      // lib/outcomes/aggregate.ts reads `r.payload.beforeAts` as a property.
+      payload: sql`${sanitizePayload(input.payload)}::jsonb` as unknown as Record<string, unknown>,
     });
   } catch (err) {
     // Instrumentation must never break the feature it observes.

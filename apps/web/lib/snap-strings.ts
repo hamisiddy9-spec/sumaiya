@@ -91,7 +91,7 @@ export const STRINGS = {
     notJobTitle: "Hii haionekani kama maelezo ya kazi",
     notJobHint: "Weka tangazo zima — pamoja na sehemu za mahitaji na majukumu.",
     noProfileTitle: "Tunahitaji CV yako kwanza",
-    buildCv: "Jenga CV yangu na Sumaiya",
+    buildCv: "Jenga CV yangu nami",
     scoreLabel: "Ulinganifu wa ATS",
     scoreBefore: "CV yako",
     scoreAfter: "Iliyolengwa",

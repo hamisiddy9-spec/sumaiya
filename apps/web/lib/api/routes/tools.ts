@@ -463,14 +463,40 @@ writer.write(sys.argv[2])
     if (limited) return limited;
 
     try {
-      const formData = await c.req.parseBody({ all: true }) as Record<string, unknown>;
-      const file = collectFiles(formData)[0] ?? null;
-      if (!file) return c.json({ error: "No file uploaded." }, 400);
-      if (file.size > MAX_PDF_BYTES) {
+      // Two accepted shapes:
+      //   1. multipart/form-data — the web app and curl.
+      //   2. application/json { fileBase64, name } — the NATIVE app.
+      // (2) exists because React Native's multipart writer fails to open a
+      // file:// part on the current RN version: the request never left the
+      // phone and surfaced as a network error, so no PDF could ever be read
+      // from the app. The native client now reads the bytes itself and posts
+      // them as base64, the same mechanism the OCR route already uses.
+      const contentType = c.req.header("content-type") ?? "";
+      let buffer: Buffer;
+      let name = "document";
+
+      if (contentType.includes("application/json")) {
+        const body = (await c.req.json().catch(() => null)) as
+          | { fileBase64?: unknown; name?: unknown }
+          | null;
+        const b64 = typeof body?.fileBase64 === "string" ? body.fileBase64 : "";
+        if (!b64) return c.json({ error: "No file uploaded." }, 400);
+        const idx = b64.indexOf("base64,");
+        buffer = Buffer.from(idx >= 0 ? b64.slice(idx + 7) : b64, "base64");
+        if (!buffer.length) return c.json({ error: "No file uploaded." }, 400);
+        if (typeof body?.name === "string" && body.name) name = body.name;
+      } else {
+        const formData = await c.req.parseBody({ all: true }) as Record<string, unknown>;
+        const file = collectFiles(formData)[0] ?? null;
+        if (!file) return c.json({ error: "No file uploaded." }, 400);
+        name = file.name;
+        buffer = Buffer.from(await file.arrayBuffer());
+      }
+
+      if (buffer.length > MAX_PDF_BYTES) {
         return c.json({ error: "That file is too large (max 4 MB). Send a smaller one, or paste the text." }, 413);
       }
 
-      const buffer = Buffer.from(await file.arrayBuffer());
       const head = buffer.subarray(0, 8);
       const isPdf = head[0] === 0x25 && head[1] === 0x50 && head[2] === 0x44 && head[3] === 0x46; // %PDF
       const isZip = head[0] === 0x50 && head[1] === 0x4b && (head[2] === 0x03 || head[2] === 0x05 || head[2] === 0x07); // PK..
@@ -496,7 +522,7 @@ writer.write(sys.argv[2])
         return c.json({ success: true, text: clean, pages: totalPages });
       }
 
-      if (isZip && (asText.includes("word/document.xml") || /\.docx$/i.test(file.name))) {
+      if (isZip && (asText.includes("word/document.xml") || /\.docx$/i.test(name))) {
         const mammoth = await import("mammoth");
         const lib = (mammoth as { extractRawText?: unknown }).extractRawText
           ? (mammoth as typeof import("mammoth"))

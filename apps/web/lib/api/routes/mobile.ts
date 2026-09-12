@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
+import { MAX_PHOTO_CHARS } from "@/lib/api/photo-limits";
 import { z } from "zod";
 import { getUserId } from "@/lib/api/auth";
 import { checkAiQuota, refundAiUsage } from "@/lib/api/ai-limit";
@@ -17,6 +18,8 @@ import { parseCareerProfile } from "@/types";
 import { ensureProfileRow } from "@/lib/career-profile/sync";
 import { stampProfileAllFacts } from "@/lib/career-profile/mapper";
 import { computeSignals } from "@/lib/assistant/signals";
+import { checkTailoring } from "@/lib/api/tailoring-guards";
+import { recordExport, normalizeExportKind, mintUnstoredExportId } from "@/lib/documents/export-ledger";
 import {
   nativeProfileToCareer,
   careerToNativeProfile,
@@ -118,7 +121,7 @@ export const mobileRoutes = new Hono()
         knownBlock = contextToPromptBlock(await assembleUserContext(userId));
       } catch { /* unpersonalised is fine */ }
 
-      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words, in the same language the user is writing in. When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names. Never claim the user "already told you" something that is not written in the exchange below — if it's missing, ask for it plainly. If a message says a file was attached but gives you NO text from it, say you couldn't read the file and ask them to paste the text — never guess or invent its contents. Never ask where the user lives, their neighbourhood, or whether they feel safe — keep every question tied to their work and the job they want. Stay on the one goal they came with; don't drift to a side topic.
+      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words, in the same language the user is writing in. When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names. When the user has no advert yet and is asking where to find work, name at most two real sources and nothing else — Ajira Portal (portal.ajira.go.tz) for government, BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com), Fuzu (fuzu.com), Mabumbe (mabumbe.com/ajira), or ReliefWeb (reliefweb.int/jobs) for NGO and UN roles — and remind them of the ones near them — district and ward notice boards, VETA, churches and mosques, and the advert pages of Mwananchi or Uhuru. When someone has no advert yet, keep the words plain and name the thing: "Umeona nafasi ya kazi sehemu yoyote? Niletee tangazo" — never "umeona kimoja", which leaves them asking "one what?". For the offline route say: "Kazi nyingi haziwekwi mtandaoni — pitia kwenye ubao wa matangazo wa halmashauri ya wilaya, ofisi ya kata, VETA, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru au The Guardian." Then ask them to paste the advert text, the link, or a photo of it, and promise to say what it really wants and whether their CV fits. Never invent a job site, URL, or listing. The app can make and download real PDFs — a CV, a cover letter, a letter and a business card — and every one is exported from inside the app, never by you: when someone asks how to send their CV or letter to an employer, tell them to open the document and tap "Pakua PDF", then share it straight to WhatsApp or email. If the notes above show a document was exported a day or two ago, you may ask ONCE, like a friend, whether it went through ("ile ilipita?") and then offer one next step — but never nag, never repeat the question, and drop it the moment they move on. Never claim the user "already told you" something that is not written in the exchange below — if it's missing, ask for it plainly. If a message says a file was attached but gives you NO text from it, say you couldn't read the file and ask them to paste the text — never guess or invent its contents. Never ask where the user lives, their neighbourhood, or whether they feel safe — keep every question tied to their work and the job they want. Stay on the one goal they came with; don't drift to a side topic.
 ${knownBlock}
 Conversation so far:
 ${transcript}
@@ -182,12 +185,22 @@ Sumaiya:`;
         }
       }
 
-      const p = ctx.profile?.personal;
+      // Name/role/location/summary used to come ONLY from the separate Career
+      // Profile blob (user_profile.career_profile) — never from the CV's own
+      // data, even though a CV has all of the same fields. A user whose
+      // career profile was never seeded (the seed can silently no-op on an
+      // older CV) but who plainly owns a real CV would fall straight through
+      // to "I need to know something about you first", telling them to build
+      // the exact thing they already had open. Fall back to the CV's own
+      // personal/summary when the career profile hasn't got there yet — a
+      // user who has given the app a CV has already given it enough.
+      const p = ctx.profile?.personal ?? cv?.data.personal;
       const facts: string[] = [];
       if (p?.fullName) facts.push(`Name: ${p.fullName}`);
       if (p?.jobTitle) facts.push(`Current role: ${p.jobTitle}`);
       if (p?.location) facts.push(`Location: ${p.location}`);
-      if (ctx.profileSummary) facts.push(`Profile summary: ${ctx.profileSummary}`);
+      const summary = ctx.profileSummary || cv?.data.summary || "";
+      if (summary) facts.push(`Profile summary: ${summary}`);
       const expEntries = (cv?.data.experience ?? []).slice(0, 8).map((e) => ({
         id: e.id,
         position: e.position || "",
@@ -206,7 +219,16 @@ Sumaiya:`;
       if (skills.length) facts.push(`Skills: ${skills.join(", ")}`);
       if (!facts.length) {
         await refundAiUsage(userId);
-        return c.json({ error: "I need something about you first — scan or build a CV, or tell Sumaiya about your background." }, 422);
+        // Sumaiya is the one speaking, so she says "tell me" — never "tell
+        // Sumaiya". A person does not refer to herself by name mid-sentence.
+        // And the language is the user's, not ours: this used to come back in
+        // English on a Swahili screen because the client never sent `lang`.
+        return c.json({
+          error:
+            lang === "sw"
+              ? "Nahitaji kujua kitu kukuhusu kwanza — pakia au jenga CV, au niambie historia yako."
+              : "I need to know something about you first — upload or build a CV, or tell me about your background.",
+        }, 422);
       }
 
       const L = lang === "sw" ? "Swahili" : lang === "en" ? "English" : "the same language as the candidate's details";
@@ -245,6 +267,15 @@ ${facts.join("\n")}`;
             .map((e) => ({ id: e.id, description: String((e as { description?: unknown }).description ?? "") }))
         : [];
 
+      // An empty body is not a success. Before this, `"coverLetter": ""` passed
+      // the "is it a string" test and the app exported a PDF holding nothing but
+      // the job title and the company name.
+      const verdict = checkTailoring(parsed, { wantCv, wantLetter });
+      if (!verdict.ok) {
+        await refundAiUsage(userId);
+        return c.json({ error: verdict.error }, 502);
+      }
+
       return c.json({
         success: true,
         data: {
@@ -253,9 +284,12 @@ ${facts.join("\n")}`;
           cvId: wantCv && cv ? cv.id : null,
           cv:
             wantCv && parsed.summary !== undefined
-              ? { summary: String(parsed.summary ?? ""), experience: expOut }
+              ? { summary: String(parsed.summary ?? "").trim(), experience: expOut }
               : null,
-          letter: wantLetter && typeof parsed.coverLetter === "string" ? { content: parsed.coverLetter } : null,
+          letter:
+            wantLetter && typeof parsed.coverLetter === "string"
+              ? { content: parsed.coverLetter.trim() }
+              : null,
         },
       });
     }
@@ -362,7 +396,13 @@ ${sanitizePromptText(transcript, 12000)}
 
       if (!cv.personalInfo.fullName && cv.experience.length === 0 && cv.skills.length === 0) {
         await refundAiUsage(userId);
-        return c.json({ error: "Not enough to go on yet — tell Sumaiya your name, a job you've done, and your skills." }, 422);
+        // First person, and in the user's language — see the guard above.
+        return c.json({
+          error:
+            lang === "sw"
+              ? "Bado hakuna vya kutosha — niambie jina lako, kazi uliyowahi kufanya, na ujuzi wako."
+              : "Not enough to go on yet — tell me your name, a job you've done, and your skills.",
+        }, 422);
       }
 
       return c.json({ success: true, data: { cv } });
@@ -412,6 +452,8 @@ ${sanitizePromptText(transcript, 12000)}
         education: z.string().max(4000).default(""),
         goals: z.string().max(2000).default(""),
         languages: z.string().max(1000).default(""),
+        /** Data URL of the compressed headshot (see photo-limits.ts). */
+        photo: z.string().max(MAX_PHOTO_CHARS).default(""),
         updatedAt: z.number().nonnegative().optional(),
       }),
     ),
@@ -490,6 +532,51 @@ ${sanitizePromptText(transcript, 12000)}
         console.error("[mobile] device-token upsert failed:", err);
         return c.json({ error: "Could not register push token" }, 500);
       }
+    },
+  )
+
+  // POST /api/mobile/export — the device tells us a document actually left the
+  // phone.
+  //
+  // Until this existed the native app reported NOTHING: it prints the PDF
+  // locally with expo-print and shares the file, so the export never touched
+  // the server and `download_log` only ever contained rows written by the web
+  // editor. The device is where most documents are actually exported, so the
+  // assistant's library was blind to the majority of real activity.
+  //
+  // No stored row is required: a cover letter from POST /apply is built on
+  // demand and never persisted, so the server mints a `mobile:`-prefixed
+  // ledger id for it and keeps the human title the user saw in the file name.
+  .post(
+    "/export",
+    zValidator(
+      "json",
+      z.object({
+        documentType: z.string().min(1).max(32),
+        documentId: z.string().min(1).max(64).optional(),
+        title: z.string().max(200).optional(),
+        format: z.string().max(16).optional(),
+      }),
+    ),
+    async (c) => {
+      const userId = await getUserId(c);
+      if (!userId) return c.json({ error: "Unauthorized" }, 401);
+
+      const body = c.req.valid("json");
+      const kind = normalizeExportKind(body.documentType);
+      if (!kind) return c.json({ error: "Unknown document type" }, 400);
+
+      await recordExport({
+        userId,
+        documentId: body.documentId?.trim() || mintUnstoredExportId(),
+        documentType: kind,
+        title: body.title ?? null,
+        format: body.format ?? "pdf",
+      });
+
+      // Always 200: this is bookkeeping. A failed ledger write must never show
+      // the user an error for an export that already succeeded on their phone.
+      return c.json({ success: true });
     },
   );
 

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, businessCard } from "@/lib/db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { recordExport } from "@/lib/documents/export-ledger";
 
 export async function POST(
   req: NextRequest,
@@ -16,15 +17,28 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await db
-    .update(businessCard)
-    .set({ downloadCount: sql`${businessCard.downloadCount} + 1`, status: "complete" })
+  const [existing] = await db
+    .select({ id: businessCard.id, title: businessCard.title })
+    .from(businessCard)
     .where(and(eq(businessCard.id, params.id), eq(businessCard.userId, user.id)))
-    .returning({ id: businessCard.id });
+    .limit(1);
 
-  if (result.length === 0) {
+  if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+
+  // Counter + ledger from one place. Previously this bumped `download_count`
+  // and wrote nothing to `download_log`, so a business card exported from the
+  // web editor was invisible to the assistant's library block.
+  // markComplete: cards have always flipped to "complete" on download here.
+  await recordExport({
+    userId: user.id,
+    documentId: existing.id,
+    documentType: "business-card",
+    title: existing.title,
+    format: "pdf",
+    markComplete: true,
+  });
 
   return NextResponse.json({ success: true });
 }

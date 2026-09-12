@@ -17,7 +17,10 @@ export interface LearningResource {
   provider: string;
   /** Live URL (verified). */
   url: string;
-  /** True when the resource is free to complete. */
+  /**
+   * True when the resource is free to complete. Kept in the shape, but the
+   * catalogue only ever returns free entries — see `freeResources()`.
+   */
   free: boolean;
 }
 

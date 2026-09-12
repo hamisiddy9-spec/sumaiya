@@ -4,6 +4,19 @@ import type { CV, SyncQueueItem } from "@sumaiya/types";
 const DB_NAME = "sumaiya.db";
 const DB_VERSION = 1;
 
+/**
+ * Dates reach this layer as `Date` (from the app), as ISO strings (straight off
+ * the wire) or as numbers (read back out of SQLite). Trusting the declared type
+ * is what broke all offline caching: a string here threw inside executeAsync,
+ * every write failed, and nothing was ever stored on the device. Coerce
+ * defensively so persistence cannot be disabled by a caller's shape.
+ */
+function toMillis(value: Date | string | number | null | undefined): number {
+  if (value instanceof Date) return value.getTime();
+  const t = value === null || value === undefined ? NaN : new Date(value).getTime();
+  return Number.isNaN(t) ? Date.now() : t;
+}
+
 export class OfflineStorage {
   private db: SQLite.SQLiteDatabase | null = null;
   private initPromise: Promise<void> | null = null;
@@ -120,8 +133,8 @@ export class OfflineStorage {
         cv.templateId,
         cv.title,
         JSON.stringify(cv.data),
-        cv.createdAt.getTime(),
-        cv.updatedAt.getTime(),
+        toMillis(cv.createdAt),
+        toMillis(cv.updatedAt),
         cv.isOfflineOnly ? 1 : 0
       );
     } finally {

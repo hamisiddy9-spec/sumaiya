@@ -3,9 +3,9 @@ import { zValidator } from "@hono/zod-validator";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 import { db, cv, debugEvent } from "@/lib/db";
-import { eq, and, sql } from "drizzle-orm";
-import { downloadLog } from "@/lib/db";
+import { eq, and } from "drizzle-orm";
 import { nanoid, customAlphabet } from "nanoid";
+import { recordExport } from "@/lib/documents/export-ledger";
 import { createHash } from "node:crypto";
 import { parseCvLoose } from "@/lib/career-profile/mapper";
 import { seedProfileFromCv } from "@/lib/career-profile/sync";
@@ -295,24 +295,23 @@ export const cvRoutes = new Hono()
 
     const cvId = c.req.param("id");
     const [existing] = await db
-      .select({ id: cv.id })
+      .select({ id: cv.id, title: cv.title })
       .from(cv)
       .where(and(eq(cv.id, cvId), eq(cv.userId, userId)))
       .limit(1);
     if (!existing) return c.json({ error: "Not found" }, 404);
 
-    await Promise.all([
-      db.update(cv)
-        .set({ downloadCount: sql`${cv.downloadCount} + 1`, updatedAt: new Date() })
-        .where(eq(cv.id, cvId)),
-      db.insert(downloadLog).values({
-        id: nanoid(),
-        userId,
-        documentId: cvId,
-        documentType: "cv",
-        format: "pdf",
-      }),
-    ]);
+    // Counter + ledger now come from one place (lib/documents/export-ledger) so
+    // a CV export is recorded identically to a letter, a card or a cover letter.
+    // markComplete stays off: downloading a draft CV must not relabel it.
+    await recordExport({
+      userId,
+      documentId: cvId,
+      documentType: "cv",
+      title: existing.title,
+      format: "pdf",
+      markComplete: false,
+    });
 
     return c.json({ success: true });
   })

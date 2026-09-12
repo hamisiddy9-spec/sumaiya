@@ -9,6 +9,23 @@ export const dynamic = "force-dynamic";
 
 const SINCE_DAYS = 90;
 
+/**
+ * Rows written before the `::jsonb` fix hold the payload as a JSON *string*
+ * (double-encoded), so `payload.x` reads undefined and the whole dashboard
+ * quietly renders "—". Old rows are still real data, so parse them instead of
+ * discarding them.
+ */
+function normalizePayload(raw: unknown): Record<string, unknown> {
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  return (raw ?? {}) as Record<string, unknown>;
+}
+
 async function loadRows(): Promise<OutcomeEventRow[]> {
   try {
     const since = new Date(Date.now() - SINCE_DAYS * 24 * 60 * 60 * 1000);
@@ -21,7 +38,7 @@ async function loadRows(): Promise<OutcomeEventRow[]> {
     return rows.map((r) => ({
       userHash: r.userHash,
       type: r.type,
-      payload: (r.payload ?? {}) as Record<string, unknown>,
+      payload: normalizePayload(r.payload),
       createdAt: r.createdAt,
     }));
   } catch {

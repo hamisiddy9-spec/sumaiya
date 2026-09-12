@@ -25,6 +25,8 @@ export interface NativeProfile {
   education: string; // free text
   goals: string;
   languages: string; // comma / newline separated
+  /** Compressed data URL of the headshot (set in Wasifu), or "" when unset. */
+  photo?: string;
   updatedAt: number; // ms epoch — native's clock
 }
 
@@ -42,6 +44,8 @@ export function nativeProfileToCareer(n: NativeProfile): CareerProfile {
   const cp = createEmptyCareerProfile();
 
   cp.personal.fullName = n.fullName?.trim() ?? "";
+  // Set once in the app, visible on every CV: the same compressed data URL.
+  if (n.photo?.trim()) cp.personal.photo = n.photo.trim();
   cp.personal.email = n.email?.trim() ?? "";
   cp.personal.phone = n.phone?.trim() ?? "";
   cp.personal.location = n.location?.trim() ?? "";
@@ -108,6 +112,7 @@ function educationText(cp: CareerProfile): string {
 export function careerToNativeProfile(cp: CareerProfile, updatedAt: number): NativeProfile {
   return {
     fullName: cp.personal?.fullName ?? "",
+    photo: cp.personal?.photo ?? "",
     headline: (cp.preferences?.targetRoles ?? []).join(" · ") || (cp.personal?.jobTitle ?? ""),
     location: cp.personal?.location ?? "",
     phone: cp.personal?.phone ?? "",

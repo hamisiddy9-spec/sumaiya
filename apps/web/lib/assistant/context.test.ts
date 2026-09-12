@@ -79,3 +79,72 @@ describe("contextToPromptBlock", () => {
     expect(block).not.toContain("description");
   });
 });
+
+/** One library entry, with the fields the renderer actually reads. */
+function doc(over: Partial<NonNullable<UnifiedContext["documents"]>[number]> = {}) {
+  return {
+    id: "d1", type: "letter" as const, title: "Kurudi kazini", jobTitle: "", companyName: "",
+    status: "complete", updatedAt: "2026-09-10T00:00:00Z", downloads: 0, lastDownloadedAt: null,
+    ...over,
+  };
+}
+
+describe("library block (documents)", () => {
+  /**
+   * The reason this block exists: the context used to stop at CVs and
+   * applications, so Sumaiya could not see a cover letter, a letter or a card —
+   * and could not ask the one question that matters after an export.
+   */
+  it("renders nothing when the user has no library", () => {
+    expect(contextToPromptBlock(ctx())).not.toContain("library");
+    expect(contextToPromptBlock(ctx({ documents: [] }))).not.toContain("library");
+  });
+
+  it("lists documents and marks the ones that have been exported", () => {
+    const block = contextToPromptBlock(ctx({
+      documents: [
+        doc({ id: "l1", type: "letter", title: "Kurudi kazini" }),
+        doc({ id: "c1", type: "cover-letter", title: "Platform Engineer", jobTitle: "Platform Engineer", lastDownloadedAt: "2026-09-11T00:00:00Z" }),
+      ],
+    }));
+    expect(block).toContain("Their library (2)");
+    expect(block).toContain('letter "Kurudi kazini"');
+    expect(block).toContain('cover-letter "Platform Engineer" for Platform Engineer [exported]');
+    // The un-exported letter must NOT carry the marker.
+    expect(block).not.toContain('letter "Kurudi kazini" [exported]');
+  });
+
+  it("raises the follow-up with a day count, and tells her to ask only once", () => {
+    const twoDaysAgo = new Date(Date.now() - 2 * 86_400_000 - 60_000).toISOString();
+    const block = contextToPromptBlock(ctx({
+      documents: [
+        doc({ id: "c1", type: "cover-letter", title: "Platform Engineer", jobTitle: "Ecoplanet", lastDownloadedAt: twoDaysAgo }),
+        doc({ id: "l1", type: "letter", title: "Older letter", lastDownloadedAt: "2020-01-01T00:00:00Z" }),
+      ],
+    }));
+    expect(block).toContain("LAST EXPORTED");
+    // The MOST RECENT export leads — not the first document in the list.
+    expect(block).toContain('LAST EXPORTED: "Platform Engineer" for Ecoplanet, 2 day(s) ago.');
+    expect(block).toContain("ask ONCE");
+    expect(block).toContain("Never nag");
+  });
+
+  it("says nothing about sending when there has been no export", () => {
+    const block = contextToPromptBlock(ctx({ documents: [doc({ lastDownloadedAt: null })] }));
+    expect(block).toContain("Their library (1)");
+    expect(block).not.toContain("LAST EXPORTED");
+  });
+
+  it("caps the rendered library so a large one cannot flood the prompt", () => {
+    const many = Array.from({ length: 12 }, (_, i) =>
+      doc({ id: `d${i}`, title: `Doc ${i}`, updatedAt: `2026-09-${String(i + 1).padStart(2, "0")}T00:00:00Z` }),
+    );
+    const block = contextToPromptBlock(ctx({ documents: many }));
+    // The count is honest, the list is not.
+    expect(block).toContain("Their library (12)");
+    // Every line is bullet-prefixed, so match on membership rather than start.
+    const line = block.split("\n").find((l) => l.includes("Their library")) ?? "";
+    expect(line.split("|")).toHaveLength(6);
+  });
+});
+

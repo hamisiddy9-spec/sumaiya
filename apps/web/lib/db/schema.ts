@@ -172,8 +172,14 @@ export const downloadLog = pgTable("download_log", {
   documentId: text("document_id").notNull(),
   documentType: text("document_type").notNull(),
   format: text("format").notNull().default("pdf"),
+  // The document's human name at export time. An export is not always a SAVED
+  // row — the native app builds cover letters on demand — so the ledger has to
+  // carry the name itself for the assistant to be able to refer to it.
+  title: text("title"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  userIdx: index("download_log_user_idx").on(t.userId, t.createdAt),
+}));
 
 // ─── AI Usage (per-user daily quota) ──────────────────────────────────────────
 
@@ -624,3 +630,62 @@ export const referralClaim = pgTable("referral_claim", {
 
 export type ReferralCode = typeof referralCode.$inferSelect;
 export type ReferralClaim = typeof referralClaim.$inferSelect;
+
+// ─── App Events (native telemetry) ────────────────────────────────────────────
+// What testers actually did on their phones: which build they run, whether the
+// in-app updater finished, and what broke. Deliberately NOT user-keyed like
+// outcome_event — the events that matter most (install, first launch, sign-up)
+// happen before anyone has a user row, and a tester who never signs in is still
+// a tester. The grouping key is `installId`: a random id the app generates once
+// and never shares with anything else. No PII by construction — events carry
+// names, counters, versions and error messages, and the ingest route runs the
+// same sanitizer as outcome events on the way in. When a session is signed in
+// we also store `userHash` (salted, irreversible — see lib/outcomes/events)
+// so app behaviour can be joined to outcome data WITHOUT identifying anyone,
+// and opted-out users' events are dropped at ingest.
+export const appEvent = pgTable("app_event", {
+  id: text("id").primaryKey(),
+  /** Random per-install id. Anonymous, stable, never tied to a person. */
+  installId: text("install_id").notNull(),
+  /** Salted user hash when signed in, else null. Never a raw user id. */
+  userHash: text("user_hash"),
+  /** Dotted event name: app.open | update.start | app.error | screen.view … */
+  name: text("name").notNull(),
+  /** Typed, PII-free payload. */
+  props: jsonb("props").notNull().default({}),
+  appVersion: text("app_version"),
+  platform: text("platform"),
+  device: text("device"),
+  /** Client clock for the event; `createdAt` is when the server received it. */
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  nameIdx: index("app_event_name_idx").on(t.name, t.createdAt),
+  installIdx: index("app_event_install_idx").on(t.installId, t.createdAt),
+  versionIdx: index("app_event_version_idx").on(t.appVersion, t.createdAt),
+}));
+
+export type AppEvent = typeof appEvent.$inferSelect;
+export type NewAppEvent = typeof appEvent.$inferInsert;
+
+// ─── App Releases (published native builds) ───────────────────────────────────
+// The native updater used to treat "an APK exists on GitHub" as "everyone
+// should update", which meant every build we uploaded could interrupt every
+// user mid-task — and did. Publishing is now an explicit act: a row in this
+// table. Uploading a file changes nothing until someone publishes it here.
+export const appRelease = pgTable("app_release", {
+  id: text("id").primaryKey(),
+  version: text("version").notNull(),
+  apkUrl: text("apk_url").notNull(),
+  sizeBytes: integer("size_bytes"),
+  notesSw: text("notes_sw").notNull().default(""),
+  notesEn: text("notes_en").notNull().default(""),
+  /** "stable" reaches everyone; "test" reaches builds that opt in. */
+  channel: text("channel").notNull().default("stable"),
+  publishedAt: timestamp("published_at").notNull().defaultNow(),
+}, (t) => ({
+  channelIdx: index("app_release_channel_idx").on(t.channel, t.publishedAt),
+}));
+
+export type AppReleaseRow = typeof appRelease.$inferSelect;
+export type NewAppRelease = typeof appRelease.$inferInsert;

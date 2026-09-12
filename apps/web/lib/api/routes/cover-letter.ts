@@ -4,7 +4,8 @@ import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { db, coverLetter, cv } from "@/lib/db";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { recordExport } from "@/lib/documents/export-ledger";
 
 const createSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -118,17 +119,23 @@ export const coverLetterRoutes = new Hono()
     if (!userId) return c.json({ error: "Unauthorized" }, 401);
 
     const [existing] = await db
-      .select({ id: coverLetter.id })
+      .select({ id: coverLetter.id, title: coverLetter.title })
       .from(coverLetter)
       .where(and(eq(coverLetter.id, c.req.param("id")), eq(coverLetter.userId, userId)))
       .limit(1);
 
     if (!existing) return c.json({ error: "Not found" }, 404);
 
-    await db
-      .update(coverLetter)
-      .set({ downloadCount: sql`${coverLetter.downloadCount} + 1` })
-      .where(eq(coverLetter.id, c.req.param("id")));
+    // This route used to bump the counter and write nothing to the ledger, so a
+    // cover letter leaving the app was invisible to the assistant's library.
+    await recordExport({
+      userId,
+      documentId: existing.id,
+      documentType: "cover-letter",
+      title: existing.title,
+      format: "pdf",
+      markComplete: false,
+    });
 
     return c.json({ success: true });
   })
