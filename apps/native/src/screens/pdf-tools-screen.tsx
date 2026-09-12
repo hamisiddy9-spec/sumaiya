@@ -21,15 +21,29 @@ export function PdfToolsScreen() {
 
   const add = async (fromCamera: boolean) => {
     haptics.light();
-    const opts: ImagePicker.ImagePickerOptions = { quality: 0.7, base64: true };
-    const res = fromCamera
-      ? await ImagePicker.launchCameraAsync(opts)
-      : await ImagePicker.launchImageLibraryAsync({ ...opts, allowsMultipleSelection: true, selectionLimit: 20 });
-    if (res.canceled) return;
-    const next = res.assets
-      .filter((a) => a.base64)
-      .map((a) => ({ uri: a.uri, base64: a.base64! }));
-    setPics((p) => [...p, ...next].slice(0, 30));
+    try {
+      // launchCameraAsync doesn't request permission itself (unlike the
+      // library picker, which prompts on its own) — this used to call it
+      // directly with no permission check and no try/catch at all, so a
+      // first-time user tapping Camera before ever granting permission would
+      // hit an unhandled rejection with zero feedback.
+      if (fromCamera) {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) return;
+      }
+      const opts: ImagePicker.ImagePickerOptions = { quality: 0.7, base64: true };
+      const res = fromCamera
+        ? await ImagePicker.launchCameraAsync(opts)
+        : await ImagePicker.launchImageLibraryAsync({ ...opts, allowsMultipleSelection: true, selectionLimit: 20 });
+      if (res.canceled) return;
+      const next = res.assets
+        .filter((a) => a.base64)
+        .map((a) => ({ uri: a.uri, base64: a.base64! }));
+      setPics((p) => [...p, ...next].slice(0, 30));
+    } catch {
+      haptics.error();
+      dialog.alert(t("Couldn't add that photo", "Imeshindwa kuongeza picha hiyo"), t("Try again.", "Jaribu tena."));
+    }
   };
 
   const remove = (i: number) => setPics((p) => p.filter((_, idx) => idx !== i));
