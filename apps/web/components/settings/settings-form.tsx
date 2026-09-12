@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
 import type { Lang } from "@/lib/i18n/translations";
 import { label } from "@/lib/i18n/labels";
+import { getPushState, subscribeToPush, unsubscribeFromPush, type PushSupport } from "@/lib/push-client";
 
 const STRINGS = {
   en: {
@@ -35,6 +36,10 @@ const STRINGS = {
     summary: "Professional Summary",
     emailNotifications: "Email Notifications",
     emailNotificationsDesc: "Receive email updates about your templates and account.",
+    pushNotifications: "Push Notifications",
+    pushNotificationsDesc: "Get notified in your browser about job matches and updates.",
+    pushUnsupported: "Not supported in this browser.",
+    pushDenied: "Blocked — enable notifications for this site in your browser settings.",
     analyticsOptOut: "Anonymous Usage Stats",
     analyticsOptOutDesc: "Help improve the product with anonymous usage data (never shared, no personal info).",
     saveChanges: "Save Changes",
@@ -84,6 +89,10 @@ const STRINGS = {
     summary: "Muhtasari Wako",
     emailNotifications: "Arifa za Barua Pepe",
     emailNotificationsDesc: "Pokea sasisho za barua pepe kuhusu miundo na akaunti yako.",
+    pushNotifications: "Arifa za Kivinjari",
+    pushNotificationsDesc: "Pata arifa kwenye kivinjari chako kuhusu ajira zinazokufaa na sasisho nyingine.",
+    pushUnsupported: "Haipatikani kwenye kivinjari hiki.",
+    pushDenied: "Imezuiwa — washa arifa za tovuti hii kwenye mipangilio ya kivinjari chako.",
     analyticsOptOut: "Takwimu za Matumizi bila Kitambulisho",
     analyticsOptOutDesc: "Saidia kuboresha bidhaa kwa takwimu za matumizi zisizojulikana (hazishirikiwi, hakuna taarifa za kibinafsi).",
     saveChanges: "Hifadhi Mabadiliko",
@@ -140,6 +149,28 @@ export function SettingsForm({
   const [email, setEmail] = useState(initialEmail);
   const [preferredLang, setPreferredLang] = useState<"en" | "sw">(lang);
   const [emailNotif, setEmailNotif] = useState(true);
+  // Browser push — a distinct, immediate action (permission prompts need a
+  // direct user gesture), not batched into the profile Save button below.
+  const [pushState, setPushState] = useState<PushSupport | "loading">("loading");
+  const [pushBusy, setPushBusy] = useState(false);
+  useEffect(() => {
+    getPushState().then(setPushState).catch(() => setPushState("unsupported"));
+  }, []);
+  const togglePush = async () => {
+    if (pushBusy || pushState === "unsupported" || pushState === "loading") return;
+    setPushBusy(true);
+    try {
+      if (pushState === "subscribed") {
+        await unsubscribeFromPush();
+        setPushState("unsubscribed");
+      } else {
+        const ok = await subscribeToPush();
+        setPushState(ok ? "subscribed" : (Notification.permission === "denied" ? "denied" : "unsubscribed"));
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  };
   const [analyticsOptOut, setAnalyticsOptOut] = useState(false);
   // Shared professional profile (userProfile) — pre-fills every new document.
   const [jobTitle, setJobTitle] = useState("");
@@ -422,6 +453,37 @@ export function SettingsForm({
               <span
                 className={`inline-block h-5 w-5 transform rounded-full bg-card shadow-sm transition ${
                   emailNotif ? "translate-x-[22px]" : "translate-x-[2px]"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Push (browser) notifications toggle — see lib/push-client.ts's
+            header comment: the server side of this was fully built and
+            never had a client to actually subscribe anyone. */}
+        <div>
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-medium text-text-body">{s.pushNotifications}</label>
+              <p className="text-xs text-text-muted mt-0.5">
+                {pushState === "unsupported" ? s.pushUnsupported : pushState === "denied" ? s.pushDenied : s.pushNotificationsDesc}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={pushState === "subscribed"}
+              aria-label={s.pushNotifications}
+              disabled={pushBusy || pushState === "unsupported" || pushState === "denied" || pushState === "loading"}
+              onClick={togglePush}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 disabled:opacity-40 ${
+                pushState === "subscribed" ? "bg-ember" : "bg-border-input"
+              }`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-card shadow-sm transition ${
+                  pushState === "subscribed" ? "translate-x-[22px]" : "translate-x-[2px]"
                 }`}
               />
             </button>
