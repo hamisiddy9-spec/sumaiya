@@ -108,28 +108,58 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
     }
   };
 
-  const clearCache = () => {
+  const clearCache = async () => {
     haptics.warning();
+    // "Your cloud copies are safe" is only true for data that's actually
+    // synced. offlineStorage.clearAll() also wipes the sync queue — any edit
+    // still waiting to upload (exactly the case the offline-sync fixes above
+    // now deliberately keep retrying forever, since it never made it to the
+    // server) would be silently discarded, contradicting the dialog's own
+    // promise. Check first and say so plainly if that's actually the case.
+    let pending = 0;
+    try {
+      pending = (await offlineStorage.getSyncQueue()).length;
+    } catch {
+      /* if this fails, fall through with the normal (0-pending) dialog */
+    }
+
+    if (pending > 0) {
+      dialog.alert(
+        t("Unsynced changes will be lost", "Mabadiliko ambayo hayajasawazishwa yatapotea"),
+        t(
+          `${pending} change${pending === 1 ? "" : "s"} on this device ${pending === 1 ? "hasn't" : "haven't"} finished uploading yet. Clearing offline data now will discard ${pending === 1 ? "it" : "them"} — this is different from your already-synced CVs, which are safe on the server.`,
+          `Mabadiliko ${pending} kwenye kifaa hiki hayajamaliza kupakiwa. Kufuta data iliyohifadhiwa sasa kutayafuta — hii ni tofauti na CV zako zilizosawazishwa tayari, ambazo ziko salama kwenye seva.`,
+        ),
+        [
+          { text: t("Cancel", "Ghairi"), style: "cancel" },
+          {
+            text: t("Clear anyway", "Futa hata hivyo"),
+            style: "destructive",
+            onPress: () => void doClearCache(),
+          },
+        ],
+      );
+      return;
+    }
+
     dialog.alert(t("Clear offline data?", "Futa data iliyohifadhiwa?"), t("Downloaded CVs and cached data will be removed from this device. Your cloud copies are safe.", "CV zilizopakuliwa na data iliyohifadhiwa zitaondolewa kwenye simu hii. Nakala zako za wingu ziko salama."), [
       { text: t("Cancel", "Ghairi"), style: "cancel" },
-      {
-        text: t("Clear", "Futa"),
-        style: "destructive",
-        onPress: async () => {
-          setBusy("cache");
-          try {
-            await offlineStorage.clearAll();
-            haptics.success();
-            dialog.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
-          } catch {
-            haptics.error();
-            dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
-          } finally {
-            setBusy(null);
-          }
-        },
-      },
+      { text: t("Clear", "Futa"), style: "destructive", onPress: () => void doClearCache() },
     ]);
+  };
+
+  const doClearCache = async () => {
+    setBusy("cache");
+    try {
+      await offlineStorage.clearAll();
+      haptics.success();
+      dialog.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
+    } catch {
+      haptics.error();
+      dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
+    } finally {
+      setBusy(null);
+    }
   };
 
   const confirmSignOut = () => {
