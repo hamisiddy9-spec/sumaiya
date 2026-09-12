@@ -208,6 +208,12 @@ export class ApiClient {
         if (err instanceof Error && err.name === "AbortError") {
           throw new ApiError(0, "Request timed out. Check your connection.", "timeout");
         }
+        // The real cause (DNS failure, TLS handshake, connection reset…) was
+        // being discarded here — every transport failure surfaced to the user
+        // and to us as an identical generic message, with no way to tell a
+        // dead network apart from, say, a blocked/misconfigured host. Log it
+        // before replacing it with the user-facing copy.
+        console.error(`[apiClient] ${method} ${url} failed:`, err instanceof Error ? `${err.name}: ${err.message}` : err);
         throw new ApiError(0, "Network error. Check your connection.", "network");
       }
     }
