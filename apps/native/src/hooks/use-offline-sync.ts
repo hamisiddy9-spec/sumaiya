@@ -96,9 +96,19 @@ export function useOfflineSync() {
             lastError: msg,
           });
 
-          // Give up after 4 retries (total time: 2s + 4s + 8s + 16s = 30s)
+          // Past 4 failures (total time so far: 2s+4s+8s+16s = 30s), just
+          // report it — NEVER delete the queued edit. This used to call
+          // removeSyncQueueItem here, which is real, silent data loss: the
+          // edit is gone from the sync queue with nothing left pointing at
+          // it, and if the local cache is ever later overwritten by a
+          // stale server read (a pull-to-refresh, a re-login), the edit
+          // never existed as far as anyone can tell. Leaving it queued
+          // means it keeps counting toward pendingCount (the editor's own
+          // "N to sync" pill) and keeps being retried on every future
+          // processSyncQueue call (on reconnect / app foreground) — each
+          // attempt already costs one exponential-backoff cycle, so this
+          // isn't a tight retry loop, just "never silently give up".
           if (item.retries >= 3) {
-            await offlineStorage.removeSyncQueueItem(item.id);
             reportError(error, { scope: "offlineSync.giveUp", op: item.operation, cvId: item.cvId });
             setStatus((prev) => ({
               ...prev,
