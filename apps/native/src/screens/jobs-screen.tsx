@@ -66,12 +66,21 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
     try {
       const [r, j] = await Promise.all([apiClient.getJobRecommendations(8), apiClient.getJobs()]);
       setRecs(r);
       setJobs(j);
+      setError(false);
+    } catch {
+      // The old code had no catch here at all: an offline/API failure was an
+      // unhandled promise rejection, and either way the empty-lists state
+      // would render "No openings right now" — indistinguishable from a
+      // genuinely empty feed, with no way to tell the user it actually
+      // failed or let them retry.
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -107,6 +116,14 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
           <SkeletonCard />
           <SkeletonCard />
         </View>
+      ) : error && recs.length === 0 && jobs.length === 0 ? (
+        <EmptyState
+          icon="wifi-off"
+          title={t("Couldn't load jobs", "Imeshindwa kupakia ajira")}
+          body={t("Check your connection and try again.", "Angalia mtandao wako kisha ujaribu tena.")}
+          actionLabel={t("Retry", "Jaribu tena")}
+          onAction={() => void load()}
+        />
       ) : recs.length === 0 && jobs.length === 0 ? (
         <EmptyState
           icon="briefcase"
