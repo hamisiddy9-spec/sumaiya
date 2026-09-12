@@ -18,7 +18,11 @@ export function ConnectivityGate() {
 
   useEffect(() => {
     if (online && !wasOnline.current) {
-      void import("../lib/profile-store").then((m) => m.syncProfileFromServer());
+      // syncProfileFromServer only catches its own network call — the
+      // AsyncStorage.setItem it does after isn't guarded, so a rare storage
+      // fault here would otherwise be an unhandled rejection on every
+      // offline-to-online transition. Best-effort background sync either way.
+      void import("../lib/profile-store").then((m) => m.syncProfileFromServer()).catch(() => {});
     }
     wasOnline.current = online;
   }, [online]);
