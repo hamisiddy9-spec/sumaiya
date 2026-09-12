@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sumaiya",
     "slug": "sumaiya",
-    "version": "1.6.3",
+    "version": "1.6.4",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
