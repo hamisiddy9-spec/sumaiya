@@ -119,20 +119,38 @@ export class ApiClient {
       Object.assign(headers, options.headers as Record<string, string>);
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    // retryAttempts was a config option that did nothing — every call, on any
+    // transient network blip, failed outright with no retry at all. Only
+    // retry GET (the default when options.method is unset): it's the one
+    // method safe to retry blindly. A retried POST/PUT/DELETE risks a
+    // duplicate side effect if the first attempt actually reached the server
+    // and only the response was lost — GETs have no such risk.
+    const method = (options.method ?? "GET").toUpperCase();
+    const isRetryable = method === "GET";
+    const maxAttempts = isRetryable ? Math.max(1, this.retryAttempts) : 1;
 
     let response: Response;
-    try {
-      response = await fetch(url, { ...options, headers, signal: controller.signal });
-    } catch (err) {
-      clearTimeout(timeoutId);
-      if (err instanceof Error && err.name === "AbortError") {
-        throw new ApiError(0, "Request timed out. Check your connection.");
+    let attempt = 0;
+    for (;;) {
+      attempt++;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      try {
+        response = await fetch(url, { ...options, headers, signal: controller.signal });
+        clearTimeout(timeoutId);
+        break;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        if (attempt < maxAttempts) {
+          await new Promise((r) => setTimeout(r, 300 * attempt));
+          continue;
+        }
+        if (err instanceof Error && err.name === "AbortError") {
+          throw new ApiError(0, "Request timed out. Check your connection.");
+        }
+        throw new ApiError(0, "Network error. Check your connection.");
       }
-      throw new ApiError(0, "Network error. Check your connection.");
     }
-    clearTimeout(timeoutId);
 
     const text = await response.text();
     let payload: unknown = undefined;
