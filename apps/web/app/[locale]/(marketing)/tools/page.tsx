@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ToolsClient from "./tools-client";
+import { alternatesFor } from "@/lib/seo";
 
 // Server metadata for the PDF-tools hub. The interactive UI is a client
 // component (ToolsClient); keeping this wrapper a server component lets the
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
           "rotate pdf", "watermark pdf", "add page numbers to pdf", "extract text from pdf",
           "pdf tools online free", "pdf editor free",
         ],
-    alternates: { canonical: "/tools" },
+    alternates: alternatesFor("/tools", params.locale),
     openGraph: {
       title: sw ? "Zana za PDF Bila Malipo | Sumaiya" : "Free PDF Tools | Sumaiya",
       description: sw

@@ -5,6 +5,7 @@ import { MarketingNav } from "@/components/ui/marketing-nav";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { translations, type Lang } from "@/lib/i18n/translations";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const lang = (params.locale ?? "sw") as Lang;
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   // here or the template gallery ships without a social preview.
   const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`;
   return {
-    alternates: { canonical: "/templates" },
+    alternates: alternatesFor("/templates", params.locale),
     title: tr.title,
     description: translations[lang].nav.templates + " — " + tr.subtitle,
     openGraph: {

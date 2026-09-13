@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { COMPANY, entityLine } from "@/lib/legal";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
@@ -10,7 +11,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     description: sw
       ? "Jinsi Sumaiya inavyokusanya, kutumia na kulinda data yako — taarifa zako za kibinafsi, hati zako na usalama wa akaunti."
       : "How Sumaiya collects, uses and protects your data — your personal information, your documents, and account security.",
-    alternates: { canonical: "/privacy" },
+    alternates: alternatesFor("/privacy", params.locale),
   };
 }
 

@@ -3,11 +3,12 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { BLOG_POSTS } from "@/lib/blog";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    alternates: { canonical: "/blog" },
+    alternates: alternatesFor("/blog", params.locale),
     title: sw ? "Blogu" : "Blog",
     description: sw
       ? "Ushauri wa vitendo kuhusu CV, barua za maombi na kutafuta ajira."

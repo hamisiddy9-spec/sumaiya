@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     description: sw
       ? "Nafasi za kazi zinazopatikana kiotomatiki kutoka vyanzo vya kuaminika, zikilinganishwa na CV yako. Angalia ulinganisho wako, omba, na fuatilia — vyote mahali pamoja."
       : "Automatically discovered openings from trusted job sources, scored against your CV. See your match, apply, and track — all in one place.",
-    alternates: { canonical: "/jobs" },
+    alternates: alternatesFor("/jobs", params.locale),
   };
 }
 
@@ -28,6 +28,7 @@ export const dynamic = "force-dynamic";
 // FeedJob is defined in the pure feed-filter module (single source of truth)
 // and re-exported here so the page's props type matches the client's.
 import type { FeedJob } from "@/lib/jobs/feed-filter";
+import { alternatesFor } from "@/lib/seo";
 export type { FeedJob } from "@/lib/jobs/feed-filter";
 
 export default async function JobsPage({ params }: { params: { locale: string } }) {

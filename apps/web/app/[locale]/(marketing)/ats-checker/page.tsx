@@ -4,6 +4,7 @@ import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { Icon } from "@/components/ui/icon";
 import { AtsCheckerClient } from "./ats-checker-client";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
           "check cv ats", "resume checker free", "ats friendly cv", "cv checker kenya",
           "cv checker tanzania", "applicant tracking system checker",
         ],
-    alternates: { canonical: "/ats-checker" },
+    alternates: alternatesFor("/ats-checker", params.locale),
     openGraph: {
       title: sw ? "Angalia Alama ya ATS ya CV Yako | Sumaiya" : "Free ATS Resume Checker | Sumaiya",
       description: sw
