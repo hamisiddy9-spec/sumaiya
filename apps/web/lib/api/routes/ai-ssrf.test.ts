@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { isPrivateHost, redirectTarget } from "./ai-ssrf";
 
 describe("SSRF guard — isPrivateHost", () => {
@@ -61,15 +61,62 @@ describe("SSRF guard — isPrivateHost", () => {
     expect(await isPrivateHost("1.1.1.1")).toBe(false);
     expect(await isPrivateHost("134.209.0.1")).toBe(false); // public DigitalOcean
   });
+});
 
-  it("allows public DNS names and rejects names resolving to private IPs", async () => {
-    // example.com resolves to public addresses (93.184.x / 2606:2800:...)
+// The DNS half of the guard runs against a stubbed resolver, never the live
+// internet. It used to resolve real names on every run: `example.com` was
+// queried each time, so the suite depended on this box's resolver being fast and
+// reachable, and vitest's 5s default timeout turned a slow lookup into a red
+// suite — observed, with no assertion actually failing (the test itself timed
+// out). Stubbing is also the only way to pin the per-family logic the live
+// internet can't be asked to produce on demand: a name that is public over A
+// but private over AAAA, or one that resolves to nothing at all.
+vi.mock("node:dns/promises", () => ({ lookup: vi.fn() }));
+import { lookup as dnsLookup } from "node:dns/promises";
+const lookupMock = vi.mocked(dnsLookup) as unknown as Mock;
+
+describe("SSRF guard — DNS name resolution", () => {
+  beforeEach(() => {
+    lookupMock.mockReset();
+  });
+
+  it("allows a DNS name that resolves to public addresses only", async () => {
+    lookupMock.mockResolvedValue([
+      { address: "93.184.216.34", family: 4 },
+      { address: "2606:2800:220:1:248:1893:25c8:1946", family: 6 },
+    ]);
     expect(await isPrivateHost("example.com")).toBe(false);
-    // A DNS name pointing at loopback must be caught via resolution.
+    // Proves the guard really consulted the resolver (rather than falling
+    // through to the "can't prove it's public" branch) and pins the call shape:
+    // `all` matters — checking only the first address would miss the attack.
+    expect(lookupMock).toHaveBeenCalledWith("example.com", { all: true, verbatim: true });
+  });
+
+  it("blocks a name whose A record is private (attacker domain → cloud metadata IP)", async () => {
+    lookupMock.mockResolvedValue([{ address: "169.254.169.254", family: 4 }]);
+    expect(await isPrivateHost("evil.example")).toBe(true);
+  });
+
+  it("blocks when only the AAAA record is private", async () => {
+    lookupMock.mockResolvedValue([
+      { address: "93.184.216.34", family: 4 },
+      { address: "fd12:3456::1", family: 6 },
+    ]);
+    expect(await isPrivateHost("dual-stack.example")).toBe(true);
+  });
+
+  it("blocks a name resolving to loopback", async () => {
+    lookupMock.mockResolvedValue([{ address: "127.0.0.1", family: 4 }]);
     expect(await isPrivateHost("localhost.localdomain")).toBe(true);
   });
 
-  it("treats unresolvable names as private (can't prove public)", async () => {
+  it("blocks a name that resolves to an empty address list", async () => {
+    lookupMock.mockResolvedValue([]);
+    expect(await isPrivateHost("empty.example")).toBe(true);
+  });
+
+  it("blocks a name that does not resolve at all — can't prove it's public", async () => {
+    lookupMock.mockRejectedValue(Object.assign(new Error("queryA ENOTFOUND"), { code: "ENOTFOUND" }));
     expect(await isPrivateHost("definitely-not-a-real-hostname-xyzzy.invalid")).toBe(true);
   });
 });
