@@ -1,9 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
 import { useEntitlements } from "../../lib/entitlements";
+import { loadProfile } from "../../lib/profile-store";
+import { fieldLabel, suggestTemplates } from "../../lib/template-suggestions";
 import { useLang } from "../../lib/i18n";
 import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
@@ -54,10 +56,38 @@ export function TemplateGallery({
   const [family, setFamily] = useState<string | null>(null);
   const [premiumFor, setPremiumFor] = useState<string | null>(null);
 
-  const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
+  // ── Job-aware suggestions ──────────────────────────────────────────────────
+  // Derived from text the user already gave us (headline, goals, experience) —
+  // no extra question. If nothing matches we show no row at all, because a
+  // wrong recommendation is worse than none.
+  const [profileText, setProfileText] = useState("");
+  const [forJob, setForJob] = useState(false);
+  useEffect(() => {
+    if (!visible) return;
+    let alive = true;
+    loadProfile()
+      .then((p) => {
+        if (alive) setProfileText([p.headline, p.goals, p.experience, p.skills].filter(Boolean).join(" "));
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [visible]);
 
+  const suggestion = useMemo(() => suggestTemplates(profileText, 12), [profileText]);
+
+  // A field filter never applies while the job filter is on — they would fight
+  // and the row would silently empty.
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
+    if (forJob && suggestion) {
+      return suggestion.templates.filter(
+        (tpl) =>
+          !q ||
+          tpl.id.includes(q) ||
+          tpl.name.en.toLowerCase().includes(q) ||
+          tpl.name.sw.toLowerCase().includes(q),
+      );
+    }
     return ALL_TEMPLATES.filter((tpl) => {
       if (tier !== "all" && tpl.tier !== tier) return false;
       if (family && tpl.style !== family) return false;
@@ -68,7 +98,9 @@ export function TemplateGallery({
         tpl.name.sw.toLowerCase().includes(q)
       );
     });
-  }, [query, tier, family]);
+  }, [query, tier, family, forJob, suggestion]);
+
+  const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
   const pick = useCallback(
     (tpl: CvTemplateMeta) => {
@@ -211,10 +243,32 @@ export function TemplateGallery({
 
         {/* Filters */}
         <View style={{ paddingHorizontal: PAD, gap: 8, marginTop: 10 }}>
+          {/* Job-aware shortcut. Only appears when we actually recognised the
+              user's field from text they already gave us. */}
+          {suggestion ? (
+            <>
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                {chip(
+                  "job",
+                  `${t("For your job", "Kwa kazi yako")} · ${fieldLabel(suggestion.field, lang)}`,
+                  forJob,
+                  () => {
+                    haptics.selection();
+                    setForJob((v) => !v);
+                  },
+                )}
+              </View>
+              {forJob ? (
+                <Text style={{ color: c.textMuted, fontSize: 11.5, lineHeight: 16 }}>
+                  {lang === "sw" ? suggestion.why.sw : suggestion.why.en}
+                </Text>
+              ) : null}
+            </>
+          ) : null}
           <View style={{ flexDirection: "row", gap: 8 }}>
-            {chip("all", t("All", "Zote"), tier === "all", () => setTier("all"))}
-            {chip("free", t("Free", "Bure"), tier === "free", () => setTier("free"))}
-            {chip("prem", "Premium", tier === "premium", () => setTier("premium"))}
+            {chip("all", t("All", "Zote"), tier === "all" && !forJob, () => { setForJob(false); setTier("all"); })}
+            {chip("free", t("Free", "Bure"), tier === "free" && !forJob, () => { setForJob(false); setTier("free"); })}
+            {chip("prem", "Premium", tier === "premium" && !forJob, () => { setForJob(false); setTier("premium"); })}
           </View>
           <FlatList
             horizontal

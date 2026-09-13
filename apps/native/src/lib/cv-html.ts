@@ -26,17 +26,18 @@ export interface CvTemplateMeta {
   name: { en: string; sw: string };
   blurb: { en: string; sw: string };
   tier: "free" | "premium";
-  /** Web style family — used by the gallery's filters. Engine templates only. */
+  /** Design family (web `style`): sidebar | header | minimal | creative | classic.
+   *  Optional because a picker must still work if an entry lacks it. */
   style?: string;
 }
 
 export const CV_TEMPLATES: CvTemplateMeta[] = [
-  { id: "classic", name: { en: "Classic", sw: "Rasmi" }, blurb: { en: "Safe everywhere. Great for ATS.", sw: "Salama kila mahali. Nzuri kwa ATS." }, tier: "free" },
-  { id: "modern", name: { en: "Modern", sw: "Ya kisasa" }, blurb: { en: "A coloured header, clean body.", sw: "Kichwa cha rangi, mwili safi." }, tier: "free" },
-  { id: "minimal", name: { en: "Minimal", sw: "Sahili" }, blurb: { en: "No colour. Just structure and air.", sw: "Bila rangi. Muundo na nafasi tu." }, tier: "free" },
-  { id: "sidebar", name: { en: "Sidebar", sw: "Pembeni" }, blurb: { en: "Contact & skills down the left.", sw: "Mawasiliano na ujuzi upande wa kushoto." }, tier: "free" },
-  { id: "executive", name: { en: "Executive", sw: "Kiongozi" }, blurb: { en: "Serif, centred, senior.", sw: "Serif, katikati, ngazi ya juu." }, tier: "premium" },
-  { id: "compact", name: { en: "Compact", sw: "Fupi" }, blurb: { en: "Fits a long history on one page.", sw: "Inaingiza historia ndefu ukurasa mmoja." }, tier: "premium" },
+  { id: "classic", name: { en: "Classic", sw: "Rasmi" }, blurb: { en: "Safe everywhere. Great for ATS.", sw: "Salama kila mahali. Nzuri kwa ATS." }, tier: "free", style: "classic" },
+  { id: "modern", name: { en: "Modern", sw: "Ya kisasa" }, blurb: { en: "A coloured header, clean body.", sw: "Kichwa cha rangi, mwili safi." }, tier: "free", style: "header" },
+  { id: "minimal", name: { en: "Minimal", sw: "Sahili" }, blurb: { en: "No colour. Just structure and air.", sw: "Bila rangi. Muundo na nafasi tu." }, tier: "free", style: "minimal" },
+  { id: "sidebar", name: { en: "Sidebar", sw: "Pembeni" }, blurb: { en: "Contact & skills down the left.", sw: "Mawasiliano na ujuzi upande wa kushoto." }, tier: "free", style: "sidebar" },
+  { id: "executive", name: { en: "Executive", sw: "Kiongozi" }, blurb: { en: "Serif, centred, senior.", sw: "Serif, katikati, ngazi ya juu." }, tier: "premium", style: "classic" },
+  { id: "compact", name: { en: "Compact", sw: "Fupi" }, blurb: { en: "Fits a long history on one page.", sw: "Inaingiza historia ndefu ukurasa mmoja." }, tier: "premium", style: "minimal" },
 ];
 
 /**
