@@ -5,7 +5,6 @@ import Animated, {
   useAnimatedStyle,
   useDerivedValue,
   withSpring,
-  withTiming,
   interpolateColor,
 } from "react-native-reanimated";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -39,12 +38,15 @@ function TabItem({
   const c = useThemeColors();
   const progress = useDerivedValue(() => withSpring(focused ? 1 : 0, { damping: 20, stiffness: 180, mass: 0.8 }));
 
+  // No translateY here. The shade (pillStyle) is absolutely positioned and does
+  // NOT move, so lifting only the icon left it visibly off-centre inside its own
+  // shade whenever that shade was visible — measured 6.5px high on a 1.7x/272dpi
+  // screen (2dp from this lift, the rest being the 3-blade mark's own resting
+  // lean). The scale pop is symmetric about the centre, so it stays concentric.
+  // Focus is still signalled by the shade, the scale, the colour and the haptic.
   const iconStyle = useAnimatedStyle(() => {
-    const translateY: number = withTiming(focused ? -2 : 0, { duration: 160 });
     const scale: number = 1 + progress.value * 0.12;
-    // reanimated's DefaultStyle transform type rejects a mixed [{translateY},{scale}]
-    // literal; the runtime shape is correct.
-    return { transform: [{ translateY }, { scale }] as unknown as [] };
+    return { transform: [{ scale }] as unknown as [] };
   });
   const pillStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
