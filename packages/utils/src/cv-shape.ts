@@ -30,7 +30,33 @@ import type {
 
 type Obj = Record<string, unknown>;
 
-const obj = (v: unknown): Obj => (v && typeof v === "object" && !Array.isArray(v) ? (v as Obj) : {});
+/**
+ * Coerce a value to a plain object.
+ *
+ * Rows written before 2026-09-13 hold the CV as a **JSON string inside** the
+ * jsonb column (`jsonb_typeof = 'string'`) rather than as a jsonb object.
+ * `parseCVData` in the web app was fixed to unwrap that shape on READ, but this
+ * shared boundary still returned `{}` for it — so the WRITE direction
+ * (`toStoredCvData`) silently stored an empty CV, with no error and nothing in
+ * the logs, while the user's data sat in the column it was handed.
+ *
+ * Both directions now resolve the same way. Two levels cover a
+ * doubly-encoded row (string inside string), matching the read path. A value
+ * that still is not an object is treated as empty, exactly as before — this
+ * unwraps a shape, it does not invent data.
+ */
+const obj = (v: unknown): Obj => {
+  let cur: unknown = v;
+  for (let depth = 0; depth < 2; depth++) {
+    if (typeof cur !== "string") break;
+    try {
+      cur = JSON.parse(cur);
+    } catch {
+      return {};
+    }
+  }
+  return cur && typeof cur === "object" && !Array.isArray(cur) ? (cur as Obj) : {};
+};
 const arr = (v: unknown): Obj[] => (Array.isArray(v) ? v.map(obj) : []);
 const str = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 const pick = (a: Obj, ...keys: string[]): unknown => {
