@@ -1,27 +1,34 @@
 import { useEffect, useState } from "react";
-import { getSecureItem } from "@sumaiya/utils";
 import { apiClient } from "./api-client";
 
 /**
- * What the user is entitled to. The free tier is generous — four CV templates,
- * the ATS checker, tailoring, cover letters, the free course guides. Premium
- * unlocks the advanced templates and the deep courses.
+ * What the user is entitled to. The free tier is generous — the curated CV
+ * templates, the ATS checker, tailoring, cover letters, the free course guides.
+ * Premium unlocks the premium-tier designs (see `tier` on each template in
+ * lib/templates) and the deep courses.
  *
- * No billing is wired yet, but referrals already grant real Premium time
- * (profile.premiumUntil, 7 days per activated friend — see lib/referral.ts on
- * the server). `premium` is true if EITHER the local waitlist flag is set OR
- * the server says premiumUntil is still in the future, so a referrer who
- * earned time is covered the moment a feature actually gets gated.
+ * Premium is EARNED, never local: referrals grant real time server-side
+ * (profile.premiumUntil — 7 days per activated friend, lib/referral.ts on the
+ * web app) and this hook reads it back. Nothing is granted to a device.
+ *
+ * This mirrors the web's lib/use-premium.ts and lib/entitlements.ts — the web
+ * asks `can(subject, "template.premium")` with the same `premiumUntil`, so a
+ * referrer's earned days unlock the same designs on both doors.
+ *
+ * ⚠️ The waitlist flag (`sumaiya_premium_waitlist`, set by PremiumSheet when
+ * someone taps "notify me") is deliberately a DIFFERENT key and must never be
+ * read here. It records interest in a paid tier that does not exist yet; it is
+ * not a purchase and must never unlock anything. An earlier version of this
+ * file read a `sumaiya_premium` flag that nothing ever wrote — dead, and a trap
+ * for anyone who might "fix" it by pointing it at the waitlist key.
  */
 export interface Entitlements {
   premium: boolean;
   /** ISO timestamp of when earned Premium runs out, or null if none earned. */
   premiumUntil: string | null;
-  /** true until both sources have been read — screens can show a neutral state */
+  /** true until the server answer has been read — screens can show a neutral state */
   loading: boolean;
 }
-
-const PREMIUM_KEY = "sumaiya_premium";
 
 export function useEntitlements(): Entitlements {
   const [premium, setPremium] = useState(false);
@@ -31,13 +38,7 @@ export function useEntitlements(): Entitlements {
   useEffect(() => {
     let alive = true;
     (async () => {
-      let localFlag = false;
       let serverUntil: string | null = null;
-      try {
-        localFlag = (await getSecureItem(PREMIUM_KEY)) === "true";
-      } catch {
-        /* default: free */
-      }
       try {
         const r = await apiClient.getReferral();
         serverUntil = r.premiumUntil ?? null;
@@ -45,8 +46,9 @@ export function useEntitlements(): Entitlements {
         /* guest, offline, or not signed in — no earned Premium visible */
       }
       if (!alive) return;
-      const earnedActive = !!serverUntil && new Date(serverUntil).getTime() > Date.now();
-      setPremium(localFlag || earnedActive);
+      const earnedActive =
+        !!serverUntil && new Date(serverUntil).getTime() > Date.now();
+      setPremium(earnedActive);
       setPremiumUntil(serverUntil);
       setLoading(false);
     })();

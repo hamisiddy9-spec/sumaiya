@@ -24,6 +24,7 @@ import {
   type LetterData,
 } from "@/types";
 import { PremiumTemplateModal } from "@/components/premium-template-modal";
+import { usePremium } from "@/lib/use-premium";
 
 // The gallery offers the curated, genuinely-distinct CV layouts (not every
 // recolor variant). Existing documents still render via the full registry.
@@ -220,12 +221,16 @@ function PremiumPill() {
   );
 }
 
-function PreviewCard({ template, cardScale }: { template: typeof TEMPLATES[0]; cardScale: number }) {
+function PreviewCard({ template, cardScale, premium }: { template: typeof TEMPLATES[0]; cardScale: number; premium: boolean }) {
   const sw = useLang() === "sw";
   const lang = sw ? "sw" : "en";
   const Component = TEMPLATE_COMPONENTS[template.id] ?? NakuruTemplate;
   const previewH = Math.round(1123 * cardScale);
-  const locked = isPremiumTemplate(template.id);
+  // Premium is a tier, not a lock: someone with an active earned window gets the
+  // design like anyone else. Before this, the card was gated purely on the
+  // template id, so a referrer who had earned 7 days of Premium was still shown
+  // the padlock on exactly the designs their Premium was supposed to unlock.
+  const locked = isPremiumTemplate(template.id) && !premium;
   const [showLock, setShowLock] = useState(false);
 
   return (
@@ -280,7 +285,10 @@ function PreviewCard({ template, cardScale }: { template: typeof TEMPLATES[0]; c
           <p className="font-display font-bold text-espresso text-sm truncate">{template.name}</p>
           <div className="mt-1.5 flex items-center gap-1.5">
             <StyleChip style={template.style} />
-            {locked ? <PremiumPill /> : template.popular ? <PopularPill /> : null}
+            {/* The badge still shows for a subscriber — it labels the design,
+                and hiding it the moment Premium is earned would make the thing
+                they paid (or referred) for look indistinguishable from free. */}
+            {isPremiumTemplate(template.id) ? <PremiumPill /> : template.popular ? <PopularPill /> : null}
           </div>
         </div>
         <div className="w-4 h-4 rounded-full shrink-0 ring-1 ring-border/50" style={{ backgroundColor: template.previewColor }} />
@@ -561,6 +569,11 @@ function Pager({ page, totalPages, onChange }: { page: number; totalPages: numbe
 
 export function TemplateGalleryClient() {
   const sw = useLang() === "sw";
+  // Earned Premium (referral days, or a paid tier when billing returns). Asked
+  // once here rather than per card — the hook memoises, but a single call site
+  // keeps the gate obvious. Resolved client-side on purpose: this page is a
+  // CDN-cached static prerender (see lib/use-premium.ts).
+  const { premium } = usePremium();
   const firstCardRef = useRef<HTMLDivElement>(null);
   const [cardScale, setCardScale] = useState(0.27);
   const [activeTab, setActiveTab] = useState<TabId>("cv");
@@ -706,7 +719,7 @@ export function TemplateGalleryClient() {
                 variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               >
-                <PreviewCard template={template} cardScale={cardScale} />
+                <PreviewCard template={template} cardScale={cardScale} premium={premium} />
               </motion.div>
             ))}
           </motion.div>

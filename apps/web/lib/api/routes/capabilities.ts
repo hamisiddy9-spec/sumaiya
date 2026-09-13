@@ -14,6 +14,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import type { CVData } from "@/types";
 import { getAuthUser } from "@/lib/api/auth";
+import { subjectForUser } from "@/lib/entitlements-server";
 import { runTool, executableTools, type ToolCaller } from "@/lib/assistant/run-tool";
 
 
@@ -47,10 +48,14 @@ export const capabilityRoutes = new Hono()
     let result;
     try {
       const user = await getAuthUser(c);
+      // Resolve the FULL subject — a bare `{ userId }` would silently drop the
+      // caller's earned Premium window, so a plan-gated capability would be
+      // refused to exactly the people who had earned it.
+      const subject = await subjectForUser(user?.id ?? null);
       result = await runTool({
         toolId,
         args: body.args ?? {},
-        subject: { userId: user?.id ?? null, sw },
+        subject: { ...subject, sw },
         caller: (body.caller ?? "ui") as ToolCaller,
         confirmed: body.confirmed,
         context: {

@@ -48,3 +48,33 @@ describe("resolveTemplatePreview", () => {
     expect(a).toEqual(b);
   });
 });
+
+// The assistant recommends designs in chat. It must be able to say which are
+// Premium (advice), while never being the thing that hands one over (that is
+// `template.premium` in lib/entitlements.ts). These pin the information half.
+describe("resolveTemplatePreview — premium tier", () => {
+  it("flags the curated premium flagships", () => {
+    for (const id of ["coral", "kioo", "malachite", "nuru", "pemba", "rift", "zahabu"]) {
+      const info = resolveTemplatePreview(id);
+      expect(info, `${id} should resolve`).not.toBeNull();
+      expect(info!.premium, `${id} should be premium`).toBe(true);
+    }
+  });
+
+  it("does not flag a free template", () => {
+    expect(resolveTemplatePreview("nakuru")!.premium).toBe(false);
+  });
+
+  it("never reports premium for an unknown id (it resolves to null instead)", () => {
+    expect(resolveTemplatePreview("not-a-real-template")).toBeNull();
+  });
+
+  it("carries the flag on non-CV doc types too", () => {
+    // Business cards and letters share the same id space and the same gate, so
+    // the flag must be answered for them, not just for CVs.
+    const bc = resolveTemplatePreview("zege-card");
+    const lt = resolveTemplatePreview("formal");
+    expect(bc!.premium).toBe(false);
+    expect(lt!.premium).toBe(false);
+  });
+});

@@ -44,6 +44,7 @@ import { renderElementToPdfBlob, exportCvToText, buildCvText, triggerBlobDownloa
 import { AutoTextarea } from "@/components/ui/auto-textarea";
 import { Icon } from "@/components/ui/icon";
 import { PremiumTemplateModal } from "@/components/premium-template-modal";
+import { usePremium } from "@/lib/use-premium";
 import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
 import { haptics } from "@/lib/haptics";
 import { Share2, FileType2, Globe } from "lucide-react";
@@ -827,6 +828,10 @@ function TemplateModal({
   templateHistory: string[];
 }) {
   const [lockedTemplate, setLockedTemplate] = useState<TemplateId | null>(null);
+  // Earned Premium — see lib/use-premium.ts. Without this the picker gated on
+  // the template id alone, so a referrer who had earned Premium days was locked
+  // out of the very designs those days were for.
+  const { premium } = usePremium();
   return (
     <div
       className="fixed inset-0 z-50 bg-black/60 flex items-end sm:items-center justify-center p-0 sm:p-6"
@@ -849,7 +854,7 @@ function TemplateModal({
               : [...TEMPLATES.filter((t) => t.id === currentTemplateId), ...CURATED_CV_TEMPLATES]
             ).map((tpl) => {
               const isActive = tpl.id === currentTemplateId;
-              const locked = isPremiumTemplate(tpl.id) && !isActive && !templateHistory.includes(tpl.id);
+              const locked = isPremiumTemplate(tpl.id) && !isActive && !premium && !templateHistory.includes(tpl.id);
               return (
                 <button
                   key={tpl.id}

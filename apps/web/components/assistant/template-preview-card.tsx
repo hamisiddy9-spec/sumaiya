@@ -116,6 +116,14 @@ export function TemplatePreviewCard({ info, sw }: { info: TemplatePreviewInfo; s
       </div>
       <div className="flex min-w-0 flex-col justify-center gap-0.5 py-0.5">
         <p className="truncate text-[12.5px] font-bold leading-tight text-espresso">{info.name}</p>
+        {/* Names the tier instead of hiding it — the assistant should not
+            recommend a design and let the padlock be the first the user hears
+            of it. Same wording as the gallery's PremiumPill. */}
+        {info.premium && (
+          <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-pill bg-espresso px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-cream">
+            Premium
+          </span>
+        )}
         <p className="line-clamp-2 text-[10.5px] leading-snug text-text-muted">{info.description}</p>
         <p className="mt-0.5 text-[10.5px] font-semibold text-ember-hover group-hover:underline">
           {sw ? "Fungua →" : "Open →"}
