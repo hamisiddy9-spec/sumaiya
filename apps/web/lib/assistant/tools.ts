@@ -316,6 +316,16 @@ export const ASSISTANT_TOOLS: AssistantTool[] = [
 
   // ── Templates + SmartFit — reason about density/style and drive the real
   // design engine (density + sectionOrder + template family). Preview first.
+  //
+  // ⚠️ TIER OBLIGATION when the executor lands. This tool is deliberately gated
+  // on `cv.create` (a free capability) because fitting/restyling a FREE template
+  // is free — density and section order are not a paid feature. It currently has
+  // NO executor, so `runTool` answers `no_executor` and it cannot hand anything
+  // over. Whoever wires one MUST check `template.premium` (lib/entitlements.ts)
+  // before applying a template whose id is in PREMIUM_TEMPLATE_IDS, or this
+  // becomes a way to give a premium design to a free user through the assistant —
+  // bypassing the padlock the galleries enforce. Recommending a premium design is
+  // fine and honest (the chat card labels it); silently applying one is not.
   {
     id: "template.smartFit",
     title: "Fit / restyle the CV",

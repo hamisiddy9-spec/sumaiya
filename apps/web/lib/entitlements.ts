@@ -6,14 +6,18 @@
  * (to decide which tools to offer). The client answer is advisory UX; the
  * server answer is authoritative.
  *
- * Everything is free today (`PAYMENTS_ENABLED = false`), so every capability
- * resolves to `{ allowed: true }`. The seam is real, though — when a paid tier
- * returns, it's a change to `CAPABILITY_RULES` and a `grants` lookup, not a
- * refactor of every call site.
+ * Everything is free today (`PAYMENTS_ENABLED = false`) so no *paid* tier can be
+ * bought yet — but "free" is not the same as "ungated". Referrals already grant
+ * real Premium time (profile.premiumUntil, 7 days per activated friend — see
+ * lib/referral.ts), so `template.premium` is `tier: "plan"` and `can()` answers
+ * it from either a paid `plan` or an active earned window. Before this wiring
+ * existed, `isPremiumActive` had zero call sites and a referrer who earned
+ * Premium was told they had it while unlocking nothing.
  *
  * Pure + synchronous by default. `can()` takes an already-resolved
  * `EntitlementSubject` so it works identically on the server (from the Hono
- * auth user) and the client (from the Supabase session) with no I/O.
+ * auth user + profile row, see lib/entitlements-server.ts) and the client with
+ * no I/O.
  */
 
 /** Every gated capability. Namespaced <domain>.<action>. Keep in sync with the
@@ -36,13 +40,20 @@ export type Capability =
   | "doc.exportBulk"
   | "pdf.tools"
   | "career.interview"
-  | "outcome.record";
+  | "outcome.record"
+  /** The premium designs (types/index.ts PREMIUM_TEMPLATE_IDS) and the deep
+   *  course set. Earned via referral days today; bought when billing returns. */
+  | "template.premium";
 
 export interface EntitlementSubject {
   /** null = a guest (not signed in). */
   userId: string | null;
-  /** Reserved for a future paid tier. Empty today. */
+  /** A paid tier. Nothing sells one today (`PAYMENTS_ENABLED = false`). */
   plan?: "free" | "pro" | "b2b";
+  /** `profile.premiumUntil` — an active earned (referral) or future paid
+   *  window. ISO string or Date; resolved server-side by
+   *  lib/entitlements-server.ts so callers never hit the DB for this. */
+  premiumUntil?: Date | string | null;
   /** Explicit grants (referral rewards, B2B seats). Empty today. */
   grants?: Capability[];
 }
@@ -59,7 +70,8 @@ const ALLOW: EntitlementResult = { allowed: true };
 
 /**
  * Per-capability rule. `free` capabilities are allowed for everyone (guests
- * included, unless `requiresAccount`). Nothing is `plan`-gated yet.
+ * included, unless `requiresAccount`). `plan` capabilities need either a paid
+ * `plan` or an active earned Premium window (`premiumUntil`).
  */
 interface Rule {
   tier: "free" | "plan";
@@ -86,6 +98,10 @@ const CAPABILITY_RULES: Record<Capability, Rule> = {
   "pdf.tools": { tier: "free" },
   "career.interview": { tier: "free", requiresAccount: true },
   "outcome.record": { tier: "free", requiresAccount: true },
+  // The ONLY plan-gated capability. Deliberately not `requiresAccount`: a guest
+  // asking for a premium design should hear "premium", not "sign in" — the
+  // upsell is the honest answer, and earn-Premium needs an account anyway.
+  "template.premium": { tier: "plan" },
 };
 
 /**
@@ -106,7 +122,11 @@ export function can(
 
   if (rule.tier === "plan") {
     const plan = subject.plan ?? "free";
-    if (plan === "free") return { allowed: false, reason: "requires_plan" };
+    // A paid plan OR a live earned window. `isPremiumActive` is the same
+    // predicate the native app uses, so both doors agree on who has Premium.
+    if (plan === "free" && !isPremiumActive(subject.premiumUntil)) {
+      return { allowed: false, reason: "requires_plan" };
+    }
   }
 
   return ALLOW;
@@ -122,8 +142,8 @@ export function allowed(
 
 /** Is a referral-earned (or future paid) Premium window still active?
  *  `premiumUntil` is the `profile.premiumUntil` column — see lib/referral.ts.
- *  Not wired into `can()` yet because no capability is `plan`-gated today;
- *  this is the seam a real gate calls once one exists. */
+ *  Consulted by `can()` for `tier: "plan"` capabilities; the native app uses
+ *  the equivalent check in src/lib/entitlements.ts, so both doors agree. */
 export function isPremiumActive(premiumUntil: Date | string | null | undefined): boolean {
   if (!premiumUntil) return false;
   const until = premiumUntil instanceof Date ? premiumUntil : new Date(premiumUntil);
