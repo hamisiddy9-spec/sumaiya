@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 
 // ─── Zod Schemas for Runtime Validation ──────────────────────────────────────
 //
@@ -118,7 +119,22 @@ export function parseCVData(data: unknown): CVData {
       break;
     }
   }
-  const result = cvDataSchema.safeParse(candidate);
+  // ...then normalise the APP's shape to the STORED one before validating.
+  // Both shapes reach this column. The native app (and the shared `CVData`
+  // type) calls this block `personalInfo` with a `headline`; the stored shape
+  // is `personal` with a `jobTitle`. `cvDataSchema` knows only the stored one,
+  // so a phone-written CV parsed to a BLANK header — name, job title, email,
+  // phone and location all gone — while the values sat intact in the column.
+  // Measured 2026-09-13: 3 of the 19 production rows are app-shaped and all 3
+  // lost their header this way.
+  //
+  // `toStoredCvData` is this project's converter for exactly this pair of
+  // shapes. It was already wired into the API's way out (`lib/api/routes/cv.ts`
+  // normalises every row it returns) and was simply never wired into the
+  // reader — so the same row rendered correctly through one path and blank
+  // through another.
+  const normalized = toStoredCvData<Record<string, unknown>>(candidate);
+  const result = cvDataSchema.safeParse(normalized);
   if (result.success) return result.data;
   return createEmptyCVData();
 }
