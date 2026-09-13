@@ -140,7 +140,7 @@ try {
   console.log("");
   console.log(`✅ Published v${version} on channel "${args.channel}".`);
   console.log(`   Users on an older build are now offered it — and only they.`);
-  console.log(`   Verify: curl -s https://sumaiya.pro/api/app/update | head -c 400`);
+  console.log(`   Verify: curl -s https://www.templatehub.pro/api/app/update | head -c 400`);
 } catch (err) {
   console.error("❌ Publish failed:", err.message);
   process.exitCode = 1;

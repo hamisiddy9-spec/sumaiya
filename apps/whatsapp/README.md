@@ -43,5 +43,5 @@ Meta side is ready.
 
 Guest-mode career coaching over WhatsApp — CV / cover-letter / job-search /
 interview advice in Swahili or English, bounded per sender per day. It does not
-build or export documents (it points users to sumaiya.pro for that). Account
+build or export documents (it points users to templatehub.pro for that). Account
 linking (a code texted from inside the app) is a later addition.

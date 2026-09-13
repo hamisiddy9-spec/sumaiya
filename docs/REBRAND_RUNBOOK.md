@@ -8,6 +8,29 @@
 > primary domain **sumaiya.pro** · same Supabase database · old-project
 > migration handled as a later, separate step.
 
+## ⚠️ Superseded 2026-09-13 — canonical host is `www.templatehub.pro`
+
+`sumaiya.pro` was **never registered**. Four checks agree: RDAP returns
+not-found, there are no nameservers, no A record (8.8.8.8 / 1.1.1.1), and
+connections fail outright. Yet the code defaults, the web env and the shipped
+Android app all named it — so downloads, update prompts and deep links were
+dead, and the app was telling users to download from a domain anyone could
+register for ~$5 and point at malware.
+
+Until `sumaiya.pro` is actually bought, treat the plan below as history:
+
+- **Canonical host = `https://www.templatehub.pro`** (the apex 308-redirects to
+  it). `NEXT_PUBLIC_APP_URL` is the single switch; nothing else hard-codes a host.
+- **Do NOT add the wildcard 301 `templatehub.pro/* → sumaiya.pro/*`** (old step
+  14). It is backwards now: `templatehub.pro` is the live front door and serves
+  `/pro`.
+- `templatehub.pro` = the front door and the online product (Sumaiya online,
+  all templates). The **Android app = the full experience**. One brand, two
+  doors.
+- When `sumaiya.pro` is eventually bought, change `NEXT_PUBLIC_APP_URL`, the
+  `EMAIL_FROM` / support addresses, the native deep-link prefixes and
+  `assetlinks.json`, then rebuild the APK. Until then, nothing should name it.
+
 ---
 
 ## What's already done in the code (branch `rebrand/sumaiya`)
@@ -131,11 +154,10 @@
 ## Phase 3 — Old-domain cutover (separate step, when the new site is proven)
 
 13. Add `templatehub.pro` to the **new** Vercel project as a secondary domain.
-14. Add a wildcard 301: `templatehub.pro/*` → `sumaiya.pro/*` (Vercel redirect
-    rule, or `vercel.json` `redirects`). Keep it indefinitely — it's carrying
-    "tengeneza CV" search equity.
-15. Google Search Console — add `sumaiya.pro`, submit the sitemap, use Change of
-    Address from the old property.
+14. ~~Add a wildcard 301: `templatehub.pro/*` → `sumaiya.pro/*`~~ — **do not do
+    this** (see the 2026-09-13 note at the top). `templatehub.pro` is the
+    canonical host; it is the front door, not the legacy one.
+15. Google Search Console — submit `templatehub.pro` (already the live domain).
 16. Once traffic has moved and 301s are verified, **pause then delete** the old
     Vercel project (`prj_VKqiG1lNRsy30wJUQFZ0TEPWlXLS`). Don't delete the old
     GitHub repo — keep it archived.

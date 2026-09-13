@@ -16,7 +16,7 @@ import { captureServer } from "@/lib/analytics/server";
 const genCode = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 7);
 
 export function referralUrl(code: string): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL || "https://sumaiya.pro";
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.templatehub.pro";
   return `${base}/?ref=${code}`;
 }
 

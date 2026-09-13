@@ -123,17 +123,21 @@ and **`https://templatehub.pro`** (the domain is attached to this project).
    **Magic Link** → add a line with `{{ .Token }}` (e.g. `Your code: {{ .Token }}`).
    Without it the code sign-in for installed PWAs can't complete.
 2. **Supabase — auth redirect URLs.** Authentication → URL Configuration → add
-   `https://sumaiyaai.vercel.app/**` (and `https://sumaiya.pro/**` once bought)
-   to Redirect URLs.
+   `https://www.templatehub.pro/**` and `https://sumaiyaai.vercel.app/**` to
+   Redirect URLs.
 3. **GitHub repo → Settings → Secrets and variables → Actions**
    - Variables: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
      `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`, optionally
      `EVAL_FLAG_RATE_ALARM`.
    - Secrets: `DATABASE_URL` (nightly evals), `CRON_SECRET` + `PROD_URL`
      (health-cron).
-4. **Domains** — buy `sumaiya.pro` (+ `.app`), attach to `sumaiya.ai`, then set
-   `NEXT_PUBLIC_APP_URL` → `https://sumaiya.pro` and redeploy. Keep
-   `templatehub.pro` for its SEO, 301 → sumaiya.pro.
+4. **Domains — `www.templatehub.pro` is the canonical host (2026-09-13).**
+   Attach it to the `sumaiya.ai` project (already done) and set
+   `NEXT_PUBLIC_APP_URL=https://www.templatehub.pro`, then redeploy.
+   `sumaiya.pro` is **not registered** — do not point anything at it, and do
+   **not** 301 `templatehub.pro` anywhere: it is the front door and serves
+   `/pro`. Buying `sumaiya.pro` later is a rename, not a migration — see
+   `REBRAND_RUNBOOK.md`.
 5. **Vercel Pro** (when the card is fixed) — restores the every-6h health cron
    (move it back into `apps/web/vercel.json`, delete `health-cron.yml`), lifts
    cron limits, and unblocks a bigger build container.
@@ -168,7 +172,7 @@ and **`https://templatehub.pro`** (the domain is attached to this project).
    - **WhatsApp** — `apps/whatsapp/README.md`: Meta app, deploy the worker,
      webhook, `WHATSAPP_WORKER_SECRET` on both sides.
 8. Later: Supabase Pro (stop the 7-day idle pause), Resend sending domain
-   `sumaiya.pro` (SPF/DKIM/DMARC), Google OAuth redirect, a real Android
+   `templatehub.pro` (SPF/DKIM/DMARC), Google OAuth redirect, a real Android
    release keystore for Play Store, regenerate OG/store screenshots.
 
 ## Engineering left (deliberately not done)

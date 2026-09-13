@@ -41,7 +41,7 @@ const jsonLd = {
   operatingSystem: "Web",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   description: "Free tool that scores a CV/resume for Applicant Tracking System compatibility and lists specific fixes.",
-  url: "https://sumaiya.pro/ats-checker",
+  url: "https://www.templatehub.pro/ats-checker",
 };
 
 export default async function AtsCheckerPage({ params }: { params: { locale: string } }) {

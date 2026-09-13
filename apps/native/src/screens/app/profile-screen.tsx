@@ -199,7 +199,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               await signOut();
             } catch {
               haptics.error();
-              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Contact support@sumaiya.pro.", "Wasiliana na support@sumaiya.pro."));
+              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Contact support@templatehub.pro.", "Wasiliana na support@templatehub.pro."));
             } finally {
               setBusy(null);
             }
@@ -394,7 +394,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         </View>
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
-          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}support@sumaiya.pro
+          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}support@templatehub.pro
         </Text>
       </Animated.View>
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="general" />

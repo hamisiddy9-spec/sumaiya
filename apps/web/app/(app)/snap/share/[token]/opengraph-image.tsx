@@ -68,7 +68,7 @@ export default async function Image({ params }: { params: { token: string } }) {
             <div style={{ marginLeft: 12, color: CREAM, fontSize: 26, fontWeight: 700, letterSpacing: -0.5, display: "flex" }}>
               Made with Sumaiya
             </div>
-            <div style={{ marginLeft: 16, color: MUTED, fontSize: 24, display: "flex" }}>· sumaiya.pro</div>
+            <div style={{ marginLeft: 16, color: MUTED, fontSize: 24, display: "flex" }}>· templatehub.pro</div>
           </div>
         </div>
       </div>

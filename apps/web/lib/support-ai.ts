@@ -3,7 +3,7 @@ import { callAi, hasAiProvider } from "@/lib/api/ai-provider";
 // Knowledge the assistant is allowed to rely on. Kept deliberately factual and
 // conservative — the model is told NOT to invent anything beyond this.
 const KNOWLEDGE = `
-Sumaiya (sumaiya.pro) is a free tool for job seekers everywhere to build professional documents, with an AI assistant that helps them get hired.
+Sumaiya (templatehub.pro) is a free tool for job seekers everywhere to build professional documents, with an AI assistant that helps them get hired.
 
 FACTS:
 - You can build a CV/resume, cover letter, business card and formal letter, and download a polished PDF — for free, with no credit card.
@@ -14,7 +14,7 @@ FACTS:
 - The whole app works in English and Swahili — a language toggle switches any time.
 - Sign in with Google, or with an email "magic link" (we email you a one-tap sign-in link). No password.
 - There are 250+ templates at /templates.
-- Support email: support@sumaiya.pro.
+- Support email: support@templatehub.pro.
 `;
 
 const GUARDRAILS = `

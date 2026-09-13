@@ -8,7 +8,7 @@ import * as Linking from "expo-linking";
 describe("Deep Linking", () => {
   describe("URL Parsing", () => {
     it("should parse sign-in URL with token and email", () => {
-      const url = "https://sumaiya.pro/auth/signin?token=TEST_TOKEN_123&email=user@example.com&action=signin";
+      const url = "https://www.templatehub.pro/auth/signin?token=TEST_TOKEN_123&email=user@example.com&action=signin";
       const { path, queryParams } = Linking.parse(url);
 
       expect(path).toBe("auth/signin");
@@ -27,14 +27,14 @@ describe("Deep Linking", () => {
     });
 
     it("should handle URL-encoded email", () => {
-      const url = "https://sumaiya.pro/auth/signin?token=TOKEN&email=john%2Btest%40example.com";
+      const url = "https://www.templatehub.pro/auth/signin?token=TOKEN&email=john%2Btest%40example.com";
       const { queryParams } = Linking.parse(url);
 
       expect(queryParams?.email).toBe("john+test@example.com");
     });
 
     it("should handle missing optional parameters", () => {
-      const url = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const url = "https://www.templatehub.pro/auth/signin?token=TOKEN";
       const { queryParams } = Linking.parse(url);
 
       expect(queryParams?.token).toBe("TOKEN");
@@ -46,7 +46,7 @@ describe("Deep Linking", () => {
       const actions = ["signin", "verify", "reset"];
 
       actions.forEach((action) => {
-        const url = `https://sumaiya.pro/auth/signin?token=TOKEN&action=${action}`;
+        const url = `https://www.templatehub.pro/auth/signin?token=TOKEN&action=${action}`;
         const { queryParams } = Linking.parse(url);
 
         expect(queryParams?.action).toBe(action);
@@ -111,11 +111,11 @@ describe("Deep Linking", () => {
       const email = "john@example.com";
       const token = "JWT_TOKEN_HERE";
 
-      const deepLink = `https://sumaiya.pro/auth/signin?token=${token}&email=${encodeURIComponent(
+      const deepLink = `https://www.templatehub.pro/auth/signin?token=${token}&email=${encodeURIComponent(
         email
       )}&action=signin`;
 
-      expect(deepLink).toContain("https://sumaiya.pro/auth/signin");
+      expect(deepLink).toContain("https://www.templatehub.pro/auth/signin");
       expect(deepLink).toContain(`token=${token}`);
       expect(deepLink).toContain(`email=${encodeURIComponent(email)}`);
       expect(deepLink).toContain("action=signin");
@@ -129,7 +129,7 @@ describe("Deep Linking", () => {
       ];
 
       specialEmails.forEach((email) => {
-        const deepLink = `https://sumaiya.pro/auth/signin?token=TOKEN&email=${encodeURIComponent(email)}`;
+        const deepLink = `https://www.templatehub.pro/auth/signin?token=TOKEN&email=${encodeURIComponent(email)}`;
 
         const { queryParams } = Linking.parse(deepLink);
         expect(queryParams?.email).toBe(email);
@@ -141,10 +141,10 @@ describe("Deep Linking", () => {
       const email = "user@example.com";
 
       // Primary deep link (app)
-      const appLink = `https://sumaiya.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}`;
+      const appLink = `https://www.templatehub.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}`;
 
       // Fallback web link (same URL, web app handles it)
-      const webLink = `https://sumaiya.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}`;
+      const webLink = `https://www.templatehub.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}`;
 
       expect(appLink).toBe(webLink);
     });
@@ -163,7 +163,7 @@ describe("Deep Linking", () => {
 
   describe("Error Handling", () => {
     it("should handle missing token parameter", () => {
-      const url = "https://sumaiya.pro/auth/signin?email=user@example.com";
+      const url = "https://www.templatehub.pro/auth/signin?email=user@example.com";
       const { queryParams } = Linking.parse(url);
 
       expect(queryParams?.token).toBeUndefined();
@@ -171,7 +171,7 @@ describe("Deep Linking", () => {
     });
 
     it("should handle empty token", () => {
-      const url = "https://sumaiya.pro/auth/signin?token=&email=user@example.com";
+      const url = "https://www.templatehub.pro/auth/signin?token=&email=user@example.com";
       const { queryParams } = Linking.parse(url);
 
       expect(queryParams?.token).toBe("");
@@ -321,8 +321,8 @@ describe("Deep Linking", () => {
     });
 
     it("should require HTTPS for web links", () => {
-      const webLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
-      const httpLink = "http://sumaiya.pro/auth/signin?token=TOKEN";
+      const webLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
+      const httpLink = "http://templatehub.pro/auth/signin?token=TOKEN";
 
       expect(webLink.startsWith("https://")).toBe(true);
       // An http:// link is NOT a secure https link — deep-link handling must
@@ -361,21 +361,21 @@ describe("Deep Linking", () => {
 
   describe("Platform-Specific Handling", () => {
     it("should support iOS Universal Links", () => {
-      const universalLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const universalLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
 
       // Universal Links configuration in app.json
       const iosConfig = {
         associatedDomains: [
-          "applinks:sumaiya.pro",
-          "applinks:www.sumaiya.pro",
+          "applinks:templatehub.pro",
+          "applinks:www.templatehub.pro",
         ],
       };
 
-      expect(iosConfig.associatedDomains).toContain("applinks:sumaiya.pro");
+      expect(iosConfig.associatedDomains).toContain("applinks:templatehub.pro");
     });
 
     it("should support Android App Links", () => {
-      const appLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const appLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
 
       // App Links configuration in app.json
       const androidConfig = {
@@ -385,7 +385,7 @@ describe("Deep Linking", () => {
             data: [
               {
                 scheme: "https",
-                host: "sumaiya.pro",
+                host: "templatehub.pro",
                 pathPrefix: "/auth",
               },
             ],
@@ -401,10 +401,10 @@ describe("Deep Linking", () => {
     it("should fallback to browser if app not installed", () => {
       // When App Links/Universal Links don't match installed app,
       // the URL should open in default browser
-      const deepLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const deepLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
 
       // Browser should handle the same URL
-      expect(deepLink).toContain("sumaiya.pro");
+      expect(deepLink).toContain("templatehub.pro");
     });
   });
 });

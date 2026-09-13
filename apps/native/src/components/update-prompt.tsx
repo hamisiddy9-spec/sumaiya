@@ -33,7 +33,7 @@ import { useLang } from "../lib/i18n";
 const SKIPPED_KEY = "sumaiya.update.skipped";
 /** The newest build we have already handed to the installer (see below). */
 const DELIVERED_KEY = "sumaiya.update.delivered";
-const DEFAULT_URL = "https://sumaiya.pro/downloads/sumaiya.apk";
+const DEFAULT_URL = "https://www.templatehub.pro/downloads/sumaiya.apk";
 
 interface Info {
   version: string;

@@ -9,7 +9,7 @@
 //   WHATSAPP_VERIFY_TOKEN   the string you type into the Meta webhook config
 //   WHATSAPP_TOKEN          Cloud API access token (System User, permanent)
 //   WHATSAPP_PHONE_ID       the phone-number id from the WhatsApp API setup
-//   SUMAIYA_API_URL         e.g. https://sumaiya.pro
+//   SUMAIYA_API_URL         e.g. https://www.templatehub.pro
 //   WHATSAPP_WORKER_SECRET  shared secret; must match the web env of the same name
 //   GRAPH_VERSION           default v21.0
 

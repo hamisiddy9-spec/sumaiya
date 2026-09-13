@@ -14,7 +14,7 @@
 
 ### Better Auth (2 values)
 1. `BETTER_AUTH_SECRET` → Run: `npx auth secret` → copy output
-2. `BETTER_AUTH_URL` → Your production URL (e.g., https://sumaiya.pro)
+2. `BETTER_AUTH_URL` → Your production URL (e.g., https://www.templatehub.pro)
 
 ### Google OAuth (2 values)
 1. Go to https://console.cloud.google.com → Credentials
@@ -40,8 +40,8 @@
    - `PAYME_APP_ID`
    - `PAYME_APP_SECRET`
    - `PAYME_SANDBOX=1` for the sandbox, unset for production
-   - `PAYME_CALLBACK_URL=https://sumaiya.pro/api/payments/callback`
-   - `PAYME_REDIRECT_URL=https://sumaiya.pro/checkout/success`
+   - `PAYME_CALLBACK_URL=https://www.templatehub.pro/api/payments/callback`
+   - `PAYME_REDIRECT_URL=https://www.templatehub.pro/checkout/success`
 3. Add the callback URL in the PayMe portal webhook settings.
 4. Charging stays OFF until BOTH `PAYMENTS_ENABLED=true` and
    `NEXT_PUBLIC_PAYMENTS_ENABLED=true`. Verify a sandbox `collection` round-trips

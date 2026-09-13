@@ -179,7 +179,7 @@ async function callProvider(provider: ProviderName, cfg: ProviderCall): Promise<
       const { free, paid } = resolveOpenRouterModels(cfg.effort);
       // OpenRouter asks for these for attribution / model-ranking; harmless if absent.
       const headers = {
-        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://sumaiya.pro",
+        "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "https://www.templatehub.pro",
         "X-Title": "Sumaiya",
       };
       const url = "https://openrouter.ai/api/v1/chat/completions";

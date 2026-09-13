@@ -39,7 +39,7 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
   const [unsharing, setUnsharing] = useState(false);
 
   const publicLink = publicSlug
-    ? `${typeof window !== "undefined" ? window.location.origin : "https://sumaiya.pro"}/cv/${publicSlug}`
+    ? `${typeof window !== "undefined" ? window.location.origin : "https://www.templatehub.pro"}/cv/${publicSlug}`
     : "";
 
   async function handleCopyLink() {

@@ -13,10 +13,10 @@ describe("Deep Linking Integration", () => {
      * Custom scheme URLs are handled by the OS/runtime, not Node.js URL API
      */
     it("should parse web-based sign-in URL", () => {
-      const urlString = "https://sumaiya.pro/auth/signin?token=TEST_TOKEN_123&email=user@example.com&action=signin";
+      const urlString = "https://www.templatehub.pro/auth/signin?token=TEST_TOKEN_123&email=user@example.com&action=signin";
       const url = new URL(urlString);
 
-      expect(url.hostname).toBe("sumaiya.pro");
+      expect(url.hostname).toBe("www.templatehub.pro");
       expect(url.pathname).toBe("/auth/signin");
       expect(url.searchParams.get("token")).toBe("TEST_TOKEN_123");
       expect(url.searchParams.get("email")).toBe("user@example.com");
@@ -24,16 +24,16 @@ describe("Deep Linking Integration", () => {
     });
 
     it("should parse www-prefixed domain", () => {
-      const urlString = "https://www.sumaiya.pro/auth/signin?token=JWT_TOKEN&email=john@email.com";
+      const urlString = "https://www.templatehub.pro/auth/signin?token=JWT_TOKEN&email=john@email.com";
       const url = new URL(urlString);
 
-      expect(url.hostname).toBe("www.sumaiya.pro");
+      expect(url.hostname).toBe("www.templatehub.pro");
       expect(url.searchParams.get("token")).toBe("JWT_TOKEN");
       expect(url.searchParams.get("email")).toBe("john@email.com");
     });
 
     it("should handle URL-encoded email addresses", () => {
-      const urlString = "https://sumaiya.pro/auth/signin?token=TOKEN&email=john%2Btest%40example.com";
+      const urlString = "https://www.templatehub.pro/auth/signin?token=TOKEN&email=john%2Btest%40example.com";
       const url = new URL(urlString);
 
       expect(url.searchParams.get("email")).toBe("john+test@example.com");
@@ -141,12 +141,12 @@ describe("Deep Linking Integration", () => {
       const email = "john@example.com";
       const token = "JWT_TOKEN_HERE";
 
-      const deepLink = `https://sumaiya.pro/auth/signin?token=${token}&email=${encodeURIComponent(
+      const deepLink = `https://www.templatehub.pro/auth/signin?token=${token}&email=${encodeURIComponent(
         email
       )}&action=signin`;
 
       const url = new URL(deepLink);
-      expect(url.hostname).toBe("sumaiya.pro");
+      expect(url.hostname).toBe("www.templatehub.pro");
       expect(url.searchParams.get("token")).toBe(token);
       expect(url.searchParams.get("email")).toBe(email);
       expect(url.searchParams.get("action")).toBe("signin");
@@ -182,7 +182,7 @@ describe("Deep Linking Integration", () => {
       ];
 
       specialEmails.forEach((email) => {
-        const deepLink = `https://sumaiya.pro/auth/signin?token=TOKEN&email=${encodeURIComponent(email)}`;
+        const deepLink = `https://www.templatehub.pro/auth/signin?token=TOKEN&email=${encodeURIComponent(email)}`;
         const url = new URL(deepLink);
         expect(url.searchParams.get("email")).toBe(email);
       });
@@ -191,7 +191,7 @@ describe("Deep Linking Integration", () => {
 
   describe("Error Handling", () => {
     it("should handle missing token parameter", () => {
-      const urlString = "https://sumaiya.pro/auth/signin?email=user@example.com";
+      const urlString = "https://www.templatehub.pro/auth/signin?email=user@example.com";
       const url = new URL(urlString);
 
       expect(url.searchParams.get("token")).toBeNull();
@@ -199,7 +199,7 @@ describe("Deep Linking Integration", () => {
     });
 
     it("should handle empty token", () => {
-      const urlString = "https://sumaiya.pro/auth/signin?token=&email=user@example.com";
+      const urlString = "https://www.templatehub.pro/auth/signin?token=&email=user@example.com";
       const url = new URL(urlString);
 
       expect(url.searchParams.get("token")).toBe("");
@@ -207,13 +207,13 @@ describe("Deep Linking Integration", () => {
 
     it("should validate minimum required parameters", () => {
       // Valid: has token and email
-      const validUrl = "https://sumaiya.pro/auth/signin?token=TOKEN&email=user@example.com";
+      const validUrl = "https://www.templatehub.pro/auth/signin?token=TOKEN&email=user@example.com";
       const url1 = new URL(validUrl);
       expect(url1.searchParams.has("token")).toBe(true);
       expect(url1.searchParams.has("email")).toBe(true);
 
       // Invalid: missing token
-      const invalidUrl = "https://sumaiya.pro/auth/signin?email=user@example.com";
+      const invalidUrl = "https://www.templatehub.pro/auth/signin?email=user@example.com";
       const url2 = new URL(invalidUrl);
       expect(url2.searchParams.has("token")).toBe(false);
     });
@@ -239,28 +239,28 @@ describe("Deep Linking Integration", () => {
 
   describe("Action Routing", () => {
     it("should route signin action correctly", () => {
-      const url = new URL("https://sumaiya.pro/auth/signin?action=signin");
+      const url = new URL("https://www.templatehub.pro/auth/signin?action=signin");
       const action = url.searchParams.get("action") || "signin";
 
       expect(action).toBe("signin");
     });
 
     it("should route verify action correctly", () => {
-      const url = new URL("https://sumaiya.pro/auth/signin?action=verify");
+      const url = new URL("https://www.templatehub.pro/auth/signin?action=verify");
       const action = url.searchParams.get("action");
 
       expect(action).toBe("verify");
     });
 
     it("should route reset action correctly", () => {
-      const url = new URL("https://sumaiya.pro/auth/signin?action=reset");
+      const url = new URL("https://www.templatehub.pro/auth/signin?action=reset");
       const action = url.searchParams.get("action");
 
       expect(action).toBe("reset");
     });
 
     it("should default to signin when action not provided", () => {
-      const url = new URL("https://sumaiya.pro/auth/signin?token=TOKEN");
+      const url = new URL("https://www.templatehub.pro/auth/signin?token=TOKEN");
       const action = url.searchParams.get("action") || "signin";
 
       expect(action).toBe("signin");
@@ -269,19 +269,19 @@ describe("Deep Linking Integration", () => {
 
   describe("Platform Support", () => {
     it("should support iOS Universal Links (https)", () => {
-      const universalLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const universalLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
       const url = new URL(universalLink);
 
       expect(url.protocol).toBe("https:");
-      expect(url.hostname).toBe("sumaiya.pro");
+      expect(url.hostname).toBe("www.templatehub.pro");
     });
 
     it("should support Android App Links (https)", () => {
-      const appLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
+      const appLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
       const url = new URL(appLink);
 
       expect(url.protocol).toBe("https:");
-      expect(url.hostname).toBe("sumaiya.pro");
+      expect(url.hostname).toBe("www.templatehub.pro");
     });
 
     it("should support custom scheme for both platforms", () => {
@@ -297,7 +297,7 @@ describe("Deep Linking Integration", () => {
 
     it("should fallback to web when app not installed", () => {
       // Web link serves as fallback
-      const webLink = "https://sumaiya.pro/auth/signin?token=TOKEN&fallback=web";
+      const webLink = "https://www.templatehub.pro/auth/signin?token=TOKEN&fallback=web";
       const url = new URL(webLink);
 
       expect(url.protocol).toBe("https:");
@@ -307,8 +307,8 @@ describe("Deep Linking Integration", () => {
 
   describe("Security", () => {
     it("should require HTTPS for web links", () => {
-      const httpsLink = "https://sumaiya.pro/auth/signin?token=TOKEN";
-      const httpLink = "http://sumaiya.pro/auth/signin?token=TOKEN";
+      const httpsLink = "https://www.templatehub.pro/auth/signin?token=TOKEN";
+      const httpLink = "http://templatehub.pro/auth/signin?token=TOKEN";
 
       const httpsUrl = new URL(httpsLink);
       expect(httpsUrl.protocol).toBe("https:");
@@ -370,7 +370,7 @@ describe("Deep Linking Integration", () => {
       const email = "john@example.com";
       const action = "signin";
 
-      const deepLink = `https://sumaiya.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}&action=${action}`;
+      const deepLink = `https://www.templatehub.pro/auth/signin?token=${token}&email=${encodeURIComponent(email)}&action=${action}`;
 
       // Step 2: Parse link
       const url = new URL(deepLink);
