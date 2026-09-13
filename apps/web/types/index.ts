@@ -83,22 +83,72 @@ export const refereeEntrySchema = z.object({
   phone: z.string(),
 });
 
+/**
+ * An array whose items are validated INDIVIDUALLY, dropping only what cannot be
+ * read.
+ *
+ * `z.array(x)` fails the WHOLE array when a single item fails, which fails the
+ * whole object, which makes `parseCVData` return an empty CV. So one bad entry
+ * — an older client's shape, a half-written row, a skill whose `level` arrived
+ * as a string instead of 1–5 — cost the user the entire document. The
+ * `personal` block already had this protection via `.catch`; the arrays did
+ * not, which is the same defect one level deeper.
+ *
+ * Measured 2026-09-13: a CV whose only fault was one unrecognised `projects`
+ * entry (`{ nonsense: true }`) parsed as completely blank.
+ *
+ * Also note the sub-schemas below (`skillEntrySchema`, `languageEntrySchema`,
+ * `certificationEntrySchema`, `projectEntrySchema`, `refereeEntrySchema`)
+ * require EVERY field — only `experienceEntrySchema` and `educationEntrySchema`
+ * carry defaults. So this is not a rare edge: any item missing `id`, or naming
+ * a language with a `proficiency` outside the five listed values, takes the
+ * whole CV with it.
+ */
+function looseArray<T extends z.ZodTypeAny>(item: T) {
+  return z
+    .array(z.unknown())
+    .default([])
+    .transform((raw) =>
+      raw.flatMap((entry) => {
+        const parsed = item.safeParse(entry);
+        return parsed.success ? [parsed.data as z.infer<T>] : [];
+      }),
+    );
+}
+
+/** Same, for the sections that must stay ABSENT rather than become `[]`. */
+function looseOptionalArray<T extends z.ZodTypeAny>(item: T) {
+  return z
+    .array(z.unknown())
+    .optional()
+    .transform((raw) =>
+      raw === undefined
+        ? undefined
+        : raw.flatMap((entry) => {
+            const parsed = item.safeParse(entry);
+            return parsed.success ? [parsed.data as z.infer<T>] : [];
+          }),
+    );
+}
+
 export const cvDataSchema = z.object({
   // `.catch` rather than `.default` so a *malformed* personal block survives too,
   // not just a missing one. Losing a name is survivable; losing the CV is not.
   personal: personalInfoSchema.catch({ fullName: "", jobTitle: "", email: "", phone: "", location: "" }),
   summary: z.string().default(""),
-  experience: z.array(experienceEntrySchema).default([]),
-  education: z.array(educationEntrySchema).default([]),
-  skills: z.array(skillEntrySchema).default([]),
+  // Each array drops the entries it cannot read instead of failing, so one
+  // malformed row costs the user that entry and nothing else.
+  experience: looseArray(experienceEntrySchema),
+  education: looseArray(educationEntrySchema),
+  skills: looseArray(skillEntrySchema),
   // Optional-with-default so CVs saved before projects existed still parse.
-  projects: z.array(projectEntrySchema).default([]),
-  languages: z.array(languageEntrySchema).default([]),
-  certifications: z.array(certificationEntrySchema).default([]),
-  referees: z.array(refereeEntrySchema).default([]),
+  projects: looseArray(projectEntrySchema),
+  languages: looseArray(languageEntrySchema),
+  certifications: looseArray(certificationEntrySchema),
+  referees: looseArray(refereeEntrySchema),
   hobbies: z.string().default(""),
-  hiddenSections: z.array(z.string()).optional(),
-  sectionOrder: z.array(z.string()).optional(),
+  hiddenSections: looseOptionalArray(z.string()),
+  sectionOrder: looseOptionalArray(z.string()),
   density: z.enum(["compact", "normal", "airy"]).optional(),
   mode: z.string().optional(),
 });
