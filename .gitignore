@@ -21,3 +21,11 @@ ios/Pods/
 # Vercel
 .vercel
 *.apk
+
+# Release signing material — NEVER commit these.
+# The debug keystore below stays tracked (it is public by design and only ever
+# used for debug builds); the release key is what protects user updates.
+apps/native/android/keystore.properties
+apps/native/android/app/sumaiya-release.keystore
+*.jks
+*.keystore.bak

@@ -83,6 +83,11 @@ jobs:
         working-directory: apps/native
       - run: npm test
         working-directory: apps/native
+      # Guards the invariant that a release build can never be signed with the
+      # public debug key, including after a future `expo prebuild --clean`.
+      # See apps/native/plugins/with-release-signing.js.
+      - run: node scripts/test-release-signing.js
+        working-directory: apps/native
       - run: npm run export
         working-directory: apps/native
         env:

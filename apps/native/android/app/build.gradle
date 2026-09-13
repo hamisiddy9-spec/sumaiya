@@ -5,6 +5,41 @@ apply plugin: "com.facebook.react"
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
+ * Release signing material.
+ *
+ * Read from android/keystore.properties (git-ignored) with environment-variable
+ * fallbacks, so the same key can be injected by CI without checking a file in.
+ * The keystore is backed up outside the repo at ~/sumaiya-keys/.
+ *
+ * If this is missing, release builds fail with a clear message rather than
+ * quietly falling back to the debug key: a debug-signed release means anyone
+ * holding the public debug keystore can forge an update to pro.sumaiya.app that
+ * Android will install over ours.
+ */
+def releaseKeystoreProps = new Properties()
+def releaseKeystorePropsFile = rootProject.file("keystore.properties")
+if (releaseKeystorePropsFile.exists()) {
+    releaseKeystorePropsFile.withInputStream { releaseKeystoreProps.load(it) }
+}
+def releaseStoreFileName = releaseKeystoreProps.getProperty("SUMAIYA_RELEASE_STORE_FILE") ?: System.getenv("SUMAIYA_RELEASE_STORE_FILE")
+def releaseStorePass = releaseKeystoreProps.getProperty("SUMAIYA_RELEASE_STORE_PASSWORD") ?: System.getenv("SUMAIYA_RELEASE_STORE_PASSWORD")
+def releaseAlias = releaseKeystoreProps.getProperty("SUMAIYA_RELEASE_KEY_ALIAS") ?: System.getenv("SUMAIYA_RELEASE_KEY_ALIAS")
+def releaseKeyPass = releaseKeystoreProps.getProperty("SUMAIYA_RELEASE_KEY_PASSWORD") ?: System.getenv("SUMAIYA_RELEASE_KEY_PASSWORD")
+def hasReleaseKeystore = releaseStoreFileName != null && file(releaseStoreFileName).exists()
+
+gradle.taskGraph.whenReady { graph ->
+    def wantsRelease = graph.allTasks.any { it.name.toLowerCase().contains("release") }
+    if (wantsRelease && !hasReleaseKeystore) {
+        throw new GradleException(
+            "Release build needs a signing key but none was found.\n" +
+            "  Expected: android/keystore.properties pointing at android/app/sumaiya-release.keystore\n" +
+            "  Restore from the backup at ~/sumaiya-keys/sumaiya-release.jks.\n" +
+            "  Refusing to fall back to the debug keystore — that key is public."
+        )
+    }
+}
+
+/**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
@@ -92,8 +127,8 @@ android {
         applicationId 'pro.sumaiya.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10610
-        versionName "1.6.10"
+        versionCode 10611
+        versionName "1.6.11"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
@@ -104,15 +139,21 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            storeFile file(releaseStoreFileName)
+            storePassword releaseStorePass
+            keyAlias releaseAlias
+            keyPassword releaseKeyPass
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Signed with the real release key (see the check at the top of this
+            // file). Never the debug key.
+            signingConfig signingConfigs.release
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
