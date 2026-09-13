@@ -37,21 +37,39 @@ export function resolveModelForEffort(effort: ThinkingEffort, env: Record<string
   return env.DEEPSEEK_MODEL || "deepseek-chat";
 }
 
-/** Map effort → OpenRouter model slugs (free first, then paid fallback). */
+/**
+ * Map effort → OpenRouter model slugs.
+ *
+ * ⚠️ There is deliberately NO default free slug any more, and it is worth
+ * knowing why. OpenRouter RETIRED every `deepseek/*:free` slug. Verified
+ * against the live model list 2026-09-13: 445 models, 19 of them free, and not
+ * one of them DeepSeek. The old defaults here —
+ * `deepseek/deepseek-chat-v3:free` and `deepseek/deepseek-r1:free` — answered
+ * **404 on every single request**, so each AI call spent a guaranteed wasted
+ * round trip before falling back to the paid model, and the "free model
+ * failed, retrying on paid" warning fired on every call until it became noise
+ * nobody reads. In the test suite it also pushed an unrelated test past its 5s
+ * timeout (lib/assistant/run-tool.test.ts).
+ *
+ * Defaulting `free` to the paid slug means the free attempt is skipped
+ * entirely, which is exactly the behaviour that already happened — minus the
+ * doomed request. A free tier returns the moment a real one is configured via
+ * `OPENROUTER_MODEL_FREE` / `OPENROUTER_MODEL_DEEP`.
+ *
+ * Changing these defaults is a cost/quality decision, not a cleanup: the paid
+ * slug is what actually serves users today. If you point a default at a free
+ * model, confirm the slug exists first —
+ * `curl -s https://openrouter.ai/api/v1/models | grep '"id"'`.
+ */
 export function resolveOpenRouterModels(
   effort: ThinkingEffort,
   env: Record<string, string | undefined> = process.env as Record<string, string | undefined>,
 ): { free: string; paid: string } {
+  const paid = env.OPENROUTER_MODEL_PAID || "deepseek/deepseek-chat";
   if (effort === "deep") {
-    return {
-      free: env.OPENROUTER_MODEL_DEEP || "deepseek/deepseek-r1:free",
-      paid: env.OPENROUTER_MODEL_PAID || "deepseek/deepseek-chat",
-    };
+    return { free: env.OPENROUTER_MODEL_DEEP || paid, paid };
   }
-  return {
-    free: env.OPENROUTER_MODEL_FREE || "deepseek/deepseek-chat-v3:free",
-    paid: env.OPENROUTER_MODEL_PAID || "deepseek/deepseek-chat",
-  };
+  return { free: env.OPENROUTER_MODEL_FREE || paid, paid };
 }
 
 interface CallOpts {
@@ -114,6 +132,37 @@ function pickText(data: unknown): string | null {
   return (d.choices?.[0]?.message?.content ?? d.content?.[0]?.text ?? "").trim() || null;
 }
 
+/**
+ * An HTTP failure from an OpenAI-compatible endpoint, carrying the status.
+ *
+ * The status used to be flattened into the message (`"${url} ${status}"`), and
+ * the caller retried on ANY error — so a 404 for a model slug that does not
+ * exist was retried identically, for ever. Callers now need to tell "try a
+ * different model" apart from "try again in a moment", and that needs the
+ * status, not a string.
+ */
+class ProviderHttpError extends Error {
+  constructor(
+    public readonly status: number,
+    url: string,
+  ) {
+    super(`${url} ${status}`);
+    this.name = "ProviderHttpError";
+  }
+}
+
+/**
+ * Model slugs the provider has told us do not exist, for the life of this
+ * process. A missing slug is permanent, so asking for it again is pure waste —
+ * that is not a retry, it is a guaranteed failure with a round trip attached.
+ */
+const deadModelSlugs = new Set<string>();
+
+/** Test seam: the cache above is module state and must not leak between tests. */
+export function __resetDeadModelCache(): void {
+  deadModelSlugs.clear();
+}
+
 async function openAiCompatible(
   url: string,
   key: string,
@@ -134,7 +183,7 @@ async function openAiCompatible(
     body: JSON.stringify(body),
     signal: cfg.signal,
   });
-  if (!res.ok) throw new Error(`${url} ${res.status}`);
+  if (!res.ok) throw new ProviderHttpError(res.status, url);
   return pickText(await res.json());
 }
 
@@ -184,16 +233,32 @@ async function callProvider(provider: ProviderName, cfg: ProviderCall): Promise<
       };
       const url = "https://openrouter.ai/api/v1/chat/completions";
       const key = process.env.OPENROUTER_API_KEY as string;
-      try {
-        const out = await openAiCompatible(url, key, free, cfg, headers);
-        if (out) return out;
-        throw new Error("OpenRouter free model returned empty");
-      } catch (err) {
-        if (cfg.signal.aborted || free === paid) throw err;
-        // Free model rate-limited / unavailable / empty → one paid retry.
-        console.warn("[AI] OpenRouter free model failed, retrying on paid:", err);
-        return openAiCompatible(url, key, paid, cfg, headers);
+      // Free attempt — skipped entirely when there is no separate free slug, or
+      // when we have already been told this one does not exist.
+      if (free !== paid && !deadModelSlugs.has(free)) {
+        try {
+          const out = await openAiCompatible(url, key, free, cfg, headers);
+          if (out) return out;
+          console.warn("[AI] OpenRouter free model returned empty, retrying on paid:", free);
+        } catch (err) {
+          if (cfg.signal.aborted) throw err;
+          if (err instanceof ProviderHttpError && err.status === 404) {
+            // A 404 means the slug does not exist — permanent, not transient.
+            // Remember it so the next call does not pay for the same doomed
+            // round trip, and say so once instead of on every request. This
+            // warning used to fire on EVERY AI call in the product, because the
+            // default free slugs had been retired upstream and nothing noticed.
+            deadModelSlugs.add(free);
+            console.warn(
+              `[AI] OpenRouter has no model "${free}" (404) — skipping it for the rest of this process`,
+            );
+          } else {
+            // Free model rate-limited / unavailable → one paid retry.
+            console.warn("[AI] OpenRouter free model failed, retrying on paid:", err);
+          }
+        }
       }
+      return openAiCompatible(url, key, paid, cfg, headers);
     }
 
     case "anthropic": {
