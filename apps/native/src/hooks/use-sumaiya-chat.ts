@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '../contexts/auth-context';
 import { apiClient } from '../lib/api-client';
-import { ApiError } from '@sumaiya/api-client';
+import { friendlyApiError } from '../lib/app-errors';
 import type {
   ChatMessage,
   SuggestionChip,
@@ -187,27 +187,13 @@ export function useSumaiyaChat() {
           });
         }
       } catch (err) {
-        // Surface what the server actually said (AI not configured, quota hit,
-        // session expired…) instead of a blanket "check your connection" —
-        // status 0 is the only genuine network/timeout case.
-        if (err instanceof ApiError && err.status !== 0) {
-          if (err.status === 401) {
-            setError(t("Your session expired — sign in again.", "Kipindi chako kimeisha — ingia tena."));
-          } else if (err.status === 503) {
-            setError(t("Sumaiya isn't switched on yet. Try again soon.", "Sumaiya bado hajawashwa. Jaribu tena hivi punde."));
-          } else if (err.status === 429) {
-            setError(err.message);
-          } else {
-            setError(err.message || t("Something went wrong. Try again.", "Kuna hitilafu. Jaribu tena."));
-          }
-        } else {
-          setError(
-            t(
-              "Couldn't reach Sumaiya. Check your connection and try again.",
-              "Imeshindwa kumfikia Sumaiya. Angalia mtandao kisha ujaribu tena.",
-            ),
-          );
-        }
+        // Everything goes through the shared mapper, which reads `status` and
+        // `kind` — never `message`. On this path `message` is English
+        // ("Network error. Check your connection.") or a raw HTTP status line
+        // ("500 Internal Server Error"), and both were reaching a Swahili
+        // screen; the English ones also blamed the user's connection for
+        // faults that were ours.
+        setError(friendlyApiError(err, lang));
         reportError(err, { scope: 'sumaiyaChat.send' });
       } finally {
         setLoading(false);
@@ -314,11 +300,12 @@ export function useSumaiyaChat() {
         },
       ]);
     } catch (err) {
-      if (err instanceof ApiError && err.status !== 0) {
-        setError(err.message);
-      } else {
-        setError(t("Couldn't build the CV just now. Try again.", "Imeshindwa kutengeneza CV sasa. Jaribu tena."));
-      }
+      setError(
+        friendlyApiError(err, lang, {
+          en: "I couldn't build the CV just now. Try again.",
+          sw: "Sikuweza kutengeneza CV sasa. Jaribu tena.",
+        }),
+      );
       reportError(err, { scope: "sumaiyaChat.buildCv" });
     } finally {
       setBuildingCv(false);
