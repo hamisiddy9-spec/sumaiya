@@ -26,6 +26,8 @@ export interface CvTemplateMeta {
   name: { en: string; sw: string };
   blurb: { en: string; sw: string };
   tier: "free" | "premium";
+  /** Web style family — used by the gallery's filters. Engine templates only. */
+  style?: string;
 }
 
 export const CV_TEMPLATES: CvTemplateMeta[] = [
@@ -43,7 +45,13 @@ export const CV_TEMPLATES: CvTemplateMeta[] = [
  */
 export const ENGINE_TEMPLATES: CvTemplateMeta[] = Object.values(TEMPLATE_REGISTRY)
   .filter((tpl: NativeTemplate) => hasRenderer(tpl))
-  .map((tpl: NativeTemplate) => ({ id: tpl.id, name: tpl.name, blurb: tpl.blurb, tier: tpl.tier }))
+  .map((tpl: NativeTemplate) => ({
+    id: tpl.id,
+    name: tpl.name,
+    blurb: tpl.blurb,
+    tier: tpl.tier,
+    style: tpl.style,
+  }))
   .sort((a, b) => a.id.localeCompare(b.id));
 
 /**
@@ -60,6 +68,17 @@ export const ALL_TEMPLATES: CvTemplateMeta[] = [...CV_TEMPLATES, ...ENGINE_TEMPL
 export function isKnownTemplate(id: string | undefined | null): boolean {
   if (!id) return false;
   return ALL_TEMPLATES.some((tpl) => tpl.id === id);
+}
+
+/** The engine layout that draws this template, or "classic" for the legacy six.
+ *  Pickers use this to draw an accurate schematic thumbnail. */
+export function templateLayout(id: string): string {
+  return TEMPLATE_REGISTRY[id]?.layout ?? "classic";
+}
+
+/** Metadata for one template, engine-backed or legacy. */
+export function templateMeta(id: string): CvTemplateMeta | undefined {
+  return ALL_TEMPLATES.find((tpl) => tpl.id === id);
 }
 
 export interface CvHtmlOptions {

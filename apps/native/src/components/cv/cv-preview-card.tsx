@@ -15,6 +15,7 @@ import { Button, haptics, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
 import { PremiumSheet } from "../premium-sheet";
 import { TemplateThumb } from "./template-thumb";
+import { TemplateGallery } from "./template-gallery";
 
 const COLORS = ["#DA4A1C", "#12433D", "#211A15", "#7C3AED", "#B57A18", "#059669"];
 const PAGE_W = 794;
@@ -52,6 +53,7 @@ export function CvPreviewCard({
   const { premium } = useEntitlements();
   const [color, setColor] = useState(initialColor);
   const [template, setTemplate] = useState<CvTemplateId>(initialTemplate ?? "classic");
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   // No explicit template? Fall back to the user's first-run choice.
   useEffect(() => {
@@ -157,6 +159,36 @@ export function CvPreviewCard({
           </Pressable>
         );
       })}
+
+      {/* This row stays the six originals — everything else is in TemplateHub,
+          so it never grows into a 224-item scroller. */}
+      <Pressable
+        onPress={() => {
+          haptics.selection();
+          setGalleryOpen(true);
+        }}
+        style={{ alignItems: "center", gap: 5, width: 54 }}
+        accessibilityRole="button"
+        accessibilityLabel={t("All designs", "Miundo yote")}
+      >
+        <View
+          style={{
+            width: 46,
+            height: Math.round(46 * 1.33),
+            borderRadius: 6,
+            borderWidth: 1.5,
+            borderColor: c.border,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: c.bg,
+          }}
+        >
+          <Icon name="chevron-right" size={18} color={c.accent} />
+        </View>
+        <Text style={{ color: c.accent, fontSize: 10.5, fontWeight: "700" }}>
+          {t("All", "Zote")}
+        </Text>
+      </Pressable>
     </ScrollView>
   );
 
@@ -331,6 +363,12 @@ export function CvPreviewCard({
         </View>
       </Modal>
 
+      <TemplateGallery
+        visible={galleryOpen}
+        selected={template}
+        onSelect={(id) => pickTemplate(id, false)}
+        onClose={() => setGalleryOpen(false)}
+      />
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
     </View>
   );

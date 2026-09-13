@@ -12,7 +12,7 @@
  * an empty page.
  */
 
-import { cvToHtml, ALL_TEMPLATES, CV_TEMPLATES, ENGINE_TEMPLATES, isKnownTemplate } from "../cv-html";
+import { cvToHtml, ALL_TEMPLATES, CV_TEMPLATES, ENGINE_TEMPLATES, isKnownTemplate, templateLayout, templateMeta } from "../cv-html";
 import { TEMPLATE_REGISTRY, BESPOKE_IDS } from "../templates/registry";
 import { hasRenderer, systemFontStack, templateAccent } from "./render";
 import { skillLevel, toEngineView } from "./view";
@@ -243,5 +243,77 @@ describe("render helpers", () => {
   it("keeps the bespoke list and the renderable list disjoint", () => {
     const renderable = new Set(ENGINE_TEMPLATES.map((t) => t.id));
     expect(BESPOKE_IDS.filter((id) => renderable.has(id))).toEqual([]);
+  });
+});
+
+describe("TemplateHub can navigate every design", () => {
+  const LAYOUTS = ["SidebarLayout", "HeaderLayout", "MinimalLayout", "TwoColumnLayout", "AccentBandLayout"];
+
+  it("draws a truthful thumbnail shape for every mirrored template", () => {
+    // A picker that fell back to the "classic" sketch for an engine template
+    // would show the wrong design. Every engine id must resolve to a real one.
+    const wrong = ENGINE_TEMPLATES.filter((t) => !LAYOUTS.includes(templateLayout(t.id))).map((t) => t.id);
+    expect(wrong).toEqual([]);
+  });
+
+  it("still draws the bespoke sketches for the original six", () => {
+    for (const id of CV_TEMPLATES.map((t) => t.id)) {
+      expect(templateLayout(id)).not.toBe("");
+    }
+    // and the six are NOT engine templates, so they keep their own sketches
+    expect(CV_TEMPLATES.some((t) => LAYOUTS.includes(templateLayout(t.id)))).toBe(false);
+  });
+
+  it("exposes a style family so the hub's filters can work", () => {
+    const missing = ENGINE_TEMPLATES.filter((t) => !t.style).map((t) => t.id);
+    expect(missing).toEqual([]);
+    const families = Array.from(new Set(ENGINE_TEMPLATES.map((t) => String(t.style))));
+    expect(families.length).toBeGreaterThan(1);
+    for (const f of families) expect(typeof f).toBe("string");
+  });
+
+  it("carries both free and premium designs", () => {
+    const free = ALL_TEMPLATES.filter((t) => t.tier === "free").length;
+    const premium = ALL_TEMPLATES.filter((t) => t.tier === "premium").length;
+    expect(free).toBeGreaterThan(0);
+    // The hub is only interesting if premium is a minority but real.
+    expect(premium).toBeGreaterThan(0);
+    expect(free + premium).toBe(ALL_TEMPLATES.length);
+  });
+
+  it("can build the dashboard teaser: one design per layout family", () => {
+    const seen = new Set<string>();
+    const teaser: string[] = [];
+    for (const tpl of ENGINE_TEMPLATES) {
+      const family = templateLayout(tpl.id);
+      if (seen.has(family)) continue;
+      seen.add(family);
+      teaser.push(tpl.id);
+      if (teaser.length === 5) break;
+    }
+    expect(teaser).toHaveLength(5);
+    expect(new Set(teaser.map(templateLayout)).size).toBe(5);
+    // each teaser id is one the app will actually render
+    for (const id of teaser) expect(isKnownTemplate(id)).toBe(true);
+  });
+
+  it("finds designs by name and by id", () => {
+    const search = (q: string) =>
+      ALL_TEMPLATES.filter(
+        (t) =>
+          t.id.includes(q) ||
+          t.name.en.toLowerCase().includes(q) ||
+          t.name.sw.toLowerCase().includes(q),
+      );
+    expect(search("meridian").map((t) => t.id)).toContain("meridian");
+    expect(search("mer").length).toBeGreaterThan(0);
+    expect(search("")).toHaveLength(ALL_TEMPLATES.length);
+    expect(search("zzzzz")).toHaveLength(0);
+  });
+
+  it("resolves metadata for a selection", () => {
+    expect(templateMeta("meridian")?.tier).toBeTruthy();
+    expect(templateMeta("classic")?.name.en).toBe("Classic");
+    expect(templateMeta("nope")).toBeUndefined();
   });
 });

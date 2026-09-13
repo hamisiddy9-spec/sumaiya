@@ -17,7 +17,8 @@ import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
 import { setDefaultTemplate } from "../lib/prefs";
 import { keyboardAvoidingBehavior } from "../lib/keyboard-avoiding";
-import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
+import { CV_TEMPLATES, ALL_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
+import { useEntitlements } from "../lib/entitlements";
 import { compressPhotoUri, pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
 import {
   CAREER_FIELDS,
@@ -27,6 +28,8 @@ import {
   skillsForFields,
 } from "../lib/career-fields";
 import { TemplateThumb } from "../components/cv/template-thumb";
+import { TemplateGallery } from "../components/cv/template-gallery";
+import { PremiumSheet } from "../components/premium-sheet";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { Button, ProgressBar, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
@@ -104,6 +107,19 @@ export function FirstRunScreen({ onDone }: Props) {
   const [experience, setExperience] = useState<string>("");
   const [skills, setSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [premiumOpen, setPremiumOpen] = useState(false);
+  const { premium } = useEntitlements();
+
+  // The look step shows a few free designs and a taste of premium — not all
+  // 224. The rest live in TemplateHub, one tap away.
+  const lookTemplates = useMemo(
+    () => [
+      ...CV_TEMPLATES.filter((tpl) => tpl.tier === "free"),
+      ...ALL_TEMPLATES.filter((tpl) => tpl.tier === "premium").slice(0, 4),
+    ],
+    [],
+  );
   const [recent, setRecent] = useState("");
   const [template, setTemplate] = useState<CvTemplateId>("classic");
   const [saving, setSaving] = useState(false);
@@ -258,7 +274,6 @@ export function FirstRunScreen({ onDone }: Props) {
   };
 
   // ── Step body ───────────────────────────────────────────────────────────────
-  const freeTemplates = CV_TEMPLATES.filter((tpl) => tpl.tier === "free");
 
   const body = (() => {
     switch (step) {
@@ -414,25 +429,57 @@ export function FirstRunScreen({ onDone }: Props) {
         );
       case "look":
         return (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 18, paddingVertical: 6, paddingHorizontal: 2 }}>
-            {freeTemplates.map((tpl) => {
-              const active = template === tpl.id;
-              return (
-                <Pressable
-                  key={tpl.id}
-                  onPress={() => { haptics.selection(); setTemplate(tpl.id); }}
-                  style={{ alignItems: "center", gap: 8, width: 116 }}
-                >
-                  <View style={{ padding: 4, borderRadius: 12, borderWidth: 3, borderColor: active ? c.accent : "transparent" }}>
-                    <TemplateThumb id={tpl.id} accent={c.accent} width={104} />
-                  </View>
-                  <Text style={{ color: active ? c.accent : c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
-                    {lang === "sw" ? tpl.name.sw : tpl.name.en}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          <View style={{ gap: 14 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 18, paddingVertical: 6, paddingHorizontal: 2 }}>
+              {lookTemplates.map((tpl) => {
+                const locked = tpl.tier === "premium" && !premium;
+                const active = !locked && template === tpl.id;
+                return (
+                  <Pressable
+                    key={tpl.id}
+                    onPress={() => {
+                      haptics.selection();
+                      if (locked) { setPremiumOpen(true); return; }
+                      setTemplate(tpl.id);
+                    }}
+                    style={{ alignItems: "center", gap: 8, width: 116 }}
+                  >
+                    <View style={{ padding: 4, borderRadius: 12, borderWidth: 3, borderColor: active ? c.accent : "transparent", opacity: locked ? 0.6 : 1 }}>
+                      <TemplateThumb id={tpl.id} accent={c.accent} width={104} />
+                    </View>
+                    <Text style={{ color: active ? c.accent : c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
+                      {lang === "sw" ? tpl.name.sw : tpl.name.en}
+                    </Text>
+                    {locked ? (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+                        <Icon name="lock" size={10} color={c.textMuted} />
+                        <Text style={{ color: c.textMuted, fontSize: 10, fontWeight: "700" }}>Premium</Text>
+                      </View>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            <Pressable
+              onPress={() => { haptics.selection(); setGalleryOpen(true); }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                paddingVertical: 11,
+                borderRadius: 12,
+                borderWidth: 1.5,
+                borderColor: c.border,
+              }}
+            >
+              <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "800" }}>
+                {t(`See all ${ALL_TEMPLATES.length} designs`, `Ona miundo yote ${ALL_TEMPLATES.length}`)}
+              </Text>
+              <Icon name="chevron-right" size={16} color={c.accent} />
+            </Pressable>
+          </View>
         );
     }
   })();
@@ -553,6 +600,14 @@ export function FirstRunScreen({ onDone }: Props) {
           </View>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      <TemplateGallery
+        visible={galleryOpen}
+        selected={template}
+        onSelect={(id) => setTemplate(id)}
+        onClose={() => setGalleryOpen(false)}
+      />
+      <PremiumSheet visible={premiumOpen} onClose={() => setPremiumOpen(false)} feature="templates" />
     </View>
   );
 }
