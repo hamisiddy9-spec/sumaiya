@@ -184,6 +184,31 @@ export function unwrapStoredJson(data: unknown): unknown {
   return candidate;
 }
 
+/**
+ * Read a value the TYPES call `string[]` when the DATABASE may hold a JSON
+ * string, at the boundary, so the lie cannot travel further.
+ *
+ * `job_recommendation.matched_terms` is a JSON string in 46 of 46 production
+ * rows — and it was read with an unchecked cast:
+ *
+ *     matchedTerms: (r.rec.matchedTerms ?? []) as string[]
+ *
+ * A string wearing an array type does not fail where you would notice. It is
+ * NOT null-ish, so `?? []` never fires; `.length` returns the character count;
+ * `.slice(0, 8)` returns the first eight CHARACTERS — so the chips that show a
+ * user *why* a job matched would have rendered the first characters of the
+ * serialised JSON. Only a `.map` in a render path throws, and then it is a
+ * TypeError blamed on the component rather than on the row.
+ *
+ * Returns `string[]` always, so every caller stops being a place this can
+ * go wrong differently.
+ */
+export function toStringArray(value: unknown): string[] {
+  const unwrapped = unwrapStoredJson(value);
+  if (!Array.isArray(unwrapped)) return [];
+  return unwrapped.filter((v): v is string => typeof v === "string");
+}
+
 export function parseCVData(data: unknown): CVData {
   const candidate = unwrapStoredJson(data);
   // ...then normalise the APP's shape to the STORED one before validating.
