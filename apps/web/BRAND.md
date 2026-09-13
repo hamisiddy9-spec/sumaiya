@@ -12,11 +12,23 @@
   name carries the feeling; the descriptor carries the facts — it is ALWAYS
   paired with what it does in store subtitles, meta titles, and the first line
   of every screen.
-- **Primary domain:** `templatehub.pro` · **App face:** `sumaiya.app` · **Android
-  id:** `pro.sumaiya.app`.
-- **Legacy domain:** `templatehub.pro` is retained and 301-redirects every path
-  to its `templatehub.pro` equivalent, so SEO equity for "tengeneza CV / CV
-  template / ATS friendly CV" flows to the new domain rather than being lost.
+- **Canonical domain:** `sumaiya.app` · **Android id:** `pro.sumaiya.app`.
+  Every generated URL, canonical tag and sitemap entry points here
+  (`NEXT_PUBLIC_APP_URL`), with `www` 308-ing to the apex.
+- **Sibling domain — `templatehub.pro`.** NOT a redirect, and not optional. It
+  is the **TemplateHub** half of the product: the template catalog, the free
+  document tools and the basic editor, with **no assistant**. The AI surfaces
+  (`/assistant`, `/studio`, `/voice`, `/interview`, `/snap`, `/dashboard`, …)
+  302 to `sumaiya.app`. The routing rules live in `lib/routing.ts` (`isTemplateHubHost`,
+  `ASSISTANT_ONLY_PREFIXES`) — edit them there, and never in `vercel.json`,
+  because middleware resolves bare paths first.
+  ⚠️ **`/api/*` and `/.well-known/assetlinks.json` must keep serving from
+  `templatehub.pro`.** The shipped Android build has `www.templatehub.pro` baked
+  in as both its API base and its App Links host, so a blanket redirect — the
+  move this doc used to prescribe — silently breaks every installed user.
+- **Mail stays on `templatehub.pro`.** `sumaiya.app` has no MX records, so
+  `support@` and `noreply@templatehub.pro` are the live mailboxes. URLs move;
+  mailboxes stay.
 - **The persona IS the product:** Sumaiya is the AI career assistant, the voice,
   and the human hook. Users chat with Sumaiya, Sumaiya drafts the CV, Sumaiya
   nudges applications.
@@ -79,8 +91,11 @@ device class (low-end Android), data budget, language, where they find jobs.
 - Warm Confidence design tokens (ember/pine/espresso/sand family) everywhere.
 - SEO keyword clusters intact: "tengeneza CV", "CV template", "barua ya
   maombi", "ATS friendly CV" — the brand no longer contains "template", so these
-  clusters now live in page copy, headings, and `templatehub.pro` 301s. Keep
-  template surfaces discoverable and keep the legacy domain redirecting.
+  clusters now live in page copy, headings, and the **TemplateHub surfaces on
+  `templatehub.pro`** (catalog, tools, `/pro`). Keep those pages indexable and
+  keep the two hosts' canonicals pointing at the URL that actually serves the
+  content — but do NOT "keep the legacy domain redirecting": there is no legacy
+  domain any more, and a redirect breaks the shipped APK (see §1).
 - Guest-first funnel (no sign-in wall), offline-first, grounded-AI claims.
 - Launch messaging replaces beta messaging; stay truthful (payments go live
   before we claim paid plans are purchasable).

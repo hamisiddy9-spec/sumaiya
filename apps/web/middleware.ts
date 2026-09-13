@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import {
-  isMarketingPath,
-  isAppPath,
-  isFileLikePath,
-  isProtectedPath,
-} from "@/lib/routing";
+import { classifyRoute } from "@/lib/routing";
 
 // ─── CDN CACHING — verified against the live site, Aug 2026 ────────────────
 // Vercel does NOT cache HTML responses that pass through middleware when the
@@ -37,6 +32,22 @@ export async function middleware(request: NextRequest) {
   const langCookie = request.cookies.get("lang")?.value;
   const lang = langCookie === "en" ? "en" : "sw";
 
+  // One decision, computed from the pure function in lib/routing.ts, so the
+  // host split and the i18n rewrite are unit-tested rather than duplicated as
+  // branches here. The host matters: templatehub.pro is the TemplateHub
+  // product — its own landing at the root, and no assistant surfaces.
+  const decision = classifyRoute(pathname, lang, request.headers.get("host"));
+
+  // A surface this host does not serve, on a host that has a sibling which
+  // does. Only the TemplateHub host produces these today (assistant pages),
+  // and a 302 beats a 404: the visitor asked for a thing that exists, just not
+  // here.
+  if (decision.kind === "cross-host") {
+    const target = new URL(decision.to);
+    target.search = request.nextUrl.search;
+    return NextResponse.redirect(target, 302);
+  }
+
   // PUBLIC marketing surface → pure rewrite to the locale path. The URL bar
   // keeps showing the clean path (e.g. /templates/rift) while the app renders
   // /sw/templates/rift or /en/templates/rift — each of which is a statically
@@ -57,9 +68,9 @@ export async function middleware(request: NextRequest) {
   // browsers revalidating so the cookie change is picked up on the next visit.
   // The /sw/ and /en/ locale paths (excluded from the matcher, served as pure
   // static prerenders) get Vercel's long static cache.
-  if (isMarketingPath(pathname)) {
+  if (decision.kind === "marketing-rewrite") {
     const url = request.nextUrl.clone();
-    url.pathname = `/${lang}${pathname}`;
+    url.pathname = decision.to;
     const response = NextResponse.rewrite(url);
     response.headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=600");
     return response;
@@ -77,18 +88,13 @@ export async function middleware(request: NextRequest) {
   // (app) route) → route through the [locale] tree so it 404s cleanly instead
   // of falling through with no root layout (→ 500). isFileLikePath keeps
   // /sw.js, /manifest.json, /robots.txt, /sitemap.xml etc. passing through.
-  if (
-    !pathname.startsWith("/api/") &&
-    !pathname.startsWith("/_next/") &&
-    !isFileLikePath(pathname) &&
-    !isAppPath(pathname)
-  ) {
+  if (decision.kind === "unknown-rewrite") {
     const url = request.nextUrl.clone();
-    url.pathname = `/${lang}${pathname}`;
+    url.pathname = decision.to;
     return NextResponse.rewrite(url);
   }
 
-  if (!isProtectedPath(pathname)) {
+  if (decision.kind !== "protected") {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
