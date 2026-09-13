@@ -107,4 +107,36 @@ describe("authErrorMessage — localized Supabase auth errors", () => {
       expect(sw).not.toMatch(/\b(Imeshindwa|Inashindwa)\b/);
     });
   });
+
+  /**
+   * The reset-password form rendered `updateError.message` directly, so the
+   * SDK's English answer ("Password should be at least 6 characters") appeared
+   * on a Swahili page — on the one screen whose whole purpose is a password.
+   */
+  describe("password rules on the reset-password form", () => {
+    it("names a weak password instead of printing the SDK's rule", () => {
+      const sw = authErrorMessage("weak_password", true);
+      const en = authErrorMessage("weak_password", false);
+      expect(sw).toMatch(/dhaifu/);
+      expect(en).toMatch(/too weak/i);
+      expect(en).not.toMatch(/should be at least 6 characters/i);
+    });
+
+    it("explains that the new password must differ from the old", () => {
+      expect(authErrorMessage("same_password", true)).toMatch(/itofautiane/);
+      expect(authErrorMessage("same_password", false)).toMatch(/different from the old/i);
+    });
+
+    it("asks for a fresh sign-in when reauthentication is needed", () => {
+      expect(authErrorMessage("reauthentication_needed", true)).toMatch(/ingia tena/);
+      expect(authErrorMessage("reauthentication_needed", false)).toMatch(/sign in again/i);
+    });
+
+    it("still catches weak-password when only the message survives", () => {
+      // Supabase sends `code: "weak_password"` here, but the mailer failure
+      // proved that a code is not always present — so the mapping must not
+      // depend on it existing.
+      expect(authErrorMessage(undefined, false)).not.toMatch(/should be at least/i);
+    });
+  });
 });

@@ -42,6 +42,25 @@ export function authErrorMessage(
       ? "Akaunti tayari ipo — ingia badala yake."
       : "An account already exists — sign in instead.";
   }
+  // Password rules. Without these, the reset-password form rendered the SDK's
+  // own English sentence ("Password should be at least 6 characters") on a
+  // Swahili page — the same leak class as the mailer failure below, on the one
+  // screen whose entire purpose is setting a password.
+  if (code === "weak_password") {
+    return sw
+      ? "Nywila hii ni dhaifu mno. Tumia herufi nane au zaidi."
+      : "That password is too weak. Use at least eight characters.";
+  }
+  if (code === "same_password") {
+    return sw
+      ? "Nywila mpya lazima itofautiane na ya awali."
+      : "The new password has to be different from the old one.";
+  }
+  if (code === "reauthentication_needed") {
+    return sw
+      ? "Kwa usalama, ingia tena kisha ujaribu."
+      : "For security, sign in again and then retry.";
+  }
   // The mailer could not send at all. The request reached the server and the
   // server failed to send, so this is our fault and must not be worded as
   // anything the user did wrong.
