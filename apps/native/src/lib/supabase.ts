@@ -8,6 +8,7 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./supabase-env";
 
 // The Google Cloud **Web** OAuth client ID (same one configured in Supabase →
 // Auth → Providers → Google). Public by design — safe to ship in the bundle.
@@ -35,13 +36,7 @@ try {
   console.warn("GoogleSignin.configure failed — Google sign-in disabled:", err);
 }
 
-const supabaseUrl =
-  process.env.EXPO_PUBLIC_SUPABASE_URL ?? "https://ayczgaddnufdxnhizpcr.supabase.co";
-const supabaseAnonKey =
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho";
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,
