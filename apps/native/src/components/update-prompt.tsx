@@ -9,6 +9,7 @@ import { Icon } from "./icon";
 import { apiClient } from "../lib/api-client";
 import { APP_VERSION } from "../lib/app-version";
 import { shouldShowPrompt, type UpdateManifest } from "../lib/update-check";
+import { APK_DOWNLOAD_URL } from "../lib/app-hosts";
 import { shortMessage, track } from "../lib/telemetry";
 import { useLang } from "../lib/i18n";
 
@@ -33,7 +34,7 @@ import { useLang } from "../lib/i18n";
 const SKIPPED_KEY = "sumaiya.update.skipped";
 /** The newest build we have already handed to the installer (see below). */
 const DELIVERED_KEY = "sumaiya.update.delivered";
-const DEFAULT_URL = "https://www.templatehub.pro/downloads/sumaiya.apk";
+const DEFAULT_URL = APK_DOWNLOAD_URL;
 
 interface Info {
   version: string;

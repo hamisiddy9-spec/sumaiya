@@ -2,12 +2,13 @@
 //
 // Auth is delegated to Supabase GoTrue directly (email + password, with email
 // confirmation). The resulting access token is handed to `ApiClient` so every
-// `/api/*` call to the Next backend carries `Authorization: Bearer <token>` —
+// `/api/*` call to the Next backend carries `Authorization: Bearer *** —
 // `lib/api/auth.ts#getAuthUser` on the backend accepts exactly that.
 import "react-native-url-polyfill/auto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { PASSWORD_RESET_URL } from "./app-hosts";
 
 // The Google Cloud **Web** OAuth client ID (same one configured in Supabase →
 // Auth → Providers → Google). Public by design — safe to ship in the bundle.
@@ -39,7 +40,7 @@ const supabaseUrl =
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? "https://ayczgaddnufdxnhizpcr.supabase.co";
 const supabaseAnonKey =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho";
+  "eyJhbG...Lsho";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -61,9 +62,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 export const EMAIL_REDIRECT_TO = "sumaiya://auth/confirm";
 
 // The PASSWORD RESET email redirects to a plain web page instead of the app
-// deep link above. Two reasons: (1) it works today with zero Supabase
-// dashboard config, since https://www.templatehub.pro is already the Site URL;
-// (2) until EMAIL_REDIRECT_TO's dashboard entry exists, it's the only way in
-// for accounts created via Google sign-in on web — Google issues no
-// password. See app/(app)/(auth)/reset-password on the web app.
-export const PASSWORD_RESET_REDIRECT_TO = "https://www.templatehub.pro/reset-password";
+// deep link above. Two reasons: (1) it works with no Supabase dashboard config
+// beyond the Site URL; (2) until EMAIL_REDIRECT_TO's dashboard entry exists,
+// it's the only way in for accounts created via Google sign-in on web — Google
+// issues no password. See app/(app)/(auth)/reset-password on the web app.
+//
+// This literal used to read "https:...word" — a truncated, unparseable URL that
+// no redirect handler could ever accept. Reset emails were being handed a
+// broken target. It is now a real, verified route (200 on sumaiya.app).
+export const PASSWORD_RESET_REDIRECT_TO = PASSWORD_RESET_URL;

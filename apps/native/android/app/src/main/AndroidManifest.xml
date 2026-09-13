@@ -35,18 +35,21 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="sumaiya"/>
       </intent-filter>
-      <!-- Android App Links: https://www.templatehub.pro/** opens the app.
+      <!-- Android App Links: https://sumaiya.app/** opens the app.
            Verified by GET /.well-known/assetlinks.json (package pro.sumaiya.app).
-           Only the canonical host is claimed. The apex 308-redirects to www, and
-           Android refuses to follow a redirect when fetching assetlinks.json, so
-           claiming the apex produced a permanently-failing verification entry
-           (domain state 1024) that could never resolve. Without this filter every
-           https deep link — including a tapped sign-in link — opens the browser. -->
+           Only the APEX is claimed, and the direction of the mistake has now
+           flipped: sumaiya.app serves assetlinks.json directly (200), while
+           www.sumaiya.app 308-redirects to the apex. Android will not follow a
+           redirect when fetching that file, so claiming www would create the
+           same permanently-failing verification entry (domain state 1024) that
+           claiming the apex used to create on the old domain. Without this
+           filter every https deep link — including a tapped sign-in link —
+           opens the browser instead of the app. -->
       <intent-filter android:autoVerify="true">
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="https" android:host="www.templatehub.pro"/>
+        <data android:scheme="https" android:host="sumaiya.app"/>
       </intent-filter>
     </activity>
   </application>

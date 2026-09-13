@@ -9,6 +9,7 @@ import { registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
+import { SUPPORT_EMAIL } from "../../lib/app-hosts";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
@@ -199,7 +200,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               await signOut();
             } catch {
               haptics.error();
-              dialog.alert(t("Couldn't delete", "Imeshindwa kufuta"), t("Contact support@templatehub.pro.", "Wasiliana na support@templatehub.pro."));
+              dialog.alert(
+                t("Couldn't delete", "Imeshindwa kufuta"),
+                t(`Contact ${SUPPORT_EMAIL}.`, `Wasiliana na ${SUPPORT_EMAIL}.`),
+              );
             } finally {
               setBusy(null);
             }
@@ -394,7 +398,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         </View>
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
-          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}support@templatehub.pro
+          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}{SUPPORT_EMAIL}
         </Text>
       </Animated.View>
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="general" />
