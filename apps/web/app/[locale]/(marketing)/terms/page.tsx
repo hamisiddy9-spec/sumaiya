@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { COMPANY, entityLine } from "@/lib/legal";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
@@ -10,7 +11,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     description: sw
       ? "Masharti yanayosimamia matumizi yako ya Sumaiya — matumizi yanayokubalika, haki zako, na wajibu wako."
       : "The terms that govern your use of Sumaiya — acceptable use, your rights, and your responsibilities.",
-    alternates: { canonical: "/terms" },
+    alternates: alternatesFor("/terms", params.locale),
   };
 }
 

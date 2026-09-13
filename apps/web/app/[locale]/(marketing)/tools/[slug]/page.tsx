@@ -6,6 +6,7 @@ import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { PDF_TOOLS, getPdfTool } from "@/lib/pdf-tools";
 import type { Lang } from "@/lib/i18n/translations";
+import { alternatesFor } from "@/lib/seo";
 
 // One indexable, rankable landing page per PDF tool — the interactive tools
 // themselves live on the client `/tools` page (no server metadata), so these
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
     title,
     description,
     keywords: t.keywords,
-    alternates: { canonical: `/tools/${t.slug}` },
+    alternates: alternatesFor(`/tools/${t.slug}`, params.locale),
     openGraph: {
       title: `${name} | Sumaiya`,
       description,

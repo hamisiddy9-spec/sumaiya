@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AiCopilotLanding } from "@/components/marketing/ai-copilot-landing";
+import { alternatesFor } from "@/lib/seo";
 
 // Preview of the "AI Career Copilot" landing redesign. Kept on its own route so
 // it can be compared against the live homepage before being promoted to "/".
@@ -7,7 +8,7 @@ import { AiCopilotLanding } from "@/components/marketing/ai-copilot-landing";
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    alternates: { canonical: "/preview" },
+    alternates: alternatesFor("/preview", params.locale),
     title: sw ? "Msaidizi wa Kazi wa AI" : "AI Career Copilot",
     description: sw
       ? "Mwambie AI unachohitaji. Inaongoza kutoka hapo — CV, ulinganishaji wa kazi, alama ya ATS au mazoezi ya usaili."

@@ -5,11 +5,12 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    alternates: { canonical: "/contact" },
+    alternates: alternatesFor("/contact", params.locale),
     title: sw ? "Wasiliana Nasi" : "Contact",
     description: sw
       ? "Pata msaada kuhusu mpango wako wa Sumaiya, upakuaji, au alama ya ATS. Tunajibu ndani ya saa 24."

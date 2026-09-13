@@ -6,18 +6,19 @@ import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { BLOG_POSTS, getPost } from "@/lib/blog";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
+import { alternatesFor } from "@/lib/seo";
 
 export function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { slug: string; locale: string } }): Promise<Metadata> {
   const post = getPost(params.slug);
   if (!post) return { title: "Blog — Sumaiya" };
   return {
     title: `${post.title} — Sumaiya`,
     description: post.excerpt,
-    alternates: { canonical: `/blog/${post.slug}` },
+    alternates: alternatesFor(`/blog/${post.slug}`, params.locale),
     openGraph: {
       type: "article",
       title: `${post.title} | Sumaiya`,

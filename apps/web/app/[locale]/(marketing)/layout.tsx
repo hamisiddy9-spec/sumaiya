@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LangProvider } from "@/lib/i18n/context";
 import type { Lang } from "@/lib/i18n/translations";
 import { MarketingAuthProvider } from "@/components/ui/marketing-auth-context";
+import { alternatesFor } from "@/lib/seo";
 
 // Language-aware — this layout wraps the homepage and all marketing pages, so its
 // title/description is what Google indexes for them. Swahili by default (the
@@ -31,6 +32,13 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     title,
     description,
     keywords,
+    // The homepage cannot declare this itself — it is a "use client" component,
+    // so it cannot export metadata, and it was the one marketing page shipping
+    // with no canonical at all. Setting it on this layout covers the homepage,
+    // while every other marketing page overrides it with its own path.
+    // Only this layout and not the root: the root also wraps /dashboard and
+    // /editor, and canonicalising those to "/" would be a lie.
+    alternates: alternatesFor("/", params.locale),
     openGraph: {
       siteName: "Sumaiya",
       type: "website",
