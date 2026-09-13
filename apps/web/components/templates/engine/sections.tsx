@@ -267,10 +267,10 @@ export function ExperienceSection({
             {/* Date column */}
             <div style={{ width: 60, flexShrink: 0, paddingTop: 2, textAlign: "right", paddingRight: 10 }}>
               <span style={{ fontSize: tokens.font.meta - 0.5, color: tokens.color.accent, fontFamily: tokens.fontFamily, lineHeight: 1.3, display: "block" }}>
-                {exp.current ? "Present" : (exp.endDate ? exp.endDate.slice(0, 7) : "")}
+                {exp.current ? "Present" : fmtDate(exp.endDate)}
               </span>
               <span style={{ fontSize: tokens.font.meta - 1, color: tokens.color.muted, fontFamily: tokens.fontFamily }}>
-                {exp.startDate ? exp.startDate.slice(0, 7) : ""}
+                {fmtDate(exp.startDate)}
               </span>
             </div>
             {/* Timeline track */}

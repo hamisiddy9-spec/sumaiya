@@ -15,8 +15,11 @@ import { AutoFitPage } from "./fit";
 const PAGE_W = 794;
 const PAGE_H = 1123;
 
-// Default section order when data doesn't specify one
-const DEFAULT_ORDER = ["summary", "experience", "education", "skills", "languages", "certifications", "referees", "hobbies"];
+// Default section order when data doesn't specify one.
+// Must match DEFAULT_SECTION_ORDER in apps/web/types/index.ts — it omitted
+// "projects", so any CV that had projects but no custom section order had them
+// silently dropped from every engine template.
+const DEFAULT_ORDER = ["summary", "experience", "projects", "education", "skills", "languages", "certifications", "referees", "hobbies"];
 
 function getOrder(data: CVData, fallback?: string[]): string[] {
   return data.sectionOrder?.length ? data.sectionOrder : (fallback ?? DEFAULT_ORDER);

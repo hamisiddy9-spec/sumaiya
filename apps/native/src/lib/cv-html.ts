@@ -1,4 +1,7 @@
 import type { CV, CVData } from "@sumaiya/types";
+import { TEMPLATE_REGISTRY } from "./templates/registry";
+import { hasRenderer, renderTemplateHtml } from "./cv-engine/render";
+import type { NativeTemplate } from "./templates/types";
 
 /**
  * One HTML renderer for a CV — used by the PDF export and the in-app preview
@@ -9,7 +12,14 @@ import type { CV, CVData } from "@sumaiya/types";
  * more are premium (rendered the same, gated only in the picker UI).
  */
 
-export type CvTemplateId = "classic" | "modern" | "minimal" | "sidebar" | "executive" | "compact";
+/**
+ * A template id. The original six are hand-written inside this file; every
+ * other id is mirrored from the web registry and drawn by the shared engine
+ * (apps/native/src/lib/cv-engine). Left as `string` on purpose: the registry is
+ * generated from the web, and a closed union here would silently reject a
+ * template the moment the web adds one.
+ */
+export type CvTemplateId = string;
 
 export interface CvTemplateMeta {
   id: CvTemplateId;
@@ -27,10 +37,37 @@ export const CV_TEMPLATES: CvTemplateMeta[] = [
   { id: "compact", name: { en: "Compact", sw: "Fupi" }, blurb: { en: "Fits a long history on one page.", sw: "Inaingiza historia ndefu ukurasa mmoja." }, tier: "premium" },
 ];
 
+/**
+ * The engine-backed templates, mirrored from the web registry. Sorted by id so
+ * the picker's ordering does not depend on object key insertion order.
+ */
+export const ENGINE_TEMPLATES: CvTemplateMeta[] = Object.values(TEMPLATE_REGISTRY)
+  .filter((tpl: NativeTemplate) => hasRenderer(tpl))
+  .map((tpl: NativeTemplate) => ({ id: tpl.id, name: tpl.name, blurb: tpl.blurb, tier: tpl.tier }))
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+/**
+ * Everything the app can render: the six hand-written templates plus the
+ * mirrored web registry.
+ *
+ * The picker screens must NOT `.map()` this straight into a ScrollView — it is
+ * 200+ rows. Use TEMPLATE_PAGE_SIZE with a virtualised list, or the screens
+ * will mount every thumbnail at once.
+ */
+export const ALL_TEMPLATES: CvTemplateMeta[] = [...CV_TEMPLATES, ...ENGINE_TEMPLATES];
+
+/** Every id the app can persist and render. */
+export function isKnownTemplate(id: string | undefined | null): boolean {
+  if (!id) return false;
+  return ALL_TEMPLATES.some((tpl) => tpl.id === id);
+}
+
 export interface CvHtmlOptions {
   accent?: string;
   lang?: "en" | "sw";
   template?: CvTemplateId;
+  /** Only the engine-backed templates use this; the legacy six ignore it. */
+  fontFamily?: string;
 }
 
 const LABELS = {
@@ -243,6 +280,18 @@ function templateBody(id: CvTemplateId, parts: Parts): string {
 }
 
 export function cvToHtml(cv: CV, opts: CvHtmlOptions = {}): string {
+  // Engine-backed templates (mirrored from the web registry) render through the
+  // shared engine. The six hand-written ones below keep their original output
+  // byte-for-byte, so nothing a user already exports changes.
+  const engineTemplate = opts.template ? TEMPLATE_REGISTRY[opts.template] : undefined;
+  if (engineTemplate && hasRenderer(engineTemplate)) {
+    return renderTemplateHtml(engineTemplate, cv, {
+      accent: opts.accent,
+      fontFamily: opts.fontFamily,
+      lang: opts.lang,
+    });
+  }
+
   const accent = opts.accent && /^#[0-9a-fA-F]{6}$/.test(opts.accent) ? opts.accent : "#DA4A1C";
   const id: CvTemplateId = CV_TEMPLATES.some((tpl) => tpl.id === opts.template) ? (opts.template as CvTemplateId) : "classic";
   const L = LABELS[opts.lang === "sw" ? "sw" : "en"];
