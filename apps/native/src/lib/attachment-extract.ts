@@ -367,7 +367,17 @@ export function attachmentsContext(atts: Attachment[]): string {
 
     if (a.kind === "link") return `- ${label}`;
     if (a.extractedText) {
-      return `- ${label}. Its contents:\n"""\n${a.extractedText}\n"""`;
+      // A photo goes through OCR, not a text layer — treat its content as
+      // probably-right, not verified. Without this, a misread digit or name
+      // (OCR turning "2019" into "2018", or garbling a company name) got
+      // relayed with the same confidence as text the user actually typed,
+      // which is exactly the kind of unverified claim the rest of the app
+      // works hard not to assert as fact.
+      const caveat =
+        a.kind === "image"
+          ? " (read by OCR from a photo — may contain misread characters; if a name, date or number looks odd, confirm it with the user rather than asserting it)"
+          : "";
+      return `- ${label}. Its contents${caveat}:\n"""\n${a.extractedText}\n"""`;
     }
     if (a.kind === "cv") return `- ${label}`;
     // The reason is stated for the model and it is told to relay THIS, not a

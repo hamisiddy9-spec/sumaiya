@@ -34,6 +34,21 @@ describe("attachmentsContext", () => {
     expect(out.toLowerCase()).not.toContain("connection and try again");
   });
 
+  it("warns the model that a photo's text came from OCR and may be wrong", () => {
+    // A misread digit or name from OCR used to be relayed with the same
+    // confidence as text the user actually typed.
+    const out = attachmentsContext([
+      { id: "3", kind: "image", uri: "file:///x.jpg", name: "cv.jpg", status: "ready", extractedText: "Juma — 2019" } as Attachment,
+    ]);
+    expect(out.toLowerCase()).toContain("ocr");
+    expect(out.toLowerCase()).toContain("confirm");
+  });
+
+  it("does not add the OCR caveat to a document's text-layer extraction", () => {
+    const out = attachmentsContext([doc({ extractedText: "Asha Mwangi — Storekeeper, 5 years" })]);
+    expect(out.toLowerCase()).not.toContain("ocr");
+  });
+
   it("passes a job link straight through without a text block", () => {
     const out = attachmentsContext([
       { id: "2", kind: "link", uri: "https://jobs.example/123", name: "link", status: "ready" } as Attachment,
