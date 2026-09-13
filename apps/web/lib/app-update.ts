@@ -28,6 +28,13 @@ export interface LiveRelease {
   url: string;
   size?: number;
   notes: { en: string; sw: string };
+  /**
+   * Optional floor / line reset for installed builds — see APP_RELEASE. Served
+   * with the manifest so the app can prompt even when the advertised version is
+   * not numerically newer. Omitted = old behaviour.
+   */
+  minimumVersion?: string;
+  lineReset?: boolean;
 }
 
 interface GhAsset {
@@ -147,6 +154,18 @@ export async function publishedRelease(channel = "stable"): Promise<LiveRelease 
  */
 export async function liveRelease(channel = "stable"): Promise<LiveRelease> {
   const published = await publishedRelease(channel).catch(() => null);
-  if (published) return published;
-  return { version: APP_RELEASE.version, url: APP_RELEASE.url, notes: APP_RELEASE.notes };
+  // The floor rides along on BOTH paths. It is policy from code, not release
+  // data, so it must not depend on the `app_release` row having it — otherwise
+  // a database-published release would silently drop the floor and a version
+  // reset would reach nobody.
+  const floor = APP_RELEASE.minimumVersion;
+  const reset = APP_RELEASE.lineReset;
+  if (published) return { ...published, minimumVersion: floor, lineReset: reset };
+  return {
+    version: APP_RELEASE.version,
+    url: APP_RELEASE.url,
+    notes: APP_RELEASE.notes,
+    minimumVersion: floor,
+    lineReset: reset,
+  };
 }
