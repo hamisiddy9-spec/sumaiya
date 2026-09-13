@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { count } from "drizzle-orm";
 import { db, profile } from "@/lib/db";
+import { EARLY_ACCESS_SEATS } from "@/lib/early-access";
 
 /**
  * GET /api/stats/early-access — how many early places are gone.
@@ -19,8 +20,6 @@ import { db, profile } from "@/lib/db";
  * every marketing page view.
  */
 export const revalidate = 300;
-
-export const EARLY_ACCESS_SEATS = 50;
 
 export async function GET() {
   try {
