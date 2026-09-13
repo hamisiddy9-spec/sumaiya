@@ -55,7 +55,7 @@ export function MarketingNav() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left: Logo — the rebrand mark, wordmark inverted to cream for the dark nav */}
-        <Logo size="sm" className="shrink-0 [&_span]:!text-cream" />
+        <Logo size="sm" animated className="shrink-0 [&_span]:!text-cream" />
 
         {/* Center: Nav links (desktop) */}
         <nav className="hidden lg:flex items-center gap-6 xl:gap-8">

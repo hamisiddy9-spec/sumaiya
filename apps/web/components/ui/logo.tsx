@@ -5,6 +5,13 @@ interface LogoProps {
   className?: string;
   showWordmark?: boolean;
   size?: "sm" | "md" | "lg" | "xl";
+  /** Subtle idle rotation + scale pulse (same keyframes as SumaiyaMark's
+   *  "idle" state — see globals.css). Off by default: this is the lockup
+   *  used in footer/dashboard/email too, and a slow live motion is a
+   *  deliberate choice for the public marketing nav, not a default every
+   *  static placement should get for free. Respects prefers-reduced-motion
+   *  automatically. */
+  animated?: boolean;
 }
 
 // One blade, tip at top, floating clear of the centre — rotated 3× on 120°.
@@ -16,7 +23,7 @@ const BLADE =
 /** The Sumaiya mark: three swept blades around an open core — reads as a spark,
  *  a compass rose, and a person with arms open. Source of truth for the favicon
  *  is public/icon.svg — keep them in sync. */
-function Mark({ px }: { px: number }) {
+function Mark({ px, animated }: { px: number; animated: boolean }) {
   return (
     <svg
       width={px}
@@ -24,26 +31,26 @@ function Mark({ px }: { px: number }) {
       viewBox="0 0 24 24"
       role="img"
       aria-label="Sumaiya"
-      className="shrink-0"
+      className={cn("shrink-0", animated && "sumaiya-mark--idle")}
     >
-      <g fill="#DA4A1C">
+      <g fill="#DA4A1C" className={animated ? "sumaiya-mark__blades" : undefined}>
         <path d={BLADE} transform="rotate(0 12 12)" />
         <path d={BLADE} transform="rotate(120 12 12)" opacity={0.9} />
         <path d={BLADE} transform="rotate(240 12 12)" opacity={0.8} />
       </g>
-      <circle cx="12" cy="12" r="2.1" fill="#FAF5EE" />
+      <circle cx="12" cy="12" r="2.1" fill="#FAF5EE" className={animated ? "sumaiya-mark__core" : undefined} />
     </svg>
   );
 }
 
-export function Logo({ className, showWordmark = true, size = "md" }: LogoProps) {
+export function Logo({ className, showWordmark = true, size = "md", animated = false }: LogoProps) {
   const box = { sm: 22, md: 30, lg: 40, xl: 48 }[size];
   const textSize = { sm: "text-sm", md: "text-[17px]", lg: "text-2xl", xl: "text-[28px]" }[size];
   const gap = { sm: "gap-2", md: "gap-2.5", lg: "gap-3", xl: "gap-3" }[size];
 
   return (
     <Link href="/" className={cn("inline-flex items-center", gap, className)}>
-      <Mark px={box} />
+      <Mark px={box} animated={animated} />
       {showWordmark && (
         <span
           // color via `currentColor` so a dark-panel parent can override it
