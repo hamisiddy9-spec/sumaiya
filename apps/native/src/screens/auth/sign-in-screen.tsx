@@ -240,6 +240,11 @@ export function SignInScreen(_props: Props) {
           <Animated.View entering={FadeIn.duration(240)} style={{ gap: 14 }}>
             <GoogleButton
               label={t("Continue with Google", "Endelea na Google")}
+              // `loading` from the auth context is true for exactly the Google
+              // round-trip (play-services check, account picker, token exchange)
+              // and false the rest of the time on this step. `disabled` stays
+              // tied to the email-code send so the two paths cannot both fire.
+              loading={loading}
               disabled={sending}
               onPress={async () => {
                 clearError();

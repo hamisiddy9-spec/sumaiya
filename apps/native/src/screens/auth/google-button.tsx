@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { haptics } from "../../components/ui/haptics";
@@ -20,24 +20,34 @@ export function GoogleButton({
   label,
   onPress,
   disabled,
+  loading = false,
 }: {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }) {
   const c = useThemeColors();
   const scale = useSharedValue(1);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
+  // `loading` is part of the disabled state, exactly as Button does it — so a
+  // tap that is already in flight cannot be sent a second time.
+  const isDisabled = Boolean(disabled) || loading;
+
   return (
     <Animated.View style={style}>
       <Pressable
         accessibilityRole="button"
-        disabled={disabled}
-        onPressIn={() => (scale.value = withTiming(0.97, { duration: 90 }))}
+        accessibilityState={{ disabled: isDisabled, busy: loading }}
+        disabled={isDisabled}
+        onPressIn={() => {
+          if (isDisabled) return;
+          scale.value = withTiming(0.97, { duration: 90 });
+        }}
         onPressOut={() => (scale.value = withTiming(1, { duration: 140 }))}
         onPress={() => {
-          if (disabled) return;
+          if (isDisabled) return;
           haptics.light();
           onPress();
         }}
@@ -51,10 +61,17 @@ export function GoogleButton({
           borderWidth: 1.5,
           borderColor: c.borderStrong,
           backgroundColor: c.bgElevated,
-          opacity: disabled ? 0.5 : 1,
+          opacity: isDisabled ? 0.5 : 1,
         }}
       >
-        <GoogleG />
+        {/*
+         * The mark is swapped for a spinner while the account picker is being
+         * opened and the token is being exchanged. It used to keep rendering the
+         * static Google logo, so the only feedback was a slight dimming — on a
+         * slow connection the button looked frozen and people tapped it again.
+         * The label stays put so the row does not reflow mid-press.
+         */}
+        {loading ? <ActivityIndicator color={c.text} size="small" /> : <GoogleG />}
         <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{label}</Text>
       </Pressable>
     </Animated.View>
