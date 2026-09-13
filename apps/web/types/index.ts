@@ -1,36 +1,45 @@
 import { z } from "zod";
 
 // ─── Zod Schemas for Runtime Validation ──────────────────────────────────────
+//
+// The `.default(...)` / `.catch(...)` calls below are load-bearing, not
+// decoration. Documents in the database are written by several clients over
+// time, and they do not all contain every key — the mobile app omits whatever
+// it has no data for, and older web versions predate fields like `referees`.
+// zod rejects the WHOLE object when one key is missing, and parseCVData then
+// falls back to an empty CV — so a missing referees list cost the user their
+// entire CV, silently. Measured 2026-09-13: 13 of 19 stored CVs rendered blank
+// for exactly this reason. A missing field must never blank a document.
 
 export const personalInfoSchema = z.object({
-  fullName: z.string(),
-  jobTitle: z.string(),
-  email: z.string(),
-  phone: z.string(),
-  location: z.string(),
+  fullName: z.string().default(""),
+  jobTitle: z.string().default(""),
+  email: z.string().default(""),
+  phone: z.string().default(""),
+  location: z.string().default(""),
   linkedin: z.string().optional(),
   website: z.string().optional(),
   photo: z.string().optional(),
 });
 
 export const experienceEntrySchema = z.object({
-  id: z.string(),
-  company: z.string(),
-  position: z.string(),
+  id: z.string().default(""),
+  company: z.string().default(""),
+  position: z.string().default(""),
   location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string(),
-  current: z.boolean(),
-  description: z.string(),
+  startDate: z.string().default(""),
+  endDate: z.string().default(""),
+  current: z.boolean().default(false),
+  description: z.string().default(""),
 });
 
 export const educationEntrySchema = z.object({
-  id: z.string(),
-  institution: z.string(),
-  degree: z.string(),
-  field: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
+  id: z.string().default(""),
+  institution: z.string().default(""),
+  degree: z.string().default(""),
+  field: z.string().default(""),
+  startDate: z.string().default(""),
+  endDate: z.string().default(""),
   grade: z.string().optional(),
   description: z.string().optional(),
 });
@@ -74,17 +83,19 @@ export const refereeEntrySchema = z.object({
 });
 
 export const cvDataSchema = z.object({
-  personal: personalInfoSchema,
-  summary: z.string(),
-  experience: z.array(experienceEntrySchema),
-  education: z.array(educationEntrySchema),
-  skills: z.array(skillEntrySchema),
+  // `.catch` rather than `.default` so a *malformed* personal block survives too,
+  // not just a missing one. Losing a name is survivable; losing the CV is not.
+  personal: personalInfoSchema.catch({ fullName: "", jobTitle: "", email: "", phone: "", location: "" }),
+  summary: z.string().default(""),
+  experience: z.array(experienceEntrySchema).default([]),
+  education: z.array(educationEntrySchema).default([]),
+  skills: z.array(skillEntrySchema).default([]),
   // Optional-with-default so CVs saved before projects existed still parse.
   projects: z.array(projectEntrySchema).default([]),
-  languages: z.array(languageEntrySchema),
-  certifications: z.array(certificationEntrySchema),
-  referees: z.array(refereeEntrySchema),
-  hobbies: z.string(),
+  languages: z.array(languageEntrySchema).default([]),
+  certifications: z.array(certificationEntrySchema).default([]),
+  referees: z.array(refereeEntrySchema).default([]),
+  hobbies: z.string().default(""),
   hiddenSections: z.array(z.string()).optional(),
   sectionOrder: z.array(z.string()).optional(),
   density: z.enum(["compact", "normal", "airy"]).optional(),
@@ -92,7 +103,22 @@ export const cvDataSchema = z.object({
 });
 
 export function parseCVData(data: unknown): CVData {
-  const result = cvDataSchema.safeParse(data);
+  // Rows written before 2026-09-13 hold the CV as a **JSON string inside** the
+  // jsonb column (jsonb_typeof = 'string'), not as a jsonb object. A plain
+  // object parse therefore failed and this function silently returned an empty
+  // CV — every one of the 19 stored CVs rendered blank, with the data sitting
+  // right there in the column. Accept both shapes; unwrap up to two levels so a
+  // doubly-encoded row still resolves. Nothing is discarded on a genuine
+  // failure, it still falls back to an empty CV.
+  let candidate: unknown = data;
+  for (let i = 0; i < 2 && typeof candidate === "string"; i++) {
+    try {
+      candidate = JSON.parse(candidate);
+    } catch {
+      break;
+    }
+  }
+  const result = cvDataSchema.safeParse(candidate);
   if (result.success) return result.data;
   return createEmptyCVData();
 }
