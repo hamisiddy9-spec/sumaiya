@@ -442,11 +442,12 @@ export class ApiClient {
 
   async sendChatMessage(
     messages: { role: "user" | "assistant"; content: string }[],
-    conversationId?: string
+    conversationId?: string,
+    lang?: "en" | "sw"
   ): Promise<{ message: string; conversationId: string | null }> {
     return this.request("/api/mobile/chat", {
       method: "POST",
-      body: JSON.stringify({ messages, conversationId }),
+      body: JSON.stringify({ messages, conversationId, lang }),
     });
   }
 

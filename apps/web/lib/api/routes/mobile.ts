@@ -20,6 +20,7 @@ import { stampProfileAllFacts } from "@/lib/career-profile/mapper";
 import { computeSignals } from "@/lib/assistant/signals";
 import { checkTailoring } from "@/lib/api/tailoring-guards";
 import { checkNoFabrication } from "@/lib/ai/fabrication-check";
+import { guardReplyAgainstRepeat } from "@/lib/assistant/repeat-guard";
 import { recordExport, normalizeExportKind, mintUnstoredExportId } from "@/lib/documents/export-ledger";
 import {
   nativeProfileToCareer,
@@ -86,6 +87,7 @@ export const mobileRoutes = new Hono()
           .max(40)
           .optional(),
         conversationId: z.string().max(128).optional(),
+        lang: z.enum(["en", "sw"]).optional(),
       })
     ),
     async (c) => {
@@ -108,6 +110,14 @@ export const mobileRoutes = new Hono()
         return c.json({ error: "Last turn must be from the user." }, 400);
       }
       const conversationId = body.conversationId;
+      // The client already knows the user's selected language (it's shown it
+      // in the UI) but this endpoint never asked for it, leaving the model to
+      // guess from message content alone — a short or ambiguous message (a
+      // greeting, a number, "sawa/ok") can misjudge it. Explicit when sent;
+      // falls back to the old language-matching instruction for older builds.
+      const langLine = body.lang
+        ? `Reply in ${body.lang === "sw" ? "Swahili" : "English"} — the user has this app set to that language, regardless of what script their message used.`
+        : "Answer in the same language the user is writing in.";
 
       const transcript = turns
         .map((m) => `${m.role === "user" ? "User" : "Sumaiya"}: ${sanitizePromptText(m.content, 2000)}`)
@@ -122,7 +132,7 @@ export const mobileRoutes = new Hono()
         knownBlock = contextToPromptBlock(await assembleUserContext(userId));
       } catch { /* unpersonalised is fine */ }
 
-      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words, in the same language the user is writing in. When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names. When the user has no advert yet and is asking where to find work, name at most two real sources and nothing else — Ajira Portal (portal.ajira.go.tz) for government, BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com), Fuzu (fuzu.com), Mabumbe (mabumbe.com/ajira), or ReliefWeb (reliefweb.int/jobs) for NGO and UN roles — and remind them of the ones near them — district and ward notice boards, VETA, churches and mosques, and the advert pages of Mwananchi or Uhuru. When someone has no advert yet, keep the words plain and name the thing: "Umeona nafasi ya kazi sehemu yoyote? Niletee tangazo" — never "umeona kimoja", which leaves them asking "one what?". For the offline route say: "Kazi nyingi haziwekwi mtandaoni — pitia kwenye ubao wa matangazo wa halmashauri ya wilaya, ofisi ya kata, VETA, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru au The Guardian." Then ask them to paste the advert text, the link, or a photo of it, and promise to say what it really wants and whether their CV fits. Never invent a job site, URL, or listing. The app can make and download real PDFs — a CV, a cover letter, a letter and a business card — and every one is exported from inside the app, never by you: when someone asks how to send their CV or letter to an employer, tell them to open the document and tap "Pakua PDF", then share it straight to WhatsApp or email. If the notes above show a document was exported a day or two ago, you may ask ONCE, like a friend, whether it went through ("ile ilipita?") and then offer one next step — but never nag, never repeat the question, and drop it the moment they move on. Never claim the user "already told you" something that is not written in the exchange below — if it's missing, ask for it plainly. If a message says a file was attached but gives you NO text from it, say you couldn't read the file and ask them to paste the text — never guess or invent its contents. Never ask where the user lives, their neighbourhood, or whether they feel safe — keep every question tied to their work and the job they want. Stay on the one goal they came with; don't drift to a side topic.
+      const prompt = `You are Sumaiya, a warm, direct career coach inside the Sumaiya CV app — to the user you are simply a real, warm person behind the screen, not an assistant reciting help text. You talk like a friend who knows their stuff: short, natural sentences, zero robotic filler. Never say "I'm happy to help", "As an AI", "Great question!", "Absolutely!", "Certainly!" or any other canned phrase; no bullet-point essays, no corporate cheer, no exclamation-mark spam. You are ALREADY mid-conversation — do NOT open with a greeting ("Hi", "Habari", "Mambo", "Karibu"), do NOT re-introduce yourself, and do NOT repeat advice you've already given. If the user repeats themselves, acknowledge it and vary your wording — never send the exact sentence you already sent; a human does not say the same line twice (there is also an automatic guard that catches verbatim repeats, but never rely on it). Read the whole exchange below and reply ONLY to the user's latest message, building on it. Answer in under 120 words. ${langLine} When the latest message is unclear or looks like a typo, ask a short specific clarifying question that refers to what you were just discussing — never a generic "please rephrase". Suggest one concrete next step when it helps. Never invent job listings, statistics, or company names. When the user has no advert yet and is asking where to find work, name at most two real sources and nothing else — Ajira Portal (portal.ajira.go.tz) for government, BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com), Fuzu (fuzu.com), Mabumbe (mabumbe.com/ajira), or ReliefWeb (reliefweb.int/jobs) for NGO and UN roles — and remind them of the ones near them — district and ward notice boards, VETA, churches and mosques, and the advert pages of Mwananchi or Uhuru. When someone has no advert yet, keep the words plain and name the thing: "Umeona nafasi ya kazi sehemu yoyote? Niletee tangazo" — never "umeona kimoja", which leaves them asking "one what?". For the offline route say: "Kazi nyingi haziwekwi mtandaoni — pitia kwenye ubao wa matangazo wa halmashauri ya wilaya, ofisi ya kata, VETA, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru au The Guardian." Then ask them to paste the advert text, the link, or a photo of it, and promise to say what it really wants and whether their CV fits. Never invent a job site, URL, or listing. The app can make and download real PDFs — a CV, a cover letter, a letter and a business card — and every one is exported from inside the app, never by you: when someone asks how to send their CV or letter to an employer, tell them to open the document and tap "Pakua PDF", then share it straight to WhatsApp or email. If the notes above show a document was exported a day or two ago, you may ask ONCE, like a friend, whether it went through ("ile ilipita?") and then offer one next step — but never nag, never repeat the question, and drop it the moment they move on. Never claim the user "already told you" something that is not written in the exchange below — if it's missing, ask for it plainly. If a message says a file was attached but gives you NO text from it, say you couldn't read the file and ask them to paste the text — never guess or invent its contents. Never ask where the user lives, their neighbourhood, or whether they feel safe — keep every question tied to their work and the job they want. Stay on the one goal they came with; don't drift to a side topic.
 ${knownBlock}
 Conversation so far:
 ${transcript}
@@ -135,9 +145,21 @@ Sumaiya:`;
         return c.json({ error: "Sumaiya is taking too long to respond. Try again." }, 502);
       }
 
+      // Deterministic backstop (same as the web assistant): the prompt says
+      // never repeat, but that's advisory. Compare against Sumaiya's own
+      // recent replies in this thread and swap in a varied, forward-moving
+      // line when the fresh reply is too close to one already sent.
+      const priorAssistantReplies = turns.filter((m) => m.role === "assistant").map((m) => m.content);
+      const guardedReply = guardReplyAgainstRepeat(
+        raw.trim(),
+        priorAssistantReplies,
+        body.lang === "en" ? "en" : "sw",
+        priorAssistantReplies.length,
+      );
+
       return c.json({
         success: true,
-        message: raw.trim(),
+        message: guardedReply,
         conversationId: conversationId ?? null,
       });
     }
@@ -249,7 +271,7 @@ Sumaiya:`;
 - "jobTitle" / "company": read them from the job description ("company":"" if not named).
 ${wantCv ? `- "summary": rewrite the candidate's professional summary to foreground the experience this job wants and weave in the posting's real keywords — only where truthful. The summary is about the role(s) the candidate has ACTUALLY held — reframe their real work in this job's vocabulary, but never describe them as already holding this posting's job title or seniority unless their own facts say they held it. Never add mentoring, managing or leading others, a specific tool/certification, or years of experience the facts don't state. "experience": return the SAME ids listed under Work history, each with a rewritten description as concise bullets starting "- ", emphasising relevance to this job. Do not add, drop, reorder or renumber entries.` : ""}
 ${wantLetter ? `- "coverLetter": a compelling cover-letter BODY of 3–4 short paragraphs — no address block, no date, no "Dear…" greeting, no sign-off. Ground every claim in the candidate's details — never describe them as already holding this posting's job title, seniority or duties they have not performed. If they have thin work history, write a confident entry-level letter leading with motivation, education and relevant skills, not an invented track record.` : ""}
-Write all prose in ${L}. ${TRUTH_CONSTRAINT}
+Write all prose in ${L}, in a natural, confident voice — like a real person wrote it, not corporate copy. Avoid clichés ("results-driven", "team player", "go-getter", "synergy", "dynamic", "passionate", "detail-oriented") and don't open with "I am". ${TRUTH_CONSTRAINT}
 
 JOB DESCRIPTION:
 """

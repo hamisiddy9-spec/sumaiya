@@ -134,7 +134,7 @@ export function useSumaiyaChat() {
             })),
           { role: "user" as const, content: outgoing },
         ];
-        const { message: replyText } = await apiClient.sendChatMessage(history);
+        const { message: replyText } = await apiClient.sendChatMessage(history, undefined, lang);
 
         const sumaiyaResponse: SumaiyaResponse = {
           id: generateMessageId(),
