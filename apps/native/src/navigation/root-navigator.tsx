@@ -16,7 +16,7 @@
  *
  * Deep Linking:
  * - Custom scheme: sumaiya://
- * - Universal links: https://sumaiya.pro
+ * - Universal links: https://www.templatehub.pro
  * - Signin link: sumaiya://signin?token=JWT_HERE
  */
 
@@ -49,14 +49,14 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 // Deep linking configuration
 // Supports:
 // - expo-managed deeplink (sumaiya://)
-// - Custom domain deeplinks (https://sumaiya.pro)
+// - Custom domain deeplinks (https://www.templatehub.pro)
 // - Screen routing (auth/signin, etc)
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [
     prefix,
     "sumaiya://",
-    "https://sumaiya.pro",
-    "https://www.sumaiya.pro",
+    "https://templatehub.pro",
+    "https://www.templatehub.pro",
     "https://sumaiyaai.vercel.app",
   ],
   config: {

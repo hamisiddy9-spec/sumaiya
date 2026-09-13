@@ -62,8 +62,8 @@ export const EMAIL_REDIRECT_TO = "sumaiya://auth/confirm";
 
 // The PASSWORD RESET email redirects to a plain web page instead of the app
 // deep link above. Two reasons: (1) it works today with zero Supabase
-// dashboard config, since https://sumaiya.pro is already the Site URL;
+// dashboard config, since https://www.templatehub.pro is already the Site URL;
 // (2) until EMAIL_REDIRECT_TO's dashboard entry exists, it's the only way in
 // for accounts created via Google sign-in on web — Google issues no
 // password. See app/(app)/(auth)/reset-password on the web app.
-export const PASSWORD_RESET_REDIRECT_TO = "https://sumaiya.pro/reset-password";
+export const PASSWORD_RESET_REDIRECT_TO = "https://www.templatehub.pro/reset-password";

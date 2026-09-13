@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   // Absolute og image — this page's openGraph REPLACES the marketing layout's
   // (Next shallow-merges at the openGraph key), so the image must be declared
   // here or the template gallery ships without a social preview.
-  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.pro"}/og-image.png`;
+  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro"}/og-image.png`;
   return {
     alternates: { canonical: "/templates" },
     title: tr.title,

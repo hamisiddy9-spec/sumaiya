@@ -16,7 +16,7 @@ export const COMPANY = {
   registrationStatus: "registration in progress",
   /** Optional — leave "" to hide the registered office line until it exists. */
   registeredOffice: "",
-  supportEmail: "support@sumaiya.pro",
+  supportEmail: "support@templatehub.pro",
   /** Courts named for dispute resolution. */
   jurisdictionCourts: "the courts of Dar es Salaam, Tanzania",
   effectiveDate: "August 2026",

@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
-const FROM = process.env.EMAIL_FROM ?? "Sumaiya <noreply@sumaiya.pro>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.pro";
+const FROM = process.env.EMAIL_FROM ?? "Sumaiya <noreply@templatehub.pro>";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro";
 
 /** Escape user-supplied text before embedding it in an HTML email. */
 function esc(s: string): string {
@@ -183,7 +183,7 @@ export async function sendContactEmail({
     : `<p style="margin:20px 0 0;font-size:13px;color:#b45309;">⚠️ AI reply was not sent (no AI provider or it failed) — a static acknowledgement went out instead. Please reply personally.</p>`;
 
   await sendEmail(
-    "support@sumaiya.pro",
+    "support@templatehub.pro",
     `New contact message from ${name}`,
     baseLayout(`
       <h2 style="margin:0 0 16px;font-size:20px;font-weight:700;color:#111827;">New Contact Message</h2>
@@ -260,7 +260,7 @@ export async function sendContactAutoReply({
  * unbranded, high-signal. Sent to ALERT_EMAIL (falls back to support@).
  */
 export async function sendOpsAlert(subject: string, lines: string[]): Promise<void> {
-  const to = process.env.ALERT_EMAIL || "support@sumaiya.pro";
+  const to = process.env.ALERT_EMAIL || "support@templatehub.pro";
   const body = lines.map((l) => `<p style="margin:0 0 8px;font-size:14px;color:#111827;font-family:monospace;">${esc(l)}</p>`).join("");
   await sendEmail(
     to,

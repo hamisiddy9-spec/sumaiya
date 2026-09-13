@@ -86,7 +86,7 @@ export async function sendToUser(userId: string, msg: PushMessage): Promise<numb
     return 0;
   }
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || "mailto:support@sumaiya.pro",
+    process.env.VAPID_SUBJECT || "mailto:support@templatehub.pro",
     process.env.VAPID_PUBLIC_KEY as string,
     process.env.VAPID_PRIVATE_KEY as string,
   );

@@ -16,7 +16,7 @@ export const apiClient = new ApiClient({
   // feed 401s the same as an authenticated call). A browser only "works"
   // because whoever is testing happens to already be signed into Vercel.
   // templatehub.pro is the real custom domain already attached to this
-  // project and bypasses the SSO check. Swap to https://sumaiya.pro once
+  // project and bypasses the SSO check. Swap to https://www.templatehub.pro once
   // that domain is bought and attached (see docs/HANDOVER.md).
   baseUrl: process.env.EXPO_PUBLIC_API_URL || "https://www.templatehub.pro",
   timeout: 30000,

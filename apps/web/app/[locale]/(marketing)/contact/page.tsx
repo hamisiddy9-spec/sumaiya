@@ -22,8 +22,8 @@ const contactDetails = (sw: boolean) => [
     icon: Mail,
     label: sw ? "Barua pepe" : "Email",
     content: (
-      <a href="mailto:support@sumaiya.pro" className="text-espresso font-semibold hover:text-ember transition">
-        support@sumaiya.pro
+      <a href="mailto:support@templatehub.pro" className="text-espresso font-semibold hover:text-ember transition">
+        support@templatehub.pro
       </a>
     ),
   },

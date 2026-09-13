@@ -60,7 +60,7 @@ const nextConfig = {
       // Backward-compatible APK link. The source repo is private, so release
       // assets there 404 for logged-out visitors; public builds live on the
       // PUBLIC releases repo (hamisiddy9-spec/sumaiya-releases). Older
-      // CTAs may still point at sumaiya.pro/downloads/sumaiya.apk —
+      // CTAs may still point at templatehub.pro/downloads/sumaiya.apk —
       // redirect them to the public asset. (No static file exists at that
       // path anymore; the binary was removed from the repo.)
       {

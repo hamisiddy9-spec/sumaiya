@@ -8,7 +8,7 @@ name: Health check (cron)
 #
 # Needs repo secrets:
 #   CRON_SECRET   — must match the web app's CRON_SECRET env
-#   PROD_URL      — e.g. https://sumaiya.pro (defaults to the vercel URL)
+#   PROD_URL      — e.g. https://www.templatehub.pro (defaults to the vercel URL)
 
 on:
   schedule:
