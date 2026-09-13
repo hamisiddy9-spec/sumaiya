@@ -20,11 +20,13 @@ import { nanoid } from "nanoid";
 import {
   createEmptyCareerProfile,
   createEmptyCVData,
+  unwrapStoredJson,
   type CareerProfile,
   type CVData,
   type FactMeta,
   type FactStatus,
 } from "@/types";
+import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 
 // ─── Completeness ────────────────────────────────────────────────────────────
 
@@ -92,8 +94,19 @@ function newer(a: Date | string | null | undefined, b: Date | string | null | un
 
 /** Forgiving CVData parse: any missing section becomes empty. */
 export function parseCvLoose(data: unknown): CVData {
-  if (!data || typeof data !== "object") return createEmptyCVData();
-  const d = data as Record<string, unknown>;
+  // Unwrap BEFORE the object check. `typeof data !== "object"` rejected every
+  // string-encoded row, and that is 19 of 19 stored CVs — so this reader, which
+  // seeds the career profile, snap-to-apply and the assistant's grounding, was
+  // handing an empty CV to all of them. It was the second reader of the same
+  // column; `parseCVData` was fixed first, which is exactly how a
+  // one-column bug survives in half the codebase.
+  //
+  // `toStoredCvData` then maps the app's own shape (`personalInfo`/`headline`)
+  // onto the stored one, so this reader agrees with `parseCVData` instead of
+  // being a looser, differently-wrong cousin.
+  const normalized = toStoredCvData<Record<string, unknown>>(unwrapStoredJson(data));
+  if (!normalized || typeof normalized !== "object") return createEmptyCVData();
+  const d = normalized as Record<string, unknown>;
   const empty = createEmptyCVData();
   const personal = (d.personal ?? {}) as Record<string, unknown>;
   return {
