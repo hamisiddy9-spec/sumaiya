@@ -247,31 +247,45 @@ export function DialogHost() {
                   key={`${shown.id}-${i}`}
                   accessibilityRole="button"
                   onPress={() => close(b)}
-                  style={({ pressed }) => ({
+                  style={{
                     // Explicit geometry rather than flex:1 — a lone button has to
                     // span the card on its own, and RNW/RN disagree about what
                     // flex does to a single row child.
                     width: stacked || buttons.length === 1 ? "100%" : undefined,
                     flexGrow: stacked || buttons.length === 1 ? 0 : 1,
                     flexBasis: stacked || buttons.length === 1 ? undefined : 0,
-                    paddingVertical: 13,
-                    paddingHorizontal: 16,
-                    borderRadius: 14,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: bg,
-                    borderWidth: filled ? 0 : 1,
-                    // c.border (not c.borderStrong) reads as almost invisible
-                    // in dark mode — an unfilled button (e.g. "Cancel" beside
-                    // a filled "Sign out") needs the stronger outline the rest
-                    // of the design system already uses for secondary buttons.
-                    borderColor: c.borderStrong,
-                    opacity: pressed ? 0.75 : 1,
-                  })}
+                  }}
                 >
-                  <Text style={{ color: fg, fontSize: 15, fontWeight: filled ? "800" : "700" }} numberOfLines={1}>
-                    {b.text}
-                  </Text>
+                  {({ pressed }) => (
+                    // The visual chrome (fill/border/padding) lives on a plain
+                    // child View rather than Pressable's own function-style —
+                    // nested inside this Modal's Reanimated-driven Animated.View,
+                    // Pressable's style-as-function reliably applied `color` but
+                    // silently dropped `backgroundColor`/`borderWidth` on first
+                    // paint (only opacity, read straight from `pressed`, updated
+                    // correctly). A plain View has none of that interaction.
+                    <View
+                      style={{
+                        paddingVertical: 13,
+                        paddingHorizontal: 16,
+                        borderRadius: 14,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: bg,
+                        borderWidth: filled ? 0 : 1,
+                        // c.border (not c.borderStrong) reads as almost invisible
+                        // in dark mode — an unfilled button (e.g. "Cancel" beside
+                        // a filled "Sign out") needs the stronger outline the rest
+                        // of the design system already uses for secondary buttons.
+                        borderColor: c.borderStrong,
+                        opacity: pressed ? 0.75 : 1,
+                      }}
+                    >
+                      <Text style={{ color: fg, fontSize: 15, fontWeight: filled ? "800" : "700" }} numberOfLines={1}>
+                        {b.text}
+                      </Text>
+                    </View>
+                  )}
                 </Pressable>
               );
             });
