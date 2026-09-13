@@ -11,6 +11,7 @@ import Animated, {
 import * as FileSystem from "expo-file-system/legacy";
 import { useAppNavigation } from "../../hooks/use-app-navigation";
 import { apiClient } from "../../lib/api-client";
+import { friendlyApiError, isTransportError } from "../../lib/app-errors";
 import type { CV, CVData } from "@sumaiya/types";
 import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
@@ -77,7 +78,17 @@ export function ScanProcessingScreen({ route }: Props) {
       } catch (err) {
         if (cancelled) return;
         haptics.error();
-        setErrorMsg(err instanceof Error ? err.message : t("Scanning failed. Try again.", "Kupiga kumeshindwa. Jaribu tena."));
+        // A transport failure goes through the shared mapper — its `message`
+        // is English or a bare status line and must not reach the screen. The
+        // "couldn't read details from this photo" Error thrown above IS
+        // deliberately localised, so it is passed through as-is.
+        setErrorMsg(
+          isTransportError(err)
+            ? friendlyApiError(err, lang)
+            : err instanceof Error
+              ? err.message
+              : t("I couldn't read this photo. Try again.", "Sikuweza kusoma picha hii. Jaribu tena."),
+        );
         setPhase("error");
       } finally {
         if (stepTimer.current) clearInterval(stepTimer.current);
