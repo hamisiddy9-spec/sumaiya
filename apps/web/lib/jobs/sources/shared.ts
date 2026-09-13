@@ -6,7 +6,7 @@
 
 export const FETCH_TIMEOUT_MS = 15_000;
 export const JOBS_USER_AGENT =
-  "Sumaiya-Jobs-Ingest/1.0 (+https://sumaiya.pro)";
+  "Sumaiya-Jobs-Ingest/1.0 (+https://www.templatehub.pro)";
 
 /** GET a JSON endpoint with a hard timeout. Throws on non-2xx. */
 export async function fetchJson(url: string): Promise<any> {

@@ -1,6 +1,6 @@
 {
   "packageId": "pro.sumaiya.app",
-  "host": "sumaiya.pro",
+  "host": "www.templatehub.pro",
   "name": "Sumaiya — CV & Document Builder",
   "launcherName": "Sumaiya",
   "display": "standalone",
@@ -13,8 +13,8 @@
   "backgroundColor": "#F4EEE4",
   "enableNotifications": true,
   "startUrl": "/?source=apk",
-  "iconUrl": "https://sumaiya.pro/icon.svg",
-  "maskableIconUrl": "https://sumaiya.pro/icon-maskable-512.png",
+  "iconUrl": "https://www.templatehub.pro/icon.svg",
+  "maskableIconUrl": "https://www.templatehub.pro/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android-keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 1,
   "shortcuts": [],
   "generatorApp": "unknown",
-  "webManifestUrl": "https://sumaiya.pro/manifest.json",
+  "webManifestUrl": "https://www.templatehub.pro/manifest.json",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://sumaiya.pro/",
+  "fullScopeUrl": "https://www.templatehub.pro/",
   "minSdkVersion": 21,
   "orientation": "portrait",
   "fingerprints": [],

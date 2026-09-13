@@ -35,6 +35,18 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="sumaiya"/>
       </intent-filter>
+      <!-- Android App Links: https://templatehub.pro/** opens the app.
+           Verified by GET /.well-known/assetlinks.json (package pro.sumaiya.app).
+           Canonical host is www.templatehub.pro; the apex 308-redirects to it,
+           so both are claimed. Without this filter every https deep link —
+           including a tapped sign-in link — opens the browser instead. -->
+      <intent-filter android:autoVerify="true">
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <category android:name="android.intent.category.BROWSABLE"/>
+        <data android:scheme="https" android:host="templatehub.pro"/>
+        <data android:scheme="https" android:host="www.templatehub.pro"/>
+      </intent-filter>
     </activity>
   </application>
 </manifest>

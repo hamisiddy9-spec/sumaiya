@@ -1,6 +1,5 @@
 import React from "react";
 import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeOut, Layout } from "react-native-reanimated";
 import { Icon } from "../icon";
 import { haptics, useThemeColors } from "../ui";
@@ -81,7 +80,6 @@ export function ChatComposer({
   inputRef,
 }: Props) {
   const c = useThemeColors();
-  const insets = useSafeAreaInsets();
   const { t } = useLang();
 
   const canSend = (value.trim().length > 0 || attachments.length > 0) && !loading;
@@ -92,7 +90,13 @@ export function ChatComposer({
         style={{
           paddingHorizontal: 12,
           paddingTop: attachments.length ? 8 : 10,
-          paddingBottom: insets.bottom + 10,
+          // Do NOT add insets.bottom here. This composer lives inside a tab
+          // screen, and the tab bar (AnimatedTabBar) is the bottom-most element
+          // and already pads itself by the safe-area inset — the scene does not
+          // extend under it. Adding the inset here too stacked it twice and left
+          // ~40dp of dead space between the input and the tab bar (measured:
+          // 80px of the 100px gap on a 1.7x/272dpi screen).
+          paddingBottom: 10,
           borderTopWidth: 1,
           borderTopColor: c.border,
           backgroundColor: c.bgElevated,

@@ -14,7 +14,7 @@ import { PDF_TOOLS } from "@/lib/pdf-tools";
 const LAST_CONTENT_PASS = new Date("2026-08-19");
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.pro";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro";
 
   // Single entry type for all lists so `lastModified` is a known optional
   // property (MetadataRoute.Sitemap[number]) everywhere below.

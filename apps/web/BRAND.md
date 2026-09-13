@@ -12,10 +12,10 @@
   name carries the feeling; the descriptor carries the facts — it is ALWAYS
   paired with what it does in store subtitles, meta titles, and the first line
   of every screen.
-- **Primary domain:** `sumaiya.pro` · **App face:** `sumaiya.app` · **Android
+- **Primary domain:** `templatehub.pro` · **App face:** `sumaiya.app` · **Android
   id:** `pro.sumaiya.app`.
 - **Legacy domain:** `templatehub.pro` is retained and 301-redirects every path
-  to its `sumaiya.pro` equivalent, so SEO equity for "tengeneza CV / CV
+  to its `templatehub.pro` equivalent, so SEO equity for "tengeneza CV / CV
   template / ATS friendly CV" flows to the new domain rather than being lost.
 - **The persona IS the product:** Sumaiya is the AI career assistant, the voice,
   and the human hook. Users chat with Sumaiya, Sumaiya drafts the CV, Sumaiya

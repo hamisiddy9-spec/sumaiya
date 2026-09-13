@@ -21,7 +21,7 @@ A document template SaaS for building CVs and cover letters. Users can:
 
 ## Repository
 - **GitHub:** https://github.com/hamisiddy9-spec/sumaiya
-- **Live:** https://sumaiya.pro
+- **Live:** https://www.templatehub.pro
 - **Vercel Project:** `hamisiddy9-9360s-projects/sumaiya`
 
 ## Quick Start
@@ -155,4 +155,4 @@ echo "value" | npx --yes vercel env add VAR_NAME production --yes
 
 - **Owner:** @Mweuc (Telegram)
 - **Support Email:** nore Sumaiya (CV template SaaS)
-- **Live URL:** https://sumaiya.pro
+- **Live URL:** https://www.templatehub.pro

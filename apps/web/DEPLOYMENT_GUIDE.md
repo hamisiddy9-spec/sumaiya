@@ -61,8 +61,8 @@
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    DATABASE_URL=postgresql://postgres:***@db.mabzufjzyazxxsuplbol.supabase.co:5432/postgres
-   NEXT_PUBLIC_APP_URL=https://sumaiya.pro
-   BETTER_AUTH_URL=https://sumaiya.pro
+   NEXT_PUBLIC_APP_URL=https://www.templatehub.pro
+   BETTER_AUTH_URL=https://www.templatehub.pro
    ```
 
 3. **Deploy**
@@ -79,7 +79,7 @@ Location: Supabase Dashboard → Authentication → Providers
 - [ ] Enable Google provider
 - [ ] Add Google Client ID
 - [ ] Add Google Client Secret
-- [ ] Redirect URL: `https://sumaiya.pro/api/auth/callback`
+- [ ] Redirect URL: `https://www.templatehub.pro/api/auth/callback`
 - [ ] Test Google login
 
 ### 2. **Email Service (Resend)**
@@ -104,8 +104,8 @@ Location: PesaPal Dashboard
 
 - [ ] Get Consumer Key
 - [ ] Get Consumer Secret
-- [ ] Set callback URL: `https://sumaiya.pro/api/payments/callback`
-- [ ] Set IPN URL: `https://sumaiya.pro/api/payments/ipn`
+- [ ] Set callback URL: `https://www.templatehub.pro/api/payments/callback`
+- [ ] Set IPN URL: `https://www.templatehub.pro/api/payments/ipn`
 
 ### 5. **Database**
 - [ ] Run migrations: `npm run db:push`

@@ -73,7 +73,7 @@ export default function Image({ params }: { params: { slug: string } }) {
             Try it free →
           </div>
           <div style={{ color: MUTED, fontSize: 22, marginLeft: 22, display: "flex" }}>
-            sumaiya.pro/tools
+            templatehub.pro/tools
           </div>
         </div>
       </div>

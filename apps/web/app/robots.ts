@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: ["/", "/editor/cv/try", "/editor/cover-letter/try", "/editor/business-card/try", "/editor/letter/try"],
       disallow: ["/api/", "/dashboard/", "/editor/", "/settings/", "/sign-in", "/verify"],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.pro"}/sitemap.xml`,
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro"}/sitemap.xml`,
   };
 }

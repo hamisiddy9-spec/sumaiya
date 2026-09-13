@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   // Absolute og/twitter image URL. Relative URLs in openGraph are resolved
   // against metadataBase, but we spell it out so the <meta> tags are complete
   // regardless of where the page is rendered (crawlers, link unfurlers, etc.).
-  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.pro"}/og-image.png`;
+  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro"}/og-image.png`;
 
   return {
     title,

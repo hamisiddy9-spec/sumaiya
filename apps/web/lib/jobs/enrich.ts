@@ -79,7 +79,7 @@ export async function fetchPublicPage(url: string): Promise<FetchedPage | null> 
         redirect: "manual", // validate EVERY hop before requesting it
         signal: controller.signal,
         headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; SumaiyaBot/1.0; +https://sumaiya.pro)",
+          "User-Agent": "Mozilla/5.0 (compatible; SumaiyaBot/1.0; +https://www.templatehub.pro)",
           Accept: "text/html,application/xhtml+xml,text/plain,*/*",
         },
       });
