@@ -152,22 +152,43 @@ export function RootNavigator() {
   // on every reinstall / new device despite clearly not being new.
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
     void (async () => {
-      try {
-        const { syncProfileFromServer, profileIsEmpty } = await import("../lib/profile-store");
-        const { apiClient } = await import("../lib/api-client");
-        const [profile, cvs] = await Promise.all([
-          syncProfileFromServer(),
-          apiClient.listCVs().catch(() => []),
-        ]);
-        if (!profileIsEmpty(profile) || cvs.length > 0) {
-          await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
-          setFirstRunDone(true);
+      const { syncProfileFromServer, profileIsEmpty } = await import("../lib/profile-store");
+      const { apiClient } = await import("../lib/api-client");
+
+      const hasExistingData = async () => {
+        try {
+          const [profile, cvs] = await Promise.all([
+            syncProfileFromServer(),
+            apiClient.listCVs().catch(() => []),
+          ]);
+          return !profileIsEmpty(profile) || cvs.length > 0;
+        } catch {
+          return false;
         }
-      } catch {
-        /* offline — first-run stays as-is */
+      };
+
+      // A returning user right after sign-in can hit this before the fresh
+      // session token has propagated to apiClient — both calls above swallow
+      // their own errors and quietly return "empty", which reads exactly like
+      // a brand-new account and strands the user in the first-run wizard
+      // every time they sign back in. Retry twice with backoff before
+      // believing "empty" is real, rather than accepting the first answer.
+      for (const delayMs of [0, 1200, 3000]) {
+        if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
+        if (cancelled) return;
+        if (await hasExistingData()) {
+          await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
+          if (!cancelled) setFirstRunDone(true);
+          return;
+        }
       }
+      /* genuinely a new account, or still offline after 3 tries — first-run stays as-is */
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   // Register for push once signed in (no-op until an EAS projectId exists).
