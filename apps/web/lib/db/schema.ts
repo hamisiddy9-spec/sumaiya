@@ -28,6 +28,12 @@ export const profile = pgTable("profile", {
   id: text("id").primaryKey(), // references auth.users.id
   name: text("name").notNull().default(""),
   email: text("email").notNull().default(""),
+  // Earned via the referral loop (see lib/referral.ts) — 7 days added each time
+  // a referred friend activates (builds a CV), stacking on top of any time
+  // still remaining. No paid tier exists yet; this is the seam so referrers
+  // who earned it are already covered the moment a feature is actually
+  // premium-gated, with nothing to migrate or backfill.
+  premiumUntil: timestamp("premium_until"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

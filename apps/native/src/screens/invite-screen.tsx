@@ -11,7 +11,7 @@ import type { InviteScreenProps } from "../navigation/types";
 export function InviteScreen({ navigation }: InviteScreenProps) {
   const c = useThemeColors();
   const { t } = useLang();
-  const [data, setData] = useState<{ code: string; url: string; joined: number; activated: number } | null>(null);
+  const [data, setData] = useState<{ code: string; url: string; joined: number; activated: number; premiumUntil: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -73,6 +73,12 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
             "Sumaiya ni bure. Mshirikishe mtu anayetafuta ajira — watu wengi wanaotumia, ndivyo inavyokuwa bora kwa wote.",
           )}
         </Text>
+        <Text style={{ color: c.accent, fontSize: 13, fontWeight: "700", textAlign: "center", marginTop: 4 }}>
+          {t(
+            "Earn 7 days of Sumaiya Premium every time a friend builds a CV.",
+            "Pata siku 7 za Sumaiya Premium kila rafiki anapotengeneza CV.",
+          )}
+        </Text>
       </Animated.View>
 
       {loading ? (
@@ -131,6 +137,18 @@ export function InviteScreen({ navigation }: InviteScreenProps) {
                 <Text style={{ color: c.text, fontSize: 22, fontWeight: "800" }}>{data.activated}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 12 }}>{t("built a CV", "wametengeneza CV")}</Text>
               </View>
+            </View>
+          ) : null}
+
+          {data.premiumUntil && new Date(data.premiumUntil).getTime() > Date.now() ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 14, borderRadius: 14, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "30", marginTop: 4 }}>
+              <Icon name="gem" size={18} color={c.accent} />
+              <Text style={{ flex: 1, color: c.text, fontSize: 13, fontWeight: "600", lineHeight: 18 }}>
+                {t(
+                  `Premium earned until ${new Date(data.premiumUntil).toLocaleDateString()}`,
+                  `Umepata Premium hadi ${new Date(data.premiumUntil).toLocaleDateString()}`,
+                )}
+              </Text>
             </View>
           ) : null}
         </Animated.View>

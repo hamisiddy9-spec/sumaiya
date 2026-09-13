@@ -462,7 +462,7 @@ export class ApiClient {
   }
 
   // ── Referral loop (Hono /api/referral, Bearer) ───────────────────────────
-  async getReferral(): Promise<{ code: string; url: string; joined: number; activated: number }> {
+  async getReferral(): Promise<{ code: string; url: string; joined: number; activated: number; premiumUntil: string | null }> {
     return this.request("/api/referral");
   }
 

@@ -120,6 +120,16 @@ export function allowed(
   return can(subject, capability).allowed;
 }
 
+/** Is a referral-earned (or future paid) Premium window still active?
+ *  `premiumUntil` is the `profile.premiumUntil` column — see lib/referral.ts.
+ *  Not wired into `can()` yet because no capability is `plan`-gated today;
+ *  this is the seam a real gate calls once one exists. */
+export function isPremiumActive(premiumUntil: Date | string | null | undefined): boolean {
+  if (!premiumUntil) return false;
+  const until = premiumUntil instanceof Date ? premiumUntil : new Date(premiumUntil);
+  return until.getTime() > Date.now();
+}
+
 /** The full map for a subject — handy for hydrating a client hook once. */
 export function entitlementsFor(
   subject: EntitlementSubject,
