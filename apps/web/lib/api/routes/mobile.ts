@@ -19,6 +19,7 @@ import { ensureProfileRow } from "@/lib/career-profile/sync";
 import { stampProfileAllFacts } from "@/lib/career-profile/mapper";
 import { computeSignals } from "@/lib/assistant/signals";
 import { checkTailoring } from "@/lib/api/tailoring-guards";
+import { checkNoFabrication } from "@/lib/ai/fabrication-check";
 import { recordExport, normalizeExportKind, mintUnstoredExportId } from "@/lib/documents/export-ledger";
 import {
   nativeProfileToCareer,
@@ -219,6 +220,14 @@ Sumaiya:`;
       if (skills.length) facts.push(`Skills: ${skills.join(", ")}`);
       if (!facts.length) {
         await refundAiUsage(userId);
+        // This has fired with a CV that visibly has content moments earlier —
+        // log what the server actually saw so a repeat is diagnosable instead
+        // of just "some users get this randomly".
+        console.error(
+          `[mobile.apply] no facts for userId=${userId} want=${want} cvId=${cvId ?? "(none sent)"} ` +
+          `resolvedCvId=${cv?.id ?? "(none)"} hasProfile=${!!ctx.profile} ` +
+          `expCount=${cv?.data.experience?.length ?? 0} hasSummary=${!!(cv?.data.summary?.trim())}`,
+        );
         // Sumaiya is the one speaking, so she says "tell me" — never "tell
         // Sumaiya". A person does not refer to herself by name mid-sentence.
         // And the language is the user's, not ours: this used to come back in
@@ -238,7 +247,7 @@ Sumaiya:`;
 
       const prompt = `You are helping a candidate apply for a SPECIFIC job. From the job description and the candidate's REAL details below, produce STRICT JSON (no markdown, no commentary) matching exactly: {${shape.join(", ")}}
 - "jobTitle" / "company": read them from the job description ("company":"" if not named).
-${wantCv ? `- "summary": rewrite the candidate's professional summary to foreground the experience this job wants and weave in the posting's real keywords — only where truthful. "experience": return the SAME ids listed under Work history, each with a rewritten description as concise bullets starting "- ", emphasising relevance to this job. Do not add, drop, reorder or renumber entries.` : ""}
+${wantCv ? `- "summary": rewrite the candidate's professional summary to foreground the experience this job wants and weave in the posting's real keywords — only where truthful. The summary is about the role(s) the candidate has ACTUALLY held — reframe their real work in this job's vocabulary, but never describe them as already holding this posting's job title or seniority unless their own facts say they held it. Never add mentoring, managing or leading others, a specific tool/certification, or years of experience the facts don't state. "experience": return the SAME ids listed under Work history, each with a rewritten description as concise bullets starting "- ", emphasising relevance to this job. Do not add, drop, reorder or renumber entries.` : ""}
 ${wantLetter ? `- "coverLetter": a compelling cover-letter BODY of 3–4 short paragraphs — no address block, no date, no "Dear…" greeting, no sign-off. Ground every claim in the candidate's details. If they have thin work history, write a confident entry-level letter leading with motivation, education and relevant skills.` : ""}
 Write all prose in ${L}. ${TRUTH_CONSTRAINT}
 
@@ -274,6 +283,30 @@ ${facts.join("\n")}`;
       if (!verdict.ok) {
         await refundAiUsage(userId);
         return c.json({ error: verdict.error }, 502);
+      }
+
+      // A second, adversarial pass: the generation prompt's own TRUTH_CONSTRAINT
+      // is an instruction, not enforcement. Observed in the wild: a shop
+      // worker's summary rewritten into a fabricated "Principal Sales Engineer"
+      // career lifted from the job posting, with the constraint sitting right
+      // there in the same prompt. Check the summary and rewritten bullets for
+      // claims the candidate's own facts don't support before this ever reaches
+      // a document someone can send to an employer.
+      if (wantCv) {
+        const generatedText = [
+          typeof parsed.summary === "string" ? parsed.summary : "",
+          ...expOut.map((e) => e.description),
+        ].filter(Boolean).join("\n\n");
+        const fab = await checkNoFabrication(facts.join("\n"), generatedText);
+        if (fab.fabricated) {
+          await refundAiUsage(userId);
+          return c.json({
+            error:
+              lang === "sw"
+                ? "Ninachukua tahadhari — matokeo yalionekana kudai zaidi ya ulichoniambia. Jaribu tena."
+                : "Playing it safe — that result seemed to claim more than what you told me. Please try again.",
+          }, 502);
+        }
       }
 
       return c.json({
