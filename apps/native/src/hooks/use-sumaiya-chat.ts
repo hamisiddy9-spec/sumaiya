@@ -20,6 +20,13 @@ import { extractAttachment, attachmentsContext } from '../lib/attachment-extract
 import { loadProfile, profilePromptBlock } from '../lib/profile-store';
 import { reportError } from '../lib/reporting';
 import { useLang, greetingFor } from '../lib/i18n';
+import { splitReplyIntoBubbles } from '../lib/reply-bubbles';
+import { sleep } from '@sumaiya/utils';
+
+// A long reply arrives in one round-trip (no streaming — see reply-bubbles.ts
+// for why), so staging it into separate bubbles is the only place a "typing"
+// pause can go. Short enough to feel like a fast typist, not a stall.
+const BUBBLE_DELAY_MS = 550;
 
 // The greeting shown before any real turn is now language-aware — see
 // greetingFor() in lib/i18n. It's fed to the model as the first history entry
@@ -143,17 +150,24 @@ export function useSumaiyaChat() {
           data: {},
         };
 
-        // Convert to chat message
-        const assistantMsg: ChatMessage = {
-          id: generateMessageId(),
-          type: sumaiyaResponse.type,
-          author: 'sumaiya',
-          content: sumaiyaResponse.content,
-          data: sumaiyaResponse.data,
-          timestamp: new Date()
-        };
-
-        setMessages(prev => [...prev, assistantMsg]);
+        // No streaming (see reply-bubbles.ts) — but a long reply popping in
+        // as one wall of text reads like a form submission, not a
+        // conversation. Stage it as separate bubbles instead, each after a
+        // short "typing" pause. Suggestions still key off the FULL text
+        // (sumaiyaResponse.content, untouched) and land on the last bubble.
+        const bubbles = splitReplyIntoBubbles(replyText);
+        for (let i = 0; i < bubbles.length; i++) {
+          if (i > 0) await sleep(BUBBLE_DELAY_MS);
+          const bubbleMsg: ChatMessage = {
+            id: generateMessageId(),
+            type: sumaiyaResponse.type,
+            author: 'sumaiya',
+            content: bubbles[i],
+            data: {},
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, bubbleMsg]);
+        }
 
         // Generate suggestions based on conversation
         const suggestions = generateSuggestions(userMessage, sumaiyaResponse);
