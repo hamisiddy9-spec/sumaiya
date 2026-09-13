@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNetworkState } from "expo-network";
+import { AppState } from "react-native";
+import { useNetworkState, getNetworkStateAsync } from "expo-network";
 
 /** How long a "not reachable" reading must persist before we believe it.
  *  expo-network's isInternetReachable does a real reachability probe, which is
@@ -35,6 +36,25 @@ export function useIsOnline(): boolean {
     const id = setTimeout(() => setDebounced(false), OFFLINE_DEBOUNCE_MS);
     return () => clearTimeout(id);
   }, [raw]);
+
+  // expo-network's own change events are push-based, and after the device
+  // spends a long stretch asleep (Doze/deep sleep) that push can simply never
+  // fire again on resume — a real user saw the "offline" banner stuck for the
+  // rest of the session even though connectivity had genuinely come back,
+  // clearing only when the app process was killed and restarted. Force a
+  // fresh, on-demand read whenever the app returns to the foreground, and
+  // correct the stuck reading if it disagrees.
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next !== "active") return;
+      getNetworkStateAsync()
+        .then((fresh) => {
+          if (rawIsOnline(fresh)) setDebounced(true);
+        })
+        .catch(() => {});
+    });
+    return () => sub.remove();
+  }, []);
 
   return debounced;
 }

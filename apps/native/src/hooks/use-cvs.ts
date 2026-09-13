@@ -66,7 +66,20 @@ export function useCvs() {
     }
   }, [LOCAL_USER]);
 
+  // Guards against two overlapping loadCVs() runs. This hook is a fresh
+  // instance per screen, so `latest.current.count` starts at 0 on every
+  // mount — the mount effect's loadCVs() and the focus effect firing on that
+  // same mount (see below) could both see count === 0 and both call
+  // loadCVs() concurrently. Two runs racing on the same local-storage rows
+  // (each doing its own read → persist → read) could land in between the
+  // other's writes and briefly report zero CVs, even though nothing was
+  // actually lost — a real user saw this as their just-saved CV vanishing
+  // for a moment after leaving and returning to the editor.
+  const loadInFlight = useRef(false);
+
   const loadCVs = useCallback(async () => {
+    if (loadInFlight.current) return;
+    loadInFlight.current = true;
     setLoading(true);
     await readLocal(); // show what's on the device right away
     try {
@@ -116,6 +129,7 @@ export function useCvs() {
         setError(e instanceof Error ? e.message : "Couldn't refresh from the server");
       }
     } finally {
+      loadInFlight.current = false;
       if (mounted.current) setLoading(false);
     }
   }, [readLocal, LOCAL_USER]);
