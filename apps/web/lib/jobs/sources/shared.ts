@@ -63,3 +63,72 @@ export function employmentType(raw: unknown): string {
   const s = String(raw ?? "").toLowerCase();
   return s || "full-time";
 }
+
+/* ── RSS/XML support ────────────────────────────────────────────────────────
+ * Some regional boards publish a feed instead of an API (JobwebTanzania). RSS
+ * is a documented, stable format the site maintains for exactly this purpose,
+ * so parsing it is less brittle than re-parsing their WordPress theme on every
+ * update. These helpers are dependency-free on purpose: the adapter layer has
+ * no XML library and should not grow one for a ten-item feed.
+ */
+
+/** GET a text/XML endpoint with a hard timeout. Throws on non-2xx. */
+export async function fetchText(url: string): Promise<string> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": JOBS_USER_AGENT,
+        Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+      },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
+    return await res.text();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Decode the entities an RSS body carries. Numeric forms are decoded FIRST and
+ * `&amp;` LAST, so a literal `&amp;lt;` ends up as the text `&lt;` rather than
+ * being double-decoded into a real tag.
+ */
+export function decodeEntities(s: string): string {
+  return s
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => codePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => codePoint(Number(d)))
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+}
+
+function codePoint(n: number): string {
+  try {
+    return Number.isFinite(n) ? String.fromCodePoint(n) : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Split an RSS document into its `<item>` bodies. Tolerates attributes. */
+export function rssItems(xml: string): string[] {
+  const out: string[] = [];
+  const re = /<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(xml)) !== null) out.push(m[1]);
+  return out;
+}
+
+/** Read one tag's text out of an item block, unwrapping CDATA. "" when absent. */
+export function rssValue(block: string, tag: string): string {
+  const re = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "i");
+  const m = re.exec(block);
+  if (!m) return "";
+  return decodeEntities(m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")).trim();
+}

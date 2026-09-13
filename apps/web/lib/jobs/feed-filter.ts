@@ -160,3 +160,35 @@ export function topCategories(jobs: FeedJob[], limit = 20): string[] {
     .slice(0, limit)
     .map(([c]) => c);
 }
+
+/* ── Home market ─────────────────────────────────────────────────────────────
+ * Sumaiya is a Tanzanian product, and until the JobwebTanzania source was
+ * added the feed held ZERO Tanzanian listings out of 8,079 — every one was
+ * Arbeitnow/Germany, Jobicy, Himalayas or USAJobs. A Tanzanian job-seeker
+ * opening "Ajira" was shown Berlin and London, which reads as a product that
+ * is not for them.
+ *
+ * This is ordering, not censorship: nothing is hidden or deleted, and remote
+ * and foreign listings remain in the feed below the home-market ones. The
+ * names below are Tanzanian cities/regions used as a MATCHING AID only — no
+ * job is ever given a location it did not state.
+ */
+const HOME_MARKET_RE =
+  /\b(tanzania|tanzanian|dar es salaam|dar|dodoma|arusha|mwanza|mbeya|morogoro|tanga|zanzibar|unguja|pemba|kilimanjaro|moshi|kigoma|shinyanga|tabora|songea|iringa|singida|bukoba|musoma|mtwara|lindi|njombe|geita|simiyu|katavi|rukwa|pwani|ruvuma|kagera)\b/i;
+
+/** True when a listing's own stated location is in the home market. */
+export function isHomeMarketLocation(location: string): boolean {
+  return HOME_MARKET_RE.test(location);
+}
+
+/**
+ * Stable partition — home-market listings first, everything else after, with
+ * the incoming order preserved inside each group (so the caller's
+ * featured/newest ordering still decides within a group).
+ */
+export function homeMarketFirst<T extends { location: string }>(jobs: T[]): T[] {
+  const home: T[] = [];
+  const rest: T[] = [];
+  for (const j of jobs) (isHomeMarketLocation(j.location) ? home : rest).push(j);
+  return [...home, ...rest];
+}
