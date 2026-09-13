@@ -12,7 +12,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.11",
+  version: "1.6.12",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -25,7 +25,11 @@ export const APP_RELEASE: AppReleaseManifest = {
   // every in-app update link 404'd at the DNS layer.
   url: "https://sumaiya.app/downloads/sumaiya.apk",
   notes: {
-    en: "This version is signed with a real release key, so updates can actually reach you from now on. Because the signature changed, it installs once from scratch: remove the old app first, then install this and sign in again. Also fixed — the app no longer tells you that you are offline when your connection is fine, and sign-in links now open inside the app instead of the browser.",
-    sw: "Toleo hili limesainiwa kwa ufunguo halisi wa matoleo, hivyo masasisho yanaweza kukufikia kuanzia sasa. Kwa sababu sahihi imebadilika, linasakinishwa mara moja kuanzia mwanzo: ondoa app ya zamani kwanza, kisha sakinisha hili na uingie tena. Pia imerekebishwa — app haisemi tena kuwa huna mtandao wakati mtandao wako ni mzuri, na viungo vya kuingia sasa vinafunguka ndani ya app badala ya browser.",
+    // Same signing key as 1.6.11, so this is a normal update — do NOT repeat the
+    // "remove the old app first" warning that 1.6.11 needed for its key change.
+    // The Google caveat is stated plainly: the fix is a Google Cloud entry, not a
+    // build, so 1.6.11 is affected identically and the email path is the way in.
+    en: "The app now talks to sumaiya.app, and the sign-in button shows when it is working instead of looking frozen. If Continue with Google reports a configuration error, use the email code instead — tap “Use email instead” and we will send you a six-digit code.",
+    sw: "App sasa inawasiliana na sumaiya.app, na kitufe cha kuingia kinaonyesha kinapofanya kazi badala ya kuonekana kimeganda. Kama “Endelea na Google” inatoa kosa la mipangilio, tumia msimbo wa barua pepe badala yake — gusa “Tumia barua pepe badala yake” na tutakutumia msimbo wa tarakimu sita.",
   },
 };
