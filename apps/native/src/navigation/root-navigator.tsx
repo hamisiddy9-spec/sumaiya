@@ -16,7 +16,7 @@
  *
  * Deep Linking:
  * - Custom scheme: sumaiya://
- * - Universal links: https://www.templatehub.pro
+ * - Universal links: https://sumaiya.app
  * - Signin link: sumaiya://signin?token=JWT_HERE
  */
 
@@ -37,6 +37,7 @@ import { SplashScreen } from "../screens/splash-screen";
 import { ThemeScope, useThemeColors } from "../components/ui";
 import { useNavTheme, rootScreenOptions } from "./nav-config";
 import { resolveNotificationTarget } from "../lib/notification-route";
+import { DEEP_LINK_PREFIXES } from "../lib/app-hosts";
 
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
@@ -49,14 +50,16 @@ const navRef = createNavigationContainerRef<RootStackParamList>();
 // Deep linking configuration
 // Supports:
 // - expo-managed deeplink (sumaiya://)
-// - Custom domain deeplinks (https://www.templatehub.pro)
+// - Custom domain deeplinks (https://sumaiya.app)
 // - Screen routing (auth/signin, etc)
 const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [
     prefix,
     "sumaiya://",
-    "https://templatehub.pro",
-    "https://www.templatehub.pro",
+    // Canonical origin, then the transitional legacy origins — derived from
+    // lib/app-hosts.ts rather than typed out here, so moving the domain again
+    // is a one-line change.
+    ...DEEP_LINK_PREFIXES,
     "https://sumaiyaai.vercel.app",
   ],
   config: {

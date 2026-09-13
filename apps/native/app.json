@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sumaiya",
     "slug": "sumaiya",
-    "version": "1.6.11",
+    "version": "1.6.12",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "pro.sumaiya.app",
-      "versionCode": 10611,
+      "versionCode": 10612,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#DA4A1C"
@@ -46,7 +46,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "www.templatehub.pro"
+              "host": "sumaiya.app"
             }
           ],
           "category": [
