@@ -4,7 +4,7 @@ import { Footer } from "@/components/ui/footer";
 import { TemplateHubProLanding } from "@/components/marketing/templatehub-pro-landing";
 
 /**
- * TemplateHub Pro — the page templatehub.pro serves at its root.
+ * TemplateHub Pro — the page sumaiya.app serves at its root.
  *
  * Kept as a server component so the page is a static prerender like every other
  * marketing route (see the CDN caching notes in middleware.ts): the copy, the
@@ -12,7 +12,7 @@ import { TemplateHubProLanding } from "@/components/marketing/templatehub-pro-la
  * interactive parts — the design shelf, the "show more" fold — live inside the
  * client island.
  *
- * The root rewrite itself lives in vercel.json, scoped to the templatehub.pro
+ * The root rewrite itself lives in vercel.json, scoped to the sumaiya.app
  * hosts, so the URL bar keeps showing the bare domain while this file renders.
  */
 export async function generateMetadata({

@@ -46,9 +46,9 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     publisher: {
       "@type": "Organization",
       name: "Sumaiya",
-      logo: { "@type": "ImageObject", url: "https://www.templatehub.pro/icon.svg" },
+      logo: { "@type": "ImageObject", url: "https://sumaiya.app/icon.svg" },
     },
-    mainEntityOfPage: { "@type": "WebPage", "@id": `https://www.templatehub.pro/blog/${post.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://sumaiya.app/blog/${post.slug}` },
   };
 
   return (

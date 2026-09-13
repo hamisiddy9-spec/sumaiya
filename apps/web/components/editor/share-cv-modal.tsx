@@ -32,7 +32,7 @@ export function ShareCvModal({ cvId, accessToken, sw, initialIsPublic, initialSl
   // Escape + focus trap + focus management.
   useModalDialog(true, onClose, panelRef);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://www.templatehub.pro";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://sumaiya.app";
   const link = slug ? `${origin}/cv/${slug}` : "";
 
   async function patch(body: { isPublic?: boolean; showContact?: boolean }, which: "toggle" | "contact") {

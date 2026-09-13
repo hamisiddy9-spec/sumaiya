@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * TemplateHub Pro — the front door at templatehub.pro.
+ * TemplateHub Pro — the front door at sumaiya.app.
  *
  * This is the page a visitor sees when they land on the TemplateHub domain. Its
  * whole job is to sell the app, so it leads with the thing people came for
@@ -268,7 +268,7 @@ export function TemplateHubProLanding() {
         {
           badge: "Sasa — mtandaoni",
           title: "Tumia Sumaiya hapa",
-          body: "Chagua muundo na uanze mara moja kwenye templatehub.pro. Ongea na Sumaiya, andika sehemu zote, pakua PDF. Hakuna kupakua kitu.",
+          body: "Chagua muundo na uanze mara moja kwenye sumaiya.app. Ongea na Sumaiya, andika sehemu zote, pakua PDF. Hakuna kupakua kitu.",
           cta: "web" as const,
           label: "Anza mtandaoni — bure",
         },
@@ -284,7 +284,7 @@ export function TemplateHubProLanding() {
         {
           badge: "Now — online",
           title: "Use Sumaiya right here",
-          body: "Pick a design and start immediately on templatehub.pro. Talk to Sumaiya, write every section, download the PDF. Nothing to install.",
+          body: "Pick a design and start immediately on sumaiya.app. Talk to Sumaiya, write every section, download the PDF. Nothing to install.",
           cta: "web" as const,
           label: "Start online — free",
         },

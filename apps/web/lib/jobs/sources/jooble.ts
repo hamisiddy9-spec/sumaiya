@@ -22,7 +22,7 @@ export const joobleAdapter: JobSourceAdapter = {
     try {
       const res = await fetch(`https://jooble.org/api/${encodeURIComponent(key)}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "User-Agent": "Sumaiya-Jobs-Ingest/1.0 (+https://www.templatehub.pro)" },
+        headers: { "Content-Type": "application/json", "User-Agent": "Sumaiya-Jobs-Ingest/1.0 (+https://sumaiya.app)" },
         body: JSON.stringify({ keywords: "developer", location: "" }),
         signal: controller.signal,
       });

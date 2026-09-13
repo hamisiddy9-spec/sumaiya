@@ -19,7 +19,7 @@ const genCode = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 7);
 export const PREMIUM_DAYS_PER_REFERRAL = 7;
 
 export function referralUrl(code: string): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.templatehub.pro";
+  const base = process.env.NEXT_PUBLIC_APP_URL || "https://sumaiya.app";
   return `${base}/?ref=${code}`;
 }
 

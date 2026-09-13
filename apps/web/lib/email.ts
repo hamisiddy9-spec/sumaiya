@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const FROM = process.env.EMAIL_FROM ?? "Sumaiya <noreply@templatehub.pro>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app";
 
 /** Escape user-supplied text before embedding it in an HTML email. */
 function esc(s: string): string {

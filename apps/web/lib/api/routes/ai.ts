@@ -1071,7 +1071,7 @@ ${cleanText}
           redirect: "manual",
           signal: controller.signal,
           headers: {
-            "User-Agent": "Mozilla/5.0 (compatible; SumaiyaBot/1.0; +https://www.templatehub.pro)",
+            "User-Agent": "Mozilla/5.0 (compatible; SumaiyaBot/1.0; +https://sumaiya.app)",
             Accept: "text/html,application/xhtml+xml,text/plain,*/*",
           },
         });

@@ -64,14 +64,14 @@ describe("isPlausibleShareToken", () => {
 
 describe("buildShareUrl", () => {
   it("builds the absolute share URL", () => {
-    expect(buildShareUrl("https://www.templatehub.pro", "abc.def")).toBe(
-      "https://www.templatehub.pro/snap/share/abc.def",
+    expect(buildShareUrl("https://sumaiya.app", "abc.def")).toBe(
+      "https://sumaiya.app/snap/share/abc.def",
     );
   });
 
   it("strips a trailing slash from the origin", () => {
-    expect(buildShareUrl("https://www.templatehub.pro/", "abc.def")).toBe(
-      "https://www.templatehub.pro/snap/share/abc.def",
+    expect(buildShareUrl("https://sumaiya.app/", "abc.def")).toBe(
+      "https://sumaiya.app/snap/share/abc.def",
     );
   });
 
@@ -82,9 +82,9 @@ describe("buildShareUrl", () => {
   });
 
   it("returns null when the token is unusable — never fabricates a link", () => {
-    expect(buildShareUrl("https://www.templatehub.pro", "")).toBe(null);
-    expect(buildShareUrl("https://www.templatehub.pro", undefined)).toBe(null);
-    expect(buildShareUrl("https://www.templatehub.pro", "not-a-token")).toBe(null);
+    expect(buildShareUrl("https://sumaiya.app", "")).toBe(null);
+    expect(buildShareUrl("https://sumaiya.app", undefined)).toBe(null);
+    expect(buildShareUrl("https://sumaiya.app", "not-a-token")).toBe(null);
   });
 });
 

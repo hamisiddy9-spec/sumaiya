@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       // Page-level openGraph replaces the marketing layout's, so the og:image
       // MUST be declared here or this page ships without one (same pattern as
       // the ats-checker landing page).
-      images: [`${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro"}/og-image.png`],
+      images: [`${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`],
     },
     twitter: {
       card: "summary_large_image",
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       description: sw
         ? "Bandika au pigia picha kazi yoyote, upate alama ya ATS, kisha CV na barua zilizolengwa. Bure, hakuna usajili."
         : "Paste or photograph any job, get an ATS match score, then a tailored CV and cover letter. Free, no sign-up.",
-      images: [`${process.env.NEXT_PUBLIC_APP_URL ?? "https://www.templatehub.pro"}/og-image.png`],
+      images: [`${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`],
     },
   };
 }
@@ -56,7 +56,7 @@ const jsonLd = {
   operatingSystem: "Web",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   description: "Paste a job description or photograph a job poster and get an instant ATS match score plus a tailored CV and cover letter in 30 seconds.",
-  url: "https://www.templatehub.pro/snap-to-apply",
+  url: "https://sumaiya.app/snap-to-apply",
 };
 
 const steps = (sw: boolean) => [
