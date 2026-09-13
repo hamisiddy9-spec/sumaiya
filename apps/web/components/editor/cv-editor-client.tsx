@@ -107,7 +107,7 @@ function SignUpModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
       // Map known Supabase auth error codes to LOCALIZED messages — the raw
       // SDK string (e.g. "Email rate limit exceeded.") must never appear in
       // the Swahili modal.
-      setError(authErrorMessage(result.error.code, sw));
+      setError(authErrorMessage(result.error.code, sw, result.error.message));
     } else {
       setStep("sent");
     }
