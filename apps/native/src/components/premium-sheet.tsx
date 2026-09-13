@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
 import { Icon } from "./icon";
@@ -8,17 +9,39 @@ import { Button, haptics, useThemeColors } from "./ui";
 import { useLang } from "../lib/i18n";
 
 /**
- * Shown when someone taps a premium template / course. Billing isn't wired
- * yet, so this explains what premium is and lets them register interest — the
- * flag is stored locally and surfaces in the profile ("You're on the list").
- * When billing lands, this sheet gets the real CTA.
+ * Shown when someone taps a premium template / course.
+ *
+ * The copy has to be TRUE, and it changed the moment the gate became real.
+ * Premium is no longer a promise: the premium designs are genuinely locked
+ * (tier === "premium"), and Premium is genuinely obtainable TODAY — referrals
+ * grant 7 days per friend who builds their first CV.
+ *
+ * Two things this used to get wrong, both now fixed:
+ *   1. It advertised "the Executive and Compact layouts" as the premium
+ *      benefit. Neither is premium — `executive-letter` and `compact-letter`
+ *      are free LETTER templates, unrelated to the gated set. Naming them sold
+ *      a tier with two designs that were already free.
+ *   2. It framed waiting as the only route ("notify me when it's ready"),
+ *      hiding the one route that works from the one screen a user reaches by
+ *      asking for the thing.
+ *
+ * The waitlist flag is stored locally and is NOT entitlement — see the warning
+ * in src/lib/entitlements.ts.
  */
 type Feature = "templates" | "courses" | "verdict" | "general";
 
 const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   templates: {
-    en: ["The Executive and Compact layouts", "More coming every month", "Everything else stays free"],
-    sw: ["Miundo ya Executive na Compact", "Mingine inaongezwa kila mwezi", "Kila kitu kingine kinabaki bure"],
+    en: [
+      "The 7 flagship designs — colour sidebars, photo rings, timelines",
+      "Earned by inviting friends — 7 days each time one builds a CV",
+      "Everything else stays free",
+    ],
+    sw: [
+      "Miundo 7 bora — sidebars za rangi, pete za picha, mistari ya muda",
+      "Inapatikana kwa kuwalika marafiki — siku 7 kila mmoja akijenga CV",
+      "Kila kitu kingine kinabaki bure",
+    ],
   },
   courses: {
     en: ["Deep courses: interview mastery, salary negotiation", "Step-by-step, built for East Africa", "The short guides stay free"],
@@ -29,8 +52,16 @@ const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
     sw: ["Uamuzi ulioandikwa kuhusu CV yako, kwa lugha rahisi", "Marekebisho matatu yenye athari kubwa, yaliyopangwa", "Alama ya ATS ya uhakika inabaki bure"],
   },
   general: {
-    en: ["The Executive and Compact templates", "Deep courses: interview mastery, salary negotiation", "Everything essential stays free"],
-    sw: ["Miundo ya Executive na Compact", "Kozi za kina: umahiri wa usaili, majadiliano ya mshahara", "Kila kitu muhimu kinabaki bure"],
+    en: [
+      "The 7 flagship designs — colour sidebars, photo rings, timelines",
+      "Deep courses: interview mastery, salary negotiation",
+      "Everything essential stays free",
+    ],
+    sw: [
+      "Miundo 7 bora — sidebars za rangi, pete za picha, mistari ya muda",
+      "Kozi za kina: umahiri wa usaili, majadiliano ya mshahara",
+      "Kila kitu muhimu kinabaki bure",
+    ],
   },
 };
 
@@ -40,15 +71,22 @@ export function PremiumSheet({
   visible,
   onClose,
   feature,
+  onEarn,
 }: {
   visible: boolean;
   onClose: () => void;
   feature: Feature;
+  /** How to reach the invite loop. Defaults to the Home tab's Invite screen.
+   *  Pass `null` to omit the CTA entirely — for a surface outside the tab
+   *  navigator (e.g. first-run) where "Invite" is not reachable, showing a
+   *  button that cannot navigate would be worse than showing none. */
+  onEarn?: (() => void) | null;
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const { t, lang } = useLang();
+  const navigation = useNavigation<{ navigate: (a: string, b?: object) => void }>();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(visible);
   const [onList, setOnList] = useState(false);
@@ -74,6 +112,12 @@ export function PremiumSheet({
 
   if (!mounted) return null;
   const points = COPY[feature][lang === "sw" ? "sw" : "en"];
+
+  // The route that works today. Same nested-navigation call profile-screen uses.
+  const earn =
+    onEarn === null
+      ? null
+      : onEarn ?? (() => navigation.navigate("HomeTab", { screen: "Invite" }));
 
   const join = async () => {
     haptics.success();
@@ -116,7 +160,7 @@ export function PremiumSheet({
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>{t("Sumaiya Premium", "Sumaiya Premium")}</Text>
           </View>
 
-          <View style={{ gap: 9, marginBottom: 18 }}>
+          <View style={{ gap: 9, marginBottom: 14 }}>
             {points.map((p) => (
               <View key={p} style={{ flexDirection: "row", gap: 9, alignItems: "flex-start" }}>
                 <Icon name="check" size={15} color={c.success} />
@@ -125,21 +169,43 @@ export function PremiumSheet({
             ))}
           </View>
 
-          {onList ? (
-            <View style={{ flexDirection: "row", gap: 8, alignItems: "center", backgroundColor: c.success + "14", borderRadius: 12, padding: 13, marginBottom: 6 }}>
-              <Icon name="check-circle" size={16} color={c.success} />
-              <Text style={{ flex: 1, color: c.textBody, fontSize: 13 }}>
-                {t("You're on the list — we'll tell you when it opens.", "Uko kwenye orodha — tutakujulisha itakapofunguliwa.")}
-              </Text>
-            </View>
-          ) : (
-            <Button label={t("Notify me when it's ready", "Nijulishe itakapokuwa tayari")} onPress={join} />
+          {/* How to actually get it. Paying is not open — saying only that would
+              leave the user with no move when there is one. */}
+          <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 }}>
+            {t(
+              "Paying isn't open yet — but you don't have to wait. Premium is earned by inviting friends: 7 days each time one of them builds their first CV.",
+              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kuwalika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
+            )}
+          </Text>
+
+          {earn && (
+            <Button
+              label={t("Earn Premium — invite friends", "Pata Premium — walika marafiki")}
+              onPress={() => {
+                haptics.tap();
+                onClose();
+                earn();
+              }}
+            />
           )}
+
+          <View style={{ marginTop: earn ? 10 : 0 }}>
+            {onList ? (
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center", backgroundColor: c.success + "14", borderRadius: 12, padding: 13 }}>
+                <Icon name="check-circle" size={16} color={c.success} />
+                <Text style={{ flex: 1, color: c.textBody, fontSize: 13 }}>
+                  {t("We'll tell you when paying opens.", "Tutakujulisha malipo yanapofunguliwa.")}
+                </Text>
+              </View>
+            ) : (
+              <Pressable onPress={join} style={{ alignSelf: "center", paddingVertical: 8 }}>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
+                  {t("Notify me when paying opens", "Nijulishe malipo yanapofunguliwa")}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+
           <Pressable onPress={onClose} style={{ alignSelf: "center", paddingVertical: 10 }}>
             <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Maybe later", "Baadaye")}</Text>
           </Pressable>
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-}
