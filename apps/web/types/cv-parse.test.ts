@@ -131,22 +131,50 @@ describe("parseCVData — the stored shape keeps working (no regression)", () =>
     expect(cv.hiddenSections).toEqual(["referees"]);
   });
 
-  // ⚠️ KNOWN SHARP EDGE — not fixed here, recorded so it is not rediscovered.
-  // The arrays (`experience`, `projects`, `referees`, …) carry `.default([])`
-  // for a MISSING key but no `.catch` on their ITEMS. One malformed item —
-  // an invented project object missing a required field, say — fails the item,
-  // which fails the array, which fails the whole object, which blanks the
-  // entire CV. That is the same "one bad field costs the whole document"
-  // failure this file exists to pin, one level deeper. A per-item `.catch`
-  // (drop the bad entry, keep the rest) is the fix; it is a deliberate
-  // follow-up, not a silent omission.
-  it("documents that a malformed array item blanks the whole CV", () => {
+  // ─── one bad entry must not cost the whole document ───────────────────────
+  // `z.array(x)` fails the entire array when one item fails, which failed the
+  // whole object, which blanked the CV. The arrays now validate each item
+  // individually and drop only what they cannot read.
+  it("drops an unreadable project instead of blanking the CV", () => {
     const oneBadProject = JSON.stringify({
       personalInfo: { fullName: "Asha M.", email: "", phone: "", location: "" },
+      summary: "kept",
       projects: [{ nonsense: true }],
     });
-    // Today's behaviour, asserted so a future fix has to change THIS line.
-    expect(parseCVData(oneBadProject).personal.fullName).toBe("");
+    const cv = parseCVData(oneBadProject);
+    expect(cv.personal.fullName).toBe("Asha M.");
+    expect(cv.summary).toBe("kept");
+    expect(cv.projects).toEqual([]);
+  });
+
+  it("keeps the readable entries when only some are malformed", () => {
+    const mixed = JSON.stringify({
+      personalInfo: { fullName: "Asha M.", email: "", phone: "", location: "" },
+      skills: [
+        { id: "s1", name: "Excel", level: 3 },
+        { id: "s2", name: "Broken", level: "expert" }, // level must be 1-5
+        { nonsense: true },
+        { id: "s4", name: "Hesabu", level: 5 },
+      ],
+    });
+    const cv = parseCVData(mixed);
+    expect(cv.personal.fullName).toBe("Asha M.");
+    expect(cv.skills.map((s) => s.name)).toEqual(["Excel", "Hesabu"]);
+  });
+
+  it("survives a language whose proficiency is outside the enum", () => {
+    // Not hypothetical: the mobile route's own CV prompt writes
+    // `"proficiency": "professional"`, and the schema accepts only
+    // Native / Fluent / Advanced / Intermediate / Basic. Before the per-item
+    // drop, that ONE field blanked the entire CV.
+    const cv = parseCVData(
+      JSON.stringify({
+        personalInfo: { fullName: "Asha M.", email: "", phone: "", location: "" },
+        languages: [{ id: "l1", language: "Kiswahili", proficiency: "professional" }],
+      }),
+    );
+    expect(cv.personal.fullName).toBe("Asha M.");
+    expect(cv.languages).toEqual([]);
   });
 });
 
