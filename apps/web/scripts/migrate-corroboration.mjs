@@ -9,15 +9,16 @@ import postgres from "postgres";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { guardWrite } from "./lib/db-target.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sqlPath = path.resolve(__dirname, "../drizzle/migrations/0007_job_corroboration.sql");
 
-const url = process.env.DATABASE_URL;
-if (!url) {
-  console.error("❌ DATABASE_URL environment variable is required");
-  process.exit(1);
-}
+// Refuses a remote database unless ALLOW_REMOTE_WRITE=1 is set
+// explicitly: .env.local points DATABASE_URL at production, so
+// "I ran it with --env-file=.env.local" is not evidence of safety.
+// See scripts/lib/db-target.mjs.
+const url = guardWrite({ what: "migrate-corroboration" });
 
 console.log("📦 Connecting to database...");
 const sql = postgres(url, { ssl: "require", prepare: false });
