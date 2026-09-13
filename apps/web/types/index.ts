@@ -249,6 +249,10 @@ export interface CareerPreferences {
   noticePeriod?: string;
   workAuthorization?: string;
   availability?: string;
+  /** Free-text career direction ("what kind of work, and where in N years") —
+   *  kept distinct from targetRoles (short role tags) so it round-trips back
+   *  to the native app's own "Malengo ya kazi" field intact. */
+  careerGoals?: string;
 }
 
 export interface CareerProfile {
@@ -316,6 +320,7 @@ export const careerPreferencesSchema = z.object({
   noticePeriod: z.string().optional(),
   workAuthorization: z.string().optional(),
   availability: z.string().optional(),
+  careerGoals: z.string().optional(),
 });
 
 export const factMetaSchema = z.object({

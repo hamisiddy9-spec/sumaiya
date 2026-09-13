@@ -24,6 +24,7 @@ describe("mobile-bridge", () => {
         skills: "Excel, bookkeeping\nCustomer service",
         experience: "Accounts clerk at Nakumatt, 2019-2023. Ran daily reconciliations.",
         languages: "English, Swahili",
+        goals: "Become a finance manager.",
       }),
     );
 
@@ -41,6 +42,8 @@ describe("mobile-bridge", () => {
       "Sales & Retail",
     ]);
     expect(cp.preferences.preferredLocations).toEqual(["Nairobi"]);
+    // Kept as its own field, not folded into targetRoles.
+    expect(cp.preferences.careerGoals).toBe("Become a finance manager.");
   });
 
   it("leaves empty sections empty (no phantom entries)", () => {
@@ -58,6 +61,7 @@ describe("mobile-bridge", () => {
       skills: "Excel, bookkeeping",
       languages: "English, Swahili",
       headline: "Finance & Accounting",
+      goals: "Move into a finance manager role within 2 years.",
     });
     const back = careerToNativeProfile(nativeProfileToCareer(original), 123);
     expect(back.fullName).toBe("Amina Yusuf");
@@ -66,6 +70,10 @@ describe("mobile-bridge", () => {
     expect(back.skills).toBe("Excel, bookkeeping");
     expect(back.languages).toBe("English, Swahili");
     expect(back.headline).toBe("Finance & Accounting");
+    // Regression: "goals" used to be folded into targetRoles on the way in
+    // and never read back on the way out — permanently lost on any
+    // round-trip through the server (e.g. the reconnect-sync pull).
+    expect(back.goals).toBe("Move into a finance manager role within 2 years.");
     expect(back.updatedAt).toBe(123);
   });
 });

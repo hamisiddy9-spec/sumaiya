@@ -77,9 +77,13 @@ export function nativeProfileToCareer(n: NativeProfile): CareerProfile {
     ];
   }
 
-  const roles = [...splitList(n.headline), ...(n.goals?.trim() ? [n.goals.trim()] : [])];
-  cp.preferences.targetRoles = Array.from(new Set(roles)).slice(0, 6);
+  cp.preferences.targetRoles = Array.from(new Set(splitList(n.headline))).slice(0, 6);
   if (n.location?.trim()) cp.preferences.preferredLocations = [n.location.trim()];
+  // Kept as its own field (not folded into targetRoles) so it round-trips
+  // back via careerToNativeProfile below instead of being permanently lost —
+  // it used to disappear from the native "Malengo ya kazi" field the moment
+  // the profile round-tripped through the server (e.g. on reconnect sync).
+  if (n.goals?.trim()) cp.preferences.careerGoals = n.goals.trim();
 
   return cp;
 }
@@ -121,8 +125,8 @@ export function careerToNativeProfile(cp: CareerProfile, updatedAt: number): Nat
     skills: (cp.skills ?? []).map((s) => s.name).filter(Boolean).join(", "),
     experience: experienceText(cp),
     education: educationText(cp),
-    goals: "",
     languages: (cp.languages ?? []).map((l) => l.name).filter(Boolean).join(", "),
+    goals: cp.preferences?.careerGoals ?? "",
     updatedAt,
   };
 }
