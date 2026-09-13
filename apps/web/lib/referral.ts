@@ -8,12 +8,15 @@
 import "server-only";
 import { customAlphabet, nanoid } from "nanoid";
 import { and, eq, isNull, inArray, count } from "drizzle-orm";
-import { db, referralCode, referralClaim, cv } from "@/lib/db";
+import { db, referralCode, referralClaim, cv, profile } from "@/lib/db";
 import { captureServer } from "@/lib/analytics/server";
 
 // Unambiguous alphabet — no 0/O/1/I/l — so a code read aloud or typed on a
 // cheap keypad still resolves.
 const genCode = customAlphabet("23456789abcdefghjkmnpqrstuvwxyz", 7);
+
+/** Days of Sumaiya Premium granted to the referrer per activated friend. */
+export const PREMIUM_DAYS_PER_REFERRAL = 7;
 
 export function referralUrl(code: string): string {
   const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.templatehub.pro";
@@ -86,6 +89,8 @@ export interface ReferralStats {
   url: string;
   joined: number;
   activated: number;
+  /** ISO timestamp, or null. Premium earned via referrals — see PREMIUM_DAYS_PER_REFERRAL. */
+  premiumUntil: string | null;
 }
 
 export async function referralStats(userId: string): Promise<ReferralStats> {
@@ -99,6 +104,7 @@ export async function referralStats(userId: string): Promise<ReferralStats> {
   // Lazy activation: a referred user is "activated" once they have a CV row.
   const pendingIds = claims.filter((c) => !c.activatedAt).map((c) => c.referredUserId);
   let newlyActivated = 0;
+  let premiumUntil: Date | null = null;
   if (pendingIds.length) {
     const withCv = await db
       .select({ userId: cv.userId })
@@ -119,11 +125,30 @@ export async function referralStats(userId: string): Promise<ReferralStats> {
           ),
         );
       newlyActivated = toStamp.length;
+      premiumUntil = await grantPremiumDays(userId, PREMIUM_DAYS_PER_REFERRAL * toStamp.length);
     }
   }
 
+  if (premiumUntil === null) {
+    const row = await db.select({ premiumUntil: profile.premiumUntil }).from(profile).where(eq(profile.id, userId)).limit(1);
+    premiumUntil = row[0]?.premiumUntil ?? null;
+  }
+
   const activated = claims.filter((c) => c.activatedAt).length + newlyActivated;
-  return { code, url: referralUrl(code), joined: claims.length, activated };
+  return { code, url: referralUrl(code), joined: claims.length, activated, premiumUntil: premiumUntil?.toISOString() ?? null };
+}
+
+/** Extends (or starts) a user's Premium window by `days`, stacking on top of
+ *  any time still remaining rather than overwriting it. Returns the new
+ *  expiry. Exported for the referral activation path and for tests. */
+export async function grantPremiumDays(userId: string, days: number): Promise<Date> {
+  const row = await db.select({ premiumUntil: profile.premiumUntil }).from(profile).where(eq(profile.id, userId)).limit(1);
+  const now = new Date();
+  const base = row[0]?.premiumUntil && row[0].premiumUntil > now ? row[0].premiumUntil : now;
+  const next = new Date(base.getTime() + days * 24 * 60 * 60 * 1000);
+  await db.update(profile).set({ premiumUntil: next, updatedAt: now }).where(eq(profile.id, userId));
+  captureServer(userId, "referral_premium_granted", { days, premiumUntil: next.toISOString() });
+  return next;
 }
 
 // Small helper kept for symmetry with count() import (used by tests/aggregation).

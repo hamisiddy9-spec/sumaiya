@@ -101,6 +101,7 @@ export interface AnalyticsEventMap {
   outcome_recorded: { stage: "interview" | "offer" | "hired" | "no" };
   referral_sent: { channel: "whatsapp" | "link" | "copy" };
   referral_converted: Record<string, never>;
+  referral_premium_granted: { days: number; premiumUntil: string };
   pwa_installed: void;
   web_push_subscribed: void;
 }
@@ -143,6 +144,7 @@ export const EVENTS = Object.freeze(
       "outcome_recorded",
       "referral_sent",
       "referral_converted",
+      "referral_premium_granted",
       "pwa_installed",
       "web_push_subscribed",
     ] as const satisfies readonly AnalyticsEventName[]

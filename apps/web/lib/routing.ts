@@ -25,6 +25,7 @@ export function isProtectedPath(pathname: string): boolean {
 // Public marketing routes under app/[locale]/(marketing)/. Keep in sync with
 // those folders.
 export const MARKETING_PREFIXES = [
+  "/pro",
   "/templates",
   "/jobs",
   "/tools",

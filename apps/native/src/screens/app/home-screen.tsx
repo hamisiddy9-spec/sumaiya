@@ -22,6 +22,10 @@ import {
   useThemeColors,
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
+import { TemplateGallery } from "../../components/cv/template-gallery";
+import { TemplateThumb } from "../../components/cv/template-thumb";
+import { ALL_TEMPLATES, ENGINE_TEMPLATES, templateLayout, type CvTemplateId } from "../../lib/cv-html";
+import { getDefaultTemplate, setDefaultTemplate } from "../../lib/prefs";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
 
@@ -71,6 +75,38 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   // here would keep laying out phone-width tiles on a now-tablet-width screen.
   const { width: winWidth } = useWindowDimensions();
   const COL_W = (winWidth - SIDE * 2 - GUTTER) / 2;
+
+  // ── TemplateHub ────────────────────────────────────────────────────────────
+  // Every design lives here. The dashboard shows one teaser — a single thumb
+  // per layout family, so the strip reads as "there are different kinds of
+  // design", not as five random swatches — and the full gallery opens from it.
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [defaultTemplate, setDefaultTemplateId] = useState<CvTemplateId | null>(null);
+  useEffect(() => {
+    let alive = true;
+    getDefaultTemplate().then((id) => { if (alive) setDefaultTemplateId(id); });
+    return () => { alive = false; };
+  }, []);
+
+  const hubTeaser = useMemo(() => {
+    const seen = new Set<string>();
+    const out: typeof ALL_TEMPLATES = [];
+    // Engine templates only, so all five layout families are represented — the
+    // original six would otherwise claim a slot and hide a whole family.
+    for (const tpl of ENGINE_TEMPLATES) {
+      const family = templateLayout(tpl.id);
+      if (seen.has(family)) continue;
+      seen.add(family);
+      out.push(tpl);
+      if (out.length === 5) break;
+    }
+    return out;
+  }, []);
+
+  const chooseTemplate = (id: CvTemplateId) => {
+    setDefaultTemplateId(id);
+    void setDefaultTemplate(id);
+  };
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -168,6 +204,44 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={{ color: c.accentText, opacity: 0.9, fontSize: 12, fontWeight: "600", marginTop: 1 }}>
               {t("Start from scratch", "Anza upya")} →
             </Text>
+          </View>
+        </Card>
+      </Animated.View>
+
+      {/* TemplateHub — the home for every design. */}
+      <Animated.View entering={FadeInDown.duration(320).delay(90)}>
+        <SectionHeader title="TemplateHub" />
+        <Card
+          onPress={() => {
+            haptics.selection();
+            setGalleryOpen(true);
+          }}
+          accessibilityLabel={t("Open TemplateHub", "Fungua TemplateHub")}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={{ color: c.text, fontSize: 16, fontWeight: "800" }}>
+                {t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
+                {t("Free and premium. Pick your look.", "Bure na premium. Chagua muonekano wako.")}
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={18} color={c.textMuted} />
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+            {hubTeaser.map((tpl) => (
+              <View key={tpl.id} style={{ alignItems: "center", gap: 4 }}>
+                <TemplateThumb id={tpl.id} accent={c.accent} width={46} />
+                <Text
+                  numberOfLines={1}
+                  style={{ color: c.textMuted, fontSize: 8.5, fontWeight: "700", maxWidth: 50 }}
+                >
+                  {lang === "sw" ? tpl.name.sw : tpl.name.en}
+                </Text>
+              </View>
+            ))}
           </View>
         </Card>
       </Animated.View>
@@ -407,6 +481,14 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           </View>
         )}
       </Animated.View>
+
+      {/* The full gallery: searchable, filterable, virtualised. */}
+      <TemplateGallery
+        visible={galleryOpen}
+        selected={defaultTemplate ?? undefined}
+        onSelect={chooseTemplate}
+        onClose={() => setGalleryOpen(false)}
+      />
     </Screen>
   );
 }

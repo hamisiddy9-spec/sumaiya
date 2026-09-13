@@ -14,6 +14,7 @@ interface Stats {
   url: string;
   joined: number;
   activated: number;
+  premiumUntil: string | null;
 }
 
 export function ReferralCard({ sw = false }: { sw?: boolean }) {
@@ -63,10 +64,13 @@ export function ReferralCard({ sw = false }: { sw?: boolean }) {
           {sw ? "Mwalike rafiki" : "Invite a friend"}
         </h3>
       </div>
-      <p className="text-xs text-text-body mb-3">
+      <p className="text-xs text-text-body mb-1">
         {sw
           ? "Shiriki Sumaiya na mtu anayetafuta kazi. Ni bure kwao pia."
           : "Share Sumaiya with someone job-hunting. It's free for them too."}
+      </p>
+      <p className="text-xs font-semibold text-ember mb-3">
+        {sw ? "Pata siku 7 za Sumaiya Premium kila rafiki anapotengeneza CV." : "Earn 7 days of Sumaiya Premium every time a friend builds a CV."}
       </p>
 
       <div className="flex items-center gap-1.5">
@@ -105,6 +109,14 @@ export function ReferralCard({ sw = false }: { sw?: boolean }) {
               ? `Watu ${stats.joined} wamejiunga · ${stats.activated} wametengeneza CV`
               : `${stats.joined} joined · ${stats.activated} built a CV`}
           </span>
+        </div>
+      )}
+
+      {stats.premiumUntil && new Date(stats.premiumUntil).getTime() > Date.now() && (
+        <div className="mt-2 text-xs font-semibold text-ember">
+          {sw
+            ? `Umepata Premium hadi ${new Date(stats.premiumUntil).toLocaleDateString()}`
+            : `Premium earned until ${new Date(stats.premiumUntil).toLocaleDateString()}`}
         </div>
       )}
     </div>
