@@ -525,6 +525,11 @@ export class ApiClient {
     version?: string | null;
     url?: string | null;
     notes?: { en?: string | null; sw?: string | null } | null;
+    // A floor and a line-reset flag. The route has returned both since the
+    // restarted-version-line work; this type simply never learned about them,
+    // so `manifest?.minimumVersion` was a compile error at the call site.
+    minimumVersion?: string | null;
+    lineReset?: boolean | null;
   }> {
     return this.request("/api/app/update");
   }
