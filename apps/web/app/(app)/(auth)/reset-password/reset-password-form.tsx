@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2, KeyRound } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { authErrorMessage } from "@/lib/auth-errors";
 import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 
@@ -72,7 +73,11 @@ export function ResetPasswordForm({ lang }: { lang: string }) {
     const supabase = createSupabaseBrowserClient();
     const { error: updateError } = await supabase.auth.updateUser({ password });
     if (updateError) {
-      setError(updateError.message);
+      // Never `updateError.message` — the SDK answers in English ("Password
+      // should be at least 6 characters"), and this page is Swahili for half
+      // its users. `code` is passed too, but a 500 drops it, so the message
+      // goes along as the fallback signal.
+      setError(authErrorMessage(updateError.code, sw, updateError.message));
       setStatus("ready");
       return;
     }

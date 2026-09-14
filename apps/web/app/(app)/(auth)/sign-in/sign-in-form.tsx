@@ -161,7 +161,7 @@ function SignInForm({ lang }: { lang: string }) {
       if (result.error) {
         // Map Supabase auth error codes to LOCALIZED messages — never leak the
         // raw SDK string (e.g. "Email rate limit exceeded.") into the UI.
-        setErrorMsg(authErrorMessage(result.error.code, sw));
+        setErrorMsg(authErrorMessage(result.error.code, sw, result.error.message));
         setStatus("error");
       } else {
         setStatus(mode === "code" ? "code-sent" : "sent");
