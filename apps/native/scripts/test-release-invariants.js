@@ -6,9 +6,10 @@
  *  1. release builds were signed with the public debug keystore
  *  2. assetlinks.json declared a fingerprint nothing was signed with, so
  *     App Links could never verify
- *  3. the App Links filter claimed the apex host, which 308-redirects to www —
- *     Android won't follow a redirect to fetch assetlinks.json, so that entry
- *     failed forever (domain state 1024)
+ *  3. the App Links filter claimed the host that 308-redirects, and Android
+ *     won't follow a redirect to fetch assetlinks.json, so that entry failed
+ *     forever (domain state 1024). Whichever host serves the file directly is
+ *     the only one worth claiming.
  *
  * Run: node scripts/test-release-invariants.js
  */
@@ -82,9 +83,12 @@ check("manifest: an autoVerify filter exists", Boolean(autoVerifyBlock));
 const av = autoVerifyBlock ? autoVerifyBlock[0] : "";
 const httpsHosts = [...av.matchAll(/android:host="([^"]+)"/g)].map((m) => m[1]);
 check("manifest: claims exactly one https host", httpsHosts.length === 1);
-check("manifest: that host is the canonical www host", httpsHosts[0] === "www.templatehub.pro");
-// The apex redirects; claiming it yields a permanent verification failure.
-check("manifest: does not claim the apex host", !/android:host="templatehub\.pro"/.test(manifest));
+// The canonical host is the apex: sumaiya.app serves assetlinks.json directly.
+check("manifest: that host is the canonical apex host", httpsHosts[0] === "sumaiya.app");
+// www 308-redirects to the apex; claiming it yields a permanent verification
+// failure. This assertion used to read the other way round, on the old domain
+// where the apex was the one that redirected.
+check("manifest: does not claim the redirecting www host", !/android:host="www\.sumaiya\.app"/.test(manifest));
 
 // ------------------------------------------------------------ assetlinks ---
 const assetlinks = read("../web/public/.well-known/assetlinks.json");
@@ -109,13 +113,13 @@ const verified = filters.filter((f) => f.autoVerify);
 check("app.json: declares the App Links filter (survives prebuild)", verified.length === 1);
 check(
   "app.json: verified filter targets the canonical host",
-  verified.length === 1 && verified[0].data.some((d) => d.host === "www.templatehub.pro"),
+  verified.length === 1 && verified[0].data.some((d) => d.host === "sumaiya.app"),
 );
 check(
   "app.json: keeps the sumaiya:// scheme filter",
   filters.some((f) => f.data.some((d) => d.scheme === "sumaiya")),
 );
-check("app.json: no apex host claimed", !JSON.stringify(filters).includes('"host":"templatehub.pro"'));
+check("app.json: no www host claimed", !JSON.stringify(filters).includes('"host":"www.sumaiya.app"'));
 
 // ---------------------------------------------------------------- report ---
 let failed = 0;

@@ -18,6 +18,8 @@ import type { AuthUser } from "@sumaiya/types";
 import { supabase } from "../lib/supabase";
 import { apiClient as sharedApiClient } from "../lib/api-client";
 import { reportError } from "../lib/reporting";
+import { friendlyError } from "../lib/auth-errors";
+import { getLastKnownLang } from "../lib/i18n";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -51,19 +53,6 @@ function toAuthUser(user: User): AuthUser {
     createdAt: user.created_at ? new Date(user.created_at) : new Date(),
     updatedAt: user.updated_at ? new Date(user.updated_at) : new Date(),
   };
-}
-
-function friendlyError(message: string): string {
-  if (/token has expired|expired|otp_expired/i.test(message)) {
-    return "That code has expired — tap “Send me a code” to get a fresh one.";
-  }
-  if (/invalid|incorrect|token/i.test(message) && /otp|code/i.test(message)) {
-    return "That code isn't right. Check the digits and try again.";
-  }
-  if (/rate limit|too many/i.test(message)) {
-    return "Too many attempts. Wait a minute, then try again.";
-  }
-  return message;
 }
 
 export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProviderProps) {
@@ -127,11 +116,11 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
           });
           if (otpError) throw otpError;
         } else if (params.error_description) {
-          setError(friendlyError(params.error_description));
+          setError(friendlyError(params.error_description, getLastKnownLang()));
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : "Confirmation failed";
-        setError(friendlyError(message));
+        setError(friendlyError(message, getLastKnownLang()));
       } finally {
         setLoading(false);
       }
@@ -178,11 +167,11 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
         return; // silent — cancelled or a double-tap
       }
       if (isErrorWithCode(err) && err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setError("Google Play Services isn't available on this device.");
+        setError(friendlyError("PLAY_SERVICES_NOT_AVAILABLE", getLastKnownLang()));
         throw err;
       }
       const message = err instanceof Error ? err.message : "Google sign-in failed";
-      setError(friendlyError(message));
+      setError(friendlyError(message, getLastKnownLang()));
       throw err;
     } finally {
       setLoading(false);
@@ -207,7 +196,7 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
       options: { shouldCreateUser: true },
     });
     if (otpError) {
-      setError(friendlyError(otpError.message));
+      setError(friendlyError(otpError.message, getLastKnownLang()));
       throw otpError;
     }
   }, []);
@@ -222,7 +211,7 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
         type: "email",
       });
       if (vErr || !data.session) {
-        setError(friendlyError(vErr?.message ?? "That code is wrong or expired."));
+        setError(friendlyError(vErr?.message ?? "That code is wrong or expired.", getLastKnownLang()));
         throw vErr ?? new Error("no session");
       }
     } finally {
