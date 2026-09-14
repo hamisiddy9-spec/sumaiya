@@ -209,6 +209,58 @@ export function toStringArray(value: unknown): string[] {
   return unwrapped.filter((v): v is string => typeof v === "string");
 }
 
+/** Every array section, paired with the schema for ONE of its rows. */
+const CV_ARRAY_SECTIONS: Array<[string, z.ZodTypeAny]> = [
+  ["experience", experienceEntrySchema],
+  ["education", educationEntrySchema],
+  ["skills", skillEntrySchema],
+  ["projects", projectEntrySchema],
+  ["languages", languageEntrySchema],
+  ["certifications", certificationEntrySchema],
+  ["referees", refereeEntrySchema],
+];
+
+/**
+ * Second-chance parse: keep every row that parses, drop only the rows that do
+ * not, then parse the document again.
+ *
+ * `cvDataSchema` is deliberately strict — a plain `z.array(itemSchema)` fails
+ * the WHOLE document when one row is off, and `parseCVData` answers a failed
+ * document with an EMPTY CV. Measured, before this existed: a single skill row
+ * written without `level` (an older app version, the mobile writer, an import)
+ * turned a complete CV into `fullName: "" · summary: "" · experience: [] ·
+ * skills: []` — the name and every job gone because of one missing number in an
+ * unrelated section. Same failure mode as the 2026-09-13 P0 that left 19 stored
+ * CVs rendering blank; the guard `personal` already carries ("losing a name is
+ * survivable; losing the CV is not") protected that one field only.
+ *
+ * Takes the document AFTER unwrapStoredJson + toStoredCvData have run, so it
+ * composes with them rather than repeating their work — the shape it filters is
+ * the STORED shape `cvDataSchema` expects.
+ *
+ * Returns null when even the salvage fails, so the caller keeps its own
+ * last-resort behaviour.
+ */
+function salvageCvData(candidate: unknown): CVData | null {
+  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return null;
+  const raw = candidate as Record<string, unknown>;
+  const salvaged: Record<string, unknown> = { ...raw };
+
+  for (const [section, rowSchema] of CV_ARRAY_SECTIONS) {
+    const rows = raw[section];
+    if (rows === undefined) continue; // let the schema's default handle "missing"
+    salvaged[section] = Array.isArray(rows)
+      ? rows.filter((row) => rowSchema.safeParse(row).success)
+      : [];
+  }
+  // Scalars: a wrong type here used to take the entire CV down with it.
+  if (typeof raw.summary !== "string") salvaged.summary = "";
+  if (typeof raw.hobbies !== "string") salvaged.hobbies = "";
+
+  const result = cvDataSchema.safeParse(salvaged);
+  return result.success ? result.data : null;
+}
+
 export function parseCVData(data: unknown): CVData {
   const candidate = unwrapStoredJson(data);
   // ...then normalise the APP's shape to the STORED one before validating.
@@ -228,7 +280,10 @@ export function parseCVData(data: unknown): CVData {
   const normalized = toStoredCvData<Record<string, unknown>>(candidate);
   const result = cvDataSchema.safeParse(normalized);
   if (result.success) return result.data;
-  return createEmptyCVData();
+  // Strict parse failed. Before throwing the document away, try once more
+  // keeping only the rows/fields that parse — one stale entry must not cost the
+  // user their name and every job. See salvageCvData.
+  return salvageCvData(normalized) ?? createEmptyCVData();
 }
 
 // ─── CV Data Types ────────────────────────────────────────────────────────────
