@@ -18,6 +18,9 @@
   "dependencies": {
     "@sumaiya/types": "file:../types"
   },
+  "devDependencies": {
+    "expo-sqlite": "^57.0.1"
+  },
   "peerDependencies": {
     "expo-sqlite": "*"
   },
