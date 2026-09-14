@@ -31,6 +31,11 @@ next-env.d.ts
 # Drizzle
 drizzle/migrations/meta
 .env*
+# ...but the template itself has to ship. The catch-all above matches
+# `.env.example` too, which left this app with no committed environment
+# reference while apps/whatsapp/.env.example is tracked (its .gitignore has no
+# catch-all). Keep this negation directly under the rule it corrects.
+!.env.example
 
 # Local env file
 .env.local
