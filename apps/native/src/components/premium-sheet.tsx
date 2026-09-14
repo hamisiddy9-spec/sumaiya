@@ -182,7 +182,7 @@ export function PremiumSheet({
             <Button
               label={t("Earn Premium — invite friends", "Pata Premium — walika marafiki")}
               onPress={() => {
-                haptics.tap();
+                haptics.light();
                 onClose();
                 earn();
               }}
@@ -209,3 +209,8 @@ export function PremiumSheet({
           <Pressable onPress={onClose} style={{ alignSelf: "center", paddingVertical: 10 }}>
             <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Maybe later", "Baadaye")}</Text>
           </Pressable>
+        </Animated.View>
+      </View>
+    </Modal>
+  );
+}
