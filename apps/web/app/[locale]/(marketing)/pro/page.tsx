@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { TemplateHubProLanding } from "@/components/marketing/templatehub-pro-landing";
+import { alternatesFor } from "@/lib/seo";
 
 /**
  * TemplateHub Pro — the page sumaiya.app serves at its root.
@@ -22,7 +23,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    alternates: { canonical: "/pro" },
+    alternates: alternatesFor("/pro", params.locale),
     title: sw
       ? "TemplateHub Pro — miundo ya CV iliyoundwa kwa zama za AI"
       : "TemplateHub Pro — CV designs built for the age of AI",

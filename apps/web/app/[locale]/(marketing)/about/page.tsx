@@ -4,11 +4,12 @@ import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { headers } from "next/headers";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    alternates: { canonical: "/about" },
+    alternates: alternatesFor("/about", params.locale),
     title: sw ? "Kuhusu Sisi" : "About",
     description: sw
       ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita ATS, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."

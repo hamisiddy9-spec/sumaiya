@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { COMPANY, entityLine } from "@/lib/legal";
+import { alternatesFor } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
@@ -10,7 +11,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     description: sw
       ? "Vidakuzi gani Sumaiya hutumia (na ambavyo hatutumii) — vidakuzi muhimu vya kuingia na uchanganuzi usio na vidakuzi."
       : "What cookies Sumaiya uses (and doesn't) — essential sign-in cookies and cookieless analytics.",
-    alternates: { canonical: "/cookies" },
+    alternates: alternatesFor("/cookies", params.locale),
   };
 }
 

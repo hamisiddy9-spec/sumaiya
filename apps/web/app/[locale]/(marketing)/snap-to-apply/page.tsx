@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { Icon } from "@/components/ui/icon";
+import { alternatesFor } from "@/lib/seo";
 
 // D6 — public Snap-to-Apply SEO landing page (#259). Lives under
 // (marketing)/ so the middleware rewrites the bare /snap-to-apply path to
@@ -25,7 +26,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
           "tailor resume to job", "cover letter generator", "job application cv",
           "cv matching job description", "customize cv for job", "resume tailoring",
         ],
-    alternates: { canonical: "/snap-to-apply" },
+    alternates: alternatesFor("/snap-to-apply", params.locale),
     openGraph: {
       title: sw ? "Lenga CV Yako kwa Sekunde 30 — Bure | Sumaiya" : "Tailor Your CV to Any Job in 30 Seconds — Free | Sumaiya",
       description: sw

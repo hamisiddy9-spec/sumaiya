@@ -7,6 +7,7 @@ import { NakuruTemplate } from "@/components/templates/nakuru";
 import { getSampleCV } from "@/lib/sample-cv";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
+import { alternatesFor } from "@/lib/seo";
 
 // One indexable, rankable landing page per template — the core of organic
 // acquisition ("<name> CV template", "free ATS CV template", etc.). Static at
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
   return {
     title,
     description,
-    alternates: { canonical: `/templates/${t.id}` },
+    alternates: alternatesFor(`/templates/${t.id}`, params.locale),
     openGraph: {
       title: `${title} | Sumaiya`,
       description,
