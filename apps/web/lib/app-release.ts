@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.11",
+  version: "1.6.14",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -52,7 +52,20 @@ export const APP_RELEASE: AppReleaseManifest = {
   // every in-app update link 404'd at the DNS layer.
   url: "https://sumaiya.app/downloads/sumaiya.apk",
   notes: {
-    en: "This version is signed with a real release key, so updates can actually reach you from now on. Because the signature changed, it installs once from scratch: remove the old app first, then install this and sign in again. Also fixed — the app no longer tells you that you are offline when your connection is fine, and sign-in links now open inside the app instead of the browser.",
-    sw: "Toleo hili limesainiwa kwa ufunguo halisi wa matoleo, hivyo masasisho yanaweza kukufikia kuanzia sasa. Kwa sababu sahihi imebadilika, linasakinishwa mara moja kuanzia mwanzo: ondoa app ya zamani kwanza, kisha sakinisha hili na uingie tena. Pia imerekebishwa — app haisemi tena kuwa huna mtandao wakati mtandao wako ni mzuri, na viungo vya kuingia sasa vinafunguka ndani ya app badala ya browser.",
+    // 1.6.12 and 1.6.13 were built but never announced, so this is the first
+    // bump since 1.6.11 that users will actually see. It is a normal update —
+    // same signing key throughout, no "remove the old app first" dance.
+    //
+    // What it says is the one thing true of every version before it: sign-in
+    // could not work. 1.6.11 and 1.6.12 shipped without the Supabase anon key
+    // in the bundle, so the email code was refused with "Invalid API key" and
+    // nobody could get in. Users who gave up should be told the cause was ours
+    // and that a retry is worth it now.
+    //
+    // Deliberately does not promise that the code will arrive: the mailer is
+    // configured on the Supabase side, so this build can accept the request
+    // while delivery is still being fixed. No "you're all set".
+    en: "Sign-in works again. Earlier versions sent your code without the app's key, so it was always refused — update, then ask for a new code.",
+    sw: "Kuingia kunafanya kazi tena. Matoleo ya awali yalituma msimbo wako bila ufunguo wa app, hivyo ulikataliwa kila mara — sasisha, kisha omba msimbo mpya.",
   },
 };
