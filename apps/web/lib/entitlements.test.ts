@@ -3,6 +3,7 @@ import {
   can,
   allowed,
   entitlementsFor,
+  isPremiumActive,
   type Capability,
   type EntitlementSubject,
 } from "./entitlements";
@@ -67,5 +68,93 @@ describe("allowed() / entitlementsFor()", () => {
     const gmap = entitlementsFor(guest);
     expect(gmap["cv.create"]).toBe(true);
     expect(gmap["application.track"]).toBe(false);
+  });
+});
+
+// ─── template.premium — the first plan-gated capability ─────────────────────
+//
+// Referrals have always granted real Premium time (profile.premiumUntil, see
+// lib/referral.ts) but nothing consulted it: `isPremiumActive` had zero call
+// sites, so a referrer was congratulated on Premium and then locked out of the
+// premium designs anyway. These pin the fix.
+
+const days = (n: number) => new Date(Date.now() + n * 86_400_000);
+const premiumUser: EntitlementSubject = {
+  userId: "u_1",
+  premiumUntil: days(7),
+};
+
+describe("can() — template.premium", () => {
+  it("is refused for a signed-in free user, with an upsell reason", () => {
+    const r = can(user, "template.premium");
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toBe("requires_plan");
+  });
+
+  it("is allowed for a user with a live earned Premium window (ISO string)", () => {
+    expect(can({ userId: "u_1", premiumUntil: days(7).toISOString() }, "template.premium").allowed).toBe(true);
+  });
+
+  it("is allowed for a user with a live earned Premium window (Date)", () => {
+    expect(can(premiumUser, "template.premium").allowed).toBe(true);
+  });
+
+  it("is refused again once the earned window has passed", () => {
+    const expired = can({ userId: "u_1", premiumUntil: days(-1).toISOString() }, "template.premium");
+    expect(expired.allowed).toBe(false);
+    expect(expired.reason).toBe("requires_plan");
+  });
+
+  it("is refused when no window was ever earned (null / undefined)", () => {
+    expect(can({ userId: "u_1", premiumUntil: null }, "template.premium").allowed).toBe(false);
+    expect(can({ userId: "u_1" }, "template.premium").allowed).toBe(false);
+  });
+
+  it("is allowed on a paid plan even with no earned window", () => {
+    expect(can({ userId: "u_1", plan: "pro" }, "template.premium").allowed).toBe(true);
+  });
+
+  it("honours an explicit grant", () => {
+    expect(can({ userId: "u_1", grants: ["template.premium"] }, "template.premium").allowed).toBe(true);
+  });
+
+  it("answers a guest with the upsell, not 'sign in'", () => {
+    // Deliberate: a guest tapping a premium design should hear "premium", and
+    // earning Premium needs an account anyway — so `requires_plan` is the more
+    // useful answer than `guest_only`.
+    const r = can(guest, "template.premium");
+    expect(r.allowed).toBe(false);
+    expect(r.reason).toBe("requires_plan");
+  });
+
+  it("does not leak into the free capabilities", () => {
+    // The gate must be surgical: adding it must not accidentally plan-gate the
+    // rest of the product for free users.
+    const map = entitlementsFor(user);
+    expect(map["template.premium"]).toBe(false);
+    expect(map["cv.create"]).toBe(true);
+    expect(map["doc.export"]).toBe(true);
+    expect(map["assistant.chat"]).toBe(true);
+  });
+
+  it("shows true in the map for a premium subject", () => {
+    expect(entitlementsFor(premiumUser)["template.premium"]).toBe(true);
+  });
+});
+
+describe("isPremiumActive()", () => {
+  it("is false for absent or unparseable values", () => {
+    expect(isPremiumActive(null)).toBe(false);
+    expect(isPremiumActive(undefined)).toBe(false);
+    expect(isPremiumActive("")).toBe(false);
+  });
+
+  it("is false at the exact expiry instant (boundary is exclusive)", () => {
+    expect(isPremiumActive(new Date())).toBe(false);
+  });
+
+  it("is true one second before expiry and false one second after", () => {
+    expect(isPremiumActive(new Date(Date.now() + 1000))).toBe(true);
+    expect(isPremiumActive(new Date(Date.now() - 1000))).toBe(false);
   });
 });
