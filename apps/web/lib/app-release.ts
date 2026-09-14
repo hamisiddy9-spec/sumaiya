@@ -9,6 +9,33 @@ export interface AppReleaseManifest {
   version: string;
   url: string;
   notes: { en: string; sw: string };
+  /**
+   * Optional FLOOR: the oldest installed build still supported. The app prompts
+   * when the installed build is NUMERICALLY BELOW this.
+   *
+   * This is a prompt rule, not release data, which is why it lives in code
+   * rather than in the `app_release` table. Leave it unset for a normal release
+   * — absent means exactly the old behaviour. Fails safe: an unparseable value
+   * is no floor, never a lock.
+   */
+  minimumVersion?: string;
+  /**
+   * Set when the shipped version line has RESTARTED.
+   *
+   * Why it exists: the app prompts only when the manifest advertises a version
+   * that is STRICTLY NEWER than the installed build. That is right for normal
+   * releases and wrong for a reset — installed 1.6.11, line restarts at 1.1,
+   * `1 < 6`, the manifest is never "newer", and the new build reaches nobody.
+   *
+   * `minimumVersion` cannot express this either: a floor of "1.1" does not catch
+   * an installed "1.6.11", because 1.6.11 is numerically ABOVE 1.1 (measured,
+   * not assumed — see `isBelowFloor` and its tests). The reset therefore needs
+   * its own flag rather than a cleverer comparison.
+   *
+   * Self-terminating: once installed equals the advertised version the prompt
+   * stops. Set it for the reset, then unset it on the release after.
+   */
+  lineReset?: boolean;
 }
 
 export const APP_RELEASE: AppReleaseManifest = {

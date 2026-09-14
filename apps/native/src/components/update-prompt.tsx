@@ -63,7 +63,17 @@ export function UpdatePrompt() {
           apiClient.getAppUpdate().catch(() => null as UpdateManifest | null),
         ]);
         const latest = manifest?.version ?? "";
-        if (latest && shouldShowPrompt(APP_VERSION, latest, skipped, delivered)) {
+        if (
+          latest &&
+          shouldShowPrompt(
+            APP_VERSION,
+            latest,
+            skipped,
+            delivered,
+            manifest?.minimumVersion,
+            manifest?.lineReset,
+          )
+        ) {
           setInfo({
             version: latest,
             url: manifest?.url || DEFAULT_URL,
