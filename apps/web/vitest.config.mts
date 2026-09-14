@@ -15,6 +15,9 @@ export default defineConfig({
     // carry Expo/mobile test files that don't belong to this (web) project.
     exclude: ["**/node_modules/**", "**/.claude/**", "**/.next/**"],
     environment: "node",
+    // Strips provider API keys before any test file loads, so nothing in the
+    // suite can reach a real (paid) AI provider — see the file for why.
+    setupFiles: [path.join(dir, "test/hermetic-ai-env.ts")],
     pool: "forks",
     maxWorkers: process.env.VITEST_PARALLEL === "1" ? undefined : 1,
     minWorkers: 1,
