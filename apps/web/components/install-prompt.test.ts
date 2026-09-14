@@ -12,6 +12,10 @@ describe("isInstallBlockedPath", () => {
     expect(isInstallBlockedPath("/editor/cv/try")).toBe(true);
     expect(isInstallBlockedPath("/import-cv")).toBe(true);
     expect(isInstallBlockedPath("/studio")).toBe(true);
+    // /snap ends in the Snap-to-Apply CTA the banner was covering in a real
+    // browser walkthrough.
+    expect(isInstallBlockedPath("/snap")).toBe(true);
+    expect(isInstallBlockedPath("/snap?job=x")).toBe(true);
   });
 
   it("allows marketing / dashboard routes where the banner may show", () => {

@@ -21,6 +21,12 @@ export const INSTALL_DISMISS_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
 const INSTALL_BLOCKED_PATHS = [
   /^\/(assistant|import-cv|studio)([/?]|$)/,
   /^\/editor([/?]|$)/,
+  // /snap is the Snap-to-Apply entry point and its whole card ends in the one
+  // button that matters ("Snap ombi langu"). Confirmed by walking it in a real
+  // browser: the banner rendered on top of that CTA, so the tap a first-time
+  // visitor is most likely to make hit the banner instead. Same click-steal the
+  // /assistant entry was added for.
+  /^\/snap([/?]|$)/,
 ];
 
 export function isInstallBlockedPath(pathname: string): boolean {
