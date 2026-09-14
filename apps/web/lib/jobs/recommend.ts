@@ -11,7 +11,7 @@
  */
 import { db, cv, job, jobRecommendation, userProfile, type NewJobRecommendation } from "../db";
 import { eq, desc, inArray, gt, and } from "drizzle-orm";
-import { parseCVData, parseCareerProfile } from "../../types";
+import { parseCVData, parseCareerProfile, toStringArray } from "../../types";
 import { getCVTerms, extractTerms, scoreTerms } from "../job-match";
 import { profileToCvData } from "../career-profile/mapper";
 import { LIVE_STATUSES } from "./constants";
@@ -191,7 +191,9 @@ export async function getRecommendations(userId: string, limit = DEFAULT_LIMIT):
         jobId: r.job.id,
         score: r.rec.score,
         reason: r.rec.reason,
-        matchedTerms: (r.rec.matchedTerms ?? []) as string[],
+        // Not a cast: 46 of 46 stored rows are a JSON string, and a cast let
+        // that reach the render path as an array-typed lie.
+        matchedTerms: toStringArray(r.rec.matchedTerms),
         job: {
           id: r.job.id, title: r.job.title, company: r.job.company, location: r.job.location,
           category: r.job.category, employmentType: r.job.employmentType, description: r.job.description,

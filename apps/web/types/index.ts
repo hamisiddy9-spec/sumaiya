@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 
 // ─── Zod Schemas for Runtime Validation ──────────────────────────────────────
 //
@@ -82,43 +83,150 @@ export const refereeEntrySchema = z.object({
   phone: z.string(),
 });
 
+/**
+ * An array whose items are validated INDIVIDUALLY, dropping only what cannot be
+ * read.
+ *
+ * `z.array(x)` fails the WHOLE array when a single item fails, which fails the
+ * whole object, which makes `parseCVData` return an empty CV. So one bad entry
+ * — an older client's shape, a half-written row, a skill whose `level` arrived
+ * as a string instead of 1–5 — cost the user the entire document. The
+ * `personal` block already had this protection via `.catch`; the arrays did
+ * not, which is the same defect one level deeper.
+ *
+ * Measured 2026-09-13: a CV whose only fault was one unrecognised `projects`
+ * entry (`{ nonsense: true }`) parsed as completely blank.
+ *
+ * Also note the sub-schemas below (`skillEntrySchema`, `languageEntrySchema`,
+ * `certificationEntrySchema`, `projectEntrySchema`, `refereeEntrySchema`)
+ * require EVERY field — only `experienceEntrySchema` and `educationEntrySchema`
+ * carry defaults. So this is not a rare edge: any item missing `id`, or naming
+ * a language with a `proficiency` outside the five listed values, takes the
+ * whole CV with it.
+ */
+function looseArray<T extends z.ZodTypeAny>(item: T) {
+  return z
+    .array(z.unknown())
+    .default([])
+    .transform((raw) =>
+      raw.flatMap((entry) => {
+        const parsed = item.safeParse(entry);
+        return parsed.success ? [parsed.data as z.infer<T>] : [];
+      }),
+    );
+}
+
+/** Same, for the sections that must stay ABSENT rather than become `[]`. */
+function looseOptionalArray<T extends z.ZodTypeAny>(item: T) {
+  return z
+    .array(z.unknown())
+    .optional()
+    .transform((raw) =>
+      raw === undefined
+        ? undefined
+        : raw.flatMap((entry) => {
+            const parsed = item.safeParse(entry);
+            return parsed.success ? [parsed.data as z.infer<T>] : [];
+          }),
+    );
+}
+
 export const cvDataSchema = z.object({
   // `.catch` rather than `.default` so a *malformed* personal block survives too,
   // not just a missing one. Losing a name is survivable; losing the CV is not.
   personal: personalInfoSchema.catch({ fullName: "", jobTitle: "", email: "", phone: "", location: "" }),
   summary: z.string().default(""),
-  experience: z.array(experienceEntrySchema).default([]),
-  education: z.array(educationEntrySchema).default([]),
-  skills: z.array(skillEntrySchema).default([]),
+  // Each array drops the entries it cannot read instead of failing, so one
+  // malformed row costs the user that entry and nothing else.
+  experience: looseArray(experienceEntrySchema),
+  education: looseArray(educationEntrySchema),
+  skills: looseArray(skillEntrySchema),
   // Optional-with-default so CVs saved before projects existed still parse.
-  projects: z.array(projectEntrySchema).default([]),
-  languages: z.array(languageEntrySchema).default([]),
-  certifications: z.array(certificationEntrySchema).default([]),
-  referees: z.array(refereeEntrySchema).default([]),
+  projects: looseArray(projectEntrySchema),
+  languages: looseArray(languageEntrySchema),
+  certifications: looseArray(certificationEntrySchema),
+  referees: looseArray(refereeEntrySchema),
   hobbies: z.string().default(""),
-  hiddenSections: z.array(z.string()).optional(),
-  sectionOrder: z.array(z.string()).optional(),
+  hiddenSections: looseOptionalArray(z.string()),
+  sectionOrder: looseOptionalArray(z.string()),
   density: z.enum(["compact", "normal", "airy"]).optional(),
   mode: z.string().optional(),
 });
 
-export function parseCVData(data: unknown): CVData {
-  // Rows written before 2026-09-13 hold the CV as a **JSON string inside** the
-  // jsonb column (jsonb_typeof = 'string'), not as a jsonb object. A plain
-  // object parse therefore failed and this function silently returned an empty
-  // CV — every one of the 19 stored CVs rendered blank, with the data sitting
-  // right there in the column. Accept both shapes; unwrap up to two levels so a
-  // doubly-encoded row still resolves. Nothing is discarded on a genuine
-  // failure, it still falls back to an empty CV.
+/**
+ * Rows written before 2026-09-13 hold a document as a **JSON string inside** the
+ * jsonb column (`jsonb_typeof = 'string'`) rather than as a jsonb object — in
+ * every jsonb column on this database, not just one. A plain object parse
+ * therefore failed and each reader silently returned an empty document, with
+ * the data sitting right there in the column.
+ *
+ * Measured 2026-09-13 across all 26 jsonb columns: 11 of them carry a JSON
+ * string in at least one row — `cv.data` 19/19, `user_profile.career_profile`
+ * 12/14, `letter.data` 1/1, `business_card.data` 2/2,
+ * `ats_score_snapshot.checks` 6/6, `job_recommendation.matched_terms` 46/46,
+ * `job.corroborated_sources` 6635/8079, `document_version.snapshot` 3/3,
+ * `cv.template_history` 2/19, `app_event.props` 11/57,
+ * `debug_event.detail` 19/19.
+ *
+ * One unwrap, shared by every reader, so this cannot be fixed in one place and
+ * left broken in the next. Two levels, so a doubly-encoded row still resolves.
+ * On a genuine failure the caller decides what to do; nothing is invented here.
+ */
+export function unwrapStoredJson(data: unknown): unknown {
   let candidate: unknown = data;
   for (let i = 0; i < 2 && typeof candidate === "string"; i++) {
     try {
       candidate = JSON.parse(candidate);
     } catch {
-      break;
+      break; // not JSON — hand back the string and let the caller fall back
     }
   }
-  const result = cvDataSchema.safeParse(candidate);
+  return candidate;
+}
+
+/**
+ * Read a value the TYPES call `string[]` when the DATABASE may hold a JSON
+ * string, at the boundary, so the lie cannot travel further.
+ *
+ * `job_recommendation.matched_terms` is a JSON string in 46 of 46 production
+ * rows — and it was read with an unchecked cast:
+ *
+ *     matchedTerms: (r.rec.matchedTerms ?? []) as string[]
+ *
+ * A string wearing an array type does not fail where you would notice. It is
+ * NOT null-ish, so `?? []` never fires; `.length` returns the character count;
+ * `.slice(0, 8)` returns the first eight CHARACTERS — so the chips that show a
+ * user *why* a job matched would have rendered the first characters of the
+ * serialised JSON. Only a `.map` in a render path throws, and then it is a
+ * TypeError blamed on the component rather than on the row.
+ *
+ * Returns `string[]` always, so every caller stops being a place this can
+ * go wrong differently.
+ */
+export function toStringArray(value: unknown): string[] {
+  const unwrapped = unwrapStoredJson(value);
+  if (!Array.isArray(unwrapped)) return [];
+  return unwrapped.filter((v): v is string => typeof v === "string");
+}
+
+export function parseCVData(data: unknown): CVData {
+  const candidate = unwrapStoredJson(data);
+  // ...then normalise the APP's shape to the STORED one before validating.
+  // Both shapes reach this column. The native app (and the shared `CVData`
+  // type) calls this block `personalInfo` with a `headline`; the stored shape
+  // is `personal` with a `jobTitle`. `cvDataSchema` knows only the stored one,
+  // so a phone-written CV parsed to a BLANK header — name, job title, email,
+  // phone and location all gone — while the values sat intact in the column.
+  // Measured 2026-09-13: 3 of the 19 production rows are app-shaped and all 3
+  // lost their header this way.
+  //
+  // `toStoredCvData` is this project's converter for exactly this pair of
+  // shapes. It was already wired into the API's way out (`lib/api/routes/cv.ts`
+  // normalises every row it returns) and was simply never wired into the
+  // reader — so the same row rendered correctly through one path and blank
+  // through another.
+  const normalized = toStoredCvData<Record<string, unknown>>(candidate);
+  const result = cvDataSchema.safeParse(normalized);
   if (result.success) return result.data;
   return createEmptyCVData();
 }
@@ -377,7 +485,12 @@ export const careerProfileSchema = z.object({
 });
 
 export function parseCareerProfile(data: unknown): CareerProfile {
-  const result = careerProfileSchema.safeParse(data);
+  // Same defect that blanked every CV, one table over: this column holds a JSON
+  // STRING for 12 of its 14 production rows, so `safeParse` failed and every
+  // caller got an empty profile while the user had filled one in. The blast
+  // radius is not cosmetic — `lib/api/routes/jobs.ts` scores job matches from
+  // this value, so those users were matched against nothing at all.
+  const result = careerProfileSchema.safeParse(unwrapStoredJson(data));
   if (result.success) return result.data;
   return createEmptyCareerProfile();
 }

@@ -13,6 +13,7 @@
 //  - Bilingual sw/en via the `sw` flag, like every other surface.
 
 import type { Recommendation } from "@/lib/jobs/recommend";
+import { toStringArray } from "@/types";
 
 // ─── Pure helpers (unit-tested, no IO) ──────────────────────────────────────
 
@@ -100,7 +101,7 @@ export function rankMatches(recs: Recommendation[], limit = 3): BriefMatch[] {
       location: r.job.location ?? "",
       score: r.score,
       reason: r.reason,
-      matchedTerms: r.matchedTerms ?? [],
+      matchedTerms: toStringArray(r.matchedTerms),
       actionable: Boolean(r.job.description && r.job.description.trim().length > 0),
     }));
 }
