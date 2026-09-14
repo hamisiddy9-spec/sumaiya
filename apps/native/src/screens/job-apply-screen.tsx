@@ -5,6 +5,7 @@ import * as Sharing from "expo-sharing";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import type { CVData } from "@sumaiya/types";
 import { apiClient } from "../lib/api-client";
+import { friendlyApiError } from "../lib/app-errors";
 import { useCvs } from "../hooks/use-cvs";
 import { Button, Screen, ScreenTitle, SectionHeader, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
@@ -56,7 +57,12 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
       setResult(r);
     } catch (e: any) {
       haptics.error();
-      setError(e?.message || t("Couldn't tailor to this job. Try again.", "Imeshindwa kulenga ajira hii. Jaribu tena."));
+      setError(
+        friendlyApiError(e, lang, {
+          en: "I couldn't tailor your CV to this job. Try again.",
+          sw: "Sikuweza kulenga CV yako kwa ajira hii. Jaribu tena.",
+        }),
+      );
     } finally {
       setLoading(false);
     }

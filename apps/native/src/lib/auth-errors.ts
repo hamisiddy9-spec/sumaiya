@@ -20,11 +20,16 @@
  *    users read when something breaks are exactly the ones nobody tests.
  */
 import type { Lang } from "./i18n";
+import { SUPPORT_EMAIL } from "./app-hosts";
 
 // NOTE: `import type` on purpose. A value import of ./i18n would drag
 // @sumaiya/utils -> expo-sqlite into this module, which makes it impossible to
 // test in the node test environment and quietly couples pure string mapping to
 // the whole app runtime. Types are erased, so this file stays dependency-free.
+//
+// ./app-hosts is a value import and that is fine: it has no imports of its own,
+// so it cannot pull the runtime in. Keeping the support address coming from
+// there means it cannot drift from the one the Profile screen shows.
 
 /**
  * @param lang Which language to answer in. Required rather than read from
@@ -47,6 +52,29 @@ export function friendlyError(message: string, lang: Lang): string {
     return t(
       "Google Play Services is missing on this phone. Tap “Use email instead” below and we'll send you a code.",
       "Google Play Services haipo kwenye simu hii. Gusa “Tumia barua pepe badala yake” hapa chini na tutakutumia msimbo.",
+    );
+  }
+
+  // The code was never sent — a 500 from the auth service's mailer
+  // (`unexpected_failure` / "Error sending magic link email"). Captured live on
+  // a device 2026-09-13 while the Supabase project had no SMTP configured: the
+  // raw English SDK sentence appeared verbatim on a Swahili sign-in screen.
+  //
+  // Deliberately does NOT point at Google. On Android, Google sign-in is
+  // broken by a separate configuration problem, so the two failure messages
+  // would bounce the user back and forth between the only two ways in — a loop
+  // that reads as the product being broken rather than honest about one fault.
+  // It names whose fault it is, keeps the promise honest (a retry may work; if
+  // it does not, there is a human), and gives a way out that is not another
+  // sign-in method.
+  if (
+    /error sending (magic link|confirmation|recovery|invite) email|unexpected_failure|error sending email/i.test(
+      message,
+    )
+  ) {
+    return t(
+      `I couldn't send your code — that's on my side, not yours. Try again in a few minutes, and if it keeps happening write to ${SUPPORT_EMAIL} and I'll sort it out.`,
+      `Sikuweza kutuma msimbo wako — tatizo ni upande wangu, si wako. Jaribu tena baada ya dakika chache; kama likiendelea niandikie ${SUPPORT_EMAIL} nitalishughulikia.`,
     );
   }
   if (/network|timeout|timed out|failed to fetch|unable to resolve|ENOTFOUND/i.test(message)) {

@@ -1,4 +1,5 @@
 import { friendlyError } from "./auth-errors";
+import { SUPPORT_EMAIL } from "./app-hosts";
 
 /**
  * These strings are the last thing a user reads before giving up, they are
@@ -58,5 +59,61 @@ describe("friendlyError", () => {
   it("does not mistake an unrelated code for the configuration failure", () => {
     // 1010 is not 10, and the word 'develop' is not 'DEVELOPER_ERROR'.
     expect(friendlyError("ApiException: 1010", "en")).toBe("ApiException: 1010");
+  });
+
+  /**
+   * The failure the device actually showed on 2026-09-13, verbatim, while the
+   * auth project had no mailer configured. It reached a Swahili screen as raw
+   * English SDK text because no branch matched it.
+   */
+  const RAW_MAIL_FAILURE = "Error sending magic link email";
+
+  it("never leaks the mailer's own error text", () => {
+    for (const lang of ["en", "sw"] as const) {
+      const msg = friendlyError(RAW_MAIL_FAILURE, lang);
+      expect(msg).not.toContain("magic link");
+      expect(msg).not.toContain("unexpected_failure");
+      expect(msg).not.toBe(RAW_MAIL_FAILURE);
+    }
+    // The signup variant names a different email; it is the same fault.
+    expect(friendlyError("Error sending confirmation email", "sw")).toMatch(/Sikuweza/);
+  });
+
+  it("takes the blame instead of accusing the user's connection", () => {
+    // "check your internet connection" would be a lie — the request reached
+    // the server and the server failed to send.
+    for (const lang of ["en", "sw"] as const) {
+      const msg = friendlyError(RAW_MAIL_FAILURE, lang);
+      expect(msg).not.toMatch(/internet|mtandao/i);
+      expect(msg).not.toMatch(/connection/i);
+    }
+    expect(friendlyError(RAW_MAIL_FAILURE, "en")).toMatch(/on my side/i);
+  });
+
+  it("does not bounce the user to the other sign-in method", () => {
+    // Google sign-in is broken on Android by an unrelated configuration
+    // problem. If this message pointed at it, and Google's message points
+    // back at email, the two dead ends would ping-pong the user forever.
+    for (const lang of ["en", "sw"] as const) {
+      const msg = friendlyError(RAW_MAIL_FAILURE, lang);
+      expect(msg).not.toMatch(/use email instead/i);
+      expect(msg).not.toMatch(/Tumia barua pepe badala yake/i);
+      expect(msg).not.toMatch(/google/i);
+    }
+  });
+
+  it("gives a way out that is not another button that will fail", () => {
+    for (const lang of ["en", "sw"] as const) {
+      expect(friendlyError(RAW_MAIL_FAILURE, lang)).toContain(SUPPORT_EMAIL);
+    }
+    expect(friendlyError(RAW_MAIL_FAILURE, "sw")).toMatch(/niandikie/);
+  });
+
+  it("uses the persona's first person, not a machine narrator", () => {
+    // The product speaks as Sumaiya. The failure line takes ni-/nina-, never
+    // the ina- class prefix used for a thing narrating a state.
+    const sw = friendlyError(RAW_MAIL_FAILURE, "sw");
+    expect(sw).toMatch(/^Sikuweza/);
+    expect(sw).not.toMatch(/\b(Imeshindwa|Inashindwa)\b/);
   });
 });
