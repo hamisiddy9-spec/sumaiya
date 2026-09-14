@@ -7,6 +7,7 @@ import { db, job, userProfile } from "@/lib/db";
 import { eq, desc, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { LIVE_STATUSES } from "@/lib/jobs/constants";
+import { homeMarketFirst } from "@/lib/jobs/feed-filter";
 import { getRecommendations } from "@/lib/jobs/recommend";
 import { enrichJob } from "@/lib/jobs/enrich";
 import { parseCareerProfile } from "@/types";
@@ -55,7 +56,12 @@ export const jobRoutes = new Hono()
       // Public, cacheable feed — let the CDN hold it for 5 min so every visitor
       // doesn't hit Postgres (the nightly cron refreshes the data).
       c.header("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
-      return c.json({ success: true, data: rows });
+      // Home-market first. The query above ranks featured-then-newest, which is
+      // correct within a country; across countries it put Berlin, London and
+      // Paris at the top of a Tanzanian product's job tab (0 of 8,079 rows
+      // mentioned Tanzania before the JobwebTanzania source existed). Ordering
+      // only — every row is still returned.
+      return c.json({ success: true, data: homeMarketFirst(rows) });
     } catch (err) {
       // Degrade to an empty feed (never 500 the public page), but ALWAYS log
       // the real error — a silent swallow made every DB failure look like

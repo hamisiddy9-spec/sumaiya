@@ -34,6 +34,7 @@ import { joobleAdapter } from "./jooble";
 import { usajobsAdapter } from "./usajobs";
 import { careerjetAdapter } from "./careerjet";
 import { talentAdapter } from "./talent";
+import { jobwebTanzaniaAdapter } from "./jobwebtanzania";
 
 /**
  * The built-in source list. Add a new source here (one file per source).
@@ -57,6 +58,9 @@ export const JOB_SOURCE_REGISTRY: JobSourceAdapter[] = [
   usajobsAdapter,
   careerjetAdapter,
   talentAdapter,
+  // Regional. Listed last only because it is a single-country board — it is the
+  // source that makes the feed usable for the users the product is built for.
+  jobwebTanzaniaAdapter,
 ];
 
 /**

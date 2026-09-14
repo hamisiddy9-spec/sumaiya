@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   filterJobs, sortJobs, groupByRecency, topLocations, topCategories,
   isRemoteLocation, REMOTE_LOCATION, DEFAULT_FILTERS,
+  homeMarketFirst, isHomeMarketLocation,
   type FeedJob,
 } from "./feed-filter";
 
@@ -135,5 +136,39 @@ describe("topLocations / topCategories", () => {
 
   it("ranks categories by frequency", () => {
     expect(topCategories(jobs)).toEqual(["Design", "Engineering", "Marketing"]);
+  });
+});
+
+describe("homeMarketFirst", () => {
+  const feed = [
+    job({ id: "de", location: "Berlin" }),
+    job({ id: "us", location: "USA" }),
+    job({ id: "tz", location: "Tanzania, United Republic of" }),
+    job({ id: "remote", location: "Remote" }),
+    job({ id: "dar", location: "Dar es Salaam" }),
+  ];
+
+  it("puts Tanzanian listings first without dropping anything", () => {
+    const out = homeMarketFirst(feed);
+    expect(out.map((j) => j.id)).toEqual(["tz", "dar", "de", "us", "remote"]);
+    expect(out).toHaveLength(feed.length);
+  });
+
+  it("keeps the caller's ordering inside each group", () => {
+    // The feed query ranks featured-then-newest; that must survive the partition.
+    const out = homeMarketFirst(feed);
+    expect(out.filter((j) => !isHomeMarketLocation(j.location)).map((j) => j.id)).toEqual([
+      "de",
+      "us",
+      "remote",
+    ]);
+  });
+
+  it("never treats a remote or foreign listing as the home market", () => {
+    expect(isHomeMarketLocation("Remote")).toBe(false);
+    expect(isHomeMarketLocation("Berlin")).toBe(false);
+    expect(isHomeMarketLocation("Nairobi, Kenya")).toBe(false);
+    expect(isHomeMarketLocation("Mwanza")).toBe(true);
+    expect(isHomeMarketLocation("Zanzibar")).toBe(true);
   });
 });
