@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Linking, Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
@@ -9,6 +8,7 @@ import { registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
+import { APP_VERSION } from "../../lib/app-version";
 import { SUPPORT_EMAIL } from "../../lib/app-hosts";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
@@ -42,7 +42,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [notifications, setNotifications] = useState(false);
   const [busy, setBusy] = useState<"signout" | "delete" | "cache" | null>(null);
 
-  const version = Constants.expoConfig?.version ?? "1.0.0";
+  // One reader for Profile, the update prompt and telemetry — a second inline
+  // read of the config is how the displayed version drifted from the installed
+  // one. See lib/app-version.ts.
+  const version = APP_VERSION;
   const dark = colorScheme === "dark";
 
   useEffect(() => {

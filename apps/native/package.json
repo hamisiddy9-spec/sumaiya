@@ -24,6 +24,7 @@
     "@sumaiya/utils": "file:../../packages/utils",
     "@supabase/supabase-js": "^2.58.0",
     "expo": "~57.0.16",
+    "expo-application": "~57.0.2",
     "expo-camera": "^57.0.4",
     "expo-clipboard": "^57.0.1",
     "expo-constants": "~57.0.17",
