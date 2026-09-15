@@ -8,8 +8,8 @@
 // Schema & Types
 export * from './schema';
 
-// Provider Interface
-export * from './provider';
+// Provider Interface (exported separately for clarity)
+export type { TemplateProvider, TemplateMetadata, TemplateFamily, DocumentContent, RenderedDocument } from './schema';
 
 // Native Implementation (currently used)
 export { NativeTemplateProvider, nativeTemplateProvider } from './native-provider';
@@ -23,6 +23,9 @@ export { STANDARD_CV_SCHEMA, TEMPLATE_SCHEMAS, getTemplateSchema, SCHEMA_VERSION
 
 // TemplateHub Provider (Phase 5)
 export { TemplateHubProvider, createTemplateHubProvider, type TemplateHubClient } from './templatehub-provider';
+
+// Database Migrations
+export { MIGRATIONS, getMigrationSQL, checkMigrationStatus, convertCVToDocument, type MigrationStatus } from './migrations';
 
 /**
  * SINGLETON INSTANCE
