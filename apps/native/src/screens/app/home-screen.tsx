@@ -164,8 +164,8 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     // "letter" instead of the generic default, so tapping this feels like a
     // purpose-built cover-letter feature, not a detour through job matching.
     { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: c.warning, onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
-    // Templates is a first-class surface — the gallery opens straight from here.
-    { icon: "layout-grid", label: t("Templates", "Miundo"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
+    // TemplateHub is a first-class surface — the gallery opens straight from here.
+    { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
   return (
