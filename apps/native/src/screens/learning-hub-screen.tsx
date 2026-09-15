@@ -545,6 +545,36 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               )}
             </View>
           )}
+
+          {/* Ask Sumaiya — learning ties back to the AI, not a separate LMS. */}
+          <View style={{ gap: 10 }}>
+            <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
+              {t("Ask about your career", "Uliza kuhusu kazi yako")}
+            </Text>
+            <Card
+              onPress={() => { haptics.selection(); navigation.navigate("SumaiyaTab"); }}
+              accessibilityLabel={t("Ask Sumaiya anything", "Muulize Sumaiya chochote")}
+              style={{ gap: 10 }}
+            >
+              <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                {[
+                  t("What should I learn first?", "Nijifunze nini kwanza?"),
+                  t("Do I need Excel for this job?", "Je, ninahitaji Excel kwa kazi hii?"),
+                  t("How can I improve my CV?", "Niboresheje CV yangu?"),
+                ].map((q) => (
+                  <View key={q} style={{ backgroundColor: c.bg, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
+                    <Text style={{ color: c.textBody, fontSize: 12 }}>{q}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <SumaiyaMark size={15} state="static" color={c.accent} />
+                <Text style={{ color: c.accent, fontSize: 13, fontWeight: "800" }}>
+                  {t("Ask Sumaiya anything", "Muulize Sumaiya chochote")} →
+                </Text>
+              </View>
+            </Card>
+          </View>
         </>
       )}
 
