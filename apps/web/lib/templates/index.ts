@@ -24,6 +24,9 @@ export { STANDARD_CV_SCHEMA, TEMPLATE_SCHEMAS, getTemplateSchema, SCHEMA_VERSION
 // TemplateHub Provider (Phase 5)
 export { TemplateHubProvider, createTemplateHubProvider, type TemplateHubClient } from './templatehub-provider';
 
+// CV template tiers (premium / core / legacy) — single source of truth
+export { getCvTemplateTier, isPremiumCvTemplate, getCuratedCvTemplateIds, type CvTemplateTier } from './tiers';
+
 // Database Migrations
 export { MIGRATIONS, getMigrationSQL, checkMigrationStatus, convertCVToDocument, type MigrationStatus } from './migrations';
 

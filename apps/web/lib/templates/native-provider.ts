@@ -18,6 +18,7 @@ import {
 } from './schema';
 import { TEMPLATE_REGISTRY } from './registry';
 import { TEMPLATE_FAMILIES } from './families';
+import { getCvTemplateTier } from './tiers';
 
 export class NativeTemplateProvider implements TemplateProvider {
   /**
@@ -50,9 +51,14 @@ export class NativeTemplateProvider implements TemplateProvider {
       results = results.filter((t) => t.family === options.family);
     }
 
-    // Filter by tier if specified
+    // Filter by tier if specified. CV templates resolve their tier from the
+    // live curation (premium / core / legacy) instead of the generated
+    // registry's uniform "core" stamp; other categories use their own field.
     if (options?.tier) {
-      results = results.filter((t) => t.tier === options.tier);
+      results = results.filter((t) => {
+        const tier = t.category === 'cv' ? getCvTemplateTier(t.id) : t.tier;
+        return tier === options.tier;
+      });
     }
 
     // Filter by source if specified
