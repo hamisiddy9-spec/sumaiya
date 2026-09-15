@@ -26,6 +26,7 @@
     "whatsapp:test": "npm -C apps/whatsapp test"
   },
   "devDependencies": {
+    "pg": "^8.23.0",
     "turbo": "^2.5.5",
     "typescript": "^5.9.3"
   },

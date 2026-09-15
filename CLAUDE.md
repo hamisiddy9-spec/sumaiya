@@ -81,17 +81,9 @@ export const templateProvider =
 - [x] DEPLOYMENT_GUIDE.md (web + mobile + post-launch)
 - [x] TEMPLATEHUB_REFACTOR_SESSION.md (8-phase refactor plan)
 
-**Phase 5: TemplateHub API (Complete)**
-- [x] `templatehub/src/api/templates/route.ts` — GET /api/templates
-- [x] `templatehub/src/api/documents/render/route.ts` — POST /api/documents/render
-- [x] `templatehub/src/api/families/route.ts` — GET /api/families
-- [x] `templatehub/src/api/exports/pdf/route.ts` — POST /api/exports/pdf
-- [x] Type definitions (template.ts, document.ts)
-- [x] Auth validation (validate-key.ts)
-- [x] Database schema (migrate.sql)
-- [x] Docker setup (docker-compose.yml, scripts)
-- [x] CI/CD pipelines (test.yml, build.yml, deploy.yml)
-- [x] Environment config (.env.example)
+**Phase 5: TemplateHub API (Separate repo)**
+- TemplateHub API lives in its own repo (`hamisiddy9-spec/TemplateHub`), not here.
+- Sumaiya keeps only the `TemplateHubProvider` HTTP client for future remote calls.
 
 ## Key Files Reference
 
@@ -174,25 +166,18 @@ TEMPLATE_HUB_API_KEY=sk_prod_...
 ✅ Web build: `npm run build` → success  
 ✅ Mobile build: `npm run build:android` → APK generated  
 ✅ E2E tests: Prepared (manual + automated scenarios)  
-✅ TemplateHub infrastructure: Complete (stubs ready)  
 ⏳ Production deployment: Requires Vercel authentication  
-⏳ TemplateHub backend logic: Ready for implementation  
 
 ## Recent Commits
 
-- `531e3bf` feat: Complete TemplateHub infrastructure + CI/CD pipelines
-- `8a689c2` feat: TemplateHub API stubs + CLAUDE.md architecture update
-- `79307fa` docs: Complete E2E testing, deployment, and TemplateHub refactor guides
-- `74bcb50` docs: launch ready status
-- `a264d23` docs(checklist): Complete template implementation status and deployment guide
+- `70b3416` docs: remove stale TemplateHub subdir references from FINAL_STATUS
+- `3f4c7b1` refactor: remove TemplateHub stub API from Sumaiya repo
+- `6339d40` PRODUCTION DEPLOYMENT: Sumaiya + Neon PostgreSQL
 
 ## Next Steps
 
-1. **TemplateHub Backend Implementation** (Phase 6):
-   - Implement `TemplateStore` database layer
-   - Implement `HTMLRenderer` with template component rendering
-   - Implement `PDFRenderer` with Puppeteer
-   - Seed database with 267 templates
+1. **TemplateHub Backend** (in its own repo, not here):
+   - TemplateHub repo (`hamisiddy9-spec/TemplateHub`) owns the template API + rendering.
 
 2. **Database Migrations**:
    - Apply Phase 1 SQL (documents table)
@@ -200,7 +185,6 @@ TEMPLATE_HUB_API_KEY=sk_prod_...
 
 3. **Production Deployment**:
    - Sumaiya: Vercel deploy with environment config
-   - TemplateHub: Docker deployment with PostgreSQL + Redis
    - Set up API key rotation, monitoring, alerting
 
 4. **Integration Testing**:
@@ -229,4 +213,4 @@ TEMPLATE_HUB_API_KEY=sk_...
 
 **Last Updated**: 2026-09-15  
 **Architecture**: Two-repo separation with pluggable TemplateProvider  
-**Status**: All phases complete. Ready for TemplateHub backend implementation.
+**Status**: Sumaiya clean of TemplateHub code; TemplateHub lives in its own repo.
