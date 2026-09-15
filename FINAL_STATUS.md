@@ -285,10 +285,10 @@ npx vercel login
 npx vercel deploy --prod
 ```
 
-### Option 2: Docker (TemplateHub)
+### Option 2: TemplateHub (separate repo)
 ```bash
-docker build -t templatehub:latest templatehub/
-docker run -p 3001:3001 templatehub:latest
+# TemplateHub lives in its own repo: hamisiddy9-spec/TemplateHub
+# Deploy it separately (no Docker build in Sumaiya).
 ```
 
 ### Option 3: GitHub Actions (Automated)
@@ -384,18 +384,16 @@ afe3e99 docs: System documentation + testing utilities
 
 **Local Development**:
 - Web: `npm run dev` → http://localhost:3000
-- API: `cd templatehub && npm run dev` → http://localhost:3001
-- Database: Docker Compose includes PostgreSQL + Redis
+- Database: `psql $DATABASE_URL -f lib/templates/database-schema.sql`
 
 **Repositories**:
 - Sumaiya: `C:\Users\hamis\projects\sumaiya`
-- TemplateHub: `C:\Users\hamis\projects\sumaiya\templatehub`
+- TemplateHub: `C:\Users\hamis\projects\TemplateHub` (separate repo)
 
 **Key Documentation**:
 - Architecture: `CLAUDE.md`
 - Deployment: `DEPLOYMENT_READY.md`
 - Testing: `E2E_TEST_PLAN.md`
-- API: `templatehub/README.md`
 
 ---
 
