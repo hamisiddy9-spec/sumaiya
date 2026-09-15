@@ -1,7 +1,16 @@
-import Application from "expo-application";
+import * as Application from "expo-application";
 import Constants from "expo-constants";
 
 import { pickVersion } from "./pick-version";
+
+// ⚠️ `expo-application` has NO default export — `import Application from
+// "expo-application"` is `undefined`, and reading `.nativeApplicationVersion`
+// off it throws during module load, which killed 1.6.16 on launch ("[runtime not
+// ready]: TypeError: Cannot read property 'nativeApplicationVersion' of
+// undefined"). `tsc` cannot catch that shape: synthetic-default interop accepts
+// a default import of a module with only named exports, and jest never loads the
+// real native module. The namespace import cannot be undefined, and a missing
+// export now degrades to pickVersion()'s fallback instead of a boot crash.
 
 /**
  * The version of the build INSTALLED on this device.
