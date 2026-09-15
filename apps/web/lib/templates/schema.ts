@@ -99,6 +99,7 @@ export interface TemplateFamilyMember {
   category: TemplateCategory;
   role: 'primary' | 'matching' | 'supporting'; // primary=main, matching=paired, supporting=optional
   position?: number; // order in family
+  accessibleTo?: AccessLevel[];
 }
 
 /**
@@ -138,9 +139,6 @@ export interface DocumentContent {
     name?: string;
     level?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   }>;
-
-  // Additional custom fields for other document types
-  [customField: string]: unknown;
 }
 
 /**

@@ -106,10 +106,8 @@ export class NativeTemplateProvider implements TemplateProvider {
       return results;
     }
 
-    // For other products, return all public families
-    return TEMPLATE_FAMILIES.filter((f) =>
-      f.templates.every((t) => t.accessibleTo?.includes(product))
-    );
+    // For other products, return all families (for now, no access control)
+    return TEMPLATE_FAMILIES;
   }
 
   /**
