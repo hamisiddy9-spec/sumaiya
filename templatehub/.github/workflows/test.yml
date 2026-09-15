@@ -1,0 +1,65 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: templatehub_test
+          POSTGRES_USER: templatehub
+          POSTGRES_PASSWORD: templatehub
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm run test
+        env:
+          DATABASE_URL: postgresql://templatehub:templatehub@localhost:5432/templatehub_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-secret
+          TEMPLATEHUB_API_KEY: test-api-key
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://templatehub:templatehub@localhost:5432/templatehub_test
+          REDIS_URL: redis://localhost:6379
+          API_URL: http://localhost:3001
