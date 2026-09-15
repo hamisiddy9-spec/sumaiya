@@ -112,63 +112,10 @@ documents (
 - **DEPLOYMENT_READY.md**: Final checklist (just created)
 
 ### Phase 5: TemplateHub API ✅
-**4 Endpoints Complete:**
-
-1. `GET /api/templates`
-   - Query: category, family, tier, limit, offset
-   - Response: Paginated template list with metadata
-   
-2. `GET /api/families`
-   - Query: product, tier
-   - Response: Template families with members
-   
-3. `POST /api/documents/render`
-   - Body: templateId, userData, options
-   - Response: Rendered HTML
-   
-4. `POST /api/exports/pdf`
-   - Body: html, options
-   - Response: PDF buffer (application/pdf)
-
-**Supporting Infrastructure:**
-- ✅ Type definitions (template.ts, document.ts)
-- ✅ Auth layer (validate-key.ts)
-- ✅ Database schema (migrate.sql)
-- ✅ Rendering stubs (HTMLRenderer, PDFRenderer)
-- ✅ Docker setup (docker-compose.yml)
-- ✅ Environment config (.env.example)
-
-**CI/CD Pipelines:**
-- ✅ `test.yml` (unit + integration tests)
-- ✅ `build.yml` (production build + artifacts)
-- ✅ `deploy.yml` (automated production deployment)
-
-**Files**:
-```
-templatehub/
-├── src/api/
-│   ├── templates/route.ts
-│   ├── families/route.ts
-│   ├── documents/render/route.ts
-│   └── exports/pdf/route.ts
-├── src/lib/
-│   ├── auth/validate-key.ts
-│   ├── templates/store.ts
-│   └── rendering/
-│       ├── html-render.ts
-│       └── pdf-render.ts
-├── src/types/
-│   ├── template.ts
-│   └── document.ts
-├── .github/workflows/
-│   ├── test.yml
-│   ├── build.yml
-│   └── deploy.yml
-├── .env.example
-├── docker-compose.yml
-├── package.json
-└── README.md
-```
+TemplateHub lives in its **own repo** (`hamisiddy9-spec/TemplateHub`), not in this one.
+The stub API (routes, Docker, CI/CD) that was temporarily committed here has been
+removed. Sumaiya talks to TemplateHub only through the `TemplateHubProvider` HTTP
+client, enabled later via `NEXT_PUBLIC_TEMPLATE_PROVIDER=remote`.
 
 ### Phase 6: Build Verification ✅
 ```
