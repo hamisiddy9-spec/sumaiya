@@ -22,3 +22,9 @@ export {
 
 export { useTemplateProviderHook } from './use-template-provider';
 export { useCVExport } from './use-cv-export';
+export {
+  getTemplateComponent,
+  hasTemplateComponent,
+  getAvailableTemplateIds,
+  renderTemplateComponent,
+} from './template-adapter';
