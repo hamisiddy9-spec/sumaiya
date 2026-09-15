@@ -110,21 +110,10 @@ export const templateProvider =
 
 ### TemplateHub (Separate Repo)
 
-| File | Purpose |
-|------|---------|
-| `.env.example` | Environment variables template |
-| `src/api/templates/route.ts` | GET /templates with filtering |
-| `src/api/documents/render/route.ts` | POST /documents/render |
-| `src/api/families/route.ts` | GET /families |
-| `src/api/exports/pdf/route.ts` | POST /exports/pdf |
-| `src/lib/auth/validate-key.ts` | API key validation (stub) |
-| `src/lib/templates/store.ts` | Database access layer (stub) |
-| `src/lib/rendering/html-render.ts` | HTML generation (stub) |
-| `src/lib/rendering/pdf-render.ts` | PDF generation (Puppeteer, stub) |
-| `.github/workflows/test.yml` | CI test pipeline |
-| `.github/workflows/build.yml` | CI build pipeline |
-| `.github/workflows/deploy.yml` | Production deployment |
-| `docker-compose.yml` | Local dev services |
+TemplateHub lives in its own repository (`hamisiddy9-spec/TemplateHub`). Sumaiya
+talks to it only through `TemplateHubProvider` (the HTTP client in
+`lib/templates/templatehub-provider.ts`). No TemplateHub server code, SQL, or
+Docker config belongs in this repo.
 
 ## Implementation Details
 

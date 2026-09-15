@@ -1,12 +1,13 @@
 @echo off
-REM 🚀 SUMAIYA × TEMPLATEHUB PRODUCTION LAUNCH SCRIPT
-REM Deploys both projects to production
+REM 🚀 SUMAIYA PRODUCTION LAUNCH SCRIPT
+REM Deploys the Sumaiya web app to production (Vercel).
+REM TemplateHub is a separate repo (hamisiddy9-spec/TemplateHub) — see that repo for its own deploy.
 
 setlocal enabledelayedexpansion
 
 cls
 echo ================================================
-echo 🚀 SUMAIYA × TEMPLATEHUB PRODUCTION LAUNCH
+echo 🚀 SUMAIYA PRODUCTION LAUNCH
 echo ================================================
 echo.
 
@@ -28,9 +29,9 @@ if %ERRORLEVEL% NEQ 0 (
 echo ✅ Prerequisites checked
 echo.
 
-REM Part 1: Sumaiya Web Deployment
+REM Sumaiya Web Deployment
 echo ================================================
-echo PART 1: SUMAIYA WEB (Vercel)
+echo SUMAIYA WEB (Vercel)
 echo ================================================
 echo.
 
@@ -70,50 +71,7 @@ timeout /t 5 /nobreak
 curl -s !VERCEL_URL!/api/health || echo API not yet ready
 echo.
 
-REM Part 2: TemplateHub Deployment
-echo ================================================
-echo PART 2: TEMPLATEHUB API (Docker)
-echo ================================================
-echo.
-
-cd templatehub
-
-echo 📋 Step 1: Verify TemplateHub build...
-call npm run build
-if %ERRORLEVEL% NEQ 0 (
-  echo ❌ TemplateHub build failed
-  exit /b 1
-)
-echo ✅ TemplateHub build successful
-echo.
-
-where docker >nul 2>nul
-if %ERRORLEVEL% EQU 0 (
-  echo 📋 Step 2: Build Docker image...
-  call docker build -t templatehub:latest .
-  if %ERRORLEVEL% NEQ 0 (
-    echo ❌ Docker build failed
-    exit /b 1
-  )
-  echo ✅ Docker image built
-  echo.
-
-  echo 📋 Step 3: Deploy instructions...
-  echo To deploy to production, use one of:
-  echo   - AWS ECS: aws ecs update-service --cluster templatehub --service api
-  echo   - Google Cloud Run: gcloud run deploy templatehub --image gcr.io/yourproject/templatehub
-  echo   - Azure Container Instances: az container create --image yourregistry.azurecr.io/templatehub
-  echo   - Vercel: vercel deploy --prod
-  echo.
-) else (
-  echo ⚠️  Docker not available
-  echo Manual deployment required for TemplateHub
-  echo.
-)
-
-cd ..
-
-REM Part 3: Summary
+REM Summary
 echo ================================================
 echo ✅ DEPLOYMENT COMPLETE
 echo ================================================
@@ -122,15 +80,11 @@ echo Sumaiya Web:
 echo   URL: !VERCEL_URL!
 echo   Status: Deployed to Vercel
 echo.
-echo TemplateHub API:
-echo   Status: Build complete (ready for Docker deployment)
-echo.
 echo Next steps:
 echo   1. Configure environment variables in Vercel dashboard
 echo   2. Apply database migrations
-echo   3. Deploy TemplateHub to your cloud platform
-echo   4. Test endpoints and verify health checks
-echo   5. Set up monitoring
+echo   3. Test endpoints and verify health checks
+echo   4. Set up monitoring
 echo.
 echo Documentation:
 echo   - Architecture: CLAUDE.md
