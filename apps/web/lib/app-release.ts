@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.15",
+  version: "1.6.16",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -65,7 +65,7 @@ export const APP_RELEASE: AppReleaseManifest = {
     // Deliberately does not promise that the code will arrive: the mailer is
     // configured on the Supabase side, so this build can accept the request
     // while delivery is still being fixed. No "you're all set".
-    en: "Premium works as it should now: the tier actually gates, the sheet opens (it never compiled before, so tapping Premium did nothing), and the copy tells you the truth.",
-    sw: "Premium sasa inafanya kazi kama inavyoelezwa: kiwango kinagata kwa kweli, karatasi inafunguka (hapo awali haikusomika, hivyo kugusa Premium hakufanya kitu), na maneno yanasema ukweli.",
+    en: "Premium works now — the tier gates, the sheet opens, and the copy tells you the truth. This build also fixes the version the app reports about itself.",
+    sw: "Premium inafanya kazi sasa — kiwango kinagata, karatasi inafunguka, na maneno yanasema ukweli. Toleo hili pia linarekebisha toleo ambalo app inajitangaza nalo.",
   },
 };
