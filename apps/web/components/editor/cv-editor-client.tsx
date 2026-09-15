@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/lib/stores/editor-store";
+import { compressPhotoFile, PHOTO_MAX_INPUT_BYTES } from "@/lib/image-compress";
 import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { TEMPLATES, CURATED_CV_TEMPLATES, DEFAULT_SECTION_ORDER, isTemplateId, isPremiumTemplate, parseCVData, type TemplateId, type CVData } from "@/types";
@@ -2009,12 +2010,25 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               {cvData.personal.photo ? (uiLang === "sw" ? "Badilisha picha" : "Change photo") : (uiLang === "sw" ? "Pakia picha" : "Upload photo")}
               <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
+                  const input = e.target;
+                  const file = input.files?.[0];
                   if (!file) return;
-                  if (file.size > 2 * 1024 * 1024) { showToast(uiLang === "sw" ? "Picha lazima iwe chini ya 2MB." : "Photo must be under 2MB."); return; }
-                  const reader = new FileReader();
-                  reader.onload = (ev) => { updatePersonal({ photo: ev.target?.result as string }); triggerAutoSave(); };
-                  reader.readAsDataURL(file);
+                  // Clear the input first: without this, re-picking the SAME
+                  // file after removing the photo fires no change event.
+                  input.value = "";
+                  if (file.size > PHOTO_MAX_INPUT_BYTES) { showToast(uiLang === "sw" ? "Picha hii ni kubwa sana. Chagua nyingine chini ya 2MB." : "This photo is too large. Pick one under 2MB."); return; }
+                  // Downscale before storing. The photo is inlined as a data URI
+                  // into every template that has a photo slot, so the raw file
+                  // made a 2.5MB CV row and a multi-megabyte PDF out of a ~100px
+                  // slot. compressPhotoFile matches what the native app already
+                  // does (400px wide, JPEG 0.7).
+                  compressPhotoFile(file)
+                    .then((photo) => { updatePersonal({ photo }); triggerAutoSave(); })
+                    .catch(() => {
+                      // Deliberately NOT falling back to the raw file: that is
+                      // exactly how a 1.9MB data URI reached production.
+                      showToast(uiLang === "sw" ? "Sikuweza kuisoma picha hiyo. Jaribu nyingine." : "I couldn't read that photo. Try another one.");
+                    });
                 }}
               />
             </label>
@@ -2022,7 +2036,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <button onClick={() => { updatePersonal({ photo: undefined }); triggerAutoSave(); }}
                 className="text-xs text-red-500 hover:text-red-600 transition text-left">{uiLang === "sw" ? "Ondoa" : "Remove"}</button>
             )}
-            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? "Kiwango cha juu 2MB · JPG / PNG / WebP" : "Max 2MB · JPG / PNG / WebP"}</span>
+            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? "Kiwango cha juu 2MB · JPG / PNG / WebP · Nitaipunguza ukubwa" : "Max 2MB · JPG / PNG / WebP · I'll shrink it"}</span>
           </div>
         </div>
       </div>
