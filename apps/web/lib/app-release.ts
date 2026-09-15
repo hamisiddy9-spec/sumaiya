@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.14",
+  version: "1.6.17",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -65,7 +65,7 @@ export const APP_RELEASE: AppReleaseManifest = {
     // Deliberately does not promise that the code will arrive: the mailer is
     // configured on the Supabase side, so this build can accept the request
     // while delivery is still being fixed. No "you're all set".
-    en: "Sign-in works again. Earlier versions sent your code without the app's key, so it was always refused — update, then ask for a new code.",
-    sw: "Kuingia kunafanya kazi tena. Matoleo ya awali yalituma msimbo wako bila ufunguo wa app, hivyo ulikataliwa kila mara — sasisha, kisha omba msimbo mpya.",
+    en: "The CV list now tells you the truth: if your session has ended it says so and lets you sign in again, instead of blaming the network. The app also reports its real version now.",
+    sw: "Orodha ya CV sasa inasema ukweli: kipindi chako kikisha inakuambia na unapewa nafasi ya kuingia tena, badala ya kulaumu mtandao. App pia inajitangaza toleo lake halisi.",
   },
 };
