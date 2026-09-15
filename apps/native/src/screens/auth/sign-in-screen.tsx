@@ -12,12 +12,13 @@ import { Icon } from "../../components/icon";
 import { GoogleButton } from "./google-button";
 import { AuthErrorBanner } from "./auth-error-banner";
 import { useLang } from "../../lib/i18n";
+import { EMAIL_OTP_DIGITS, isCompleteEmailOtp, normalizeEmailOtp } from "../../lib/auth-code";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "SignIn">;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Six-box code entry — one hidden input drives all six cells. */
+/** Multi-box code entry — one hidden input drives every cell. */
 function CodeInput({
   value,
   onChange,
@@ -29,8 +30,8 @@ function CodeInput({
 }) {
   const c = useThemeColors();
   const ref = useRef<TextInput>(null);
-  const cells = Array.from({ length: 6 }, (_, i) => value[i] ?? "");
-  const focusIndex = Math.min(value.length, 5);
+  const cells = Array.from({ length: EMAIL_OTP_DIGITS }, (_, i) => value[i] ?? "");
+  const focusIndex = Math.min(value.length, EMAIL_OTP_DIGITS - 1);
 
   return (
     <Pressable onPress={() => ref.current?.focus()} style={{ marginBottom: 18 }}>
@@ -60,15 +61,15 @@ function CodeInput({
         ref={ref}
         value={value}
         onChangeText={(x) => {
-          const next = x.replace(/\D/g, "").slice(0, 6);
+          const next = normalizeEmailOtp(x);
           onChange(next);
-          if (next.length === 6) onFilled();
+          if (isCompleteEmailOtp(next)) onFilled();
         }}
         keyboardType="number-pad"
         autoComplete="one-time-code"
         textContentType="oneTimeCode"
         autoFocus
-        maxLength={6}
+        maxLength={EMAIL_OTP_DIGITS}
         style={{ position: "absolute", opacity: 0, width: "100%", height: 58 }}
       />
     </Pressable>
@@ -114,7 +115,7 @@ export function SignInScreen(_props: Props) {
   }
 
   async function confirmCode() {
-    if (code.replace(/\D/g, "").length < 6) {
+    if (!isCompleteEmailOtp(code)) {
       haptics.error();
       return;
     }
@@ -194,7 +195,7 @@ export function SignInScreen(_props: Props) {
             {t("Enter your code", "Weka msimbo")}
           </Text>
           <Text style={{ color: c.textBody, fontSize: 14.5, marginTop: 6, marginBottom: 24 }}>
-            {t("We sent a 6-digit code to", "Tumetuma msimbo wa tarakimu 6 kwa")} {email}
+            {t("We sent a code to", "Tumetuma msimbo kwa")} {email}
           </Text>
 
           <AuthErrorBanner error={error} onDismiss={clearError} />
@@ -206,7 +207,7 @@ export function SignInScreen(_props: Props) {
             onPress={confirmCode}
             loading={loading}
             size="lg"
-            disabled={code.replace(/\D/g, "").length < 6}
+            disabled={!isCompleteEmailOtp(code)}
           />
 
           <Pressable

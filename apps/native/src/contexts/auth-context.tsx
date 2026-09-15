@@ -26,7 +26,7 @@ interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  /** Email a 6-digit code. No redirect, no deep link — the code is typed in
+  /** Email a one-time code. No redirect, no deep link — the code is typed in
    *  the app and verifyCode sets the session directly. The same code creates
    *  the account, so there is no separate sign-up. */
   sendCode: (email: string) => Promise<void>;
