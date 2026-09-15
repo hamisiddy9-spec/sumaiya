@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.16",
+  version: "1.6.17",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -65,7 +65,7 @@ export const APP_RELEASE: AppReleaseManifest = {
     // Deliberately does not promise that the code will arrive: the mailer is
     // configured on the Supabase side, so this build can accept the request
     // while delivery is still being fixed. No "you're all set".
-    en: "Premium works now — the tier gates, the sheet opens, and the copy tells you the truth. This build also fixes the version the app reports about itself.",
-    sw: "Premium inafanya kazi sasa — kiwango kinagata, karatasi inafunguka, na maneno yanasema ukweli. Toleo hili pia linarekebisha toleo ambalo app inajitangaza nalo.",
+    en: "The CV list now tells you the truth: if your session has ended it says so and lets you sign in again, instead of blaming the network. The app also reports its real version now.",
+    sw: "Orodha ya CV sasa inasema ukweli: kipindi chako kikisha inakuambia na unapewa nafasi ya kuingia tena, badala ya kulaumu mtandao. App pia inajitangaza toleo lake halisi.",
   },
 };
