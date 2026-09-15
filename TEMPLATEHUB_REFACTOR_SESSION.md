@@ -1,5 +1,11 @@
 # TemplateHub Refactor & Alignment Session
 
+> **Superseded (2026-09-15).** TemplateHub already lives in its own repo
+> (`hamisiddy9-spec/TemplateHub`). Sumaiya no longer contains any TemplateHub
+> code — only the `TemplateProvider` abstraction + `TemplateHubProvider` HTTP
+> client. **No Docker** is used for this. This doc is kept for historical
+> reference of the original plan.
+
 Complete guide for creating TemplateHub repo and aligning with Sumaiya project.
 
 ## 🎯 Session Goal
