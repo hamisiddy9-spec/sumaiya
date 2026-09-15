@@ -14,9 +14,15 @@ export * from './provider';
 // Native Implementation (currently used)
 export { NativeTemplateProvider, nativeTemplateProvider } from './native-provider';
 
-// Registry & Families
+// Registry & Families (Phase 2)
 export { TEMPLATE_REGISTRY } from './registry';
 export { TEMPLATE_FAMILIES, getFamiliesForProduct, getFamiliesByCategory, getFamilyById } from './families';
+
+// Schemas (Phase 3)
+export { STANDARD_CV_SCHEMA, TEMPLATE_SCHEMAS, getTemplateSchema, SCHEMA_VERSION } from './schemas';
+
+// TemplateHub Provider (Phase 5)
+export { TemplateHubProvider, createTemplateHubProvider, type TemplateHubClient } from './templatehub-provider';
 
 /**
  * SINGLETON INSTANCE

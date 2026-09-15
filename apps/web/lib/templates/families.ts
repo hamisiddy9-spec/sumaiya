@@ -21,8 +21,9 @@ import { TemplateFamily } from './schema';
  */
 
 export const TEMPLATE_FAMILIES: TemplateFamily[] = [
-  // ===== SUMAIYA CORE FAMILIES =====
-  // Small, curated set for new users
+  // ===== SUMAIYA CORE FAMILIES (5 families) =====
+  // Small, curated set for Sumaiya free experience
+  // These remain local until TemplateHub is ready
 
   {
     id: 'core-simple',
@@ -30,7 +31,7 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
     description: 'Quick start. Clean, minimal CV for fast creation.',
     tier: 'core',
     templates: [
-      { templateId: 'simple-cv', category: 'cv', role: 'primary' },
+      { templateId: 'simple-cv', category: 'cv', role: 'primary', position: 1 },
     ],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -42,7 +43,7 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
     description: 'Professional CV for most roles. Polished, trustworthy.',
     tier: 'core',
     templates: [
-      { templateId: 'professional-cv', category: 'cv', role: 'primary' },
+      { templateId: 'professional-cv', category: 'cv', role: 'primary', position: 1 },
     ],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
@@ -54,77 +55,91 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
     description: 'Designed to pass automated resume scanners. Clean, scannable.',
     tier: 'core',
     templates: [
-      { templateId: 'ats-cv', category: 'cv', role: 'primary' },
+      { templateId: 'ats-cv', category: 'cv', role: 'primary', position: 1 },
     ],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
 
-  // ===== TEMPLATEHUB PREMIUM FAMILIES (Planned) =====
-  // These will be populated after template migration audit
-
-  // Placeholder for Executive Collection
-  // (Will include 2-3 migrated CV templates + matching cover letter)
-  {
-    id: 'executive-professional',
-    name: 'Executive Professional',
-    description: 'Premium family for senior roles and experienced professionals.',
-    tier: 'premium',
-    templates: [
-      // TODO: Add CV templates from apex, etc.
-      // TODO: Add matching cover letter
-      // TODO: Add reference sheet
-    ],
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-  },
-
-  // Placeholder for Modern Specialist
-  {
-    id: 'modern-specialist',
-    name: 'Modern Specialist',
-    description: 'Clean, modern presentation for technical roles.',
-    tier: 'premium',
-    templates: [
-      // TODO: Add CV template (from altus, etc.)
-      // TODO: Add matching cover letter
-    ],
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-  },
-
-  // Placeholder for Creative Professional
-  {
-    id: 'creative-professional',
-    name: 'Creative Professional',
-    description: 'Distinctive design for creative roles (designer, writer, etc.)',
-    tier: 'premium',
-    templates: [
-      // TODO: Add CV template
-      // TODO: Add matching cover letter
-    ],
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-  },
-
-  // Placeholder for Professional Minimal
   {
     id: 'professional-minimal',
     name: 'Professional Minimal',
     description: 'Minimal, elegant. Let your experience speak for itself.',
     tier: 'core',
     templates: [
-      // TODO: Merged from alpine, athens, atlanta (combined)
-      // - templateId: alpine (cool variant)
-      // - templateId: athens (warm variant)
-      // - templateId: atlanta (neutral variant)
+      { templateId: 'alpine', category: 'cv', role: 'primary', position: 1 },
+      { templateId: 'aberdare', category: 'cv', role: 'primary', position: 2 },
+      { templateId: 'athens', category: 'cv', role: 'primary', position: 3 },
+      { templateId: 'atlanta', category: 'cv', role: 'primary', position: 4 },
     ],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
 
-  // ===== MORE FAMILIES TO COME =====
-  // This list will grow to 30-50 families during the migration process
+  {
+    id: 'ats-optimized',
+    name: 'ATS-Optimized Family',
+    description: 'Variants of ATS-optimized design.',
+    tier: 'core',
+    templates: [
+      { templateId: 'apex', category: 'cv', role: 'primary', position: 1 },
+      { templateId: 'artemis', category: 'cv', role: 'primary', position: 2 },
+    ],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+
+  // ===== TEMPLATEHUB PREMIUM FAMILIES (Planned, to be built from remaining 261) =====
+  // After TEMPLATE_ASSET_MIGRATION_PLAN audit:
+  // - 261 templates will be classified into 25-45 premium families
+  // - Each family: CV + matching cover letter + optionally reference sheet
+  // - Organized by: Executive, Modern, Creative, Industry-specific, etc.
+
+  {
+    id: 'executive-professional',
+    name: 'Executive Professional',
+    description: 'Premium family for senior roles and experienced professionals. Includes CV + matching cover letter + reference sheet.',
+    tier: 'premium',
+    templates: [
+      { templateId: 'altus', category: 'cv', role: 'primary', position: 1 },
+      // TODO: Add matching cover letter (to be created)
+      // TODO: Add reference sheet (to be created)
+    ],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+
+  {
+    id: 'modern-specialist',
+    name: 'Modern Specialist',
+    description: 'Clean, modern presentation for technical and specialist roles.',
+    tier: 'premium',
+    templates: [
+      { templateId: 'aurora', category: 'cv', role: 'primary', position: 1 },
+      // TODO: Add matching cover letter
+    ],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+
+  {
+    id: 'creative-professional',
+    name: 'Creative Professional',
+    description: 'Distinctive design for creative roles (designer, writer, artist, etc.)',
+    tier: 'premium',
+    templates: [
+      // TODO: Assign from remaining 261 templates
+    ],
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  },
+
+  // ===== PENDING FAMILIES (261 remaining templates) =====
+  // These will be organized during TEMPLATE_ASSET_MIGRATION_PLAN
+  // Each will eventually become a premium family with:
+  // - CV template
+  // - Matching cover letter
+  // - Optional: reference sheet, LinkedIn profile guide
 ];
 
 /**
