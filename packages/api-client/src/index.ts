@@ -96,6 +96,18 @@ export interface ApiClientConfig {
   baseUrl: string;
   timeout?: number;
   retryAttempts?: number;
+  /**
+   * Recover from a rejected token. Called at most ONCE per request, after a 401,
+   * and must return true only if it applied a fresh token via setAccessToken().
+   *
+   * Why this belongs here: a 401 was indistinguishable from a dead network at
+   * every call site, and the app's own screens then told the user "we couldn't
+   * reach the server" — which is false. Worse, retry buttons re-sent the same
+   * dead token forever. A 401 whose cause is a stale or not-yet-applied session
+   * (cold start: getSession() resolves AFTER the first screen mounts) is
+   * recoverable, and the recovery belongs next to the request that fails.
+   */
+  refreshAuth?: () => Promise<boolean>;
 }
 
 export class ApiError extends Error {
@@ -105,9 +117,13 @@ export class ApiError extends Error {
    * locally — the server may well still be working (an upload that got past
    * the uplink but not back), which is worth telling the user differently from
    * a transport failure. `"network"` means the request never went out.
+   *
+   * `"unauthorized"` is the opposite case: the server answered, and it refused
+   * our credentials even after a refresh. Callers must NOT report that as a
+   * connection problem.
    */
-  kind?: "timeout" | "network";
-  constructor(status: number, message: string, kind?: "timeout" | "network") {
+  kind?: "timeout" | "network" | "unauthorized";
+  constructor(status: number, message: string, kind?: "timeout" | "network" | "unauthorized") {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -141,15 +157,26 @@ export class ApiClient {
   private timeout: number;
   private retryAttempts: number;
   private accessToken?: string;
+  private refreshAuth?: () => Promise<boolean>;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl;
     this.timeout = config.timeout || 30000;
     this.retryAttempts = config.retryAttempts || 3;
+    this.refreshAuth = config.refreshAuth;
   }
 
   setAccessToken(token: string) {
     this.accessToken = token || undefined;
+  }
+
+  /**
+   * Wire up token recovery after construction. The app has exactly ONE
+   * ApiClient instance, built before Supabase is touched (see
+   * apps/native/src/lib/api-client.ts), so the handler is injected later.
+   */
+  setRefreshAuth(fn: () => Promise<boolean>) {
+    this.refreshAuth = fn;
   }
 
   private async request<T>(
@@ -162,7 +189,9 @@ export class ApiClient {
      * surfaced as a bogus "check your connection". Long-running calls pass
      * their own budget (see UPLOAD_TIMEOUT_MS / OCR_TIMEOUT_MS below).
      */
-    timeoutMs?: number
+    timeoutMs?: number,
+    /** Internal: true on the single retry that follows a recovered 401. */
+    authRetry = false
   ): Promise<T> {
     const timeout = timeoutMs ?? this.timeout;
     const url = `${this.baseUrl}${endpoint}`;
@@ -233,7 +262,31 @@ export class ApiClient {
           : null) ||
         (typeof payload === "string" && payload) ||
         `${response.status} ${response.statusText}`;
-      throw new ApiError(response.status, message);
+
+      /**
+       * A 401 is usually a stale/absent token, not a bad user: on a cold start
+       * `supabase.auth.getSession()` resolves AFTER the first screen mounts, so
+       * the very first authenticated request can go out with no Authorization
+       * header at all — and every "Try again" re-sent the same missing token,
+       * so the screen failed identically forever while claiming the server was
+       * unreachable.
+       *
+       * Ask the app to restore/refresh the session, then retry ONCE. If it
+       * still refuses, the error is reported as `unauthorized` so callers can
+       * say what actually happened.
+       */
+      if (response.status === 401 && !authRetry && this.refreshAuth) {
+        const recovered = await this.refreshAuth().catch(() => false);
+        if (recovered) {
+          return this.request<T>(endpoint, options, timeoutMs, true);
+        }
+      }
+
+      throw new ApiError(
+        response.status,
+        message,
+        response.status === 401 ? "unauthorized" : undefined
+      );
     }
 
     // Unwrap Hono's { success, data } envelope when present.

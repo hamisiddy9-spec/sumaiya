@@ -4,6 +4,7 @@ import type { CV, SyncQueueItem } from "@sumaiya/types";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { dedupe } from "../lib/cv-dedupe";
+import { classifyCvError, type CvErrorKind } from "../lib/cv-fetch-error";
 import { useAuthContext } from "../contexts/auth-context";
 
 /**
@@ -43,6 +44,12 @@ export function useCvs() {
   const [cvs, setCvs] = useState<CV[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /**
+   * WHY the load failed, not just that it did. Every caller used to print the
+   * same "couldn't reach the server" line — false for a 401, and it sent people
+   * to retry a request that could never succeed.
+   */
+  const [errorKind, setErrorKind] = useState<CvErrorKind | null>(null);
   // True when the server gave us rows but they could not be cached on the
   // device. The list still renders them; we just say so instead of pretending
   // local storage is fine.
@@ -122,11 +129,13 @@ export function useCvs() {
         if (storageUnusable) setCvs(server);
         setStorageBlocked(persistFailed || storageUnusable);
         setError(null);
+        setErrorKind(null);
       }
     } catch (e) {
       // Offline / not signed in — the local list still stands.
       if (mounted.current) {
         setError(e instanceof Error ? e.message : "Couldn't refresh from the server");
+        setErrorKind(classifyCvError(e));
       }
     } finally {
       loadInFlight.current = false;
@@ -226,5 +235,5 @@ export function useCvs() {
     }, [loadCVs, readLocal]),
   );
 
-  return { cvs, loading, error, storageBlocked, loadCVs, deleteCV, updateCV };
+  return { cvs, loading, error, errorKind, storageBlocked, loadCVs, deleteCV, updateCV };
 }

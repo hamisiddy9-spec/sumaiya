@@ -3,6 +3,8 @@ import { Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { useCvs } from "../../hooks/use-cvs";
+import { useAuthContext } from "../../contexts/auth-context";
+import { cvErrorCopy } from "../../lib/cv-fetch-error";
 import {
   Button,
   Card,
@@ -26,7 +28,10 @@ import type { CvListScreenProps } from "../../navigation/types";
 export function CvListScreen({ navigation }: CvListScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
-  const { cvs, loading, error, storageBlocked, deleteCV, loadCVs } = useCvs();
+  const { cvs, loading, error, errorKind, storageBlocked, deleteCV, loadCVs } = useCvs();
+  const { signOut } = useAuthContext();
+  // Same truth as Home: the reason decides the message AND the action.
+  const cvError = cvErrorCopy(errorKind ?? "unknown");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -121,13 +126,10 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
           <EmptyState
             icon="alert-circle"
-            title={t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
-            body={t(
-              "Your CVs are safe on your account — we just couldn't reach the server. Check your connection and try again.",
-              "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server. Angalia mtandao kisha ujaribu tena.",
-            )}
-            actionLabel={t("Try again", "Jaribu tena")}
-            onAction={onRefresh}
+            title={t(cvError.title.en, cvError.title.sw)}
+            body={t(cvError.body.en, cvError.body.sw)}
+            actionLabel={t(cvError.action.en, cvError.action.sw)}
+            onAction={cvError.actionKind === "signin" ? () => void signOut() : onRefresh}
           />
         </View>
       ) : cvs.length === 0 ? (

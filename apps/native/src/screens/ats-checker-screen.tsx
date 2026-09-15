@@ -4,6 +4,8 @@ import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import type { CV, CVData } from "@sumaiya/types";
 import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { useCvs } from "../hooks/use-cvs";
+import { useAuthContext } from "../contexts/auth-context";
+import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
 import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
@@ -35,7 +37,10 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const sw = lang === "sw";
-  const { cvs, loading, error, loadCVs } = useCvs();
+  const { cvs, loading, error, errorKind, loadCVs } = useCvs();
+  const { signOut } = useAuthContext();
+  // Same truth as Home: the reason decides the message AND the action.
+  const cvError = cvErrorCopy(errorKind ?? "unknown");
   const { premium } = useEntitlements();
   const preselect: string | undefined = route?.params?.cvId;
   const [pickedId, setPickedId] = useState<string | undefined>(preselect);
@@ -108,13 +113,10 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
            couldn't reach the server — that is indistinguishable from data loss. */
         <EmptyState
           icon="alert-circle"
-          title={t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
-          body={t(
-            "Your CVs are safe on your account — we just couldn't reach the server. Check your connection and try again.",
-            "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server. Angalia mtandao kisha ujaribu tena.",
-          )}
-          actionLabel={t("Try again", "Jaribu tena")}
-          onAction={loadCVs}
+          title={t(cvError.title.en, cvError.title.sw)}
+          body={t(cvError.body.en, cvError.body.sw)}
+          actionLabel={t(cvError.action.en, cvError.action.sw)}
+          onAction={cvError.actionKind === "signin" ? () => void signOut() : loadCVs}
         />
       ) : cvs.length === 0 ? (
         <View style={{ gap: 12 }}>
