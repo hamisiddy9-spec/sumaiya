@@ -11,6 +11,7 @@ import { useAuthContext } from "../../contexts/auth-context";
 import { useLang, type Lang } from "../../lib/i18n";
 import { GUIDES } from "../../lib/guides";
 import { relativeDate } from "../../lib/relative-date";
+import { cvErrorCopy } from "../../lib/cv-fetch-error";
 import {
   Card,
   Screen,
@@ -66,9 +67,12 @@ function greeting(lang: Lang): string {
 
 export function HomeScreen({ navigation }: HomeScreenProps) {
   const c = useThemeColors();
-  const { user } = useAuthContext();
+  const { user, signOut } = useAuthContext();
   const { t, lang } = useLang();
-  const { cvs, loading, error, loadCVs } = useCvs();
+  const { cvs, loading, error, errorKind, loadCVs } = useCvs();
+  // What to say when the list failed — decided by WHY it failed (a refused
+  // session is not a dead network), and what the action must actually do.
+  const cvError = errorKind ? cvErrorCopy(errorKind) : null;
   const [refreshing, setRefreshing] = React.useState(false);
   // Live, not a module-level Dimensions.get() snapshot — a foldable's window
   // width changes on fold/unfold without an app restart, and a stale value
@@ -406,22 +410,30 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "700" }}>
-                {t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
+                {cvError
+                  ? t(cvError.title.en, cvError.title.sw)
+                  : t("Couldn't load your CVs", "Imeshindwa kupakia CV zako")}
               </Text>
               <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={2}>
-                {t(
-                  "Your CVs are safe on your account — we just couldn't reach the server.",
-                  "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server.",
-                )}
+                {cvError
+                  ? t(cvError.body.en, cvError.body.sw)
+                  : t(
+                      "Your CVs are safe on your account — we just couldn't reach the server.",
+                      "CV zako ziko salama kwenye akaunti yako — tumeshindwa kufikia server.",
+                    )}
               </Text>
             </View>
             <Pressable
-              onPress={onRefresh}
+              onPress={cvError?.actionKind === "signin" ? () => void signOut() : onRefresh}
               accessibilityRole="button"
-              accessibilityLabel={t("Try again", "Jaribu tena")}
+              accessibilityLabel={
+                cvError ? t(cvError.action.en, cvError.action.sw) : t("Try again", "Jaribu tena")
+              }
               hitSlop={10}
             >
-              <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Try again", "Jaribu tena")}</Text>
+              <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>
+                {cvError ? t(cvError.action.en, cvError.action.sw) : t("Try again", "Jaribu tena")}
+              </Text>
             </Pressable>
           </View>
         ) : recent.length === 0 ? (

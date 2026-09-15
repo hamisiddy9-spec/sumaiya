@@ -17,6 +17,7 @@ import type { ApiClient } from "@sumaiya/api-client";
 import type { AuthUser } from "@sumaiya/types";
 import { supabase } from "../lib/supabase";
 import { apiClient as sharedApiClient } from "../lib/api-client";
+import { installAuthRecovery } from "../lib/auth-recovery";
 import { reportError } from "../lib/reporting";
 import { friendlyError } from "../lib/auth-errors";
 import { getLastKnownLang } from "../lib/i18n";
@@ -71,6 +72,12 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
 
   // Restore any persisted session + keep the API client token in sync.
   useEffect(() => {
+    // A request can outrun this effect: getSession() below is async, and the
+    // first screen's fetch may already be on the wire with no token. Recovery
+    // gives that request one refresh-and-retry instead of a 401 the UI would
+    // report as "can't reach the server".
+    installAuthRecovery();
+
     supabase.auth
       .getSession()
       .then(({ data }) => applySession(data.session))
