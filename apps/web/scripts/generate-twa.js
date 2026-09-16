@@ -24,7 +24,7 @@ const targetDir = process.cwd();
 (async () => {
   // 1. Fetch the LIVE web manifest and convert to a TWA manifest
   const manifest = await TwaManifest.fromWebManifest(
-    'https://www.templatehub.pro/manifest.json'
+    'https://sumaiya.app/manifest.json'
   );
 
   // 2. Pin identifiers the web manifest cannot express
@@ -38,7 +38,7 @@ const targetDir = process.cwd();
   };
   manifest.enableNotifications = true;
   manifest.enableSiteSettingsShortcut = true;
-  manifest.webManifestUrl = new URL('https://www.templatehub.pro/manifest.json');
+  manifest.webManifestUrl = new URL('https://sumaiya.app/manifest.json');
 
   // 3. Write the manifest + generate the Android project
   const manifestFile = path.join(targetDir, 'twa-manifest.json');

@@ -6,7 +6,7 @@
  *
  * Run:
  *   BROWSERBASE_API_KEY=... BROWSERBASE_PROJECT_ID=... npm run test:e2e
- *   # optional: TARGET_URL=https://www.templatehub.pro (default)
+ *   # optional: TARGET_URL=https://sumaiya.app (default)
  *
  * Exit code: 0 = all checks passed, 1 = a check failed, 2 = misconfigured.
  * On failure it saves a screenshot under scripts/e2e-artifacts/.
@@ -17,7 +17,7 @@ import { chromium } from "playwright-core";
 
 const API_KEY = process.env.BROWSERBASE_API_KEY;
 const PROJECT_ID = process.env.BROWSERBASE_PROJECT_ID;
-const BASE = (process.env.TARGET_URL || "https://www.templatehub.pro").replace(/\/$/, "");
+const BASE = (process.env.TARGET_URL || "https://sumaiya.app").replace(/\/$/, "");
 const ART_DIR = "scripts/e2e-artifacts";
 
 if (!API_KEY || !PROJECT_ID) {
