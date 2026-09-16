@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, SectionList, Text, View, useWindowDimensions } from "react-native";
+import { Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
@@ -68,6 +68,7 @@ export function TemplateGallery({
   const [query, setQuery] = useState("");
   const [family, setFamily] = useState<string | null>(null);
   const [premiumFor, setPremiumFor] = useState<string | null>(null);
+  const [previewFor, setPreviewFor] = useState<CvTemplateMeta | null>(null);
 
   // ── Job-aware suggestions ──────────────────────────────────────────────────
   // Derived from text the user already gave us (headline, goals, experience) —
@@ -166,10 +167,11 @@ export function TemplateGallery({
         setPremiumFor(tpl.id);
         return;
       }
-      onSelect(tpl.id);
-      onClose();
+      // Tap opens a full-screen preview, not a silent select — the user gets a
+      // chance to see the design large before committing to it.
+      setPreviewFor(tpl);
     },
-    [premium, onSelect, onClose],
+    [premium],
   );
 
   const renderCell = useCallback(
@@ -345,6 +347,48 @@ export function TemplateGallery({
           }
         />
       </View>
+
+      {/* Full-screen preview — tap a thumbnail to see the design large, then
+          commit with "Use this design" (or dismiss). */}
+      {previewFor ? (
+        <View style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: PAD, paddingVertical: 12 }}>
+            <View style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
+              <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }} numberOfLines={1}>
+                {lang === "sw" ? previewFor.name.sw : previewFor.name.en}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
+                {FAMILIES.find((f) => f.key === previewFor.style)?.[lang === "sw" ? "sw" : "en"] ?? ""} ·{" "}
+                {previewFor.tier === "premium" ? t("Premium", "Premium") : t("Free", "Bure")}
+              </Text>
+            </View>
+            <Pressable onPress={() => setPreviewFor(null)} hitSlop={12} accessibilityRole="button" accessibilityLabel={t("Close", "Funga")}>
+              <Icon name="x" size={22} color={c.text} />
+            </Pressable>
+          </View>
+
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ alignItems: "center", paddingHorizontal: PAD, paddingVertical: 8 }}>
+            <RealTemplateThumb id={previewFor.id} accent={c.accent} width={width - PAD * 2} />
+          </ScrollView>
+
+          <View style={{ paddingHorizontal: PAD, paddingBottom: insets.bottom + 12, paddingTop: 4 }}>
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                onSelect(previewFor.id);
+                onClose();
+              }}
+              style={{ backgroundColor: c.accent, borderRadius: 14, paddingVertical: 15, alignItems: "center" }}
+              accessibilityRole="button"
+              accessibilityLabel={t("Use this design", "Tumia muundo huu")}
+            >
+              <Text style={{ color: c.accentText, fontSize: 16, fontWeight: "800" }}>
+                {t("Use this design", "Tumia muundo huu")}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
 
       <PremiumSheet visible={premiumFor !== null} onClose={() => setPremiumFor(null)} feature="templates" />
     </Modal>

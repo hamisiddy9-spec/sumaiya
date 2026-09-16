@@ -22,15 +22,13 @@ export function RealTemplateThumb({
   width?: number;
 }) {
   const [ready, setReady] = useState(false);
-  // Match the editor's live-preview page ratio (A4 794×1123) so the page fits
-  // the frame exactly — a mismatched ratio leaves the page taller than the
-  // thumbnail and the WebView shows a scroll gutter.
-  const h = Math.round(width * (1123 / 794));
+  // Ceil (never round down) + a 2px buffer so the 794px page scaled to a tiny
+  // thumbnail never overflows the frame by a sub-pixel — that overflow is what
+  // draws the thin WebView scroll gutter. The container clips the buffer.
+  const h = Math.ceil(width * (1123 / 794)) + 2;
   const html = useMemo(() => {
     const base = cvToHtml({ ...SAMPLE_CV, templateId: id }, { template: id, accent, lang: "en" });
-    // Clip any overflow and hide the WebView's scrollbar entirely, so the
-    // preview frame never shows a scroll indicator.
-    const style = `<style>html,body{margin:0;padding:0;overflow:hidden!important}::-webkit-scrollbar{width:0;height:0;display:none}</style>`;
+    const style = `<style>html,body{margin:0;padding:0;overflow:hidden!important}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}</style>`;
     return base.includes("</head>") ? base.replace("</head>", `${style}</head>`) : style + base;
   }, [id, accent]);
 
@@ -45,6 +43,8 @@ export function RealTemplateThumb({
         originWhitelist={["*"]}
         source={{ html }}
         scrollEnabled={false}
+        nestedScrollEnabled={false}
+        setBuiltInZoomControls={false}
         pointerEvents="none"
         onLoadEnd={() => setReady(true)}
         style={{ width, height: h, backgroundColor: "#fff", opacity: ready ? 1 : 0 }}
