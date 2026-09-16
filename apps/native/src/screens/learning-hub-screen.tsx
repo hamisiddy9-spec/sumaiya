@@ -384,13 +384,24 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             </View>
           ) : (
             <Pressable
-              onPress={() => navigation.navigate("Jobs")}
-              style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24", borderRadius: 12, padding: 14 }}
+              onPress={() => { haptics.selection(); navigation.navigate("Jobs"); }}
+              style={{ flexDirection: "row", gap: 12, alignItems: "center", backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24", borderRadius: 14, padding: 16 }}
             >
-              <SumaiyaMark size={18} state="static" color={c.accent} />
-              <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-                {t("Finish your profile and I'll show you the exact skills to build for the jobs you want.", "Kamilisha wasifu wako nami nikuonyeshe ujuzi hasa wa kujenga kwa kazi unazotaka.")}
-              </Text>
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+                <SumaiyaMark size={18} state="static" color={c.accent} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
+                  {t("Add your first job to see what to learn", "Ongeza kazi yako ya kwanza uone cha kujifunza")}
+                </Text>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
+                  {t("Finish your profile and I'll show you the exact skills to build for the jobs you want.", "Kamilisha wasifu wako nami nikuonyeshe ujuzi hasa wa kujenga kwa kazi unazotaka.")}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Find jobs", "Tafuta kazi")}</Text>
+                <Icon name="chevron-right" size={18} color={c.accent} />
+              </View>
             </Pressable>
           )}
 

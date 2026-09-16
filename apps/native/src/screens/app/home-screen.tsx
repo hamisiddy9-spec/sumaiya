@@ -182,22 +182,50 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         const freeGuides = GUIDES.filter((g) => g.tier === "free");
         const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
 
+        // A sparse profile — no CVs yet and no matched openings — gets a
+        // concrete first step instead of a rotated tip. "Add your first job"
+        // is the one input that unlocks matches, advice and skill gaps, so the
+        // empty state names it directly rather than a vague "get started".
+        const sparse = !topSignal && cvs.length === 0 && jobRecs.length === 0;
+
         const onPress = () => {
           if (topSignal && act) {
             (navigation.navigate as (screen: string, params?: Record<string, unknown>) => void)(
               act.target.screen,
               act.target.params,
             );
+          } else if (sparse) {
+            navigation.navigate("Jobs");
           } else {
             navigation.navigate("Guide", { id: tip.id });
           }
         };
 
+        const eyebrow = topSignal
+          ? t("Worth your attention", "Inastahili umakini")
+          : sparse
+            ? t("Get started", "Anza sasa")
+            : t("A tip from me", "Kidokezo changu");
+        const title = st
+          ? st.title
+          : sparse
+            ? t("Add your first job to get career advice", "Ongeza kazi yako ya kwanza upate ushauri wa kazi")
+            : tip.title[lang];
+        const detail = st
+          ? st.detail
+          : sparse
+            ? t(
+                "Tell me the role you're aiming for and I'll match jobs, skills and advice to it.",
+                "Niambie nafasi unayolenga nami nitaoanisha ajira, ujuzi na ushauri nayo.",
+              )
+            : tip.summary[lang];
+        const cta = st ? act?.cta[lang] : sparse ? t("Find jobs", "Tafuta kazi") : t("Read the guide", "Soma mwongozo");
+
         return (
           <Animated.View entering={FadeInDown.duration(320).delay(40)}>
             <Card
               onPress={onPress}
-              accessibilityLabel={st ? st.title : tip.title[lang]}
+              accessibilityLabel={title}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -212,20 +240,20 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
-                  {topSignal ? t("Worth your attention", "Inastahili umakini") : t("A tip from me", "Kidokezo changu")}
+                  {eyebrow}
                 </Text>
                 <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
-                  {st ? st.title : tip.title[lang]}
+                  {title}
                 </Text>
-                {st ? (
+                {detail ? (
                   <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>
-                    {st.detail}
+                    {detail}
                   </Text>
                 ) : null}
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                {act ? (
-                  <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{act.cta[lang]}</Text>
+                {cta ? (
+                  <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{cta}</Text>
                 ) : null}
                 <Icon name="chevron-right" size={18} color={c.accent} />
               </View>

@@ -11,6 +11,7 @@ import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
 import { haptics, TextField, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
+import { track } from "../../lib/analytics";
 
 /**
  * The TemplateHub gallery.
@@ -84,6 +85,13 @@ export function TemplateGallery({
     return () => { alive = false; };
   }, [visible]);
 
+  // Fired once per open, from any opener (dashboard teaser, first-run, the CV
+  // preview card). Kept here — not in the callers — so a new entry point can't
+  // forget to emit it.
+  useEffect(() => {
+    if (visible) track("template_viewed");
+  }, [visible]);
+
   const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
 
   const sections = useMemo<Section[]>(() => {
@@ -150,6 +158,9 @@ export function TemplateGallery({
   const pick = useCallback(
     (tpl: CvTemplateMeta) => {
       const locked = tpl.tier === "premium" && !premium;
+      // Fired on every cell press — including a locked Premium tap — so the
+      // funnel shows demand for designs before entitlement filters it.
+      track("template_selected", { id: tpl.id, tier: tpl.tier });
       haptics.selection();
       if (locked) {
         setPremiumFor(tpl.id);
