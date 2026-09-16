@@ -429,7 +429,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         </View>
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
-          {t("Sumaiya · Documents that get you hired", "Sumaiya · Hati zinazokupatia ajira")}{"\n"}{SUPPORT_EMAIL}
+          {t("Sumaiya · Your career, guided", "Sumaiya · Kazi yako, inaongozwa")}{"\n"}{SUPPORT_EMAIL}
         </Text>
       </Animated.View>
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="general" />

@@ -46,8 +46,8 @@ export function Footer() {
             <Logo className="text-cream [&_span]:!text-cream" />
             <p className="mt-3 text-sm text-cream/60 leading-relaxed max-w-xs">
               {sw
-                ? "Miundo ya kitaalamu ya CV, barua za maombi, kadi za biashara na barua rasmi, pamoja na msaidizi wa AI unaokusaidia kupata ajira."
-                : "Professional CV, cover letter, business card & letter templates, with an AI assistant that helps you get hired."}
+                ? "Msaidizi wako wa kazi wa AI — CV, barua za maombi, ajira na ushauri, mahali pamoja."
+                : "Your AI career assistant — CVs, cover letters, jobs and advice in one place."}
             </p>
           </div>
 
