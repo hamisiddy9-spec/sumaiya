@@ -10,7 +10,7 @@ import { useLang } from "../../lib/i18n";
 import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
 import { haptics, TextField, useThemeColors } from "../ui";
-import { TemplateThumb } from "./template-thumb";
+import { RealTemplateThumb } from "./real-template-thumb";
 
 /**
  * The full template gallery.
@@ -136,7 +136,7 @@ export function TemplateGallery({
               opacity: locked ? 0.55 : 1,
             }}
           >
-            <TemplateThumb id={item.id} accent={c.accent} width={cell - 12} />
+            <RealTemplateThumb id={item.id} accent={c.accent} width={cell - 12} />
           </View>
           <Text
             numberOfLines={1}
