@@ -27,6 +27,9 @@ export { TemplateHubProvider, createTemplateHubProvider, type TemplateHubClient 
 // CV template tiers (premium / core / legacy) — single source of truth
 export { getCvTemplateTier, isPremiumCvTemplate, getCuratedCvTemplateIds, type CvTemplateTier } from './tiers';
 
+// Curated / premium template id lists (single source of truth for tiers)
+export { CURATED_CV_TEMPLATE_IDS, PREMIUM_TEMPLATE_IDS } from './curation';
+
 // Database Migrations
 export { MIGRATIONS, getMigrationSQL, checkMigrationStatus, convertCVToDocument, type MigrationStatus } from './migrations';
 

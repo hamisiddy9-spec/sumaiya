@@ -719,7 +719,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "atlas-v2": {
     "id": "atlas-v2",
-    "name": "Atlas V2",
+    "name": "Atlas v2",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -1159,7 +1159,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "avant-garde-cv": {
     "id": "avant-garde-cv",
-    "name": "Avant Garde Cv",
+    "name": "Avant Garde",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -1687,7 +1687,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "baroque-cv": {
     "id": "baroque-cv",
-    "name": "Baroque Cv",
+    "name": "Baroque",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -1775,7 +1775,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "baskerville-cv": {
     "id": "baskerville-cv",
-    "name": "Baskerville Cv",
+    "name": "Baskerville",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -2215,7 +2215,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "bodoni-cv": {
     "id": "bodoni-cv",
-    "name": "Bodoni Cv",
+    "name": "Bodoni",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -2479,7 +2479,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "brutalist-cv": {
     "id": "brutalist-cv",
-    "name": "Brutalist Cv",
+    "name": "Brutalist",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -4063,7 +4063,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "clarendon-cv": {
     "id": "clarendon-cv",
-    "name": "Clarendon Cv",
+    "name": "Clarendon",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -4151,7 +4151,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "classical-cv": {
     "id": "classical-cv",
-    "name": "Classical Cv",
+    "name": "Classical",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -4239,7 +4239,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "clean-cv": {
     "id": "clean-cv",
-    "name": "Clean Cv",
+    "name": "Clean",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -5735,7 +5735,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "deco-cv": {
     "id": "deco-cv",
-    "name": "Deco Cv",
+    "name": "Deco",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -6263,7 +6263,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "didot-cv": {
     "id": "didot-cv",
-    "name": "Didot Cv",
+    "name": "Didot",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -7583,7 +7583,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "futura-cv": {
     "id": "futura-cv",
-    "name": "Futura Cv",
+    "name": "Futura",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -7671,7 +7671,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "futurism-cv": {
     "id": "futurism-cv",
-    "name": "Futurism Cv",
+    "name": "Futurism",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -7847,7 +7847,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "gambia-cv": {
     "id": "gambia-cv",
-    "name": "Gambia Cv",
+    "name": "Gambia",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -7935,7 +7935,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "garamond-cv": {
     "id": "garamond-cv",
-    "name": "Garamond Cv",
+    "name": "Garamond",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -8727,7 +8727,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "herald-cv": {
     "id": "herald-cv",
-    "name": "Herald Cv",
+    "name": "Herald",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -9343,7 +9343,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "impressionist-cv": {
     "id": "impressionist-cv",
-    "name": "Impressionist Cv",
+    "name": "Impressionist",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -11103,7 +11103,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "limpopo-cv": {
     "id": "limpopo-cv",
-    "name": "Limpopo Cv",
+    "name": "Limpopo",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -12863,7 +12863,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "miami-cv": {
     "id": "miami-cv",
-    "name": "Miami Cv",
+    "name": "Miami",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -13127,7 +13127,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "modernist-cv": {
     "id": "modernist-cv",
-    "name": "Modernist Cv",
+    "name": "Modernist",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -13391,7 +13391,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "mono-cv": {
     "id": "mono-cv",
-    "name": "Mono Cv",
+    "name": "Mono",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -14447,7 +14447,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "neoclassical-cv": {
     "id": "neoclassical-cv",
-    "name": "Neoclassical Cv",
+    "name": "Neoclassical",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -15679,7 +15679,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "palatino-cv": {
     "id": "palatino-cv",
-    "name": "Palatino Cv",
+    "name": "Palatino",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -17791,7 +17791,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "rockwell-cv": {
     "id": "rockwell-cv",
-    "name": "Rockwell Cv",
+    "name": "Rockwell",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -18583,7 +18583,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "script-cv": {
     "id": "script-cv",
-    "name": "Script Cv",
+    "name": "Script",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -18847,7 +18847,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "serif-cv": {
     "id": "serif-cv",
-    "name": "Serif Cv",
+    "name": "Serif",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -19111,7 +19111,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "singapore-cv": {
     "id": "singapore-cv",
-    "name": "Singapore Cv",
+    "name": "Singapore",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -19375,7 +19375,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "slate-v2": {
     "id": "slate-v2",
-    "name": "Slate V2",
+    "name": "Slate v2",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -20431,7 +20431,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "sydney-cv": {
     "id": "sydney-cv",
-    "name": "Sydney Cv",
+    "name": "Sydney",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -20872,94 +20872,6 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   "tekeze": {
     "id": "tekeze",
     "name": "Tekeze",
-    "version": "1.0.0",
-    "source": "native",
-    "category": "cv",
-    "family": "pending",
-    "tier": "core",
-    "accessibleTo": [
-      "sumaiya"
-    ],
-    "editable_fields": [
-      {
-        "path": "personalInfo.fullName",
-        "type": "text",
-        "required": true,
-        "label": "Full Name"
-      },
-      {
-        "path": "personalInfo.email",
-        "type": "email",
-        "required": true,
-        "label": "Email"
-      },
-      {
-        "path": "personalInfo.phone",
-        "type": "phone",
-        "required": false,
-        "label": "Phone"
-      },
-      {
-        "path": "personalInfo.location",
-        "type": "text",
-        "required": false,
-        "label": "Location"
-      },
-      {
-        "path": "personalInfo.headline",
-        "type": "text",
-        "required": false,
-        "label": "Professional Headline"
-      },
-      {
-        "path": "summary",
-        "type": "multiline",
-        "required": false,
-        "label": "Professional Summary"
-      },
-      {
-        "path": "experience",
-        "type": "array",
-        "required": false,
-        "label": "Experience",
-        "itemSchema": {
-          "company": "text",
-          "title": "text",
-          "startDate": "date",
-          "endDate": "date",
-          "description": "multiline",
-          "keyAchievements": "array"
-        }
-      },
-      {
-        "path": "education",
-        "type": "array",
-        "required": false,
-        "label": "Education",
-        "itemSchema": {
-          "institution": "text",
-          "degree": "text",
-          "field": "text",
-          "graduationDate": "date"
-        }
-      },
-      {
-        "path": "skills",
-        "type": "array",
-        "required": false,
-        "label": "Skills",
-        "itemSchema": {
-          "name": "text",
-          "level": "enum"
-        }
-      }
-    ],
-    "createdAt": "2024-01-01T00:00:00Z",
-    "updatedAt": "2024-01-01T00:00:00Z"
-  },
-  "template-utils": {
-    "id": "template-utils",
-    "name": "Template Utils",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",
@@ -22719,7 +22631,7 @@ export const TEMPLATE_REGISTRY: Record<string, TemplateMetadata> = {
   },
   "volta-cv": {
     "id": "volta-cv",
-    "name": "Volta Cv",
+    "name": "Volta",
     "version": "1.0.0",
     "source": "native",
     "category": "cv",

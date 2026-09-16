@@ -16,7 +16,7 @@ console.log('📖 Scanning template files...');
 
 const files = fs
   .readdirSync(TEMPLATES_DIR)
-  .filter(f => f.endsWith('.tsx') && f !== 'index.ts')
+  .filter(f => f.endsWith('.tsx') && f !== 'index.ts' && f !== 'template-utils.tsx')
   .sort();
 
 console.log(`✅ Found ${files.length} templates`);
@@ -42,13 +42,49 @@ const familyMap = {
   __default: { family: 'pending', tier: 'core' },
 };
 
+// Curated display names that don't follow the simple title-case rule. Keeps
+// the generated registry names in sync with the hand-curated list in @/types
+// (the single source of truth for names) instead of emitting "Serif Cv" etc.
+const nameMap = {
+  'atlas-v2': 'Atlas v2',
+  'avant-garde-cv': 'Avant Garde',
+  'baroque-cv': 'Baroque',
+  'baskerville-cv': 'Baskerville',
+  'bodoni-cv': 'Bodoni',
+  'brutalist-cv': 'Brutalist',
+  'clarendon-cv': 'Clarendon',
+  'classical-cv': 'Classical',
+  'clean-cv': 'Clean',
+  'deco-cv': 'Deco',
+  'didot-cv': 'Didot',
+  'futura-cv': 'Futura',
+  'futurism-cv': 'Futurism',
+  'gambia-cv': 'Gambia',
+  'garamond-cv': 'Garamond',
+  'herald-cv': 'Herald',
+  'impressionist-cv': 'Impressionist',
+  'limpopo-cv': 'Limpopo',
+  'miami-cv': 'Miami',
+  'modernist-cv': 'Modernist',
+  'mono-cv': 'Mono',
+  'neoclassical-cv': 'Neoclassical',
+  'palatino-cv': 'Palatino',
+  'rockwell-cv': 'Rockwell',
+  'script-cv': 'Script',
+  'serif-cv': 'Serif',
+  'singapore-cv': 'Singapore',
+  'slate-v2': 'Slate v2',
+  'sydney-cv': 'Sydney',
+  'volta-cv': 'Volta',
+};
+
 const registry = {};
 
 files.forEach((file, idx) => {
   const templateId = file.replace('.tsx', '');
   const classification = familyMap[templateId] || familyMap.__default;
 
-  const templateName = templateId
+  const templateName = nameMap[templateId] || templateId
     .split('-')
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');

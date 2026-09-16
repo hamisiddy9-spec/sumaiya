@@ -3,10 +3,10 @@
  * premium (paid flagships), core (curated free), or legacy (the long tail of
  * recolor/rename variants that stay renderable but are not offered).
  *
- * Backed by the existing hand-curated lists in @/types so the provider layer
- * can answer "what tier is this" without every caller importing @/types.
+ * Backed by the hand-curated lists in ./curation so the provider layer
+ * answers "what tier is this" without every caller importing @/types.
  */
-import { CURATED_CV_TEMPLATE_IDS, PREMIUM_TEMPLATE_IDS } from '@/types';
+import { CURATED_CV_TEMPLATE_IDS, PREMIUM_TEMPLATE_IDS } from './curation';
 
 export type CvTemplateTier = 'premium' | 'core' | 'legacy';
 
