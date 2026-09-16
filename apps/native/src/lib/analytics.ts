@@ -16,6 +16,21 @@
 
 export type TrackProps = Record<string, string | number | boolean | null | undefined>;
 
+/**
+ * The activation funnel — the ordered stages a user passes through on the way
+ * to their first completed application. Keep in sync with the web catalog
+ * (apps/web/lib/analytics/events.ts) so the two apps measure the same journey.
+ */
+export const FUNNEL_EVENTS = {
+  signedUp: "signed_up",
+  onboarded: "onboarded",
+  profileCompleted: "profile_completed",
+  cvCreated: "cv_created",
+  cvExported: "cv_exported",
+  applicationCreated: "application_created",
+  templateSelected: "template_selected",
+} as const;
+
 type Sink = (name: string, props?: TrackProps) => void;
 
 let sink: Sink | null = null;

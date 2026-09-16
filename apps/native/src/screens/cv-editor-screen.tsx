@@ -7,6 +7,7 @@ import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
+import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
@@ -391,6 +392,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       };
       const uri = await exportCVAsPDF(cv, { accent, lang, template });
       haptics.success();
+      track(FUNNEL_EVENTS.cvExported, { template });
       await shareCV(cv, uri);
     } catch {
       haptics.error();
