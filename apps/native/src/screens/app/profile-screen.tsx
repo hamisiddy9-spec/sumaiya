@@ -379,6 +379,37 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           <ListRow last icon="alert-circle" label={t("Version", "Toleo")} value={version} />
         </View>
 
+        {/* Help & support */}
+        <ListGroupLabel>{t("Help & support", "Msaada na usaidizi")}</ListGroupLabel>
+        <View style={groupBox}>
+          <ListRow
+            first
+            icon="help-circle"
+            iconColor={c.accent}
+            label={t("Help & FAQ", "Msaada na Maswali")}
+            sublabel={t("How to scan, score, export and more", "Jinsi ya kuchanganua, kutoa alama, kuhamisha na zaidi")}
+            onPress={() => navigation.navigate("HelpFaq")}
+            chevron
+          />
+          <ListRow
+            icon="shield"
+            iconColor={c.accent}
+            label={t("Privacy & Terms", "Faragha na Masharti")}
+            sublabel={t("How your data is used and protected", "Jinsi data yako inavyotumiwa na kulindwa")}
+            onPress={() => navigation.navigate("PrivacyTerms")}
+            chevron
+          />
+          <ListRow
+            last
+            icon="mail"
+            iconColor={c.accent}
+            label={t("Contact support", "Wasiliana nasi")}
+            sublabel={SUPPORT_EMAIL}
+            onPress={() => navigation.navigate("Support")}
+            chevron
+          />
+        </View>
+
         {/* Danger */}
         <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
         <View style={groupBox}>

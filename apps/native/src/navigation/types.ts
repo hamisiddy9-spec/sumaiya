@@ -33,6 +33,9 @@ export type CvStackParamList = {
 export type ProfileStackParamList = {
   ProfileMain: undefined;
   CareerProfile: undefined;
+  HelpFaq: undefined;
+  PrivacyTerms: undefined;
+  Support: undefined;
 };
 
 export type RootStackParamList = {
@@ -105,6 +108,9 @@ export type CvEditorScreenProps = Screen<CvStackParamList, "CvEditor">;
 // Profile stack
 export type ProfileScreenProps = Screen<ProfileStackParamList, "ProfileMain">;
 export type CareerProfileScreenProps = Screen<ProfileStackParamList, "CareerProfile">;
+export type HelpFaqScreenProps = Screen<ProfileStackParamList, "HelpFaq">;
+export type PrivacyTermsScreenProps = Screen<ProfileStackParamList, "PrivacyTerms">;
+export type SupportScreenProps = Screen<ProfileStackParamList, "Support">;
 
 // Sumaiya is a direct tab screen
 export type SumaiyaChatScreenProps = {
