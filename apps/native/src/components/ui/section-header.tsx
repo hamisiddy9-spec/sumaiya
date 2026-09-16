@@ -33,6 +33,7 @@ export function SectionHeader({
       </View>
       {actionLabel && onAction ? (
         <Pressable
+          accessibilityRole="button"
           hitSlop={8}
           onPress={() => {
             haptics.selection();

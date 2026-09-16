@@ -69,6 +69,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
       <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 14, paddingBottom: 14 }}>
         <Pressable
           disabled={loading}
+          accessibilityRole="button"
           onPress={() => {
             haptics.light();
             onActionPress("learn", { skills: sorted });
@@ -90,6 +91,7 @@ export function SkillGapCard({ skills, onActionPress, loading = false }: Props) 
         </Pressable>
         <Pressable
           disabled={loading}
+          accessibilityRole="button"
           onPress={() => {
             haptics.light();
             onActionPress("practice", { skills: sorted });

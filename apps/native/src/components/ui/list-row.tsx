@@ -101,6 +101,7 @@ export function ListRow({
   if (!onPress || toggle) return content;
   return (
     <Pressable
+      accessibilityRole="button"
       disabled={disabled}
       onPress={() => {
         haptics.light();

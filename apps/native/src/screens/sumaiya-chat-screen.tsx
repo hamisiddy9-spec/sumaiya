@@ -303,7 +303,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         }}
       >
         {navigation.canGoBack?.() ? (
-          <Pressable hitSlop={10} onPress={() => navigation.goBack()}>
+          <Pressable hitSlop={10} onPress={() => navigation.goBack()} accessibilityRole="button" accessibilityLabel={t("Back", "Rudi")}>
             <Icon name="arrow-left" size={20} color={c.text} />
           </Pressable>
         ) : null}
@@ -332,13 +332,19 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
               haptics.selection();
               speech.speaking ? speech.stop() : speech.speak(lastReply);
             }}
+            accessibilityRole="button"
             accessibilityLabel={speech.speaking ? t("Stop reading", "Acha kusoma") : t("Read aloud", "Soma kwa sauti")}
           >
             <Icon name={speech.speaking ? "volume-x" : "volume-2"} size={18} color={speech.speaking ? c.accent : c.textMuted} />
           </Pressable>
         ) : null}
         {!empty ? (
-          <Pressable hitSlop={10} onPress={() => { haptics.selection(); speech.stop(); clearChat(); }}>
+          <Pressable
+            hitSlop={10}
+            onPress={() => { haptics.selection(); speech.stop(); clearChat(); }}
+            accessibilityRole="button"
+            accessibilityLabel={t("Clear conversation", "Futa mazungumzo")}
+          >
             <Icon name="refresh-cw" size={17} color={c.textMuted} />
           </Pressable>
         ) : null}
@@ -438,6 +444,8 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
 
         {showBuildBar ? (
           <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: buildingCv }}
             onPress={() => {
               haptics.selection();
               buildCvFromChat();

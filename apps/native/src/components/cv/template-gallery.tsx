@@ -241,6 +241,8 @@ export function TemplateGallery({
   const chip = (key: string, label: string, active: boolean, onPress: () => void) => (
     <Pressable
       key={key}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
       onPress={() => {
         haptics.selection();
         onPress();

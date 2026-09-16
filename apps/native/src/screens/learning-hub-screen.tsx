@@ -155,7 +155,7 @@ function GapCard({
           {/* The one thing the app genuinely cannot infer. Tapping either action
               above already means "I'm working on this", so there is no separate
               "Mark as learning" button any more. */}
-          <Pressable onPress={onCanDo} hitSlop={8} style={{ alignSelf: "flex-start" }}>
+          <Pressable accessibilityRole="button" onPress={onCanDo} hitSlop={8} style={{ alignSelf: "flex-start" }}>
             <Text style={{ color: c.success, fontSize: 12.5, fontWeight: "700", textDecorationLine: "underline" }}>
               {t("I can do this — add", "Naweza — ongeza")}
             </Text>
@@ -330,6 +330,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }}>
       <Pressable
+        accessibilityRole="button"
         hitSlop={10}
         onPress={() => { haptics.selection(); navigation.goBack(); }}
         style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}
@@ -361,6 +362,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
           {/* target + readiness */}
           {loadError && !result ? (
             <Pressable
+              accessibilityRole="button"
               onPress={() => void load()}
               style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.error + "10", borderWidth: 1, borderColor: c.error + "24", borderRadius: 12, padding: 14 }}
             >
@@ -384,6 +386,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             </View>
           ) : (
             <Pressable
+              accessibilityRole="button"
               onPress={() => { haptics.selection(); navigation.navigate("Jobs"); }}
               style={{ flexDirection: "row", gap: 12, alignItems: "center", backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24", borderRadius: 14, padding: 16 }}
             >
@@ -497,6 +500,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               return (
                 <Stagger key={g.id} index={i} step={30}>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => { haptics.selection(); navigation.navigate("Guide", { id: g.id }); }}
                     style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}
                   >
@@ -518,7 +522,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
 
           {/* EXPLORE ALL */}
           {!exploreOpen ? (
-            <Pressable onPress={openExplore} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.border }}>
+            <Pressable accessibilityRole="button" onPress={openExplore} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.border }}>
               <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>{t("Explore all courses", "Chunguza kozi zote")}</Text>
               <Icon name="chevron-down" size={16} color={c.textMuted} />
             </Pressable>

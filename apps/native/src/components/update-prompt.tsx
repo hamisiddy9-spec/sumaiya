@@ -194,6 +194,7 @@ export function UpdatePrompt() {
         }}
       >
         <Pressable
+          accessibilityRole="button"
           onPress={() => {
             haptics.light();
             setMinimized(false);
@@ -285,6 +286,7 @@ export function UpdatePrompt() {
             <Button label={t("Download now", "Pakua sasa")} onPress={updateNow} />
           )}
           <Pressable
+            accessibilityRole="button"
             onPress={phase === "idle" ? dismiss : phase === "downloading" ? minimize : undefined}
             hitSlop={8}
             style={{ paddingVertical: 12, alignItems: "center", marginTop: 4 }}

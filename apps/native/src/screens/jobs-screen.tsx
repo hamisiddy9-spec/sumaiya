@@ -160,6 +160,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
             </Animated.View>
           ) : (
             <Pressable
+              accessibilityRole="button"
               onPress={() => { haptics.selection(); navigation.navigate("ProfileTab", { screen: "CareerProfile" }); }}
               style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}
             >

@@ -81,6 +81,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
             : "I hit a problem on this screen. Your CVs and data are safe — nothing was lost."}
         </Text>
         <Pressable
+          accessibilityRole="button"
           onPress={this.reset}
           style={{ marginTop: 6, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 14, backgroundColor: "#DA4A1C" }}
         >

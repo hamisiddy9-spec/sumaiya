@@ -25,6 +25,7 @@ export function QuickActionsGrid({ actions, onActionPress, onSelect, loading = f
         <Animated.View key={a.id} entering={FadeInDown.duration(280).delay(i * 55)} style={{ width: "47.5%" }}>
           <Pressable
             disabled={loading}
+            accessibilityRole="button"
             onPress={() => {
               haptics.light();
               if (onSelect) onSelect(a);

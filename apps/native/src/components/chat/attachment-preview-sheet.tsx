@@ -68,7 +68,12 @@ export function AttachmentPreviewSheet({
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
       <View style={{ width, height }}>
-        <Pressable style={{ flex: 1 }} onPress={onClose}>
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("Close", "Funga")}
+        >
           <Animated.View style={[backdropStyle, { flex: 1, backgroundColor: c.overlay }]} />
         </Pressable>
 
@@ -184,6 +189,7 @@ export function AttachmentPreviewSheet({
           )}
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => {
               haptics.selection();
               onClose();

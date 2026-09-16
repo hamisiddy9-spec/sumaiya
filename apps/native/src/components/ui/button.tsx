@@ -30,7 +30,7 @@ interface ButtonProps extends Omit<PressableProps, "style" | "children"> {
 }
 
 const SIZES: Record<Size, { padY: number; padX: number; text: number; gap: number; minH: number }> = {
-  sm: { padY: 8, padX: 14, text: 14, gap: 6, minH: 38 },
+  sm: { padY: 8, padX: 14, text: 14, gap: 6, minH: 44 },
   md: { padY: 12, padX: 18, text: 15, gap: 8, minH: 46 },
   lg: { padY: 15, padX: 22, text: 16, gap: 8, minH: 54 },
 };

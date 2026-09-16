@@ -21,6 +21,7 @@ interface Props {
 
 function Chip({ att, onRemove }: { att: Attachment; onRemove: () => void }) {
   const c = useThemeColors();
+  const { t } = useLang();
   const isImg = att.kind === "image";
   return (
     <Animated.View
@@ -53,7 +54,7 @@ function Chip({ att, onRemove }: { att: Attachment; onRemove: () => void }) {
       <Text numberOfLines={1} style={{ flex: 1, color: c.textBody, fontSize: 12 }}>
         {att.name}
       </Text>
-      <Pressable hitSlop={8} onPress={onRemove}>
+      <Pressable hitSlop={8} onPress={onRemove} accessibilityRole="button" accessibilityLabel={t("Remove attachment", "Ondoa kiambatisho")}>
         <Icon name="x" size={13} color={c.textMuted} />
       </Pressable>
     </Animated.View>
@@ -113,6 +114,7 @@ export function ChatComposer({
 
         <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
           <Pressable
+            accessibilityRole="button"
             onPress={() => {
               haptics.light();
               onOpenAttach();
@@ -163,6 +165,7 @@ export function ChatComposer({
           />
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => {
               if (!canSend) return;
               haptics.light();

@@ -297,6 +297,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
                   <Pressable
                     key={l}
                     onPress={() => pickLanguage(l)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
                     style={{
                       flex: 1,
                       paddingVertical: 9,

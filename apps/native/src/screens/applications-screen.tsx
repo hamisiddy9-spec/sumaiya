@@ -44,6 +44,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
           <Pressable
             onPress={() => { haptics.light(); navigation.navigate("ApplicationDetail", {}); }}
             style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.accent, alignItems: "center", justifyContent: "center" }}
+            accessibilityRole="button"
             accessibilityLabel={t("Add application", "Ongeza ombi")}
             hitSlop={8}
           >
@@ -82,6 +83,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
           return (
             <Stagger key={a.id} index={i}>
               <Pressable
+                accessibilityRole="button"
                 onPress={() => { haptics.selection(); navigation.navigate("ApplicationDetail", { id: a.id }); }}
                 style={{
                   padding: 15, borderRadius: 14, borderWidth: 1, borderColor: c.border,

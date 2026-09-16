@@ -63,6 +63,7 @@ function TabItem({
       style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: 6, gap: 3 }}
       accessibilityRole="button"
       accessibilityState={{ selected: focused }}
+      accessibilityLabel={label}
     >
       <View style={{ width: 44, height: 30, alignItems: "center", justifyContent: "center" }}>
         <Animated.View
