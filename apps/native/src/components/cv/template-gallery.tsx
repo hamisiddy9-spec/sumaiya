@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { FlatList, Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Modal, Pressable, SectionList, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
@@ -13,13 +13,17 @@ import { haptics, TextField, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
 
 /**
- * The full template gallery.
+ * The TemplateHub gallery.
  *
- * This exists because the app now carries 224 templates (the original six plus
- * the mirrored web registry) and a horizontal `ScrollView` with `.map()` would
- * mount every one of them at once. Here a virtualised FlatList only builds the
- * cells on screen, and search + filters make 224 navigable without scrolling
- * through 224 rows.
+ * The catalogue is organised as collections, not a flat grid:
+ *
+ *   1. Recommended for you  — AI-ranked designs for the user's field.
+ *   2. TemplateHub Premium   — the paid collection (gated by entitlement).
+ *   3. Curated Core          — simple, dependable, always-free designs.
+ *
+ * Search collapses this into a single flat "Results" section. A family filter
+ * (Sidebar / Minimal / …) applies inside every section. The grid is virtualised
+ * via SectionList and stays three-across by chunking each section into rows.
  */
 
 const FAMILIES: { key: string; en: string; sw: string }[] = [
@@ -33,6 +37,15 @@ const FAMILIES: { key: string; en: string; sw: string }[] = [
 const GAP = 12;
 const PAD = 20;
 const COLUMNS = 3;
+
+type Row = CvTemplateMeta[];
+type Section = { key: string; title: string; subtitle?: string; data: Row[] };
+
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
 
 export function TemplateGallery({
   visible,
@@ -52,16 +65,14 @@ export function TemplateGallery({
   const { premium } = useEntitlements();
 
   const [query, setQuery] = useState("");
-  const [tier, setTier] = useState<"all" | "free" | "premium">("all");
   const [family, setFamily] = useState<string | null>(null);
   const [premiumFor, setPremiumFor] = useState<string | null>(null);
 
   // ── Job-aware suggestions ──────────────────────────────────────────────────
   // Derived from text the user already gave us (headline, goals, experience) —
-  // no extra question. If nothing matches we show no row at all, because a
+  // no extra question. If nothing matches we show no section at all, because a
   // wrong recommendation is worse than none.
   const [profileText, setProfileText] = useState("");
-  const [forJob, setForJob] = useState(false);
   useEffect(() => {
     if (!visible) return;
     let alive = true;
@@ -73,32 +84,66 @@ export function TemplateGallery({
     return () => { alive = false; };
   }, [visible]);
 
-  const suggestion = useMemo(() => suggestTemplates(profileText, 12), [profileText]);
+  const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
 
-  // A field filter never applies while the job filter is on — they would fight
-  // and the row would silently empty.
-  const results = useMemo(() => {
+  const sections = useMemo<Section[]>(() => {
     const q = query.trim().toLowerCase();
-    if (forJob && suggestion) {
-      return suggestion.templates.filter(
-        (tpl) =>
-          !q ||
-          tpl.id.includes(q) ||
-          tpl.name.en.toLowerCase().includes(q) ||
-          tpl.name.sw.toLowerCase().includes(q),
-      );
-    }
-    return ALL_TEMPLATES.filter((tpl) => {
-      if (tier !== "all" && tpl.tier !== tier) return false;
-      if (family && tpl.style !== family) return false;
-      if (!q) return true;
-      return (
+    const matches = (tpl: CvTemplateMeta) =>
+      (!q ||
         tpl.id.includes(q) ||
         tpl.name.en.toLowerCase().includes(q) ||
-        tpl.name.sw.toLowerCase().includes(q)
-      );
-    });
-  }, [query, tier, family, forJob, suggestion]);
+        tpl.name.sw.toLowerCase().includes(q)) &&
+      (!family || tpl.style === family);
+
+    // Search: one flat results section, no collection framing.
+    if (q) {
+      const data = ALL_TEMPLATES.filter(matches);
+      return [{ key: "results", title: t("Results", "Matokeo"), data: chunk(data, COLUMNS) }];
+    }
+
+    const out: Section[] = [];
+
+    // 1. AI recommendation. Surfaces even while a family filter is active, but
+    //    never fights search (handled above).
+    if (suggestion) {
+      const recs = suggestion.templates.filter((tpl) => !family || tpl.style === family);
+      if (recs.length) {
+        out.push({
+          key: "recs",
+          title: t("Recommended for you", "Imependekezwa kwako"),
+          subtitle: `${t("For your job", "Kwa kazi yako")} · ${fieldLabel(suggestion.field, lang)}`,
+          data: chunk(recs, COLUMNS),
+        });
+      }
+    }
+
+    // 2. Premium collections.
+    const premiumRows = ALL_TEMPLATES.filter((tpl) => tpl.tier === "premium" && matches(tpl));
+    if (premiumRows.length) {
+      out.push({
+        key: "premium",
+        title: t("TemplateHub Premium", "TemplateHub Premium"),
+        subtitle: t(
+          "Distinct designs for when your documents need to stand out",
+          "Miundo bora kwa nyaraka zinazohitaji kuvutia",
+        ),
+        data: chunk(premiumRows, COLUMNS),
+      });
+    }
+
+    // 3. Curated core (always free).
+    const coreRows = ALL_TEMPLATES.filter((tpl) => tpl.tier !== "premium" && matches(tpl));
+    if (coreRows.length) {
+      out.push({
+        key: "core",
+        title: t("Curated Core", "Mkusanyiko Msingi"),
+        subtitle: t("Simple, dependable designs — always free", "Miundo sahili na ya uhakika — bure daima"),
+        data: chunk(coreRows, COLUMNS),
+      });
+    }
+
+    return out;
+  }, [query, family, suggestion, lang, t]);
 
   const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
@@ -116,12 +161,13 @@ export function TemplateGallery({
     [premium, onSelect, onClose],
   );
 
-  const renderItem = useCallback(
-    ({ item }: { item: CvTemplateMeta }) => {
+  const renderCell = useCallback(
+    (item: CvTemplateMeta, idx: number) => {
       const locked = item.tier === "premium" && !premium;
       const active = item.id === selected;
       return (
         <Pressable
+          key={item.id}
           onPress={() => pick(item)}
           style={{ width: cell, alignItems: "center", gap: 6 }}
           accessibilityRole="button"
@@ -140,12 +186,7 @@ export function TemplateGallery({
           </View>
           <Text
             numberOfLines={1}
-            style={{
-              color: active ? c.accent : c.text,
-              fontSize: 11.5,
-              fontWeight: "700",
-              maxWidth: cell,
-            }}
+            style={{ color: active ? c.accent : c.text, fontSize: 11.5, fontWeight: "700", maxWidth: cell }}
           >
             {lang === "sw" ? item.name.sw : item.name.en}
           </Text>
@@ -163,12 +204,28 @@ export function TemplateGallery({
     [cell, selected, premium, lang, pick, c, t],
   );
 
-  const chip = (
-    key: string,
-    label: string,
-    active: boolean,
-    onPress: () => void,
-  ) => (
+  const renderRow = useCallback(
+    ({ item }: { item: Row }) => (
+      <View style={{ flexDirection: "row", gap: GAP, paddingHorizontal: PAD, paddingBottom: GAP + 4 }}>
+        {item.map((tpl, i) => renderCell(tpl, i))}
+      </View>
+    ),
+    [renderCell],
+  );
+
+  const renderSectionHeader = useCallback(
+    ({ section }: { section: Section }) => (
+      <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 8 }}>
+        <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }}>{section.title}</Text>
+        {section.subtitle ? (
+          <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2, lineHeight: 16 }}>{section.subtitle}</Text>
+        ) : null}
+      </View>
+    ),
+    [c],
+  );
+
+  const chip = (key: string, label: string, active: boolean, onPress: () => void) => (
     <Pressable
       key={key}
       onPress={() => {
@@ -184,13 +241,11 @@ export function TemplateGallery({
         backgroundColor: active ? c.accent + "18" : "transparent",
       }}
     >
-      <Text
-        style={{ color: active ? c.accent : c.textMuted, fontSize: 12, fontWeight: "700" }}
-      >
-        {label}
-      </Text>
+      <Text style={{ color: active ? c.accent : c.textMuted, fontSize: 12, fontWeight: "700" }}>{label}</Text>
     </Pressable>
   );
+
+  const total = useMemo(() => sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0), [sections]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -208,13 +263,10 @@ export function TemplateGallery({
         >
           <View>
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>
-              {t("Choose a design", "Chagua muundo")}
+              {t("TemplateHub", "TemplateHub")}
             </Text>
             <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-              {t(
-                `${results.length} of ${ALL_TEMPLATES.length} designs`,
-                `${results.length} kati ya ${ALL_TEMPLATES.length} miundo`,
-              )}
+              {t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)}
             </Text>
           </View>
           <Pressable
@@ -241,59 +293,26 @@ export function TemplateGallery({
           />
         </View>
 
-        {/* Filters */}
-        <View style={{ paddingHorizontal: PAD, gap: 8, marginTop: 10 }}>
-          {/* Job-aware shortcut. Only appears when we actually recognised the
-              user's field from text they already gave us. */}
-          {suggestion ? (
-            <>
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                {chip(
-                  "job",
-                  `${t("For your job", "Kwa kazi yako")} · ${fieldLabel(suggestion.field, lang)}`,
-                  forJob,
-                  () => {
-                    haptics.selection();
-                    setForJob((v) => !v);
-                  },
-                )}
-              </View>
-              {forJob ? (
-                <Text style={{ color: c.textMuted, fontSize: 11.5, lineHeight: 16 }}>
-                  {lang === "sw" ? suggestion.why.sw : suggestion.why.en}
-                </Text>
-              ) : null}
-            </>
-          ) : null}
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {chip("all", t("All", "Zote"), tier === "all" && !forJob, () => { setForJob(false); setTier("all"); })}
-            {chip("free", t("Free", "Bure"), tier === "free" && !forJob, () => { setForJob(false); setTier("free"); })}
-            {chip("prem", "Premium", tier === "premium" && !forJob, () => { setForJob(false); setTier("premium"); })}
-          </View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={FAMILIES}
-            keyExtractor={(f) => f.key}
-            contentContainerStyle={{ gap: 8 }}
-            renderItem={({ item: f }) =>
+        {/* Family filter */}
+        <View style={{ paddingHorizontal: PAD, marginTop: 10 }}>
+          <FlatListRow>
+            {FAMILIES.map((f) =>
               chip(f.key, lang === "sw" ? f.sw : f.en, family === f.key, () =>
                 setFamily(family === f.key ? null : f.key),
-              )
-            }
-          />
+              ),
+            )}
+          </FlatListRow>
         </View>
 
-        {/* Grid */}
-        <FlatList
-          data={results}
-          keyExtractor={(tpl) => tpl.id}
-          renderItem={renderItem}
-          numColumns={COLUMNS}
-          columnWrapperStyle={{ gap: GAP, paddingHorizontal: PAD }}
-          contentContainerStyle={{ gap: GAP + 6, paddingVertical: 16, paddingBottom: insets.bottom + 28 }}
+        {/* Collections grid */}
+        <SectionList
+          sections={sections}
+          keyExtractor={(item, idx) => (item[0]?.id ?? "row") + idx}
+          renderItem={renderRow}
+          renderSectionHeader={renderSectionHeader}
+          stickySectionHeadersEnabled={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 28 }}
           initialNumToRender={COLUMNS * 4}
-          maxToRenderPerBatch={COLUMNS * 4}
           windowSize={5}
           removeClippedSubviews
           keyboardShouldPersistTaps="handled"
@@ -307,11 +326,14 @@ export function TemplateGallery({
         />
       </View>
 
-      <PremiumSheet
-        visible={premiumFor !== null}
-        onClose={() => setPremiumFor(null)}
-        feature="templates"
-      />
+      <PremiumSheet visible={premiumFor !== null} onClose={() => setPremiumFor(null)} feature="templates" />
     </Modal>
+  );
+}
+
+/** A simple horizontal chip row (kept inline to avoid a second file). */
+function FlatListRow({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{children}</View>
   );
 }
