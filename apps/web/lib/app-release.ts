@@ -65,7 +65,7 @@ export const APP_RELEASE: AppReleaseManifest = {
     // Deliberately does not promise that the code will arrive: the mailer is
     // configured on the Supabase side, so this build can accept the request
     // while delivery is still being fixed. No "you're all set".
-    en: "A rebuilt design gallery: every template now previews as a real CV, tap one to see it full-screen, then use it. Plus a rotating 'what next' hint on your dashboard, Tanzanian jobs first, and in-app Help & FAQ, Privacy and Support.",
-    sw: "Ghala la miundo lililoundwa upya: kila muundo sasa unaonekana kama CV halisi, gusa mmoja kuuona kamili, kisha uitumie. Pia kidokezo kinachozunguka cha 'nini kifuatacho' kwenye dashibodi, kazi za Tanzania kwanza, na Msaada & Maswali, Faragha na Usaidizi ndani ya app.",
+    en: "Crash reporting is on — when something breaks in the app we now capture it and fix it fast. Your CVs and personal details are never sent, only the error.",
+    sw: "Ufuatiliaji wa hitilafu umeanza — app inapokwama sasa tunapata taarifa na kurekebisha haraka. CV zako na taarifa binafsi hazitumwi, hitilafu pekee.",
   },
 };
