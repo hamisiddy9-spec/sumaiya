@@ -63,13 +63,15 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
       ) : applications.length === 0 ? (
         <EmptyState
           icon="briefcase"
-          title={t("Track every job here", "Fuatilia kila ajira hapa")}
+          title={t("Add your first application", "Ongeza ombi lako la kwanza")}
           body={t(
-            "Add a job you're applying to. Keep the description, your tailored CV, the cover letter and where it stands — all in one place, on your phone.",
-            "Ongeza ajira unayoomba. Weka maelezo, CV yako, barua ya maombi na hali yake — mahali pamoja, kwenye simu yako.",
+            "Log a job you're applying to and keep the description, your tailored CV, the cover letter and where it stands — all in one place, on your phone.",
+            "Weka ajira unayoomba na uhifadhi maelezo, CV yako iliyolengwa, barua ya maombi na hali yake — mahali pamoja, kwenye simu yako.",
           )}
           actionLabel={t("Add a job", "Ongeza ajira")}
           onAction={() => navigation.navigate("ApplicationDetail", {})}
+          secondaryLabel={t("Find jobs to apply to", "Tafuta ajira za kuomba")}
+          onSecondary={() => navigation.navigate("Jobs")}
         />
       ) : (
         applications.map((a, i) => {

@@ -159,12 +159,26 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               </View>
             </Animated.View>
           ) : (
-            <View style={{ flexDirection: "row", gap: 10, alignItems: "flex-start", padding: 14, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}>
-              <Icon name="target" size={16} color={c.accent} />
-              <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-                {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
-              </Text>
-            </View>
+            <Pressable
+              onPress={() => { haptics.selection(); navigation.navigate("ProfileTab", { screen: "CareerProfile" }); }}
+              style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}
+            >
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="target" size={18} color={c.accent} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
+                  {t("Add your first job to get matched", "Ongeza kazi yako ya kwanza upate ulinganifu")}
+                </Text>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
+                  {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Finish profile", "Kamilisha wasifu")}</Text>
+                <Icon name="chevron-right" size={18} color={c.accent} />
+              </View>
+            </Pressable>
           )}
 
           {rest.length > 0 ? (
