@@ -256,7 +256,14 @@ export function TemplateGallery({
     </Pressable>
   );
 
-  const total = useMemo(() => sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0), [sections]);
+  const total = useMemo(() => {
+    if (query.trim()) {
+      // Searching: count the single flat results section.
+      return sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0);
+    }
+    // Browsing: unique designs — the recommended section overlaps its own tier.
+    return ALL_TEMPLATES.length;
+  }, [sections, query]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
@@ -277,7 +284,9 @@ export function TemplateGallery({
               {t("TemplateHub", "TemplateHub")}
             </Text>
             <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-              {t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)}
+              {query.trim()
+                ? t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)
+                : t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
             </Text>
           </View>
           <Pressable

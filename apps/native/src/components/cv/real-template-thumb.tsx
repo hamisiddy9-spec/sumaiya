@@ -22,11 +22,17 @@ export function RealTemplateThumb({
   width?: number;
 }) {
   const [ready, setReady] = useState(false);
-  const h = Math.round(width * 1.33);
-  const html = useMemo(
-    () => cvToHtml({ ...SAMPLE_CV, templateId: id }, { template: id, accent, lang: "en" }),
-    [id, accent],
-  );
+  // Match the editor's live-preview page ratio (A4 794×1123) so the page fits
+  // the frame exactly — a mismatched ratio leaves the page taller than the
+  // thumbnail and the WebView shows a scroll gutter.
+  const h = Math.round(width * (1123 / 794));
+  const html = useMemo(() => {
+    const base = cvToHtml({ ...SAMPLE_CV, templateId: id }, { template: id, accent, lang: "en" });
+    // Clip any overflow and hide the WebView's scrollbar entirely, so the
+    // preview frame never shows a scroll indicator.
+    const style = `<style>html,body{margin:0;padding:0;overflow:hidden!important}::-webkit-scrollbar{width:0;height:0;display:none}</style>`;
+    return base.includes("</head>") ? base.replace("</head>", `${style}</head>`) : style + base;
+  }, [id, accent]);
 
   return (
     <View style={{ width, height: h, borderRadius: 4, overflow: "hidden", backgroundColor: "#fff" }}>
