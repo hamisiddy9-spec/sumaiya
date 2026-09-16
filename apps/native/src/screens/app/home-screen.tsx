@@ -26,6 +26,8 @@ import { TemplateGallery } from "../../components/cv/template-gallery";
 import { TemplateThumb } from "../../components/cv/template-thumb";
 import { ALL_TEMPLATES, ENGINE_TEMPLATES, templateLayout, type CvTemplateId } from "../../lib/cv-html";
 import { getDefaultTemplate, setDefaultTemplate } from "../../lib/prefs";
+import { loadProfile } from "../../lib/profile-store";
+import { recommendNextMoves, type NextMoves } from "../../lib/recommendations";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
 
@@ -146,6 +148,20 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   );
   const topSignal = signals[0] ?? null;
 
+  // The AI spine — one "what next" answer built from the Career Profile across
+  // templates, skills and a single action. `undefined` = not loaded yet,
+  // `null` = profile too sparse for a confident guess (show a nudge instead).
+  // Recomputed on focus so a profile edit made on the Profile tab is reflected
+  // the moment the user comes back here.
+  const [nextMoves, setNextMoves] = useState<NextMoves | null | undefined>(undefined);
+  useFocusEffect(
+    React.useCallback(() => {
+      let alive = true;
+      loadProfile().then((p) => { if (alive) setNextMoves(recommendNextMoves(p)); });
+      return () => { alive = false; };
+    }, []),
+  );
+
   const rawName = user?.name?.trim();
   const looksLikeDevice = rawName
     ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
@@ -233,6 +249,91 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           </Animated.View>
         );
       })()}
+
+      {/* Recommended next move — the AI spine's lead: one action, the templates
+          that suit the detected field, and the skills worth closing next. The
+          whole card opens the gallery. A sparse profile gets a nudge to fill
+          it in instead of a wrong guess. */}
+      {nextMoves === undefined ? null : nextMoves === null ? (
+        <Animated.View entering={FadeInDown.duration(320).delay(50)}>
+          <Card
+            onPress={() => navigation.navigate("ProfileTab", { screen: "CareerProfile" })}
+            accessibilityLabel={t("Complete your career profile", "Kamilisha wasifu wako")}
+            style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14 }}
+          >
+            <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="compass" size={18} color={c.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>
+                {t("Add your work and skills", "Ongeza kazi na ujuzi wako")}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>
+                {t(
+                  "Tell Sumaiya what you do and she'll point you to the right CV design and next skill.",
+                  "Mwambie Sumaiya unachofanya naye atakuelekeza kwenye muundo sahihi wa CV na ujuzi unaofuata.",
+                )}
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={18} color={c.textMuted} />
+          </Card>
+        </Animated.View>
+      ) : (
+        <Animated.View entering={FadeInDown.duration(320).delay(50)}>
+          <SectionHeader title={t("Recommended next move", "Hatua inayofuata")} />
+          <Card
+            onPress={() => {
+              haptics.selection();
+              setGalleryOpen(true);
+            }}
+            accessibilityLabel={nextMoves.action[lang]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="sparkles" size={17} color={c.accent} />
+              </View>
+              <Text style={{ color: c.text, fontSize: 15, fontWeight: "800", flex: 1 }}>{nextMoves.action[lang]}</Text>
+              <Icon name="chevron-right" size={18} color={c.textMuted} />
+            </View>
+
+            {nextMoves.templates.length > 0 ? (
+              <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
+                {nextMoves.templates.slice(0, 2).map((tpl) => (
+                  <View
+                    key={tpl.id}
+                    style={{
+                      flex: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: 8,
+                      borderRadius: 12,
+                      backgroundColor: c.bg,
+                      borderWidth: 1,
+                      borderColor: c.border,
+                    }}
+                  >
+                    <TemplateThumb id={tpl.id} accent={c.accent} width={34} />
+                    <Text style={{ color: c.text, fontSize: 12, fontWeight: "700", flex: 1 }} numberOfLines={1}>
+                      {lang === "sw" ? tpl.name.sw : tpl.name.en}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+
+            {nextMoves.skills.length > 0 ? (
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                {nextMoves.skills.slice(0, 3).map((s) => (
+                  <View key={s.area.id} style={{ backgroundColor: c.accent + "14", borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
+                    <Text style={{ color: c.accent, fontSize: 11, fontWeight: "700" }}>{s.area.skill[lang]}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </Card>
+        </Animated.View>
+      )}
 
       {/* Primary row — two equal tiles: the count, and the make-a-CV CTA. */}
       <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
