@@ -69,7 +69,8 @@
         {
           "color": "#DA4A1C"
         }
-      ]
+      ],
+      "@sentry/react-native"
     ]
   }
 }

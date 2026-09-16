@@ -14,6 +14,7 @@
 // makes a nonce/strict-dynamic policy fragile, and the host allowlist already
 // blocks off-origin script injection.
 import { buildCsp } from "./lib/security/csp.mjs";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -95,4 +96,15 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Source-map upload only runs when SENTRY_AUTH_TOKEN + org/project are set
+  // (see .env.example). Without them the plugin skips upload and the build
+  // proceeds normally — no real DSN or token is hardcoded here.
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Upload a larger set of source maps (monorepo) for prettier stack traces.
+  widenClientFileUpload: true,
+  // Only print source-map-upload logs in CI.
+  silent: !process.env.CI,
+});

@@ -20,6 +20,16 @@ import { apiClient as sharedApiClient } from "../lib/api-client";
 import { reportError } from "../lib/reporting";
 import { friendlyError } from "../lib/auth-errors";
 import { getLastKnownLang } from "../lib/i18n";
+import { track, FUNNEL_EVENTS } from "../lib/analytics";
+
+/** Accounts created in the last 5 minutes count as "new" — OTP / Google sign-in
+ *  can take a few minutes between account creation and the successful sign-in
+ *  we observe here. Best-effort only; the funnel reads the flag, not a hard gate. */
+function isNewAccount(createdAt?: string): boolean {
+  if (!createdAt) return false;
+  const t = new Date(createdAt).getTime();
+  return Number.isFinite(t) && Date.now() - t < 5 * 60_000;
+}
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -153,12 +163,16 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
       const idToken = (payload as { idToken?: string }).idToken;
       if (!idToken) throw new Error("Google sign-in didn't return an ID token.");
 
-      const { error: sessionError } = await supabase.auth.signInWithIdToken({
+      const { data, error: sessionError } = await supabase.auth.signInWithIdToken({
         provider: "google",
         token: idToken,
       });
       if (sessionError) throw sessionError;
       // onAuthStateChange applies the session.
+      track(FUNNEL_EVENTS.signed_up, {
+        method: "google",
+        isNew: isNewAccount(data.user?.created_at),
+      });
     } catch (err) {
       if (
         isErrorWithCode(err) &&
@@ -214,6 +228,10 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
         setError(friendlyError(vErr?.message ?? "That code is wrong or expired.", getLastKnownLang()));
         throw vErr ?? new Error("no session");
       }
+      track(FUNNEL_EVENTS.signed_up, {
+        method: "email",
+        isNew: isNewAccount(data.session.user.created_at),
+      });
     } finally {
       setLoading(false);
     }

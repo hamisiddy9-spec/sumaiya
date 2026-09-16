@@ -20,6 +20,10 @@ type Sink = (name: string, props?: TrackProps) => void;
 
 let sink: Sink | null = null;
 
+// Re-export the shared activation-funnel definition so native call sites import
+// one entry point (`../lib/analytics`) for both `track` and the stage names.
+export { ACTIVATION_FUNNEL, FUNNEL_EVENTS, type FunnelEventName } from "@sumaiya/types";
+
 /** Register the real sink once at startup. Pass null to disable it. */
 export function setAnalyticsSink(fn: Sink | null): void {
   sink = fn;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import posthog from "@/lib/analytics";
 
 // global-error.tsx replaces the root layout on fatal errors, so it must
@@ -14,6 +15,12 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error(error);
+    // Report to Sentry (no-op until a real NEXT_PUBLIC_SENTRY_DSN is set).
+    try {
+      Sentry.captureException(error);
+    } catch {
+      /* reporting must never mask the original error */
+    }
     try {
       (posthog as unknown as { captureException?: (e: unknown, p?: unknown) => void })
         .captureException?.(error, { digest: error.digest });

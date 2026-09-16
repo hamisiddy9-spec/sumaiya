@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { getSecureItem, offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { reportError, setReporter } from "../lib/reporting";
+import { captureException } from "../lib/sentry";
 import { flushTelemetry, shortMessage, startTelemetry, track } from "../lib/telemetry";
 import { AuthProvider } from "../contexts/auth-context";
 import { LangProvider } from "../lib/i18n";
@@ -84,6 +85,9 @@ export default function RootLayout() {
             scope: typeof context?.scope === "string" ? context.scope : "unknown",
             message: shortMessage(error),
           });
+          // Ship the same error to Sentry — a no-op until a real
+          // EXPO_PUBLIC_SENTRY_DSN is configured.
+          captureException(error, context);
         });
       } catch (e) {
         console.warn("Font loading error:", e);

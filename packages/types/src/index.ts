@@ -1,5 +1,7 @@
 // Shared types for web and mobile
 
+export * from "./analytics";
+
 export type Lang = "sw" | "en";
 
 export interface CV {
