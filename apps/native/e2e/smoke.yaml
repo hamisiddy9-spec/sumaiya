@@ -1,0 +1,33 @@
+appId: pro.sumaiya.app
+name: Sumaiya native smoke test
+---
+# ---------------------------------------------------------------------------
+# Smoke test: launch -> sign-in screen visible.
+#
+# The app requires a real account to proceed past authentication, so this flow
+# deliberately stops at the pre-auth sign-in screen. It verifies only that the
+# app boots and renders the sign-in UI.
+#
+# Locale note: the sign-in screen is bilingual (Swahili/English). "Sumaiya" is
+# the brand mark and renders in both locales. The auth CTAs render as:
+#   - "Tumia barua pepe badala yake"  /  "Use email instead"
+#   - "Endelea na Google"             /  "Continue with Google"
+# The optional taps below are best-effort and will not fail the run if the
+# element is absent (e.g. different locale or a future screen change).
+# ---------------------------------------------------------------------------
+
+- launchApp
+
+# Wait up to 30s for the splash -> sign-in transition before asserting.
+- extendedWaitUntil:
+    visible: "Sumaiya"
+    timeout: 30000
+
+- assertVisible: "Sumaiya"
+
+# Best-effort: tap the email CTA. Chosen over "Endelea na Google" because it is
+# fully in-app (no external Google account picker). `optional: true` keeps the
+# flow green in the English locale, where the label is "Use email instead".
+- tapOn:
+    text: "Tumia barua pepe.*"
+    optional: true
