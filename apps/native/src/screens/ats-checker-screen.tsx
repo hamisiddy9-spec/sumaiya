@@ -135,6 +135,8 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                 return (
                   <Pressable
                     key={cv.id}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
                     onPress={() => { haptics.selection(); setPickedId(cv.id); }}
                     style={{
                       paddingVertical: 8, paddingHorizontal: 13, borderRadius: 10, borderWidth: 1.5,

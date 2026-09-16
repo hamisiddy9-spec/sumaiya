@@ -20,6 +20,7 @@ import { OnboardingArt } from "../components/onboarding-art";
 import { PortalTransition } from "../components/portal-transition";
 import { useLang, type Lang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
+import { track as trackActivation, FUNNEL_EVENTS } from "../lib/analytics";
 
 interface Props {
   navigation: unknown;
@@ -202,6 +203,7 @@ function WelcomeStage({
         {choices.map((ch, i) => (
           <Animated.View key={ch.lang} entering={FadeInDown.delay(200 + i * 80).duration(360)}>
             <Pressable
+              accessibilityRole="button"
               onPress={() => {
                 haptics.selection();
                 onPick(ch.lang);
@@ -307,6 +309,8 @@ export function OnboardingScreen({ onComplete }: Props) {
     // point in the whole funnel to lose someone, because they have no account
     // to abandon yet.
     track("onboarding.done", { via, i: page, of: SLIDES.length });
+    // Activation-funnel stage 2: reached whether they read every slide or skipped.
+    trackActivation(FUNNEL_EVENTS.onboarded, { via });
     // No haptic here — PortalTransition fires its own opening beat the
     // instant it mounts (this call), so a tap-acknowledgment tick here would
     // double up with it almost simultaneously.
@@ -362,6 +366,7 @@ export function OnboardingScreen({ onComplete }: Props) {
           <View style={{ height: insets.top + 8 }} />
 
           <Pressable
+            accessibilityRole="button"
             onPress={() => finish("skip")}
             hitSlop={10}
             style={{ alignSelf: "flex-end", paddingHorizontal: 20, paddingVertical: 8 }}

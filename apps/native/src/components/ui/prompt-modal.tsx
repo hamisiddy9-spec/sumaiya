@@ -88,10 +88,11 @@ export function PromptModal({
             }}
           />
           <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 6 }}>
-            <Pressable onPress={onCancel} style={{ paddingVertical: 9, paddingHorizontal: 16 }}>
+            <Pressable accessibilityRole="button" onPress={onCancel} style={{ paddingVertical: 9, paddingHorizontal: 16 }}>
               <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>{cancelLabel}</Text>
             </Pressable>
             <Pressable
+              accessibilityRole="button"
               onPress={() => { haptics.selection(); onConfirm(value.trim()); }}
               style={{ paddingVertical: 9, paddingHorizontal: 16, borderRadius: 10, backgroundColor: c.accent }}
             >

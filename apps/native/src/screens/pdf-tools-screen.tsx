@@ -114,13 +114,13 @@ export function PdfToolsScreen() {
             >
               <Image source={{ uri: p.uri }} style={{ width: 44, height: 58, borderRadius: 6, backgroundColor: c.border }} />
               <Text style={{ flex: 1, color: c.textBody, fontSize: 13 }}>{t("Page", "Ukurasa")} {i + 1}</Text>
-              <Pressable hitSlop={8} onPress={() => move(i, -1)} disabled={i === 0}>
+              <Pressable hitSlop={8} onPress={() => move(i, -1)} disabled={i === 0} accessibilityRole="button" accessibilityLabel={t("Move page up", "Sogeza ukurasa juu")}>
                 <Icon name="chevron-up" size={18} color={i === 0 ? c.border : c.textMuted} />
               </Pressable>
-              <Pressable hitSlop={8} onPress={() => move(i, 1)} disabled={i === pics.length - 1}>
+              <Pressable hitSlop={8} onPress={() => move(i, 1)} disabled={i === pics.length - 1} accessibilityRole="button" accessibilityLabel={t("Move page down", "Sogeza ukurasa chini")}>
                 <Icon name="chevron-down" size={18} color={i === pics.length - 1 ? c.border : c.textMuted} />
               </Pressable>
-              <Pressable hitSlop={8} onPress={() => remove(i)}>
+              <Pressable hitSlop={8} onPress={() => remove(i)} accessibilityRole="button" accessibilityLabel={t("Remove page", "Ondoa ukurasa")}>
                 <Icon name="trash-2" size={16} color={c.error} />
               </Pressable>
             </Animated.View>

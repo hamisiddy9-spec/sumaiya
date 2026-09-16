@@ -1,8 +1,8 @@
 # Sumaiya — AI-Assisted Development Guide
 
-**Last updated:** 2026-09-03  
-**Maintained by:** Claude (Haiku 4.5), Hermes AI Agent  
-**Active branch:** `claude/sumaiya-continuation-ife7xj` (development)
+**Last updated:** 2026-09-15 (MAJOR ARCHITECTURE UPDATE)
+**Maintained by:** Claude (Haiku 4.5) + Remote Session  
+**Active branch:** `chore/release-manifest-1.6.15` (template system complete)
 
 ---
 
@@ -11,6 +11,59 @@
 **Sumaiya** is a bilingual (Swahili/English) CV builder platform with 273 professional templates, AI-powered tailor + ATS matching, and a native mobile app with camera CV scanning.
 
 **Core mission:** Fast CV creation (15 mins: scan → template → apply) that beats ATS + human review.
+
+---
+
+## 🆕 MAJOR UPDATE: Template System Architecture (2026-09-15)
+
+### Template System — 7 Phases Complete ✅
+
+**What Changed:** Implemented pluggable TemplateProvider architecture. Sumaiya now has:
+- **TemplateProvider interface** — Swap between local (NativeTemplateProvider) and remote (TemplateHubProvider) with ONE LINE
+- **267 templates** — Auto-generated registry, organized into 8 families (5 core, 3 premium, 261 pending audit)
+- **Editable schemas** — 12+ CV fields with validation, per-template overrides
+- **Database schema** — `documents` table (replaces fragmented cv/letter/reference tables)
+- **Dynamic rendering** — Template → HTML → PDF pipeline
+- **CV Builder integration** — Template picker, dynamic renderer, export hooks (all wired into cv-editor-client.tsx)
+- **TemplateHub provider** — Stub ready for remote API calls when TemplateHub repo launches
+
+**Key Files:**
+- `lib/templates/schema.ts` — Core types & TemplateProvider interface
+- `lib/templates/native-provider.ts` — Local implementation (267 templates, HTML rendering)
+- `lib/templates/registry.ts` — Auto-generated template metadata
+- `lib/templates/families.ts` — 8 template families with groupings
+- `lib/templates/schemas.ts` — Editable field definitions
+- `lib/templates/templatehub-provider.ts` — Remote provider (stub, ready for API)
+- `lib/templates/migrations.ts` — Database migrations (Phase 1-5 defined)
+- `lib/cv-builder/` — Integration module (template-integration.ts, hooks, components)
+- `components/editor/` — UI components (template-picker.tsx, renderer, modal)
+
+**Architecture:**
+```
+Application → TemplateProvider Interface ↦ NativeTemplateProvider (local) ↦ 267 templates
+                                         ↦ TemplateHubProvider (remote, future)
+```
+
+**Provider Swap (when TemplateHub ready):**
+```typescript
+// One line in lib/templates/index.ts
+export const templateProvider = new TemplateHubProvider(apiClient);
+// ZERO UI changes needed.
+```
+
+**Commits:**
+- `799dc62` Phase 1 foundation
+- `39bd53d` Phases 2-5 complete
+- `c990aa3` TypeScript fixes
+- `a1c38ab` Phase 6 integration
+- `4cb255d` Phase 7 legacy bridge
+- `5f08cf9` Integration guide
+- `afe3e99` Documentation
+- `a264d23` Implementation checklist
+- `74bcb50` Launch ready status
+- `79307fa` E2E/Deployment/TemplateHub guides
+
+**Status:** ✅ All code complete, typed, tested. Ready for deployment.
 
 ---
 

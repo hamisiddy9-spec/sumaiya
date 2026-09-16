@@ -1,0 +1,2141 @@
+{
+  "templates": [
+    {
+      "id": "aberdare",
+      "name": "aberdare",
+      "order": 0,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "alpine",
+      "name": "alpine",
+      "order": 1,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "altus",
+      "name": "altus",
+      "order": 2,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "apex",
+      "name": "apex",
+      "order": 3,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ascent",
+      "name": "ascent",
+      "order": 4,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "athens",
+      "name": "athens",
+      "order": 5,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "athi",
+      "name": "athi",
+      "order": 6,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "atlanta",
+      "name": "atlanta",
+      "order": 7,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "atlas-v2",
+      "name": "atlas-v2",
+      "order": 8,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "atlas",
+      "name": "atlas",
+      "order": 9,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "aurora-edge",
+      "name": "aurora-edge",
+      "order": 10,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "aurora-two",
+      "name": "aurora-two",
+      "order": 11,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "austin",
+      "name": "austin",
+      "order": 12,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "avant-garde-cv",
+      "name": "avant-garde-cv",
+      "order": 13,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "awash",
+      "name": "awash",
+      "order": 14,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "axis",
+      "name": "axis",
+      "order": 15,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "baltimore",
+      "name": "baltimore",
+      "order": 16,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "bangweulu",
+      "name": "bangweulu",
+      "order": 17,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "baro",
+      "name": "baro",
+      "order": 18,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "baroque-cv",
+      "name": "baroque-cv",
+      "order": 19,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "baskerville-cv",
+      "name": "baskerville-cv",
+      "order": 20,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "bauhaus",
+      "name": "bauhaus",
+      "order": 21,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "bento",
+      "name": "bento",
+      "order": 22,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "berlin",
+      "name": "berlin",
+      "order": 23,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "bloom",
+      "name": "bloom",
+      "order": 24,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "bodoni-cv",
+      "name": "bodoni-cv",
+      "order": 25,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "boston",
+      "name": "boston",
+      "order": 26,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "brisk",
+      "name": "brisk",
+      "order": 27,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "brutalist-cv",
+      "name": "brutalist-cv",
+      "order": 28,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "budapest",
+      "name": "budapest",
+      "order": 29,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "busia",
+      "name": "busia",
+      "order": 30,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cameo",
+      "name": "cameo",
+      "order": 31,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "canvas-magazine",
+      "name": "canvas-magazine",
+      "order": 32,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "canyon",
+      "name": "canyon",
+      "order": 33,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "capsule",
+      "name": "capsule",
+      "order": 34,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "carbon",
+      "name": "carbon",
+      "order": 35,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cascade",
+      "name": "cascade",
+      "order": 36,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "caslon",
+      "name": "caslon",
+      "order": 37,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cavendish",
+      "name": "cavendish",
+      "order": 38,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "celeste",
+      "name": "celeste",
+      "order": 39,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "charlotte",
+      "name": "charlotte",
+      "order": 40,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "chicago",
+      "name": "chicago",
+      "order": 41,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "chrome",
+      "name": "chrome",
+      "order": 42,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cincinnati",
+      "name": "cincinnati",
+      "order": 43,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cipher",
+      "name": "cipher",
+      "order": 44,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cirrus",
+      "name": "cirrus",
+      "order": 45,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "clarendon-cv",
+      "name": "clarendon-cv",
+      "order": 46,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "classical-cv",
+      "name": "classical-cv",
+      "order": 47,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "clean-cv",
+      "name": "clean-cv",
+      "order": 48,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cobalt",
+      "name": "cobalt",
+      "order": 49,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cobblestone",
+      "name": "cobblestone",
+      "order": 50,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cocoa",
+      "name": "cocoa",
+      "order": 51,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "collage",
+      "name": "collage",
+      "order": 52,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "console",
+      "name": "console",
+      "order": 53,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "constructivist",
+      "name": "constructivist",
+      "order": 54,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "contour",
+      "name": "contour",
+      "order": 55,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "copenhagen",
+      "name": "copenhagen",
+      "order": 56,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "coral",
+      "name": "coral",
+      "order": 57,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cosmos",
+      "name": "cosmos",
+      "order": 58,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "crimson",
+      "name": "crimson",
+      "order": 59,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cumulus",
+      "name": "cumulus",
+      "order": 60,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "cunene",
+      "name": "cunene",
+      "order": 61,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "dadaist",
+      "name": "dadaist",
+      "order": 62,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "dallas",
+      "name": "dallas",
+      "order": 63,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "de-stijl",
+      "name": "de-stijl",
+      "order": 64,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "deco-cv",
+      "name": "deco-cv",
+      "order": 65,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "delta",
+      "name": "delta",
+      "order": 66,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "denim",
+      "name": "denim",
+      "order": 67,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "denver",
+      "name": "denver",
+      "order": 68,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "detroit",
+      "name": "detroit",
+      "order": 69,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "diani",
+      "name": "diani",
+      "order": 70,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "didot-cv",
+      "name": "didot-cv",
+      "order": 71,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "dubai",
+      "name": "dubai",
+      "order": 72,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "dublin",
+      "name": "dublin",
+      "order": 73,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "dusk",
+      "name": "dusk",
+      "order": 74,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "eclipse",
+      "name": "eclipse",
+      "order": 75,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "edge",
+      "name": "edge",
+      "order": 76,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ember",
+      "name": "ember",
+      "order": 77,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "equinox",
+      "name": "equinox",
+      "order": 78,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "estuary",
+      "name": "estuary",
+      "order": 79,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ewaso",
+      "name": "ewaso",
+      "order": 80,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "executive-one",
+      "name": "executive-one",
+      "order": 81,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "fjord",
+      "name": "fjord",
+      "order": 82,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "flux",
+      "name": "flux",
+      "order": 83,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "folio",
+      "name": "folio",
+      "order": 84,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "fractal",
+      "name": "fractal",
+      "order": 85,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "futura-cv",
+      "name": "futura-cv",
+      "order": 86,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "futurism-cv",
+      "name": "futurism-cv",
+      "order": 87,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "galana",
+      "name": "galana",
+      "order": 88,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "gambia-cv",
+      "name": "gambia-cv",
+      "order": 89,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "garamond-cv",
+      "name": "garamond-cv",
+      "order": 90,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "garissa",
+      "name": "garissa",
+      "order": 91,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "gash",
+      "name": "gash",
+      "order": 92,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "geneva",
+      "name": "geneva",
+      "order": 93,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "graphite",
+      "name": "graphite",
+      "order": 94,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "gravity",
+      "name": "gravity",
+      "order": 95,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "grid",
+      "name": "grid",
+      "order": 96,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "haven",
+      "name": "haven",
+      "order": 97,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "helsinki",
+      "name": "helsinki",
+      "order": 98,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "herald-cv",
+      "name": "herald-cv",
+      "order": 99,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "herald",
+      "name": "herald",
+      "order": 100,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "highland",
+      "name": "highland",
+      "order": 101,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "homabay",
+      "name": "homabay",
+      "order": 102,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "horizon",
+      "name": "horizon",
+      "order": 103,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "houston",
+      "name": "houston",
+      "order": 104,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "imperial",
+      "name": "imperial",
+      "order": 105,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "impressionist-cv",
+      "name": "impressionist-cv",
+      "order": 106,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "indianapolis",
+      "name": "indianapolis",
+      "order": 107,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "inset",
+      "name": "inset",
+      "order": 108,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "istanbul",
+      "name": "istanbul",
+      "order": 109,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "jade",
+      "name": "jade",
+      "order": 110,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kagera",
+      "name": "kagera",
+      "order": 111,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kajiado",
+      "name": "kajiado",
+      "order": 112,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kariba",
+      "name": "kariba",
+      "order": 113,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kavango",
+      "name": "kavango",
+      "order": 114,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kericho",
+      "name": "kericho",
+      "order": 115,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kibo",
+      "name": "kibo",
+      "order": 116,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kilimanjaro",
+      "name": "kilimanjaro",
+      "order": 117,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kioo",
+      "name": "kioo",
+      "order": 118,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kisii",
+      "name": "kisii",
+      "order": 119,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "kitale",
+      "name": "kitale",
+      "order": 120,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lagoon",
+      "name": "lagoon",
+      "order": 121,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "laikipia",
+      "name": "laikipia",
+      "order": 122,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lamu",
+      "name": "lamu",
+      "order": 123,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ledge",
+      "name": "ledge",
+      "order": 124,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ledger",
+      "name": "ledger",
+      "order": 125,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "limpopo-cv",
+      "name": "limpopo-cv",
+      "order": 126,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "linen",
+      "name": "linen",
+      "order": 127,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lisbon",
+      "name": "lisbon",
+      "order": 128,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lodge",
+      "name": "lodge",
+      "order": 129,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "louisville",
+      "name": "louisville",
+      "order": 130,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lukuga",
+      "name": "lukuga",
+      "order": 131,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "lunar",
+      "name": "lunar",
+      "order": 132,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "machakos",
+      "name": "machakos",
+      "order": 133,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "madrid",
+      "name": "madrid",
+      "order": 134,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "malachite",
+      "name": "malachite",
+      "order": 135,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "malindi",
+      "name": "malindi",
+      "order": 136,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "mareb",
+      "name": "mareb",
+      "order": 137,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "margin",
+      "name": "margin",
+      "order": 138,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "marlowe",
+      "name": "marlowe",
+      "order": 139,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "marsabit",
+      "name": "marsabit",
+      "order": 140,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "melbourne",
+      "name": "melbourne",
+      "order": 141,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "memphis",
+      "name": "memphis",
+      "order": 142,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "meridian",
+      "name": "meridian",
+      "order": 143,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "mesa",
+      "name": "mesa",
+      "order": 144,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "metro",
+      "name": "metro",
+      "order": 145,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "miami-cv",
+      "name": "miami-cv",
+      "order": 146,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "migori",
+      "name": "migori",
+      "order": 147,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "minneapolis",
+      "name": "minneapolis",
+      "order": 148,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "modernist-cv",
+      "name": "modernist-cv",
+      "order": 149,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "mombasa",
+      "name": "mombasa",
+      "order": 150,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "monarch",
+      "name": "monarch",
+      "order": 151,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "mono-cv",
+      "name": "mono-cv",
+      "order": 152,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "montage",
+      "name": "montage",
+      "order": 153,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "montreal",
+      "name": "montreal",
+      "order": 154,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "mosaic",
+      "name": "mosaic",
+      "order": 155,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "moyale",
+      "name": "moyale",
+      "order": 156,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "muse",
+      "name": "muse",
+      "order": 157,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nairobi",
+      "name": "nairobi",
+      "order": 158,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nakuru",
+      "name": "nakuru",
+      "order": 159,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "narok",
+      "name": "narok",
+      "order": 160,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "narrative",
+      "name": "narrative",
+      "order": 161,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nashville",
+      "name": "nashville",
+      "order": 162,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nebula",
+      "name": "nebula",
+      "order": 163,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "neoclassical-cv",
+      "name": "neoclassical-cv",
+      "order": 164,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "neon",
+      "name": "neon",
+      "order": 165,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "neural",
+      "name": "neural",
+      "order": 166,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nile",
+      "name": "nile",
+      "order": 167,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nimbus",
+      "name": "nimbus",
+      "order": 168,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nordic-minimal",
+      "name": "nordic-minimal",
+      "order": 169,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nova",
+      "name": "nova",
+      "order": 170,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "nuru",
+      "name": "nuru",
+      "order": 171,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ocean",
+      "name": "ocean",
+      "order": 172,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "okavango",
+      "name": "okavango",
+      "order": 173,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "onyx",
+      "name": "onyx",
+      "order": 174,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "orbit",
+      "name": "orbit",
+      "order": 175,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "oslo",
+      "name": "oslo",
+      "order": 176,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "oxford",
+      "name": "oxford",
+      "order": 177,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "palatino-cv",
+      "name": "palatino-cv",
+      "order": 178,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "panorama",
+      "name": "panorama",
+      "order": 179,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "parallax",
+      "name": "parallax",
+      "order": 180,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "peel",
+      "name": "peel",
+      "order": 181,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "pemba",
+      "name": "pemba",
+      "order": 182,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "phoenix",
+      "name": "phoenix",
+      "order": 183,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "photon",
+      "name": "photon",
+      "order": 184,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "pier",
+      "name": "pier",
+      "order": 185,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "pittsburgh",
+      "name": "pittsburgh",
+      "order": 186,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "plateau",
+      "name": "plateau",
+      "order": 187,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "portland",
+      "name": "portland",
+      "order": 188,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "prague",
+      "name": "prague",
+      "order": 189,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "prism",
+      "name": "prism",
+      "order": 190,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "pulsar",
+      "name": "pulsar",
+      "order": 191,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "quantum",
+      "name": "quantum",
+      "order": 192,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "quasar",
+      "name": "quasar",
+      "order": 193,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "rail",
+      "name": "rail",
+      "order": 194,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "raleigh",
+      "name": "raleigh",
+      "order": 195,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "regent",
+      "name": "regent",
+      "order": 196,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "relief",
+      "name": "relief",
+      "order": 197,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ribbon",
+      "name": "ribbon",
+      "order": 198,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "richmond",
+      "name": "richmond",
+      "order": 199,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "rift",
+      "name": "rift",
+      "order": 200,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "riso",
+      "name": "riso",
+      "order": 201,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "rockwell-cv",
+      "name": "rockwell-cv",
+      "order": 202,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "rufiji",
+      "name": "rufiji",
+      "order": 203,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ruvuma",
+      "name": "ruvuma",
+      "order": 204,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ruwenzori",
+      "name": "ruwenzori",
+      "order": 205,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "sabaki",
+      "name": "sabaki",
+      "order": 206,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "sacramento",
+      "name": "sacramento",
+      "order": 207,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "sahara",
+      "name": "sahara",
+      "order": 208,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "samburu",
+      "name": "samburu",
+      "order": 209,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "savanna",
+      "name": "savanna",
+      "order": 210,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "script-cv",
+      "name": "script-cv",
+      "order": 211,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "seattle",
+      "name": "seattle",
+      "order": 212,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "serengeti",
+      "name": "serengeti",
+      "order": 213,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "serif-cv",
+      "name": "serif-cv",
+      "order": 214,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "silhouette",
+      "name": "silhouette",
+      "order": 215,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "silicon-pro",
+      "name": "silicon-pro",
+      "order": 216,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "singapore-cv",
+      "name": "singapore-cv",
+      "order": 217,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "slab",
+      "name": "slab",
+      "order": 218,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "slate-two",
+      "name": "slate-two",
+      "order": 219,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "slate-v2",
+      "name": "slate-v2",
+      "order": 220,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "solaris",
+      "name": "solaris",
+      "order": 221,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "solstice",
+      "name": "solstice",
+      "order": 222,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "st-louis",
+      "name": "st-louis",
+      "order": 223,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "stellar",
+      "name": "stellar",
+      "order": 224,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "stockholm",
+      "name": "stockholm",
+      "order": 225,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "storm",
+      "name": "storm",
+      "order": 226,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "stratus",
+      "name": "stratus",
+      "order": 227,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "stripe",
+      "name": "stripe",
+      "order": 228,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "structuralist",
+      "name": "structuralist",
+      "order": 229,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "studio",
+      "name": "studio",
+      "order": 230,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "suprematist",
+      "name": "suprematist",
+      "order": 231,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "sydney-cv",
+      "name": "sydney-cv",
+      "order": 232,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tableau",
+      "name": "tableau",
+      "order": 233,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tampa",
+      "name": "tampa",
+      "order": 234,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tana",
+      "name": "tana",
+      "order": 235,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tanganyika",
+      "name": "tanganyika",
+      "order": 236,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tekeze",
+      "name": "tekeze",
+      "order": 237,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "template-utils",
+      "name": "template-utils",
+      "order": 238,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tempo",
+      "name": "tempo",
+      "order": 239,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "terracotta",
+      "name": "terracotta",
+      "order": 240,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ticker",
+      "name": "ticker",
+      "order": 241,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "titan",
+      "name": "titan",
+      "order": 242,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "tokyo-grid",
+      "name": "tokyo-grid",
+      "order": 243,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "toronto",
+      "name": "toronto",
+      "order": 244,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "trace",
+      "name": "trace",
+      "order": 245,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "turkana",
+      "name": "turkana",
+      "order": 246,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "ubuntu",
+      "name": "ubuntu",
+      "order": 247,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vancouver",
+      "name": "vancouver",
+      "order": 248,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vector",
+      "name": "vector",
+      "order": 249,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "veldt",
+      "name": "veldt",
+      "order": 250,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "verdant",
+      "name": "verdant",
+      "order": 251,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vertex",
+      "name": "vertex",
+      "order": 252,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vibe",
+      "name": "vibe",
+      "order": 253,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "victoria",
+      "name": "victoria",
+      "order": 254,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vienna",
+      "name": "vienna",
+      "order": 255,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "vignette",
+      "name": "vignette",
+      "order": 256,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "voi",
+      "name": "voi",
+      "order": 257,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "volta-cv",
+      "name": "volta-cv",
+      "order": 258,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "wajir",
+      "name": "wajir",
+      "order": 259,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "warsaw",
+      "name": "warsaw",
+      "order": 260,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "watamu",
+      "name": "watamu",
+      "order": 261,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "zahabu",
+      "name": "zahabu",
+      "order": 262,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "zanzibar",
+      "name": "zanzibar",
+      "order": 263,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "zege",
+      "name": "zege",
+      "order": 264,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "zenith",
+      "name": "zenith",
+      "order": 265,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    },
+    {
+      "id": "zurich",
+      "name": "zurich",
+      "order": 266,
+      "category": "general",
+      "career_stage": "mid",
+      "industry": "tech"
+    }
+  ],
+  "count": 267
+}

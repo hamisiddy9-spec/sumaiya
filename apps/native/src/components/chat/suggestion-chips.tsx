@@ -20,6 +20,7 @@ export function SuggestionChips({ suggestions, onSuggestionPress, loading = fals
         <Pressable
           key={s.id}
           disabled={loading}
+          accessibilityRole="button"
           onPress={() => {
             haptics.light();
             onSuggestionPress(s.action, s.data);

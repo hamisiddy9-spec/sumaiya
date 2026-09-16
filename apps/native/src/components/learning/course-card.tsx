@@ -223,7 +223,7 @@ export function CourseCard({ course, progress, onUnit, onOpenLesson, onReset }: 
       </View>
 
       {done > 0 ? (
-        <Pressable onPress={() => { haptics.selection(); onReset(); }} style={{ alignSelf: "flex-start" }}>
+        <Pressable accessibilityRole="button" onPress={() => { haptics.selection(); onReset(); }} style={{ alignSelf: "flex-start" }}>
           <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", textDecorationLine: "underline" }}>
             {t("Start over", "Anza upya")}
           </Text>

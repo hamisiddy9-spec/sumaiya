@@ -89,6 +89,7 @@ function LearningResourceCard({ resource, onPress, compact = false }: LearningRe
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
       style={{
         borderRadius: 12,

@@ -7,6 +7,7 @@ import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
+import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
@@ -47,6 +48,8 @@ function Section({
       }}
     >
       <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
         onPress={() => {
           haptics.selection();
           setOpen((o) => !o);
@@ -389,6 +392,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       };
       const uri = await exportCVAsPDF(cv, { accent, lang, template });
       haptics.success();
+      track(FUNNEL_EVENTS.cvExported, { template });
       await shareCV(cv, uri);
     } catch {
       haptics.error();
@@ -516,7 +520,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       {/* Personal */}
       <Section title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 4 }}>
-          <Pressable onPress={pickPhoto} disabled={photoBusy} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}>
+          <Pressable onPress={pickPhoto} disabled={photoBusy} accessibilityRole="button" accessibilityLabel={data.personalInfo?.profilePhoto ? t("Change photo", "Badilisha picha") : t("Add profile photo", "Ongeza picha ya wasifu")} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}>
             {photoBusy ? (
               <ActivityIndicator color={c.accent} />
             ) : data.personalInfo?.profilePhoto ? (
@@ -526,13 +530,13 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
             )}
           </Pressable>
           <View style={{ flex: 1, gap: 4 }}>
-            <Pressable onPress={pickPhoto} disabled={photoBusy} hitSlop={6}>
+            <Pressable onPress={pickPhoto} disabled={photoBusy} hitSlop={6} accessibilityRole="button">
               <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
                 {data.personalInfo?.profilePhoto ? t("Change photo", "Badilisha picha") : t("Add profile photo", "Ongeza picha ya wasifu")}
               </Text>
             </Pressable>
             {data.personalInfo?.profilePhoto ? (
-              <Pressable onPress={removePhoto} hitSlop={6}>
+              <Pressable onPress={removePhoto} hitSlop={6} accessibilityRole="button">
                 <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{t("Remove", "Ondoa")}</Text>
               </Pressable>
             ) : (
@@ -565,7 +569,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>{t("ROLE", "KAZI")} {i + 1}</Text>
-              <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ experience: exp.filter((x) => x.id !== e.id) }); }}>
+              <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ experience: exp.filter((x) => x.id !== e.id) }); }} accessibilityRole="button" accessibilityLabel={t("Delete role", "Futa kazi")}>
                 <Icon name="trash-2" size={15} color={c.error} />
               </Pressable>
             </View>
@@ -587,7 +591,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
               <Text style={{ color: c.textMuted, fontSize: 11.5, fontWeight: "700", letterSpacing: 0.5 }}>{t("SCHOOL", "SHULE")} {i + 1}</Text>
-              <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ education: edu.filter((x) => x.id !== e.id) }); }}>
+              <Pressable hitSlop={8} onPress={() => { haptics.warning(); patch({ education: edu.filter((x) => x.id !== e.id) }); }} accessibilityRole="button" accessibilityLabel={t("Delete school", "Futa shule")}>
                 <Icon name="trash-2" size={15} color={c.error} />
               </Pressable>
             </View>
@@ -608,6 +612,8 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           {skills.map((s) => (
             <Pressable
               key={s.id}
+              accessibilityRole="button"
+              accessibilityLabel={`${t("Remove skill", "Ondoa ujuzi")}: ${s.name}`}
               onPress={() => { haptics.selection(); patch({ skills: skills.filter((x) => x.id !== s.id) }); }}
               style={{ flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: c.accent + "14", borderRadius: 9, paddingHorizontal: 10, paddingVertical: 6 }}
             >

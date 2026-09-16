@@ -54,12 +54,18 @@ export function ChatMessageComponent({
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: message.content ? 8 : 0 }}>
             {message.attachments.map((a) =>
               a.kind === "image" ? (
-                <Pressable key={a.id} onPress={() => onPreviewAttachment?.(a)}>
+                <Pressable
+                  key={a.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("Preview photo", "Ona picha")}
+                  onPress={() => onPreviewAttachment?.(a)}
+                >
                   <Image source={{ uri: a.uri }} style={{ width: 108, height: 108, borderRadius: 10 }} />
                 </Pressable>
               ) : (
                 <Pressable
                   key={a.id}
+                  accessibilityRole="button"
                   onPress={() => onPreviewAttachment?.(a)}
                   style={{
                     flexDirection: "row",

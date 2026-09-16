@@ -654,7 +654,7 @@ CV TEXT:
 ${sanitizePromptText(text)}
 """`;
 
-  const raw = await callAi(prompt, { temperature: 0.2, maxTokens: 1800, jsonMode: true, timeoutMs: 40_000 });
+  const raw = await callAi(prompt, { temperature: 0.2, maxTokens: 1800, jsonMode: true, timeoutMs: 10_000 });
   if (!raw) {
     await refundAiUsage(userId);
     return null;

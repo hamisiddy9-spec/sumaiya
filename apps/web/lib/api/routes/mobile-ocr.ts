@@ -17,7 +17,7 @@ import { extractCvFields } from "@/lib/api/routes/mobile";
 //   - refuse empty/undecodable payloads before tesseract ever spins up
 
 const MAX_BASE64_BYTES = 4 * 1024 * 1024; // 4 MB base64 string
-const OCR_TIMEOUT_MS = 60_000;
+const OCR_TIMEOUT_MS = 15_000; // tesseract.js: target <3s for typical CV; 15s hard limit
 
 const bodySchema = z.object({
   imageBase64: z.string().min(1).max(MAX_BASE64_BYTES),

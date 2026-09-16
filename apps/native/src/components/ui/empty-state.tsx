@@ -56,7 +56,7 @@ export function EmptyState({
         </View>
       ) : null}
       {secondaryLabel && onSecondary ? (
-        <Pressable onPress={onSecondary} hitSlop={8} style={{ marginTop: 16, alignSelf: "center" }}>
+        <Pressable accessibilityRole="button" onPress={onSecondary} hitSlop={8} style={{ marginTop: 16, alignSelf: "center" }}>
           <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>{secondaryLabel}</Text>
         </Pressable>
       ) : null}

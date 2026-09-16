@@ -186,6 +186,8 @@ export function ScanScreen() {
           }}
         >
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("Close", "Funga")}
             onPress={() => {
               haptics.selection();
               setLive(false);
@@ -200,6 +202,8 @@ export function ScanScreen() {
           <Pressable
             onPress={shoot}
             disabled={shooting}
+            accessibilityRole="button"
+            accessibilityLabel={t("Take photo", "Piga picha")}
             style={{
               width: 74,
               height: 74,
@@ -219,6 +223,9 @@ export function ScanScreen() {
               setTorch((t) => !t);
             }}
             hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel={t("Torch", "Mwanga")}
+            accessibilityState={{ selected: torch }}
             style={{ width: 48, height: 48, borderRadius: 24, alignItems: "center", justifyContent: "center", backgroundColor: torch ? "#fff" : "rgba(255,255,255,0.15)" }}
           >
             <Icon name="zap" size={20} color={torch ? "#000" : "#fff"} />

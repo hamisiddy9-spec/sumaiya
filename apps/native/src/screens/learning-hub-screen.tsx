@@ -155,7 +155,7 @@ function GapCard({
           {/* The one thing the app genuinely cannot infer. Tapping either action
               above already means "I'm working on this", so there is no separate
               "Mark as learning" button any more. */}
-          <Pressable onPress={onCanDo} hitSlop={8} style={{ alignSelf: "flex-start" }}>
+          <Pressable accessibilityRole="button" onPress={onCanDo} hitSlop={8} style={{ alignSelf: "flex-start" }}>
             <Text style={{ color: c.success, fontSize: 12.5, fontWeight: "700", textDecorationLine: "underline" }}>
               {t("I can do this — add", "Naweza — ongeza")}
             </Text>
@@ -330,6 +330,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }}>
       <Pressable
+        accessibilityRole="button"
         hitSlop={10}
         onPress={() => { haptics.selection(); navigation.goBack(); }}
         style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 }}
@@ -361,6 +362,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
           {/* target + readiness */}
           {loadError && !result ? (
             <Pressable
+              accessibilityRole="button"
               onPress={() => void load()}
               style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.error + "10", borderWidth: 1, borderColor: c.error + "24", borderRadius: 12, padding: 14 }}
             >
@@ -384,13 +386,25 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             </View>
           ) : (
             <Pressable
-              onPress={() => navigation.navigate("Jobs")}
-              style={{ flexDirection: "row", gap: 10, alignItems: "center", backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24", borderRadius: 12, padding: 14 }}
+              accessibilityRole="button"
+              onPress={() => { haptics.selection(); navigation.navigate("Jobs"); }}
+              style={{ flexDirection: "row", gap: 12, alignItems: "center", backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24", borderRadius: 14, padding: 16 }}
             >
-              <SumaiyaMark size={18} state="static" color={c.accent} />
-              <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 18 }}>
-                {t("Finish your profile and I'll show you the exact skills to build for the jobs you want.", "Kamilisha wasifu wako nami nikuonyeshe ujuzi hasa wa kujenga kwa kazi unazotaka.")}
-              </Text>
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+                <SumaiyaMark size={18} state="static" color={c.accent} />
+              </View>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
+                  {t("Add your first job to see what to learn", "Ongeza kazi yako ya kwanza uone cha kujifunza")}
+                </Text>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
+                  {t("Finish your profile and I'll show you the exact skills to build for the jobs you want.", "Kamilisha wasifu wako nami nikuonyeshe ujuzi hasa wa kujenga kwa kazi unazotaka.")}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Find jobs", "Tafuta kazi")}</Text>
+                <Icon name="chevron-right" size={18} color={c.accent} />
+              </View>
             </Pressable>
           )}
 
@@ -486,6 +500,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               return (
                 <Stagger key={g.id} index={i} step={30}>
                   <Pressable
+                    accessibilityRole="button"
                     onPress={() => { haptics.selection(); navigation.navigate("Guide", { id: g.id }); }}
                     style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 14, borderRadius: 14, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}
                   >
@@ -507,7 +522,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
 
           {/* EXPLORE ALL */}
           {!exploreOpen ? (
-            <Pressable onPress={openExplore} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.border }}>
+            <Pressable accessibilityRole="button" onPress={openExplore} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, borderRadius: 14, borderWidth: 1, borderColor: c.border }}>
               <Text style={{ color: c.text, fontSize: 14, fontWeight: "700" }}>{t("Explore all courses", "Chunguza kozi zote")}</Text>
               <Icon name="chevron-down" size={16} color={c.textMuted} />
             </Pressable>
@@ -545,6 +560,36 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               )}
             </View>
           )}
+
+          {/* Ask Sumaiya — learning ties back to the AI, not a separate LMS. */}
+          <View style={{ gap: 10 }}>
+            <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
+              {t("Ask about your career", "Uliza kuhusu kazi yako")}
+            </Text>
+            <Card
+              onPress={() => { haptics.selection(); navigation.navigate("SumaiyaTab"); }}
+              accessibilityLabel={t("Ask Sumaiya anything", "Muulize Sumaiya chochote")}
+              style={{ gap: 10 }}
+            >
+              <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
+                {[
+                  t("What should I learn first?", "Nijifunze nini kwanza?"),
+                  t("Do I need Excel for this job?", "Je, ninahitaji Excel kwa kazi hii?"),
+                  t("How can I improve my CV?", "Niboresheje CV yangu?"),
+                ].map((q) => (
+                  <View key={q} style={{ backgroundColor: c.bg, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 }}>
+                    <Text style={{ color: c.textBody, fontSize: 12 }}>{q}</Text>
+                  </View>
+                ))}
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <SumaiyaMark size={15} state="static" color={c.accent} />
+                <Text style={{ color: c.accent, fontSize: 13, fontWeight: "800" }}>
+                  {t("Ask Sumaiya anything", "Muulize Sumaiya chochote")} →
+                </Text>
+              </View>
+            </Card>
+          </View>
         </>
       )}
 

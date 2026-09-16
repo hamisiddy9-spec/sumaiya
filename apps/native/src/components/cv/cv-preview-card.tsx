@@ -121,6 +121,9 @@ export function CvPreviewCard({
           <Pressable
             key={tpl.id}
             onPress={() => pickTemplate(tpl.id, locked)}
+            accessibilityRole="button"
+            accessibilityLabel={lang === "sw" ? tpl.name.sw : tpl.name.en}
+            accessibilityState={{ selected: active }}
             style={{ alignItems: "center", gap: 5, width: 54, opacity: locked ? 0.7 : 1 }}
           >
             <View
@@ -221,6 +224,8 @@ export function CvPreviewCard({
           the 794px page down to fit (no zoom hack, which rendered blank on the
           Android WebView). Tap to open the full-screen view. */}
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t("Full screen preview", "Onyesho la skrini kamili")}
         onPress={() => {
           haptics.selection();
           setFull(true);
@@ -282,6 +287,10 @@ export function CvPreviewCard({
               setColor(col);
               onColorChange?.(col);
             }}
+            accessibilityRole="button"
+            accessibilityLabel={t("Accent colour", "Rangi ya mwangaza")}
+            accessibilityState={{ selected: color === col }}
+            hitSlop={9}
             style={{
               width: 26,
               height: 26,
@@ -332,7 +341,7 @@ export function CvPreviewCard({
         </Text>
       ) : null}
       {onOpenEditor ? (
-        <Pressable onPress={onOpenEditor} style={{ alignSelf: "center", paddingVertical: 6 }}>
+        <Pressable accessibilityRole="button" onPress={onOpenEditor} style={{ alignSelf: "center", paddingVertical: 6 }}>
           <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
             {t("Open the full editor", "Fungua kihariri kamili")}
           </Text>

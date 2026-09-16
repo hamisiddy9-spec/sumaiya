@@ -128,7 +128,12 @@ export function PremiumSheet({
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none" statusBarTranslucent>
       <View style={{ width, height }}>
-        <Pressable style={{ flex: 1 }} onPress={onClose}>
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("Close", "Funga")}
+        >
           <Animated.View style={[backdrop, { flex: 1, backgroundColor: c.overlay }]} />
         </Pressable>
         <Animated.View
@@ -198,7 +203,7 @@ export function PremiumSheet({
                 </Text>
               </View>
             ) : (
-              <Pressable onPress={join} style={{ alignSelf: "center", paddingVertical: 8 }}>
+              <Pressable accessibilityRole="button" onPress={join} style={{ alignSelf: "center", paddingVertical: 8 }}>
                 <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
                   {t("Notify me when paying opens", "Nijulishe malipo yanapofunguliwa")}
                 </Text>
@@ -206,7 +211,7 @@ export function PremiumSheet({
             )}
           </View>
 
-          <Pressable onPress={onClose} style={{ alignSelf: "center", paddingVertical: 10 }}>
+          <Pressable accessibilityRole="button" onPress={onClose} style={{ alignSelf: "center", paddingVertical: 10 }}>
             <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Maybe later", "Baadaye")}</Text>
           </Pressable>
         </Animated.View>

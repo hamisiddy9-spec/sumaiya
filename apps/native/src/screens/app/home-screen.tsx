@@ -24,9 +24,10 @@ import {
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { TemplateGallery } from "../../components/cv/template-gallery";
-import { TemplateThumb } from "../../components/cv/template-thumb";
-import { ALL_TEMPLATES, ENGINE_TEMPLATES, templateLayout, type CvTemplateId } from "../../lib/cv-html";
+import { type CvTemplateId } from "../../lib/cv-html";
 import { getDefaultTemplate, setDefaultTemplate } from "../../lib/prefs";
+import { loadProfile } from "../../lib/profile-store";
+import { recommendNextMoves, type NextMoves } from "../../lib/recommendations";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
 
@@ -81,30 +82,15 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const COL_W = (winWidth - SIDE * 2 - GUTTER) / 2;
 
   // ── TemplateHub ────────────────────────────────────────────────────────────
-  // Every design lives here. The dashboard shows one teaser — a single thumb
-  // per layout family, so the strip reads as "there are different kinds of
-  // design", not as five random swatches — and the full gallery opens from it.
+  // The full gallery (searchable, sectioned, virtualised) opens from the
+  // TemplateHub quick action and from hint cards; the picked template becomes
+  // the default for new CVs.
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [defaultTemplate, setDefaultTemplateId] = useState<CvTemplateId | null>(null);
   useEffect(() => {
     let alive = true;
     getDefaultTemplate().then((id) => { if (alive) setDefaultTemplateId(id); });
     return () => { alive = false; };
-  }, []);
-
-  const hubTeaser = useMemo(() => {
-    const seen = new Set<string>();
-    const out: typeof ALL_TEMPLATES = [];
-    // Engine templates only, so all five layout families are represented — the
-    // original six would otherwise claim a slot and hide a whole family.
-    for (const tpl of ENGINE_TEMPLATES) {
-      const family = templateLayout(tpl.id);
-      if (seen.has(family)) continue;
-      seen.add(family);
-      out.push(tpl);
-      if (out.length === 5) break;
-    }
-    return out;
   }, []);
 
   const chooseTemplate = (id: CvTemplateId) => {
@@ -150,6 +136,132 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   );
   const topSignal = signals[0] ?? null;
 
+  // The AI spine — one "what next" answer built from the Career Profile across
+  // templates, skills and a single action. `undefined` = not loaded yet,
+  // `null` = profile too sparse for a confident guess (show a nudge instead).
+  // Recomputed on focus so a profile edit made on the Profile tab is reflected
+  // the moment the user comes back here.
+  const [nextMoves, setNextMoves] = useState<NextMoves | null | undefined>(undefined);
+  useFocusEffect(
+    React.useCallback(() => {
+      let alive = true;
+      loadProfile().then((p) => { if (alive) setNextMoves(recommendNextMoves(p)); });
+      return () => { alive = false; };
+    }, []),
+  );
+
+  // ── Rotating hints ─────────────────────────────────────────────────────────
+  // One proactive suggestion card that cycles through everything Sumaiya can
+  // push — a live signal, the AI spine's next move, the TemplateHub collection,
+  // the first-step nudge, and free guides. Shown one at a time with a shuffle
+  // control, so the dashboard reads as "what should I do next" without stacking
+  // three near-duplicate cards.
+  type Hint = {
+    key: string;
+    eyebrow: string;
+    title: string;
+    detail?: string;
+    cta: string;
+    icon: string;
+    onPress: () => void;
+  };
+  const [hintIndex, setHintIndex] = useState(0);
+
+  const hints = useMemo<Hint[]>(() => {
+    const out: Hint[] = [];
+
+    if (topSignal) {
+      const st = signalText(topSignal, lang);
+      const act = signalAction(topSignal, lang);
+      if (st && act) {
+        out.push({
+          key: "signal",
+          eyebrow: t("Worth your attention", "Inastahili umakini"),
+          title: st.title,
+          detail: st.detail,
+          cta: act.cta[lang],
+          icon: "sparkles",
+          onPress: () =>
+            (navigation.navigate as (screen: string, params?: Record<string, unknown>) => void)(
+              act.target.screen,
+              act.target.params,
+            ),
+        });
+      }
+    }
+
+    if (nextMoves) {
+      const skills = nextMoves.skills.slice(0, 3).map((s) => s.area.skill[lang]).join(" · ");
+      out.push({
+        key: "next-move",
+        eyebrow: t("Recommended", "Imependekezwa"),
+        title: nextMoves.action[lang],
+        detail: skills ? `${t("Skills to grow", "Ujuzi wa kukuza")}: ${skills}` : undefined,
+        cta: t("See designs", "Ona miundo"),
+        icon: "compass",
+        onPress: () => {
+          haptics.selection();
+          setGalleryOpen(true);
+        },
+      });
+    }
+
+    out.push({
+      key: "templatehub",
+      eyebrow: "TemplateHub",
+      title: t("224 designs for every document", "Miundo 224 kwa kila nyaraka"),
+      detail: t(
+        "Real previews and premium collections, matched to your field.",
+        "Miundo halisi na makusanyo ya premium, yanayolingana na uwanja wako.",
+      ),
+      cta: t("Explore", "Gundua"),
+      icon: "layout-grid",
+      onPress: () => {
+        haptics.selection();
+        setGalleryOpen(true);
+      },
+    });
+
+    const sparse = !topSignal && cvs.length === 0 && jobRecs.length === 0;
+    if (sparse) {
+      out.push({
+        key: "sparse",
+        eyebrow: t("Get started", "Anza sasa"),
+        title: t("Add your first job to get career advice", "Ongeza kazi yako ya kwanza upate ushauri wa kazi"),
+        detail: t(
+          "Tell me the role you're aiming for and I'll match jobs, skills and advice to it.",
+          "Niambie nafasi unayolenga nami nitaoanisha ajira, ujuzi na ushauri nayo.",
+        ),
+        cta: t("Find jobs", "Tafuta kazi"),
+        icon: "compass",
+        onPress: () => navigation.navigate("Jobs"),
+      });
+    }
+
+    for (const tip of GUIDES.filter((g) => g.tier === "free").slice(0, 2)) {
+      out.push({
+        key: `guide-${tip.id}`,
+        eyebrow: t("A tip from me", "Kidokezo changu"),
+        title: tip.title[lang],
+        detail: tip.summary[lang],
+        cta: t("Read the guide", "Soma mwongozo"),
+        icon: "help-circle",
+        onPress: () => navigation.navigate("Guide", { id: tip.id }),
+      });
+    }
+
+    return out;
+  }, [topSignal, nextMoves, cvs.length, jobRecs.length, lang, t, navigation]);
+
+  const hint = hints[Math.min(hintIndex, Math.max(hints.length - 1, 0))] ?? null;
+  const shuffleHint = () => {
+    haptics.light();
+    if (hints.length > 1) {
+      const next = (hintIndex + 1 + Math.floor(Math.random() * (hints.length - 1))) % hints.length;
+      setHintIndex(next);
+    }
+  };
+
   const rawName = user?.name?.trim();
   const looksLikeDevice = rawName
     ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
@@ -158,8 +270,8 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
-    { icon: "sumaiya", label: t("Ask me", "Niulize"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
-    { icon: "target", label: t("New openings", "Nafasi mpya"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
+    { icon: "sumaiya", label: t("Career AI", "AI ya kazi"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
+    { icon: "target", label: t("Find jobs", "Tafuta kazi"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
     { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: c.success, onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
     // Cover letters were only reachable buried inside the job-tailor flow or a
@@ -168,14 +280,76 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     // "letter" instead of the generic default, so tapping this feels like a
     // purpose-built cover-letter feature, not a detour through job matching.
     { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: c.warning, onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
-    // Import already has its own dedicated tab — a Home tile duplicated it.
-    // Removing it also brings the grid to a clean 6 tiles (2x3/3x2), not 7.
-    { icon: "book-open", label: t("Add skills", "Ongeza ujuzi"), tint: c.warning, onPress: () => navigation.navigate("LearningHub") },
+    // TemplateHub is a first-class surface — the gallery opens straight from here.
+    { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 24 }} refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenTitle eyebrow={`${greeting(lang)},`}>{name}</ScreenTitle>
+
+      {/* Rotating hint — one proactive suggestion at a time. The shuffle control
+          cycles to the next; tapping the card acts on the current one. */}
+      {hint ? (
+        <Animated.View entering={FadeInDown.duration(320).delay(40)}>
+          <Card
+            onPress={hint.onPress}
+            accessibilityLabel={hint.title}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              padding: 14,
+              backgroundColor: c.accent + "12",
+              borderColor: c.accent + "2a",
+            }}
+          >
+            <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "22", alignItems: "center", justifyContent: "center" }}>
+              {hint.icon === "sparkles" ? (
+                <SumaiyaMark size={18} state="static" color={c.accent} />
+              ) : (
+                <Icon name={hint.icon} size={18} color={c.accent} />
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
+                  {hint.eyebrow}
+                </Text>
+                {hints.length > 1 ? (
+                  <Text style={{ color: c.textMuted, fontSize: 10, fontWeight: "600", opacity: 0.7 }}>
+                    {hintIndex + 1}/{hints.length}
+                  </Text>
+                ) : null}
+              </View>
+              <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
+                {hint.title}
+              </Text>
+              {hint.detail ? (
+                <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>
+                  {hint.detail}
+                </Text>
+              ) : null}
+            </View>
+            <View style={{ alignItems: "flex-end", gap: 10 }}>
+              {hints.length > 1 ? (
+                <Pressable
+                  onPress={shuffleHint}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("Another suggestion", "Pendekezo lingine")}
+                >
+                  <Icon name="refresh-cw" size={16} color={c.textMuted} />
+                </Pressable>
+              ) : null}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{hint.cta}</Text>
+                <Icon name="chevron-right" size={18} color={c.accent} />
+              </View>
+            </View>
+          </Card>
+        </Animated.View>
+      ) : null}
 
       {/* Primary row — two equal tiles: the count, and the make-a-CV CTA. */}
       <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
@@ -204,48 +378,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <Icon name="plus" size={18} color={c.accentText} />
           <View>
-            <Text style={{ color: c.accentText, fontSize: 18, fontWeight: "800" }}>{t("New CV", "CV mpya")}</Text>
+            <Text style={{ color: c.accentText, fontSize: 18, fontWeight: "800" }}>{t("Build your CV", "Jenga CV yako")}</Text>
             <Text style={{ color: c.accentText, opacity: 0.9, fontSize: 12, fontWeight: "600", marginTop: 1 }}>
-              {t("Start from scratch", "Anza upya")} →
+              {t("Use your profile to start", "Tumia wasifu kuanza")} →
             </Text>
-          </View>
-        </Card>
-      </Animated.View>
-
-      {/* TemplateHub — the home for every design. */}
-      <Animated.View entering={FadeInDown.duration(320).delay(90)}>
-        <SectionHeader title="TemplateHub" />
-        <Card
-          onPress={() => {
-            haptics.selection();
-            setGalleryOpen(true);
-          }}
-          accessibilityLabel={t("Open TemplateHub", "Fungua TemplateHub")}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={{ color: c.text, fontSize: 16, fontWeight: "800" }}>
-                {t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
-              </Text>
-              <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                {t("Free and premium. Pick your look.", "Bure na premium. Chagua muonekano wako.")}
-              </Text>
-            </View>
-            <Icon name="chevron-right" size={18} color={c.textMuted} />
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
-            {hubTeaser.map((tpl) => (
-              <View key={tpl.id} style={{ alignItems: "center", gap: 4 }}>
-                <TemplateThumb id={tpl.id} accent={c.accent} width={46} />
-                <Text
-                  numberOfLines={1}
-                  style={{ color: c.textMuted, fontSize: 8.5, fontWeight: "700", maxWidth: 50 }}
-                >
-                  {lang === "sw" ? tpl.name.sw : tpl.name.en}
-                </Text>
-              </View>
-            ))}
           </View>
         </Card>
       </Animated.View>
@@ -279,66 +415,6 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
           ))}
         </View>
       </Animated.View>
-
-      {/* From Sumaiya — a live proactive nudge when the signal engine has one,
-          otherwise a free guide rotated daily. Same slot, same treatment. */}
-      {(() => {
-        const st = topSignal ? signalText(topSignal, lang) : null;
-        const act = topSignal ? signalAction(topSignal, lang) : null;
-        const freeGuides = GUIDES.filter((g) => g.tier === "free");
-        const tip = freeGuides[Math.floor(Date.now() / 86_400_000) % freeGuides.length];
-
-        const onPress = () => {
-          if (topSignal && act) {
-            (navigation.navigate as (screen: string, params?: Record<string, unknown>) => void)(
-              act.target.screen,
-              act.target.params,
-            );
-          } else {
-            navigation.navigate("Guide", { id: tip.id });
-          }
-        };
-
-        return (
-          <Animated.View entering={FadeInDown.duration(320).delay(160)}>
-            <Card
-              onPress={onPress}
-              accessibilityLabel={st ? st.title : tip.title[lang]}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 12,
-                padding: 14,
-                backgroundColor: c.accent + "12",
-                borderColor: c.accent + "2a",
-              }}
-            >
-              <View style={{ width: 38, height: 38, borderRadius: 11, backgroundColor: c.accent + "22", alignItems: "center", justifyContent: "center" }}>
-                <SumaiyaMark size={18} state="static" color={c.accent} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "700", letterSpacing: 0.4, textTransform: "uppercase" }}>
-                  {topSignal ? t("From me", "Kutoka kwangu") : t("A tip from me", "Kidokezo changu")}
-                </Text>
-                <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 2 }} numberOfLines={2}>
-                  {st ? st.title : tip.title[lang]}
-                </Text>
-                {st ? (
-                  <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }} numberOfLines={2}>
-                    {st.detail}
-                  </Text>
-                ) : null}
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                {act ? (
-                  <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{act.cta[lang]}</Text>
-                ) : null}
-                <Icon name="chevron-right" size={18} color={c.accent} />
-              </View>
-            </Card>
-          </Animated.View>
-        );
-      })()}
 
       {/* Jobs matched to the profile */}
       {jobRecs.length > 0 ? (
@@ -378,7 +454,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       {/* Recent CVs */}
       <Animated.View entering={FadeInDown.duration(320).delay(180)}>
         <SectionHeader
-          title={t("Recent", "Za hivi karibuni")}
+          title={t("Recent CVs", "CV za hivi karibuni")}
           actionLabel={cvs.length > 3 ? t("View all", "Ona zote") : undefined}
           onAction={() => navigation.navigate("CVsTab")}
         />
