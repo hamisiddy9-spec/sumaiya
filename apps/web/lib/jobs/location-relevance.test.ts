@@ -12,8 +12,12 @@ describe("locationRelevance", () => {
     expect(locationRelevance("Dar es Salaam, Tanzania", "   ")).toBe(1);
   });
 
-  it("does not penalize when the user's location is unknown", () => {
-    expect(locationRelevance("", "Toronto, Canada")).toBe(1);
+  it("defaults an unknown user location to Tanzania (Tanzania-first)", () => {
+    // A user with no stated location is treated as Tanzanian, so a far-away
+    // posting is demoted rather than floating to the top on keyword match.
+    expect(locationRelevance("", "Toronto, Canada")).toBeLessThan(1);
+    expect(locationRelevance("", "Dar es Salaam, Tanzania")).toBe(1);
+    expect(locationRelevance("", "Nairobi, Kenya")).toBeGreaterThan(0.5);
   });
 
   it("does not penalize a real geographic overlap", () => {
@@ -25,6 +29,12 @@ describe("locationRelevance", () => {
   it("demotes a specific non-remote location that shares nothing with the user's", () => {
     expect(locationRelevance("Dar es Salaam, Tanzania", "Toronto, Canada")).toBeLessThan(1);
     expect(locationRelevance("Dar es Salaam, Tanzania", "London, United Kingdom")).toBeLessThan(1);
+  });
+
+  it("gives a nearby East African nation mild (not hard) demotion", () => {
+    const nearby = locationRelevance("Dar es Salaam, Tanzania", "Nairobi, Kenya");
+    const far = locationRelevance("Dar es Salaam, Tanzania", "Berlin, Germany");
+    expect(nearby).toBeGreaterThan(far);
   });
 
   it("ignores generic geography words when comparing", () => {
