@@ -12,6 +12,7 @@ import { shouldShowPrompt, type UpdateManifest } from "../lib/update-check";
 import { APK_DOWNLOAD_URL } from "../lib/app-hosts";
 import { shortMessage, track } from "../lib/telemetry";
 import { useLang } from "../lib/i18n";
+import { useTabBarClearance } from "../navigation/tab-bar-metrics";
 
 /**
  * On launch, ask the web backend (GET /api/app/update) for the latest released
@@ -45,6 +46,7 @@ interface Info {
 export function UpdatePrompt() {
   const c = useThemeColors();
   const { t, lang } = useLang();
+  const tabBarClearance = useTabBarClearance();
   const [info, setInfo] = useState<Info | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [phase, setPhase] = useState<"idle" | "downloading" | "installing">("idle");
@@ -186,11 +188,13 @@ export function UpdatePrompt() {
           position: "absolute",
           left: 0,
           right: 0,
-          bottom: 0,
+          // Clear the tab bar. Anchored at bottom:0 this pill sat ON TOP of the
+          // tabs, and because it is pressable it ate the taps meant for them —
+          // the app appeared unable to change screens mid-download.
+          bottom: tabBarClearance + 8,
           zIndex: 999,
           alignItems: "center",
           paddingHorizontal: 16,
-          paddingBottom: 22,
         }}
       >
         <Pressable

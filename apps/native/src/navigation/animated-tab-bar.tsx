@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { publishTabBarHeight } from "./tab-bar-metrics";
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
@@ -110,6 +111,11 @@ export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarP
 
   return (
     <View
+      // The bar publishes its true height so bottom-anchored floating UI (the
+      // update download pill) can clear it instead of guessing — see
+      // ./tab-bar-metrics. Measured, because large accessibility text makes the
+      // bar taller than any constant.
+      onLayout={(e) => publishTabBarHeight(e.nativeEvent.layout.height)}
       style={{
         flexDirection: "row",
         backgroundColor: c.bgElevated,
