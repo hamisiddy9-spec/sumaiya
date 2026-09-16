@@ -330,6 +330,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     try {
       await offlineStorage.saveCVOffline(cv);
       storedLocally = true;
+      track(FUNNEL_EVENTS.cvCreated, { template });
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.local", cvId: cv.id });
     }

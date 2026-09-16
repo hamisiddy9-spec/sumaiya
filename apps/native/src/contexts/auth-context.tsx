@@ -7,6 +7,7 @@ import React, {
   useRef,
 } from "react";
 import * as Linking from "expo-linking";
+import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import {
   GoogleSignin,
   statusCodes,
@@ -84,8 +85,10 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
       .catch((err) => reportError(err, { scope: "auth.restore" }))
       .finally(() => setLoading(false));
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       applySession(session);
+      // Funnel entry: a real sign-in (not the INITIAL_SESSION restore on launch).
+      if (event === "SIGNED_IN") track(FUNNEL_EVENTS.signedUp);
     });
 
     return () => sub.subscription.unsubscribe();

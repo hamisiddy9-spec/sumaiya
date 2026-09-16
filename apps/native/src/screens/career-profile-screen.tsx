@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { loadProfile, saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
+import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { pickAndCompressPhoto } from "../lib/pick-photo";
 import { Icon } from "../components/icon";
 import { getDefaultTemplate, setDefaultTemplate } from "../lib/prefs";
@@ -52,6 +53,7 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       await saveProfile(rest);
       await setDefaultTemplate(template);
       haptics.success();
+      track(FUNNEL_EVENTS.profileCompleted);
       navigation.goBack();
     } catch {
       // saveProfile's AsyncStorage.setItem can throw (disk full, rare storage
