@@ -155,3 +155,29 @@ the ~2 days the audit estimated instead of becoming a render migration.
 `TemplateMetadata.version` + `StoredDocument.templateVersion` already exist on the Sumaiya side.
 TemplateHub must send a `version` per template so a user's saved document can be re-rendered
 against the design it was created with. Don't omit it.
+
+---
+
+## Verified: TemplateHub `49dfdd0` (the corrected audit) — 2026-09-16
+
+Claude's correction is real and adopts the contract above. Confirmed by reading the doc at that
+commit: `GalleryProvider` is **gone**, `TemplateProvider` + `getTemplatesByCategory` /
+`getFamiliesForProduct` / `renderDocument` / `exportPdf` / `TemplateFamily` / `tier:` /
+`editable_fields` are all present, and render ownership is resolved (Sumaiya renders).
+
+**Two gaps remain:**
+
+### 1. "React components" is a web-only answer — the APK can't consume it ⚠️
+The corrected doc says TemplateHub supplies *"metadata + schema + React components"*. That works
+for the **web** surface. It does **not** work for the **native** app: Sumaiya's APK is React
+Native — it cannot render React DOM components. Native renders through its own engine
+(`cvToHtml`) into a WebView (that is exactly how the gallery's real-template previews work today).
+
+So the **design** must ship in a portable form that *both* surfaces can render — an HTML/CSS
+string or a schema the native engine can consume. "React components" alone leaves the APK with
+metadata but no way to draw the template.
+
+### 2. The `product=sumaiya` query param isn't in the doc
+Our provider is instantiated with `productId = 'sumaiya'` and appends `product=sumaiya` to every
+call. Keep it in the spec — it is how TemplateHub serves a product-specific curation (which
+templates Sumaiya sees) without a separate endpoint.
