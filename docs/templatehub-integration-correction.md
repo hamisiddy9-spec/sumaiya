@@ -110,3 +110,48 @@ Given `DocumentTemplate` from TemplateHub, Map to Sumaiya's `TemplateMetadata`:
 3. Model **families** (group a CV + cover letter) — Sumaiya's `TemplateFamily` expects them.
 4. Add `hasAiDraft` to `DocumentTemplate.metadata`.
 5. Don't ship a gallery UI sumaiya has to call — Sumaiya consumes via the provider, not HTTP from the UI.
+
+---
+
+## The authoritative API contract (Sumaiya's stub already defines it)
+
+`apps/web/lib/templates/templatehub-provider.ts` (295 lines, currently **STUB**) is the consumer
+side of this contract. It already declares exactly what it will call. **TemplateHub should
+implement these, not invent a different shape:**
+
+| Method | Call | Expected shape |
+|---|---|---|
+| `getTemplate(id)` | `GET /templates/{id}?product=sumaiya` | `TemplateMetadata` |
+| `getTemplatesByCategory(cat, opts)` | `GET /templates?product=sumaiya&category={cat}&family=&tier=&source=&limit=` | `TemplateMetadata[]` |
+| `getTemplateFamily(id)` | `GET /families/{id}` | `TemplateFamily` |
+| `getFamiliesForProduct('sumaiya')` | `GET /families?product=sumaiya` | `TemplateFamily[]` |
+| `renderDocument(id, data, {lang})` | `POST /documents/render` | `{ documentId, content, format, previewUrl? }` |
+| `exportPdf(rendered)` | export endpoint | `{ buffer, contentType }` |
+
+Note the `product=sumaiya` query param — the provider is instantiated with `productId = 'sumaiya'`
+and passes it on every call, so TemplateHub can serve a product-specific curation without a
+separate endpoint. Keep it.
+
+### Render ownership — resolved: **Sumaiya renders**
+
+The stub currently POSTs to `/documents/render` (i.e. assumes TemplateHub renders). That
+assumption should change, for one decisive reason:
+
+> **Sumaiya ships as an Android APK that must render CVs offline.** A remote render call cannot
+> be in the critical path of a mobile app that works without a network.
+
+So the split:
+- **TemplateHub supplies**: `TemplateMetadata` (identity, tier, family, category, `preview`),
+  `EditableFieldSpec[]` (the form schema), and the **design** in a portable form (HTML/CSS or a
+  schema Sumaiya's engine can consume).
+- **Sumaiya renders + exports locally**: web via `native-provider`'s engine, native via
+  `cvToHtml` + the CV engine. `TemplateHubProvider.renderDocument` should call the **local**
+  renderer with the TemplateHub-supplied design — not the network.
+
+This keeps the adapter a pure data map, keeps the APK offline-capable, and means Phase 1 stays
+the ~2 days the audit estimated instead of becoming a render migration.
+
+### Contract versioning
+`TemplateMetadata.version` + `StoredDocument.templateVersion` already exist on the Sumaiya side.
+TemplateHub must send a `version` per template so a user's saved document can be re-rendered
+against the design it was created with. Don't omit it.
