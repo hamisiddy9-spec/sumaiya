@@ -18,6 +18,7 @@ import type {
 } from '../components/chat/chat-types';
 import { extractAttachment, attachmentsContext } from '../lib/attachment-extract';
 import { loadProfile, profilePromptBlock } from '../lib/profile-store';
+import { loadMemory, renderMemoryBlock } from '../lib/ai-memory';
 import { reportError } from '../lib/reporting';
 import { useLang, greetingFor } from '../lib/i18n';
 import { splitReplyIntoBubbles } from '../lib/reply-bubbles';
@@ -95,6 +96,14 @@ export function useSumaiyaChat() {
         try { profileBlock = profilePromptBlock(await loadProfile()); } catch { /* ignore */ }
       }
 
+      // What she already knows about this person — facts learned across previous
+      // sessions, not just the profile they typed. Rendered into the FIRST item
+      // of the transcript so it lives in a stable prefix: the provider's prompt
+      // cache only pays out on an identical prefix, and this changes far less
+      // often than the conversation does.
+      let memoryBlock = "";
+      try { memoryBlock = renderMemoryBlock(await loadMemory()); } catch { /* ignore */ }
+
       const userMsgId = generateMessageId();
       const readable = attachments.filter((a) => a.kind === "image" || a.kind === "document");
       const userMsg: ChatMessage = {
@@ -132,7 +141,7 @@ export function useSumaiyaChat() {
         // send the recent transcript so Sumaiya remembers the conversation.
         // Prepend the synthetic greeting so she doesn't re-introduce herself.
         const history: { role: "user" | "assistant"; content: string }[] = [
-          { role: "assistant", content: greetingFor(lang) },
+          { role: "assistant", content: [greetingFor(lang), memoryBlock].filter(Boolean).join("\n\n") },
           ...messages
             .filter(m => m.content?.trim())
             .map(m => ({

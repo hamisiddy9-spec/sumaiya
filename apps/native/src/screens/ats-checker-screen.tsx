@@ -7,6 +7,7 @@ import { useCvs } from "../hooks/use-cvs";
 import { useAuthContext } from "../contexts/auth-context";
 import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
+import { addEpisode, updateMemory } from "../lib/ai-memory";
 import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
@@ -89,6 +90,21 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
       const { message } = await apiClient.sendChatMessage([{ role: "user", content: prompt }]);
       setVerdict(message.trim());
       haptics.success();
+
+      // Let this teach her. The same check failing across successive CVs is a
+      // THEME, not a one-off: recording it as an episode is what lets
+      // consolidation promote it into a standing fact and coach it up front,
+      // instead of rediscovering it from scratch every time.
+      const firstFailure = analysis.checks.find((ch) => !ch.pass);
+      if (firstFailure) {
+        const topic = `ats_${firstFailure.label
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "_")
+          .slice(0, 30)}`;
+        updateMemory((m) =>
+          addEpisode(m, topic, `ATS ${analysis.score}/100, losing points on "${firstFailure.label}"`),
+        ).catch(() => {});
+      }
     } catch {
       haptics.error();
       setVerdict(null);
