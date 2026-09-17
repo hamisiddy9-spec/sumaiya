@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CipherTemplate: NativeTemplate = {
   id: "cipher",
   name: { en: "Cipher", sw: "Cipher" },
-  blurb: { en: "Red name, accent lines, no divider", sw: "Jina la nyekundu, mistari ya msisitizo, bila kitenganishi" },
+  blurb: { en: "Red name, accent lines, no divider", sw: "Jina la nyekundu, mistari ya rangi, bila kitenganishi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "minimal",

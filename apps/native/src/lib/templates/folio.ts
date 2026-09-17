@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FolioTemplate: NativeTemplate = {
   id: "folio",
   name: { en: "Folio", sw: "Folio" },
-  blurb: { en: "Pill labels, tag-rated skills, timeline-v2, airy", sw: "Lebo za vidonge, ujuzi wenye madaraja, mstari wa wakati v2, nafasi nyingi" },
+  blurb: { en: "Pill labels, tag-rated skills, timeline-v2, airy", sw: "Lebo za mviringo, ujuzi wenye madaraja, timeline v2, nafasi nyingi" },
   tier: "free",
   previewColor: "#059669",
   style: "minimal",

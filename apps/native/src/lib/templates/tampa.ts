@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TampaTemplate: NativeTemplate = {
   id: "tampa",
   name: { en: "Tampa", sw: "Tampa" },
-  blurb: { en: "Dark, narrow aside, accent lines", sw: "Nyeusi, pembeni nyembamba, mistari ya msisitizo" },
+  blurb: { en: "Dark, narrow aside, accent lines", sw: "Nyeusi, pembeni nyembamba, mistari ya rangi" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

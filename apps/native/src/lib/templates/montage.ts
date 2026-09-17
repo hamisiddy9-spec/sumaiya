@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MontageTemplate: NativeTemplate = {
   id: "montage",
   name: { en: "Montage", sw: "Montage" },
-  blurb: { en: "Pink banner, photo right, timeline", sw: "Bango la waridi, picha kulia, mstari wa wakati" },
+  blurb: { en: "Pink banner, photo right, timeline", sw: "Bango la waridi, picha kulia, timeline" },
   tier: "free",
   previewColor: "#BE185D",
   style: "creative",

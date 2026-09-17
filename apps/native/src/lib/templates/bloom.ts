@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BloomTemplate: NativeTemplate = {
   id: "bloom",
   name: { en: "Bloom", sw: "Bloom" },
-  blurb: { en: "Pink, pill labels, card body, two-column", sw: "Waridi, lebo za vidonge, maudhui ya kadi, safu mbili" },
+  blurb: { en: "Pink, pill labels, card body, two-column", sw: "Waridi, lebo za mviringo, maudhui ya kadi, safu mbili" },
   tier: "free",
   previewColor: "#DB2777",
   style: "creative",

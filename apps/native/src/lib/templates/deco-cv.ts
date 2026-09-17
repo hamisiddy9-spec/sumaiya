@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DecoCvTemplate: NativeTemplate = {
   id: "deco-cv",
   name: { en: "Deco", sw: "Deco" },
-  blurb: { en: "Gold accent name, airy, accent lines", sw: "Jina la msisitizo wa dhahabu, nafasi nyingi, mistari ya msisitizo" },
+  blurb: { en: "Gold accent name, airy, accent lines", sw: "Jina la msisitizo wa dhahabu, nafasi nyingi, mistari ya rangi" },
   tier: "free",
   previewColor: "#B45309",
   style: "minimal",

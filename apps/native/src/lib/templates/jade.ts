@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const JadeTemplate: NativeTemplate = {
   id: "jade",
   name: { en: "Jade", sw: "Jade" },
-  blurb: { en: "Forest green, pill skills, accent lines", sw: "Kijani cha msitu, ujuzi katika vidonge, mistari ya msisitizo" },
+  blurb: { en: "Forest green, pill skills, accent lines", sw: "Kijani cha msitu, ujuzi katika vidonge, mistari ya rangi" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

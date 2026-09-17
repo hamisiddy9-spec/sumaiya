@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FuturaCvTemplate: NativeTemplate = {
   id: "futura-cv",
   name: { en: "Futura", sw: "Futura" },
-  blurb: { en: "Blue accent name, accent-line sections", sw: "Jina la msisitizo wa bluu, sehemu za mistari ya msisitizo" },
+  blurb: { en: "Blue accent name, accent-line sections", sw: "Jina la msisitizo wa bluu, sehemu za mistari ya rangi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HomabayTemplate: NativeTemplate = {
   id: "homabay",
   name: { en: "Homabay", sw: "Homabay" },
-  blurb: { en: "Charcoal sidebar, rounded photo, timeline", sw: "Pembeni ya mkaa, picha ya mviringo, mstari wa wakati" },
+  blurb: { en: "Charcoal sidebar, rounded photo, timeline", sw: "Pembeni ya mkaa, picha ya mviringo, timeline" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

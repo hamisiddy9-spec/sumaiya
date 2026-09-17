@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AthiTemplate: NativeTemplate = {
   id: "athi",
   name: { en: "Athi", sw: "Athi" },
-  blurb: { en: "Deep rose, square photo, timeline", sw: "Waridi nzito, picha ya mraba, mstari wa wakati" },
+  blurb: { en: "Deep rose, square photo, timeline", sw: "Waridi nzito, picha ya mraba, timeline" },
   tier: "free",
   previewColor: "#831843",
   style: "sidebar",

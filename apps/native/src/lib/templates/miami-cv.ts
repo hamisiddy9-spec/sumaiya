@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MiamiCvTemplate: NativeTemplate = {
   id: "miami-cv",
   name: { en: "Miami", sw: "Miami" },
-  blurb: { en: "Deep navy, timeline, hobbies in aside", sw: "Bluu nyeusi, mstari wa wakati, burudani pembeni" },
+  blurb: { en: "Deep navy, timeline, hobbies in aside", sw: "Bluu nyeusi, timeline, burudani pembeni" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "header",

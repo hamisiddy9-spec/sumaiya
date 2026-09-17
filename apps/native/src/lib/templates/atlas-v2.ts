@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AtlasV2Template: NativeTemplate = {
   id: "atlas-v2",
   name: { en: "Atlas v2", sw: "Atlas v2" },
-  blurb: { en: "Numbered, chip skills, card blocks, accent name", sw: "Namba, ujuzi katika vibao, vibao vya kadi, jina la msisitizo" },
+  blurb: { en: "Numbered, chip skills, card blocks, accent name", sw: "Namba, ujuzi katika vibao vya UI, vibao vya kadi, jina la msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

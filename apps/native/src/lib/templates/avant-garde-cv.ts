@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AvantGardeCvTemplate: NativeTemplate = {
   id: "avant-garde-cv",
   name: { en: "Avant Garde", sw: "Avant Garde" },
-  blurb: { en: "Violet accent name, accent lines", sw: "Jina la msisitizo wa zambarau, mistari ya msisitizo" },
+  blurb: { en: "Violet accent name, accent lines", sw: "Jina la msisitizo wa zambarau, mistari ya rangi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "minimal",

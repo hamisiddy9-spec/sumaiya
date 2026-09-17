@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MontrealTemplate: NativeTemplate = {
   id: "montreal",
   name: { en: "Montreal", sw: "Montreal" },
-  blurb: { en: "Slate, green, card timeline", sw: "Kijivu, kijani, mstari wa wakati wa kadi" },
+  blurb: { en: "Slate, green, card timeline", sw: "Kijivu, kijani, timeline ya kadi" },
   tier: "free",
   previewColor: "#166534",
   style: "header",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AuroraTwoTemplate: NativeTemplate = {
   id: "aurora-two",
   name: { en: "Aurora Two", sw: "Aurora Two" },
-  blurb: { en: "Violet header, pill labels, airy body", sw: "Kichwa cha zambarau, lebo za vidonge, maudhui yenye nafasi" },
+  blurb: { en: "Violet header, pill labels, airy body", sw: "Kichwa cha zambarau, lebo za mviringo, maudhui yenye nafasi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "creative",

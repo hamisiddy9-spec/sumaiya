@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RailTemplate: NativeTemplate = {
   id: "rail",
   name: { en: "Rail", sw: "Rail" },
-  blurb: { en: "12px rail, timeline, accent lines", sw: "Reli ya 12px, mstari wa wakati, mistari ya msisitizo" },
+  blurb: { en: "12px rail, timeline, accent lines", sw: "Reli ya 12px, timeline, mistari ya rangi" },
   tier: "free",
   previewColor: "#059669",
   style: "minimal",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MalindiTemplate: NativeTemplate = {
   id: "malindi",
   name: { en: "Malindi", sw: "Malindi" },
-  blurb: { en: "Borderless sections, accent lines", sw: "Sehemu bila mipaka, mistari ya msisitizo" },
+  blurb: { en: "Borderless sections, accent lines", sw: "Sehemu bila mipaka, mistari ya rangi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

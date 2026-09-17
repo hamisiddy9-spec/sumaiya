@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KitaleTemplate: NativeTemplate = {
   id: "kitale",
   name: { en: "Kitale", sw: "Kitale" },
-  blurb: { en: "Rounded photo, airy, accent lines", sw: "Picha ya mviringo, nafasi nyingi, mistari ya msisitizo" },
+  blurb: { en: "Rounded photo, airy, accent lines", sw: "Picha ya mviringo, nafasi nyingi, mistari ya rangi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

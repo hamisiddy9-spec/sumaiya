@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ApexTemplate: NativeTemplate = {
   id: "apex",
   name: { en: "Apex", sw: "Apex" },
-  blurb: { en: "Bold header, timeline body", sw: "Kichwa kinene, maudhui ya mstari wa wakati" },
+  blurb: { en: "Bold header, timeline body", sw: "Kichwa kinene, maudhui ya timeline" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MarebTemplate: NativeTemplate = {
   id: "mareb",
   name: { en: "Mareb", sw: "Mareb" },
-  blurb: { en: "Dark forest green, accent lines", sw: "Kijani cheusi cha msitu, mistari ya msisitizo" },
+  blurb: { en: "Dark forest green, accent lines", sw: "Kijani cheusi cha msitu, mistari ya rangi" },
   tier: "free",
   previewColor: "#14532D",
   style: "sidebar",

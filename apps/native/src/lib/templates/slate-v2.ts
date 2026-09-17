@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SlateV2Template: NativeTemplate = {
   id: "slate-v2",
   name: { en: "Slate v2", sw: "Slate v2" },
-  blurb: { en: "White-ish sidebar, ruled main, grid, timeline-v2", sw: "Pembeni nyeupe hafifu, sehemu kuu yenye mistari, gridi, mstari wa wakati v2" },
+  blurb: { en: "White-ish sidebar, ruled main, grid, timeline-v2", sw: "Pembeni nyeupe hafifu, sehemu kuu yenye mistari, gridi, timeline v2" },
   tier: "free",
   previewColor: "#374151",
   style: "sidebar",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VerdantTemplate: NativeTemplate = {
   id: "verdant",
   name: { en: "Verdant", sw: "Verdant" },
-  blurb: { en: "Green header, pill labels, two-column", sw: "Kichwa cha kijani, lebo za vidonge, safu mbili" },
+  blurb: { en: "Green header, pill labels, two-column", sw: "Kichwa cha kijani, lebo za mviringo, safu mbili" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

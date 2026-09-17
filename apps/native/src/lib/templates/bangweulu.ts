@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BangweuluTemplate: NativeTemplate = {
   id: "bangweulu",
   name: { en: "Bangweulu", sw: "Bangweulu" },
-  blurb: { en: "Purple accent, timeline, dot sections", sw: "Msisitizo wa zambarau, mstari wa wakati, sehemu za vitone" },
+  blurb: { en: "Purple accent, timeline, dot sections", sw: "Msisitizo wa zambarau, timeline, sehemu za vitone" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "sidebar",

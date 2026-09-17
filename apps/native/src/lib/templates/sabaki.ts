@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SabakiTemplate: NativeTemplate = {
   id: "sabaki",
   name: { en: "Sabaki", sw: "Sabaki" },
-  blurb: { en: "Navy accent, dot labels, accent lines", sw: "Msisitizo wa bluu nyeusi, lebo za vitone, mistari ya msisitizo" },
+  blurb: { en: "Navy accent, dot labels, accent lines", sw: "Msisitizo wa bluu nyeusi, lebo za vitone, mistari ya rangi" },
   tier: "free",
   previewColor: "#1E3A5F",
   style: "sidebar",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KisiiTemplate: NativeTemplate = {
   id: "kisii",
   name: { en: "Kisii", sw: "Kisii" },
-  blurb: { en: "Deep navy, chip skills", sw: "Bluu nyeusi, ujuzi katika vibao" },
+  blurb: { en: "Deep navy, chip skills", sw: "Bluu nyeusi, ujuzi katika vibao vya UI" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "sidebar",

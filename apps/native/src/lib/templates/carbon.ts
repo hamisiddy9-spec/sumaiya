@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CarbonTemplate: NativeTemplate = {
   id: "carbon",
   name: { en: "Carbon", sw: "Carbon" },
-  blurb: { en: "Near-black header+left, timeline-v2 body", sw: "Karibu nyeusi kichwa na kushoto, maudhui ya mstari wa wakati v2" },
+  blurb: { en: "Near-black header+left, timeline-v2 body", sw: "Karibu nyeusi kichwa na kushoto, maudhui ya timeline v2" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

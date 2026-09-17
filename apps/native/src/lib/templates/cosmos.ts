@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CosmosTemplate: NativeTemplate = {
   id: "cosmos",
   name: { en: "Cosmos", sw: "Cosmos" },
-  blurb: { en: "Dark centered name, accent lines, airy", sw: "Jina cheusi katikati, mistari ya msisitizo, nafasi nyingi" },
+  blurb: { en: "Dark centered name, accent lines, airy", sw: "Jina cheusi katikati, mistari ya rangi, nafasi nyingi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

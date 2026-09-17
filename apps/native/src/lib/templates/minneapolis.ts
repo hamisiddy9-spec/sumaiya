@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MinneapolisTemplate: NativeTemplate = {
   id: "minneapolis",
   name: { en: "Minneapolis", sw: "Minneapolis" },
-  blurb: { en: "Midnight, accent lines, aside skills", sw: "Usiku wa manane, mistari ya msisitizo, ujuzi pembeni" },
+  blurb: { en: "Midnight, accent lines, aside skills", sw: "Usiku wa manane, mistari ya rangi, ujuzi pembeni" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OnyxTemplate: NativeTemplate = {
   id: "onyx",
   name: { en: "Onyx", sw: "Onyx" },
-  blurb: { en: "Near-black, pill sidebar, accent lines, compact", sw: "Karibu nyeusi, pembeni ya vidonge, mistari ya msisitizo, fupi" },
+  blurb: { en: "Near-black, pill sidebar, accent lines, compact", sw: "Karibu nyeusi, pembeni ya vidonge, mistari ya rangi, fupi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "sidebar",

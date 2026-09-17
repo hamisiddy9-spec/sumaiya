@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LunarTemplate: NativeTemplate = {
   id: "lunar",
   name: { en: "Lunar", sw: "Lunar" },
-  blurb: { en: "Dark centered, accent lines, spacious", sw: "Cheusi katikati, mistari ya msisitizo, nafasi nyingi" },
+  blurb: { en: "Dark centered, accent lines, spacious", sw: "Cheusi katikati, mistari ya rangi, nafasi nyingi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",
