@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KavangoTemplate: NativeTemplate = {
   id: "kavango",
   name: { en: "Kavango", sw: "Kavango" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Violet accent, compact, dot labels", sw: "Violet accent, compact, dot labels" },
+  blurb: { en: "Violet accent, compact, dot labels", sw: "Msisitizo wa zambarau, fupi, lebo za vitone" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "sidebar",

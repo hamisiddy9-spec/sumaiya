@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CopenhagenTemplate: NativeTemplate = {
   id: "copenhagen",
   name: { en: "Copenhagen", sw: "Copenhagen" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate header, pink sub, photo right", sw: "Slate header, pink sub, photo right" },
+  blurb: { en: "Slate header, pink sub, photo right", sw: "Kichwa cha kijivu, kichwa kidogo cha waridi, picha kulia" },
   tier: "free",
   previewColor: "#BE185D",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RichmondTemplate: NativeTemplate = {
   id: "richmond",
   name: { en: "Richmond", sw: "Richmond" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, airy body, dot labels", sw: "Dark, airy body, dot labels" },
+  blurb: { en: "Dark, airy body, dot labels", sw: "Nyeusi, maudhui yenye nafasi, lebo za vitone" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SolarisTemplate: NativeTemplate = {
   id: "solaris",
   name: { en: "Solaris", sw: "Solaris" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Amber, box sections, card experience", sw: "Amber, box sections, card experience" },
+  blurb: { en: "Amber, box sections, card experience", sw: "Njano, sehemu za masanduku, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#F59E0B",
   style: "minimal",

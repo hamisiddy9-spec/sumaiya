@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ImpressionistCvTemplate: NativeTemplate = {
   id: "impressionist-cv",
   name: { en: "Impressionist", sw: "Impressionist" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Purple accent, borderless sections, airy", sw: "Purple accent, borderless sections, airy" },
+  blurb: { en: "Purple accent, borderless sections, airy", sw: "Msisitizo wa zambarau, sehemu bila mipaka, nafasi nyingi" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "minimal",

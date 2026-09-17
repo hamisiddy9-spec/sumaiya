@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MesaTemplate: NativeTemplate = {
   id: "mesa",
   name: { en: "Mesa", sw: "Mesa" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm sand sidebar, compact, square", sw: "Warm sand sidebar, compact, square" },
+  blurb: { en: "Warm sand sidebar, compact, square", sw: "Pembeni ya mchanga wa joto, fupi, mraba" },
   tier: "free",
   previewColor: "#92400E",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SilhouetteTemplate: NativeTemplate = {
   id: "silhouette",
   name: { en: "Silhouette", sw: "Silhouette" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Barely-there sidebar, sharp accent lines", sw: "Barely-there sidebar, sharp accent lines" },
+  blurb: { en: "Barely-there sidebar, sharp accent lines", sw: "Pembeni hafifu sana, mistari mikali ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "creative",

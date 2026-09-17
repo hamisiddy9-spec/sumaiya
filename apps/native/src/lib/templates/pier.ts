@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PierTemplate: NativeTemplate = {
   id: "pier",
   name: { en: "Pier", sw: "Pier" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Teal band, pill labels, grid skills", sw: "Teal band, pill labels, grid skills" },
+  blurb: { en: "Teal band, pill labels, grid skills", sw: "Ukanda wa kijani cha bahari, lebo za vidonge, ujuzi kwa gridi" },
   tier: "free",
   previewColor: "#0369A1",
   style: "minimal",

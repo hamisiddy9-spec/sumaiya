@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KaribaTemplate: NativeTemplate = {
   id: "kariba",
   name: { en: "Kariba", sw: "Kariba" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Red accent, square photo, compact", sw: "Red accent, square photo, compact" },
+  blurb: { en: "Red accent, square photo, compact", sw: "Msisitizo wa nyekundu, picha ya mraba, fupi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "sidebar",

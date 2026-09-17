@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DenimTemplate: NativeTemplate = {
   id: "denim",
   name: { en: "Denim", sw: "Denim" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ice blue sidebar, pill mains, card experience", sw: "Ice blue sidebar, pill mains, card experience" },
+  blurb: { en: "Ice blue sidebar, pill mains, card experience", sw: "Pembeni ya bluu hafifu, sehemu kuu za vidonge, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "sidebar",

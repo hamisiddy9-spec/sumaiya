@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SeattleTemplate: NativeTemplate = {
   id: "seattle",
   name: { en: "Seattle", sw: "Seattle" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark header, skill aside, timeline", sw: "Dark header, skill aside, timeline" },
+  blurb: { en: "Dark header, skill aside, timeline", sw: "Kichwa cheusi, pembeni ya ujuzi, mstari wa wakati" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

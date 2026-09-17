@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ScriptCvTemplate: NativeTemplate = {
   id: "script-cv",
   name: { en: "Script", sw: "Script" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm background, timeline-v2, accent lines", sw: "Warm background, timeline-v2, accent lines" },
+  blurb: { en: "Warm background, timeline-v2, accent lines", sw: "Mandhari ya joto, mstari wa wakati v2, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#B45309",
   style: "minimal",

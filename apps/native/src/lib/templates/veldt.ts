@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VeldtTemplate: NativeTemplate = {
   id: "veldt",
   name: { en: "Veldt", sw: "Veldt" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Forest banner, tag labels", sw: "Forest banner, tag labels" },
+  blurb: { en: "Forest banner, tag labels", sw: "Bango la kijani cha msitu, lebo za tagi" },
   tier: "free",
   previewColor: "#166534",
   style: "creative",

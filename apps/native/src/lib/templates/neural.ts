@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NeuralTemplate: NativeTemplate = {
   id: "neural",
   name: { en: "Neural", sw: "Neural" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Green, card experience, centered", sw: "Green, card experience, centered" },
+  blurb: { en: "Green, card experience, centered", sw: "Kijani, uzoefu wa kadi, katikati" },
   tier: "free",
   previewColor: "#059669",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BusiaTemplate: NativeTemplate = {
   id: "busia",
   name: { en: "Busia", sw: "Busia" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Square photo, borderless sections", sw: "Square photo, borderless sections" },
+  blurb: { en: "Square photo, borderless sections", sw: "Picha ya mraba, sehemu bila mipaka" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

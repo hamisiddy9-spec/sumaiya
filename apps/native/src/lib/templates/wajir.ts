@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const WajirTemplate: NativeTemplate = {
   id: "wajir",
   name: { en: "Wajir", sw: "Wajir" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Box sections, dot labels, compact", sw: "Box sections, dot labels, compact" },
+  blurb: { en: "Box sections, dot labels, compact", sw: "Sehemu za masanduku, lebo za vitone, fupi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

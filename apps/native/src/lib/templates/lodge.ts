@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LodgeTemplate: NativeTemplate = {
   id: "lodge",
   name: { en: "Lodge", sw: "Lodge" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, dot sidebar, ruled main, tag-rated, timeline-v2", sw: "Charcoal, dot sidebar, ruled main, tag-rated, timeline-v2" },
+  blurb: { en: "Charcoal, dot sidebar, ruled main, tag-rated, timeline-v2", sw: "Mkaa, pembeni ya vitone, sehemu kuu yenye mistari, ujuzi wenye madaraja, mstari wa wakati v2" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

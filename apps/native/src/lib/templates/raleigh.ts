@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RaleighTemplate: NativeTemplate = {
   id: "raleigh",
   name: { en: "Raleigh", sw: "Raleigh" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, compact, narrow aside", sw: "Midnight, compact, narrow aside" },
+  blurb: { en: "Midnight, compact, narrow aside", sw: "Usiku wa manane, fupi, pembeni nyembamba" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

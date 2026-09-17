@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AustinTemplate: NativeTemplate = {
   id: "austin",
   name: { en: "Austin", sw: "Austin" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, full aside, card blocks", sw: "Dark, full aside, card blocks" },
+  blurb: { en: "Dark, full aside, card blocks", sw: "Nyeusi, pembeni kamili, vibao vya kadi" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

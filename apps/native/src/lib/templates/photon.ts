@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PhotonTemplate: NativeTemplate = {
   id: "photon",
   name: { en: "Photon", sw: "Photon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Sky blue name, airy, underline sections", sw: "Sky blue name, airy, underline sections" },
+  blurb: { en: "Sky blue name, airy, underline sections", sw: "Jina la bluu ya anga, nafasi nyingi, sehemu zenye mstari chini" },
   tier: "free",
   previewColor: "#0284C7",
   style: "minimal",

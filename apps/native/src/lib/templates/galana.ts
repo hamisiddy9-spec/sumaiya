@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GalanaTemplate: NativeTemplate = {
   id: "galana",
   name: { en: "Galana", sw: "Galana" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep green accent sidebar", sw: "Deep green accent sidebar" },
+  blurb: { en: "Deep green accent sidebar", sw: "Pembeni ya msisitizo wa kijani kizito" },
   tier: "free",
   previewColor: "#166534",
   style: "sidebar",

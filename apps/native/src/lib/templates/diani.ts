@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DianiTemplate: NativeTemplate = {
   id: "diani",
   name: { en: "Diani", sw: "Diani" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Wide airy sidebar, full sections", sw: "Wide airy sidebar, full sections" },
+  blurb: { en: "Wide airy sidebar, full sections", sw: "Pembeni pana yenye nafasi, sehemu zote" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

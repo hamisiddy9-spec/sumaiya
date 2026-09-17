@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const EdgeTemplate: NativeTemplate = {
   id: "edge",
   name: { en: "Edge", sw: "Edge" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Wide 16px edge, card experience, rounded photo", sw: "Wide 16px edge, card experience, rounded photo" },
+  blurb: { en: "Wide 16px edge, card experience, rounded photo", sw: "Ukingo pana wa 16px, uzoefu wa kadi, picha ya mviringo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const EmberTemplate: NativeTemplate = {
   id: "ember",
   name: { en: "Ember", sw: "Ember" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep orange, timeline-v2 body", sw: "Deep orange, timeline-v2 body" },
+  blurb: { en: "Deep orange, timeline-v2 body", sw: "Machungwa nzito, maudhui ya mstari wa wakati v2" },
   tier: "free",
   previewColor: "#EA580C",
   style: "creative",

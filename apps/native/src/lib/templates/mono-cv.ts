@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MonoCvTemplate: NativeTemplate = {
   id: "mono-cv",
   name: { en: "Mono", sw: "Mono" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Black band, no section headers, ultra compact", sw: "Black band, no section headers, ultra compact" },
+  blurb: { en: "Black band, no section headers, ultra compact", sw: "Ukanda mweusi, bila vichwa vya sehemu, fupi sana" },
   tier: "free",
   previewColor: "#111827",
   style: "minimal",

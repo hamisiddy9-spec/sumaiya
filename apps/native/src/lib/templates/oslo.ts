@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OsloTemplate: NativeTemplate = {
   id: "oslo",
   name: { en: "Oslo", sw: "Oslo" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, violet accent, compact", sw: "Deep navy, violet accent, compact" },
+  blurb: { en: "Deep navy, violet accent, compact", sw: "Bluu nyeusi, msisitizo wa zambarau, fupi" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "header",

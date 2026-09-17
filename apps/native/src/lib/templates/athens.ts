@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AthensTemplate: NativeTemplate = {
   id: "athens",
   name: { en: "Athens", sw: "Athens" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, light blue sub, clean body", sw: "Midnight, light blue sub, clean body" },
+  blurb: { en: "Midnight, light blue sub, clean body", sw: "Usiku wa manane, kichwa kidogo cha bluu hafifu, maudhui safi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "header",

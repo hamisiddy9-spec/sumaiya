@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CincinnatiTemplate: NativeTemplate = {
   id: "cincinnati",
   name: { en: "Cincinnati", sw: "Cincinnati" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, card timeline, accent lines", sw: "Slate, card timeline, accent lines" },
+  blurb: { en: "Slate, card timeline, accent lines", sw: "Kijivu, mstari wa wakati wa kadi, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

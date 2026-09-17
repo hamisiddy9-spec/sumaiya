@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BodoniCvTemplate: NativeTemplate = {
   id: "bodoni-cv",
   name: { en: "Bodoni", sw: "Bodoni" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "No divider, borderless, generous whitespace", sw: "No divider, borderless, generous whitespace" },
+  blurb: { en: "No divider, borderless, generous whitespace", sw: "Bila kitenganishi, bila mipaka, nafasi kubwa" },
   tier: "free",
   previewColor: "#111827",
   style: "minimal",

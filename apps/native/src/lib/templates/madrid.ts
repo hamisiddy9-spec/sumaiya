@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MadridTemplate: NativeTemplate = {
   id: "madrid",
   name: { en: "Madrid", sw: "Madrid" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, rose accent, photo right", sw: "Dark, rose accent, photo right" },
+  blurb: { en: "Dark, rose accent, photo right", sw: "Nyeusi, msisitizo wa waridi, picha kulia" },
   tier: "free",
   previewColor: "#E11D48",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AthiTemplate: NativeTemplate = {
   id: "athi",
   name: { en: "Athi", sw: "Athi" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep rose, square photo, timeline", sw: "Deep rose, square photo, timeline" },
+  blurb: { en: "Deep rose, square photo, timeline", sw: "Waridi nzito, picha ya mraba, mstari wa wakati" },
   tier: "free",
   previewColor: "#831843",
   style: "sidebar",

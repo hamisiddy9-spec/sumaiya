@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CameoTemplate: NativeTemplate = {
   id: "cameo",
   name: { en: "Cameo", sw: "Cameo" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm cream sidebar, amber accent", sw: "Warm cream sidebar, amber accent" },
+  blurb: { en: "Warm cream sidebar, amber accent", sw: "Pembeni ya krimu ya joto, msisitizo wa njano" },
   tier: "free",
   previewColor: "#D97706",
   style: "creative",

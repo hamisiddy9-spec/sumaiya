@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BriskTemplate: NativeTemplate = {
   id: "brisk",
   name: { en: "Brisk", sw: "Brisk" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, tag sidebar, pill main, table experience", sw: "Dark, tag sidebar, pill main, table experience" },
+  blurb: { en: "Dark, tag sidebar, pill main, table experience", sw: "Nyeusi, pembeni ya tagi, sehemu kuu ya kidonge, uzoefu kwa jedwali" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

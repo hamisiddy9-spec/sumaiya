@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RufijiTemplate: NativeTemplate = {
   id: "rufiji",
   name: { en: "Rufiji", sw: "Rufiji" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Amber accent, wide sidebar, timeline", sw: "Amber accent, wide sidebar, timeline" },
+  blurb: { en: "Amber accent, wide sidebar, timeline", sw: "Msisitizo wa njano, pembeni pana, mstari wa wakati" },
   tier: "free",
   previewColor: "#D97706",
   style: "sidebar",

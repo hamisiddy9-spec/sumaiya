@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MalindiTemplate: NativeTemplate = {
   id: "malindi",
   name: { en: "Malindi", sw: "Malindi" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Borderless sections, accent lines", sw: "Borderless sections, accent lines" },
+  blurb: { en: "Borderless sections, accent lines", sw: "Sehemu bila mipaka, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FjordTemplate: NativeTemplate = {
   id: "fjord",
   name: { en: "Fjord", sw: "Fjord" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ocean blue banner, airy single column", sw: "Ocean blue banner, airy single column" },
+  blurb: { en: "Ocean blue banner, airy single column", sw: "Bango la bluu ya bahari, safu moja yenye nafasi" },
   tier: "free",
   previewColor: "#0369A1",
   style: "creative",

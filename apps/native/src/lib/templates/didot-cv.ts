@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DidotCvTemplate: NativeTemplate = {
   id: "didot-cv",
   name: { en: "Didot", sw: "Didot" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Card experience, accent name, solid divider", sw: "Card experience, accent name, solid divider" },
+  blurb: { en: "Card experience, accent name, solid divider", sw: "Uzoefu wa kadi, jina la msisitizo, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#111827",
   style: "minimal",

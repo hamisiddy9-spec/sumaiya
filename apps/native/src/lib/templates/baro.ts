@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BaroTemplate: NativeTemplate = {
   id: "baro",
   name: { en: "Baro", sw: "Baro" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark amber, compact, rounded photo", sw: "Dark amber, compact, rounded photo" },
+  blurb: { en: "Dark amber, compact, rounded photo", sw: "Njano nyeusi, fupi, picha ya mviringo" },
   tier: "free",
   previewColor: "#422006",
   style: "sidebar",

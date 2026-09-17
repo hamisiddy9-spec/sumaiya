@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CharlotteTemplate: NativeTemplate = {
   id: "charlotte",
   name: { en: "Charlotte", sw: "Charlotte" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, card blocks, aside with hobbies", sw: "Slate, card blocks, aside with hobbies" },
+  blurb: { en: "Slate, card blocks, aside with hobbies", sw: "Kijivu, vibao vya kadi, pembeni yenye burudani" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

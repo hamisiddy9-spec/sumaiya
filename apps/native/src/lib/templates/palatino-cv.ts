@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PalatinoCvTemplate: NativeTemplate = {
   id: "palatino-cv",
   name: { en: "Palatino", sw: "Palatino" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "No divider, accent name, airy", sw: "No divider, accent name, airy" },
+  blurb: { en: "No divider, accent name, airy", sw: "Bila kitenganishi, jina la msisitizo, nafasi nyingi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LagoonTemplate: NativeTemplate = {
   id: "lagoon",
   name: { en: "Lagoon", sw: "Lagoon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Teal mint sidebar, rounded photo", sw: "Teal mint sidebar, rounded photo" },
+  blurb: { en: "Teal mint sidebar, rounded photo", sw: "Pembeni ya kijani hafifu cha bahari, picha ya mviringo" },
   tier: "free",
   previewColor: "#0F766E",
   style: "creative",

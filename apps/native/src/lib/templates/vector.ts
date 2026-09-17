@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VectorTemplate: NativeTemplate = {
   id: "vector",
   name: { en: "Vector", sw: "Vector" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Blue name, dot sections, airy", sw: "Blue name, dot sections, airy" },
+  blurb: { en: "Blue name, dot sections, airy", sw: "Jina la bluu, sehemu za vitone, nafasi nyingi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

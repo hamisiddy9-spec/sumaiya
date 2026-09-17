@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ConstructivistTemplate: NativeTemplate = {
   id: "constructivist",
   name: { en: "Constructivist", sw: "Constructivist" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Red accent, box sections, compact", sw: "Red accent, box sections, compact" },
+  blurb: { en: "Red accent, box sections, compact", sw: "Msisitizo wa nyekundu, sehemu za masanduku, fupi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "minimal",

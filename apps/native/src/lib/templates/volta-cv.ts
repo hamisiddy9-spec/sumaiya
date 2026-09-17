@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VoltaCvTemplate: NativeTemplate = {
   id: "volta-cv",
   name: { en: "Volta", sw: "Volta" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Brown accent, square photo, card blocks", sw: "Brown accent, square photo, card blocks" },
+  blurb: { en: "Brown accent, square photo, card blocks", sw: "Msisitizo wa kahawia, picha ya mraba, vibao vya kadi" },
   tier: "free",
   previewColor: "#7C2D12",
   style: "sidebar",

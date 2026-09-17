@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ClarendonCvTemplate: NativeTemplate = {
   id: "clarendon-cv",
   name: { en: "Clarendon", sw: "Clarendon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "No divider, accent-line sections", sw: "No divider, accent-line sections" },
+  blurb: { en: "No divider, accent-line sections", sw: "Bila kitenganishi, sehemu za mistari ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

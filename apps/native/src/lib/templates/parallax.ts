@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ParallaxTemplate: NativeTemplate = {
   id: "parallax",
   name: { en: "Parallax", sw: "Parallax" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Red banner, aside, card experience", sw: "Red banner, aside, card experience" },
+  blurb: { en: "Red banner, aside, card experience", sw: "Bango la nyekundu, pembeni, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StratusTemplate: NativeTemplate = {
   id: "stratus",
   name: { en: "Stratus", sw: "Stratus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, borderless, compact centered", sw: "Slate, borderless, compact centered" },
+  blurb: { en: "Slate, borderless, compact centered", sw: "Kijivu, bila mipaka, fupi katikati" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

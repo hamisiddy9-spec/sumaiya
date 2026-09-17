@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TraceTemplate: NativeTemplate = {
   id: "trace",
   name: { en: "Trace", sw: "Trace" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ruled sections, dotted divider, left-aligned", sw: "Ruled sections, dotted divider, left-aligned" },
+  blurb: { en: "Ruled sections, dotted divider, left-aligned", sw: "Sehemu zenye mistari, kitenganishi cha vitone, kushoto" },
   tier: "free",
   previewColor: "#0891B2",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AxisTemplate: NativeTemplate = {
   id: "axis",
   name: { en: "Axis", sw: "Axis" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Black band, timeline-v2 experience", sw: "Black band, timeline-v2 experience" },
+  blurb: { en: "Black band, timeline-v2 experience", sw: "Ukanda mweusi, uzoefu wa mstari wa wakati v2" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

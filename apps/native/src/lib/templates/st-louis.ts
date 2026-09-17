@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StLouisTemplate: NativeTemplate = {
   id: "st-louis",
   name: { en: "St Louis", sw: "St Louis" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, wide aside, full sections", sw: "Midnight, wide aside, full sections" },
+  blurb: { en: "Midnight, wide aside, full sections", sw: "Usiku wa manane, pembeni pana, sehemu zote" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

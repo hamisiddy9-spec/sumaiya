@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TableauTemplate: NativeTemplate = {
   id: "tableau",
   name: { en: "Tableau", sw: "Tableau" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Lavender sidebar, square photo, cards", sw: "Lavender sidebar, square photo, cards" },
+  blurb: { en: "Lavender sidebar, square photo, cards", sw: "Pembeni ya zambarau hafifu, picha ya mraba, kadi" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BaroqueCvTemplate: NativeTemplate = {
   id: "baroque-cv",
   name: { en: "Baroque", sw: "Baroque" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Card experience, no divider, dark", sw: "Card experience, no divider, dark" },
+  blurb: { en: "Card experience, no divider, dark", sw: "Uzoefu wa kadi, bila kitenganishi, nyeusi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

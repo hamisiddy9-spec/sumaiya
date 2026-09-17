@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PhoenixTemplate: NativeTemplate = {
   id: "phoenix",
   name: { en: "Phoenix", sw: "Phoenix" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, box sections, skill aside", sw: "Slate, box sections, skill aside" },
+  blurb: { en: "Slate, box sections, skill aside", sw: "Kijivu, sehemu za masanduku, pembeni ya ujuzi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

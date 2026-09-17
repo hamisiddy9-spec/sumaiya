@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MarginTemplate: NativeTemplate = {
   id: "margin",
   name: { en: "Margin", sw: "Margin" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate band, square photo, tag-rated skills", sw: "Slate band, square photo, tag-rated skills" },
+  blurb: { en: "Slate band, square photo, tag-rated skills", sw: "Ukanda wa kijivu, picha ya mraba, ujuzi wenye madaraja" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

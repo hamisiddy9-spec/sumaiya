@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TerracottaTemplate: NativeTemplate = {
   id: "terracotta",
   name: { en: "Terracotta", sw: "Terracotta" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm amber header, ruled section dividers", sw: "Warm amber header, ruled section dividers" },
+  blurb: { en: "Warm amber header, ruled section dividers", sw: "Kichwa cha njano ya joto, vitenganishi vya sehemu vyenye mistari" },
   tier: "free",
   previewColor: "#B45309",
   style: "creative",

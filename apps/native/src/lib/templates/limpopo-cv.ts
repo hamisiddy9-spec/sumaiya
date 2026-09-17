@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LimpopoCvTemplate: NativeTemplate = {
   id: "limpopo-cv",
   name: { en: "Limpopo", sw: "Limpopo" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Teal-green, wide airy sidebar", sw: "Teal-green, wide airy sidebar" },
+  blurb: { en: "Teal-green, wide airy sidebar", sw: "Kijani cha bahari, pembeni pana yenye nafasi" },
   tier: "free",
   previewColor: "#0F766E",
   style: "sidebar",

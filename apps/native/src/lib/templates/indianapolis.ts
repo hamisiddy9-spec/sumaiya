@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const IndianapolisTemplate: NativeTemplate = {
   id: "indianapolis",
   name: { en: "Indianapolis", sw: "Indianapolis" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, compact, box aside", sw: "Deep navy, compact, box aside" },
+  blurb: { en: "Deep navy, compact, box aside", sw: "Bluu nyeusi, fupi, pembeni ya masanduku" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "header",

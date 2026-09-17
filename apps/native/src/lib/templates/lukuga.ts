@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LukugaTemplate: NativeTemplate = {
   id: "lukuga",
   name: { en: "Lukuga", sw: "Lukuga" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Forest green, full sections", sw: "Forest green, full sections" },
+  blurb: { en: "Forest green, full sections", sw: "Kijani cha msitu, sehemu zote" },
   tier: "free",
   previewColor: "#065F46",
   style: "sidebar",

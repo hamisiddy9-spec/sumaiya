@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DublinTemplate: NativeTemplate = {
   id: "dublin",
   name: { en: "Dublin", sw: "Dublin" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, emerald accent, clean body", sw: "Dark, emerald accent, clean body" },
+  blurb: { en: "Dark, emerald accent, clean body", sw: "Nyeusi, msisitizo wa kijani cha zumaridi, maudhui safi" },
   tier: "free",
   previewColor: "#059669",
   style: "header",

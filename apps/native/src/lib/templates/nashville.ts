@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NashvilleTemplate: NativeTemplate = {
   id: "nashville",
   name: { en: "Nashville", sw: "Nashville" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, compact, box aside", sw: "Midnight, compact, box aside" },
+  blurb: { en: "Midnight, compact, box aside", sw: "Usiku wa manane, fupi, pembeni ya masanduku" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ContourTemplate: NativeTemplate = {
   id: "contour",
   name: { en: "Contour", sw: "Contour" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate-tint sidebar, box sections", sw: "Slate-tint sidebar, box sections" },
+  blurb: { en: "Slate-tint sidebar, box sections", sw: "Pembeni ya kijivu hafifu, sehemu za masanduku" },
   tier: "free",
   previewColor: "#1E293B",
   style: "creative",

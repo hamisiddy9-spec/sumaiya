@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SydneyCvTemplate: NativeTemplate = {
   id: "sydney-cv",
   name: { en: "Sydney", sw: "Sydney" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, sky blue sub, dot sections", sw: "Dark, sky blue sub, dot sections" },
+  blurb: { en: "Dark, sky blue sub, dot sections", sw: "Nyeusi, kichwa kidogo cha bluu ya anga, sehemu za vitone" },
   tier: "free",
   previewColor: "#0284C7",
   style: "header",

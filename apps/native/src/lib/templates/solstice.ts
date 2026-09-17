@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SolsticeTemplate: NativeTemplate = {
   id: "solstice",
   name: { en: "Solstice", sw: "Solstice" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Amber name, tag labels, solid divider", sw: "Amber name, tag labels, solid divider" },
+  blurb: { en: "Amber name, tag labels, solid divider", sw: "Jina la njano, lebo za tagi, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#D97706",
   style: "minimal",

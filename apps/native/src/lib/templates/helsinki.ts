@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HelsinkiTemplate: NativeTemplate = {
   id: "helsinki",
   name: { en: "Helsinki", sw: "Helsinki" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, cyan accent, timeline", sw: "Charcoal, cyan accent, timeline" },
+  blurb: { en: "Charcoal, cyan accent, timeline", sw: "Mkaa, msisitizo wa bluu ya samawati, mstari wa wakati" },
   tier: "free",
   previewColor: "#0891B2",
   style: "header",

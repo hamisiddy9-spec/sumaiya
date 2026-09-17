@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GarissaTemplate: NativeTemplate = {
   id: "garissa",
   name: { en: "Garissa", sw: "Garissa" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Square photo, chip skills", sw: "Square photo, chip skills" },
+  blurb: { en: "Square photo, chip skills", sw: "Picha ya mraba, ujuzi kwa vibao" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

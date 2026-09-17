@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TanaTemplate: NativeTemplate = {
   id: "tana",
   name: { en: "Tana", sw: "Tana" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep ocean blue, square photo", sw: "Deep ocean blue, square photo" },
+  blurb: { en: "Deep ocean blue, square photo", sw: "Bluu nzito ya bahari, picha ya mraba" },
   tier: "free",
   previewColor: "#0C4A6E",
   style: "sidebar",

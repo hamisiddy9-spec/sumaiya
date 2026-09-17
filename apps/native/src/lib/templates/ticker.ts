@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TickerTemplate: NativeTemplate = {
   id: "ticker",
   name: { en: "Ticker", sw: "Ticker" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Centered, numbered, timeline-v2 experience", sw: "Centered, numbered, timeline-v2 experience" },
+  blurb: { en: "Centered, numbered, timeline-v2 experience", sw: "Katikati, namba, uzoefu wa mstari wa wakati v2" },
   tier: "free",
   previewColor: "#DC2626",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CobaltTemplate: NativeTemplate = {
   id: "cobalt",
   name: { en: "Cobalt", sw: "Cobalt" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep blue, airy two-column layout", sw: "Deep blue, airy two-column layout" },
+  blurb: { en: "Deep blue, airy two-column layout", sw: "Bluu nzito, mpangilio wa safu mbili wenye nafasi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "creative",

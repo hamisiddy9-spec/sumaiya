@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NeoclassicalCvTemplate: NativeTemplate = {
   id: "neoclassical-cv",
   name: { en: "Neoclassical", sw: "Neoclassical" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Box sections, compact, solid divider", sw: "Box sections, compact, solid divider" },
+  blurb: { en: "Box sections, compact, solid divider", sw: "Sehemu za masanduku, fupi, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#111827",
   style: "minimal",

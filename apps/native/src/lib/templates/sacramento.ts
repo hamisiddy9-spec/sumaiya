@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SacramentoTemplate: NativeTemplate = {
   id: "sacramento",
   name: { en: "Sacramento", sw: "Sacramento" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, compact, slim aside", sw: "Midnight, compact, slim aside" },
+  blurb: { en: "Midnight, compact, slim aside", sw: "Usiku wa manane, fupi, pembeni nyembamba" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OnyxTemplate: NativeTemplate = {
   id: "onyx",
   name: { en: "Onyx", sw: "Onyx" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Near-black, pill sidebar, accent lines, compact", sw: "Near-black, pill sidebar, accent lines, compact" },
+  blurb: { en: "Near-black, pill sidebar, accent lines, compact", sw: "Karibu nyeusi, pembeni ya vidonge, mistari ya msisitizo, fupi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "sidebar",

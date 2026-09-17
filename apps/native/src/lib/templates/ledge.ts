@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LedgeTemplate: NativeTemplate = {
   id: "ledge",
   name: { en: "Ledge", sw: "Ledge" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ruled sections, grid skills, no divider", sw: "Ruled sections, grid skills, no divider" },
+  blurb: { en: "Ruled sections, grid skills, no divider", sw: "Sehemu zenye mistari, ujuzi kwa gridi, bila kitenganishi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

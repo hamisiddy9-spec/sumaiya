@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MemphisTemplate: NativeTemplate = {
   id: "memphis",
   name: { en: "Memphis", sw: "Memphis" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, compact, chip skills", sw: "Dark, compact, chip skills" },
+  blurb: { en: "Dark, compact, chip skills", sw: "Nyeusi, fupi, ujuzi kwa vibao" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

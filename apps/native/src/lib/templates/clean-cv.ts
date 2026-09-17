@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CleanCvTemplate: NativeTemplate = {
   id: "clean-cv",
   name: { en: "Clean", sw: "Clean" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "No section labels, grid skills, ultra compact", sw: "No section labels, grid skills, ultra compact" },
+  blurb: { en: "No section labels, grid skills, ultra compact", sw: "Bila lebo za sehemu, ujuzi kwa gridi, fupi sana" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

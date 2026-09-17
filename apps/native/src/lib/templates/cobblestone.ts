@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CobblestoneTemplate: NativeTemplate = {
   id: "cobblestone",
   name: { en: "Cobblestone", sw: "Cobblestone" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm dark, numbered main, table exp, timeline", sw: "Warm dark, numbered main, table exp, timeline" },
+  blurb: { en: "Warm dark, numbered main, table exp, timeline", sw: "Nyeusi ya joto, sehemu kuu yenye namba, uzoefu kwa jedwali, mstari wa wakati" },
   tier: "free",
   previewColor: "#1C1917",
   style: "sidebar",

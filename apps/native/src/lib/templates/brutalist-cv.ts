@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BrutalistCvTemplate: NativeTemplate = {
   id: "brutalist-cv",
   name: { en: "Brutalist", sw: "Brutalist" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Tag labels, accent name, borderless", sw: "Tag labels, accent name, borderless" },
+  blurb: { en: "Tag labels, accent name, borderless", sw: "Lebo za tagi, jina la msisitizo, bila mipaka" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

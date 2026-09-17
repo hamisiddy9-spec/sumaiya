@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HighlandTemplate: NativeTemplate = {
   id: "highland",
   name: { en: "Highland", sw: "Highland" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Clean white sidebar, dark accent lines", sw: "Clean white sidebar, dark accent lines" },
+  blurb: { en: "Clean white sidebar, dark accent lines", sw: "Pembeni nyeupe safi, mistari yeusi ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "creative",

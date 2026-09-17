@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VignetteTemplate: NativeTemplate = {
   id: "vignette",
   name: { en: "Vignette", sw: "Vignette" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Mint sidebar, airy accent lines", sw: "Mint sidebar, airy accent lines" },
+  blurb: { en: "Mint sidebar, airy accent lines", sw: "Pembeni ya kijani hafifu, mistari ya msisitizo yenye nafasi" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

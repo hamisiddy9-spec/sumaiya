@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const JadeTemplate: NativeTemplate = {
   id: "jade",
   name: { en: "Jade", sw: "Jade" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Forest green, pill skills, accent lines", sw: "Forest green, pill skills, accent lines" },
+  blurb: { en: "Forest green, pill skills, accent lines", sw: "Kijani cha msitu, ujuzi kwa vidonge, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

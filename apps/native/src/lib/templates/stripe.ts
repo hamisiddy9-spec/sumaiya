@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StripeTemplate: NativeTemplate = {
   id: "stripe",
   name: { en: "Stripe", sw: "Stripe" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "8px left accent band, clean single column", sw: "8px left accent band, clean single column" },
+  blurb: { en: "8px left accent band, clean single column", sw: "Ukanda wa msisitizo wa 8px kushoto, safu moja safi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

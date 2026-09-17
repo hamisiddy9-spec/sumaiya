@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DeltaTemplate: NativeTemplate = {
   id: "delta",
   name: { en: "Delta", sw: "Delta" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Sand sidebar, square photo, card body", sw: "Sand sidebar, square photo, card body" },
+  blurb: { en: "Sand sidebar, square photo, card body", sw: "Pembeni ya mchanga, picha ya mraba, maudhui ya kadi" },
   tier: "free",
   previewColor: "#B45309",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CapsuleTemplate: NativeTemplate = {
   id: "capsule",
   name: { en: "Capsule", sw: "Capsule" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Pill section labels, accent name, solid divider", sw: "Pill section labels, accent name, solid divider" },
+  blurb: { en: "Pill section labels, accent name, solid divider", sw: "Lebo za vidonge vya sehemu, jina la msisitizo, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "minimal",

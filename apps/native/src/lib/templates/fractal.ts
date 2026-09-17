@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FractalTemplate: NativeTemplate = {
   id: "fractal",
   name: { en: "Fractal", sw: "Fractal" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Light grey sidebar, purple accent lines", sw: "Light grey sidebar, purple accent lines" },
+  blurb: { en: "Light grey sidebar, purple accent lines", sw: "Pembeni ya kijivu hafifu, mistari ya msisitizo ya zambarau" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "creative",

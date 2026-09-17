@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CaslonTemplate: NativeTemplate = {
   id: "caslon",
   name: { en: "Caslon", sw: "Caslon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Tag labels, compact, solid divider", sw: "Tag labels, compact, solid divider" },
+  blurb: { en: "Tag labels, compact, solid divider", sw: "Lebo za tagi, fupi, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

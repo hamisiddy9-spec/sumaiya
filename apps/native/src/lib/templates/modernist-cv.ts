@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ModernistCvTemplate: NativeTemplate = {
   id: "modernist-cv",
   name: { en: "Modernist", sw: "Modernist" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Blue accent name, dotted divider", sw: "Blue accent name, dotted divider" },
+  blurb: { en: "Blue accent name, dotted divider", sw: "Jina la msisitizo wa bluu, kitenganishi cha vitone" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

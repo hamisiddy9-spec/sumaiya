@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DenverTemplate: NativeTemplate = {
   id: "denver",
   name: { en: "Denver", sw: "Denver" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, narrow aside, card body", sw: "Charcoal, narrow aside, card body" },
+  blurb: { en: "Charcoal, narrow aside, card body", sw: "Mkaa, pembeni nyembamba, maudhui ya kadi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MelbourneTemplate: NativeTemplate = {
   id: "melbourne",
   name: { en: "Melbourne", sw: "Melbourne" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, lavender, compact", sw: "Midnight, lavender, compact" },
+  blurb: { en: "Midnight, lavender, compact", sw: "Usiku wa manane, zambarau hafifu, fupi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "header",

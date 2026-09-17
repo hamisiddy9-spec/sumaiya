@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BauhausTemplate: NativeTemplate = {
   id: "bauhaus",
   name: { en: "Bauhaus", sw: "Bauhaus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Left-aligned, solid divider, compact", sw: "Left-aligned, solid divider, compact" },
+  blurb: { en: "Left-aligned, solid divider, compact", sw: "Kushoto, kitenganishi kigumu, fupi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

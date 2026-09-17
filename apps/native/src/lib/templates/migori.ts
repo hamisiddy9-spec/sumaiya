@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MigoriTemplate: NativeTemplate = {
   id: "migori",
   name: { en: "Migori", sw: "Migori" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dot-style sections throughout", sw: "Dot-style sections throughout" },
+  blurb: { en: "Dot-style sections throughout", sw: "Sehemu za vitone kote" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

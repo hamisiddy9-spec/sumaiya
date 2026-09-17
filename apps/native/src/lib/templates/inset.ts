@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const InsetTemplate: NativeTemplate = {
   id: "inset",
   name: { en: "Inset", sw: "Inset" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "6px band, ruled sections, airy", sw: "6px band, ruled sections, airy" },
+  blurb: { en: "6px band, ruled sections, airy", sw: "Ukanda wa 6px, sehemu zenye mistari, nafasi nyingi" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "minimal",

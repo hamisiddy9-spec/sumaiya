@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RuwenzoriTemplate: NativeTemplate = {
   id: "ruwenzori",
   name: { en: "Ruwenzori", sw: "Ruwenzori" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark slate sidebar, bar skills", sw: "Dark slate sidebar, bar skills" },
+  blurb: { en: "Dark slate sidebar, bar skills", sw: "Pembeni ya kijivu cheusi, ujuzi kwa mistari" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

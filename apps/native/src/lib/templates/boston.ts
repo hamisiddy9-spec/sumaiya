@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BostonTemplate: NativeTemplate = {
   id: "boston",
   name: { en: "Boston", sw: "Boston" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, purple sub, timeline", sw: "Midnight, purple sub, timeline" },
+  blurb: { en: "Midnight, purple sub, timeline", sw: "Usiku wa manane, kichwa kidogo cha zambarau, mstari wa wakati" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "header",

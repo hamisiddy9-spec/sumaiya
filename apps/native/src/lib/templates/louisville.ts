@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LouisvilleTemplate: NativeTemplate = {
   id: "louisville",
   name: { en: "Louisville", sw: "Louisville" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, clean underline sections", sw: "Charcoal, clean underline sections" },
+  blurb: { en: "Charcoal, clean underline sections", sw: "Mkaa, sehemu safi zenye mstari chini" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

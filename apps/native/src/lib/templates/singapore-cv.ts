@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SingaporeCvTemplate: NativeTemplate = {
   id: "singapore-cv",
   name: { en: "Singapore", sw: "Singapore" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, mint, chip skills", sw: "Charcoal, mint, chip skills" },
+  blurb: { en: "Charcoal, mint, chip skills", sw: "Mkaa, kijani hafifu, ujuzi kwa vibao" },
   tier: "free",
   previewColor: "#059669",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GravityTemplate: NativeTemplate = {
   id: "gravity",
   name: { en: "Gravity", sw: "Gravity" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, box sections, no divider", sw: "Slate, box sections, no divider" },
+  blurb: { en: "Slate, box sections, no divider", sw: "Kijivu, sehemu za masanduku, bila kitenganishi" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ChicagoTemplate: NativeTemplate = {
   id: "chicago",
   name: { en: "Chicago", sw: "Chicago" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, ice cyan, accent lines", sw: "Dark, ice cyan, accent lines" },
+  blurb: { en: "Dark, ice cyan, accent lines", sw: "Nyeusi, bluu hafifu ya samawati, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#0891B2",
   style: "header",

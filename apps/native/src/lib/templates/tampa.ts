@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TampaTemplate: NativeTemplate = {
   id: "tampa",
   name: { en: "Tampa", sw: "Tampa" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, narrow aside, accent lines", sw: "Dark, narrow aside, accent lines" },
+  blurb: { en: "Dark, narrow aside, accent lines", sw: "Nyeusi, pembeni nyembamba, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

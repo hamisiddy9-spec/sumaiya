@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FuturismCvTemplate: NativeTemplate = {
   id: "futurism-cv",
   name: { en: "Futurism", sw: "Futurism" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Red accent name, tag labels, airy", sw: "Red accent name, tag labels, airy" },
+  blurb: { en: "Red accent name, tag labels, airy", sw: "Jina la msisitizo wa nyekundu, lebo za tagi, nafasi nyingi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "minimal",

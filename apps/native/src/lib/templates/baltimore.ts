@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BaltimoreTemplate: NativeTemplate = {
   id: "baltimore",
   name: { en: "Baltimore", sw: "Baltimore" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, airy body, dot sections", sw: "Charcoal, airy body, dot sections" },
+  blurb: { en: "Charcoal, airy body, dot sections", sw: "Mkaa, maudhui yenye nafasi, sehemu za vitone" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

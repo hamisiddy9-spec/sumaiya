@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CascadeTemplate: NativeTemplate = {
   id: "cascade",
   name: { en: "Cascade", sw: "Cascade" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark header, left skill column, right story", sw: "Dark header, left skill column, right story" },
+  blurb: { en: "Dark header, left skill column, right story", sw: "Kichwa cheusi, safu ya ujuzi kushoto, hadithi kulia" },
   tier: "free",
   previewColor: "#0F172A",
   style: "creative",

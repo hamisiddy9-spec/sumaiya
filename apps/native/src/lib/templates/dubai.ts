@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DubaiTemplate: NativeTemplate = {
   id: "dubai",
   name: { en: "Dubai", sw: "Dubai" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, gold sub, photo right, airy", sw: "Slate, gold sub, photo right, airy" },
+  blurb: { en: "Slate, gold sub, photo right, airy", sw: "Kijivu, kichwa kidogo cha dhahabu, picha kulia, nafasi nyingi" },
   tier: "free",
   previewColor: "#D97706",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KisiiTemplate: NativeTemplate = {
   id: "kisii",
   name: { en: "Kisii", sw: "Kisii" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, chip skills", sw: "Deep navy, chip skills" },
+  blurb: { en: "Deep navy, chip skills", sw: "Bluu nyeusi, ujuzi kwa vibao" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "sidebar",

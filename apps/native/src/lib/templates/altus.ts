@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AltusTemplate: NativeTemplate = {
   id: "altus",
   name: { en: "Altus", sw: "Altus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, card experience, accent lines", sw: "Slate, card experience, accent lines" },
+  blurb: { en: "Slate, card experience, accent lines", sw: "Kijivu, uzoefu wa kadi, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

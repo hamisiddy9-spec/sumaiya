@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OkavangoTemplate: NativeTemplate = {
   id: "okavango",
   name: { en: "Okavango", sw: "Okavango" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Green accent, airy, full sidebar sections", sw: "Green accent, airy, full sidebar sections" },
+  blurb: { en: "Green accent, airy, full sidebar sections", sw: "Msisitizo wa kijani, nafasi nyingi, sehemu zote za pembeni" },
   tier: "free",
   previewColor: "#059669",
   style: "sidebar",

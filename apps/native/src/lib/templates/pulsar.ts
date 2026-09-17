@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PulsarTemplate: NativeTemplate = {
   id: "pulsar",
   name: { en: "Pulsar", sw: "Pulsar" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark name, tag labels, compact", sw: "Dark name, tag labels, compact" },
+  blurb: { en: "Dark name, tag labels, compact", sw: "Jina cheusi, lebo za tagi, fupi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

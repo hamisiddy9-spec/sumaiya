@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KiboTemplate: NativeTemplate = {
   id: "kibo",
   name: { en: "Kibo", sw: "Kibo" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark sidebar, pill labels, numbered mains, grid skills", sw: "Dark sidebar, pill labels, numbered mains, grid skills" },
+  blurb: { en: "Dark sidebar, pill labels, numbered mains, grid skills", sw: "Pembeni nyeusi, lebo za vidonge, sehemu kuu zenye namba, ujuzi kwa gridi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

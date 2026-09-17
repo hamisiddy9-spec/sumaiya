@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CuneneTemplate: NativeTemplate = {
   id: "cunene",
   name: { en: "Cunene", sw: "Cunene" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate accent, narrow, compact", sw: "Slate accent, narrow, compact" },
+  blurb: { en: "Slate accent, narrow, compact", sw: "Msisitizo wa kijivu, nyembamba, fupi" },
   tier: "free",
   previewColor: "#374151",
   style: "sidebar",

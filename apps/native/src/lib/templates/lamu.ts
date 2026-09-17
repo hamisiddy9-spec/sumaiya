@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LamuTemplate: NativeTemplate = {
   id: "lamu",
   name: { en: "Lamu", sw: "Lamu" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight blue, card layout", sw: "Midnight blue, card layout" },
+  blurb: { en: "Midnight blue, card layout", sw: "Bluu ya usiku, mpangilio wa kadi" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "sidebar",

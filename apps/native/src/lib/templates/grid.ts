@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GridTemplate: NativeTemplate = {
   id: "grid",
   name: { en: "Grid", sw: "Grid" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "ATS-strict, machine-readable", sw: "ATS-strict, machine-readable" },
+  blurb: { en: "ATS-strict, machine-readable", sw: "Kali kwa ATS, inasomwa na mashine" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

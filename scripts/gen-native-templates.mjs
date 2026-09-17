@@ -30,6 +30,17 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const WEB_TYPES = path.join(ROOT, "apps/web/types/index.ts");
 const WEB_TPL_DIR = path.join(ROOT, "apps/web/components/templates");
 const OUT_DIR = path.join(ROOT, "apps/native/src/lib/templates");
+
+/**
+ * This generator has NO Swahili source: all it can do with the `sw` blurb is
+ * mirror the English description, which is how 218 template files came to show
+ * English to Swahili users. Those have since been translated for real.
+ *
+ * So it must never silently overwrite an existing template file. Without an
+ * explicit --force it skips anything already on disk and reports the count,
+ * which makes re-running it safe instead of destructive.
+ */
+const FORCE = process.argv.includes("--force");
 const CHECK = process.argv.includes("--check");
 
 const LAYOUTS = ["SidebarLayout", "HeaderLayout", "MinimalLayout", "TwoColumnLayout", "AccentBandLayout"];
@@ -282,6 +293,22 @@ export const BESPOKE_IDS: string[] = ${JSON.stringify(bespoke)};
   report.push("", "bespoke ids:", "  " + bespoke.join("\n  "));
   const summary = report.join("\n");
 
+  // A parser that finds nothing must FAIL, never write.
+  //
+  // This generator once parsed 0 templates from the web registry (its shape
+  // changed during a refactor) and cheerfully rewrote registry.ts down to 13
+  // empty lines — wiping 218 entries, reporting "files written : 0", and
+  // exiting 0. Codegen that produces nothing looks exactly like codegen that
+  // succeeded. Empty output is a fault, not a result.
+  if (templates.length === 0) {
+    console.error(
+      "\n✗ Parsed 0 templates from the web registry — refusing to write anything.\n" +
+        "  An empty run must never overwrite a populated registry. Fix the parser first:\n" +
+        "  " + WEB_TYPES,
+    );
+    process.exit(1);
+  }
+
   if (CHECK) {
     const drift = generated.filter((g) => {
       const p = path.join(OUT_DIR, g.id + ".ts");
@@ -296,17 +323,32 @@ export const BESPOKE_IDS: string[] = ${JSON.stringify(bespoke)};
   }
 
   let written = 0;
+  let skipped = 0;
   for (const g of generated) {
     const p = path.join(OUT_DIR, g.id + ".ts");
-    if (!fs.existsSync(p) || fs.readFileSync(p, "utf8") !== g.body) {
+    if (!fs.existsSync(p)) {
       fs.writeFileSync(p, g.body);
       written++;
+      continue;
     }
+    if (fs.readFileSync(p, "utf8") === g.body) continue; // already up to date
+    if (!FORCE) {
+      // Would clobber real copy (see FORCE above). Leave it alone.
+      skipped++;
+      continue;
+    }
+    fs.writeFileSync(p, g.body);
+    written++;
   }
   fs.writeFileSync(path.join(OUT_DIR, "registry.ts"), registry);
 
   console.log(summary);
   console.log("\nfiles written : " + written);
+  if (skipped > 0) {
+    console.log(
+      "files kept    : " + skipped + " (already on disk and would have been overwritten — pass --force to replace)",
+    );
+  }
 }
 
 main();

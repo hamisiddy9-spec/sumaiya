@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MinneapolisTemplate: NativeTemplate = {
   id: "minneapolis",
   name: { en: "Minneapolis", sw: "Minneapolis" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, accent lines, aside skills", sw: "Midnight, accent lines, aside skills" },
+  blurb: { en: "Midnight, accent lines, aside skills", sw: "Usiku wa manane, mistari ya msisitizo, ujuzi pembeni" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "header",

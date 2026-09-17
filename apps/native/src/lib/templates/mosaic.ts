@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MosaicTemplate: NativeTemplate = {
   id: "mosaic",
   name: { en: "Mosaic", sw: "Mosaic" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Teal banner, skill aside, chip tags", sw: "Teal banner, skill aside, chip tags" },
+  blurb: { en: "Teal banner, skill aside, chip tags", sw: "Bango la kijani cha bahari, pembeni ya ujuzi, lebo za vibao" },
   tier: "free",
   previewColor: "#0891B2",
   style: "creative",

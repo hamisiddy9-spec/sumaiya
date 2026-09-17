@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DeStijlTemplate: NativeTemplate = {
   id: "de-stijl",
   name: { en: "De Stijl", sw: "De Stijl" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Blue, dot sections, card experience", sw: "Blue, dot sections, card experience" },
+  blurb: { en: "Blue, dot sections, card experience", sw: "Bluu, sehemu za vitone, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

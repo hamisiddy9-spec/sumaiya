@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GaramondCvTemplate: NativeTemplate = {
   id: "garamond-cv",
   name: { en: "Garamond", sw: "Garamond" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dotted divider, dot-label sections", sw: "Dotted divider, dot-label sections" },
+  blurb: { en: "Dotted divider, dot-label sections", sw: "Kitenganishi cha vitone, sehemu za lebo za vitone" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

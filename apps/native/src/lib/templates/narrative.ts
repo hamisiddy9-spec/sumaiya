@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NarrativeTemplate: NativeTemplate = {
   id: "narrative",
   name: { en: "Narrative", sw: "Narrative" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Bold header, editorial story", sw: "Bold header, editorial story" },
+  blurb: { en: "Bold header, editorial story", sw: "Kichwa kinene, hadithi ya kihariri" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "creative",

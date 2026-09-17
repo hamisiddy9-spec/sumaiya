@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VancouverTemplate: NativeTemplate = {
   id: "vancouver",
   name: { en: "Vancouver", sw: "Vancouver" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, pink, photo right, airy", sw: "Charcoal, pink, photo right, airy" },
+  blurb: { en: "Charcoal, pink, photo right, airy", sw: "Mkaa, waridi, picha kulia, nafasi nyingi" },
   tier: "free",
   previewColor: "#E11D48",
   style: "header",

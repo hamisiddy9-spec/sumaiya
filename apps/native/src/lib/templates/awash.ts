@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AwashTemplate: NativeTemplate = {
   id: "awash",
   name: { en: "Awash", sw: "Awash" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep plum, card blocks, airy", sw: "Deep plum, card blocks, airy" },
+  blurb: { en: "Deep plum, card blocks, airy", sw: "Zambarau nyeusi, vibao vya kadi, nafasi nyingi" },
   tier: "free",
   previewColor: "#4A044E",
   style: "sidebar",

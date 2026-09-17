@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AberdareTemplate: NativeTemplate = {
   id: "aberdare",
   name: { en: "Aberdare", sw: "Aberdare" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark charcoal, compact, rounded photo", sw: "Dark charcoal, compact, rounded photo" },
+  blurb: { en: "Dark charcoal, compact, rounded photo", sw: "Mkaa mweusi, fupi, picha ya mviringo" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

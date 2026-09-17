@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CumulusTemplate: NativeTemplate = {
   id: "cumulus",
   name: { en: "Cumulus", sw: "Cumulus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Green name, box sections, airy", sw: "Green name, box sections, airy" },
+  blurb: { en: "Green name, box sections, airy", sw: "Jina la kijani, sehemu za masanduku, nafasi nyingi" },
   tier: "free",
   previewColor: "#059669",
   style: "minimal",

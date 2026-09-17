@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CosmosTemplate: NativeTemplate = {
   id: "cosmos",
   name: { en: "Cosmos", sw: "Cosmos" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark centered name, accent lines, airy", sw: "Dark centered name, accent lines, airy" },
+  blurb: { en: "Dark centered name, accent lines, airy", sw: "Jina cheusi katikati, mistari ya msisitizo, nafasi nyingi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

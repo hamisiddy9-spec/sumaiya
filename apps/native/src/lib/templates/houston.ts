@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HoustonTemplate: NativeTemplate = {
   id: "houston",
   name: { en: "Houston", sw: "Houston" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate, wide aside, box sections", sw: "Slate, wide aside, box sections" },
+  blurb: { en: "Slate, wide aside, box sections", sw: "Kijivu, pembeni pana, sehemu za masanduku" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

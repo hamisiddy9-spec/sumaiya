@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RibbonTemplate: NativeTemplate = {
   id: "ribbon",
   name: { en: "Ribbon", sw: "Ribbon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "10px ribbon, pill section labels, photo", sw: "10px ribbon, pill section labels, photo" },
+  blurb: { en: "10px ribbon, pill section labels, photo", sw: "Utepe wa 10px, lebo za vidonge vya sehemu, picha" },
   tier: "free",
   previewColor: "#DC2626",
   style: "minimal",

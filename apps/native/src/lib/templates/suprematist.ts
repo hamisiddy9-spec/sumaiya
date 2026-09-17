@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SuprematistTemplate: NativeTemplate = {
   id: "suprematist",
   name: { en: "Suprematist", sw: "Suprematist" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Borderless, accent name, ultra-compact", sw: "Borderless, accent name, ultra-compact" },
+  blurb: { en: "Borderless, accent name, ultra-compact", sw: "Bila mipaka, jina la msisitizo, fupi sana" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

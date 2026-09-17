@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TorontoTemplate: NativeTemplate = {
   id: "toronto",
   name: { en: "Toronto", sw: "Toronto" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, red-pink accent", sw: "Deep navy, red-pink accent" },
+  blurb: { en: "Deep navy, red-pink accent", sw: "Bluu nyeusi, msisitizo wa nyekundu-waridi" },
   tier: "free",
   previewColor: "#DC2626",
   style: "header",

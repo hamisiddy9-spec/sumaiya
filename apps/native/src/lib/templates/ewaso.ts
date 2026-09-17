@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const EwasoTemplate: NativeTemplate = {
   id: "ewaso",
   name: { en: "Ewaso", sw: "Ewaso" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm brown, card experience", sw: "Warm brown, card experience" },
+  blurb: { en: "Warm brown, card experience", sw: "Kahawia ya joto, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#78350F",
   style: "sidebar",

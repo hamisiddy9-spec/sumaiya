@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OceanTemplate: NativeTemplate = {
   id: "ocean",
   name: { en: "Ocean", sw: "Ocean" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ocean blue, numbered sections, timeline", sw: "Ocean blue, numbered sections, timeline" },
+  blurb: { en: "Ocean blue, numbered sections, timeline", sw: "Bluu ya bahari, sehemu zenye namba, mstari wa wakati" },
   tier: "free",
   previewColor: "#0369A1",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const WatamuTemplate: NativeTemplate = {
   id: "watamu",
   name: { en: "Watamu", sw: "Watamu" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Narrow compact sidebar, skills only", sw: "Narrow compact sidebar, skills only" },
+  blurb: { en: "Narrow compact sidebar, skills only", sw: "Pembeni nyembamba fupi, ujuzi pekee" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

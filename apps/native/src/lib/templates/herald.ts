@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HeraldTemplate: NativeTemplate = {
   id: "herald",
   name: { en: "Herald", sw: "Herald" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark band, ruled sections, table layout, rounded photo", sw: "Dark band, ruled sections, table layout, rounded photo" },
+  blurb: { en: "Dark band, ruled sections, table layout, rounded photo", sw: "Ukanda mweusi, sehemu zenye mistari, mpangilio wa jedwali, picha ya mviringo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

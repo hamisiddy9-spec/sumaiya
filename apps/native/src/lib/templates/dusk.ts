@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DuskTemplate: NativeTemplate = {
   id: "dusk",
   name: { en: "Dusk", sw: "Dusk" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark left column, accent-line right body", sw: "Dark left column, accent-line right body" },
+  blurb: { en: "Dark left column, accent-line right body", sw: "Safu ya kushoto cheusi, maudhui ya mistari ya msisitizo kulia" },
   tier: "free",
   previewColor: "#1E293B",
   style: "creative",

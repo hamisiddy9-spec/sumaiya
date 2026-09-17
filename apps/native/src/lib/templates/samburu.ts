@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SamburuTemplate: NativeTemplate = {
   id: "samburu",
   name: { en: "Samburu", sw: "Samburu" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Wide dark sidebar, accent lines", sw: "Wide dark sidebar, accent lines" },
+  blurb: { en: "Wide dark sidebar, accent lines", sw: "Pembeni pana nyeusi, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

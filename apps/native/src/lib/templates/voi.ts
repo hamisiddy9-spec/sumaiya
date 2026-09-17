@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const VoiTemplate: NativeTemplate = {
   id: "voi",
   name: { en: "Voi", sw: "Voi" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Card experience, timeline, rounded photo", sw: "Card experience, timeline, rounded photo" },
+  blurb: { en: "Card experience, timeline, rounded photo", sw: "Uzoefu wa kadi, mstari wa wakati, picha ya mviringo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

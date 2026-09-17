@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GambiaCvTemplate: NativeTemplate = {
   id: "gambia-cv",
   name: { en: "Gambia", sw: "Gambia" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Royal blue accent sidebar", sw: "Royal blue accent sidebar" },
+  blurb: { en: "Royal blue accent sidebar", sw: "Pembeni ya msisitizo wa bluu ya kifalme" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "sidebar",

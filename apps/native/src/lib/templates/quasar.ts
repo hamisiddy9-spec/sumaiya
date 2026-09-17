@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const QuasarTemplate: NativeTemplate = {
   id: "quasar",
   name: { en: "Quasar", sw: "Quasar" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Purple, accent lines, dotted divider", sw: "Purple, accent lines, dotted divider" },
+  blurb: { en: "Purple, accent lines, dotted divider", sw: "Zambarau, mistari ya msisitizo, kitenganishi cha vitone" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "minimal",

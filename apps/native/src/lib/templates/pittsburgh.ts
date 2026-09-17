@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PittsburghTemplate: NativeTemplate = {
   id: "pittsburgh",
   name: { en: "Pittsburgh", sw: "Pittsburgh" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, wide aside, box layout", sw: "Deep navy, wide aside, box layout" },
+  blurb: { en: "Deep navy, wide aside, box layout", sw: "Bluu nyeusi, pembeni pana, mpangilio wa masanduku" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "header",

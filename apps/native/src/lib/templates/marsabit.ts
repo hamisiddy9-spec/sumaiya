@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MarsabitTemplate: NativeTemplate = {
   id: "marsabit",
   name: { en: "Marsabit", sw: "Marsabit" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Square photo, airy spacing", sw: "Square photo, airy spacing" },
+  blurb: { en: "Square photo, airy spacing", sw: "Picha ya mraba, nafasi nyingi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

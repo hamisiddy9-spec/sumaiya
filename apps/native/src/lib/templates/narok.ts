@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NarokTemplate: NativeTemplate = {
   id: "narok",
   name: { en: "Narok", sw: "Narok" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Full sidebar sections, airy layout", sw: "Full sidebar sections, airy layout" },
+  blurb: { en: "Full sidebar sections, airy layout", sw: "Sehemu zote za pembeni, mpangilio wenye nafasi" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "sidebar",

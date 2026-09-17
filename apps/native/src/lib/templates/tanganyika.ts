@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TanganyikaTemplate: NativeTemplate = {
   id: "tanganyika",
   name: { en: "Tanganyika", sw: "Tanganyika" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Teal accent sidebar, clean underlines", sw: "Teal accent sidebar, clean underlines" },
+  blurb: { en: "Teal accent sidebar, clean underlines", sw: "Pembeni ya msisitizo wa kijani cha bahari, mistari safi chini" },
   tier: "free",
   previewColor: "#0891B2",
   style: "sidebar",

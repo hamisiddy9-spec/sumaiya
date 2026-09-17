@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TekezeTemplate: NativeTemplate = {
   id: "tekeze",
   name: { en: "Tekeze", sw: "Tekeze" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Steel blue accent, timeline", sw: "Steel blue accent, timeline" },
+  blurb: { en: "Steel blue accent, timeline", sw: "Msisitizo wa bluu ya chuma, mstari wa wakati" },
   tier: "free",
   previewColor: "#1C3A5E",
   style: "sidebar",

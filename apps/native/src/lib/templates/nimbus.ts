@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NimbusTemplate: NativeTemplate = {
   id: "nimbus",
   name: { en: "Nimbus", sw: "Nimbus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Blue name, compact, no divider", sw: "Blue name, compact, no divider" },
+  blurb: { en: "Blue name, compact, no divider", sw: "Jina la bluu, fupi, bila kitenganishi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

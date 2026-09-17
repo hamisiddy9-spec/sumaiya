@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const EquinoxTemplate: NativeTemplate = {
   id: "equinox",
   name: { en: "Equinox", sw: "Equinox" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "No divider, borderless, spacious", sw: "No divider, borderless, spacious" },
+  blurb: { en: "No divider, borderless, spacious", sw: "Bila kitenganishi, bila mipaka, nafasi nyingi" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

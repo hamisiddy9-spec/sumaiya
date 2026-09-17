@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PortlandTemplate: NativeTemplate = {
   id: "portland",
   name: { en: "Portland", sw: "Portland" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, narrow aside, accent lines", sw: "Charcoal, narrow aside, accent lines" },
+  blurb: { en: "Charcoal, narrow aside, accent lines", sw: "Mkaa, pembeni nyembamba, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

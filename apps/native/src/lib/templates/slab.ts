@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SlabTemplate: NativeTemplate = {
   id: "slab",
   name: { en: "Slab", sw: "Slab" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Numbered headers, table experience, tag-rated skills", sw: "Numbered headers, table experience, tag-rated skills" },
+  blurb: { en: "Numbered headers, table experience, tag-rated skills", sw: "Vichwa vyenye namba, uzoefu kwa jedwali, ujuzi wenye madaraja" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

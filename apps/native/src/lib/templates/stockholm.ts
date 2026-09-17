@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StockholmTemplate: NativeTemplate = {
   id: "stockholm",
   name: { en: "Stockholm", sw: "Stockholm" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight header, green sub, airy body", sw: "Midnight header, green sub, airy body" },
+  blurb: { en: "Midnight header, green sub, airy body", sw: "Kichwa cha usiku wa manane, kichwa kidogo cha kijani, maudhui yenye nafasi" },
   tier: "free",
   previewColor: "#059669",
   style: "header",

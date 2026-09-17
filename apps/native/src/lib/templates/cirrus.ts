@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CirrusTemplate: NativeTemplate = {
   id: "cirrus",
   name: { en: "Cirrus", sw: "Cirrus" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Cyan, tag labels, dotted divider", sw: "Cyan, tag labels, dotted divider" },
+  blurb: { en: "Cyan, tag labels, dotted divider", sw: "Bluu ya samawati, lebo za tagi, kitenganishi cha vitone" },
   tier: "free",
   previewColor: "#0891B2",
   style: "minimal",

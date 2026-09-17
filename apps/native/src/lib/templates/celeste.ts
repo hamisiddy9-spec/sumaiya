@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CelesteTemplate: NativeTemplate = {
   id: "celeste",
   name: { en: "Celeste", sw: "Celeste" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Pink name, dot sections, dotted divider", sw: "Pink name, dot sections, dotted divider" },
+  blurb: { en: "Pink name, dot sections, dotted divider", sw: "Jina la waridi, sehemu za vitone, kitenganishi cha vitone" },
   tier: "free",
   previewColor: "#BE185D",
   style: "minimal",

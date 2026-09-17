@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StellarTemplate: NativeTemplate = {
   id: "stellar",
   name: { en: "Stellar", sw: "Stellar" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark, dot sections, dotted divider", sw: "Dark, dot sections, dotted divider" },
+  blurb: { en: "Dark, dot sections, dotted divider", sw: "Nyeusi, sehemu za vitone, kitenganishi cha vitone" },
   tier: "free",
   previewColor: "#0F172A",
   style: "minimal",

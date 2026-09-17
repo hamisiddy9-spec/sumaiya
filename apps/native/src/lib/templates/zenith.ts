@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ZenithTemplate: NativeTemplate = {
   id: "zenith",
   name: { en: "Zenith", sw: "Zenith" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Purple name, underline sections", sw: "Purple name, underline sections" },
+  blurb: { en: "Purple name, underline sections", sw: "Jina la zambarau, sehemu zenye mstari chini" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "minimal",

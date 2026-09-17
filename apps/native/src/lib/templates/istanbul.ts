@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const IstanbulTemplate: NativeTemplate = {
   id: "istanbul",
   name: { en: "Istanbul", sw: "Istanbul" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, pink, card experience", sw: "Deep navy, pink, card experience" },
+  blurb: { en: "Deep navy, pink, card experience", sw: "Bluu nyeusi, waridi, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#DB2777",
   style: "header",

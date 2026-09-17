@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ZurichTemplate: NativeTemplate = {
   id: "zurich",
   name: { en: "Zurich", sw: "Zurich" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal header, photo right", sw: "Charcoal header, photo right" },
+  blurb: { en: "Charcoal header, photo right", sw: "Kichwa cha mkaa, picha kulia" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

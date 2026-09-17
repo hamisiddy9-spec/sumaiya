@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KajiadoTemplate: NativeTemplate = {
   id: "kajiado",
   name: { en: "Kajiado", sw: "Kajiado" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Narrow, square photo, compact", sw: "Narrow, square photo, compact" },
+  blurb: { en: "Narrow, square photo, compact", sw: "Nyembamba, picha ya mraba, fupi" },
   tier: "free",
   previewColor: "#111827",
   style: "sidebar",

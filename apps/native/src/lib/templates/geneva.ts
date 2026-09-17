@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GenevaTemplate: NativeTemplate = {
   id: "geneva",
   name: { en: "Geneva", sw: "Geneva" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Slate header, centered contact row", sw: "Slate header, centered contact row" },
+  blurb: { en: "Slate header, centered contact row", sw: "Kichwa cha kijivu, safu ya mawasiliano katikati" },
   tier: "free",
   previewColor: "#0F172A",
   style: "header",

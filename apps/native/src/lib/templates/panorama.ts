@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PanoramaTemplate: NativeTemplate = {
   id: "panorama",
   name: { en: "Panorama", sw: "Panorama" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Green banner, single column, airy", sw: "Green banner, single column, airy" },
+  blurb: { en: "Green banner, single column, airy", sw: "Bango la kijani, safu moja, nafasi nyingi" },
   tier: "free",
   previewColor: "#059669",
   style: "creative",

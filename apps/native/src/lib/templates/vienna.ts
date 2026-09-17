@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ViennaTemplate: NativeTemplate = {
   id: "vienna",
   name: { en: "Vienna", sw: "Vienna" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dark header, amber subtext, card blocks", sw: "Dark header, amber subtext, card blocks" },
+  blurb: { en: "Dark header, amber subtext, card blocks", sw: "Kichwa cheusi, maandishi madogo ya njano, vibao vya kadi" },
   tier: "free",
   previewColor: "#B45309",
   style: "header",

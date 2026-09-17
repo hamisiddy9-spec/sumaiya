@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const NebulaTemplate: NativeTemplate = {
   id: "nebula",
   name: { en: "Nebula", sw: "Nebula" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Centered violet name, airy whitespace", sw: "Centered violet name, airy whitespace" },
+  blurb: { en: "Centered violet name, airy whitespace", sw: "Jina la zambarau katikati, nafasi nyingi" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "minimal",

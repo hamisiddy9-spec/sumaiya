@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const WarsawTemplate: NativeTemplate = {
   id: "warsaw",
   name: { en: "Warsaw", sw: "Warsaw" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Midnight, orange accent, card blocks", sw: "Midnight, orange accent, card blocks" },
+  blurb: { en: "Midnight, orange accent, card blocks", sw: "Usiku wa manane, msisitizo wa machungwa, vibao vya kadi" },
   tier: "free",
   previewColor: "#EA580C",
   style: "header",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ReliefTemplate: NativeTemplate = {
   id: "relief",
   name: { en: "Relief", sw: "Relief" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Ice blue sidebar, rounded photo", sw: "Ice blue sidebar, rounded photo" },
+  blurb: { en: "Ice blue sidebar, rounded photo", sw: "Pembeni ya bluu hafifu, picha ya mviringo" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "creative",

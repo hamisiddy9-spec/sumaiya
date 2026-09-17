@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PeelTemplate: NativeTemplate = {
   id: "peel",
   name: { en: "Peel", sw: "Peel" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Centered, pill labels, chip skills, card exp, airy", sw: "Centered, pill labels, chip skills, card exp, airy" },
+  blurb: { en: "Centered, pill labels, chip skills, card exp, airy", sw: "Katikati, lebo za vidonge, ujuzi kwa vibao, uzoefu wa kadi, nafasi nyingi" },
   tier: "free",
   previewColor: "#BE185D",
   style: "minimal",

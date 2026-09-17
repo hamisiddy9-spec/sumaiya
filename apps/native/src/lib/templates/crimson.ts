@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CrimsonTemplate: NativeTemplate = {
   id: "crimson",
   name: { en: "Crimson", sw: "Crimson" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep red, box sections, two-column", sw: "Deep red, box sections, two-column" },
+  blurb: { en: "Deep red, box sections, two-column", sw: "Nyekundu nzito, sehemu za masanduku, safu mbili" },
   tier: "free",
   previewColor: "#DC2626",
   style: "creative",

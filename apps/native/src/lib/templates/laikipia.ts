@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LaikipiaTemplate: NativeTemplate = {
   id: "laikipia",
   name: { en: "Laikipia", sw: "Laikipia" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, card experience blocks", sw: "Deep navy, card experience blocks" },
+  blurb: { en: "Deep navy, card experience blocks", sw: "Bluu nyeusi, vibao vya uzoefu wa kadi" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "sidebar",

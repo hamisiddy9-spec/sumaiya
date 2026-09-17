@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CanyonTemplate: NativeTemplate = {
   id: "canyon",
   name: { en: "Canyon", sw: "Canyon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Brick banner, compact, aside", sw: "Brick banner, compact, aside" },
+  blurb: { en: "Brick banner, compact, aside", sw: "Bango la nyekundu ya matofali, fupi, pembeni" },
   tier: "free",
   previewColor: "#7C2D12",
   style: "creative",

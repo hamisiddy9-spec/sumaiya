@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CocoaTemplate: NativeTemplate = {
   id: "cocoa",
   name: { en: "Cocoa", sw: "Cocoa" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm yellow sidebar, numbered, tag-rated skills", sw: "Warm yellow sidebar, numbered, tag-rated skills" },
+  blurb: { en: "Warm yellow sidebar, numbered, tag-rated skills", sw: "Pembeni ya njano ya joto, namba, ujuzi wenye madaraja" },
   tier: "free",
   previewColor: "#B45309",
   style: "sidebar",

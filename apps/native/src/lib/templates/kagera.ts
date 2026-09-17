@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KageraTemplate: NativeTemplate = {
   id: "kagera",
   name: { en: "Kagera", sw: "Kagera" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Blue accent, rounded, compact", sw: "Blue accent, rounded, compact" },
+  blurb: { en: "Blue accent, rounded, compact", sw: "Msisitizo wa bluu, mviringo, fupi" },
   tier: "free",
   previewColor: "#0369A1",
   style: "sidebar",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StudioTemplate: NativeTemplate = {
   id: "studio",
   name: { en: "Studio", sw: "Studio" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Editorial single-column", sw: "Editorial single-column" },
+  blurb: { en: "Editorial single-column", sw: "Safu moja ya kihariri" },
   tier: "free",
   previewColor: "#6366F1",
   style: "minimal",

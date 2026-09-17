@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LinenTemplate: NativeTemplate = {
   id: "linen",
   name: { en: "Linen", sw: "Linen" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Warm cream sidebar, ruled sections, airy", sw: "Warm cream sidebar, ruled sections, airy" },
+  blurb: { en: "Warm cream sidebar, ruled sections, airy", sw: "Pembeni ya krimu ya joto, sehemu zenye mistari, nafasi nyingi" },
   tier: "free",
   previewColor: "#D97706",
   style: "sidebar",

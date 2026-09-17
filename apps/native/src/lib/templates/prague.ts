@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PragueTemplate: NativeTemplate = {
   id: "prague",
   name: { en: "Prague", sw: "Prague" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, purple, photo right, airy", sw: "Deep navy, purple, photo right, airy" },
+  blurb: { en: "Deep navy, purple, photo right, airy", sw: "Bluu nyeusi, zambarau, picha kulia, nafasi nyingi" },
   tier: "free",
   previewColor: "#7C3AED",
   style: "header",

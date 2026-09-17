@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const QuantumTemplate: NativeTemplate = {
   id: "quantum",
   name: { en: "Quantum", sw: "Quantum" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, borderless centered body", sw: "Charcoal, borderless centered body" },
+  blurb: { en: "Charcoal, borderless centered body", sw: "Mkaa, maudhui bila mipaka katikati" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

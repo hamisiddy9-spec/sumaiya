@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RuvumaTemplate: NativeTemplate = {
   id: "ruvuma",
   name: { en: "Ruvuma", sw: "Ruvuma" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Pink accent, card experience", sw: "Pink accent, card experience" },
+  blurb: { en: "Pink accent, card experience", sw: "Msisitizo wa waridi, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#BE185D",
   style: "sidebar",

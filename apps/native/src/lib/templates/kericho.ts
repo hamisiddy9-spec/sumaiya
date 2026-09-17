@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const KerichoTemplate: NativeTemplate = {
   id: "kericho",
   name: { en: "Kericho", sw: "Kericho" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Minimal sections, card experience", sw: "Minimal sections, card experience" },
+  blurb: { en: "Minimal sections, card experience", sw: "Sehemu chache, uzoefu wa kadi" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PlateauTemplate: NativeTemplate = {
   id: "plateau",
   name: { en: "Plateau", sw: "Plateau" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Near-white sidebar, navy accent", sw: "Near-white sidebar, navy accent" },
+  blurb: { en: "Near-white sidebar, navy accent", sw: "Pembeni karibu nyeupe, msisitizo wa bluu nyeusi" },
   tier: "free",
   previewColor: "#1E3A8A",
   style: "creative",

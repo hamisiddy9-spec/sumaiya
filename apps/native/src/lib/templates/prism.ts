@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const PrismTemplate: NativeTemplate = {
   id: "prism",
   name: { en: "Prism", sw: "Prism" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Violet banner, card timeline, no aside", sw: "Violet banner, card timeline, no aside" },
+  blurb: { en: "Violet banner, card timeline, no aside", sw: "Bango la zambarau, mstari wa wakati wa kadi, bila pembeni" },
   tier: "free",
   previewColor: "#8B5CF6",
   style: "creative",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RockwellCvTemplate: NativeTemplate = {
   id: "rockwell-cv",
   name: { en: "Rockwell", sw: "Rockwell" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Dot sections, compact, solid divider", sw: "Dot sections, compact, solid divider" },
+  blurb: { en: "Dot sections, compact, solid divider", sw: "Sehemu za vitone, fupi, kitenganishi kigumu" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LisbonTemplate: NativeTemplate = {
   id: "lisbon",
   name: { en: "Lisbon", sw: "Lisbon" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Charcoal, cyan, compact body", sw: "Charcoal, cyan, compact body" },
+  blurb: { en: "Charcoal, cyan, compact body", sw: "Mkaa, bluu ya samawati, maudhui fupi" },
   tier: "free",
   previewColor: "#0891B2",
   style: "header",

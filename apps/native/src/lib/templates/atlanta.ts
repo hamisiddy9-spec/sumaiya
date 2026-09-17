@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AtlantaTemplate: NativeTemplate = {
   id: "atlanta",
   name: { en: "Atlanta", sw: "Atlanta" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Deep navy, airy, accent lines", sw: "Deep navy, airy, accent lines" },
+  blurb: { en: "Deep navy, airy, accent lines", sw: "Bluu nyeusi, nafasi nyingi, mistari ya msisitizo" },
   tier: "free",
   previewColor: "#1A1A2E",
   style: "header",

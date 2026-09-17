@@ -9,8 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StormTemplate: NativeTemplate = {
   id: "storm",
   name: { en: "Storm", sw: "Storm" },
-  // TODO(copy): sw blurb — mirrored from the web description for now.
-  blurb: { en: "Steel, numbered+tag-rated, ruled body", sw: "Steel, numbered+tag-rated, ruled body" },
+  blurb: { en: "Steel, numbered+tag-rated, ruled body", sw: "Kijivu cha chuma, namba na madaraja, maudhui yenye mistari" },
   tier: "free",
   previewColor: "#374151",
   style: "creative",
