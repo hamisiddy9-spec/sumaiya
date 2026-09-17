@@ -21,6 +21,15 @@
  *        node scripts/make-branded-qr.mjs && node <scratch>/verify.js
  *
  *    Ship the branded file only when that prints the URL back.
+ *
+ * 3. WHAT THE CANVAS CONTAINS (the poster's sizing depends on this, so it is
+ *    measured, not assumed). A version-5 symbol is 37x37 modules, and the
+ *    generator's viewBox is 45x45 — i.e. the artwork carries a full 4-module
+ *    QUIET ZONE on all four sides of the ink. Rasterising this file and taking
+ *    the dark bounding box confirms it: ink at module 4.00..41.00, white margin
+ *    of 4 modules left, top, right and bottom. Do not crop this file tight —
+ *    scanners need those 4 modules, and it is the single most common reason a
+ *    printed code refuses to read.
  */
 import fs from "fs";
 import path from "path";
@@ -52,6 +61,13 @@ const cy = VB_H / 2;
 const PLATE = 5.2;
 const half = PLATE / 2;
 
+// Guard rail: the mark's clean field must stay INSIDE the symbol. 4 modules of
+// the canvas at each edge are the quiet zone (note 3) — a plate that reached
+// into it would eat the white margin a scanner needs.
+if (cx - half < 4 || cy - half < 4 || cx + half > VB_W - 4 || cy + half > VB_H - 4) {
+  throw new Error(`mark plate ${PLATE} modules at ${cx},${cy} intrudes into the 4-module quiet zone`);
+}
+
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="${viewBox}" shape-rendering="crispEdges">
   <!-- The code, unchanged and in its own module coordinates -->
@@ -75,3 +91,6 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
 fs.writeFileSync(OUT, svg);
 console.log("branded QR ->", path.relative(ROOT, OUT));
 console.log(`viewBox preserved: ${viewBox} · plate ${PLATE} modules (${Math.round((PLATE / VB_W) * 100)}% of the canvas)`);
+console.log(
+  `quiet zone: ${VB_W - 37} modules of white beyond the 37-module symbol (${(VB_W - 37) / 2} each side) — do not crop`,
+);
