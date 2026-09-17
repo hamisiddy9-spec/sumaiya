@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Footer } from "@/components/ui/footer";
+import { ScanToApp } from "@/components/marketing/scan-to-app";
 import { PDF_TOOL_LINKS, pdfToolHref } from "@/lib/pdf-tools-list";
 import { TESTIMONIALS, CVS_CREATED } from "@/lib/testimonials";
 
@@ -909,6 +910,7 @@ export default function LandingPage() {
       </main>
 
       {/* ── FOOTER ── */}
+      <ScanToApp />
       <Footer />
     </div>
   );
