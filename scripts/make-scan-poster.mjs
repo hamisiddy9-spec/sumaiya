@@ -17,7 +17,7 @@ import fs from "fs";
 import path from "path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
-const QR = path.join(ROOT, "apps/web/public/qr/scan-kazi.svg");
+const QR = path.join(ROOT, "apps/web/public/qr/scan-kazi-branded.svg");
 const OUT = path.join(ROOT, "apps/web/public/qr/poster-scan-kazi.svg");
 
 // Brand tokens, mirrored from the app so the poster and the product agree.
@@ -50,7 +50,7 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <text x="${W / 2}" y="248" text-anchor="middle" font-family="Georgia, serif"
         font-size="46" font-weight="700" fill="${ESPRESSO}">Scan hapa kupata kazi</text>
   <text x="${W / 2}" y="292" text-anchor="middle" font-family="Georgia, serif"
-        font-size="22" fill="${ESPRESSO}" opacity="0.72">CV yako inakataliwa kabla mtu aisome</text>
+        font-size="22" fill="${ESPRESSO}" opacity="0.72">CV yako haifiki kwa mwajiri</text>
 
   <!-- QR, framed so the quiet zone survives printing (a tight crop is the
        single most common reason a printed code will not scan). -->
@@ -61,9 +61,9 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
   </g>
 
   <text x="${W / 2}" y="852" text-anchor="middle" font-family="Georgia, serif"
-        font-size="25" font-weight="700" fill="${EMBER}">Piga simu kamera hapa</text>
+        font-size="25" font-weight="700" fill="${EMBER}">Lenga kamera hapa</text>
   <text x="${W / 2}" y="886" text-anchor="middle" font-family="Georgia, serif"
-        font-size="19" fill="${ESPRESSO}" opacity="0.7">Bure. Hakuna malipo.</text>
+        font-size="19" fill="${ESPRESSO}" opacity="0.7">Bure kabisa</text>
 
   <!-- Three concrete outcomes — what the person gets, not what the app does.
        "Inapita ATS" belonged here and was removed for exactly that reason. -->

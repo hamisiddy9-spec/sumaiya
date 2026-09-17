@@ -67,7 +67,7 @@ export function ScanToApp() {
           <div className="rounded-2xl bg-white p-4 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.55)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/qr/scan-kazi.svg"
+              src="/qr/scan-kazi-branded.svg"
               alt={
                 sw
                   ? "Msimbo wa QR — scan kupata kazi"
