@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SlateTwoTemplate: NativeTemplate = {
   id: "slate-two",
   name: { en: "Slate Two", sw: "Slate Two" },
-  blurb: { en: "Steel blue, two-col, grid skill display", sw: "Bluu ya chuma, safu mbili, ujuzi kwa gridi" },
+  blurb: { en: "Steel blue, two-col, grid skill display", sw: "Bluu ya chuma, safu mbili, ujuzi katika gridi" },
   tier: "free",
   previewColor: "#334155",
   style: "creative",

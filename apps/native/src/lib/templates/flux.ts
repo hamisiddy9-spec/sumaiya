@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const FluxTemplate: NativeTemplate = {
   id: "flux",
   name: { en: "Flux", sw: "Flux" },
-  blurb: { en: "10px band, box headers, chip skills", sw: "Ukanda wa 10px, vichwa vya masanduku, ujuzi kwa vibao" },
+  blurb: { en: "10px band, box headers, chip skills", sw: "Ukanda wa 10px, vichwa vya masanduku, ujuzi katika vibao" },
   tier: "free",
   previewColor: "#6D28D9",
   style: "minimal",

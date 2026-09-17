@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const RuwenzoriTemplate: NativeTemplate = {
   id: "ruwenzori",
   name: { en: "Ruwenzori", sw: "Ruwenzori" },
-  blurb: { en: "Dark slate sidebar, bar skills", sw: "Pembeni ya kijivu cheusi, ujuzi kwa mistari" },
+  blurb: { en: "Dark slate sidebar, bar skills", sw: "Pembeni ya kijivu cheusi, ujuzi katika mistari" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

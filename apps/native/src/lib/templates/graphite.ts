@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GraphiteTemplate: NativeTemplate = {
   id: "graphite",
   name: { en: "Graphite", sw: "Graphite" },
-  blurb: { en: "Near-black, ruled labels, grid skills, compact", sw: "Karibu nyeusi, lebo zenye mistari, ujuzi kwa gridi, fupi" },
+  blurb: { en: "Near-black, ruled labels, grid skills, compact", sw: "Karibu nyeusi, lebo zenye mistari, ujuzi katika gridi, fupi" },
   tier: "free",
   previewColor: "#404040",
   style: "creative",

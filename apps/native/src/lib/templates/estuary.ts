@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const EstuaryTemplate: NativeTemplate = {
   id: "estuary",
   name: { en: "Estuary", sw: "Estuary" },
-  blurb: { en: "Light blue sidebar, chip skills", sw: "Pembeni ya bluu hafifu, ujuzi kwa vibao" },
+  blurb: { en: "Light blue sidebar, chip skills", sw: "Pembeni ya bluu hafifu, ujuzi katika vibao" },
   tier: "free",
   previewColor: "#0891B2",
   style: "creative",

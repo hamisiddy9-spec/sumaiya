@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const HeraldCvTemplate: NativeTemplate = {
   id: "herald-cv",
   name: { en: "Herald", sw: "Herald" },
-  blurb: { en: "Centered, numbered, dot skills, accent name", sw: "Katikati, namba, ujuzi kwa vitone, jina la msisitizo" },
+  blurb: { en: "Centered, numbered, dot skills, accent name", sw: "Katikati, namba, ujuzi katika vitone, jina la msisitizo" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "minimal",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LedgerTemplate: NativeTemplate = {
   id: "ledger",
   name: { en: "Ledger", sw: "Ledger" },
-  blurb: { en: "Dark band, numbered headers, table exp, grid skills", sw: "Ukanda mweusi, vichwa vyenye namba, uzoefu kwa jedwali, ujuzi kwa gridi" },
+  blurb: { en: "Dark band, numbered headers, table exp, grid skills", sw: "Ukanda mweusi, vichwa vyenye namba, uzoefu katika jedwali, ujuzi katika gridi" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

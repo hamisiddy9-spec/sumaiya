@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ChromeTemplate: NativeTemplate = {
   id: "chrome",
   name: { en: "Chrome", sw: "Chrome" },
-  blurb: { en: "Light sidebar, numbered main, grid skills", sw: "Pembeni nyepesi, sehemu kuu yenye namba, ujuzi kwa gridi" },
+  blurb: { en: "Light sidebar, numbered main, grid skills", sw: "Pembeni nyepesi, sehemu kuu yenye namba, ujuzi katika gridi" },
   tier: "free",
   previewColor: "#1D4ED8",
   style: "sidebar",

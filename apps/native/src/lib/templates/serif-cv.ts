@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SerifCvTemplate: NativeTemplate = {
   id: "serif-cv",
   name: { en: "Serif", sw: "Serif" },
-  blurb: { en: "Warm paper bg, ruled sections, bar skills", sw: "Mandhari ya karatasi ya joto, sehemu zenye mistari, ujuzi kwa mistari" },
+  blurb: { en: "Warm paper bg, ruled sections, bar skills", sw: "Mandhari ya karatasi ya joto, sehemu zenye mistari, ujuzi katika mistari" },
   tier: "free",
   previewColor: "#78350F",
   style: "minimal",

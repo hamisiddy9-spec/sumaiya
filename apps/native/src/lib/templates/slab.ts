@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const SlabTemplate: NativeTemplate = {
   id: "slab",
   name: { en: "Slab", sw: "Slab" },
-  blurb: { en: "Numbered headers, table experience, tag-rated skills", sw: "Vichwa vyenye namba, uzoefu kwa jedwali, ujuzi wenye madaraja" },
+  blurb: { en: "Numbered headers, table experience, tag-rated skills", sw: "Vichwa vyenye namba, uzoefu katika jedwali, ujuzi wenye madaraja" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",
