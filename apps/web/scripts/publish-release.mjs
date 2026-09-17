@@ -131,11 +131,21 @@ try {
     process.exit(1);
   }
 
-  await sql`
-    insert into app_release (id, version, apk_url, size_bytes, notes_sw, notes_en, channel)
-    values (${`rel_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`},
-            ${version}, ${apkUrl}, ${sizeBytes}, ${notesSw}, ${notesEn}, ${args.channel})
-  `;
+  // Re-publishing the SAME version must REPLACE, not duplicate. A plain INSERT
+  // with a random id silently created a second row for 1.6.23, and the endpoint
+  // then kept serving the older row's shorter notes — the live manifest showed
+  // the previous release's crash-reporting copy while the correct notes sat in
+  // the newer row. Delete-then-insert inside one transaction is used rather
+  // than ON CONFLICT because `version` carries no unique index, so an upsert
+  // has nothing to conflict on.
+  await sql.begin(async (tx) => {
+    await tx`delete from app_release where version = ${version} and channel = ${args.channel}`;
+    await tx`
+      insert into app_release (id, version, apk_url, size_bytes, notes_sw, notes_en, channel)
+      values (${`rel_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`},
+              ${version}, ${apkUrl}, ${sizeBytes}, ${notesSw}, ${notesEn}, ${args.channel})
+    `;
+  });
 
   console.log("");
   console.log(`✅ Published v${version} on channel "${args.channel}".`);
