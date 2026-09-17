@@ -12,6 +12,11 @@
  * `posthog` stub export are unchanged. New code should prefer `capture(name,
  * props)` with a name from `EVENTS` for compile-time safety.
  *
+ * Every event that leaves here also carries campaign attribution
+ * (`{ src }` — see lib/analytics/attribution.ts): a scan of a printed poster
+ * must stay visible all the way down the funnel, not just on the page it landed
+ * on. Call sites do not pass it; this file attaches it, so no surface can forget.
+ *
  * Nothing here throws — analytics must never break a user action — and with no
  * PostHog key set every call degrades to the Vercel-only behaviour we had
  * before.
@@ -20,17 +25,38 @@ import { track as vercelTrack } from "@vercel/analytics";
 import {
   type AnalyticsEventMap,
   type AnalyticsEventName,
+  type AttributionProps,
   isKnownEvent,
 } from "./events";
+import { getAttributionProps } from "./attribution";
 
 export {
   EVENTS,
   ACTIVATION_EVENTS,
   type AnalyticsEventName,
   type AnalyticsEventMap,
+  type AttributionProps,
+  type CampaignSource,
+  type EmittedEventProps,
   type DocumentType,
   type ExportSource,
 } from "./events";
+
+// Attribution is part of the public surface: a component that reports its own
+// event (or needs to know which campaign it is serving) imports it from here
+// rather than reaching for localStorage by hand.
+export {
+  ATTRIBUTION_PARAM,
+  ATTRIBUTION_STORAGE_KEY,
+  MAX_CAMPAIGN_SOURCE_LENGTH,
+  captureAttribution,
+  getAttributionProps,
+  getCampaignSource,
+  initAttribution,
+  readSrcFromSearch,
+  resetAttribution,
+  sanitizeCampaignSource,
+} from "./attribution";
 
 // Re-export for the handful of legacy imports that referenced these types.
 export type { ExportSource as LegacyExportSource } from "./events";
@@ -101,9 +127,26 @@ function loadPostHog() {
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 /**
+ * Attribution, or a null-tagged stand-in. `getAttributionProps()` is written to
+ * never throw (blocked storage, no `location`, SSR); this is the belt on top of
+ * those braces, because a throw here would sit between a click and its result.
+ */
+function attributionProps(): AttributionProps {
+  try {
+    return getAttributionProps();
+  } catch {
+    return { src: null };
+  }
+}
+
+/**
  * Loose event tracker — kept for existing call sites. Fires PostHog (when
  * available) and Vercel. In dev, warns on an event name that isn't in the
  * catalog so orphan events are caught early.
+ *
+ * Campaign attribution is added here rather than at the call site, so every
+ * event a scan can reach carries `src` (poster, flyer, …) without twenty
+ * surfaces each remembering to pass it.
  */
 export function track(event: string, props?: Props): void {
   if (typeof window === "undefined") return;
@@ -113,7 +156,9 @@ export function track(event: string, props?: Props): void {
       `[analytics] "${event}" is not in lib/analytics/events.ts — add it to the catalog.`,
     );
   }
-  const clean = primitivesOnly(props);
+  // Attribution second so a stray `src` in `props` can never override the
+  // captured campaign.
+  const clean = primitivesOnly({ ...props, ...attributionProps() });
   try {
     vercelTrack(event, clean);
   } catch {
@@ -124,7 +169,11 @@ export function track(event: string, props?: Props): void {
     .catch(() => {});
 }
 
-/** Typed tracker — preferred for new code. `props` is inferred from the name. */
+/**
+ * Typed tracker — preferred for new code. `props` is inferred from the name.
+ * Call sites pass only their own properties: attribution (`src`) is attached by
+ * `track()` for every event.
+ */
 export function capture<K extends AnalyticsEventName>(
   event: K,
   ...args: AnalyticsEventMap[K] extends void ? [] : [props: AnalyticsEventMap[K]]
@@ -140,10 +189,14 @@ export function trackFunnelEvent(event: string, props?: Props): void {
 /**
  * Tie subsequent events to a real user. Call on sign-in / session restore.
  * `reset()` (via signOut) unlinks so a shared phone doesn't merge two people.
+ *
+ * Include `src` (see `getAttributionProps()`) in `traits` on first identify:
+ * it lands on the person profile, so a poster scan stays attached to the human
+ * who scanned it even on events that reach PostHog from somewhere else.
  */
 export function identify(
   userId: string,
-  traits?: Record<string, string | number | boolean>,
+  traits?: Record<string, string | number | boolean | null>,
 ): void {
   loadPostHog()
     .then((ph) => ph?.identify(userId, traits))
@@ -175,7 +228,7 @@ const posthog = {
   },
   identify: (id?: unknown, traits?: unknown) => {
     if (typeof id === "string")
-      identify(id, traits as Record<string, string | number | boolean>);
+      identify(id, traits as Record<string, string | number | boolean | null>);
   },
   reset: () => resetIdentity(),
   captureException: (_e?: unknown, _props?: unknown) => {

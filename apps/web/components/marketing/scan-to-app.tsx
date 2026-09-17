@@ -22,6 +22,16 @@ import { useLang } from "@/lib/i18n/context";
  *
  * The downloadable poster carries the same code, so what is on the website and
  * what ends up on a shop noticeboard stay identical.
+ *
+ * MEASURABLE, NOT JUST PRETTY
+ * The code points at /ats-checker?src=poster, not the bare checker: the tag is
+ * what lib/analytics/attribution.ts captures and attaches to every later event,
+ * so a scan can be followed to the signup and the install instead of vanishing
+ * into "some traffic". The assets are build output — regenerate, never hand-edit:
+ *   1. node scripts/make-scan-qr.mjs       -> public/qr/scan-kazi.svg (?src=poster)
+ *   2. node scripts/make-branded-qr.mjs    -> public/qr/scan-kazi-branded.svg
+ *   3. node scripts/make-scan-poster.mjs   -> public/qr/poster-scan-kazi.svg
+ * A QR that has not been rasterised and decoded is not known to work.
  */
 export function ScanToApp() {
   const lang = useLang();

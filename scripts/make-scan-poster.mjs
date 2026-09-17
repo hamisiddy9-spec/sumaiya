@@ -29,6 +29,22 @@ const qr = fs.readFileSync(QR, "utf8");
 // Keep only the paths; the QR's own canvas is discarded so we can place it.
 const inner = qr.replace(/^[\s\S]*?<svg[^>]*>/, "").replace(/<\/svg>\s*$/, "");
 
+// UNITS: the QR's content is in MODULE coordinates and its viewBox does the
+// scaling (see make-branded-qr.mjs note 1). Sizing it with a bare scale() —
+// e.g. scale(0.625) because "the source is 640px wide" — draws a ~28px blob
+// inside the 462px plate: a poster with a decorative smudge where the code
+// should be, which is how this shipped once. So derive the scale from the
+// viewBox: modules × an INTEGER module size, so every module lands on whole
+// pixels and prints crisp instead of blurry.
+const viewBox = (qr.match(/viewBox="([^"]+)"/) || [])[1];
+if (!viewBox) throw new Error("no viewBox in " + QR);
+const [, , VB_W] = viewBox.split(/\s+/).map(Number);
+if (!VB_W) throw new Error("unreadable viewBox: " + viewBox);
+
+const FRAME = 462; // the white plate + its frame (see below)
+const MODULE_PX = 9; // printed module size
+const QR_PX = VB_W * MODULE_PX;
+
 // A4 at 96dpi — matches what a Word/Canva user expects to print.
 const W = 794;
 const H = 1123;
@@ -53,10 +69,14 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
         font-size="22" fill="${ESPRESSO}" opacity="0.72">CV yako haifiki kwa mwajiri</text>
 
   <!-- QR, framed so the quiet zone survives printing (a tight crop is the
-       single most common reason a printed code will not scan). -->
-  <rect x="${W / 2 - 231}" y="340" width="462" height="462" rx="18" fill="#FFFFFF"
+       single most common reason a printed code will not scan). The plate below
+       is FRAME wide; the code inside is QR_PX = modules × MODULE_PX, derived
+       from the QR's own viewBox, and the group carries shape-rendering so the
+       modules stay sharp at this size. -->
+  <rect x="${W / 2 - FRAME / 2}" y="${340}" width="${FRAME}" height="${FRAME}" rx="18" fill="#FFFFFF"
         stroke="${ESPRESSO}" stroke-opacity="0.14" stroke-width="2"/>
-  <g transform="translate(${W / 2 - 200}, 371) scale(0.625)">
+  <g transform="translate(${W / 2 - QR_PX / 2}, ${340 + (FRAME - QR_PX) / 2}) scale(${MODULE_PX})"
+     shape-rendering="crispEdges">
     ${inner}
   </g>
 
@@ -81,3 +101,6 @@ const svg = `<?xml version="1.0" encoding="UTF-8"?>
 
 fs.writeFileSync(OUT, svg);
 console.log("poster ->", path.relative(ROOT, OUT), `(${svg.length} bytes)`);
+console.log(
+  `qr: ${VB_W} modules @ ${MODULE_PX}px = ${QR_PX}px inside a ${FRAME}px plate (viewBox ${viewBox})`,
+);

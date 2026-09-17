@@ -10,7 +10,8 @@
  * ways or with the wrong properties.
  *
  * Adding an event = add a line to `AnalyticsEventMap`. Nothing is emitted that
- * isn't declared here.
+ * isn't declared here. Adding a property to EVERY event (attribution is the one
+ * example) = extend `AttributionProps` below, instead of touching every event.
  */
 
 export type DocumentType = "cv" | "cover-letter" | "letter" | "business-card";
@@ -38,6 +39,38 @@ export type ToolOutcome =
 
 /** Who invoked a tool. */
 export type ToolCaller = "ui" | "assistant" | "cron" | "whatsapp" | "api";
+
+/**
+ * A campaign source captured from `?src=` on the landing URL — `poster` for the
+ * printed posters, `flyer-boda`, `shop-kariakoo-3`, … Open-ended on purpose:
+ * every new printed surface gets a new tag without a code change. Always the
+ * sanitized slug produced by lib/analytics/attribution.ts, never raw input.
+ */
+export type CampaignSource = string;
+
+/**
+ * Attribution attached by lib/analytics to EVERY emitted event, so a scan of a
+ * printed poster stays visible all the way down the funnel
+ * (ats_checked → sign_in_completed → pwa_installed) instead of dissolving into
+ * "some traffic". `src` is null — never absent — when the visitor arrived
+ * without a tag, so a cohort or funnel filter can rely on the property existing.
+ *
+ * A `type` and not an `interface` on purpose: type aliases get an implicit index
+ * signature, so `{ ...getAttributionProps() }` (or the bare object) can be
+ * passed anywhere the sinks take a props bag — `identify(id, traits)` included.
+ */
+export type AttributionProps = { src: CampaignSource | null };
+
+/**
+ * The payload a sink actually receives: the event's own declared properties
+ * plus attribution. `void` events (no properties of their own) are emitted with
+ * attribution only — which is why `capture()` below still takes no argument for
+ * them: attribution is injected by the tracker, not by the call site.
+ */
+export type EmittedEventProps<K extends AnalyticsEventName> =
+  AnalyticsEventMap[K] extends void
+    ? AttributionProps
+    : AnalyticsEventMap[K] & AttributionProps;
 
 /**
  * Every event, mapped to its property shape. `void` = a bare event with no
