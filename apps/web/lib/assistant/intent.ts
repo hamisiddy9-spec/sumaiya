@@ -102,9 +102,7 @@ const REFUSAL_RE = [
   /\btosha\b/,
   /\bstop\b/,
   /\bleave\s+(it|that|this|the\s+(cv|job))\b/,
-  /\bsiwezi\b/,
   /\bsitaki\b/,
-  /\bsijui\b/,
   /\bnimechoka\b/,
   /\busini?ulize\b/,
   /\busiulize\b/,
@@ -112,6 +110,13 @@ const REFUSAL_RE = [
   /\bno\s+(more\s+)?(jobs?|career|cv|questions?)\b/,
   /\bnot\s+(now|today|interested|again)\b/,
   /\bsihitaji\b/,
+  // NOTE: "sijui" (I don't know) and "siwezi" (I can't) are deliberately NOT
+  // refusals. They are Swahili incapacity/helplessness, and in this market they
+  // are the most common way a low-literacy user asks for help — "sijui kuandika"
+  // means "I don't know how to write", not "leave me alone". Counting them as
+  // refusals locked out exactly the people the product exists for: two of them
+  // and intent.ts's hard career lockout fired. Withdrawal is "acha", "basta",
+  // "tosha", "sitaki", "sihitaji" — not "I can't".
   /\bnataka\s+kupumzika\b/,
 ];
 
