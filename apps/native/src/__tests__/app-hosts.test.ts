@@ -135,9 +135,34 @@ describe("app-hosts — one source of truth", () => {
     });
 
     it("a local .env, when present, points at the canonical origin", () => {
-      const exists = fs.existsSync(path.join(root, ".env"));
-      if (!exists) return; // git-ignored and absent — nothing to check
-      expect(read(".env").trim()).toBe(`EXPO_PUBLIC_API_URL=${CANONICAL_ORIGIN}`);
+      // .env is git-ignored, so this test has three states to stay honest in:
+      // absent (a clean clone, or CI — nothing to check), present without an
+      // EXPO_PUBLIC_API_URL entry (legitimate: lib/api-client.ts falls back to
+      // CANONICAL_ORIGIN, the same host), and present with one (it must be the
+      // canonical origin, never a local/staging/www host typed by hand).
+      //
+      // It reads that entry out of the file rather than demanding the whole
+      // file be exactly one line. The old form did the latter, and so failed
+      // the moment a local .env also carried EXPO_PUBLIC_SENTRY_DSN — a
+      // second variable has nothing to do with which host the app talks to.
+      const file = path.join(root, ".env");
+      if (!fs.existsSync(file)) return; // git-ignored and absent — nothing to check
+
+      const contents = read(".env");
+      expect(contents.trim().length).toBeGreaterThan(0); // it really was read
+
+      const PREFIX = "EXPO_PUBLIC_API_URL=";
+      const values = contents
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith(PREFIX)) // a commented-out line does not count
+        .map((line) => line.slice(PREFIX.length).trim());
+
+      for (const value of values) {
+        // Quoted or space-padded values fail here too: api-client.ts would
+        // pass them to the transport verbatim.
+        expect(value).toBe(CANONICAL_ORIGIN);
+      }
     });
   });
 
