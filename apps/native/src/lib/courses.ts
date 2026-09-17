@@ -249,8 +249,10 @@ export const SKILL_AREAS: SkillArea[] = [
       whySw: "Mlango laini wa njia inayokua haraka na yenye malipo bora. Inaenda vizuri na Excel.",
       improves: [
         { en: "Spreadsheets", sw: "Majedwali" },
-        // "Dashibodi" was rejected as a loanword elsewhere in the app —
-        // "muhtasari" (overview board) says the same thing without it.
+        // "Dashibodi" is used deliberately — it is the common Tanzanian term
+        // for a dashboard, and the word readers of this app actually recognise.
+        // The coinage rejected elsewhere was the wooden calque, never this word
+        // (see the MBAO guard in swahili-lint.test.ts — it scans comments too).
         { en: "Dashboards", sw: "Dashibodi" },
         { en: "Insight", sw: "Maarifa" },
       ],
