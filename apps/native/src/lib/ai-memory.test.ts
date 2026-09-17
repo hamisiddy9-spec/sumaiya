@@ -1,4 +1,15 @@
-import { describe, it, expect } from "vitest";
+// jest provides describe/it/expect as globals — this project's runner is jest,
+// NOT vitest. Importing them from vitest works under vitest and fails here with
+// "Cannot find module 'vitest'", which is exactly how a green local run can be
+// a false positive.
+//
+// AsyncStorage ships a native module, which does not exist under jest — without
+// this mock the suite dies at import with "[@RNC/AsyncStorage]: NativeModule:
+// AsyncStorage is null". Mocked file-locally rather than in shared setup so this
+// test is self-sufficient wherever it runs.
+jest.mock("@react-native-async-storage/async-storage", () =>
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+);
 import {
   EMPTY_MEMORY,
   CONSOLIDATION_THRESHOLD,
