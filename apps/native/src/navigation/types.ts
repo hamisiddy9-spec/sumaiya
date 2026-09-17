@@ -35,6 +35,7 @@ export type ProfileStackParamList = {
   CareerProfile: undefined;
   HelpFaq: undefined;
   PrivacyTerms: undefined;
+  Memory: undefined;
   Support: undefined;
 };
 

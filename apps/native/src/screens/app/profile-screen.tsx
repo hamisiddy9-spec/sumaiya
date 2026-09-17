@@ -396,6 +396,15 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={() => navigation.navigate("HelpFaq")}
             chevron
           />
+          {/* PDPA ss.33/38 — access and erasure need a door, not a paragraph. */}
+          <ListRow
+            icon="sparkles"
+            iconColor={c.accent}
+            label={t("What Sumaiya knows", "Anachojua Sumaiya")}
+            sublabel={t("See, correct or delete what she remembers", "Ona, rekebisha au futa anachokumbuka")}
+            onPress={() => navigation.navigate("Memory")}
+            chevron
+          />
           <ListRow
             icon="shield"
             iconColor={c.accent}

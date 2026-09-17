@@ -252,6 +252,37 @@ export function renderMemoryBlock(memory: Memory): string {
   return parts.join("\n");
 }
 
+/**
+ * Consent — PDPA 2022 s.23(2).
+ *
+ * "Before collecting data, a data controller shall ensure that the data subject
+ * is aware of the purposes for which the personal data is collected." A notice
+ * shown after the fact is not notice, so nothing is written until the person has
+ * been told what is kept and why.
+ *
+ * Three states, deliberately: we ask once, a refusal is remembered as firmly as
+ * a yes, and refusing must not break the assistant — she simply stops learning.
+ */
+const CONSENT_KEY = "sumaiya.memory.consent.v1";
+export type Consent = "unasked" | "granted" | "declined";
+
+export async function loadConsent(): Promise<Consent> {
+  try {
+    const raw = await AsyncStorage.getItem(CONSENT_KEY);
+    return raw === "granted" || raw === "declined" ? raw : "unasked";
+  } catch {
+    return "unasked";
+  }
+}
+
+export async function setConsent(value: Consent): Promise<void> {
+  try {
+    await AsyncStorage.setItem(CONSENT_KEY, value);
+  } catch {
+    /* silent */
+  }
+}
+
 /* ------------------------------------------------------------ persistence --- */
 
 /** Never throws: a broken store must not take the assistant down. */
@@ -283,13 +314,28 @@ export async function saveMemory(memory: Memory): Promise<void> {
  * The one call sites should use: read, apply a change, consolidate, write back.
  * Consolidation runs here rather than on a timer because it is cheap and
  * idempotent, and it keeps the device as the single source of truth offline.
+ *
+ * Refuses to WRITE without consent (PDPA s.23(2)) but always reports the current
+ * memory, so a refusal never breaks a screen that reads it.
  */
 export async function updateMemory(
   change: (memory: Memory) => Memory,
-): Promise<{ memory: Memory; promoted: Fact[] }> {
+): Promise<{ memory: Memory; promoted: Fact[]; blocked: boolean }> {
   const before = await loadMemory();
+  if ((await loadConsent()) !== "granted") {
+    return { memory: before, promoted: [], blocked: true };
+  }
   const changed = change(before);
   const { memory, promoted } = consolidate(changed);
   if (promoted.length > 0 || memory !== before) await saveMemory(memory);
-  return { memory, promoted };
+  return { memory, promoted, blocked: false };
+}
+
+/** Wipe everything she has learned. PDPA s.38 — erasure, and it is total. */
+export async function eraseMemory(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(KEY);
+  } catch {
+    /* silent */
+  }
 }

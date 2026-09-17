@@ -47,6 +47,7 @@ import { AtsCheckerScreen } from "../../screens/ats-checker-screen";
 import { CareerProfileScreen } from "../../screens/career-profile-screen";
 import { HelpFaqScreen } from "../../screens/app/help-faq-screen";
 import { PrivacyTermsScreen } from "../../screens/app/privacy-screen";
+import { MemoryScreen } from "../../screens/app/memory-screen";
 import { SupportScreen } from "../../screens/app/support-screen";
 import { ScanStack } from "./scan-stack";
 
@@ -95,6 +96,11 @@ function ProfileStackScreen() {
       <ProfileStack.Screen name="CareerProfile" component={CareerProfileScreen} />
       <ProfileStack.Screen name="HelpFaq" component={HelpFaqScreen} />
       <ProfileStack.Screen name="PrivacyTerms" component={PrivacyTermsScreen} />
+      <ProfileStack.Screen
+        name="Memory"
+        component={MemoryScreen}
+        options={{ title: "What Sumaiya knows" }}
+      />
       <ProfileStack.Screen name="Support" component={SupportScreen} />
     </ProfileStack.Navigator>
   );
