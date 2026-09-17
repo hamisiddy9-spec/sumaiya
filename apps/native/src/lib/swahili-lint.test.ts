@@ -17,23 +17,15 @@
  * same mistakes can't quietly reappear in a future string. Extend the
  * pattern lists below as new instances of the same classes are found live.
  *
- * Scope: the -a connective and plural-with-one patterns still scan every
- * source file under src/. The calque patterns scan ONLY lib/templates/ —
- * those are the generated blurb strings this lint owns.
+ * Scope: every guard below scans every source file under src/ — a bad string
+ * anywhere in the app fails the build. (The calque guards used to be limited
+ * to lib/templates/ while another workstream owned the rest of src; that
+ * workstream is finished, so the limit is gone.)
  */
 import { readFileSync, readdirSync, statSync } from "fs";
-import { join, extname, sep } from "path";
+import { join, extname } from "path";
 
 const SRC_ROOT = join(__dirname, "..", "..", "src");
-// The calque guards below only cover the template blurbs, which are the
-// strings this lint owns: apps/native/src/lib/templates/. Other files in the
-// scan keep the pre-existing -a connective / plural-with-one coverage but are
-// not scanned for calques — a guard that fails on another area's in-flight
-// work blocks the build for no reason.
-const TEMPLATES_DIR = join(__dirname, "templates");
-function isOwnedTemplateFile(file: string): boolean {
-  return file.startsWith(TEMPLATES_DIR + sep);
-}
 const SKIP_DIRS = new Set(["node_modules", "__tests__"]);
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -65,16 +57,71 @@ const PLURAL_NOUN_WITH_ONE = /\bMiezi\s+1\b/;
 
 // Word-by-word calques of English design vocabulary into a Swahili word that
 // means something else. Each was repeated across dozens of template blurbs
-// because the blurbs were generated, not written. Checked against
-// lib/templates/ only (see isOwnedTemplateFile above). "msisitizo" is emphasis or
-// stress (accent lines are "mistari ya rangi"), "vidonge" are medicine
-// tablets (UI pills are "mviringo"), "mbao" are planks of timber (a dashboard
-// is a "dashibodi"/overview board, never "mbao za muhtasari"), and
-// "MANENO YA MAPENZI" is a banned all-caps literal headline.
+// because the blurbs were generated, not written. Checked against every
+// source file under src/, like the grammar checks above. "msisitizo" is
+// emphasis or stress (accent lines are "mistari ya rangi"), "vibao" are planks
+// or boards (UI/card blocks are "vipande"), "vidonge" are medicine tablets (UI
+// pills are "mviringo"), "vitone"/"kitone" is a coinage nobody uses (a dot is
+// "nukta", "dots" as a modifier is "yenye nukta"), "mbao" are planks of timber
+// (a dashboard is a "dashibodi"/overview board, never "mbao za muhtasari"),
+// "MANENO YA MAPENZI" is a banned all-caps literal headline, and
+// "mviringo vya" is a broken agreement — "vya" has nothing to agree with once
+// "mviringo" replaced a noun.
+//
+// NOTE on MBAO: the guard is deliberately the full phrase "Mbao za muhtasari",
+// not a bare "mbao" — "mbao za matangazo" (a real notice board) is correct
+// Swahili and must stay legal.
 const MSISITIZO_CALQUE = /mistari ya msisitizo/i;
-const VIDONGE_CALQUE = /lebo za vidonge/i;
+const VIBAO_CALQUE = /\bvibao\b/i;
+const VIDONGE_CALQUE = /\bvidonge\b/i;
+const VITONE_CALQUE = /\bvitone\b/i;
+const KITONE_CALQUE = /\bkitone\b/i;
+const MVIRINGO_VYA_CALQUE = /mviringo vya/i;
 const MBAO_CALQUE = /Mbao za muhtasari/i;
 const MANENO_MAPENZI_CALQUE = /MANENO YA MAPENZI/i;
+
+// One entry per tripwire. `pattern` is the bad string; `message` names the
+// pattern that tripped, the replacement to use, and the file and line, so the
+// failure tells the next person exactly what to type instead.
+interface CalqueGuard {
+  pattern: RegExp;
+  message: (match: string, file: string, line: number) => string;
+}
+
+const CALQUE_GUARDS: CalqueGuard[] = [
+  {
+    pattern: MSISITIZO_CALQUE,
+    message: (m, file, line) => `"${m}" — calque of "accent lines": "msisitizo" is emphasis/stress, use "mistari ya rangi" in ${file}:${line}`,
+  },
+  {
+    pattern: VIBAO_CALQUE,
+    message: (m, file, line) => `"${m}" — calque of "blocks/boards": "vibao" are planks, use "vipande" in ${file}:${line}`,
+  },
+  {
+    pattern: VIDONGE_CALQUE,
+    message: (m, file, line) => `"${m}" — calque of "pills": "vidonge" are medicine tablets, use "mviringo" in ${file}:${line}`,
+  },
+  {
+    pattern: VITONE_CALQUE,
+    message: (m, file, line) => `"${m}" — coinage of "dots": "vitone" is not a Swahili word, use "nukta" or "yenye nukta" in ${file}:${line}`,
+  },
+  {
+    pattern: KITONE_CALQUE,
+    message: (m, file, line) => `"${m}" — coinage of "dot": "kitone" is not a Swahili word, use "nukta" or "yenye nukta" in ${file}:${line}`,
+  },
+  {
+    pattern: MVIRINGO_VYA_CALQUE,
+    message: (m, file, line) => `"${m}" — broken agreement: "vya" agrees with nothing after "mviringo", use "lebo za sehemu zenye mviringo" in ${file}:${line}`,
+  },
+  {
+    pattern: MBAO_CALQUE,
+    message: (m, file, line) => `"${m}" — calque of "dashboards": "mbao" are planks of timber, not a UI overview board in ${file}:${line}`,
+  },
+  {
+    pattern: MANENO_MAPENZI_CALQUE,
+    message: (m, file, line) => `"${m}" — banned all-caps word-by-word headline calque; rewrite in sentence case in ${file}:${line}`,
+  },
+];
 
 describe("Swahili grammar lint (regression guard)", () => {
   const files = walk(SRC_ROOT);
@@ -99,26 +146,12 @@ describe("Swahili grammar lint (regression guard)", () => {
       if (pluralMatch) {
         throw new Error(`"${pluralMatch[0]}" — plural agreement with a count of one in ${file}:${i + 1}`);
       }
-      // The calque guards below cover ONLY the strings this lint owns — the
-      // generated template blurbs in lib/templates/ — so they can never fail
-      // on another area's in-flight file. Placed after the checks above so
-      // those keep their coverage of the whole scan.
-      if (!isOwnedTemplateFile(file)) return;
-      const msisitizoMatch = line.match(MSISITIZO_CALQUE);
-      const vidongeMatch = line.match(VIDONGE_CALQUE);
-      const mbaoMatch = line.match(MBAO_CALQUE);
-      const mapenziMatch = line.match(MANENO_MAPENZI_CALQUE);
-      if (msisitizoMatch) {
-        throw new Error(`"${msisitizoMatch[0]}" — calque of "accent lines": "msisitizo" is emphasis/stress, use "mistari ya rangi" in ${file}:${i + 1}`);
-      }
-      if (vidongeMatch) {
-        throw new Error(`"${vidongeMatch[0]}" — calque of "pill labels": "vidonge" are medicine tablets, use "lebo za mviringo" in ${file}:${i + 1}`);
-      }
-      if (mbaoMatch) {
-        throw new Error(`"${mbaoMatch[0]}" — calque of "dashboards": "mbao" are planks of timber, not a UI overview board in ${file}:${i + 1}`);
-      }
-      if (mapenziMatch) {
-        throw new Error(`"${mapenziMatch[0]}" — banned all-caps word-by-word headline calque; rewrite in sentence case in ${file}:${i + 1}`);
+      // Calque guards last, so the grammar checks above are reported first
+      // when a single line trips both. These scan every source file, like
+      // those checks — a calque anywhere in the app fails the build.
+      for (const guard of CALQUE_GUARDS) {
+        const match = line.match(guard.pattern);
+        if (match) throw new Error(guard.message(match[0], file, i + 1));
       }
     });
   });

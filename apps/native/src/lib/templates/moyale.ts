@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MoyaleTemplate: NativeTemplate = {
   id: "moyale",
   name: { en: "Moyale", sw: "Moyale" },
-  blurb: { en: "Midnight, airy, dot sections, timeline", sw: "Usiku wa manane, nafasi nyingi, sehemu za vitone, timeline" },
+  blurb: { en: "Midnight, airy, dot sections, timeline", sw: "Usiku wa manane, nafasi nyingi, sehemu zenye nukta, timeline" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "sidebar",

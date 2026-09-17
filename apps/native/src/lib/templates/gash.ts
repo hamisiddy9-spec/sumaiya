@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const GashTemplate: NativeTemplate = {
   id: "gash",
   name: { en: "Gash", sw: "Gash" },
-  blurb: { en: "Indigo accent, square photo, dot sections", sw: "Msisitizo wa zambarau-bluu, picha ya mraba, sehemu za vitone" },
+  blurb: { en: "Indigo accent, square photo, dot sections", sw: "Msisitizo wa zambarau-bluu, picha ya mraba, sehemu zenye nukta" },
   tier: "free",
   previewColor: "#1E1B4B",
   style: "sidebar",

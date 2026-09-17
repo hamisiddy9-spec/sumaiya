@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const CollageTemplate: NativeTemplate = {
   id: "collage",
   name: { en: "Collage", sw: "Collage" },
-  blurb: { en: "Amber banner, full aside, dot sections", sw: "Bango la njano, pembeni kamili, sehemu za vitone" },
+  blurb: { en: "Amber banner, full aside, dot sections", sw: "Bango la njano, pembeni kamili, sehemu zenye nukta" },
   tier: "free",
   previewColor: "#F59E0B",
   style: "creative",

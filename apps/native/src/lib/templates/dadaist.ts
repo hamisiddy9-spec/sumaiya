@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DadaistTemplate: NativeTemplate = {
   id: "dadaist",
   name: { en: "Dadaist", sw: "Dadaist" },
-  blurb: { en: "Dotted divider, underline sections", sw: "Kitenganishi cha vitone, sehemu zenye mstari chini" },
+  blurb: { en: "Dotted divider, underline sections", sw: "Kitenganishi chenye nukta, sehemu zenye mstari chini" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

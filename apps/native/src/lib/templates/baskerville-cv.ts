@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BaskervilleCvTemplate: NativeTemplate = {
   id: "baskerville-cv",
   name: { en: "Baskerville", sw: "Baskerville" },
-  blurb: { en: "Box sections, dotted divider", sw: "Sehemu za masanduku, kitenganishi cha vitone" },
+  blurb: { en: "Box sections, dotted divider", sw: "Sehemu za masanduku, kitenganishi chenye nukta" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const AustinTemplate: NativeTemplate = {
   id: "austin",
   name: { en: "Austin", sw: "Austin" },
-  blurb: { en: "Dark, full aside, card blocks", sw: "Nyeusi, pembeni kamili, vibao vya kadi" },
+  blurb: { en: "Dark, full aside, card blocks", sw: "Nyeusi, pembeni kamili, vipande vya kadi" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

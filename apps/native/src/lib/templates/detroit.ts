@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DetroitTemplate: NativeTemplate = {
   id: "detroit",
   name: { en: "Detroit", sw: "Detroit" },
-  blurb: { en: "Charcoal, card layout, dot sections", sw: "Mkaa, mpangilio wa kadi, sehemu za vitone" },
+  blurb: { en: "Charcoal, card layout, dot sections", sw: "Mkaa, mpangilio wa kadi, sehemu zenye nukta" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",

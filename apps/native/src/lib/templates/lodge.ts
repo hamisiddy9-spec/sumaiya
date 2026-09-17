@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const LodgeTemplate: NativeTemplate = {
   id: "lodge",
   name: { en: "Lodge", sw: "Lodge" },
-  blurb: { en: "Charcoal, dot sidebar, ruled main, tag-rated, timeline-v2", sw: "Mkaa, pembeni ya vitone, sehemu kuu yenye mistari, ujuzi wenye madaraja, timeline v2" },
+  blurb: { en: "Charcoal, dot sidebar, ruled main, tag-rated, timeline-v2", sw: "Mkaa, pembeni yenye nukta, sehemu kuu yenye mistari, ujuzi wenye madaraja, timeline v2" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

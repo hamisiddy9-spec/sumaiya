@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TempoTemplate: NativeTemplate = {
   id: "tempo",
   name: { en: "Tempo", sw: "Tempo" },
-  blurb: { en: "Accent name, dot sections, dot skills, timeline", sw: "Jina la msisitizo, sehemu za vitone, ujuzi katika vitone, timeline" },
+  blurb: { en: "Accent name, dot sections, dot skills, timeline", sw: "Jina la msisitizo, sehemu zenye nukta, ujuzi katika nukta, timeline" },
   tier: "free",
   previewColor: "#0891B2",
   style: "minimal",

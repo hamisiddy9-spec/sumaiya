@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const StructuralistTemplate: NativeTemplate = {
   id: "structuralist",
   name: { en: "Structuralist", sw: "Structuralist" },
-  blurb: { en: "Dot sections, dotted divider, slate", sw: "Sehemu za vitone, kitenganishi cha vitone, kijivu" },
+  blurb: { en: "Dot sections, dotted divider, slate", sw: "Sehemu zenye nukta, kitenganishi chenye nukta, kijivu" },
   tier: "free",
   previewColor: "#374151",
   style: "minimal",

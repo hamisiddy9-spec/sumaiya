@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MeridianTemplate: NativeTemplate = {
   id: "meridian",
   name: { en: "Meridian", sw: "Meridian" },
-  blurb: { en: "Dark sidebar, accent dots", sw: "Pembeni nyeusi, vitone vya msisitizo" },
+  blurb: { en: "Dark sidebar, accent dots", sw: "Pembeni nyeusi, nukta za msisitizo" },
   tier: "free",
   previewColor: "#0F172A",
   style: "sidebar",

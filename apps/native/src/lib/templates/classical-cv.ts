@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const ClassicalCvTemplate: NativeTemplate = {
   id: "classical-cv",
   name: { en: "Classical", sw: "Classical" },
-  blurb: { en: "Tag labels, dotted divider, charcoal", sw: "Lebo za tagi, kitenganishi cha vitone, mkaa" },
+  blurb: { en: "Tag labels, dotted divider, charcoal", sw: "Lebo za tagi, kitenganishi chenye nukta, mkaa" },
   tier: "free",
   previewColor: "#1E293B",
   style: "minimal",

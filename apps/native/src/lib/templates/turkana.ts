@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const TurkanaTemplate: NativeTemplate = {
   id: "turkana",
   name: { en: "Turkana", sw: "Turkana" },
-  blurb: { en: "Charcoal sidebar, dot skills, timeline", sw: "Pembeni ya mkaa, ujuzi katika vitone, timeline" },
+  blurb: { en: "Charcoal sidebar, dot skills, timeline", sw: "Pembeni ya mkaa, ujuzi katika nukta, timeline" },
   tier: "free",
   previewColor: "#1E293B",
   style: "sidebar",

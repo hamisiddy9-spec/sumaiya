@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const DallasTemplate: NativeTemplate = {
   id: "dallas",
   name: { en: "Dallas", sw: "Dallas" },
-  blurb: { en: "Dark, dot sections, skill aside", sw: "Nyeusi, sehemu za vitone, pembeni ya ujuzi" },
+  blurb: { en: "Dark, dot sections, skill aside", sw: "Nyeusi, sehemu zenye nukta, pembeni ya ujuzi" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const OrbitTemplate: NativeTemplate = {
   id: "orbit",
   name: { en: "Orbit", sw: "Orbit" },
-  blurb: { en: "Cyan, dot sections, dotted divider", sw: "Bluu ya samawati, sehemu za vitone, kitenganishi cha vitone" },
+  blurb: { en: "Cyan, dot sections, dotted divider", sw: "Bluu ya samawati, sehemu zenye nukta, kitenganishi chenye nukta" },
   tier: "free",
   previewColor: "#0891B2",
   style: "minimal",

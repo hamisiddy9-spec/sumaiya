@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MemphisTemplate: NativeTemplate = {
   id: "memphis",
   name: { en: "Memphis", sw: "Memphis" },
-  blurb: { en: "Dark, compact, chip skills", sw: "Nyeusi, fupi, ujuzi katika vibao vya UI" },
+  blurb: { en: "Dark, compact, chip skills", sw: "Nyeusi, fupi, ujuzi katika vipande" },
   tier: "free",
   previewColor: "#111827",
   style: "header",

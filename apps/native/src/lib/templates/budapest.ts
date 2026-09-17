@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BudapestTemplate: NativeTemplate = {
   id: "budapest",
   name: { en: "Budapest", sw: "Budapest" },
-  blurb: { en: "Slate, amber sub, dot-label sections", sw: "Kijivu, kichwa kidogo cha njano, sehemu za lebo za vitone" },
+  blurb: { en: "Slate, amber sub, dot-label sections", sw: "Kijivu, kichwa kidogo cha njano, sehemu za lebo zenye nukta" },
   tier: "free",
   previewColor: "#D97706",
   style: "header",

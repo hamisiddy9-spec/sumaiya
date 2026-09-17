@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const MachakosTemplate: NativeTemplate = {
   id: "machakos",
   name: { en: "Machakos", sw: "Machakos" },
-  blurb: { en: "Midnight, timeline, dot labels", sw: "Usiku wa manane, timeline, lebo za vitone" },
+  blurb: { en: "Midnight, timeline, dot labels", sw: "Usiku wa manane, timeline, lebo zenye nukta" },
   tier: "free",
   previewColor: "#0D1B2A",
   style: "sidebar",

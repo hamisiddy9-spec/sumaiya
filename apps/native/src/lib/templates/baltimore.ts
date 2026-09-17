@@ -9,7 +9,7 @@ import type { NativeTemplate } from "./types";
 export const BaltimoreTemplate: NativeTemplate = {
   id: "baltimore",
   name: { en: "Baltimore", sw: "Baltimore" },
-  blurb: { en: "Charcoal, airy body, dot sections", sw: "Mkaa, maudhui yenye nafasi, sehemu za vitone" },
+  blurb: { en: "Charcoal, airy body, dot sections", sw: "Mkaa, maudhui yenye nafasi, sehemu zenye nukta" },
   tier: "free",
   previewColor: "#1E293B",
   style: "header",
