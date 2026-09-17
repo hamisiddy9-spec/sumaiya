@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { INSTALL_DISMISS_KEY, shouldShowInstallBanner } from "@/lib/pwa/install-prompt-logic";
+import { INSTALL_DISMISS_KEY, classifyDevice, shouldShowInstallBanner, type DevicePlatform } from "@/lib/pwa/install-prompt-logic";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -16,8 +16,13 @@ export function InstallPrompt() {
   const [loaded, setLoaded] = useState(false);
   const [standalone, setStandalone] = useState(false);
   const [sw, setSw] = useState(false);
+  // What is looking at us. Without this the banner offered a PWA install to
+  // every browser that supports one — Android included, where we were
+  // advertising a worse copy of our own app over the real one.
+  const [platform, setPlatform] = useState<DevicePlatform>("desktop");
 
   useEffect(() => {
+    setPlatform(classifyDevice(navigator.userAgent ?? ""));
     setSw(document.cookie.includes("lang=sw"));
     // NOTE: service-worker registration moved to <SwRegister /> (always
     // mounted) so the SW lifecycle is not coupled to this banner's visibility.
@@ -35,7 +40,7 @@ export function InstallPrompt() {
   }, []);
 
   if (!deferred || !loaded) return null;
-  if (!shouldShowInstallBanner(pathname, dismissedAt, Date.now(), standalone)) return null;
+  if (!shouldShowInstallBanner(pathname, dismissedAt, Date.now(), standalone, platform)) return null;
 
   return (
     <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-[100] mx-auto flex max-w-[420px] items-center gap-3 rounded-[14px] bg-espresso px-4 py-3.5 text-cream shadow-[0_12px_30px_-12px_rgba(33,26,21,0.5)] md:bottom-4">
