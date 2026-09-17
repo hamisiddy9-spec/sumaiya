@@ -58,7 +58,7 @@ const STRINGS = {
       projects: "Miradi",
       achievements: "Mafanikio",
       volunteer: "Kujitolea",
-      references: "Wathibitishaji",
+      references: "Wadhamini",
     },
     error: "Imeshindwa kupakia wasifu wako wa kazi.",
     entries: "vitu",

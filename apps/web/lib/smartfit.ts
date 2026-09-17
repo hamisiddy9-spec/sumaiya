@@ -79,7 +79,7 @@ export function applyDirective(directive: string, current: { templateId?: string
       density: fit.length === "long" ? "compact" : "normal",
       rationale: {
         en: "Executive style: centered serif template, tightened to read as senior leadership.",
-        sw: "Mtindo wa ukiongozi: templeti ya serif iliyo katikati, iliyobana ili isomeke kama uongozi wa juu.",
+        sw: "Mtindo wa uongozi: templeti ya serif iliyo katikati, iliyobana ili isomeke kama uongozi wa juu.",
       },
     };
   }

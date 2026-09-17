@@ -29,14 +29,14 @@ const CARDS: {
     choice: "apply",
     Icon: Target,
     tint: "text-pine bg-pine-tint",
-    title: { en: "I found a job — help me apply", sw: "Nina kazi — nisaidie kuomba" },
+    title: { en: "I found a job — help me apply", sw: "Nimepata kazi — nisaidie kuomba" },
     desc: { en: "Paste the job, I tailor your CV + write the letter", sw: "Bandika kazi, nalenga CV + naandika barua" },
   },
   {
     choice: "cover-letter",
     Icon: Mail,
     tint: "text-gold-text bg-gold-tint",
-    title: { en: "Write a cover letter", sw: "Barua ya kazi" },
+    title: { en: "Write a cover letter", sw: "Barua ya Maombi" },
     desc: { en: "A strong application letter, from your CV", sw: "Barua ya maombi yenye nguvu, kutoka CV yako" },
   },
   {

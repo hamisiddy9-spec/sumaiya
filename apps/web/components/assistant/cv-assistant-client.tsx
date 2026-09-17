@@ -140,14 +140,14 @@ const LETTER_TYPES: LetterType[] = [
 
 const DOC_CHIPS: { id: DocType; sw: string; en: string; Icon: typeof FileText }[] = [
   { id: "cv", sw: "CV / Wasifu", en: "CV / Résumé", Icon: FileText },
-  { id: "cover-letter", sw: "Barua ya kazi", en: "Cover letter", Icon: Mail },
+  { id: "cover-letter", sw: "Barua ya Maombi", en: "Cover letter", Icon: Mail },
   { id: "business-card", sw: "Kadi ya biashara", en: "Business card", Icon: CreditCard },
   { id: "letter", sw: "Barua rasmi", en: "Formal letter", Icon: ScrollText },
 ];
 
 const DOC_LABEL: Record<DocType, { sw: string; en: string }> = {
   cv: { sw: "CV", en: "CV" },
-  "cover-letter": { sw: "barua ya kazi", en: "cover letter" },
+  "cover-letter": { sw: "barua ya maombi", en: "cover letter" },
   "business-card": { sw: "kadi ya biashara", en: "business card" },
   letter: { sw: "barua rasmi", en: "formal letter" },
 };
@@ -184,7 +184,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   const greeting = convoSw
     ? (guest
         ? `Karibu! Mimi ni Sumaiya 😊 Niko hapa kukusaidia kutengeneza CV yako ya kitaalamu — bure, kwa dakika chache. Gusa kimoja hapa chini, pakia CV yako ya zamani, au niambie tu jina lako.`
-        : `${returning ? `Karibu tena, ${firstName}!` : `Karibu${firstName ? `, ${firstName}` : ""}!`} Mimi ni Sumaiya 😊 Niko hapa — naweza kutengeneza CV, barua ya kazi, kadi ya biashara au barua rasmi, na pia tupige story tu. Unachotaka leo?`)
+        : `${returning ? `Karibu tena, ${firstName}!` : `Karibu${firstName ? `, ${firstName}` : ""}!`} Mimi ni Sumaiya 😊 Niko hapa — naweza kutengeneza CV, barua ya maombi, kadi ya biashara au barua rasmi, na pia tupige story tu. Unachotaka leo?`)
     : (guest
         ? `Welcome! I'm Sumaiya 😊 I'll write your professional CV, free — in minutes. Tap one below, upload your old CV, or just tell me your name.`
         : `${returning ? `Welcome back, ${firstName}!` : `Welcome${firstName ? `, ${firstName}` : ""}!`} I'm Sumaiya 😊 I'm here — I can create a CV, a cover letter, a business card, or a formal letter, and we can also just chat. What would you like today?`);

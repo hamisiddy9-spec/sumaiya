@@ -31,7 +31,7 @@ const COMPONENT_LABEL: Record<ScoreComponentKey, { en: string; sw: string }> = {
   jobRelevance: { en: "Job relevance", sw: "Uhusiano na kazi" },
   keywordCoverage: { en: "Keyword coverage", sw: "Upatikanaji wa maneno muhimu" },
   skillsAlignment: { en: "Skills alignment", sw: "Upangaji wa ujuzi" },
-  experienceRelevance: { en: "Experience relevance", sw: "Uhusiano wa tajriba" },
+  experienceRelevance: { en: "Experience relevance", sw: "Uhusiano wa uzoefu" },
   achievementStrength: { en: "Achievement strength", sw: "Nguvu ya mafanikio" },
   educationQualification: { en: "Education & qualifications", sw: "Elimu na sifa" },
   atsQuality: { en: "ATS document quality", sw: "Ubora wa hati kwa ATS" },

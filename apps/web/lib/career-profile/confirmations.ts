@@ -46,7 +46,7 @@ const SECTION_TITLES: Record<string, { en: string; sw: string }> = {
   projects: { en: "Projects", sw: "Miradi" },
   achievements: { en: "Achievements", sw: "Mafanikio" },
   volunteer: { en: "Volunteering", sw: "Kujitolea" },
-  references: { en: "References", sw: "Marejeo" },
+  references: { en: "References", sw: "Wadhamini" },
   preferences: { en: "Preferences", sw: "Mapendeleo" },
 };
 

@@ -251,7 +251,7 @@ export const SKILL_AREAS: SkillArea[] = [
         { en: "Spreadsheets", sw: "Majedwali" },
         // "Dashibodi" was rejected as a loanword elsewhere in the app —
         // "muhtasari" (overview board) says the same thing without it.
-        { en: "Dashboards", sw: "Mbao za muhtasari" },
+        { en: "Dashboards", sw: "Dashibodi" },
         { en: "Insight", sw: "Maarifa" },
       ],
       lastVerified: V,

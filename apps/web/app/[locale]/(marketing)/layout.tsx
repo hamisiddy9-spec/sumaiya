@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     ? "Jukwaa la Ajira lenye AI — Tengeneza CV Bila Malipo"
     : "Sumaiya — AI Career Platform: CV, Jobs & Interview Prep";
   const description = sw
-    ? "Ongea na msaidizi wa AI kwa Kiswahili au Kiingereza akuandikie CV, barua ya kazi, kadi ya biashara au barua rasmi kwa dakika — bila malipo. Miundo inayopita ATS, upakuaji wa PDF."
+    ? "Ongea na msaidizi wa AI kwa Kiswahili au Kiingereza akuandikie CV, barua ya maombi, kadi ya biashara au barua rasmi kwa dakika — bila malipo. Miundo inayopita ATS, upakuaji wa PDF."
     : "Chat with an AI assistant in English or Swahili to create your CV, cover letter, business card or formal letter in minutes — free. ATS-ready templates, PDF download.";
   const keywords = sw
     ? ["tengeneza CV", "kutengeneza CV", "jinsi ya kutengeneza CV", "CV bila malipo", "msaidizi wa CV AI", "AI ya kutengeneza CV", "barua ya maombi ya kazi", "kadi ya biashara", "barua rasmi", "mfano wa CV", "CV ya kazi", "wasifu", "template ya CV", "CV builder", "resume builder"]

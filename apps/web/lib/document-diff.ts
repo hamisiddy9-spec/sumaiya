@@ -19,7 +19,7 @@ export interface DiffSection {
 
 const SECTION_LABELS: Record<DiffSection["sectionId"], { en: string; sw: string }> = {
   summary: { en: "Summary", sw: "Muhtasari" },
-  experience: { en: "Experience", sw: "Tajriba" },
+  experience: { en: "Experience", sw: "Uzoefu" },
   skills: { en: "Skills", sw: "Ujuzi" },
   education: { en: "Education", sw: "Elimu" },
   personal: { en: "Personal details", sw: "Taarifa binafsi" },

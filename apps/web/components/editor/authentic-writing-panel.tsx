@@ -16,7 +16,7 @@ interface AuthenticWritingPanelProps {
 
 const TYPE_LABEL: Record<WritingFinding["type"], { en: string; sw: string }> = {
   cliche: { en: "CLICHÉ", sw: "MSEMO" },
-  buzzword: { en: "BUZZWORD", sw: "MANENO YA MAPENZI" },
+  buzzword: { en: "BUZZWORD", sw: "MANENO YA KUPENDEZA" },
   stuffing: { en: "STUFFING", sw: "KURUDIARUDIA" },
 };
 

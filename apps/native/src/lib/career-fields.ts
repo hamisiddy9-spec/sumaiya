@@ -129,7 +129,7 @@ export const EXPERIENCE_LEVELS: ExperienceLevel[] = [
   { id: "1-3", label: { en: "1–3 years", sw: "Miaka 1–3" } },
   { id: "3-7", label: { en: "3–7 years", sw: "Miaka 3–7" } },
   { id: "7+", label: { en: "7+ years", sw: "Zaidi ya miaka 7" } },
-  { id: "self", label: { en: "Running my own thing", sw: "Ninajiendesha mwenyewe" } },
+  { id: "self", label: { en: "Running my own thing", sw: "Ninajiajiri" } },
 ];
 
 /** Skills to offer for the fields the user picked (deduped, capped). */
