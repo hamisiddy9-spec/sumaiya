@@ -14,6 +14,7 @@ import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { MarketingNav } from "@/components/ui/marketing-nav";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Footer } from "@/components/ui/footer";
 import { PDF_TOOL_LINKS, pdfToolHref } from "@/lib/pdf-tools-list";
 import { TESTIMONIALS, CVS_CREATED } from "@/lib/testimonials";
@@ -401,6 +402,31 @@ export default function LandingPage() {
   const lang = useLang();
   const tr = translations[lang];
   const router = useRouter();
+
+  // A signed-in person should never be shown the sales pitch — they already have
+  // an account. Send them to their work instead.
+  //
+  // Deliberately client-side. The bare `/` path is served from the CDN cache
+  // (`s-maxage=300` in middleware), so a per-user redirect decided there would be
+  // cached and then handed to everyone: one signed-in visitor's bounce would
+  // become every stranger's first impression. The prerendered /en and /sw SEO
+  // paths carry the search weight and are untouched by this.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createSupabaseBrowserClient();
+        const { data } = await supabase.auth.getUser();
+        // Middleware localises a bare path, so no need to build `/sw/...` here.
+        if (!cancelled && data.user) router.replace("/dashboard");
+      } catch {
+        /* a session hiccup must never break the landing page */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   // Hero panel cycling state
   const [panelIdxs, setPanelIdxs] = useState([0, 1, 2, 3]);
