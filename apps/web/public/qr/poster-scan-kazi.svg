@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sumaiya poster — "Kazi inakusubiri" ("the job is waiting for you").
+  Sumaiya poster — "Scan hapa kupata kazi" ("scan here to get a job").
   Trim: A4 portrait, 794x1123 design units = 210x297 mm.
   BLEED: 3 mm on EVERY side (canvas 216x303 mm). The espresso top
   band, the espresso footer band and the cream field are all drawn out past
@@ -25,7 +25,7 @@
 
   <!-- Tier 1 — the BENEFIT, not the mechanism. Someone reading only this line
        should still understand what they get. Bold, sentence case, no caps. -->
-  <text x="397" y="172" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#211A15">Kazi inakusubiri</text>
+  <text x="397" y="172" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="52" font-weight="700" fill="#211A15">Scan hapa kupata kazi</text>
   <!-- Tier 2 — the pain it answers, in the words people already use. "ATS" is
        jargon and belongs nowhere near this poster. -->
   <text x="397" y="218" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="32" font-weight="400" fill="#211A15" opacity="0.72">CV yako haifiki kwa mwajiri</text>
@@ -67,7 +67,7 @@
 
   <!-- The scan instruction, demoted to the code it belongs to — it describes the
        action, so it lives with the action (note 1). -->
-  <text x="397" y="956" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#DA4A1C">Scan hapa</text>
+  <text x="397" y="956" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#DA4A1C"></text>
   <!-- Plain-text address for people who cannot or will not scan: bigger and more
        prominent than the footer, which is now just the brand line. -->
   <text x="397" y="996" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="32" font-weight="700" fill="#211A15">sumaiya.app/ats-checker</text>

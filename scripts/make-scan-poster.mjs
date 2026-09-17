@@ -88,9 +88,9 @@ const T3 = 20; // details: bullets, "Bure kabisa", footer
 // audit — do NOT paraphrase them. Only the headline changed in this revision
 // (mechanism -> benefit); every other string is byte-identical to the previous
 // poster.
-const HEADLINE = "Kazi inakusubiri"; // was "Scan hapa kupata kazi" (mechanism)
+const HEADLINE = "Scan hapa kupata kazi"; // HIS words. Research says lead with the benefit, but this line carries both the action AND the payoff ("kupata kazi" = get a job) and he wants the clickbait.
 const SUBHEAD = "CV yako haifiki kwa mwajiri";
-const QR_LABEL = "Scan hapa"; // the owner's own words, kept
+const QR_LABEL = ""; // suppressed: the headline now says "Scan hapa", so repeating it under the code is sloppy
 const PLAIN_URL = "sumaiya.app/ats-checker"; // typeable by people who won't scan
 const FREE = "Bure kabisa";
 const BULLETS = [
@@ -165,7 +165,7 @@ const label = (y, text, { size = T3, weight = 400, fill = ESPRESSO, opacity = 1,
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Sumaiya poster — "Kazi inakusubiri" ("the job is waiting for you").
+  Sumaiya poster — "Scan hapa kupata kazi" ("scan here to get a job").
   Trim: A4 portrait, ${TRIM_W}x${TRIM_H} design units = 210x297 mm.
   BLEED: ${BLEED_MM} mm on EVERY side (canvas ${CANVAS_MM_W}x${CANVAS_MM_H} mm). The espresso top
   band, the espresso footer band and the cream field are all drawn out past
