@@ -1177,7 +1177,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         const jobTitle = or(s(d.jobTitle), p?.jobTitle), companyName = s(d.companyName);
         endpoint = "/api/cover-letter";
         payload = {
-          title: jobTitle ? `${jobTitle}${companyName ? " — " + companyName : ""}` : (sw ? "Barua ya Kazi" : "Cover Letter"),
+          title: jobTitle ? `${jobTitle}${companyName ? " — " + companyName : ""}` : (sw ? "Barua ya Maombi" : "Cover Letter"),
           content: s(d.content), jobTitle, companyName,
         };
         editorBase = "/editor/cover-letter/";

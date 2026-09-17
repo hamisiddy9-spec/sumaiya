@@ -200,7 +200,7 @@ export function computeCompositeScore(input: CompositeInput, jobProfile?: JobPro
       weight: WEIGHTS.achievementStrength,
       score: achieve.score,
       detail: achieve.detail,
-      detailSw: `${achieve.count} mafanikio yaliyopimika yamepatikana kwenye tajriba yako.`,
+      detailSw: `${achieve.count} mafanikio yaliyopimika yamepatikana kwenye uzoefu wako.`,
     },
     {
       key: "educationQualification",

@@ -87,7 +87,7 @@ export function explainScore(score: CompositeScore, data: CVData, jd: string, sw
   for (const tool of missingTools.slice(0, 4)) {
     needsUserInput.push(
       sw
-        ? `"${tool}" inaonekana kwenye maelezo ya kazi lakini haipo kwenye CV yako. Kama unayo tajriba hiyo, niambie wapi/umetumiaje.`
+        ? `"${tool}" inaonekana kwenye maelezo ya kazi lakini haipo kwenye CV yako. Kama una uzoefu huo, niambie wapi/umetumiaje.`
         : `"${tool}" appears in the job description but not in your CV. If you have this experience, tell me where/how you used it.`
     );
   }
@@ -111,7 +111,7 @@ export function explainScore(score: CompositeScore, data: CVData, jd: string, sw
   if (achieve && achieve.score < 70) {
     improvable.push(
       sw
-        ? "Ongeza idadi/matokeo yaliyopimika kwenye maelezo ya tajriba (mfano: asilimia, kiasi, muda)."
+        ? "Ongeza idadi/matokeo yaliyopimika kwenye maelezo ya uzoefu (mfano: asilimia, kiasi, muda)."
         : "Add measurable outcomes to your experience bullets (percentages, counts, timeframes)."
     );
   }
