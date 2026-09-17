@@ -8,6 +8,7 @@ import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
+import { addEpisode, updateMemory } from "../lib/ai-memory";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
@@ -331,6 +332,11 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       await offlineStorage.saveCVOffline(cv);
       storedLocally = true;
       track(FUNNEL_EVENTS.cvCreated, { template });
+      // Let her learn from real activity, not only from the ATS screen.
+      // Rebuilding a CV repeatedly is itself a signal worth noticing.
+      updateMemory((m) =>
+        addEpisode(m, "cv_rebuilt", `Rebuilt a CV using the ${template} template`),
+      ).catch(() => {});
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.local", cvId: cv.id });
     }
@@ -394,6 +400,13 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       const uri = await exportCVAsPDF(cv, { accent, lang, template });
       haptics.success();
       track(FUNNEL_EVENTS.cvExported, { template });
+      // An export is the moment a CV leaves the app to be sent to someone, so
+      // it is the strongest signal we ever get that the person is actively
+      // applying. Three of these across different days becomes a fact she can
+      // coach from — "actively applying" — without ever being asked.
+      updateMemory((m) =>
+        addEpisode(m, "cv_exported", `Exported a CV using the ${template} template`),
+      ).catch(() => {});
       await shareCV(cv, uri);
     } catch {
       haptics.error();
