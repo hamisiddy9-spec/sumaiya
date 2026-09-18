@@ -1,329 +1,192 @@
-# Sumaiya — AI-Assisted Development Guide
+# apps/web — AI-assisted development guide
 
-**Last updated:** 2026-09-15 (MAJOR ARCHITECTURE UPDATE)
-**Maintained by:** Claude (Haiku 4.5) + Remote Session  
-**Active branch:** `chore/release-manifest-1.6.15` (template system complete)
+**Last verified: 2026-09-18** — every statement below was checked against the **code in
+this working tree** (`git rev-parse HEAD` → `37e0b5b`, branch `main`), with the commands
+quoted. Nothing was carried over from other markdown in this repo; the previous version
+of this file described a product that does not exist (it named a `mobile/` directory, an
+`npm run build:android` script, a `documents` table, and three commits that are not in
+this repo's history — see *Corrections* at the bottom).
 
----
-
-## Project Overview
-
-**Sumaiya** is a bilingual (Swahili/English) CV builder platform with 273 professional templates, AI-powered tailor + ATS matching, and a native mobile app with camera CV scanning.
-
-**Core mission:** Fast CV creation (15 mins: scan → template → apply) that beats ATS + human review.
+Re-run the gate commands before trusting any number here.
 
 ---
 
-## 🆕 MAJOR UPDATE: Template System Architecture (2026-09-15)
+## What the product is
 
-### Template System — 7 Phases Complete ✅
-
-**What Changed:** Implemented pluggable TemplateProvider architecture. Sumaiya now has:
-- **TemplateProvider interface** — Swap between local (NativeTemplateProvider) and remote (TemplateHubProvider) with ONE LINE
-- **267 templates** — Auto-generated registry, organized into 8 families (5 core, 3 premium, 261 pending audit)
-- **Editable schemas** — 12+ CV fields with validation, per-template overrides
-- **Database schema** — `documents` table (replaces fragmented cv/letter/reference tables)
-- **Dynamic rendering** — Template → HTML → PDF pipeline
-- **CV Builder integration** — Template picker, dynamic renderer, export hooks (all wired into cv-editor-client.tsx)
-- **TemplateHub provider** — Stub ready for remote API calls when TemplateHub repo launches
-
-**Key Files:**
-- `lib/templates/schema.ts` — Core types & TemplateProvider interface
-- `lib/templates/native-provider.ts` — Local implementation (267 templates, HTML rendering)
-- `lib/templates/registry.ts` — Auto-generated template metadata
-- `lib/templates/families.ts` — 8 template families with groupings
-- `lib/templates/schemas.ts` — Editable field definitions
-- `lib/templates/templatehub-provider.ts` — Remote provider (stub, ready for API)
-- `lib/templates/migrations.ts` — Database migrations (Phase 1-5 defined)
-- `lib/cv-builder/` — Integration module (template-integration.ts, hooks, components)
-- `components/editor/` — UI components (template-picker.tsx, renderer, modal)
-
-**Architecture:**
-```
-Application → TemplateProvider Interface ↦ NativeTemplateProvider (local) ↦ 267 templates
-                                         ↦ TemplateHubProvider (remote, future)
-```
-
-**Provider Swap (when TemplateHub ready):**
-```typescript
-// One line in lib/templates/index.ts
-export const templateProvider = new TemplateHubProvider(apiClient);
-// ZERO UI changes needed.
-```
-
-**Commits:**
-- `799dc62` Phase 1 foundation
-- `39bd53d` Phases 2-5 complete
-- `c990aa3` TypeScript fixes
-- `a1c38ab` Phase 6 integration
-- `4cb255d` Phase 7 legacy bridge
-- `5f08cf9` Integration guide
-- `afe3e99` Documentation
-- `a264d23` Implementation checklist
-- `74bcb50` Launch ready status
-- `79307fa` E2E/Deployment/TemplateHub guides
-
-**Status:** ✅ All code complete, typed, tested. Ready for deployment.
+**Sumaiya** is a bilingual (Swahili/English) career-intelligence web app: users build a
+CV, tailor it to a job description, check it against ATS rules, and apply. The phone app
+is the second client and lives in `apps/native` (Expo / React Native 0.86, SDK ~57).
+The en/sw split is enforced by parity tests, not by convention —
+`lib/i18n/translations.test.ts` and `lib/snap-strings.test.ts` fail if a key exists in
+one language and not the other.
 
 ---
 
-## Current State (as of commit 8d908c9)
-
-### ✅ Completed Work (This Session)
-
-#### **1. Refinement Wave (RF1-RF5) — Design System + UX Polish**
-- **PR #279 (RF1):** Design-system consistency — Badge primitive, AA ember token, 48-file contrast sweep
-- **PR #280 (RF2):** Skeleton loaders — PageLoader card grid, applications-grid skeleton, riseClass stagger
-- **PR #281 (RF3):** Copy pass SW/EN — bilingual parity test, mixed-language fixes, verb consistency
-- **PR #282 (RF4):** Mobile tap targets — modal close buttons 36px hit area (w-9 h-9)
-- **PR #283 (RF5):** Motion utilities — easeOutCubic, countUpValueAt, riseClass (extracted to lib/motion.ts)
-
-#### **2. Advanced Features**
-- **PR #289:** Skill-gap KB — learning resources (34 URLs verified live), requirement-evidence system
-- **PR #290:** Repeat-guard fix — order-insensitive bag cover + DP LCS (Swahili near-dups now 0.957 match)
-- **PR #293:** Nav relevance — removed stale "New" badge from Jobs, added Snap-to-Apply "New" badge
-- **PR #295:** Native Android app — Expo SDK 57, RN 0.86, onboarding carousel, Sumaiya chat, CV builder, PDF export
-
-#### **3. Accessibility & Privacy**
-- **Commit c8a3fe1:** Accessibility fix — 36px modal close button + focus ring styling (resolves PR #282 conflict)
-- **Commit 8d908c9:** Privacy policy Section 5 — Conversation Logging for AI Improvement disclosure (12-month retention, opt-out available)
-
-#### **4. Documentation**
-- **Commit 7838ab9:** NATIVE_APP_SPEC.md — Detailed 4-week native app implementation plan (monorepo architecture, 8 screens, camera+OCR+offline+sync)
-
----
-
-## Architecture
-
-### Web + Native (Monorepo Ready)
+## Where things live (verified paths)
 
 ```
-sumaiya/
-├─ apps/
-│  ├─ web/               (Next.js, React, 273 templates, full editor)
-│  │  ├─ app/            (App Router, locale routing)
-│  │  ├─ components/     (React UI, 273 template previews)
-│  │  ├─ lib/            (Snap-to-Apply engine, ATS, tailor, OCR, KB)
-│  │  └─ public/         (SVG, fonts, APK download link)
-│  │
-│  └─ mobile/            (Expo/RN, native app — READY FOR MULTI-PHASE BUILD)
-│     ├─ src/screens/    (8 screens: Splash, Auth, Onboarding, Scan, Templates, CVs, Profile, Settings)
-│     ├─ src/components/ (RN Button, Card, Modal, Badge, Camera, etc.)
-│     ├─ src/services/   (camera.ts, ocr.ts, pdf.ts, share.ts, storage.ts)
-│     ├─ src/state/      (authContext, cvContext, uiContext)
-│     ├─ src/hooks/      (useCamera, useOCR, useCVSync, useTheme)
-│     ├─ eas.json        (EAS build config for Play Store & App Store)
-│     └─ NATIVE_APP_SPEC.md (implementation blueprint)
-│
-├─ packages/ (monorepo ready, not yet split)
-│  ├─ design-tokens/     (colors, spacing, typography — shared)
-│  ├─ api-client/        (auth, CV CRUD, template fetch, sync)
-│  ├─ types/             (TypeScript interfaces)
-│  ├─ utils/             (OCR, CV parsing, template matching, storage)
-│  └─ hooks/             (useAuth, useOfflineSync, useCVs)
-│
-├─ scripts/
-│  ├─ gen-mobile-templates.mjs (generates 266 templates for mobile)
-│  └─ verify-learning-urls.sh (validates 34 KB URLs)
-│
-└─ .github/workflows/
-   ├─ verify.yml         (tsc, vitest 800+, evals 100+, build)
-   ├─ apk-build.yml      (Expo EAS build → signed APK)
-   └─ mobile-apk-build.yml (Android native build + signing)
+apps/web/
+├─ app/                     App Router, locale routing ([locale]), API routes
+│  └─ api/[[...route]]/     Hono-style catch-all API entry
+├─ components/
+│  ├─ editor/               cv-editor-client, template-picker, dynamic-template-renderer,
+│  │                        template-selection-modal, ats-panel, share-cv-modal, …
+│  ├─ templates/            267 .tsx template sources (the real gallery)
+│  ├─ ui/                   primitives (badge.tsx, …)
+│  └─ admin/, marketing/    admin screens, landing pages
+├─ lib/
+│  ├─ templates/            see next section — the provider layer
+│  ├─ cv-builder/           template-integration.ts, template-adapter.ts,
+│  │                        use-template-provider.ts, use-cv-export.ts
+│  ├─ db/schema.ts          Drizzle schema (29 tables)
+│  ├─ i18n/                 translations.ts + parity tests
+│  ├─ snap-*.ts             the Snap-to-Apply surface
+│  └─ client-cv-extract.ts  browser-side OCR path (lazy tesseract.js)
+├─ drizzle/migrations/      SQL migrations
+├─ scripts/                 generators, verifiers, migrate-*.mjs
+└─ evals/                   anti-fabrication eval harness (run as `npm run evals`)
 ```
 
----
-
-## Key Features
-
-### Web Platform
-| Feature | Status | Notes |
-|---------|--------|-------|
-| CV Builder (273 templates) | ✅ Shipped | Full React editor, drag-drop, live preview |
-| Snap-to-Apply (E1) | ✅ Shipped | Paste/photo → JD guard → ATS match → tailor → export |
-| Snap-to-Apply Share (viral) | ✅ Shipped | PII-free signed token (HMAC-SHA256, 90-day) |
-| ATS Checker | ✅ Shipped | Real ATS parser, keyword matching |
-| Jobs Feed | ✅ Shipped | Curated opportunities, apply direct |
-| Sumaiya AI Chat | ✅ Shipped | CV assistant, skill gaps, learning resources |
-| Learning Resources KB | ✅ Shipped | 34 URLs (Coursera, freeCodeCamp, AWS, etc.) |
-| Bilingual (SW/EN) | ✅ Shipped | Recursive parity test, 100% coverage |
-| Conversation Logging | ✅ Spec'd | Privacy policy updated, ready for backend impl |
-
-### Native Mobile App (Expo/RN)
-| Feature | Status | Next |
-|---------|--------|------|
-| Onboarding (4-page carousel) | 📋 Spec'd | Implement (Week 2) |
-| **Camera CV Scan** | 📋 Spec'd | **HIGH PRIORITY** (Week 3) — OCR + field extraction |
-| **Offline SQLite + Sync Queue** | 📋 Spec'd | **HIGH PRIORITY** (Week 3) — FIFO, exponential backoff |
-| Template Picker (266 templates) | 📋 Spec'd | Carousel, ranking by career stage (Week 3) |
-| CV List (local + cloud) | 📋 Spec'd | Offline badges, sync status (Week 2) |
-| PDF Export | 📋 Spec'd | expo-print integration (Week 4) |
-| Native Share Sheet | 📋 Spec'd | expo-sharing (email, messages, WhatsApp) (Week 4) |
-| Dark Mode + Language Toggle | 📋 Spec'd | Persisted settings (Week 4) |
-| EAS Build Config | 📋 Spec'd | Play Store & App Store (Week 4) |
+**Snap-to-Apply is not one file.** There is no `lib/snap-apply.ts`; the behaviour is
+split across `lib/snap-application.ts`, `snap-ocr.ts`, `snap-prefill.ts`,
+`snap-export.ts`, `snap-share.ts`, `snap-a11y.ts`, `snap-strings.ts` (each with a
+colocated `.test.ts`).
 
 ---
 
-## Gates & Verification
+## The template system (the part that is real)
 
-### CI/CD (GitHub Workflows)
+`lib/templates/` — provider layer, verified by reading and by running its unit test:
+
+| File | What it is |
+|---|---|
+| `schema.ts` | `TemplateProvider`, `TemplateMetadata`, `TemplateFamily`, `RenderedDocument`, `EditableFieldSpec` |
+| `native-provider.ts` | `NativeTemplateProvider` — serves the local registry |
+| `registry.ts` | **generated** (266 entries). Regenerate: `node scripts/generate-template-registry.mjs` |
+| `curation.ts` | 47 curated ids, of which 7 are premium — the single source of truth for what is *offered* |
+| `tiers.ts` | `getCvTemplateTier()` → `premium` / `core` / `legacy` |
+| `families.ts` | **STUB** (see below) |
+| `schemas.ts` | `STANDARD_CV_SCHEMA` (14 fields) + a `TEMPLATE_SCHEMAS` map with no real overrides |
+| `templatehub-provider.ts` | HTTP client for the separate TemplateHub repo; self-labelled "STUB only. Not yet integrated." |
+| `index.ts` | `selectProvider()` + the `templateProvider` singleton used by the UI |
+| `migrations.ts`, `database-schema.sql` | SQL kept alongside the provider layer — **the `documents` table they describe is not the live schema** |
+
+**Counts, measured (not inherited):** 267 `.tsx` sources → **266** registry entries →
+**265** distinct names (`"Herald"` is duplicated) → **47** offered (**7** premium).
+All 266 registry entries are `category: "cv"`. The number **273 appears nowhere in the
+tree**.
+
+**`families.ts` is a stub and must not be described as shipped.** It declares 8 families,
+but 5 of the template ids it references (`simple-cv`, `professional-cv`, `ats-cv`,
+`artemis`, `aurora`) do not exist in the registry, and it carries the comment
+*"IMPORTANT: This is a STUB showing the pattern."* In the generated registry, **260 of
+266 templates have `family: "pending"`**; only 6 have a real family. Likewise
+`TEMPLATE_SCHEMAS` in `schemas.ts` maps 10 ids to the *same* standard schema — there are
+zero per-template overrides today (the file has a TODO saying so), and 5 of those keys are
+the same non-existent ids.
+
+The singleton is wired into the editor for real: `components/editor/template-picker.tsx`,
+`template-selection-modal.tsx`, `dynamic-template-renderer.tsx` and
+`lib/cv-builder/template-integration.ts` all import `templateProvider`, and
+`lib/templates/provider-select.test.ts` pins the selection rule (native by default;
+remote only with URL **and** key; remote without credentials falls back to native).
+
+---
+
+## Database
+
+`lib/db/schema.ts` (Drizzle) defines **29 tables**. The CV-family tables are still
+separate: `cv`, `cover_letter`, `letter`, plus `document_version` for history, whose
+payload column is **`snapshot` (jsonb)**.
+
+There is **no `documents` table** and **no `content_snapshot` column**. Any migration file
+under `lib/templates/` that describes one is a design document, not the applied schema.
+
+---
+
+## Commands that must pass before a change is "done"
+
+### This app uses VITEST (there is no jest here)
+
 ```bash
-# All must pass before merge
-npm run build          # Next.js + Expo (0 errors)
-npx tsc --noEmit       # TypeScript strict (0 errors)
-npx vitest run         # 800+ tests (all passing)
-npm run evals          # 100+ anti-fabrication tests (green)
+cd apps/web
+npx tsc --noEmit     # clean
+npm run lint         # next lint
+npx vitest run       # 127 files: 126 pass, 1 skipped · 2042 tests: 2039 pass, 3 skipped
+npm run evals        # anti-fabrication gate: 9 files, 135 tests (133 pass, 2 skip)
+npm run build        # next build
 ```
 
-### Pre-Commit Checks
-- No console.log in production code
-- No hardcoded secrets
-- Design token consistency (colors, spacing)
-- Bilingual strings parity (SW = EN length ±10%)
+Full gate in one command (what `npm run verify` runs, via `scripts/verify-all.sh`):
+`npx tsc --noEmit` → `npm run lint` → `npm test` → `npm run evals` → `npm run build` →
+cross-browser Playwright E2E (`playwright.config.ts`) → Lighthouse → DB checks. It exits
+non-zero on the first failure and logs to `e2e/reports/verify.log`.
+
+Other real scripts in this workspace: `test:watch`, `test:e2e` (`scripts/e2e-smoke.mjs`),
+`test:e2e:local` (Playwright), `lh`, `verify:visual:update`, `db:generate`, `db:migrate`,
+`db:push`, `db:studio`, `evals:prod`.
+
+**Not from this workspace:** `npm run evals` does not exist at the repo root — call it as
+`npm -w @sumaiya/web run evals`. There is no `build:android` script anywhere.
+
+These also run in CI (`/.github/workflows/ci.yml`, jobs `web` and `web-evals`), so a
+change that passes locally but breaks `web:build` will still fail the PR.
 
 ---
 
-## Next Phase: Native App Implementation (4 Weeks)
+## Corrections to the previous version of this file
 
-**Proposed PRs (ready to create):**
+| Previous claim | Reality |
+|---|---|
+| Active branch `chore/release-manifest-1.6.15` | active branch is **`main`**; that branch exists (local + origin) but is stale |
+| Branching from `claude/sumaiya-continuation-ife7xj`, merging `hermes/native-scan`, `hermes/native-offline`, `hermes/native-template-picker`, `hermes/native-settings-eas` | **none of those branches exist.** The real `hermes/*` branches are `hermes/ai-spine`, `hermes/crash-funnel-wip`, `hermes/native-a11y`, `hermes/native-e2e`, `hermes/native-empty-states-analytics`, `hermes/native-faq-privacy`, `hermes/web-template-dedup` |
+| `apps/mobile/` with `src/screens`, `src/components`, `src/services`, `src/state`, `src/hooks`, `eas.json`, `NATIVE_APP_SPEC.md` | the app is **`apps/native`**; it has `src/screens`, `src/components`, `src/services`, `src/hooks`, **`src/contexts`** (not `src/state`), and `eas.json` — but **no `NATIVE_APP_SPEC.md`** anywhere in the repo |
+| 273 templates (and "267 templates" in the sibling file) | 267 `.tsx` → 266 registry entries → 47 offered; 273 is not a real figure |
+| `documents` table "replaces fragmented cv/letter/reference tables" | no `documents` table exists; `cv`, `cover_letter`, `letter` are all still present |
+| "Content snapshot" field for versioning | `document_version.snapshot` (jsonb) |
+| `.github/workflows/verify.yml`, `apk-build.yml`, `mobile-apk-build.yml` | only `ci.yml`, `nightly-evals.yml`, `health-cron.yml` exist |
+| `npm run build` covers "Next.js + Expo"; `npx vitest run` = "800+ tests" | web and native are separate builds and **different runners**; real counts are 2042 (vitest, web) and 1201 (jest, native) |
+| "All 800+ tests green", "master branch is production-ready" | the branch is `main`; measured counts above, and both suites were green at verification time |
+| Commit `8d908c9` ("as of"), `c8a3fe1`, `7838ab9` | **not in this repo's history** (`git log` fails on all three) |
+| `lib/learning-resources.ts` = "34 URLs verified live" | the file contains **51 distinct URLs**; the verifier is `scripts/verify-learning-urls.sh` in *this* workspace, not at the repo root |
+| `lib/snap-apply.ts` | does not exist — the surface is `snap-application.ts` + siblings |
+| PR numbers (#279–#295, #296–#299) | not verifiable here (no `gh` CLI, no PR data in the tree) |
 
-### Week 1: Project Structure
-- **PR #296:** Native monorepo setup + TypeScript
-- Shared packages: design-tokens, api-client, types, utils, hooks
-
-### Week 2: Navigation + Screens
-- **PR #297:** RootNavigator, AuthStack, MainTabs, ScanStack
-- 8 core screens (Splash, Auth, Onboarding, MyCVs, Home, Profile, Settings)
-- UI component library (Button, Card, Modal, etc.)
-
-### Week 3: Camera + OCR + Offline
-- **PR #298:** ScanScreen (camera capture + gallery upload)
-- OCR: tesseract.js on `/api/mobile/ocr` OR Google Cloud Vision (latency TBD)
-- SQLite: cvs table + syncQueue table with FIFO + exponential backoff
-- TemplatePicker: 266 templates, lazy-load carousel, ranking by career stage
-
-### Week 4: Export + Deployment
-- **PR #299:** PDF export (expo-print) + native share sheet (expo-sharing)
-- Settings: dark mode (persisted), language toggle, clear cache, logout
-- EAS config: preview/preview2/production
-- Play Store & App Store metadata + screenshots
-
-**Blockers before PR #298:**
-- [ ] Verify template count: 266 or 273?
-- [ ] Confirm OCR architecture (tesseract.js latency vs Google Vision cost)
-- [ ] EAS credentials (Expo account + signing keys)
-- [ ] Device testing plan (iOS simulator, Android emulator, physical device)
+Claims that **did** hold up: Expo 57 / RN 0.86 (`apps/native/package.json`); 14 editable
+fields in `STANDARD_CV_SCHEMA`; en/sw parity tests exist and are recursive over the key
+tree; `lib/motion.ts` exports `easeOutCubic`, `countUpValueAt`, `riseClass`; the `Badge`
+primitive exists (`components/ui/badge.tsx`); privacy Section 5 "Conversation Logging for
+AI Improvement" (opt-out + 12-month retention) is really in
+`app/[locale]/(marketing)/privacy/page.tsx`; the template-phase commits
+`799dc62`…`79307fa` all exist (2026-09-15); `app/[locale]/(marketing)/privacy/page.tsx`
+and `apps/native/eas.json` exist at the stated paths.
 
 ---
 
-## Known Limitations & Tech Debt
+## Plans (NOT current facts)
 
-### Current
-1. **Monorepo not split yet** — packages/ exist but not yet separate npm packages
-2. **Mobile template count mismatch** — web has 273, script generates 266 (gap of 7)
-3. **OCR endpoint latency** — tesseract.js on server; may need Cloud Vision for <500ms
-4. **Offline sync conflicts** — delete-wins strategy simple but may lose user data in edge cases
-5. **PWA not optimized** — web app works offline but not as smooth as native
-
-### Planned Fixes
-- Week 2: Audit all 273 templates, generate all for mobile
-- Week 3: Benchmark OCR (target <1s per CV), decide tesseract vs Cloud
-- Week 4: Add conflict resolution UI (show user, ask which version to keep)
-- Post-launch: PWA improvements (service worker, background sync)
-
----
-
-## Testing Strategy
-
-### Unit Tests
-- `lib/ocr.ts`: Field extraction accuracy (jina, email, phone, titles, skills)
-- `lib/template-matcher.ts`: Ranking by career stage + industry
-- `lib/sync-queue.ts`: FIFO order, conflict detection, backoff timing
-
-### Integration Tests
-- Camera → OCR → field prefill → template picker → save to SQLite
-- Offline create CV → go online → sync to server → verify no duplicates
-- Dark mode toggle → check all 8 screens render correctly
-
-### Device Testing
-- iOS: camera permission flow, PDFs render, native share sheet
-- Android: same + back button navigation, system fonts
-
-### E2E (Playwright, cross-browser)
-- Web + mobile workflows:
-  - Sign up → onboarding → scan → pick template → download PDF → share
-  - Mobile offline: create 3 CVs, go airplane mode, make changes, come online, verify synced
+1. **Native app work** — the phone app is a real, built app (`apps/native`, version 1.6.23,
+   versionCode 10623) with 218 template implementations, not a 4-week greenfield spec.
+   Anything still planned (camera/OCR round-trips, offline sync hardening, store
+   submission) should be written as a plan in `docs/`, not asserted here.
+2. **TemplateHub remote serving** — `templatehub-provider.ts` is a client stub; switching
+   to it needs env vars (`NEXT_PUBLIC_TEMPLATE_PROVIDER`, `TEMPLATE_HUB_API_URL`,
+   `TEMPLATE_HUB_API_KEY`) that are **not in `.env.example` yet**, plus integration tests
+   with native fallback.
+3. **Template curation** — give the 260 `family: "pending"` templates a real
+   classification or retire them, and fix/delete the non-existent ids in `families.ts`
+   and `schemas.ts`.
+4. **This file** — if a claim here goes stale, fix the claim; do not let a new document
+   restate it.
 
 ---
 
-## Branching Strategy
+## Could NOT be verified
 
-**Primary development:** `claude/sumaiya-continuation-ife7xj`
-- Merges from feature branches: `hermes/native-scan`, `hermes/native-offline`, `hermes/native-template-picker`, `hermes/native-settings-eas`
-- Each feature branch is independent (no inter-PR conflicts)
-- All tests must pass before merge
-
-**Deployment:** `master`
-- Only fully tested, verified PRs merged to master
-- Master = production-ready (gates all green)
-- Releases tagged (v1.0.0, v1.1.0, etc.)
-
----
-
-## For Hermes (Next Steps)
-
-1. **Verify template count:** `scripts/gen-mobile-templates.mjs` — does it generate 266 or all 273?
-2. **OCR latency test:** Benchmark `/api/mobile/ocr` with 5 test CVs (target <500ms)
-3. **Create branch:** `hermes/native-scan` from `claude/sumaiya-continuation-ife7xj`
-4. **Implement Week 2 screens:** RootNavigator, ScanScreen, CvListScreen
-5. **Run gates:** tsc, vitest, evals, build before opening PR #296
-
-**Spec reference:** `mobile/NATIVE_APP_SPEC.md` (942 lines, detailed checklist per week)
-
----
-
-## For Humans (Stakeholders)
-
-**Shipping Timeline:**
-- ✅ Web platform: fully shipped (273 templates, AI, ATS, chat, jobs feed)
-- 📅 Native app MVP: 4 weeks (camera scan + offline + template picker)
-- 📅 App Store/Play Store: Week 5 (submissions, approval ~1–2 weeks)
-
-**ROI on native:**
-- Camera CV scan (mobile-only) = 5x faster than desktop upload
-- Offline sync = works on 3G / airplane mode
-- Native share sheet = one-tap send to email/LinkedIn/WhatsApp
-- Defensibility: competitors can't easily copy camera+OCR integration
-
-**Privacy compliant:**
-- Conversation logging disclosed (Section 5 of privacy policy)
-- Opt-out toggle in settings
-- 12-month retention, then deleted
-- No PII in learning resources (just course links)
-
----
-
-## References
-
-- **Expo docs:** https://docs.expo.dev/versions/v57.0.0/
-- **React Native:** https://reactnative.dev/
-- **EAS Build:** https://docs.expo.dev/build/setup/
-- **Privacy Policy:** `app/[locale]/(marketing)/privacy/page.tsx`
-- **Native Spec:** `mobile/NATIVE_APP_SPEC.md`
-- **Learning Resources:** `lib/learning-resources.ts` (34 URLs)
-- **Snap-to-Apply:** `lib/snap-apply.ts` (E1 engine)
-
----
-
-## Questions for Claude/Hermes?
-
-- **What's the OCR latency budget?** (e.g., <500ms for good UX)
-- **Should 266 templates in mobile match 273 on web, or is 266 intentional?**
-- **Do we want Cloud Vision for OCR accuracy, or optimize tesseract.js?**
-- **App Store approval: which comes first, iOS or Android?**
-
----
-
-**Status:** Ready for Hermes to implement Weeks 1–4 of NATIVE_APP_SPEC.md  
-**Last gate check:** All PR #295 flows tested, all 800+ tests green, evals 100+  
-**Deploy readiness:** master branch is production-ready  
+- **PR numbers and their titles** (#279–#299) — no `gh` CLI, no PR metadata locally.
+- **"34 URLs verified live"** — only the current file can be counted (51 distinct URLs);
+  whether they resolved when claimed cannot be reconstructed.
+- **"48-file contrast sweep"**, **"36px modal close targets"** (10 `w-9 h-9` occurrences in
+  8 files), **"800+"** phrasing — no reproducible source.
+- **Deployed state** — Vercel/Neon/Supabase/production behaviour is outside this tree;
+  nothing about "production-ready" can be confirmed from the repo alone.
