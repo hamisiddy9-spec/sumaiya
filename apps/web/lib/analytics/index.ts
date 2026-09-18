@@ -26,17 +26,21 @@ import {
   type AnalyticsEventMap,
   type AnalyticsEventName,
   type AttributionProps,
+  isCampaignFunnelStep,
   isKnownEvent,
 } from "./events";
 import { getAttributionProps } from "./attribution";
+import { reportCampaignStep } from "./campaign";
 
 export {
   EVENTS,
   ACTIVATION_EVENTS,
+  CAMPAIGN_FUNNEL_STEPS,
   type AnalyticsEventName,
   type AnalyticsEventMap,
   type AttributionProps,
   type CampaignSource,
+  type CampaignFunnelStep,
   type EmittedEventProps,
   type DocumentType,
   type ExportSource,
@@ -49,14 +53,26 @@ export {
   ATTRIBUTION_PARAM,
   ATTRIBUTION_STORAGE_KEY,
   MAX_CAMPAIGN_SOURCE_LENGTH,
+  VISITOR_STORAGE_KEY,
   captureAttribution,
   getAttributionProps,
   getCampaignSource,
+  getVisitorId,
   initAttribution,
   readSrcFromSearch,
   resetAttribution,
+  resetVisitorId,
   sanitizeCampaignSource,
 } from "./attribution";
+
+// The client half of the campaign funnel — already wired into `track()` below,
+// so a component normally does not need to call it; exported for the rare
+// surface that reports a step outside the tracker.
+export {
+  CAMPAIGN_EVENT_ENDPOINT,
+  buildCampaignPayload,
+  reportCampaignStep,
+} from "./campaign";
 
 // Re-export for the handful of legacy imports that referenced these types.
 export type { ExportSource as LegacyExportSource } from "./events";
@@ -164,6 +180,11 @@ export function track(event: string, props?: Props): void {
   } catch {
     /* never let analytics break a user action */
   }
+  // The server-side half of the campaign funnel. PostHog and Vercel answer
+  // "what happened" but this repo cannot query either, so a scan was invisible
+  // in our own database; the funnel steps are mirrored here, once, for every
+  // call site — see lib/analytics/campaign.ts. No `src` → no request.
+  if (isCampaignFunnelStep(event)) reportCampaignStep(event, clean);
   loadPostHog()
     .then((ph) => ph?.capture(event, clean))
     .catch(() => {});

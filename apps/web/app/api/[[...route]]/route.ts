@@ -23,6 +23,7 @@ import { jobRoutes } from "@/lib/api/routes/jobs";
 import { mobileOcrRoutes } from "@/lib/api/routes/mobile-ocr";
 import { mobileRoutes } from "@/lib/api/routes/mobile";
 import { appTelemetryRoutes } from "@/lib/api/routes/app-telemetry";
+import { campaignEventRoutes } from "@/lib/api/routes/campaign-events";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 import { reportError } from "@/lib/observability/report-error";
 
@@ -93,6 +94,9 @@ app.route("/mobile", mobileRoutes);
 // Anonymous native telemetry — signed-out installs included, so it can't live
 // behind the user-keyed outcome-event path. Never rejects the client.
 app.route("/app", appTelemetryRoutes);
+// Printed-poster campaign funnel — client-reported, anonymous, unsigned-in
+// scans included (they are the scans that matter). See lib/campaign/ingest.ts.
+app.route("/campaign", campaignEventRoutes);
 
 app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
 

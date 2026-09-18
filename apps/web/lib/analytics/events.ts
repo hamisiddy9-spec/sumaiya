@@ -79,6 +79,14 @@ export type EmittedEventProps<K extends AnalyticsEventName> =
  */
 export interface AnalyticsEventMap {
   // ─── Acquisition & the activation funnel ──────────────────────────────────
+  /**
+   * A visit that arrived from a tagged printed surface (`?src=poster`). This is
+   * the top of the campaign funnel: the scan itself. Emitted once per page load
+   * from lib/analytics/provider.tsx, only when attribution was captured, and
+   * mirrored to the server by lib/analytics/campaign.ts so the admin campaign
+   * view has a denominator that does not live in a third-party dashboard.
+   */
+  campaign_landing: { path: string };
   sample_cv_loaded: void;
   wizard_started: void;
   wizard_step_completed: { step: number; stepName: string };
@@ -148,6 +156,7 @@ export type AnalyticsEventName = keyof AnalyticsEventMap;
 export const EVENTS = Object.freeze(
   (
     [
+      "campaign_landing",
       "sample_cv_loaded",
       "wizard_started",
       "wizard_step_completed",
@@ -205,3 +214,39 @@ export const ACTIVATION_EVENTS: readonly AnalyticsEventName[] = Object.freeze([
   "document_exported",
   "ats_checked",
 ]);
+
+/**
+ * The campaign funnel — the steps a printed-poster scan can reach, in order.
+ *
+ * This is the list lib/analytics/campaign.ts mirrors to the server (POST
+ * /api/campaign/event) and the list the admin campaign view reads back per
+ * `src`. It is a SUBSET of the catalog on purpose: the whole catalog mirrored
+ * per event would be a second analytics pipeline to maintain, while these four
+ * are exactly what turns "someone scanned the poster" into "someone signed up
+ * and built a CV".
+ *
+ * campaign_landing  — the scan landed            (server-recorded)
+ * ats_checked       — the ATS checker was used   (client-reported)
+ * sign_in_completed — an account signed in       (client-reported, isNew flag)
+ * document_created  — a document was created     (client-reported)
+ *
+ * The step names are declared here, and nothing may be reported that is not in
+ * this list — the ingest route rejects anything else.
+ */
+export const CAMPAIGN_FUNNEL_STEPS = Object.freeze([
+  "campaign_landing",
+  "ats_checked",
+  "sign_in_completed",
+  "document_created",
+] as const satisfies readonly AnalyticsEventName[]);
+
+export type CampaignFunnelStep = (typeof CAMPAIGN_FUNNEL_STEPS)[number];
+
+const CAMPAIGN_STEP_SET = new Set<string>(CAMPAIGN_FUNNEL_STEPS);
+
+/** Is this event a campaign funnel step (i.e. one the server should record)? */
+export function isCampaignFunnelStep(
+  name: string,
+): name is CampaignFunnelStep {
+  return CAMPAIGN_STEP_SET.has(name);
+}

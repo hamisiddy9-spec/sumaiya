@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/jobs", label: "Jobs", icon: "briefcase" },
   { href: "/admin/submissions", label: "Submissions", icon: "folder" },
   { href: "/admin/insights", label: "Insights", icon: "chart" },
+  { href: "/admin/campaigns", label: "Campaigns", icon: "megaphone" },
 ];
 
 function NavIcon({ name }: { name: string }) {
@@ -23,6 +24,7 @@ function NavIcon({ name }: { name: string }) {
     folder: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z",
     briefcase: "M3 7h18v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7ZM8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18",
     chart: "M3 3v15a3 3 0 0 0 3 3h15M8 17v-5M13 17V8M18 17v-3",
+    megaphone: "M3 11a1 1 0 0 1 1-1h2l4-4v12l-4-4H4a1 1 0 0 1-1-1v-2ZM14 6.5a6 6 0 0 1 0 11M17 9a3 3 0 0 1 0 6",
   };
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">

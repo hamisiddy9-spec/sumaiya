@@ -51,6 +51,17 @@ export const ATTRIBUTION_PARAM = "src";
 export const ATTRIBUTION_STORAGE_KEY = "sumaiya.attribution.src";
 
 /**
+ * Key the anonymous visitor id is persisted under.
+ *
+ * A campaign funnel counts PEOPLE, not page loads, and the server cannot count
+ * people it cannot tell apart. This is a random id this origin generates once
+ * and reuses — never derived from anything about the person, never sent to
+ * PostHog, and never joined to a user account. It exists so "12 scans" means 12
+ * browsers rather than 12 page loads from one bored tester.
+ */
+export const VISITOR_STORAGE_KEY = "sumaiya.attribution.vid";
+
+/**
  * Longest source we keep. A campaign tag is a short slug — `poster`,
  * `flyer-boda`, `shop-kariakoo-3`. Anything longer is a broken link or someone
  * poking at the URL, and every emitted event would carry the whole thing.
@@ -227,4 +238,72 @@ export function resetAttribution(): void {
   } catch {
     /* nothing to clear */
   }
+}
+
+// ─── Anonymous visitor id ────────────────────────────────────────────────────
+// See VISITOR_STORAGE_KEY above for why this exists. It is the counting unit of
+// the campaign funnel (lib/analytics/campaign.ts → POST /api/campaign/event).
+
+/** Session fallback when storage is unavailable — same trick as sessionSource. */
+let sessionVisitorId: string | null = null;
+
+/** Forget the visitor id. For tests only — a real visitor keeps their id. */
+export function resetVisitorId(): void {
+  sessionVisitorId = null;
+  try {
+    browserStorage()?.removeItem(VISITOR_STORAGE_KEY);
+  } catch {
+    /* nothing to clear */
+  }
+}
+
+/**
+ * A random opaque id, generated once per browser and reused forever after.
+ *
+ * Idempotent and safe to call on every page load. Falls back to the in-memory
+ * id when storage is blocked, which means a private-mode visitor is counted
+ * once per page load rather than once per person — understating unique
+ * visitors, never overstating them, and never throwing.
+ */
+export function getVisitorId(): string {
+  if (sessionVisitorId) return sessionVisitorId;
+
+  try {
+    const stored = browserStorage()?.getItem(VISITOR_STORAGE_KEY);
+    // Sanitize on the way out: the stored value is user-editable (devtools) and
+    // ends up in a column the funnel groups by.
+    const clean =
+      typeof stored === "string"
+        ? stored.toLowerCase().replace(/[^a-z0-9-]+/g, "").slice(0, 40)
+        : "";
+    if (clean) {
+      sessionVisitorId = clean;
+      return clean;
+    }
+  } catch {
+    /* fall through to a fresh id */
+  }
+
+  const fresh = newId();
+  sessionVisitorId = fresh;
+  try {
+    browserStorage()?.setItem(VISITOR_STORAGE_KEY, fresh);
+  } catch {
+    /* quota / private mode — the session id still works this page load */
+  }
+  return fresh;
+}
+
+/** crypto.randomUUID where available, with a Math.random fallback. */
+function newId(): string {
+  try {
+    const g = globalThis as typeof globalThis & {
+      crypto?: { randomUUID?: () => string };
+    };
+    const uuid = g.crypto?.randomUUID?.();
+    if (uuid) return uuid.toLowerCase();
+  } catch {
+    /* fall through */
+  }
+  return `v-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
 }

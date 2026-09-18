@@ -8,6 +8,17 @@ const dir = path.dirname(fileURLToPath(import.meta.url));
 // pure logic the AI features are built on. LLM output itself is non-deterministic
 // and is not asserted here; we test the parts that must always behave the same.
 export default defineConfig({
+  // Next's tsconfig sets `jsx: "preserve"` (it must, or next build fails), which
+  // leaves JSX untransformed and makes any test that imports a .tsx component
+  // die with "invalid JS syntax". Rendering is the only way to prove what an
+  // admin actually SEES on a page whose numbers can each be individually
+  // correct while the page still misleads (see
+  // components/admin/campaign-funnel-view.test.ts), so tests compile JSX with
+  // the automatic runtime. Costs nothing for .ts tests — no .ts file has JSX.
+  //
+  // Vite 8 transforms with oxc, not esbuild: the `esbuild: { jsx }` option is
+  // read but the tsconfig still wins, so the runtime must be set on `oxc`.
+  oxc: { jsx: { runtime: "automatic" } },
   resolve: { alias: { "@": dir, "server-only": path.join(dir, "test/server-only-stub.ts"), "client-only": path.join(dir, "test/server-only-stub.ts") } },
   test: {
     include: ["**/*.test.ts"],

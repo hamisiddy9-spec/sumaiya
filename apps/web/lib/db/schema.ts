@@ -674,6 +674,49 @@ export const appEvent = pgTable("app_event", {
 export type AppEvent = typeof appEvent.$inferSelect;
 export type NewAppEvent = typeof appEvent.$inferInsert;
 
+// ─── Campaign Events (printed-poster attribution, server-side) ────────────────
+// The QR on a printed poster lands on /ats-checker?src=poster. attribution.ts
+// captures that tag in the browser, and lib/analytics attaches it to every
+// PostHog/Vercel event — but PostHog is a third-party dashboard this repo cannot
+// query, so "did any poster produce a single user?" had no server-side answer at
+// all. This table is that answer: the client reports the handful of funnel steps
+// a scan can reach to POST /api/campaign/event, and the admin campaign view
+// reads them back per `src`.
+//
+// Why not reuse app_event: that table is the NATIVE app's telemetry, keyed by an
+// install id generated inside the app. A poster scan happens in a browser, on a
+// device that may never install anything, so it needs its own key (`visitorId` —
+// a random id this origin generates once and stores beside the attribution).
+//
+// Privacy by construction: no user id, no hash, no IP, nothing derived from a
+// person. Only the campaign slug, the step name, an opaque random visitor id,
+// and the event's own declared props (sanitized on the way in by the same
+// PII-stripper outcome events use). `src` is NOT NULL on purpose — an untagged
+// visitor is not a campaign, and rows that cannot be attributed to a campaign
+// would only dilute the view.
+export const campaignEvent = pgTable("campaign_event", {
+  id: text("id").primaryKey(),
+  /** Sanitized campaign slug from `?src=` (lib/analytics/attribution.ts). */
+  src: text("src").notNull(),
+  /** A funnel step name from the declared catalog — never free text. */
+  name: text("name").notNull(),
+  /** Random per-browser id: the unit "unique visitors" is counted in. */
+  visitorId: text("visitor_id").notNull(),
+  /** The event's own declared props (path, mode/score, method/isNew…), sanitized. */
+  props: jsonb("props").notNull().default({}),
+  /** Client clock when sent; the server clock is the fallback. */
+  occurredAt: timestamp("occurred_at").notNull().defaultNow(),
+  /** When the server received it. */
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  srcIdx: index("campaign_event_src_idx").on(t.src, t.createdAt),
+  visitorIdx: index("campaign_event_visitor_idx").on(t.visitorId, t.createdAt),
+  nameIdx: index("campaign_event_name_idx").on(t.name, t.createdAt),
+}));
+
+export type CampaignEventRow = typeof campaignEvent.$inferSelect;
+export type NewCampaignEvent = typeof campaignEvent.$inferInsert;
+
 // ─── App Releases (published native builds) ───────────────────────────────────
 // The native updater used to treat "an APK exists on GitHub" as "everyone
 // should update", which meant every build we uploaded could interrupt every
