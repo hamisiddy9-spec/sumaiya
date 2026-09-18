@@ -70,7 +70,41 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
-function SignUpModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
+// ── Guest sign-up copy ────────────────────────────────────────────────────────
+// The account prompt does TWO different jobs and they need different words:
+//  - "account": the visitor is reaching for something that genuinely needs an
+//    account (save online, version history) — here the prompt IS the gate.
+//  - "postExport": a guest has ALREADY downloaded their file — here the prompt
+//    is an offer to carry it to another device, never a demand before delivery.
+// Both variants live side by side on purpose: the wording gets tuned in ONE
+// place instead of being scattered through the render tree.
+type SignUpIntent = "account" | "postExport";
+
+const SIGN_UP_COPY: Record<SignUpIntent, {
+  titleEn: string; titleSw: string;
+  bodyEn: string; bodySw: string;
+  sentNoteEn: string; sentNoteSw: string;
+}> = {
+  account: {
+    titleEn: "Save your CV online",
+    titleSw: "Hifadhi CV yako mtandaoni",
+    bodyEn: "Create a free account to keep it safe, restore earlier versions and open it on another device.",
+    bodySw: "Fungua akaunti bila malipo ili kuihifadhi, kurudisha matoleo ya awali na kuifungua kwenye kifaa kingine.",
+    sentNoteEn: "Your CV will be saved automatically.",
+    sentNoteSw: "CV yako itahifadhiwa kiotomatiki.",
+  },
+  postExport: {
+    titleEn: "Open it on your phone too?",
+    titleSw: "Kuifungua kwenye simu yako pia?",
+    bodyEn: "Your CV is saved on this device — sign in to open it on your phone.",
+    bodySw: "CV yako imehifadhiwa kwenye kifaa hiki — ingia ili kuifungua kwenye simu yako.",
+    sentNoteEn: "Your file is already on this device — the link opens it on your other devices.",
+    sentNoteSw: "Faili lako lipo tayari kwenye kifaa hiki — kiungo hiki kitaifungua kwenye vifaa vyako vingine.",
+  },
+};
+
+function SignUpModal({ onClose, sw, intent = "account" }: { onClose: () => void; sw: boolean; intent?: SignUpIntent }) {
+  const copy = SIGN_UP_COPY[intent];
   const [email, setEmail] = useState("");
   const [step, setStep] = useState<"options" | "sent">("options");
   const [isLoading, setIsLoading] = useState(false);
@@ -128,17 +162,19 @@ function SignUpModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
             </div>
             <h2 className="text-xl font-bold text-espresso mb-2">{sw ? "Angalia kikasha chako" : "Check your inbox"}</h2>
             <p className="text-text-muted text-sm">
-              {sw ? <>Tumetuma kiungo cha kuingia kwa <strong>{email}</strong>. CV yako itahifadhiwa kiotomatiki.</> : <>We sent a sign-in link to <strong>{email}</strong>. Your CV will be saved automatically.</>}
+              {sw
+                ? <>Tumetuma kiungo cha kuingia kwa <strong>{email}</strong>. {copy.sentNoteSw}</>
+                : <>We sent a sign-in link to <strong>{email}</strong>. {copy.sentNoteEn}</>}
             </p>
           </div>
         ) : (
           <>
             <div className="text-center mb-6">
               <div className="w-12 h-12 bg-ember-tint rounded-card flex items-center justify-center mx-auto mb-3">
-                <Icon name="download" className="text-ember" size={20} />
+                <Icon name={intent === "postExport" ? "check" : "download"} className="text-ember" size={20} />
               </div>
-              <h2 className="text-xl font-bold text-espresso mb-1">{sw ? "Pakua CV yako" : "Download your CV"}</h2>
-              <p className="text-text-muted text-sm">{sw ? "Fungua akaunti bila malipo — CV yako itahifadhiwa kiotomatiki." : "Create a free account — your CV will be saved automatically."}</p>
+              <h2 className="text-xl font-bold text-espresso mb-1">{sw ? copy.titleSw : copy.titleEn}</h2>
+              <p className="text-text-muted text-sm">{sw ? copy.bodySw : copy.bodyEn}</p>
             </div>
             <button onClick={handleGoogle} disabled={isLoading}
               className="w-full flex items-center justify-center gap-3 border border-border hover:bg-cream text-text-body font-medium py-3 rounded-input transition mb-4 disabled:opacity-60">
@@ -946,7 +982,10 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // is already persisted, so it starts true; a fresh guest draft flips true
   // after its first successful save.
   const [everSaved, setEverSaved] = useState(false);
-  const [showSignUpModal, setShowSignUpModal] = useState(false);
+  // Which account prompt is open (null = none). The intent picks the copy:
+  // "account" gates something that needs an account, "postExport" is the
+  // after-delivery offer a guest sees once their file has been downloaded.
+  const [signUpPrompt, setSignUpPrompt] = useState<SignUpIntent | null>(null);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -1393,15 +1432,14 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
   const handleDownloadRef = useRef<(source?: ExportSource) => void>(() => {});
   const handleDownload = async (source: ExportSource = "topbar") => {
-    if (guestMode) {
-      // The download wall — the single highest-drop step in the funnel.
-      posthog.capture('guest_download_wall', { source, templateId: initialDoc.templateId });
-      track("guest_download_wall", { source });
-      haptics.warning();
-      setShowSignUpModal(true);
-      return;
-    }
+    // No guest wall here: a visitor who built a CV on /editor/cv/try gets the
+    // FILE. The account ask moved to after delivery (see the success path
+    // below) — asking first is what was costing us the whole funnel.
     if (!isPremium) { setShowUpgradeModal(true); return; }
+    // Guests on a phone start on the Edit tab, where the Preview pane is
+    // display:none — and the Preview is exactly what gets rendered to PDF.
+    // Switch to it first so a mobile guest's first download isn't blank.
+    if (guestMode) setMobileTab("preview");
     track("export_started", { source });
     posthog.capture('export_start', { source });
     setIsDownloading(true);
@@ -1420,6 +1458,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       await new Promise<void>(r => setTimeout(r, 400));
       setExportOverlay("success");
       haptics.success();
+      // Delivery is done — NOW the guest gets the account ask, and not before.
+      // It renders under the success overlay (later sibling, same z-index), so
+      // they read "your CV is ready" first and get the prompt when they dismiss
+      // it. Failure never reaches this line (see the catch below).
+      if (guestMode) setSignUpPrompt("postExport");
       // Fire confetti celebration once per session on first successful download
       if (!hasFiredConfettiRef.current) {
         hasFiredConfettiRef.current = true;
@@ -1488,7 +1531,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     } catch {} finally { setVersionsLoading(false); }
   };
   const saveVersion = async (opts?: { silent?: boolean }) => {
-    if (guestMode) { if (!opts?.silent) setShowSignUpModal(true); return; }
+    if (guestMode) { if (!opts?.silent) setSignUpPrompt("account"); return; }
     if (!opts?.silent) setSavingVersion(true);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -1504,7 +1547,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   };
   const openHistory = () => {
     setDownloadMenu(false);
-    if (guestMode) { setShowSignUpModal(true); return; }
+    // Version history lives on the server (and its snapshots are per-account),
+    // so this one genuinely needs an account — the prompt IS the gate.
+    if (guestMode) { setSignUpPrompt("account"); return; }
     setShowHistory(true);
     void loadVersions();
   };
@@ -1534,7 +1579,6 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // and recruiters prefer/require .docx.
   const handleDownloadDocx = async () => {
     setDownloadMenu(false);
-    if (guestMode) { setShowSignUpModal(true); return; }
     if (!isPremium) { setShowUpgradeModal(true); return; }
     setIsDocx(true);
     try {
@@ -1542,8 +1586,13 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
       await downloadCvDocx(cvData, base, primaryColor);
       track("document_exported", { documentType: "cv", templateId });
+      // File delivered — only now the (guest) account ask. The catch below
+      // skips it, so a failed export never nags.
+      if (guestMode) setSignUpPrompt("postExport");
+      // Download log is per-account; a guest has no document id to log against
+      // (their fixed path segment is "try", which is not a CV id).
       const cvId = typeof window !== "undefined" ? window.location.pathname.split("/").pop() : null;
-      if (cvId && cvId !== "new") {
+      if (!guestMode && cvId && cvId !== "new") {
         const headers: Record<string, string> = {};
         if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
         fetch(`/api/cv/${cvId}/download`, { method: "POST", headers }).catch(() => {});
@@ -1558,11 +1607,12 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // Plain-text (.txt) export — the leanest ATS-safe format.
   const handleDownloadText = () => {
     setDownloadMenu(false);
-    if (guestMode) { setShowSignUpModal(true); return; }
     if (!isPremium) { setShowUpgradeModal(true); return; }
     const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
     exportCvToText(cvData, `${base}.txt`);
     track("document_exported", { documentType: "cv", templateId });
+    // Delivered (the .txt is written synchronously by the anchor click above).
+    if (guestMode) setSignUpPrompt("postExport");
   };
 
   // Native share — opens the OS share sheet (email, Google Drive, WhatsApp,
@@ -1570,7 +1620,6 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // to a normal download where files-sharing isn't supported (most desktops).
   const handleShare = async () => {
     setDownloadMenu(false);
-    if (guestMode) { setShowSignUpModal(true); return; }
     if (!isPremium) { setShowUpgradeModal(true); return; }
     if (!previewRef.current) return;
     const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
@@ -1588,6 +1637,10 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         triggerBlobDownload(blob, `${base}.pdf`);
       }
       track("document_exported", { documentType: "cv", templateId });
+      // Same rule as the other three outputs: the file/PDF is out, THEN the
+      // account offer. A cancelled native share sheet throws AbortError and
+      // lands in the catch below, so no prompt and no false success.
+      if (guestMode) setSignUpPrompt("postExport");
       // Log the export so dashboard download stats count shares too (the plain
       // PDF-download path already logs via the store; this path didn't).
       if (!guestMode && initialDoc.id && initialDoc.id !== "new") {
@@ -2605,7 +2658,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-dvh bg-sand/50 overflow-hidden">
-      {showSignUpModal && <SignUpModal onClose={() => setShowSignUpModal(false)} sw={uiLang === "sw"} />}
+      {signUpPrompt && <SignUpModal intent={signUpPrompt} onClose={() => setSignUpPrompt(null)} sw={uiLang === "sw"} />}
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} sw={uiLang === "sw"} />}
       {showShareModal && !guestMode && (
         <ShareCvModal
@@ -2905,7 +2958,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <div className="h-px bg-border my-1.5" />
                   <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">{uiLang === "sw" ? "Shiriki" : "Share"}</p>
                   <button
-                    onClick={() => { setDownloadMenu(false); if (guestMode) setShowSignUpModal(true); else setShowShareModal(true); }}
+                    onClick={() => { setDownloadMenu(false); if (guestMode) setSignUpPrompt("account"); else setShowShareModal(true); }}
                     className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left"
                   >
                     <Globe size={15} className="text-pine mt-0.5 shrink-0" />
@@ -2939,7 +2992,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           {guestMode && (
             <Button variant="primary" size="sm" onClick={() => {
               posthog.capture('sign_in_triggered', { source: 'guest_editor_topbar', method: 'button' });
-              setShowSignUpModal(true);
+              setSignUpPrompt("account");
             }}>
               {uiLang === "sw" ? "Jisajili bure" : "Sign up free"}
             </Button>
@@ -2949,10 +3002,14 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
       {guestMode && (
         <div className="bg-gold-tint border-b border-gold/30 px-3 md:px-4 py-2 flex items-center justify-between flex-shrink-0 z-10">
-          <span className="text-xs md:text-sm text-gold-text"><strong>{uiLang === "sw" ? "Hali ya mgeni" : "Guest mode"}</strong> — {uiLang === "sw" ? "imehifadhiwa kwenye kivinjari hiki tu." : "saved in this browser only."}</span>
+          {/* The banner must agree with what the editor actually does: the
+              download is free and account-free (the landing page's "Hakuna
+              usajili wa lazima"), and an account is only needed to save the
+              work online / open it on another device. */}
+          <span className="text-xs md:text-sm text-gold-text"><strong>{uiLang === "sw" ? "Hali ya mgeni" : "Guest mode"}</strong> — {uiLang === "sw" ? "pakua bila malipo, hakuna usajili; kazi yako imehifadhiwa kwenye kivinjari hiki tu." : "download free, no sign-up; your work is saved in this browser only."}</span>
           <button onClick={() => {
             posthog.capture('sign_in_triggered', { source: 'guest_editor_banner', method: 'button' });
-            setShowSignUpModal(true);
+            setSignUpPrompt("account");
           }} className="text-xs md:text-sm font-semibold text-gold-text hover:underline ml-3 flex-shrink-0">
             {uiLang === "sw" ? "Hifadhi mtandaoni →" : "Save online →"}
           </button>
