@@ -1,13 +1,17 @@
 import type { CVData } from "@/types";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   PhotoSquare, SkillBar, ContactItem, fmtDate, dateRange,
   visibleSkills,
 } from "@/components/templates/template-utils";
 
-interface Props { data: CVData; primaryColor: string; fontFamily: string }
+interface Props { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang;
+  }
 
-export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
+export function MuseTemplate({ data, primaryColor, fontFamily, lang = "en" }: Props) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
   const sidebarWidth = 210;
@@ -86,7 +90,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         <Divider />
 
         {/* Contact */}
-        <SidebarSection title="Contact" />
+        <SidebarSection title={L.contact} />
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 7, marginBottom: 14 }}>
           {personal.email && (
             <ContactItem icon={<IcoEmail size={10} color={dark} />} text={personal.email} color={dark} fontSize={9.5} />
@@ -109,7 +113,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {skills?.length > 0 && !hidden("skills") && (
           <>
             <Divider />
-            <SidebarSection title="Skills" />
+            <SidebarSection title={L.skills} />
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 8, marginBottom: 14 }}>
               {visibleSkills(skills).map((sk) => (
                 <div key={sk.id}>
@@ -127,7 +131,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {languages?.length > 0 && !hidden("languages") && (
           <>
             <Divider />
-            <SidebarSection title="Languages" />
+            <SidebarSection title={L.languages} />
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 6, marginBottom: 14 }}>
               {languages.map((lang) => (
                 <div key={lang.id}>
@@ -145,7 +149,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {hobbies && !hidden("hobbies") && (
           <>
             <Divider />
-            <SidebarSection title="Interests" />
+            <SidebarSection title={L.interests} />
             <p style={{ fontSize: 9.5, color: "#6b7280", lineHeight: 1.6, margin: 0 }}>{hobbies}</p>
           </>
         )}
@@ -161,7 +165,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Summary */}
         {summary && !hidden("summary") && (
           <div style={{ marginBottom: 20 }}>
-            <MainSectionHeader title="Profile" />
+            <MainSectionHeader title={L.profile} />
             <Card>
               <p style={{ fontSize: 10.5, color: "#374151", lineHeight: 1.7, margin: 0 }}>{summary}</p>
             </Card>
@@ -171,7 +175,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Experience */}
         {experience?.length > 0 && !hidden("experience") && (
           <div style={{ marginBottom: 20 }}>
-            <MainSectionHeader title="Experience" />
+            <MainSectionHeader title={L.experience} />
             {experience.map((exp) => (
               <Card key={exp.id}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
@@ -202,7 +206,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Education */}
         {education?.length > 0 && !hidden("education") && (
           <div style={{ marginBottom: 20 }}>
-            <MainSectionHeader title="Education" />
+            <MainSectionHeader title={L.education} />
             {education.map((edu) => (
               <Card key={edu.id}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
@@ -235,7 +239,7 @@ export function MuseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Certifications */}
         {certifications?.length > 0 && !hidden("certifications") && (
           <div>
-            <MainSectionHeader title="Certifications" />
+            <MainSectionHeader title={L.certifications} />
             {certifications.map((cert) => (
               <Card key={cert.id}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

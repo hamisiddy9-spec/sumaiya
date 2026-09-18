@@ -48,6 +48,8 @@ import { snapExportFilename } from "@/lib/snap-export";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import type { CVData } from "@/types";
 import type { Lang } from "@/lib/i18n/translations";
+import { INTER_STACK } from "@/lib/fonts";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
 
 const GUEST_CV_KEY = "sumaiya-guest-cv";
 
@@ -457,7 +459,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
       if (!el) return;
       await exportElementToPdf(el, {
         filename: snapExportFilename("cv", result.match.jobTitle, sw),
-        textLayer: buildCvText(result.tailoredCv),
+        textLayer: buildCvText(result.tailoredCv, lang),
       });
     } catch {
       setHardError(s.pdfError);
@@ -1057,7 +1059,9 @@ export function SnapClient({ lang }: { lang: Lang }) {
       <div aria-hidden="true" className="pointer-events-none" style={{ position: "fixed", left: -10000, top: 0, zIndex: -1 }}>
         {result?.tailoredCv && (
           <div ref={cvExportRef} style={{ width: 794, background: "#fff" }}>
-            <NakuruTemplate data={result.tailoredCv} primaryColor="#DA4A1C" fontFamily="Inter" lang={sw ? "sw" : "en"} />
+            <TemplateCanvas>
+              <NakuruTemplate data={result.tailoredCv} primaryColor="#DA4A1C" fontFamily={INTER_STACK} lang={sw ? "sw" : "en"} />
+            </TemplateCanvas>
           </div>
         )}
         {result?.coverLetter && (

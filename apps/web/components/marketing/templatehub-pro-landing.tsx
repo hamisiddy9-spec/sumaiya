@@ -26,6 +26,7 @@ import { useLang } from "@/lib/i18n/context";
 import { Icon, type IconName } from "@/components/ui/icon";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
 import { TESTIMONIALS } from "@/lib/testimonials";
+import { INTER_STACK } from "@/lib/fonts";
 
 const APK_HREF = "/downloads/sumaiya.apk";
 
@@ -187,7 +188,7 @@ function DesignCard({ id, scale, label }: { id: TemplateId; scale: number; label
             left: 0,
           }}
         >
-          <Component data={SAMPLE_CV} primaryColor={meta?.previewColor ?? "#DA4A1C"} fontFamily="Inter, sans-serif" />
+          <Component data={SAMPLE_CV} primaryColor={meta?.previewColor ?? "#DA4A1C"} fontFamily={INTER_STACK} />
         </div>
       </div>
       <div className="flex items-center justify-between px-3 py-2.5">

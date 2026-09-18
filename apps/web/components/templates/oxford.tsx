@@ -1,4 +1,6 @@
 import React from "react";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   fmtDate, dateRange,
@@ -10,7 +12,8 @@ interface Props {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
-}
+  lang?: Lang;
+  }
 
 function SectionHeader({ title }: { title: string }) {
   return (
@@ -30,7 +33,8 @@ function SectionHeader({ title }: { title: string }) {
   );
 }
 
-export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
+export function OxfordTemplate({ data, primaryColor, fontFamily, lang = "en" }: Props) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -116,7 +120,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Summary */}
       {summary && !hidden("summary") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Profile" />
+          <SectionHeader title={L.profile} />
           <p style={{ fontSize: 10.5, lineHeight: 1.7, color: "#4b5563", margin: 0, textAlign: "justify" }}>
             {summary}
           </p>
@@ -126,7 +130,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Experience */}
       {experience?.length > 0 && !hidden("experience") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Experience" />
+          <SectionHeader title={L.experience} />
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {experience.map((exp) => (
               <div key={exp.id}>
@@ -158,7 +162,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Education */}
       {education?.length > 0 && !hidden("education") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Education" />
+          <SectionHeader title={L.education} />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {education.map((edu) => (
               <div key={edu.id}>
@@ -188,7 +192,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Skills */}
       {skills?.length > 0 && !hidden("skills") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Skills" />
+          <SectionHeader title={L.skills} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 24px" }}>
             {visibleSkills(skills).map((skill) => (
               <span key={skill.id} style={{ fontSize: 10, color: "#374151" }}>
@@ -202,7 +206,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Languages */}
       {languages?.length > 0 && !hidden("languages") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Languages" />
+          <SectionHeader title={L.languages} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: "4px 24px" }}>
             {languages.map((lang) => (
               <span key={lang.id} style={{ fontSize: 10, color: "#374151" }}>
@@ -217,7 +221,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Certifications */}
       {certifications?.length > 0 && !hidden("certifications") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Certifications" />
+          <SectionHeader title={L.certifications} />
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {certifications.map((cert) => (
               <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -237,7 +241,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Referees */}
       {referees?.length > 0 && !hidden("referees") && (
         <div style={{ marginBottom: 20 }}>
-          <SectionHeader title="Referees" />
+          <SectionHeader title={L.referees} />
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {referees.map((ref) => (
               <div key={ref.id}>
@@ -263,7 +267,7 @@ export function OxfordTemplate({ data, primaryColor, fontFamily }: Props) {
       {/* Hobbies */}
       {hobbies && !hidden("hobbies") && (
         <div>
-          <SectionHeader title="Interests" />
+          <SectionHeader title={L.interests} />
           <p style={{ fontSize: 10, color: "#4b5563", lineHeight: 1.6, margin: 0 }}>{hobbies}</p>
         </div>
       )}

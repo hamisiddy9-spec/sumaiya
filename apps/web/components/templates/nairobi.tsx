@@ -6,10 +6,12 @@ import {
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 const PROF: Record<string, number> = { Native: 5, Fluent: 4, Advanced: 3, Intermediate: 2, Basic: 1 };
 
 export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = data.hiddenSections ?? [];
 
@@ -93,7 +95,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Experience */}
           {!hidden.includes("experience") && experience.length > 0 && (
             <div>
-              <SectionHeader title="Experience" />
+              <SectionHeader title={L.experience} />
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {experience.map((exp) => (
                   <div key={exp.id} style={{ display: "flex", gap: 10 }}>
@@ -134,7 +136,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Education */}
           {!hidden.includes("education") && education.length > 0 && (
             <div>
-              <SectionHeader title="Education" />
+              <SectionHeader title={L.education} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id} style={{ display: "flex", gap: 10 }}>
@@ -180,7 +182,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Skills */}
           {!hidden.includes("skills") && skills.length > 0 && (
             <div>
-              <SectionHeader title="Skills" />
+              <SectionHeader title={L.skills} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {visibleSkills(skills).map((skill) => (
                   <div key={skill.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -195,7 +197,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Languages */}
           {!hidden.includes("languages") && languages.length > 0 && (
             <div>
-              <SectionHeader title="Languages" />
+              <SectionHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((lang) => (
                   <div key={lang.id}>
@@ -210,7 +212,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Certifications */}
           {!hidden.includes("certifications") && certifications.length > 0 && (
             <div>
-              <SectionHeader title="Certifications" />
+              <SectionHeader title={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id}>
@@ -250,7 +252,7 @@ export function NairobiTemplate({ data, primaryColor, fontFamily, lang = "en" }:
           {/* Interests */}
           {!hidden.includes("hobbies") && hobbies && (
             <div>
-              <SectionHeader title="Interests" />
+              <SectionHeader title={L.interests} />
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
                 {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
                   <span key={i} style={{

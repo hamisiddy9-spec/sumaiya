@@ -1,4 +1,6 @@
 import React from "react";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   ContactItem, SkillBar,
@@ -11,7 +13,8 @@ interface Props {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
-}
+  lang?: Lang;
+  }
 
 function SectionTitle({ title, color }: { title: string; color: string }) {
   return (
@@ -30,7 +33,8 @@ function SectionTitle({ title, color }: { title: string; color: string }) {
   );
 }
 
-export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
+export function HorizonTemplate({ data, primaryColor, fontFamily, lang = "en" }: Props) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -93,7 +97,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
         }}>
           {/* Contact */}
           <div style={{ marginBottom: 20 }}>
-            <SectionTitle title="Contact" color={primaryColor} />
+            <SectionTitle title={L.contact} color={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {personal.email && (
                 <ContactItem icon={<IcoEmail size={9} color={primaryColor} />} text={personal.email} color="#374151" fontSize={9} />
@@ -116,7 +120,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
           {/* Skills with bar */}
           {skills?.length > 0 && !hidden("skills") && (
             <div style={{ marginBottom: 20 }}>
-              <SectionTitle title="Skills" color={primaryColor} />
+              <SectionTitle title={L.skills} color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {visibleSkills(skills).map((skill) => (
                   <div key={skill.id}>
@@ -131,7 +135,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
           {/* Languages */}
           {languages?.length > 0 && !hidden("languages") && (
             <div style={{ marginBottom: 20 }}>
-              <SectionTitle title="Languages" color={primaryColor} />
+              <SectionTitle title={L.languages} color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((lang) => (
                   <div key={lang.id}>
@@ -146,7 +150,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
           {/* Hobbies */}
           {hobbies && !hidden("hobbies") && (
             <div>
-              <SectionTitle title="Interests" color={primaryColor} />
+              <SectionTitle title={L.interests} color={primaryColor} />
               <p style={{ fontSize: 9, color: "#374151", lineHeight: 1.6, margin: 0 }}>{hobbies}</p>
             </div>
           )}
@@ -156,14 +160,14 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
         <div style={{ flex: 1, padding: "20px 20px 20px 22px", boxSizing: "border-box" }}>
           {summary && !hidden("summary") && (
             <div style={{ marginBottom: 20 }}>
-              <SectionTitle title="Profile" color={primaryColor} />
+              <SectionTitle title={L.profile} color={primaryColor} />
               <p style={{ fontSize: 10, lineHeight: 1.7, color: "#4b5563", margin: 0 }}>{summary}</p>
             </div>
           )}
 
           {experience?.length > 0 && !hidden("experience") && (
             <div>
-              <SectionTitle title="Experience" color={primaryColor} />
+              <SectionTitle title={L.experience} color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {experience.map((exp) => (
                   <div key={exp.id}>
@@ -209,7 +213,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
         }}>
           {education?.length > 0 && !hidden("education") && (
             <div style={{ marginBottom: 20 }}>
-              <SectionTitle title="Education" color={primaryColor} />
+              <SectionTitle title={L.education} color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -234,7 +238,7 @@ export function HorizonTemplate({ data, primaryColor, fontFamily }: Props) {
 
           {certifications?.length > 0 && !hidden("certifications") && (
             <div>
-              <SectionTitle title="Certifications" color={primaryColor} />
+              <SectionTitle title={L.certifications} color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id}>

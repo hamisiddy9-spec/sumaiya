@@ -1,3 +1,6 @@
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
+
 interface ExportOptions {
   /** Saved file name, including the .pdf extension. */
   filename: string;
@@ -425,16 +428,31 @@ export interface CvTextInput {
   skills?: Array<{ name?: string }>;
   languages?: Array<{ name?: string; proficiency?: string }>;
   certifications?: Array<{ name?: string; issuer?: string; date?: string }>;
+  /** Section order on the page: summary, experience, PROJECTS, education, … */
+  projects?: Array<{ name?: string; role?: string; date?: string; description?: string; url?: string }>;
+  /** Last section on the page, after certifications. */
+  referees?: Array<{ name?: string; title?: string; company?: string; email?: string; phone?: string }>;
   hobbies?: string;
+  /** Sections the user hid in the editor. They are not on the page, so they must
+   *  not be in the machine-readable copy either. */
+  hiddenSections?: string[];
 }
 
 /**
  * Builds a clean, ATS-friendly plain-text rendering of a CV. Shared by the .txt
  * export and the invisible PDF text layer so both stay in sync.
+ *
+ * `lang` makes the machine copy match the human copy: on a Swahili CV the
+ * headings are the same Swahili headings the template renders (MUHTASARI,
+ * UZOEFU WA KAZI, …), so an ATS does not receive an English document describing
+ * a Swahili page. English output is byte-identical to before.
  */
-export function buildCvText(cv: CvTextInput): string {
+export function buildCvText(cv: CvTextInput, lang: Lang = "en"): string {
   const lines: string[] = [];
   const { personal } = cv;
+  const sw = lang === "sw";
+  const H = cvHeadings(lang);
+  const hidden = (key: string) => (cv.hiddenSections ?? []).includes(key);
 
   // Join only the non-empty parts, so blank fields never leave stray "|"
   // separators, empty "start – end" date ranges, or literal "undefined" in the
@@ -442,7 +460,7 @@ export function buildCvText(cv: CvTextInput): string {
   const join = (parts: Array<string | undefined>, sep: string) =>
     parts.map((p) => (p ?? "").trim()).filter(Boolean).join(sep);
   const period = (start?: string, end?: string, current?: boolean) => {
-    const to = current ? "Present" : (end ?? "").trim();
+    const to = current ? (sw ? "Sasa" : "Present") : (end ?? "").trim();
     return join([start, to], " – ");
   };
 
@@ -452,12 +470,12 @@ export function buildCvText(cv: CvTextInput): string {
   const contacts = join([personal.email, personal.phone, personal.location, personal.linkedin, personal.website], " | ");
   if (contacts) lines.push(contacts);
 
-  if (cv.summary?.trim()) {
-    lines.push("", "PROFESSIONAL SUMMARY", cv.summary.trim());
+  if (cv.summary?.trim() && !hidden("summary")) {
+    lines.push("", (sw ? H.summary : "Professional Summary").toUpperCase(), cv.summary.trim());
   }
 
-  if (cv.experience?.length) {
-    lines.push("", "EXPERIENCE");
+  if (cv.experience?.length && !hidden("experience")) {
+    lines.push("", (sw ? H.experience : "Experience").toUpperCase());
     for (const exp of cv.experience) {
       const org = join([exp.company, exp.location], ", ");
       const header = join([exp.position, org, period(exp.startDate, exp.endDate, exp.current)], " | ");
@@ -467,37 +485,60 @@ export function buildCvText(cv: CvTextInput): string {
     }
   }
 
-  if (cv.education?.length) {
-    lines.push("EDUCATION");
+  // Projects and referees were visible in the exported PDF but were never
+  // written into the text layer, so no ATS could see a candidate's projects or
+  // their referees at all (docs/CV_DESIGN_AUDIT.md §3).
+  if (cv.projects?.length && !hidden("projects")) {
+    lines.push("", (sw ? H.projects : "Projects").toUpperCase());
+    for (const p of cv.projects) {
+      const head = join([p.name, p.role, p.date], " | ");
+      if (head) lines.push(head);
+      if (p.description?.trim()) lines.push(p.description.trim());
+      if (p.url?.trim()) lines.push(p.url.trim());
+    }
+  }
+
+  if (cv.education?.length && !hidden("education")) {
+    lines.push("", (sw ? H.education : "Education").toUpperCase());
     for (const ed of cv.education) {
       const degree = join([ed.degree, ed.field], " ");
       lines.push(join([degree, ed.institution, period(ed.startDate, ed.endDate), ed.grade], " | "));
     }
   }
 
-  if (cv.skills?.length) {
+  if (cv.skills?.length && !hidden("skills")) {
     const skills = join(cv.skills.map((s) => s.name), ", ");
-    if (skills) lines.push("", "SKILLS", skills);
+    if (skills) lines.push("", (sw ? H.skills : "Skills").toUpperCase(), skills);
   }
 
-  if (cv.languages?.length) {
+  if (cv.languages?.length && !hidden("languages")) {
     const langs = cv.languages
       .map((l) => (l.proficiency ? `${(l.name ?? "").trim()} (${l.proficiency})` : (l.name ?? "").trim()))
       .filter((s) => s.trim())
       .join(", ");
-    if (langs) lines.push("", "LANGUAGES", langs);
+    if (langs) lines.push("", (sw ? H.languages : "Languages").toUpperCase(), langs);
   }
 
-  if (cv.certifications?.length) {
-    lines.push("", "CERTIFICATIONS");
+  if (cv.certifications?.length && !hidden("certifications")) {
+    lines.push("", (sw ? H.certifications : "Certifications").toUpperCase());
     for (const c of cv.certifications) {
       const cert = join([c.name, c.issuer, c.date], " | ");
       if (cert) lines.push(cert);
     }
   }
 
-  if (cv.hobbies?.trim()) {
-    lines.push("", "INTERESTS", cv.hobbies.trim());
+  if (cv.referees?.length && !hidden("referees")) {
+    lines.push("", (sw ? H.referees : "Referees").toUpperCase());
+    for (const r of cv.referees) {
+      const head = join([r.name, join([r.title, r.company], ", ")], " | ");
+      if (head) lines.push(head);
+      const contact = join([r.email, r.phone], " | ");
+      if (contact) lines.push(contact);
+    }
+  }
+
+  if (cv.hobbies?.trim() && !hidden("hobbies")) {
+    lines.push("", (sw ? H.interests : "Interests").toUpperCase(), cv.hobbies.trim());
   }
 
   return lines.join("\n");
@@ -506,8 +547,8 @@ export function buildCvText(cv: CvTextInput): string {
 /**
  * Exports CV data as a plain-text .txt file so ATS systems can parse the content.
  */
-export function exportCvToText(cv: CvTextInput, filename: string): void {
-  const blob = new Blob([buildCvText(cv)], { type: "text/plain;charset=utf-8" });
+export function exportCvToText(cv: CvTextInput, filename: string, lang: Lang = "en"): void {
+  const blob = new Blob([buildCvText(cv, lang)], { type: "text/plain;charset=utf-8" });
   triggerBlobDownload(blob, filename);
 }
 

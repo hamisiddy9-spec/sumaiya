@@ -3,16 +3,21 @@ import {
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 
 export function MonarchTemplate({
   data,
   primaryColor,
   fontFamily,
+  lang = "en",
 }: {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
+  lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -120,7 +125,7 @@ export function MonarchTemplate({
           {/* Summary */}
           {show("summary") && summary && (
             <div>
-              <DoubleBorderHeader title="Profile" />
+              <DoubleBorderHeader title={L.profile} />
               <p style={{
                 fontSize: 10.5,
                 color: "#374151",
@@ -136,7 +141,7 @@ export function MonarchTemplate({
           {/* Experience */}
           {show("experience") && experience.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Professional Experience" />
+              <DoubleBorderHeader title={L.experience} />
               <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
                 {experience.map((exp) => (
                   <div key={exp.id}>
@@ -181,7 +186,7 @@ export function MonarchTemplate({
           {/* Education */}
           {show("education") && education.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Education" />
+              <DoubleBorderHeader title={L.education} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -220,7 +225,7 @@ export function MonarchTemplate({
           {/* Skills */}
           {show("skills") && skills.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Skills" />
+              <DoubleBorderHeader title={L.skills} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {visibleSkills(skills).map((skill) => (
                   <div key={skill.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -244,7 +249,7 @@ export function MonarchTemplate({
           {/* Certifications */}
           {show("certifications") && certifications.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Certifications" />
+              <DoubleBorderHeader title={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id}>
@@ -266,7 +271,7 @@ export function MonarchTemplate({
           {/* Referees */}
           {show("referees") && referees.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Referees" />
+              <DoubleBorderHeader title={L.referees} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {referees.map((ref) => (
                   <div key={ref.id}>
@@ -288,7 +293,7 @@ export function MonarchTemplate({
           {/* Languages */}
           {show("languages") && languages.length > 0 && (
             <div>
-              <DoubleBorderHeader title="Languages" />
+              <DoubleBorderHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {languages.map((lang) => (
                   <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -303,7 +308,7 @@ export function MonarchTemplate({
           {/* Hobbies */}
           {show("hobbies") && hobbies && (
             <div>
-              <DoubleBorderHeader title="Interests" />
+              <DoubleBorderHeader title={L.interests} />
               <p style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.7, margin: 0 }}>
                 {hobbies.split(/[,\n]+/).filter((h) => h.trim()).join(" · ")}
               </p>

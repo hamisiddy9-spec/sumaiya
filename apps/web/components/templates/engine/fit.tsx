@@ -1,17 +1,47 @@
 "use client";
 
-// SmartFit engine — wraps template output in an A4-fixed container.
-// Uses a 3-tier compression strategy before resorting to scaling,
-// so content shrinks gracefully rather than uniformly.
+// SmartFit engine — wraps template output in an A4-fixed container and makes the
+// sheet come out right, in both directions:
 //
-// Tier 1 (overflow ≤ 8%): reduce spacing via CSS custom props
-// Tier 2 (overflow 8-22%): clamp descriptions + reduce spacing
-// Tier 3 (overflow > 22%): scale (max 0.84) + show "CV too long" warning
+//   1. CONTENT THAT DOESN'T FIT. Tier 1 (overflow ≤ 8%): tighten spacing via
+//      CSS custom props. Tier 2 (8–22%): clamp descriptions + tighter spacing.
+//      Tier 3 (> 22%): scale down (floor 0.84) + a "CV too long" warning.
+//   2. A SHEET THAT ISN'T FILLED. A two-role CV used to occupy 52–71% of A4 and
+//      a new graduate's 45% — half a blank page on almost every template
+//      (docs/CV_DESIGN_AUDIT.md). SmartFit now *fills*: the design is laid out
+//      at a narrower width and magnified, so short content is poured into the
+//      sheet instead of huddled at the top of it.
+//
+// Both directions are driven by MEASURING THE REAL DOM (the bottom edge of the
+// lowest element that contains text) and iterating, never by guessing from the
+// CV data: the templates are hand-written with inline pixel sizes, so nothing
+// but the rendered layout knows how tall a CV actually is.
+//
+// Why the width change and not a plain `transform: scale()`: magnifying a
+// 794-wide layout makes it 794·s wide, which the page cannot show. Laying the
+// design out at 794/s and magnifying by s keeps the sheet exactly filled, and
+// the same trick in reverse lets an over-long CV breathe across the full width
+// instead of being scaled into a narrow strip with a white margin beside it.
 
-import { useEffect, useRef, useState, createContext, useContext } from "react";
+import { useCallback, useEffect, useRef, useState, createContext, useContext } from "react";
 
 const PAGE_W = 794;
 const PAGE_H = 1123;
+
+// A sheet counts as filled at 90% of A4 by ink height. The loop stops as soon
+// as the page is within FILL_TOLERANCE of that, so the resting fill lands at
+// 87%+ — above the 85% an audit would call "filled" — while leaving a template
+// that already fills the sheet (sahara, 90%) completely alone.
+const FILL_TARGET = 0.9;
+const FILL_TOLERANCE = 0.03;
+// Never magnify past this. Beyond ~1.5× the body text of an already-roomy
+// template starts to read as a poster rather than a CV.
+const FILL_MAX = 1.5;
+// Minimum shrink — unchanged from the original tier-3 floor.
+const SHRINK_MIN = 0.84;
+// Templates are at least this tall, so a per-iteration step can't run away.
+const STEP_MAX = 0.22;
+const ITERATIONS = 7;
 
 // Context lets sections read fit state and adapt their own rendering
 export interface FitContextValue {
@@ -24,56 +54,161 @@ export const FitContext = createContext<FitContextValue>({
 });
 export function useFit() { return useContext(FitContext); }
 
-function deriveState(overflowRatio: number): {
-  scale: number;
-  ctx: FitContextValue;
-  warn: boolean;
-} {
+function deriveContext(overflowRatio: number): { ctx: FitContextValue; warn: boolean } {
   if (overflowRatio <= 1.0) {
-    return { scale: 1, ctx: { descriptionClamp: 4, spacingFactor: 1 }, warn: false };
+    return { ctx: { descriptionClamp: 4, spacingFactor: 1 }, warn: false };
   }
   if (overflowRatio <= 1.08) {
     // Tier 1 — tighten spacing only
-    return { scale: 1, ctx: { descriptionClamp: 4, spacingFactor: 0.78 }, warn: false };
+    return { ctx: { descriptionClamp: 4, spacingFactor: 0.78 }, warn: false };
   }
   if (overflowRatio <= 1.22) {
     // Tier 2 — clamp descriptions + tighter spacing
-    return { scale: 1, ctx: { descriptionClamp: 2, spacingFactor: 0.65 }, warn: false };
+    return { ctx: { descriptionClamp: 2, spacingFactor: 0.65 }, warn: false };
   }
-  // Tier 3 — scale (last resort), max compression 0.84
-  const scale = Math.max(0.84, PAGE_H / (overflowRatio * PAGE_H));
-  return { scale, ctx: { descriptionClamp: 2, spacingFactor: 0.6 }, warn: scale < 0.88 };
+  // Tier 3 — scale (last resort)
+  return { ctx: { descriptionClamp: 2, spacingFactor: 0.6 }, warn: true };
 }
 
-export function AutoFitPage({ children }: { children: React.ReactNode }) {
+/**
+ * How full the sheet is: the bottom edge of the lowest element containing
+ * visible text, as a fraction of the page box.
+ *
+ * Measured against the page element's OWN rendered height rather than the
+ * PAGE_H constant, because the page is often mounted inside a scaled container
+ * (the editor preview and the public marketing pages both scale it). Normalising
+ * by what the page actually renders as keeps the number identical at any
+ * ancestor zoom — this is the same rule the design audit measured fill with
+ * (`fill.cjs`: bottom-of-lowest-text ÷ page height), so before/after numbers and
+ * the audit's numbers are comparable.
+ */
+function renderedFill(page: HTMLElement): number {
+  const rect = page.getBoundingClientRect();
+  if (rect.height <= 0) return 0;
+  let bottom = 0;
+  for (const el of Array.from(page.querySelectorAll<HTMLElement>("*"))) {
+    const hasText = Array.from(el.childNodes).some(
+      (n) => n.nodeType === 3 && (n.textContent ?? "").trim().length > 0,
+    );
+    if (!hasText) continue;
+    const r = el.getBoundingClientRect();
+    if (r.height <= 0) continue;
+    bottom = Math.max(bottom, r.bottom - rect.top);
+  }
+  return bottom / rect.height;
+}
+
+export interface AutoFitPageProps {
+  children: React.ReactNode;
+  /**
+   * `false` restores the shrink-only engine (no filling). It exists so the fill
+   * change can be measured against the old behaviour on the same page, same
+   * data, same fonts — a before/after comparison, not two different renders.
+   */
+  fill?: boolean;
+}
+
+export function AutoFitPage({ children, fill = true }: AutoFitPageProps) {
+  const pageRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
-  const [fitResult, setFitResult] = useState(() => deriveState(1));
+  const [fitResult, setFitResult] = useState(() => deriveContext(1));
+
+  const apply = useCallback((scale: number) => {
+    const inner = innerRef.current;
+    if (!inner) return;
+    const layoutW = `${PAGE_W / scale}px`;
+    inner.style.transformOrigin = "top left";
+    inner.style.transform = scale === 1 ? "" : `scale(${scale})`;
+    inner.style.width = layoutW;
+    // The template root carries its own inline `width: 794px`, which would win
+    // over the container — so the width has to be set on it directly.
+    const root = inner.firstElementChild as HTMLElement | null;
+    if (root) root.style.width = layoutW;
+  }, []);
+
+  const run = useCallback(() => {
+    const page = pageRef.current;
+    const inner = innerRef.current;
+    if (!page || !inner) return;
+
+    // First pass at natural size: what the template does with no help at all.
+    apply(1);
+    let scale = 1;
+    const naturalOverflow = renderedFill(page);
+    const { ctx, warn } = deriveContext(naturalOverflow);
+
+    // Then iterate toward the target. `best` keeps the fullest legal result so
+    // a pass that overshoots (and gets clipped) can't be the one we keep.
+    let best = { scale: 1, fill: naturalOverflow };
+    for (let i = 0; i < ITERATIONS; i++) {
+      const measured = renderedFill(page);
+      if (measured > 0 && measured <= 1.02 && measured > best.fill) best = { scale, fill: measured };
+
+      const overflow = measured > 1.005;
+      const under = fill && measured < FILL_TARGET - FILL_TOLERANCE;
+      if (!overflow && !under) break;
+
+      // Over-long: shrink by the measured amount (damped, so a re-wrap at the
+      // new width can't lurch). Too empty: grow toward the target, damped for
+      // the same reason — text no longer wraps identically once the layout box
+      // changes width.
+      const raw = overflow
+        ? scale * (1 / Math.max(measured, 0.5)) * 0.999
+        : scale * Math.pow(FILL_TARGET / Math.max(measured, 0.1), 0.6);
+      const stepped = Math.min(
+        Math.max(raw, scale * (1 - STEP_MAX)),
+        scale * (1 + STEP_MAX),
+      );
+      const next = Math.min(FILL_MAX, Math.max(SHRINK_MIN, stepped));
+      if (Math.abs(next - scale) < 0.005) break;
+      scale = next;
+      apply(scale);
+    }
+
+    // A final measurement AFTER the last applied scale decides the keep.
+    const finalFill = renderedFill(page);
+    if (finalFill > 1.02 && best.fill <= 1.02 && best.scale !== scale) {
+      apply(best.scale);
+    }
+    setFitResult({ ctx, warn: warn || scale <= SHRINK_MIN + 0.001 });
+  }, [apply, fill]);
 
   useEffect(() => {
-    const el = innerRef.current;
-    if (!el) return;
+    const inner = innerRef.current;
+    if (!inner) return;
 
-    const measure = () => {
-      // Temporarily reset scale so measurement is accurate
-      el.style.transform = "";
-      const h = el.scrollHeight;
-      const result = deriveState(h / PAGE_H);
-      setFitResult(result);
-      if (result.scale < 1) {
-        el.style.transform = `scale(${result.scale})`;
-        el.style.transformOrigin = "top left";
-      }
+    let raf = 0;
+    let adjusting = false;
+    const schedule = () => {
+      if (adjusting) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        adjusting = true;
+        try { run(); } finally { adjusting = false; }
+      });
     };
 
-    measure();
-    const obs = new ResizeObserver(measure);
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+    schedule();
+    // Re-run when the content itself changes (typing in the editor, a new
+    // template) — and after webfonts land, because font metrics change every
+    // measurement above.
+    const obs = new ResizeObserver(schedule);
+    obs.observe(inner);
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(schedule).catch(() => {});
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      obs.disconnect();
+    };
+  }, [run]);
 
   return (
     <FitContext.Provider value={fitResult.ctx}>
-      <div style={{ width: PAGE_W, height: PAGE_H, overflow: "hidden", position: "relative" }}>
+      <div
+        ref={pageRef}
+        style={{ width: PAGE_W, height: PAGE_H, overflow: "hidden", position: "relative" }}
+      >
         <div ref={innerRef} style={{ width: PAGE_W }}>
           {children}
         </div>

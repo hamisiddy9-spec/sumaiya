@@ -4,6 +4,7 @@ import {
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 // Ultra-minimal typographic section header — no bold, just letterspace + left accent
 function SectionHeader({ title, primaryColor }: { title: string; primaryColor: string }) {
@@ -35,6 +36,7 @@ export function SaharaTemplate({
 }: {
   data: CVData; primaryColor: string; fontFamily: string; lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -127,7 +129,7 @@ export function SaharaTemplate({
         {/* Summary */}
         {show("summary") && summary && (
           <div>
-            <SectionHeader title="Summary" primaryColor={primaryColor} />
+            <SectionHeader title={L.summary} primaryColor={primaryColor} />
             <p style={{
               fontSize: 10.5,
               color: "#374151",
@@ -143,7 +145,7 @@ export function SaharaTemplate({
         {/* Experience */}
         {show("experience") && experience.length > 0 && (
           <div>
-            <SectionHeader title="Experience" primaryColor={primaryColor} />
+            <SectionHeader title={L.experience} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
               {experience.map((exp) => (
                 <div key={exp.id}>
@@ -191,7 +193,7 @@ export function SaharaTemplate({
         {/* Education */}
         {show("education") && education.length > 0 && (
           <div>
-            <SectionHeader title="Education" primaryColor={primaryColor} />
+            <SectionHeader title={L.education} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {education.map((edu) => (
                 <div key={edu.id}>
@@ -222,7 +224,7 @@ export function SaharaTemplate({
         {/* Skills — horizontal flat list, no bars */}
         {show("skills") && skills.length > 0 && (
           <div>
-            <SectionHeader title="Skills" primaryColor={primaryColor} />
+            <SectionHeader title={L.skills} primaryColor={primaryColor} />
             <p style={{ fontSize: 10.5, color: "#374151", lineHeight: 1.9, margin: 0, letterSpacing: "0.01em" }}>
               {visibleSkills(skills).map((sk, i) => (
                 <span key={sk.id}>
@@ -242,7 +244,7 @@ export function SaharaTemplate({
         {/* Languages */}
         {show("languages") && languages.length > 0 && (
           <div>
-            <SectionHeader title="Languages" primaryColor={primaryColor} />
+            <SectionHeader title={L.languages} primaryColor={primaryColor} />
             <p style={{ fontSize: 10.5, color: "#374151", lineHeight: 1.9, margin: 0 }}>
               {languages.map((lang, i) => (
                 <span key={lang.id}>
@@ -258,7 +260,7 @@ export function SaharaTemplate({
         {/* Certifications */}
         {show("certifications") && certifications.length > 0 && (
           <div>
-            <SectionHeader title="Certifications" primaryColor={primaryColor} />
+            <SectionHeader title={L.certifications} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {certifications.map((cert) => (
                 <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -280,7 +282,7 @@ export function SaharaTemplate({
         {/* Referees */}
         {show("referees") && referees.length > 0 && (
           <div>
-            <SectionHeader title="Referees" primaryColor={primaryColor} />
+            <SectionHeader title={L.referees} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {referees.map((ref) => (
                 <div key={ref.id}>
@@ -308,7 +310,7 @@ export function SaharaTemplate({
         {/* Interests */}
         {show("hobbies") && hobbies && (
           <div>
-            <SectionHeader title="Interests" primaryColor={primaryColor} />
+            <SectionHeader title={L.interests} primaryColor={primaryColor} />
             <p style={{
               fontSize: 10.5,
               color: "#6b7280",

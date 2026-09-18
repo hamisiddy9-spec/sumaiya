@@ -25,6 +25,7 @@ import {
 } from "@/types";
 import { PremiumTemplateModal } from "@/components/premium-template-modal";
 import { usePremium } from "@/lib/use-premium";
+import { INTER_STACK } from "@/lib/fonts";
 
 // The gallery offers the curated, genuinely-distinct CV layouts (not every
 // recolor variant). Existing documents still render via the full registry.
@@ -252,7 +253,7 @@ function PreviewCard({ template, cardScale, premium }: { template: typeof TEMPLA
             pointerEvents: "none",
           }}
         >
-          <Component data={SAMPLE_CV} primaryColor={template.previewColor} fontFamily="Inter" />
+          <Component data={SAMPLE_CV} primaryColor={template.previewColor} fontFamily={INTER_STACK} />
         </div>
 
         {/* Hover overlay */}
@@ -474,7 +475,7 @@ function CoverLetterGalleryCard({ template }: { template: typeof COVER_LETTER_TE
               date="July 2025"
               content={SAMPLE_COVER_LETTER_CONTENT}
               primaryColor={template.previewColor}
-              fontFamily="Inter"
+              fontFamily={INTER_STACK}
             />
           </div>
         </div>

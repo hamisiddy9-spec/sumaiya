@@ -5,10 +5,12 @@ import {
   visibleSkills,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 const PROF: Record<string, number> = { Native: 5, Fluent: 4, Advanced: 3, Intermediate: 2, Basic: 1 };
 
 export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -30,7 +32,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
 
           {/* Contact */}
           <div>
-            <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>Contact</p>
+            <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>{L.contact}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {personal.email && <ContactItem icon={<IcoEmail size={9} color="rgba(255,255,255,0.8)" />} text={personal.email} color="rgba(255,255,255,0.8)" fontSize={9} />}
               {personal.phone && <ContactItem icon={<IcoPhone size={9} color="rgba(255,255,255,0.8)" />} text={personal.phone} color="rgba(255,255,255,0.8)" fontSize={9} />}
@@ -43,7 +45,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
           {/* Skills as pills */}
           {skills.length > 0 && !hidden("skills") && (
             <div>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>Skills</p>
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>{L.skills}</p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
                 {visibleSkills(skills).map((s) => (
                   <span key={s.id} style={{ fontSize: 9, color: "#fff", backgroundColor: "rgba(255,255,255,0.18)", padding: "3px 8px", borderRadius: 99, border: "1px solid rgba(255,255,255,0.25)" }}>{s.name}</span>
@@ -55,7 +57,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
           {/* Languages */}
           {languages.length > 0 && !hidden("languages") && (
             <div>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>Languages</p>
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>{L.languages}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((l) => (
                   <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -70,7 +72,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
           {/* Certifications */}
           {certifications.length > 0 && !hidden("certifications") && (
             <div>
-              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>Certifications</p>
+              <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>{L.certifications}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {certifications.map((c) => (
                   <div key={c.id}>
@@ -89,7 +91,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
         {summary && !hidden("summary") && (
           <div>
             <div style={{ borderLeft: `3px solid ${primaryColor}`, paddingLeft: 10, marginBottom: 10 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>Profile</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>{L.profile}</p>
             </div>
             <p style={{ fontSize: 10.5, color: "#475569", lineHeight: 1.75, margin: 0 }}>{summary}</p>
           </div>
@@ -98,7 +100,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
         {experience.length > 0 && !hidden("experience") && (
           <div>
             <div style={{ borderLeft: `3px solid ${primaryColor}`, paddingLeft: 10, marginBottom: 12 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>Experience</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>{L.experience}</p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
               {experience.map((exp) => (
@@ -129,7 +131,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
         {education.length > 0 && !hidden("education") && (
           <div>
             <div style={{ borderLeft: `3px solid ${primaryColor}`, paddingLeft: 10, marginBottom: 12 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>Education</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>{L.education}</p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {education.map((edu) => (
@@ -149,7 +151,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
         {referees.length > 0 && !hidden("referees") && (
           <div>
             <div style={{ borderLeft: `3px solid ${primaryColor}`, paddingLeft: 10, marginBottom: 12 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>Referees <span style={{ fontWeight: 400, opacity: 0.5 }}>/ Wadhamini</span></p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>{L.referees} <span style={{ fontWeight: 400, opacity: 0.5 }}>/ Wadhamini</span></p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
               {referees.map((ref) => (
@@ -174,7 +176,7 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
         {hobbies && !hidden("hobbies") && (
           <div>
             <div style={{ borderLeft: `3px solid ${primaryColor}`, paddingLeft: 10, marginBottom: 10 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>Interests</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#1e293b", margin: 0 }}>{L.interests}</p>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
               {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (

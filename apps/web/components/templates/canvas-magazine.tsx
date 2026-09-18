@@ -5,16 +5,21 @@ import {
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 
 export function CanvasMagazineTemplate({
   data,
   primaryColor,
   fontFamily,
+  lang = "en",
 }: {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
+  lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -116,7 +121,7 @@ export function CanvasMagazineTemplate({
 
           {/* Contact */}
           <div>
-            <SectionLabel title="Contact" />
+            <SectionLabel title={L.contact} />
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {personal.email && (
                 <ContactItem
@@ -164,7 +169,7 @@ export function CanvasMagazineTemplate({
           {/* Skills */}
           {show("skills") && skills.length > 0 && (
             <div>
-              <SectionLabel title="Skills" />
+              <SectionLabel title={L.skills} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {visibleSkills(skills).map((skill) => (
                   <div key={skill.id}>
@@ -190,7 +195,7 @@ export function CanvasMagazineTemplate({
           {/* Summary */}
           {show("summary") && summary && (
             <div>
-              <SectionLabel title="Profile" />
+              <SectionLabel title={L.profile} />
               <p style={{
                 fontSize: 10.5,
                 color: "#4b5563",
@@ -206,7 +211,7 @@ export function CanvasMagazineTemplate({
           {/* Experience */}
           {show("experience") && experience.length > 0 && (
             <div>
-              <SectionLabel title="Experience" />
+              <SectionLabel title={L.experience} />
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {experience.map((exp) => (
                   <div key={exp.id} style={{
@@ -256,7 +261,7 @@ export function CanvasMagazineTemplate({
           {/* Education */}
           {show("education") && education.length > 0 && (
             <div>
-              <SectionLabel title="Education" />
+              <SectionLabel title={L.education} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -281,7 +286,7 @@ export function CanvasMagazineTemplate({
           {/* Certifications */}
           {show("certifications") && certifications.length > 0 && (
             <div>
-              <SectionLabel title="Certifications" />
+              <SectionLabel title={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id}>
@@ -303,7 +308,7 @@ export function CanvasMagazineTemplate({
           {/* Referees */}
           {show("referees") && referees.length > 0 && (
             <div>
-              <SectionLabel title="Referees" />
+              <SectionLabel title={L.referees} />
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {referees.map((ref) => (
                   <div key={ref.id}>
@@ -326,7 +331,7 @@ export function CanvasMagazineTemplate({
           {/* Languages */}
           {show("languages") && languages.length > 0 && (
             <div>
-              <SectionLabel title="Languages" />
+              <SectionLabel title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {languages.map((lang) => (
                   <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -341,7 +346,7 @@ export function CanvasMagazineTemplate({
           {/* Hobbies */}
           {show("hobbies") && hobbies && (
             <div>
-              <SectionLabel title="Interests" />
+              <SectionLabel title={L.interests} />
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
                 {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
                   <span key={i} style={{

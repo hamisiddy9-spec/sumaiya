@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { Plus, Edit2, MoreHorizontal, Trash2, Copy, AlertCircle, Globe, Check, Link2, EyeOff, MessageSquareText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
+import { resolveFontStack } from "@/lib/fonts";
 import { useDeleteConfirm } from "@/components/dashboard/use-delete-confirm";
 import { ScaledPreview } from "@/components/dashboard/scaled-preview";
 import { TEMPLATES, parseCVData, isTemplateId, type CVData } from "@/types";
@@ -112,7 +114,9 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
         className="block rounded-t-card-lg bg-sand overflow-hidden relative"
       >
         <ScaledPreview designW={794} designH={1123}>
-          <Component data={data} primaryColor={doc.primaryColor} fontFamily={doc.fontFamily} />
+          <TemplateCanvas>
+            <Component data={data} primaryColor={doc.primaryColor} fontFamily={resolveFontStack(doc.fontFamily)} />
+          </TemplateCanvas>
         </ScaledPreview>
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 transition-all translate-y-1 group-hover:translate-y-0 bg-card rounded-xl px-4 py-2.5 flex items-center gap-2 shadow-lg">

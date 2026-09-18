@@ -1,13 +1,17 @@
 import type { CVData } from "@/types";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   PhotoCircle, SkillDots, ContactItem, fmtDate, dateRange,
   visibleSkills,
 } from "@/components/templates/template-utils";
 
-interface Props { data: CVData; primaryColor: string; fontFamily: string }
+interface Props { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang;
+  }
 
-export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
+export function EclipseTemplate({ data, primaryColor, fontFamily, lang = "en" }: Props) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
   const headerBg = "#0F172A";
@@ -81,7 +85,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Summary */}
         {summary && !hidden("summary") && (
           <div style={{ marginBottom: 24 }}>
-            <SectionHeader title="Profile" />
+            <SectionHeader title={L.profile} />
             <p style={{ fontSize: 11, color: "#374151", lineHeight: 1.65, margin: 0 }}>{summary}</p>
           </div>
         )}
@@ -89,7 +93,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Experience */}
         {experience?.length > 0 && !hidden("experience") && (
           <div style={{ marginBottom: 24 }}>
-            <SectionHeader title="Experience" />
+            <SectionHeader title={L.experience} />
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 16 }}>
               {experience.map((exp) => (
                 <div key={exp.id}>
@@ -114,7 +118,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Education */}
         {education?.length > 0 && !hidden("education") && (
           <div style={{ marginBottom: 24 }}>
-            <SectionHeader title="Education" />
+            <SectionHeader title={L.education} />
             <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
               {education.map((edu) => (
                 <div key={edu.id}>
@@ -141,7 +145,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Skills */}
         {skills?.length > 0 && !hidden("skills") && (
           <div style={{ marginBottom: 24 }}>
-            <SectionHeader title="Skills" />
+            <SectionHeader title={L.skills} />
             <div style={{ display: "flex", flexWrap: "wrap" as const, gap: "8px 24px" }}>
               {visibleSkills(skills).map((sk) => (
                 <div key={sk.id} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 160 }}>
@@ -157,7 +161,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
         <div style={{ display: "flex", gap: 32 }}>
           {languages?.length > 0 && !hidden("languages") && (
             <div style={{ flex: 1 }}>
-              <SectionHeader title="Languages" />
+              <SectionHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
                 {languages.map((lang) => (
                   <div key={lang.id} style={{ display: "flex", justifyContent: "space-between" }}>
@@ -170,7 +174,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
           )}
           {certifications?.length > 0 && !hidden("certifications") && (
             <div style={{ flex: 2 }}>
-              <SectionHeader title="Certifications" />
+              <SectionHeader title={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
@@ -208,7 +212,7 @@ export function EclipseTemplate({ data, primaryColor, fontFamily }: Props) {
 
         {hobbies && !hidden("hobbies") && (
           <div style={{ marginTop: 20 }}>
-            <SectionHeader title="Interests" />
+            <SectionHeader title={L.interests} />
             <p style={{ fontSize: 11, color: "#4b5563", lineHeight: 1.6, margin: 0 }}>{hobbies}</p>
           </div>
         )}

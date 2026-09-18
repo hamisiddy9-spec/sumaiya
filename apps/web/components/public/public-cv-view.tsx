@@ -6,6 +6,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
+import { resolveFontStack } from "@/lib/fonts";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { isTemplateId, type CVData } from "@/types";
 import type { Lang } from "@/lib/i18n/translations";
@@ -50,7 +52,9 @@ export function PublicCvView({
           ref={innerRef}
           style={{ width: 794, transform: `scale(${scale})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}
         >
-          <Template data={data} primaryColor={primaryColor} fontFamily={fontFamily} lang={lang} />
+          <TemplateCanvas>
+            <Template data={data} primaryColor={primaryColor} fontFamily={resolveFontStack(fontFamily)} lang={lang} />
+          </TemplateCanvas>
         </div>
       </div>
     </div>

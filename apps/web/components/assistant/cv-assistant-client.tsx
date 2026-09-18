@@ -65,6 +65,8 @@ import {
   type CVData, type BusinessCardData, type LetterData, type LetterType,
 } from "@/types";
 import type { Lang } from "@/lib/i18n/translations";
+import { INTER_STACK } from "@/lib/fonts";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
 
 export interface AssistantProfile {
   fullName: string; jobTitle: string; email: string; phone: string; location: string;
@@ -1358,7 +1360,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       if (!el) return;
       await exportElementToPdf(el, {
         filename: `${builtDoc.title}.pdf`,
-        textLayer: builtDoc.kind === "cv" ? buildCvText(builtDoc.cvData) : undefined,
+        textLayer: builtDoc.kind === "cv" ? buildCvText(builtDoc.cvData, lang) : undefined,
       });
     } catch {
       setError(sw ? "Imeshindwa kutengeneza PDF. Jaribu tena." : "Couldn't create the PDF. Try again.");
@@ -1384,7 +1386,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setExporting("txt");
     try {
       if (builtDoc.kind === "cv") {
-        exportCvToText(builtDoc.cvData, `${builtDoc.title}.txt`);
+        exportCvToText(builtDoc.cvData, `${builtDoc.title}.txt`, lang);
       } else {
         triggerBlobDownload(
           new Blob([builtDoc.textContent], { type: "text/plain;charset=utf-8" }),
@@ -2345,7 +2347,9 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       <div aria-hidden="true" className="pointer-events-none" style={{ position: "fixed", left: -10000, top: 0, zIndex: -1 }}>
         {builtDoc?.kind === "cv" && (
           <div ref={cvExportRef} style={{ width: 794, background: "#fff" }}>
-            <NakuruTemplate data={builtDoc.cvData} primaryColor="#DA4A1C" fontFamily="Inter" lang={sw ? "sw" : "en"} />
+            <TemplateCanvas>
+              <NakuruTemplate data={builtDoc.cvData} primaryColor="#DA4A1C" fontFamily={INTER_STACK} lang={sw ? "sw" : "en"} />
+            </TemplateCanvas>
           </div>
         )}
         {builtDoc && builtDoc.kind !== "cv" && (

@@ -3,16 +3,21 @@ import {
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 
 export function BerlinTemplate({
   data,
   primaryColor,
   fontFamily,
+  lang = "en",
 }: {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
+  lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -104,7 +109,7 @@ export function BerlinTemplate({
         {/* Summary */}
         {show("summary") && summary && (
           <div>
-            <SectionLabel title="Profile" />
+            <SectionLabel title={L.profile} />
             <p style={{ fontSize: 10, color: "#374151", lineHeight: 1.75, margin: 0 }}>
               {summary}
             </p>
@@ -114,7 +119,7 @@ export function BerlinTemplate({
         {/* Experience */}
         {show("experience") && experience.length > 0 && (
           <div>
-            <SectionLabel title="Experience" />
+            <SectionLabel title={L.experience} />
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {experience.map((exp) => (
                 <div key={exp.id} style={{ display: "flex", gap: 0 }}>
@@ -159,7 +164,7 @@ export function BerlinTemplate({
         {/* Education */}
         {show("education") && education.length > 0 && (
           <div>
-            <SectionLabel title="Education" />
+            <SectionLabel title={L.education} />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {education.map((edu) => (
                 <div key={edu.id} style={{ display: "flex", gap: 0 }}>
@@ -196,7 +201,7 @@ export function BerlinTemplate({
         {/* Skills — comma-separated text */}
         {show("skills") && skills.length > 0 && (
           <div>
-            <SectionLabel title="Skills" />
+            <SectionLabel title={L.skills} />
             <p style={{ fontSize: 10, color: "#374151", lineHeight: 1.7, margin: 0 }}>
               {visibleSkills(skills).map((skill, i) => (
                 <span key={skill.id}>
@@ -213,7 +218,7 @@ export function BerlinTemplate({
           <div style={{ display: "flex", gap: 28 }}>
             {show("languages") && languages.length > 0 && (
               <div style={{ flex: 1 }}>
-                <SectionLabel title="Languages" />
+                <SectionLabel title={L.languages} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   {languages.map((lang) => (
                     <div key={lang.id} style={{ fontSize: 10, color: "#374151" }}>
@@ -226,7 +231,7 @@ export function BerlinTemplate({
             )}
             {show("certifications") && certifications.length > 0 && (
               <div style={{ flex: 1 }}>
-                <SectionLabel title="Certifications" />
+                <SectionLabel title={L.certifications} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {certifications.map((cert) => (
                     <div key={cert.id}>
@@ -265,7 +270,7 @@ export function BerlinTemplate({
         {/* Hobbies */}
         {show("hobbies") && hobbies && (
           <div>
-            <SectionLabel title="Interests" />
+            <SectionLabel title={L.interests} />
             <p style={{ fontSize: 10, color: "#6b7280", lineHeight: 1.7, margin: 0 }}>
               {hobbies.split(/[,\n]+/).filter((h) => h.trim()).join("  ·  ")}
             </p>

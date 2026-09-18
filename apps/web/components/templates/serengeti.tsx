@@ -6,6 +6,7 @@ import {
   visibleSkills,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 const PROF: Record<string, number> = { Native: 5, Fluent: 4, Advanced: 3, Intermediate: 2, Basic: 1 };
 
@@ -25,6 +26,7 @@ function SectionHeader({ text, primaryColor }: { text: string; primaryColor: str
 }
 
 export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -127,7 +129,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Experience ───────────────────────────────────────────────────── */}
       {experience.length > 0 && !hidden("experience") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Experience" primaryColor={primaryColor} />
+          <SectionHeader text={L.experience} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             {experience.map((exp) => (
               <div key={exp.id}>
@@ -164,7 +166,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Education ────────────────────────────────────────────────────── */}
       {education.length > 0 && !hidden("education") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Education" primaryColor={primaryColor} />
+          <SectionHeader text={L.education} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {education.map((edu) => (
               <div key={edu.id}>
@@ -190,7 +192,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Skills ───────────────────────────────────────────────────────── */}
       {skills.length > 0 && !hidden("skills") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Skills" primaryColor={primaryColor} />
+          <SectionHeader text={L.skills} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
             {visibleSkills(skills).map((skill) => (
               <span key={skill.id} style={{
@@ -211,7 +213,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Languages ────────────────────────────────────────────────────── */}
       {languages.length > 0 && !hidden("languages") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Languages" primaryColor={primaryColor} />
+          <SectionHeader text={L.languages} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
             {languages.map((lang) => (
               <span key={lang.id} style={{
@@ -232,7 +234,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Certifications ───────────────────────────────────────────────── */}
       {certifications.length > 0 && !hidden("certifications") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Certifications" primaryColor={primaryColor} />
+          <SectionHeader text={L.certifications} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {certifications.map((cert) => (
               <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -254,7 +256,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Referees ─────────────────────────────────────────────────────── */}
       {referees.length > 0 && !hidden("referees") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Referees" primaryColor={primaryColor} />
+          <SectionHeader text={L.referees} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {referees.map((ref) => (
               <div key={ref.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -280,7 +282,7 @@ export function SerengetiTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* ── Interests ────────────────────────────────────────────────────── */}
       {hobbies && !hidden("hobbies") && (
         <div style={{ marginBottom: 24 }}>
-          <SectionHeader text="Interests" primaryColor={primaryColor} />
+          <SectionHeader text={L.interests} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
             {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
               <span key={i} style={{

@@ -19,6 +19,7 @@ import { Footer } from "@/components/ui/footer";
 import { ScanToApp } from "@/components/marketing/scan-to-app";
 import { PDF_TOOL_LINKS, pdfToolHref } from "@/lib/pdf-tools-list";
 import { TESTIMONIALS, CVS_CREATED } from "@/lib/testimonials";
+import { INTER_STACK } from "@/lib/fonts";
 
 // ─── Sample CV data (Amara Osei) ──────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ function HeroCVPanel({
           pointerEvents: "none",
         }}
       >
-        <Component data={SAMPLE_CV} primaryColor={color} fontFamily="Inter, sans-serif" />
+        <Component data={SAMPLE_CV} primaryColor={color} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -183,7 +184,7 @@ function TemplatePreview({
           pointerEvents: "none",
         }}
       >
-        <Component data={SAMPLE_CV} primaryColor={primaryColor} fontFamily="Inter, sans-serif" />
+        <Component data={SAMPLE_CV} primaryColor={primaryColor} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -580,7 +581,7 @@ export default function LandingPage() {
                 >
                   {(() => {
                     const M = HERO_TEMPLATE_COMPONENTS["nakuru"];
-                    return <M data={SAMPLE_CV} primaryColor="#DA4A1C" fontFamily="Inter, sans-serif" />;
+                    return <M data={SAMPLE_CV} primaryColor="#DA4A1C" fontFamily={INTER_STACK} />;
                   })()}
                 </div>
               </div>

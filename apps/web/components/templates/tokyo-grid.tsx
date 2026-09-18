@@ -5,8 +5,10 @@ import {
   visibleSkills,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -19,7 +21,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
         <div style={{ padding: "28px 16px", display: "flex", flexDirection: "column", gap: 22, flex: 1 }}>
           {/* Contact */}
           <div>
-            <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>Contact</p>
+            <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>{L.contact}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {personal.email && <ContactItem icon={<IcoEmail size={9} color="#9ca3af" />} text={personal.email} color="#d1d5db" fontSize={8.5} />}
               {personal.phone && <ContactItem icon={<IcoPhone size={9} color="#9ca3af" />} text={personal.phone} color="#d1d5db" fontSize={8.5} />}
@@ -32,7 +34,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
           {/* Languages */}
           {languages.length > 0 && !hidden("languages") && (
             <div>
-              <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>Languages</p>
+              <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>{L.languages}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((l) => (
                   <div key={l.id}>
@@ -49,7 +51,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
           {/* Certifications */}
           {certifications.length > 0 && !hidden("certifications") && (
             <div>
-              <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>Certifications</p>
+              <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>{L.certifications}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {certifications.map((c) => (
                   <div key={c.id}>
@@ -103,7 +105,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <div style={{ width: 4, height: 16, backgroundColor: primaryColor, borderRadius: 2, flexShrink: 0 }} />
-                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>Profile</p>
+                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>{L.profile}</p>
               </div>
               <p style={{ fontSize: 10.5, color: "#374151", lineHeight: 1.75, margin: 0 }}>{summary}</p>
             </div>
@@ -114,7 +116,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                 <div style={{ width: 4, height: 16, backgroundColor: primaryColor, borderRadius: 2, flexShrink: 0 }} />
-                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>Experience</p>
+                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>{L.experience}</p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {experience.map((exp) => (
@@ -147,7 +149,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                 <div style={{ width: 4, height: 16, backgroundColor: primaryColor, borderRadius: 2, flexShrink: 0 }} />
-                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>Education</p>
+                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>{L.education}</p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
@@ -169,7 +171,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                 <div style={{ width: 4, height: 16, backgroundColor: primaryColor, borderRadius: 2, flexShrink: 0 }} />
-                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>Skills</p>
+                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>{L.skills}</p>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px" }}>
                 {visibleSkills(skills).map((s) => (
@@ -189,7 +191,7 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                 <div style={{ width: 4, height: 16, backgroundColor: primaryColor, borderRadius: 2, flexShrink: 0 }} />
-                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>Interests</p>
+                <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111827", margin: 0 }}>{L.interests}</p>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                 {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (

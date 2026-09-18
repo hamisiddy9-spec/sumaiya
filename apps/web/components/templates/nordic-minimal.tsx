@@ -3,8 +3,10 @@ import {
   type CVData,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -70,7 +72,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
       {/* Summary */}
       {summary && !hidden("summary") && (
         <div style={{ marginBottom: 36 }}>
-          <p style={sectionLabel}>Profile</p>
+          <p style={sectionLabel}>{L.profile}</p>
           <hr style={hr} />
           <p style={{ fontSize: 10.5, color: "#334155", lineHeight: 1.85, margin: 0 }}>{summary}</p>
         </div>
@@ -79,7 +81,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
       {/* Experience */}
       {experience.length > 0 && !hidden("experience") && (
         <div style={{ marginBottom: 36 }}>
-          <p style={sectionLabel}>Experience</p>
+          <p style={sectionLabel}>{L.experience}</p>
           <hr style={hr} />
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             {experience.map((exp) => (
@@ -111,7 +113,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
       {/* Education */}
       {education.length > 0 && !hidden("education") && (
         <div style={{ marginBottom: 36 }}>
-          <p style={sectionLabel}>Education</p>
+          <p style={sectionLabel}>{L.education}</p>
           <hr style={hr} />
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {education.map((edu) => (
@@ -134,7 +136,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
       {/* Skills */}
       {skills.length > 0 && !hidden("skills") && (
         <div style={{ marginBottom: 36 }}>
-          <p style={sectionLabel}>Skills</p>
+          <p style={sectionLabel}>{L.skills}</p>
           <hr style={hr} />
           <p style={{ fontSize: 10.5, color: "#475569", margin: 0, lineHeight: 1.8 }}>
             {visibleSkills(skills).map((s) => s.name).join(", ")}
@@ -147,7 +149,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
         <div style={{ display: "flex", gap: 40, marginBottom: 36 }}>
           {languages.length > 0 && !hidden("languages") && (
             <div style={{ flex: 1 }}>
-              <p style={sectionLabel}>Languages</p>
+              <p style={sectionLabel}>{L.languages}</p>
               <hr style={hr} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((l) => (
@@ -161,7 +163,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
           )}
           {certifications.length > 0 && !hidden("certifications") && (
             <div style={{ flex: 1 }}>
-              <p style={sectionLabel}>Certifications</p>
+              <p style={sectionLabel}>{L.certifications}</p>
               <hr style={hr} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {certifications.map((c) => (
@@ -199,7 +201,7 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
       {/* Interests */}
       {hobbies && !hidden("hobbies") && (
         <div style={{ marginBottom: 36 }}>
-          <p style={sectionLabel}>Interests</p>
+          <p style={sectionLabel}>{L.interests}</p>
           <hr style={hr} />
           <p style={{ fontSize: 10.5, color: "#475569", margin: 0, lineHeight: 1.8 }}>
             {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h) => h.trim()).join("  ·  ")}

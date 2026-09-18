@@ -5,16 +5,21 @@ import {
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 
 export function AtlasTemplate({
   data,
   primaryColor,
   fontFamily,
+  lang = "en",
 }: {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
+  lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -151,7 +156,7 @@ export function AtlasTemplate({
         {/* Summary */}
         {show("summary") && summary && (
           <div>
-            <SectionHeader title="Profile" />
+            <SectionHeader title={L.profile} />
             <p style={{
               fontSize: 10.5,
               color: "#4b5563",
@@ -166,7 +171,7 @@ export function AtlasTemplate({
         {/* Experience — card style */}
         {show("experience") && experience.length > 0 && (
           <div>
-            <SectionHeader title="Experience" />
+            <SectionHeader title={L.experience} />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {experience.map((exp) => (
                 <div key={exp.id} style={{
@@ -218,7 +223,7 @@ export function AtlasTemplate({
         {/* Education — side-by-side if multiple */}
         {show("education") && education.length > 0 && (
           <div>
-            <SectionHeader title="Education" />
+            <SectionHeader title={L.education} />
             <div style={{
               display: "flex",
               flexWrap: "wrap" as const,
@@ -256,7 +261,7 @@ export function AtlasTemplate({
         {/* Skills — horizontal pill row */}
         {show("skills") && skills.length > 0 && (
           <div>
-            <SectionHeader title="Skills" />
+            <SectionHeader title={L.skills} />
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {visibleSkills(skills).map((skill) => (
                 <div key={skill.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -283,7 +288,7 @@ export function AtlasTemplate({
           <div style={{ display: "flex", gap: 20 }}>
             {show("certifications") && certifications.length > 0 && (
               <div style={{ flex: 1 }}>
-                <SectionHeader title="Certifications" />
+                <SectionHeader title={L.certifications} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {certifications.map((cert) => (
                     <div key={cert.id} style={{
@@ -333,7 +338,7 @@ export function AtlasTemplate({
 
             {show("languages") && languages.length > 0 && (
               <div style={{ flex: 1 }}>
-                <SectionHeader title="Languages" />
+                <SectionHeader title={L.languages} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {languages.map((lang) => (
                     <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -356,7 +361,7 @@ export function AtlasTemplate({
 
             {show("hobbies") && hobbies && (
               <div style={{ flex: 1 }}>
-                <SectionHeader title="Interests" />
+                <SectionHeader title={L.interests} />
                 <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
                   {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
                     <span key={i} style={{

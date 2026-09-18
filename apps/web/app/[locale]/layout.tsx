@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { InstallPrompt } from "@/components/install-prompt";
 import { SwRegister } from "@/components/sw-register";
@@ -40,6 +40,26 @@ const fontBody = Hanken_Grotesk({
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-body",
   display: "optional",
+  adjustFontFallback: true,
+});
+// The face every CV template is typeset in. It was requested by name
+// (fontFamily="Inter") long before it was ever loaded, so every CV silently
+// rendered in Arial/Helvetica. Self-hosted here via next/font — served from our
+// own origin, no external request — and exposed as --font-inter for
+// lib/fonts.ts INTER_STACK. `display: "optional"` matches the other faces: if it
+// hasn't arrived within the browser's window the session keeps the
+// metric-adjusted fallback rather than swapping mid-read.
+const fontCv = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  // "swap", NOT "optional" like the UI faces: a CV is a document whose
+  // typography is the product. With "optional" a cold load keeps the
+  // metric-adjusted Arial fallback for the whole session — which is the exact
+  // defect being fixed, just with a better-looking Arial. The PDF exporter
+  // awaits document.fonts.ready before rasterizing, so a swap guarantees the
+  // exported document is set in the real face.
+  display: "swap",
   adjustFontFallback: true,
 });
 const fontMono = JetBrains_Mono({
@@ -128,7 +148,7 @@ export default function LocaleRootLayout({
 }) {
   const lang = params.locale === "en" ? "en" : "sw";
   return (
-    <html lang={lang} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`} suppressHydrationWarning>
+    <html lang={lang} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable} ${fontCv.variable}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />

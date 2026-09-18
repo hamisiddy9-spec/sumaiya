@@ -51,7 +51,8 @@ import { Share2, FileType2, Globe } from "lucide-react";
 import { ShareCvModal } from "@/components/editor/share-cv-modal";
 import { metaTrack } from "@/components/meta-pixel";
 import { getPairingTip, getFamilyForCv, getCoverLetterForCv } from "@/lib/template-families";
-import { DOC_FONTS } from "@/lib/fonts";
+import { DOC_FONTS, INTER_STACK, resolveFontStack } from "@/lib/fonts";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
 import { getSampleCV } from "@/lib/sample-cv";
 import { PreviewWatermark } from "@/components/editor/preview-watermark";
 import { Button } from "@/components/ui/button";
@@ -797,7 +798,7 @@ function TemplateMiniPreview({ templateId, color }: { templateId: TemplateId; co
   return (
     <div style={{ width: THUMB_W, height: THUMB_H, overflow: "hidden", position: "relative", pointerEvents: "none", flexShrink: 0 }}>
       <div style={{ width: 794, height: 1123, transform: `scale(${THUMB_SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
-        <Component data={PREVIEW_CV} primaryColor={color} fontFamily="Inter" />
+        <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -847,7 +848,7 @@ function TemplateLargePreview({ templateId, color }: { templateId: TemplateId; c
   return (
     <div style={{ width: MODAL_THUMB_W, height: MODAL_THUMB_H, overflow: "hidden", position: "relative", pointerEvents: "none", flexShrink: 0 }}>
       <div style={{ width: 794, height: 1123, transform: `scale(${MODAL_THUMB_SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
-        <Component data={PREVIEW_CV} primaryColor={color} fontFamily="Inter" />
+        <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -1452,7 +1453,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       setTimeout(() => setExportStepIdx(i + 1), delay)
     );
     try {
-      await Promise.all([exportPdf(previewRef), new Promise<void>(r => setTimeout(r, MIN_MS))]);
+      await Promise.all([exportPdf(previewRef, uiLang), new Promise<void>(r => setTimeout(r, MIN_MS))]);
       timers.forEach(clearTimeout);
       setExportStepIdx(EXPORT_STEPS.length - 1);
       await new Promise<void>(r => setTimeout(r, 400));
@@ -1609,7 +1610,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     setDownloadMenu(false);
     if (!isPremium) { setShowUpgradeModal(true); return; }
     const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
-    exportCvToText(cvData, `${base}.txt`);
+    exportCvToText(cvData, `${base}.txt`, uiLang);
     track("document_exported", { documentType: "cv", templateId });
     // Delivered (the .txt is written synchronously by the anchor click above).
     if (guestMode) setSignUpPrompt("postExport");
@@ -1625,7 +1626,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
     setIsSharing(true);
     try {
-      const blob = await renderElementToPdfBlob(previewRef.current, { filename: `${base}.pdf`, textLayer: buildCvText(cvData) });
+      const blob = await renderElementToPdfBlob(previewRef.current, { filename: `${base}.pdf`, textLayer: buildCvText(cvData, uiLang) });
       const file = new File([blob], `${base}.pdf`, { type: "application/pdf" });
       const nav = navigator as unknown as { canShare?: (d: unknown) => boolean; share?: (d: unknown) => Promise<void> };
       if (nav.canShare && nav.share && nav.canShare({ files: [file] })) {
@@ -3074,7 +3075,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             <div ref={previewRef} id="cv-preview"
               style={{ width: "794px", minHeight: "1123px", fontFamily, transform: `scale(${previewScale})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}
               className="bg-card shadow-floating ring-1 ring-black/[0.04] rounded-[2px]">
-              <TemplateComponent data={visibleData} primaryColor={primaryColor} fontFamily={fontFamily} lang={uiLang} />
+              <TemplateCanvas>
+                <TemplateComponent data={visibleData} primaryColor={primaryColor} fontFamily={resolveFontStack(fontFamily)} lang={uiLang} />
+              </TemplateCanvas>
             </div>
             {/* Sibling of #cv-preview (the captured element) so downloads stay
                 clean while the on-screen preview / any screenshot is marked. */}

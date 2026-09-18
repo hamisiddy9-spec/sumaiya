@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { InstallPrompt } from "@/components/install-prompt";
 import { SwRegister } from "@/components/sw-register";
@@ -30,6 +30,22 @@ const fontBody = Hanken_Grotesk({
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-body",
   display: "optional",
+  adjustFontFallback: true,
+});
+// The face every CV template is typeset in — see app/[locale]/layout.tsx for the
+// full note. Loaded here too because the editors (which is where a CV is
+// actually made and exported) live under the (app) route group.
+const fontCv = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  // "swap", NOT "optional" like the UI faces: a CV is a document whose
+  // typography is the product. With "optional" a cold load keeps the
+  // metric-adjusted Arial fallback for the whole session — which is the exact
+  // defect being fixed, just with a better-looking Arial. The PDF exporter
+  // awaits document.fonts.ready before rasterizing, so a swap guarantees the
+  // exported document is set in the real face.
+  display: "swap",
   adjustFontFallback: true,
 });
 const fontMono = JetBrains_Mono({
@@ -103,7 +119,7 @@ export default async function AppRootLayout({ children }: { children: React.Reac
   // Dynamic routes only — headers() is fine here (see header comment).
   const lang = (await headers()).get("x-lang") === "en" ? "en" : "sw";
   return (
-    <html lang={lang} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable}`} suppressHydrationWarning>
+    <html lang={lang} className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable} ${fontCv.variable}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/icon.svg" />

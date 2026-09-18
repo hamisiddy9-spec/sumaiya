@@ -15,6 +15,7 @@ import { Download, Loader2, Pencil } from "lucide-react";
 import type { CVData } from "@/types";
 import { HERO_TEMPLATE_COMPONENTS } from "@/components/templates/hero-registry";
 import { exportElementToPdf } from "@/lib/pdf";
+import { INTER_STACK } from "@/lib/fonts";
 
 const LOOKS: { id: string; label: { en: string; sw: string } }[] = [
   { id: "rift", label: { en: "Classic", sw: "Rasmi" } },
@@ -81,7 +82,7 @@ export function CvReadyCard({
         style={{ width: thumbW, height: Math.round(PAGE_H * scale) }}
       >
         <div style={{ width: PAGE_W, height: PAGE_H, transform: `scale(${scale})`, transformOrigin: "top left", pointerEvents: "none" }}>
-          <Template data={cv} primaryColor={color} fontFamily="Inter, sans-serif" />
+          <Template data={cv} primaryColor={color} fontFamily={INTER_STACK} />
         </div>
       </div>
 
@@ -133,7 +134,7 @@ export function CvReadyCard({
       {/* offscreen full-size render for the PDF export */}
       <div style={{ position: "fixed", left: -99999, top: 0, width: PAGE_W, pointerEvents: "none" }} aria-hidden>
         <div ref={exportRef} style={{ width: PAGE_W, minHeight: PAGE_H, background: "#fff" }}>
-          <Template data={cv} primaryColor={color} fontFamily="Inter, sans-serif" />
+          <Template data={cv} primaryColor={color} fontFamily={INTER_STACK} />
         </div>
       </div>
     </div>

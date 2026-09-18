@@ -4,6 +4,7 @@ import { nanoid } from "nanoid";
 import { createEmptyCVData, parseCVData, isTemplateId, type CVData, type TemplateId, type PersonalInfo, type ExperienceEntry, type EducationEntry, type SkillEntry, type LanguageEntry, type CertificationEntry, type RefereeEntry, type ProjectEntry } from "@/types";
 import type { CV } from "@/lib/db/schema";
 import { exportElementToPdf, buildCvText } from "@/lib/pdf";
+import type { Lang } from "@/lib/i18n/translations";
 
 // Bounded auto-retry for a failed autosave. A transient network blip used to
 // leave the edit unsaved until the user's NEXT edit (or a manual tap) — this
@@ -77,7 +78,7 @@ interface EditorState {
   setFontFamily: (font: string) => void;
 
   saveCv: (id: string, opts?: { keepalive?: boolean }) => Promise<void>;
-  exportPdf: (previewRef: React.RefObject<HTMLDivElement>) => Promise<void>;
+  exportPdf: (previewRef: React.RefObject<HTMLDivElement>, lang?: Lang) => Promise<void>;
 }
 
 export const useEditorStore = create<EditorState>()(
@@ -268,7 +269,7 @@ export const useEditorStore = create<EditorState>()(
       }
     },
 
-    exportPdf: async (previewRef) => {
+    exportPdf: async (previewRef, lang = "en") => {
       if (!previewRef.current) return;
       const { title, cv, accessToken } = get();
       // Fall back to the person's name (matching the .txt/.docx handlers) so an
@@ -281,7 +282,7 @@ export const useEditorStore = create<EditorState>()(
         await exportElementToPdf(previewRef.current, {
           filename: `${safeName}.pdf`,
           // Embed an invisible, ATS-readable text layer from the structured CV.
-          textLayer: buildCvText(cv),
+          textLayer: buildCvText(cv, lang),
         });
       } catch (err) {
         set((s) => { s.saveError = err instanceof Error ? err.message : "PDF export failed"; });

@@ -5,6 +5,8 @@ import { TEMPLATES } from "@/types";
 import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { getSampleCV } from "@/lib/sample-cv";
+import { TemplateCanvas } from "@/components/templates/template-canvas";
+import { resolveFontStack } from "@/lib/fonts";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
 import { alternatesFor } from "@/lib/seo";
@@ -52,7 +54,8 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
   if (!t) notFound();
 
   const Component = TEMPLATE_COMPONENTS[t.id] ?? NakuruTemplate;
-  const sample = getSampleCV("en");
+  // Localised preview: the Swahili URL shows a Swahili CV, headings and all.
+  const sample = getSampleCV(params.locale === "en" ? "en" : "sw");
   const related = TEMPLATES.filter((x) => x.id !== t.id && x.style === t.style).slice(0, 6);
 
   return (
@@ -108,7 +111,14 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
               className="rounded-[3px] bg-white shadow-floating ring-1 ring-black/[0.05]"
             >
               <div style={{ width: 794, height: 1123, transform: `scale(${SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
-                <Component data={sample} primaryColor={t.previewColor} fontFamily="Inter" />
+                <TemplateCanvas>
+                  <Component
+                    data={sample}
+                    primaryColor={t.previewColor}
+                    fontFamily={resolveFontStack("Inter")}
+                    lang={params.locale === "en" ? "en" : "sw"}
+                  />
+                </TemplateCanvas>
               </div>
             </div>
           </div>

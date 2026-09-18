@@ -1,4 +1,6 @@
 import React from "react";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   ContactItem, SkillDots,
@@ -11,7 +13,8 @@ interface Props {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
-}
+  lang?: Lang;
+  }
 
 function StationLabel({ title, primaryColor }: { title: string; primaryColor: string }) {
   return (
@@ -34,7 +37,8 @@ function StationLabel({ title, primaryColor }: { title: string; primaryColor: st
   );
 }
 
-export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
+export function MetroTemplate({ data, primaryColor, fontFamily, lang = "en" }: Props) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
 
@@ -103,7 +107,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
               color: "#94a3b8",
               marginBottom: 10,
             }}>
-              Contact
+              {L.contact}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
               {personal.email && (
@@ -135,7 +139,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
                 color: "#94a3b8",
                 marginBottom: 10,
               }}>
-                Skills
+                {L.skills}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {visibleSkills(skills).map((skill) => (
@@ -159,7 +163,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
                 color: "#94a3b8",
                 marginBottom: 10,
               }}>
-                Languages
+                {L.languages}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((lang) => (
@@ -183,7 +187,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
                 color: "#94a3b8",
                 marginBottom: 8,
               }}>
-                Interests
+                {L.interests}
               </div>
               <p style={{ fontSize: 9, color: "#94a3b8", lineHeight: 1.6, margin: 0 }}>{hobbies}</p>
             </div>
@@ -197,7 +201,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Summary */}
         {summary && !hidden("summary") && (
           <div style={{ marginBottom: 22 }}>
-            <StationLabel title="Profile" primaryColor={primaryColor} />
+            <StationLabel title={L.profile} primaryColor={primaryColor} />
             <p style={{ fontSize: 10, lineHeight: 1.7, color: "#334155", margin: 0 }}>{summary}</p>
           </div>
         )}
@@ -205,7 +209,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Experience */}
         {experience?.length > 0 && !hidden("experience") && (
           <div style={{ marginBottom: 22 }}>
-            <StationLabel title="Experience" primaryColor={primaryColor} />
+            <StationLabel title={L.experience} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {experience.map((exp) => (
                 <div key={exp.id} style={{ paddingLeft: 0 }}>
@@ -233,7 +237,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Education */}
         {education?.length > 0 && !hidden("education") && (
           <div style={{ marginBottom: 22 }}>
-            <StationLabel title="Education" primaryColor={primaryColor} />
+            <StationLabel title={L.education} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {education.map((edu) => (
                 <div key={edu.id}>
@@ -263,7 +267,7 @@ export function MetroTemplate({ data, primaryColor, fontFamily }: Props) {
         {/* Certifications */}
         {certifications?.length > 0 && !hidden("certifications") && (
           <div>
-            <StationLabel title="Certifications" primaryColor={primaryColor} />
+            <StationLabel title={L.certifications} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {certifications.map((cert) => (
                 <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>

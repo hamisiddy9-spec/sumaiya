@@ -5,16 +5,21 @@ import {
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
+import type { Lang } from "@/lib/i18n/translations";
 
 export function VertexTemplate({
   data,
   primaryColor,
   fontFamily,
+  lang = "en",
 }: {
   data: CVData;
   primaryColor: string;
   fontFamily: string;
+  lang?: Lang;
 }) {
+  const L = cvHeadings(lang);
   const {
     personal, summary, experience, education,
     skills, languages, certifications, referees, hobbies,
@@ -182,7 +187,7 @@ export function VertexTemplate({
           {/* Summary */}
           {show("summary") && summary && (
             <div>
-              <DiamondHeader title="Profile" />
+              <DiamondHeader title={L.profile} />
               <p style={{
                 fontSize: 10.5,
                 color: "#4b5563",
@@ -197,7 +202,7 @@ export function VertexTemplate({
           {/* Experience */}
           {show("experience") && experience.length > 0 && (
             <div>
-              <DiamondHeader title="Experience" />
+              <DiamondHeader title={L.experience} />
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 {experience.map((exp) => (
                   <div key={exp.id}>
@@ -248,7 +253,7 @@ export function VertexTemplate({
           {/* Skills */}
           {show("skills") && skills.length > 0 && (
             <div>
-              <DiamondHeader title="Skills" />
+              <DiamondHeader title={L.skills} />
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {visibleSkills(skills).map((skill) => (
                   <div key={skill.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -263,7 +268,7 @@ export function VertexTemplate({
           {/* Education */}
           {show("education") && education.length > 0 && (
             <div>
-              <DiamondHeader title="Education" />
+              <DiamondHeader title={L.education} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -291,7 +296,7 @@ export function VertexTemplate({
           {/* Certifications */}
           {show("certifications") && certifications.length > 0 && (
             <div>
-              <DiamondHeader title="Certifications" />
+              <DiamondHeader title={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id}>
@@ -311,7 +316,7 @@ export function VertexTemplate({
           {/* Referees */}
           {show("referees") && referees.length > 0 && (
             <div>
-              <DiamondHeader title="Referees" />
+              <DiamondHeader title={L.referees} />
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {referees.map((ref) => (
                   <div key={ref.id}>
@@ -335,7 +340,7 @@ export function VertexTemplate({
           {/* Languages */}
           {show("languages") && languages.length > 0 && (
             <div>
-              <DiamondHeader title="Languages" />
+              <DiamondHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((lang) => (
                   <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -359,7 +364,7 @@ export function VertexTemplate({
           {/* Hobbies */}
           {show("hobbies") && hobbies && (
             <div>
-              <DiamondHeader title="Interests" />
+              <DiamondHeader title={L.interests} />
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
                 {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
                   <span key={i} style={{

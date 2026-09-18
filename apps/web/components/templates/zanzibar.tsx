@@ -6,6 +6,7 @@ import {
   visibleSkills,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 const PROF: Record<string, number> = { Native: 5, Fluent: 4, Advanced: 3, Intermediate: 2, Basic: 1 };
 
@@ -47,9 +48,14 @@ function RightSectionHeader({ text }: { text: string }) {
 }
 
 export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees } = data;
   const hidden = (k: string) => data.hiddenSections?.includes(k) ?? false;
-  const font = "'Helvetica Neue', Arial, sans-serif";
+  // Was a hardcoded Helvetica stack, so this template ignored `fontFamily`
+  // completely and rendered in Arial on any machine that has no Helvetica —
+  // the requested face never reached the page. Design intent (Helvetica-ish
+  // neutrality) is unchanged; the fallback chain is the shared one.
+  const font = fontFamily || "'Inter', 'Helvetica Neue', Arial, sans-serif";
 
   return (
     <div style={{
@@ -158,7 +164,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
               color: "#64748b",
               margin: "0 0 10px",
             }}>
-              Contact
+              {L.contact}
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {personal.email && (
@@ -190,7 +196,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
                 color: "#64748b",
                 margin: "0 0 10px",
               }}>
-                Skills
+                {L.skills}
               </p>
               <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5 }}>
                 {visibleSkills(skills).map((skill) => (
@@ -223,7 +229,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
                 color: "#64748b",
                 margin: "0 0 10px",
               }}>
-                Languages
+                {L.languages}
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {languages.map((lang) => (
@@ -259,7 +265,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
           {/* Summary */}
           {summary && !hidden("summary") && (
             <div>
-              <RightSectionHeader text="Profile" />
+              <RightSectionHeader text={L.profile} />
               <p style={{ fontSize: 10.5, color: "#374151", lineHeight: 1.8, margin: 0 }}>{summary}</p>
             </div>
           )}
@@ -267,7 +273,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
           {/* Experience */}
           {experience.length > 0 && !hidden("experience") && (
             <div>
-              <RightSectionHeader text="Experience" />
+              <RightSectionHeader text={L.experience} />
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {experience.map((exp) => (
                   <div key={exp.id}>
@@ -313,7 +319,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
           {/* Education */}
           {education.length > 0 && !hidden("education") && (
             <div>
-              <RightSectionHeader text="Education" />
+              <RightSectionHeader text={L.education} />
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -338,7 +344,7 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
           {/* Certifications */}
           {certifications.length > 0 && !hidden("certifications") && (
             <div>
-              <RightSectionHeader text="Certifications" />
+              <RightSectionHeader text={L.certifications} />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {certifications.map((cert) => (
                   <div key={cert.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>

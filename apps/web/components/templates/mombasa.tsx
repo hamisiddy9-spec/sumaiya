@@ -6,6 +6,7 @@ import {
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
+import { cvHeadings } from "@/lib/i18n/cv-headings";
 
 const PROF: Record<string, number> = { Native: 5, Fluent: 4, Advanced: 3, Intermediate: 2, Basic: 1 };
 
@@ -47,9 +48,13 @@ function MainHeader({ title, primaryColor }: { title: string; primaryColor: stri
 }
 
 export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }: { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang }) {
+  const L = cvHeadings(lang);
   const { personal, summary, experience, education, skills, languages, certifications, referees, hobbies } = data;
   const hidden = data.hiddenSections ?? [];
-  const interFont = "'Inter', 'Segoe UI', Arial, sans-serif";
+  // Was a hardcoded stack ("'Inter', 'Segoe UI', Arial, sans-serif"), so this
+  // template ignored `fontFamily` — with no Inter installed it fell through to
+  // Segoe UI and the requested family never reached the page.
+  const interFont = fontFamily || "'Inter', 'Segoe UI', Arial, sans-serif";
 
   return (
     <div style={{
@@ -100,7 +105,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Summary */}
         {!hidden.includes("summary") && summary && (
           <div>
-            <MainHeader title="Profile" primaryColor={primaryColor} />
+            <MainHeader title={L.profile} primaryColor={primaryColor} />
             <p style={{ fontSize: 10.5, color: "#4b5563", lineHeight: 1.8, margin: 0 }}>{summary}</p>
           </div>
         )}
@@ -108,7 +113,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Experience */}
         {!hidden.includes("experience") && experience.length > 0 && (
           <div>
-            <MainHeader title="Experience" primaryColor={primaryColor} />
+            <MainHeader title={L.experience} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
               {experience.map((exp) => (
                 <div key={exp.id} style={{ paddingLeft: 12, borderLeft: `2px solid ${primaryColor}25` }}>
@@ -153,7 +158,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Education */}
         {!hidden.includes("education") && education.length > 0 && (
           <div>
-            <MainHeader title="Education" primaryColor={primaryColor} />
+            <MainHeader title={L.education} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {education.map((edu) => (
                 <div key={edu.id} style={{ paddingLeft: 12, borderLeft: `2px solid ${primaryColor}25` }}>
@@ -178,7 +183,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Interests */}
         {!hidden.includes("hobbies") && hobbies && (
           <div>
-            <MainHeader title="Interests" primaryColor={primaryColor} />
+            <MainHeader title={L.interests} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
               {hobbies.split(/[,\n]+/).filter((h) => h.trim()).map((h, i) => (
                 <span key={i} style={{
@@ -233,7 +238,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
 
         {/* Contact */}
         <div>
-          <SideHeader title="Contact" primaryColor={primaryColor} />
+          <SideHeader title={L.contact} primaryColor={primaryColor} />
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {personal.email && (
               <ContactItem icon={<IcoEmail size={9} color={primaryColor} />} text={personal.email} color="#374151" fontSize={9.5} />
@@ -256,7 +261,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Skills */}
         {!hidden.includes("skills") && skills.length > 0 && (
           <div>
-            <SideHeader title="Skills" primaryColor={primaryColor} />
+            <SideHeader title={L.skills} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {visibleSkills(skills).map((skill) => (
                 <div key={skill.id}>
@@ -277,7 +282,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Languages */}
         {!hidden.includes("languages") && languages.length > 0 && (
           <div>
-            <SideHeader title="Languages" primaryColor={primaryColor} />
+            <SideHeader title={L.languages} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {languages.map((lang) => (
                 <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -297,7 +302,7 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         {/* Certifications */}
         {!hidden.includes("certifications") && certifications.length > 0 && (
           <div>
-            <SideHeader title="Certifications" primaryColor={primaryColor} />
+            <SideHeader title={L.certifications} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {certifications.map((cert) => (
                 <div key={cert.id}>
