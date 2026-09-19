@@ -13,6 +13,7 @@ export type HomeStackParamList = {
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
   AtsChecker: { cvId?: string } | undefined;
+  SendToRecruiter: { cvId?: string } | undefined;
 };
 
 export type CvStackParamList = {
@@ -101,6 +102,7 @@ export type LearningHubScreenProps = Screen<HomeStackParamList, "LearningHub">;
 export type GuideScreenProps = Screen<HomeStackParamList, "Guide">;
 export type InviteScreenProps = Screen<HomeStackParamList, "Invite">;
 export type JobsScreenProps = Screen<HomeStackParamList, "Jobs">;
+export type SendToRecruiterScreenProps = Screen<HomeStackParamList, "SendToRecruiter">;
 
 // CV stack
 export type CvListScreenProps = Screen<CvStackParamList, "CvListMain">;

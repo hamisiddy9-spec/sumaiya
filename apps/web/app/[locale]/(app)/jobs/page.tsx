@@ -1,22 +1,13 @@
+export const dynamic = "force-dynamic";
+
 import React from "react";
 import { Metadata } from "next";
 import { JobFeedClient } from "@/components/jobs/job-feed-client";
-import { getTranslations } from "next-intl/server";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const t = await getTranslations({ locale: (await params).locale, namespace: "jobs" });
-  return {
-    title: t("title", "Job Recommendations"),
-    description: t(
-      "description",
-      "Discover personalized job recommendations based on your CV and skills"
-    ),
-  };
-}
+export const metadata: Metadata = {
+  title: "Job Recommendations",
+  description: "Discover personalized job recommendations based on your CV and skills",
+};
 
 export default async function JobsPage({
   params,

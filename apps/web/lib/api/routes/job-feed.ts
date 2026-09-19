@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { cv as cvTable } from "@/lib/db/schema";
 import { job as jobTable, jobMatch, savedJob } from "@/lib/db/schema-jobs";
 import { extractUserProfileFromCV, calculateJobMatch } from "@/lib/jobs/job-matcher";
-import { eq, desc, gt } from "drizzle-orm";
+import { eq, desc, gt, and } from "drizzle-orm";
 
 /**
  * Job feed API
@@ -264,8 +264,7 @@ export const jobFeedRoutes = new Hono()
       const existing = await db
         .select()
         .from(savedJob)
-        .where(eq(savedJob.userId, userId))
-        .where(eq(savedJob.jobId, jobId));
+        .where(and(eq(savedJob.userId, userId), eq(savedJob.jobId, jobId)));
 
       if (existing.length) {
         return c.json({ success: true, message: "Already saved" });

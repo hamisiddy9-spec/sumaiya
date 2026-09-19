@@ -117,7 +117,7 @@ export const emailDocumentRoutes = new Hono()
       // 3. Send via email with tracking pixel
       // For now, return the schema structure
 
-      const documents = {
+      const documents: Record<string, { id: string; fileName: string; format: string; size: number }> = {
         cv: {
           id: generateId(),
           fileName: `${primaryCv.title}.pdf`,

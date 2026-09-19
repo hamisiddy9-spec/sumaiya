@@ -225,12 +225,12 @@ export function JobFeedClient({ sw = false, onSendCV }: JobFeedClientProps) {
                 {job.skills && job.skills.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
                     {job.skills.slice(0, 3).map((skill, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
+                      <Badge key={idx} variant="neutral" className="text-xs">
                         {skill}
                       </Badge>
                     ))}
                     {job.skills.length > 3 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="neutral" className="text-xs">
                         +{job.skills.length - 3}
                       </Badge>
                     )}
@@ -280,7 +280,7 @@ export function JobFeedClient({ sw = false, onSendCV }: JobFeedClientProps) {
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {job.skills.map((skill, idx) => (
-                          <Badge key={idx} variant="secondary">
+                          <Badge key={idx} variant="neutral">
                             {skill}
                           </Badge>
                         ))}

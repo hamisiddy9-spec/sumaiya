@@ -10,7 +10,7 @@
 // /api/ai/tailor-cv behind TRUTH_CONSTRAINT + the evidence gate).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FeedJob } from "@/app/[locale]/(marketing)/jobs/page";
+import type { FeedJob } from "@/lib/jobs/feed-filter";
 import type { Lang } from "@/lib/i18n/translations";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";

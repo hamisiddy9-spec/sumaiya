@@ -7,9 +7,9 @@ import { apiClient } from "../lib/api-client";
 import { track } from "../lib/analytics";
 import { reportError } from "../lib/reporting";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { AppTabsParamList } from "../navigation/types";
+import type { HomeStackParamList } from "../navigation/types";
 
-type Props = NativeStackScreenProps<AppTabsParamList, "SendToRecruiter">;
+type Props = NativeStackScreenProps<HomeStackParamList, "SendToRecruiter">;
 
 export function SendToRecruiterScreen({ route, navigation }: Props) {
   const c = useThemeColors();
@@ -116,20 +116,22 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             </View>
           )}
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <Button
-              label={isSw ? "Batilisha" : "Cancel"}
-              variant="secondary"
-              onPress={() => navigation.goBack()}
-              disabled={isSubmitting}
-              style={{ flex: 1 }}
-            />
-            <Button
-              label={isSw ? "Tuma CV" : "Send CV"}
-              onPress={handleSubmit}
-              disabled={isSubmitting}
-              loading={isSubmitting}
-              style={{ flex: 1 }}
-            />
+            <View style={{ flex: 1 }}>
+              <Button
+                label={isSw ? "Batilisha" : "Cancel"}
+                variant="secondary"
+                onPress={() => navigation.goBack()}
+                disabled={isSubmitting}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                label={isSw ? "Tuma CV" : "Send CV"}
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+                loading={isSubmitting}
+              />
+            </View>
           </View>
         </View>
       }
@@ -177,7 +179,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: emailError ? 6 : 16,
           }}
@@ -205,7 +207,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: 16,
           }}
@@ -230,7 +232,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: 10,
           }}
@@ -250,7 +252,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: 10,
           }}
@@ -276,7 +278,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: 4,
             textAlignVertical: "top",
@@ -309,7 +311,7 @@ export function SendToRecruiterScreen({ route, navigation }: Props) {
             paddingHorizontal: 12,
             paddingVertical: 10,
             color: c.text,
-            backgroundColor: c.bgDefault,
+            backgroundColor: c.bgElevated,
             fontSize: 14,
             marginBottom: 4,
             textAlignVertical: "top",

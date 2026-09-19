@@ -39,7 +39,7 @@ const RATING_OPTIONS = [
 export function OutcomeReportModal({ visible, cvId, onClose, onSubmit }: OutcomeReportModalProps) {
   const c = useThemeColors();
   const { width, height } = useWindowDimensions();
-  const lang = useLang();
+  const { lang, t } = useLang();
   const isSw = lang === "sw";
 
   const [mounted, setMounted] = useState(visible);
@@ -189,7 +189,7 @@ export function OutcomeReportModal({ visible, cvId, onClose, onSubmit }: Outcome
                   paddingHorizontal: 12,
                   paddingVertical: 10,
                   color: c.text,
-                  backgroundColor: c.bgDefault,
+                  backgroundColor: c.bgElevated,
                   fontSize: 14,
                 }}
               />
@@ -211,7 +211,7 @@ export function OutcomeReportModal({ visible, cvId, onClose, onSubmit }: Outcome
                   paddingHorizontal: 12,
                   paddingVertical: 10,
                   color: c.text,
-                  backgroundColor: c.bgDefault,
+                  backgroundColor: c.bgElevated,
                   fontSize: 14,
                 }}
               />
@@ -268,7 +268,7 @@ export function OutcomeReportModal({ visible, cvId, onClose, onSubmit }: Outcome
                   paddingHorizontal: 12,
                   paddingVertical: 10,
                   color: c.text,
-                  backgroundColor: c.bgDefault,
+                  backgroundColor: c.bgElevated,
                   fontSize: 14,
                   textAlignVertical: "top",
                 }}

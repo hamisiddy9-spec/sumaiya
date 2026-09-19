@@ -243,13 +243,17 @@ export function extractUserProfileFromCV(cv: CVData): UserProfile {
 
   const yearsExperience = experience.reduce((sum, exp) => sum + exp.years, 0);
 
+  // Extract skill names from SkillEntry array
+  const skillNames = skills.map((skill: any) => typeof skill === 'string' ? skill : skill.name);
+
+  // Extract language names from LanguageEntry array
+  const languageNames = (cv.languages || []).map((lang: any) => typeof lang === 'string' ? lang : lang.name || '');
+
   return {
-    skills: Array.isArray(skills) ? skills : Object.keys(skills || {}),
+    skills: skillNames,
     experience,
     yearsExperience: Math.max(0, yearsExperience),
-    location: cv.location || undefined,
-    salaryMin: cv.salaryMin || undefined,
-    salaryMax: cv.salaryMax || undefined,
-    languages: cv.languages || [],
+    location: cv.personal?.location || undefined,
+    languages: languageNames,
   };
 }

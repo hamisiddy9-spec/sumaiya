@@ -17,7 +17,7 @@
  */
 
 import { db } from "@/lib/db";
-import { jobs } from "@/lib/db/schema";
+import { job as jobsTable } from "@/lib/db/schema-jobs";
 import { eq, sql } from "drizzle-orm";
 
 const OTTA_API_KEY = process.env.OTTA_API_KEY;
@@ -80,13 +80,14 @@ interface OttaJob {
 }
 
 interface OttaResponse {
-  data: {
+  data?: {
     jobs: {
       edges: Array<{
         node: OttaJob;
       }>;
     };
   };
+  errors?: Array<{ message: string }>;
 }
 
 async function fetchOttaJobs(limit: number = 50, offset: number = 0): Promise<OttaJob[]> {
@@ -117,6 +118,10 @@ async function fetchOttaJobs(limit: number = 50, offset: number = 0): Promise<Ot
       throw new Error(`GraphQL errors: ${JSON.stringify(data.errors)}`);
     }
 
+    if (!data.data) {
+      throw new Error("No data returned from Otta API");
+    }
+
     return data.data.jobs.edges.map((edge) => edge.node);
   } catch (err) {
     console.error("Error fetching from Otta:", err);
@@ -124,16 +129,23 @@ async function fetchOttaJobs(limit: number = 50, offset: number = 0): Promise<Ot
   }
 }
 
-function formatSalary(salary?: { currency: string; minimum?: number; maximum?: number }): string | null {
-  if (!salary) return null;
+function parseSalary(salary?: { currency: string; minimum?: number; maximum?: number }): {
+  salaryMin: number | null;
+  salaryMax: number | null;
+  salaryCurrency: string;
+} {
+  if (!salary) {
+    return { salaryMin: null, salaryMax: null, salaryCurrency: "KES" };
+  }
 
   const { currency, minimum, maximum } = salary;
-  const parts = [];
+  const currencyCode = currency === "USD" ? "USD" : "KES";
 
-  if (minimum) parts.push(`${currency}${minimum.toLocaleString()}`);
-  if (maximum) parts.push(`${currency}${maximum.toLocaleString()}`);
-
-  return parts.length > 0 ? parts.join(" - ") : null;
+  return {
+    salaryMin: minimum || null,
+    salaryMax: maximum || null,
+    salaryCurrency: currencyCode,
+  };
 }
 
 async function syncJobs() {
@@ -156,26 +168,30 @@ async function syncJobs() {
     for (const ottaJob of ottaJobs) {
       try {
         // Check if job already exists by sourceJobId
-        const existing = await db.query.jobs.findFirst({
-          where: eq(jobs.sourceJobId, ottaJob.id),
+        const existing = await db.query.job.findFirst({
+          where: eq(jobsTable.sourceJobId, ottaJob.id),
         });
+
+        const { salaryMin, salaryMax, salaryCurrency } = parseSalary(ottaJob.salary);
 
         if (existing) {
           // Update if newer
           if (new Date(ottaJob.createdAt) > new Date(existing.createdAt || new Date(0))) {
             await db
-              .update(jobs)
+              .update(jobsTable)
               .set({
                 title: ottaJob.title,
                 description: ottaJob.description,
                 company: ottaJob.company.name,
                 location: ottaJob.location.name,
-                salary: formatSalary(ottaJob.salary),
-                applyUrl: ottaJob.applicationUrl,
-                deadline: ottaJob.closesAt ? new Date(ottaJob.closesAt) : null,
+                salaryMin,
+                salaryMax,
+                salaryCurrency,
+                sourceUrl: ottaJob.applicationUrl,
+                expiresAt: ottaJob.closesAt ? new Date(ottaJob.closesAt) : null,
                 updatedAt: new Date(),
               })
-              .where(eq(jobs.sourceJobId, ottaJob.id));
+              .where(eq(jobsTable.sourceJobId, ottaJob.id));
             synced++;
           } else {
             skipped++;
@@ -184,17 +200,20 @@ async function syncJobs() {
         }
 
         // Insert new job
-        await db.insert(jobs).values({
+        await db.insert(jobsTable).values({
           id: `otta-${ottaJob.id}`,
           sourceJobId: ottaJob.id,
+          source: "otta",
           title: ottaJob.title,
           description: ottaJob.description,
           company: ottaJob.company.name,
           location: ottaJob.location.name,
-          salary: formatSalary(ottaJob.salary),
-          applyUrl: ottaJob.applicationUrl,
-          deadline: ottaJob.closesAt ? new Date(ottaJob.closesAt) : null,
-          createdAt: new Date(ottaJob.createdAt),
+          salaryMin,
+          salaryMax,
+          salaryCurrency,
+          sourceUrl: ottaJob.applicationUrl,
+          expiresAt: ottaJob.closesAt ? new Date(ottaJob.closesAt) : null,
+          postedAt: new Date(ottaJob.createdAt),
           updatedAt: new Date(),
         });
         synced++;

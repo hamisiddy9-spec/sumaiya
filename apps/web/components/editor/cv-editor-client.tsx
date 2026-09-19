@@ -1502,10 +1502,10 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // Submit outcome report to track CV impact (interview, offer, rejection, etc.)
   const handleOutcomeSubmit = async (outcomeData: {
     outcome: string;
-    companyName: string;
-    jobTitle: string;
-    aiHelpfulRating: number;
-    feedbackText: string;
+    companyName?: string;
+    jobTitle?: string;
+    aiHelpfulRating?: number;
+    feedbackText?: string;
   }) => {
     if (guestMode) {
       // Guests just see the modal close; authenticated users auto-save
@@ -2788,7 +2788,6 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           isOpen={showOutcomeModal}
           onClose={() => setShowOutcomeModal(false)}
           cvId={lastExportedCvId}
-          sw={uiLang === "sw"}
           onSubmit={handleOutcomeSubmit}
         />
       )}

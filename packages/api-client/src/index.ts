@@ -677,6 +677,41 @@ export class ApiClient {
       return false;
     }
   }
+
+  // ── Outcomes (Hono /api/outcomes) ────────────────────────────────────────
+
+  async submitOutcome(data: {
+    cvId: string;
+    outcome: string;
+    companyName?: string;
+    jobTitle?: string;
+    aiHelpfulRating?: number;
+    feedbackText?: string;
+  }): Promise<{ id: string; createdAt: string }> {
+    return this.request<{ id: string; createdAt: string }>("/api/outcomes", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  // ── Send to Recruiter (Hono /api/ai/email-document) ───────────────────────
+
+  async sendCVToRecruiter(data: {
+    cvId: string;
+    recipientEmail: string;
+    recipientName?: string;
+    customMessage?: string;
+    jobTitle?: string;
+    company?: string;
+    jobDescription?: string;
+    includeTrackingPixel?: boolean;
+    saveToProfile?: boolean;
+  }): Promise<{ success: boolean; sentAt: string }> {
+    return this.request<{ success: boolean; sentAt: string }>("/api/ai/email-document", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 /** Mirrors the ToolResult union in apps/web/lib/assistant/run-tool.ts. */

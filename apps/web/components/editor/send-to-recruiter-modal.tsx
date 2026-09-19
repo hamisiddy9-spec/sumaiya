@@ -308,7 +308,6 @@ export function SendToRecruiterModal({
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            loading={isSubmitting}
             className="flex-1"
           >
             {isSubmitting ? (
