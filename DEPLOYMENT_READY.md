@@ -1,5 +1,11 @@
 # 🚀 DEPLOYMENT_READY — Sumaiya Launch Checklist
 
+> **Partly superseded (2026-09-19).** Written 2026-09-15. The claims flagged here were wrong
+> and are removed or corrected inline: there is no `TemplateHubProvider` (deleted in
+> `aee08ae` — `docs/DECISIONS.md` D1), the registry holds 266 entries, not 267, and
+> `NEXT_PUBLIC_TEMPLATE_PROVIDER` is not a variable any code reads. Treat the rest as a
+> 2026-09-15 snapshot; `apps/web/CLAUDE.md` carries the verified figures.
+
 **Status**: ✅ Ready for production deployment (TemplateHub is a separate repo)
 
 ---
@@ -8,7 +14,8 @@
 
 ✅ **Web Build**: SUCCESSFUL
 ✅ **Mobile Build (APK)**: Ready (`apps/native`, package `pro.sumaiya.app`)
-✅ **TemplateProvider**: Native provider active (267 templates), `TemplateHubProvider` client ready for later remote use
+✅ **TemplateProvider**: Native provider active (266 registry entries) and it is the **only**
+provider — the remote `TemplateHubProvider` was deleted in `aee08ae` (`docs/DECISIONS.md` D1)
 
 ---
 
@@ -33,7 +40,6 @@ npx vercel inspect <deployment-url>
 DATABASE_URL=postgresql://[user]:***@[host]:[port]/[db]
 NEXT_PUBLIC_SUPABASE_URL=https://[project].supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=[key]
-NEXT_PUBLIC_TEMPLATE_PROVIDER=native
 NEXT_PUBLIC_APP_URL=https://sumaiya.app
 STRIPE_SECRET_KEY=[key]
 STRIPE_WEBHOOK_SECRET=[key]

@@ -35,12 +35,13 @@ packages/       8 private packages: analytics, api-client, core, design-tokens,
 
 ## Templates — the real numbers
 
-`apps/web/components/templates/` holds the web template sources. Measured:
+`apps/web/components/templates/` holds the web template sources. Measured (also re-checked
+2026-09-19 at `aee08ae`):
 
 | What | Count | How |
 |---|---|---|
-| `.tsx` template files in `components/templates/` | **267** | `ls -1 components/templates/*.tsx \| wc -l` |
-| Entries in `lib/templates/registry.ts` | **266** | the generator skips `template-utils.tsx` |
+| `.tsx` template files in `components/templates/` | **268** | `ls -1 components/templates/*.tsx \| wc -l` |
+| Entries in `lib/templates/registry.ts` | **266** | the generator skips `template-canvas.tsx` and `template-utils.tsx` |
 | Distinct registry ids | 266 | every id unique |
 | Distinct display names | **265** | `"Herald"` appears twice |
 | Registry category | 266 × `"cv"` | no other category is populated |
@@ -52,9 +53,10 @@ packages/       8 private packages: analytics, api-client, core, design-tokens,
 | Mobile template index | 267 entries, 267 distinct ids | `node scripts/gen-mobile-templates.mjs` → `apps/native/src/data/templates.json` |
 
 So the three numbers that circulate in this repo are all measuring different things:
-**267** = `.tsx` files, **266** = registry entries, **273** = does not exist anywhere in
-the tree. 47 templates are actually offered; the rest are the legacy/recolor tail that
-still renders but is not surfaced (`getCvTemplateTier()` in `lib/templates/tiers.ts`).
+**268** = `.tsx` files (266 of them template sources), **266** = registry entries, **273**
+= does not exist anywhere in the tree. 47 templates are actually offered; the rest are the
+legacy/recolor tail that still renders but is not surfaced (`getCvTemplateTier()` in
+`lib/templates/tiers.ts`).
 
 **The 8-template-family structure is a stub, not a fact.** `lib/templates/families.ts`
 declares 8 family records, but 5 of the template ids it references
@@ -67,32 +69,35 @@ real per-template overrides, and 5 of those keys are the same non-existent ids.
 
 ---
 
-## TemplateProvider (the one abstraction that is real)
+## TemplateProvider (one implementation, one rule)
 
-`apps/web/lib/templates/index.ts` exports a `selectProvider()` and a `templateProvider`
-singleton: `native` (default) → local `NativeTemplateProvider`; `templatehub`/`remote`
-**with** URL + key → `TemplateHubProvider`; remote without credentials → graceful
-fallback to native. Covered by `lib/templates/provider-select.test.ts`.
+`apps/web/lib/templates/index.ts` exports `selectProvider()` and a `templateProvider`
+singleton. `selectProvider()` returns the local `NativeTemplateProvider`
+**unconditionally**: commit `aee08ae` deleted the remote `TemplateHubProvider` file and the
+`templatehub`/`remote` branch (with its graceful-fallback path) under `docs/DECISIONS.md`
+D1 — an offline-first APK cannot fetch its templates from a remote service. There is no env
+var, no remote branch and no fallback. Covered by `lib/templates/provider-select.test.ts`,
+which now also asserts that `TemplateHubProvider`/`createTemplateHubProvider` are **not**
+exported and that `index.ts` contains no `templatehub` / `TEMPLATE_HUB` string.
 
 It is genuinely wired into UI: `components/editor/template-picker.tsx`,
 `template-selection-modal.tsx`, `dynamic-template-renderer.tsx`,
 `lib/cv-builder/template-integration.ts` all import the singleton.
 
-`lib/templates/templatehub-provider.ts` (295 lines) is a working HTTP client whose own
-header says *"Currently: STUB only. Not yet integrated."*
+**On TemplateHub generally** (this file's previous version carried two contradictory
+claims; both are settled now):
 
-**Reconciling the two contradictory claims about TemplateHub** (both of which appeared
-in this file's previous version):
-
-- *"Sumaiya contains NO TemplateHub code"* — **true only in the server sense.** The tree
-  contains no TemplateHub server, no Docker/Dockerfile, no SQL schema, and no API route
-  for it (verified by directory and file search). Sumaiya *does* contain an HTTP
-  **client** for it and marketing references to templatehub.pro.
-- *"Sumaiya consumes TemplateHub templates"* — **not currently true.** Nothing fetches
-  remote templates unless `NEXT_PUBLIC_TEMPLATE_PROVIDER=templatehub|remote` plus
-  `TEMPLATE_HUB_API_URL` + `TEMPLATE_HUB_API_KEY` are set, and those variables are
-  **absent from `apps/web/.env.example`**. Production behaviour is therefore to serve
-  the local registry. Treat remote consumption as a plan, not a fact.
+- *"Sumaiya contains NO TemplateHub code"* — **true, and now true in the client sense
+  too.** No TemplateHub server, no Docker/Dockerfile, no SQL schema, no API route, and
+  since `aee08ae` no HTTP client. What remains is **branding**: the `templatehub.pro`
+  domain in `vercel.json`, `.env.example`, `twa-manifest.json` and the marketing page at
+  `app/[locale]/(marketing)/pro/`, plus the native app's "TemplateHub Premium" gallery
+  label. That is naming, not a provider path.
+- *"Sumaiya consumes TemplateHub templates"* — **never true, and no longer planable
+  here.** D1 forbids it. `NEXT_PUBLIC_TEMPLATE_PROVIDER`, `TEMPLATE_HUB_API_URL` and
+  `TEMPLATE_HUB_API_KEY` are read **nowhere** in the tree (the only mentions are
+  assertions of their absence in `provider-select.test.ts`) and are absent from
+  `apps/web/.env.example`. Templates are served from the local registry, always.
 
 `packages/templates` is **dead scaffolding**: 5 mock templates with
 `https://example.com/...` preview URLs, comment *"In production, this would be
@@ -123,7 +128,7 @@ Per-app test runners are **different** — this is the single most common mistak
 cd apps/web
 npx tsc --noEmit            # clean
 npm run lint                # next lint
-npx vitest run              # 127 files: 126 pass, 1 skipped; 2042 tests: 2039 pass, 3 skipped
+npx vitest run              # 127 files pass, 1 skipped; 2052 tests pass, 3 skipped (2026-09-19)
 npm run evals               # anti-fabrication gate: 9 files, 135 tests (133 pass, 2 skip)
 npm run build               # next build
 ```
@@ -195,9 +200,9 @@ export`); the process is written up in `docs/aso-play-store.md` and
 | `content_snapshot` field for versioning | the column is `snapshot` on `document_version` |
 | `verify.yml` / `apk-build.yml` / `mobile-apk-build.yml` | only `ci.yml`, `nightly-evals.yml`, `health-cron.yml` |
 | `npm run build:android` → APK | no such script |
-| "All 800+ tests green", "master production-ready" | branch is `main`; web 2042 tests, native 1201 (jest), evals 135 |
+| "All 800+ tests green", "master production-ready" | branch is `main`; web 2052 tests (2026-09-19), native 1201 (jest), evals 135 |
 | commit `8d908c9`, `c8a3fe1`, `7838ab9` | do not exist in this repo's history |
-| `TEMPLATE_IMPLEMENTATION_CHECKLIST.md` | missing (as are `NATIVE_APP_SPEC.md`, `mobile/NATIVE_APP_SPEC.md`) |
+| `TEMPLATE_IMPLEMENTATION_CHECKLIST.md` | it **is missing from the repo root but exists at `apps/web/TEMPLATE_IMPLEMENTATION_CHECKLIST.md`** — and it is stale (its TemplateHub phase is gone and its template counts are wrong). `NATIVE_APP_SPEC.md` and `mobile/NATIVE_APP_SPEC.md` really are missing everywhere |
 | `lib/snap-apply.ts`, `lib/ocr.ts`, `lib/template-matcher.ts`, `lib/sync-queue.ts` | missing in `apps/web/lib` |
 | `scripts/verify-learning-urls.sh` at repo root | it is at `apps/web/scripts/verify-learning-urls.sh` |
 | `lib/learning-resources.ts` has "34 URLs" | it has 51 distinct URLs (52 occurrences) |
@@ -216,15 +221,12 @@ commits `799dc62`…`79307fa` (all dated 2026-09-15).
 
 These are intent, restated so nobody re-reads them as shipped state:
 
-1. **Remote TemplateHub serving** — swap `templateProvider` to the remote client per
-   environment, add the env vars to `.env.example`, integration-test both providers with
-   native fallback. Not wired today.
-2. **Real template families** — replace `families.ts` stub with a curated classification
-   of the registry, and either populate or delete the non-existent ids referenced by
-   `families.ts` and `schemas.ts`.
-3. **Native template parity** — reconcile 218 native implementations / 267 mobile index
+1. **Real template families** — replace the `families.ts` stub with a curated
+   classification of the registry, and either populate or delete the non-existent ids
+   referenced by `families.ts` and `schemas.ts`.
+2. **Native template parity** — reconcile 218 native implementations / 267 mobile index
    entries / 266 web registry entries into one governed number.
-4. **Docs cleanup** — the same false claims appear in `README.md`, `FINAL_STATUS.md`,
+3. **Docs cleanup** — the same false claims appear in `README.md`, `FINAL_STATUS.md`,
    `LAUNCH_READY.md`, `docs/HANDOVER.md`, `TEMPLATEHUB_REFACTOR_SESSION.md` and others.
    They need the same code-first treatment. Consider gating this file's numbers in CI so
    it cannot drift again.

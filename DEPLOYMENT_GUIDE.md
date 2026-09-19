@@ -19,8 +19,9 @@ Complete guide for deploying Sumaiya web and mobile apps to production.
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID=811013224847-1g6ml0490hh...
    NEXT_PUBLIC_API_URL=https://sumaiya.app
-   NEXT_PUBLIC_TEMPLATE_PROVIDER=native  # Will change to 'templatehub' later
    ```
+   (There is no `NEXT_PUBLIC_TEMPLATE_PROVIDER`. The template system is native-only —
+   `docs/DECISIONS.md` D1 — and no `TEMPLATE_*` variable is read anywhere in `apps/web`.)
 
 ### Step 1: Authenticate with Vercel
 
@@ -456,7 +457,7 @@ Solution:
 - Analyze usage patterns
 - Optimize hot paths
 - Plan Phase 2 improvements
-- TemplateHub integration
+- Template provider maintenance (native-only — there is no remote provider to integrate)
 
 ---
 

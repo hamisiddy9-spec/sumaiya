@@ -1,10 +1,12 @@
 # TemplateHub Refactor & Alignment Session
 
-> **Superseded (2026-09-15).** TemplateHub already lives in its own repo
-> (`hamisiddy9-spec/TemplateHub`). Sumaiya no longer contains any TemplateHub
-> code — only the `TemplateProvider` abstraction + `TemplateHubProvider` HTTP
-> client. **No Docker** is used for this. This doc is kept for historical
-> reference of the original plan.
+> **Superseded (2026-09-15; provider path deleted 2026-09-19, `aee08ae`).** TemplateHub
+> already lives in its own repo (`hamisiddy9-spec/TemplateHub`). Sumaiya contains **no**
+> TemplateHub code at all: the `TemplateHubProvider` HTTP client was deleted, and
+> `selectProvider()` returns the local native provider unconditionally — no env var, no
+> remote branch, no fallback (`docs/DECISIONS.md` D1: an offline-first app cannot fetch its
+> templates from a remote service). **No Docker** is used for this. This doc is kept for
+> historical reference of the original plan.
 
 Complete guide for creating TemplateHub repo and aligning with Sumaiya project.
 

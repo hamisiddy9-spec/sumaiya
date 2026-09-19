@@ -25,14 +25,16 @@ bash LAUNCH.sh
 ### Sumaiya Web (Vercel)
 - Next.js web app
 - All routes + API endpoints
-- 267 templates available via the native `TemplateProvider`
+- 266 templates in the registry (47 offered in the picker) via the native `TemplateProvider`
 
 **Domain**: Your Vercel domain (sumaiya.vercel.app or custom)  
 **Region**: Vercel global CDN
 
 > **TemplateHub** lives in its own repo (`hamisiddy9-spec/TemplateHub`) and is not
-> deployed from this repo. Sumaiya talks to it only through `TemplateHubProvider`
-> (an HTTP client), enabled later via `NEXT_PUBLIC_TEMPLATE_PROVIDER=remote`.
+> deployed from this repo. Sumaiya does not talk to it at all: the `TemplateHubProvider`
+> HTTP client was **deleted** in commit `aee08ae`, and there is no
+> `NEXT_PUBLIC_TEMPLATE_PROVIDER` variable (the variable is read nowhere in the tree).
+> `docs/DECISIONS.md` D1 — the APK must work offline, so templates ship inside the app.
 
 ---
 
@@ -69,7 +71,6 @@ npx vercel deploy --prod
 DATABASE_URL=postgresql://user:***@host:5432/db
 NEXT_PUBLIC_SUPABASE_URL=https://[project].supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=[key]
-NEXT_PUBLIC_TEMPLATE_PROVIDER=native
 STRIPE_SECRET_KEY=[key]
 STRIPE_WEBHOOK_SECRET=[key]
 ```
@@ -134,7 +135,8 @@ npx vercel env list
 ```
 
 ### Templates Not Rendering
-- Confirm `NEXT_PUBLIC_TEMPLATE_PROVIDER=native` is set
+- There is no `NEXT_PUBLIC_TEMPLATE_PROVIDER` to confirm - the template system is
+  native-only (`docs/DECISIONS.md` D1); check the browser console for render errors instead
 - Check the browser console for provider errors
 
 ---

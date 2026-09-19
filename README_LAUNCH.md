@@ -58,7 +58,6 @@ psql $DATABASE_URL -f lib/templates/database-schema.sql
 DATABASE_URL=postgresql://user:***@host/db
 NEXT_PUBLIC_SUPABASE_URL=https://[project].supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=[key]
-NEXT_PUBLIC_TEMPLATE_PROVIDER=native
 STRIPE_SECRET_KEY=[key]
 ```
 

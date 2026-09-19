@@ -2,6 +2,13 @@
 
 Complete implementation status of the TemplateProvider architecture and CV Builder integration.
 
+> **Partly stale — the notes inline below say what changed.** The TemplateHub provider path
+> (*Phase 5*) was deleted in `aee08ae` (`docs/DECISIONS.md` D1); every remaining TemplateHub /
+> `templatehub-provider.ts` item in this file is historical, not shipped. The template counts
+> here (267 / 273 / 261) are also wrong: the tree has 268 `.tsx` files in
+> `components/templates/`, **266** of them template sources → **266** registry entries →
+> **260** still `family: "pending"`. Measured figures live in `apps/web/CLAUDE.md`.
+
 ## ✅ Completed (All Committed)
 
 ### Phase 1: TemplateProvider Abstraction
@@ -21,15 +28,15 @@ Complete implementation status of the TemplateProvider architecture and CV Build
 
 ### Phase 2: Template Families & Registry
 - [x] **registry.ts** (auto-generated)
-  - 267 templates with complete metadata
-  - Generated from 273 .tsx files
+  - 266 templates with complete metadata
+  - Generated from 268 .tsx files in components/templates/ (266 sources + 2 helpers)
   - Includes family, tier, editable fields
 
 - [x] **families.ts**
   - 8 template families (5 core, 3 premium)
   - Template family members with roles
   - Helper functions: getFamiliesForProduct, getFamiliesByCategory, getFamilyById
-  - 261 templates marked for migration audit
+  - 260 templates still marked `family: "pending"` for the migration audit
 
 ### Phase 3: Editable Schemas
 - [x] **schemas.ts**
@@ -42,17 +49,15 @@ Complete implementation status of the TemplateProvider architecture and CV Build
 - [x] **database-schema.sql**
   - documents table (PK, user_id, content versioning)
   - document_exports table (analytics tracking)
-  - template_metadata_cache table (TemplateHub sync prep)
+  - template_metadata_cache table (local metadata cache; `source` is 'native' | 'partner')
   - template_families table (reference data)
   - Proper indexes and constraints
 
-### Phase 5: TemplateHub Provider
-- [x] **templatehub-provider.ts** (296 lines)
-  - TemplateHubProvider stub implementation
-  - API contract defined (/templates, /families, /render, /export)
-  - HTTP client with authentication
-  - Error handling and caching hooks
-  - Ready for TemplateHub API implementation
+### Phase 5: TemplateHub Provider - REMOVED (2026-09-19)
+- ~~**templatehub-provider.ts** (296 lines)~~ - **DELETED** in commit `aee08ae`
+  (`docs/DECISIONS.md` D1: an offline-first APK cannot fetch templates from a remote service).
+  It was a stub that never ran in production; there is no API contract, no HTTP client, and
+  nothing to implement against.
 
 ### Phase 6: CV Builder Integration
 - [x] **lib/cv-builder/** module (complete)
@@ -120,7 +125,7 @@ Complete implementation status of the TemplateProvider architecture and CV Build
 
 ### Template System
 - NativeTemplateProvider fully functional
-- All 267 templates registered and categorized
+- All 266 registry entries present (260 are still `family: "pending"`)
 - 8 template families defined
 - Schema validation working
 - Dynamic rendering implemented
@@ -173,20 +178,15 @@ const { data, error } = await supabaseClient
   });
 ```
 
-### 3. TemplateHub API Integration
+### 3. TemplateHub API Integration - CANCELLED
 
-When TemplateHub API is built:
-```typescript
-// One-line swap in lib/templates/index.ts
-export const templateProvider: TemplateProvider = 
-  new TemplateHubProvider(apiClient, 'sumaiya');
-
-// No UI changes needed!
-```
+Dropped by `docs/DECISIONS.md` D1. There is no provider swap to make and no remote client to
+swap in - `templatehub-provider.ts` was deleted in `aee08ae`, and `selectProvider()` returns
+the local native provider unconditionally.
 
 ### 4. Template Classification Audit
 
-Complete classification of 261 pending templates:
+Complete classification of the 260 pending templates:
 - Map to appropriate families
 - Set tier (core vs premium)
 - Add descriptions and previews
@@ -203,16 +203,14 @@ Complete classification of 261 pending templates:
 ### Before Production
 1. **Database migration** - Deploy Phase 1 SQL when ready
 2. **Document persistence** - Wire up document save
-3. **Template audit** - Classify 261 pending templates
+3. **Template audit** - Classify the 260 pending templates
 4. **QA testing** - Verify in staging environment
 5. **Analytics** - Set up export metrics tracking
 
 ### Post-Launch
 1. **Monitor errors** - Watch console for export failures
 2. **Collect feedback** - Track template popularity
-3. **TemplateHub API** - Plan and build remote template service
-4. **Phase 2-5** - Execute remaining migration phases
-5. **Provider swap** - Switch to TemplateHub when API ready
+3. **Phase 2-5** - Execute remaining migration phases
 
 ## 📊 Project Status
 
@@ -223,11 +221,10 @@ Complete classification of 261 pending templates:
 | Registry & Families | ✅ Complete | 400+ | 2 |
 | Schemas & Validation | ✅ Complete | 150+ | 1 |
 | Database | ✅ Complete | 200+ | 1 |
-| TemplateHub Provider | ✅ Complete | 296 | 1 |
 | CV Builder Integration | ✅ Complete | 600+ | 6 |
 | UI Components | ✅ Complete | 400+ | 3 |
 | Documentation | ✅ Complete | 900+ | 4 |
-| **TOTAL** | **✅ COMPLETE** | **3,500+** | **20** |
+| **TOTAL** | **✅ COMPLETE** | **3,000+** | **19** |
 
 ### Test Coverage
 - [x] TypeScript strict mode
@@ -247,11 +244,11 @@ Complete classification of 261 pending templates:
 ## 🔐 Two-Repo Safety
 
 Implementation maintains clean separation:
-- ✅ No TemplateHub code in Sumaiya repo
+- ✅ No TemplateHub code in Sumaiya repo (and, since `aee08ae`, no TemplateHub *client* either)
 - ✅ TemplateProvider is abstraction layer
 - ✅ All integration points clearly marked
-- ✅ One-line swap mechanism defined
-- ✅ API contract documented
+- ❌ No swap mechanism - the remote path was deleted (`docs/DECISIONS.md` D1)
+- ❌ No API contract - there is no remote API to contract with
 
 ## 📋 Pre-Launch Checklist
 
@@ -302,7 +299,6 @@ Implementation maintains clean separation:
    ├─ Phase 1: Deploy code (zero downtime)
    ├─ Phase 2: Run database migrations
    ├─ Phase 3: Enable document persistence (later)
-   ├─ Phase 4: Deploy TemplateHub provider (when ready)
    └─ Phase 5: Monitor metrics
 
 4. Post-Launch
@@ -318,11 +314,10 @@ Implementation maintains clean separation:
 |------|---------|-------|
 | `lib/templates/schema.ts` | Core types & contracts | 212 |
 | `lib/templates/native-provider.ts` | Local implementation | 160+ |
-| `lib/templates/registry.ts` | 267 templates | auto |
+| `lib/templates/registry.ts` | 266 templates | auto |
 | `lib/templates/families.ts` | 8 families | 150+ |
 | `lib/templates/schemas.ts` | Field definitions | 150+ |
 | `lib/templates/database-schema.sql` | DB DDL | 200+ |
-| `lib/templates/templatehub-provider.ts` | Remote stub | 296 |
 | `lib/templates/migrations.ts` | Migration steps | 300+ |
 | `lib/templates/test-utils.ts` | Testing toolkit | 250+ |
 | `lib/templates/README.md` | System guide | 400+ |
@@ -337,13 +332,12 @@ Complete, production-ready template system delivered:
 - ✅ Documentation is comprehensive
 - ✅ Provider abstraction enables future growth
 - ✅ Everything is TypeScript-safe
-- ✅ Ready to swap to TemplateHub with one line
+- ❌ No provider swap exists - the remote path was deleted (`docs/DECISIONS.md` D1)
 
 **All coding, integrations, and UI/UX work complete.**  
 **Awaiting your input for:**
 1. Database migration timing
-2. Template classification audit
-3. TemplateHub API implementation
-4. Production deployment approval
+2. Template classification audit (260 templates)
+3. Production deployment approval
 
 **Status:** Ready to ship 🚀

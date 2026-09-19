@@ -1,7 +1,9 @@
 # apps/web — AI-assisted development guide
 
-**Last verified: 2026-09-18** — every statement below was checked against the **code in
-this working tree** (`git rev-parse HEAD` → `37e0b5b`, branch `main`), with the commands
+**Last verified: 2026-09-18; template-provider section updated 2026-09-19** (`aee08ae`, D1 — the
+remote TemplateHub provider was deleted; see `docs/DECISIONS.md`). Every statement below was
+checked against the **code in this working tree** (`git rev-parse HEAD` was `37e0b5b`, branch
+`main`, on 2026-09-18), with the commands
 quoted. Nothing was carried over from other markdown in this repo; the previous version
 of this file described a product that does not exist (it named a `mobile/` directory, an
 `npm run build:android` script, a `documents` table, and three commits that are not in
@@ -31,7 +33,7 @@ apps/web/
 ├─ components/
 │  ├─ editor/               cv-editor-client, template-picker, dynamic-template-renderer,
 │  │                        template-selection-modal, ats-panel, share-cv-modal, …
-│  ├─ templates/            267 .tsx template sources (the real gallery)
+│  ├─ templates/            268 .tsx files, 266 of them template sources (the real gallery)
 │  ├─ ui/                   primitives (badge.tsx, …)
 │  └─ admin/, marketing/    admin screens, landing pages
 ├─ lib/
@@ -67,14 +69,14 @@ colocated `.test.ts`).
 | `tiers.ts` | `getCvTemplateTier()` → `premium` / `core` / `legacy` |
 | `families.ts` | **STUB** (see below) |
 | `schemas.ts` | `STANDARD_CV_SCHEMA` (14 fields) + a `TEMPLATE_SCHEMAS` map with no real overrides |
-| `templatehub-provider.ts` | HTTP client for the separate TemplateHub repo; self-labelled "STUB only. Not yet integrated." |
 | `index.ts` | `selectProvider()` + the `templateProvider` singleton used by the UI |
 | `migrations.ts`, `database-schema.sql` | SQL kept alongside the provider layer — **the `documents` table they describe is not the live schema** |
 
-**Counts, measured (not inherited):** 267 `.tsx` sources → **266** registry entries →
-**265** distinct names (`"Herald"` is duplicated) → **47** offered (**7** premium).
-All 266 registry entries are `category: "cv"`. The number **273 appears nowhere in the
-tree**.
+**Counts, measured 2026-09-19:** 268 `.tsx` files in `components/templates/` → **266**
+template sources (`template-canvas.tsx` and `template-utils.tsx` are helpers, not registry
+entries) → **266** registry entries → **265** distinct names (`"Herald"` is duplicated, as
+`herald` and `herald-cv`) → **47** offered (**7** premium). All 266 registry entries are
+`category: "cv"`. The number **273 appears nowhere in the tree**.
 
 **`families.ts` is a stub and must not be described as shipped.** It declares 8 families,
 but 5 of the template ids it references (`simple-cv`, `professional-cv`, `ats-cv`,
@@ -87,9 +89,11 @@ the same non-existent ids.
 
 The singleton is wired into the editor for real: `components/editor/template-picker.tsx`,
 `template-selection-modal.tsx`, `dynamic-template-renderer.tsx` and
-`lib/cv-builder/template-integration.ts` all import `templateProvider`, and
-`lib/templates/provider-select.test.ts` pins the selection rule (native by default;
-remote only with URL **and** key; remote without credentials falls back to native).
+`lib/cv-builder/template-integration.ts` all import `templateProvider`.
+`selectProvider()` in `index.ts` returns `nativeTemplateProvider` unconditionally — no env
+var, no remote branch, no fallback — and `lib/templates/provider-select.test.ts` pins exactly
+that, including assertions that `TemplateHubProvider` is not exported and that `index.ts`
+contains no `templatehub` / `TEMPLATE_HUB` string.
 
 ---
 
@@ -112,7 +116,7 @@ under `lib/templates/` that describes one is a design document, not the applied 
 cd apps/web
 npx tsc --noEmit     # clean
 npm run lint         # next lint
-npx vitest run       # 127 files: 126 pass, 1 skipped · 2042 tests: 2039 pass, 3 skipped
+npx vitest run       # 127 files pass, 1 skipped · 2052 tests pass, 3 skipped (2026-09-19)
 npm run evals        # anti-fabrication gate: 9 files, 135 tests (133 pass, 2 skip)
 npm run build        # next build
 ```
@@ -141,11 +145,11 @@ change that passes locally but breaks `web:build` will still fail the PR.
 | Active branch `chore/release-manifest-1.6.15` | active branch is **`main`**; that branch exists (local + origin) but is stale |
 | Branching from `claude/sumaiya-continuation-ife7xj`, merging `hermes/native-scan`, `hermes/native-offline`, `hermes/native-template-picker`, `hermes/native-settings-eas` | **none of those branches exist.** The real `hermes/*` branches are `hermes/ai-spine`, `hermes/crash-funnel-wip`, `hermes/native-a11y`, `hermes/native-e2e`, `hermes/native-empty-states-analytics`, `hermes/native-faq-privacy`, `hermes/web-template-dedup` |
 | `apps/mobile/` with `src/screens`, `src/components`, `src/services`, `src/state`, `src/hooks`, `eas.json`, `NATIVE_APP_SPEC.md` | the app is **`apps/native`**; it has `src/screens`, `src/components`, `src/services`, `src/hooks`, **`src/contexts`** (not `src/state`), and `eas.json` — but **no `NATIVE_APP_SPEC.md`** anywhere in the repo |
-| 273 templates (and "267 templates" in the sibling file) | 267 `.tsx` → 266 registry entries → 47 offered; 273 is not a real figure |
+| 273 templates (and "267 templates" in the sibling file) | 268 `.tsx` files, 266 of them template sources → 266 registry entries → 47 offered; 273 is not a real figure |
 | `documents` table "replaces fragmented cv/letter/reference tables" | no `documents` table exists; `cv`, `cover_letter`, `letter` are all still present |
 | "Content snapshot" field for versioning | `document_version.snapshot` (jsonb) |
 | `.github/workflows/verify.yml`, `apk-build.yml`, `mobile-apk-build.yml` | only `ci.yml`, `nightly-evals.yml`, `health-cron.yml` exist |
-| `npm run build` covers "Next.js + Expo"; `npx vitest run` = "800+ tests" | web and native are separate builds and **different runners**; real counts are 2042 (vitest, web) and 1201 (jest, native) |
+| `npm run build` covers "Next.js + Expo"; `npx vitest run` = "800+ tests" | web and native are separate builds and **different runners**; real counts are 2052 (vitest, web, 2026-09-19) and 1201 (jest, native) |
 | "All 800+ tests green", "master branch is production-ready" | the branch is `main`; measured counts above, and both suites were green at verification time |
 | Commit `8d908c9` ("as of"), `c8a3fe1`, `7838ab9` | **not in this repo's history** (`git log` fails on all three) |
 | `lib/learning-resources.ts` = "34 URLs verified live" | the file contains **51 distinct URLs**; the verifier is `scripts/verify-learning-urls.sh` in *this* workspace, not at the repo root |
@@ -169,14 +173,10 @@ and `apps/native/eas.json` exist at the stated paths.
    versionCode 10623) with 218 template implementations, not a 4-week greenfield spec.
    Anything still planned (camera/OCR round-trips, offline sync hardening, store
    submission) should be written as a plan in `docs/`, not asserted here.
-2. **TemplateHub remote serving** — `templatehub-provider.ts` is a client stub; switching
-   to it needs env vars (`NEXT_PUBLIC_TEMPLATE_PROVIDER`, `TEMPLATE_HUB_API_URL`,
-   `TEMPLATE_HUB_API_KEY`) that are **not in `.env.example` yet**, plus integration tests
-   with native fallback.
-3. **Template curation** — give the 260 `family: "pending"` templates a real
+2. **Template curation** — give the 260 `family: "pending"` templates a real
    classification or retire them, and fix/delete the non-existent ids in `families.ts`
    and `schemas.ts`.
-4. **This file** — if a claim here goes stale, fix the claim; do not let a new document
+3. **This file** — if a claim here goes stale, fix the claim; do not let a new document
    restate it.
 
 ---

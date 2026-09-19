@@ -199,15 +199,11 @@ NativeTemplateProvider (local, current)
 TEMPLATE_REGISTRY + TEMPLATE_FAMILIES
 ```
 
-When TemplateHub is ready, swap providers with **one line change**:
-
-```typescript
-// In lib/templates/index.ts
-export const templateProvider: TemplateProvider = 
-  new TemplateHubProvider(apiClient, 'sumaiya');
-```
-
-No UI changes needed!
+Provider resolution is a single, unconditional step: `selectProvider()` in
+`lib/templates/index.ts` returns `nativeTemplateProvider`. There is no second implementation
+to swap in (`docs/DECISIONS.md` D1 — an offline-first APK cannot fetch templates remotely). UI
+code depends only on the `TemplateProvider` interface, so the abstraction stays even though it
+has exactly one implementation.
 
 ## Rendering Pipeline
 
@@ -243,7 +239,7 @@ triggerBlobDownload() → Save file
 ✅ **Template picker UI** - Browse and select templates  
 ✅ **Error handling** - Graceful fallbacks  
 ✅ **TypeScript types** - Full type safety  
-✅ **Provider abstraction** - Ready for TemplateHub  
+✅ **Provider abstraction** - One implementation behind a stable interface  
 
 ## Gradual Migration
 
@@ -259,10 +255,8 @@ The system supports running old and new code together:
    - Move rendering to dynamic-template-renderer
    - Switch export to useCVExport hook
 
-3. **Phase 3 (when ready):** Switch to TemplateHub provider
-   - Change one line in lib/templates/index.ts
-   - All components automatically use remote templates
-   - No UI code changes needed
+3. **Phase 3 (dropped):** there is no remote provider to switch to. `docs/DECISIONS.md` D1
+   deleted the TemplateHub path; the native provider is the only implementation.
 
 ## Testing
 

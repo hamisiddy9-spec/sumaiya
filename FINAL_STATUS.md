@@ -1,6 +1,14 @@
 # ✅ FINAL_STATUS — Complete Project Delivery
 
-**Date**: 2026-09-15  
+> **Superseded as a status document (2026-09-19).** This was written 2026-09-15. The
+> TemplateHub integration it treats as delivered was never production code, and the remote
+> provider path named here (`TemplateHubProvider`, `lib/templates/templatehub-provider.ts`)
+> was **deleted** in commit `aee08ae` — see `docs/DECISIONS.md` D1: an offline-first APK
+> cannot fetch its templates from a remote service. Read every figure below as a 2026-09-15
+> snapshot, not as current state; `CLAUDE.md` and `apps/web/CLAUDE.md` carry the verified
+> numbers.
+
+**Date**: 2026-09-15
 **Status**: 🚀 **READY FOR PRODUCTION DEPLOYMENT**
 
 ---

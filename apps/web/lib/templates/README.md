@@ -1,12 +1,15 @@
 # Template System
 
-Complete template management system for Sumaiya CV Builder, with pluggable provider architecture for seamless TemplateHub integration.
+Template system for the Sumaiya CV Builder. There is exactly **one** provider
+implementation — the local `NativeTemplateProvider` — because the app must work with no
+network (`docs/DECISIONS.md` D1); `selectProvider()` in `index.ts` returns it
+unconditionally, with no env-var selection and no remote branch.
 
 ## Overview
 
 The template system provides:
 
-- **TemplateProvider abstraction** - Swap between local and remote templates with one line
+- **TemplateProvider abstraction** - A stable interface with exactly one implementation (local)
 - **Template families** - Group related templates (CV + cover letter + reference sheet)
 - **Dynamic rendering** - Render CVs to HTML/PDF with user data
 - **Export pipeline** - PDF, HTML, JSON formats with proper error handling
@@ -21,27 +24,22 @@ Application Layer
 TemplateProvider Interface (schema.ts)
     ↓
 ┌─────────────────────────────────────────┐
-│  NativeTemplateProvider (current)       │
+│  NativeTemplateProvider (the only one)  │
 │  - Local template registry              │
 │  - In-memory families                   │
 │  - Browser-based rendering              │
 └─────────────────────────────────────────┘
-    ↓ (ONE LINE SWAP when ready)
-┌─────────────────────────────────────────┐
-│  TemplateHubProvider (future)           │
-│  - Remote API calls                     │
-│  - Cloud rendering service              │
-│  - Caching layer                        │
-└─────────────────────────────────────────┘
 ```
 
-**Key insight:** All UI code uses the interface. Provider swap requires zero UI changes.
+**Key insight:** All UI code uses the interface, so the abstraction outlived the second
+implementation that was once planned for it. There is nothing to swap to: the remote path was
+deleted (`docs/DECISIONS.md` D1).
 
 ## Modules
 
 ### Core
 
-**schema.ts** (212 lines)
+**schema.ts** (232 lines)
 - `TemplateProvider` interface - Contract all providers implement
 - `TemplateMetadata` - Template identity, preview, fields, access
 - `TemplateFamily` - Group related templates
@@ -49,7 +47,7 @@ TemplateProvider Interface (schema.ts)
 - `RenderedDocument` - HTML/PDF-ready output
 - `StoredDocument` - Database-persisted document
 
-**native-provider.ts** (160+ lines)
+**native-provider.ts** (318 lines)
 - `NativeTemplateProvider` - Local implementation
 - Methods: `getTemplate()`, `getTemplatesByCategory()`, `getTemplateFamily()`, `getFamiliesForProduct()`
 - Rendering: `renderDocument()` with HTML generation
@@ -58,8 +56,8 @@ TemplateProvider Interface (schema.ts)
 ### Data
 
 **registry.ts** (auto-generated)
-- `TEMPLATE_REGISTRY` - 267 templates with metadata
-- Generated from 267 .tsx files in components/templates/
+- `TEMPLATE_REGISTRY` - 266 registry entries with metadata
+- Generated from 268 .tsx files (266 template sources + 2 helpers) in components/templates/
 - Includes family, tier, editable fields, versions
 
 **families.ts**
@@ -68,24 +66,22 @@ TemplateProvider Interface (schema.ts)
 - Family members with role (primary, matching, supporting)
 
 **schemas.ts**
-- `STANDARD_CV_SCHEMA` - 12+ editable fields for all templates
+- `STANDARD_CV_SCHEMA` - 14 editable fields, shared by all templates
 - Fields: personalInfo, summary, experience[], education[], skills[], etc.
 - Per-field validation (minLength, maxLength, pattern, required)
 - `TEMPLATE_SCHEMAS` - Per-template schema overrides
 
 ### Integration
 
-**templatehub-provider.ts** (296 lines)
-- `TemplateHubProvider` - Remote API implementation (stub)
-- Methods mirror NativeTemplateProvider exactly
-- HTTP client for TemplateHub API
-- Caching and error handling built-in
-- Ready for when TemplateHub API is built
+There is no remote provider module. `templatehub-provider.ts` (296 lines, self-labelled a
+stub) was **deleted** in commit `aee08ae` under `docs/DECISIONS.md` D1:
+`selectProvider()` in `index.ts` returns the local `NativeTemplateProvider`
+unconditionally, with no env var and no remote branch.
 
 ### Database
 
 **migrations.ts**
-- Phase 1: Create `documents`, `document_exports`, `template_metadata_cache`, `template_families` tables
+- Phase 1: Create `documents`, `document_exports`, `template_metadata_cache`, `template_families` tables - **design only**: the `documents` table is not in the live Drizzle schema (`cv`, `cover_letter` and `letter` are still separate)
 - Phase 2: Redirect new writes to new tables
 - Phase 3: Backfill existing data
 - Phase 4: Deprecate old tables
@@ -196,17 +192,17 @@ function Editor() {
 - ✅ Dynamic rendering implemented
 - ✅ CV Builder integration complete
 - ⏳ Database migrations ready (Phase 1-5 defined)
-- ⏳ TemplateHub API (stub, ready to implement)
+- ❌ TemplateHub API - dropped (`docs/DECISIONS.md` D1); the client was deleted in `aee08ae`
 
 ### Phase 1: Deploy Local System
 
 ```bash
 # 1. Run database migration Phase 1
-npm run migrate:templates -- --phase 1
+#    There is NO npm script for this (`migrate:templates` does not exist).
+#    The SQL lives in lib/templates/migrations.ts (MIGRATIONS / getMigrationSQL).
 
-# 2. Deploy cv-builder integration
+# 2. Build (deployment is the Vercel flow - there is no "npm run deploy" script)
 npm run build
-npm run deploy
 
 # 3. Monitor analytics
 # - Template selection rate
@@ -217,24 +213,16 @@ npm run deploy
 ### Phase 2-3: Backfill & Stabilize
 
 ```bash
-# Backfill existing CVs to new documents table
-npm run migrate:templates -- --phase 3
+# Backfill existing CVs to the new tables (Phase 3)
+#    Same as above: SQL from lib/templates/migrations.ts, no npm script exists.
 
 # Monitor for issues
 ```
 
-### Phase 4-5: TemplateHub Integration
+### Phase 4-5: dropped
 
-```typescript
-// When TemplateHub API is ready:
-// 1. Build TemplateHub API
-// 2. Update lib/templates/index.ts:
-
-export const templateProvider: TemplateProvider = 
-  new TemplateHubProvider(apiClient, 'sumaiya');
-
-// 3. Deploy - no UI changes needed!
-```
+The remote-provider phases were dropped by `docs/DECISIONS.md` D1, and the client was deleted
+in `aee08ae`. There is no TemplateHub API to integrate with and no provider swap to make.
 
 ## Files
 
@@ -245,7 +233,6 @@ lib/templates/
 ├── registry.ts                  (auto-generated)
 ├── families.ts                  (template families)
 ├── schemas.ts                   (editable fields)
-├── templatehub-provider.ts      (remote impl stub)
 ├── migrations.ts                (database)
 ├── test-utils.ts                (testing)
 ├── index.ts                     (main exports)
@@ -309,7 +296,7 @@ test('full export pipeline', async () => {
 ## Troubleshooting
 
 **Templates not loading**
-- Check TEMPLATE_REGISTRY is generated: `npm run generate:registry`
+- Check TEMPLATE_REGISTRY is generated: `node scripts/generate-template-registry.mjs`
 - Verify templateProvider is initialized
 - Check browser console for errors
 
@@ -334,11 +321,11 @@ Before deploying to production:
 - [ ] Monitor error rates for 1 week
 - [ ] Run Phase 2-3 migrations
 - [ ] Test rollback procedures
-- [ ] Plan TemplateHub API implementation
+- [ ] Re-measure the counts in this file against `apps/web/CLAUDE.md` (they drift)
 
 ## References
 
-- [Sumaiya × TemplateHub Vision](../../docs/STRATEGIC_VISION.md)
+- [Verified template-system reference](../../CLAUDE.md) - counts, provider rule, what is a stub
 - [CV Builder Integration Guide](../../lib/cv-builder/INTEGRATION_GUIDE.md)
 - [Database Schema](./database-schema.sql)
 - [TemplateProvider Interface](./schema.ts)
