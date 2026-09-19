@@ -49,6 +49,7 @@ import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
 import { haptics } from "@/lib/haptics";
 import { Share2, FileType2, Globe } from "lucide-react";
 import { ShareCvModal } from "@/components/editor/share-cv-modal";
+import { OutcomeReportModal } from "@/components/editor/outcome-report-modal";
 import { metaTrack } from "@/components/meta-pixel";
 import { getPairingTip, getFamilyForCv, getCoverLetterForCv } from "@/lib/template-families";
 import { DOC_FONTS, INTER_STACK, resolveFontStack } from "@/lib/fonts";
@@ -1203,6 +1204,8 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   const [showPresets, setShowPresets] = useState(false);
   const [showSectionOrder, setShowSectionOrder] = useState(false);
   const [sampleJdActive, setSampleJdActive] = useState(false);
+  const [showOutcomeModal, setShowOutcomeModal] = useState(false);
+  const [lastExportedCvId, setLastExportedCvId] = useState<string | null>(null);
 
   const {
     cv: cvData, templateId, primaryColor, fontFamily, isSaving,
@@ -1459,11 +1462,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       await new Promise<void>(r => setTimeout(r, 400));
       setExportOverlay("success");
       haptics.success();
-      // Delivery is done — NOW the guest gets the account ask, and not before.
-      // It renders under the success overlay (later sibling, same z-index), so
-      // they read "your CV is ready" first and get the prompt when they dismiss
-      // it. Failure never reaches this line (see the catch below).
-      if (guestMode) setSignUpPrompt("postExport");
+      // Store CV ID for outcome tracking
+      setLastExportedCvId(initialDoc.id);
+      // Show outcome modal to capture interview/offer/rejection feedback
+      // Guests see the modal and optional sign-up after; authenticated users auto-save
+      setShowOutcomeModal(true);
       // Fire confetti celebration once per session on first successful download
       if (!hasFiredConfettiRef.current) {
         hasFiredConfettiRef.current = true;
@@ -1493,6 +1496,50 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   };
   // Keep ref current so keyboard handler always calls latest closure
   handleDownloadRef.current = handleDownload;
+
+  // Submit outcome report to track CV impact (interview, offer, rejection, etc.)
+  const handleOutcomeSubmit = async (outcomeData: {
+    outcome: string;
+    companyName: string;
+    jobTitle: string;
+    aiHelpfulRating: number;
+    feedbackText: string;
+  }) => {
+    if (guestMode) {
+      // Guests just see the modal close; authenticated users auto-save
+      setShowOutcomeModal(false);
+      setSignUpPrompt("postExport");
+      return;
+    }
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+      const res = await fetch("/api/outcomes", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          cvId: lastExportedCvId,
+          outcome: outcomeData.outcome,
+          companyName: outcomeData.companyName,
+          jobTitle: outcomeData.jobTitle,
+          aiHelpfulRating: outcomeData.aiHelpfulRating,
+          feedbackText: outcomeData.feedbackText,
+        }),
+      });
+      if (res.ok) {
+        showToast(uiLang === "sw" ? "Matokeo yamesabitiwa ✓" : "Outcome saved ✓");
+        setShowOutcomeModal(false);
+        track("outcome_submitted", { outcome: outcomeData.outcome, cvId: lastExportedCvId });
+      } else {
+        showToast(uiLang === "sw" ? "Imeshindwa kusabiti matokeo." : "Couldn't save outcome.");
+      }
+    } catch (err) {
+      showToast(uiLang === "sw" ? "Imeshindwa kusabiti matokeo." : "Couldn't save outcome.");
+      track("outcome_submit_error", { error: err instanceof Error ? err.message : "unknown" });
+    }
+  };
 
   // Resume a download that a guest started before the sign-up wall. The
   // migration redirect appends ?download=pdf; switch to the Preview so the
@@ -2670,6 +2717,16 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           initialSlug={(initialDoc as { publicSlug?: string | null }).publicSlug ?? null}
           initialShowContact={(initialDoc as { publicShowContact?: boolean }).publicShowContact ?? true}
           onClose={() => setShowShareModal(false)}
+        />
+      )}
+
+      {showOutcomeModal && lastExportedCvId && (
+        <OutcomeReportModal
+          isOpen={showOutcomeModal}
+          onClose={() => setShowOutcomeModal(false)}
+          cvId={lastExportedCvId}
+          sw={uiLang === "sw"}
+          onSubmit={handleOutcomeSubmit}
         />
       )}
 
