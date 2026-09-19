@@ -19,6 +19,7 @@ import { reportError } from "../lib/reporting";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { getDefaultTemplate } from "../lib/prefs";
 import { CvPreviewCard } from "../components/cv/cv-preview-card";
+import { OutcomeReportModal } from "../components/outcome-report-modal";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
@@ -96,6 +97,8 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [showOutcomeModal, setShowOutcomeModal] = useState(false);
+  const [lastExportedCvId, setLastExportedCvId] = useState<string>("");
 
   /**
    * Unsaved-work guard for EVERY way out of this screen.
@@ -385,6 +388,9 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     }
   }
 
+  const cvRefForShare = useRef<CV | null>(null);
+  const uriRefForShare = useRef<string | null>(null);
+
   async function exportPdf() {
     setExporting(true);
     try {
@@ -407,7 +413,12 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       updateMemory((m) =>
         addEpisode(m, "cv_exported", `Exported a CV using the ${template} template`),
       ).catch(() => {});
-      await shareCV(cv, uri);
+      // Store CV data for share and outcome tracking
+      cvRefForShare.current = cv;
+      uriRefForShare.current = uri;
+      setLastExportedCvId(cv.id);
+      // Show outcome modal to capture feedback before sharing
+      setShowOutcomeModal(true);
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
@@ -415,6 +426,38 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       setExporting(false);
     }
   }
+
+  const handleOutcomeSubmit = async (outcomeData: {
+    outcome: string;
+    companyName: string;
+    jobTitle: string;
+    aiHelpfulRating: number;
+    feedbackText: string;
+  }) => {
+    try {
+      // POST outcome to server (best-effort; don't block sharing if offline)
+      await apiClient.submitOutcome({
+        cvId: lastExportedCvId,
+        outcome: outcomeData.outcome,
+        companyName: outcomeData.companyName,
+        jobTitle: outcomeData.jobTitle,
+        aiHelpfulRating: outcomeData.aiHelpfulRating,
+        feedbackText: outcomeData.feedbackText,
+      }).catch(() => {}); // Ignore errors—offline is ok
+
+      track("outcome_submitted", { outcome: outcomeData.outcome, cvId: lastExportedCvId });
+    } catch (err) {
+      reportError(err);
+    }
+
+    // Close outcome modal
+    setShowOutcomeModal(false);
+
+    // Now proceed with share
+    if (cvRefForShare.current && uriRefForShare.current) {
+      await shareCV(cvRefForShare.current, uriRefForShare.current);
+    }
+  };
 
   const addExp = () => {
     haptics.light();
@@ -643,6 +686,22 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           <Button label="Add" size="sm" fullWidth={false} onPress={addSkill} />
         </View>
       </Section>
+
+      {/* Outcome Report Modal */}
+      {showOutcomeModal && lastExportedCvId && (
+        <OutcomeReportModal
+          visible={showOutcomeModal}
+          cvId={lastExportedCvId}
+          onClose={() => {
+            setShowOutcomeModal(false);
+            // Share without outcome submission if user closes modal
+            if (cvRefForShare.current && uriRefForShare.current) {
+              shareCV(cvRefForShare.current, uriRefForShare.current).catch(() => {});
+            }
+          }}
+          onSubmit={handleOutcomeSubmit}
+        />
+      )}
     </Screen>
   );
 }
