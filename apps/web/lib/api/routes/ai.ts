@@ -150,7 +150,7 @@ export const aiRoutes = new Hono()
   })
 
   // ── Tailor a professional summary to a specific job description ────────────
-  .post("/tailor", zValidator("json", tailorSchema), async (c) => {
+  .post("/tailor", async (c) => {
     const userId = await getUserId(c);
     if (!userId) return c.json({ error: "Unauthorized" }, 401);
 
@@ -159,7 +159,22 @@ export const aiRoutes = new Hono()
     const quota = await checkAiQuota(userId);
     if (!quota.allowed) return c.json({ error: quota.message, retryAfter: quota.retryAfter }, 429);
 
-    const { summary, jobTitle, jobDescription } = c.req.valid("json");
+    let payload: unknown;
+    try {
+      payload = await c.req.json();
+    } catch {
+      return c.json({ error: "Invalid JSON in request body." }, 400);
+    }
+
+    const validation = tailorSchema.safeParse(payload);
+    if (!validation.success) {
+      const messages = validation.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join("; ");
+      return c.json({ error: `Validation failed: ${messages}` }, 400);
+    }
+
+    const { summary, jobTitle, jobDescription } = validation.data;
     const cleanJd = sanitizePromptText(jobDescription, 8000);
     const roleBlock = roleTaxonomyPromptBlock(`${jobTitle || ""} ${cleanJd}`);
     const prompt = `You are an expert CV writer. Rewrite the candidate's professional summary to target the specific job below. Naturally weave in the most relevant skills, keywords and requirements from the job description, but stay strictly truthful to the candidate's existing experience. ${TRUTH_CONSTRAINT} Keep it to 3–4 concise sentences in a confident, professional tone.${roleBlock} Return ONLY the rewritten summary, with no preamble or quotes.
