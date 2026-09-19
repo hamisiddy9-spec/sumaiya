@@ -1,11 +1,10 @@
 /**
  * TemplateProvider — The Abstraction Layer
  *
- * This interface allows Sumaiya to work with different template backends
- * without depending on their implementation.
+ * The contract the template system is used through, so callers depend on the
+ * shape of a provider rather than on the local implementation.
  *
- * Currently implemented by: NativeTemplateProvider (local 273 templates)
- * Future implementations: TemplateHubProvider (remote API), etc.
+ * Implemented by: NativeTemplateProvider (the templates shipped in the app).
  */
 
 export type { TemplateProvider } from './schema';

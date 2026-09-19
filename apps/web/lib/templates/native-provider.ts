@@ -1,11 +1,9 @@
 /**
  * NativeTemplateProvider — Local Template Implementation
  *
- * Serves templates from the local Sumaiya database (currently 273 CV templates).
- * This is the current/fallback implementation.
- *
- * When TemplateHub is ready, we'll add TemplateHubProvider.
- * The switch will be a single line; no UI changes needed.
+ * Serves the templates that ship with the app (267 template files, 266 registry
+ * entries), read from the local registry. This is the only implementation: an
+ * offline-first product cannot fetch templates over HTTP (docs/DECISIONS.md D1).
  */
 
 import {

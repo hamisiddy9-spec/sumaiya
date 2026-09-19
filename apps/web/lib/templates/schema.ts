@@ -1,14 +1,14 @@
 /**
  * Template Schema & Type Definitions
  *
- * This is the contract that all TemplateProviders must implement.
- * Both NativeTemplateProvider (local) and future TemplateHubProvider (remote)
- * expose the same interface.
+ * This is the contract the template provider implements. There is one
+ * implementation — NativeTemplateProvider, serving the templates that ship
+ * inside the app (offline-first: docs/DECISIONS.md D1).
  */
 
-export type TemplateSource = 'native' | 'templatehub' | 'partner';
+export type TemplateSource = 'native' | 'partner';
 export type TemplateCategory = 'cv' | 'cover-letter' | 'reference-sheet' | 'other';
-export type AccessLevel = 'sumaiya' | 'templatehub' | 'public' | 'premium';
+export type AccessLevel = 'sumaiya' | 'public' | 'premium';
 
 /**
  * Metadata for a single template (CV, cover letter, etc.)
@@ -158,7 +158,7 @@ export interface RenderedDocument {
 
 /**
  * Main TemplateProvider interface
- * Implementations: NativeTemplateProvider, TemplateHubProvider, etc.
+ * Implemented by NativeTemplateProvider (local templates).
  */
 export interface TemplateProvider {
   /**

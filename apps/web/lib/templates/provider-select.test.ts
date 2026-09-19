@@ -1,43 +1,49 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-import { selectProvider } from './index';
-import { nativeTemplateProvider } from './native-provider';
-import { TemplateHubProvider } from './templatehub-provider';
+import * as templates from './index';
+import { selectProvider, templateProvider } from './index';
+import { NativeTemplateProvider, nativeTemplateProvider } from './native-provider';
 
-describe('selectProvider', () => {
-  it('defaults to the native provider when no type is given', () => {
-    expect(selectProvider(undefined)).toBe(nativeTemplateProvider);
+const indexSource = readFileSync(
+  fileURLToPath(new URL('./index.ts', import.meta.url)),
+  'utf8'
+);
+
+describe('template provider selection', () => {
+  it('always selects the native provider', () => {
+    expect(selectProvider()).toBe(nativeTemplateProvider);
+    expect(selectProvider()).toBeInstanceOf(NativeTemplateProvider);
   });
 
-  it('returns native for "native"', () => {
-    expect(selectProvider('native')).toBe(nativeTemplateProvider);
+  it('exposes the native provider as the templateProvider singleton', () => {
+    expect(templateProvider).toBe(nativeTemplateProvider);
   });
 
-  it('returns native for an unknown provider type', () => {
-    expect(selectProvider('bogus')).toBe(nativeTemplateProvider);
-  });
-
-  it('falls back to native when remote is requested without credentials', () => {
-    expect(selectProvider('templatehub', {})).toBe(nativeTemplateProvider);
+  // The remote path is gone, so no argument may resurrect it. Offline-first is
+  // the product (docs/DECISIONS.md D1): a template fetch over HTTP cannot be
+  // part of the APK, not even behind a flag.
+  it('cannot be steered to a remote provider by an argument', () => {
+    const legacy = selectProvider as unknown as (...args: unknown[]) => unknown;
+    expect(legacy('templatehub')).toBe(nativeTemplateProvider);
     expect(
-      selectProvider('remote', { templateHubUrl: 'https://th.example', templateHubApiKey: '' })
+      legacy('remote', {
+        templateHubUrl: 'https://templatehub.example.com',
+        templateHubApiKey: 'secret',
+      })
     ).toBe(nativeTemplateProvider);
   });
 
-  it('returns a TemplateHubProvider when remote is requested with credentials', () => {
-    const provider = selectProvider('templatehub', {
-      templateHubUrl: 'https://templatehub.example.com',
-      templateHubApiKey: 'sk_test',
-    });
-    expect(provider).toBeInstanceOf(TemplateHubProvider);
-    expect(provider).not.toBe(nativeTemplateProvider);
+  it('exports no remote provider', () => {
+    const ns = templates as unknown as Record<string, unknown>;
+    expect(ns.TemplateHubProvider).toBeUndefined();
+    expect(ns.createTemplateHubProvider).toBeUndefined();
   });
 
-  it('accepts the "remote" alias and trims whitespace', () => {
-    const provider = selectProvider('  REMOTE ', {
-      templateHubUrl: 'https://templatehub.example.com',
-      templateHubApiKey: 'sk_test',
-    });
-    expect(provider).toBeInstanceOf(TemplateHubProvider);
+  it('has no remote-provider code and no env selection left in index.ts', () => {
+    expect(indexSource.toLowerCase()).not.toContain('templatehub');
+    expect(indexSource).not.toContain('TEMPLATE_HUB');
+    expect(indexSource).not.toContain('NEXT_PUBLIC_TEMPLATE_PROVIDER');
   });
 });
