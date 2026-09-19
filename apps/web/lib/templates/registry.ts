@@ -1,13 +1,11 @@
 /**
  * GENERATED: apps/web/scripts/generate-template-registry.mjs
  *
- * Template metadata for all 267 CV templates in Sumaiya.
+ * Template metadata for Sumaiya's CV templates.
  *
  * Do NOT edit manually. Run:
  *   cd apps/web
  *   node scripts/generate-template-registry.mjs
- *
- * This registry will eventually be replaced by TemplateHub API when available.
  */
 
 import { TemplateMetadata } from './schema';

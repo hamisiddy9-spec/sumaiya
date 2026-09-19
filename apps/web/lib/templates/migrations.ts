@@ -89,14 +89,14 @@ CREATE INDEX IF NOT EXISTS idx_document_exports_created_at ON document_exports(c
 
   /**
    * Phase 1: Create template_metadata_cache table
-   * Local cache of TemplateHub templates (optional, for offline support)
+   * Local cache of template metadata (optional, for offline support)
    */
   createTemplateMetadataCacheTable: `
 CREATE TABLE IF NOT EXISTS template_metadata_cache (
   id text PRIMARY KEY,
   name text NOT NULL,
   version text NOT NULL,
-  source text NOT NULL,  -- 'native', 'templatehub', 'partner'
+  source text NOT NULL,  -- 'native', 'partner'
   category text NOT NULL,  -- 'cv', 'cover-letter', 'reference-sheet'
   family text,
   description text,

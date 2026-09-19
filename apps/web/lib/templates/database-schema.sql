@@ -2,10 +2,8 @@
  * Phase 4: Database Schema for Template System
  *
  * This schema separates template infrastructure from Sumaiya logic.
- * Prepared for TemplateHub integration (will live in separate DB eventually).
  *
  * For now: Add to Sumaiya database
- * Later: Migrate to TemplateHub database, access via API
  */
 
 -- ============================================================================
@@ -93,7 +91,6 @@ CREATE TABLE IF NOT EXISTS document_exports (
 
 -- ============================================================================
 -- TEMPLATE_METADATA TABLE (future)
--- When TemplateHub API is available, we'll query templates from there.
 -- Keep this schema for reference and local caching.
 -- ============================================================================
 
@@ -103,7 +100,7 @@ CREATE TABLE IF NOT EXISTS template_metadata_cache (
   -- Basic info
   name VARCHAR(255) NOT NULL,
   version VARCHAR(20) NOT NULL,
-  source VARCHAR(50) NOT NULL, -- 'native', 'templatehub', 'partner'
+  source VARCHAR(50) NOT NULL, -- 'native', 'partner'
   category VARCHAR(50) NOT NULL, -- 'cv', 'cover-letter', etc.
   family VARCHAR(100),
 
@@ -121,7 +118,7 @@ CREATE TABLE IF NOT EXISTS template_metadata_cache (
   -- Timestamps
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  synced_at TIMESTAMP NULL, -- Last sync with TemplateHub
+  synced_at TIMESTAMP NULL, -- Last refresh of the cached metadata
 
   KEY idx_source (source),
   KEY idx_category (category),
@@ -163,8 +160,7 @@ CREATE TABLE IF NOT EXISTS template_families (
 -- 1. Unify document storage (cv, cover_letter, reference_sheet → documents)
 -- 2. Support template versioning (documents know which template_version was used)
 -- 3. Preserve snapshots (content_snapshot prevents changes to old template breaks)
--- 4. Prepare for TemplateHub (metadata_cache can sync from API)
--- 5. Enable analytics (document_exports tracks what users do)
+-- 4. Enable analytics (document_exports tracks what users do)
 --
 -- Migration path:
 -- Phase 1 (now): Add these tables, keep old tables

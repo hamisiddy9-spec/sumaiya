@@ -4,7 +4,6 @@
  * Groups related templates into coherent design systems.
  * Example: Executive Collection = CV + Cover Letter + Reference Sheet
  *
- * This is the structure that makes TemplateHub valuable.
  * Not just individual templates, but complete document systems.
  */
 
@@ -23,7 +22,6 @@ import { TemplateFamily } from './schema';
 export const TEMPLATE_FAMILIES: TemplateFamily[] = [
   // ===== SUMAIYA CORE FAMILIES (5 families) =====
   // Small, curated set for Sumaiya free experience
-  // These remain local until TemplateHub is ready
 
   {
     id: 'core-simple',
@@ -89,10 +87,8 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
     updatedAt: '2024-01-01T00:00:00Z',
   },
 
-  // ===== TEMPLATEHUB PREMIUM FAMILIES (Planned, to be built from remaining 261) =====
-  // After TEMPLATE_ASSET_MIGRATION_PLAN audit:
-  // - 261 templates will be classified into 25-45 premium families
-  // - Each family: CV + matching cover letter + optionally reference sheet
+  // ===== PREMIUM FAMILIES =====
+  // Premium families: CV + matching cover letter + optionally reference sheet.
   // - Organized by: Executive, Modern, Creative, Industry-specific, etc.
 
   {
@@ -128,13 +124,13 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
     description: 'Distinctive design for creative roles (designer, writer, artist, etc.)',
     tier: 'premium',
     templates: [
-      // TODO: Assign from remaining 261 templates
+      // TODO: Assign templates
     ],
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
 
-  // ===== PENDING FAMILIES (261 remaining templates) =====
+  // ===== PENDING FAMILIES =====
   // These will be organized during TEMPLATE_ASSET_MIGRATION_PLAN
   // Each will eventually become a premium family with:
   // - CV template
@@ -149,11 +145,6 @@ export function getFamiliesForProduct(product: string): TemplateFamily[] {
   if (product === 'sumaiya') {
     // Sumaiya gets core families only (small, free experience)
     return TEMPLATE_FAMILIES.filter((f) => f.tier === 'core');
-  }
-
-  if (product === 'templatehub') {
-    // TemplateHub gets all families (including premium)
-    return TEMPLATE_FAMILIES;
   }
 
   // Other products: filtered by their specific needs
