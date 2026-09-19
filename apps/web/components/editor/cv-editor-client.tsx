@@ -50,6 +50,7 @@ import { haptics } from "@/lib/haptics";
 import { Share2, FileType2, Globe } from "lucide-react";
 import { ShareCvModal } from "@/components/editor/share-cv-modal";
 import { OutcomeReportModal } from "@/components/editor/outcome-report-modal";
+import { SendToRecruiterModal } from "@/components/editor/send-to-recruiter-modal";
 import { metaTrack } from "@/components/meta-pixel";
 import { getPairingTip, getFamilyForCv, getCoverLetterForCv } from "@/lib/template-families";
 import { DOC_FONTS, INTER_STACK, resolveFontStack } from "@/lib/fonts";
@@ -1206,6 +1207,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   const [sampleJdActive, setSampleJdActive] = useState(false);
   const [showOutcomeModal, setShowOutcomeModal] = useState(false);
   const [lastExportedCvId, setLastExportedCvId] = useState<string | null>(null);
+  const [showSendToRecruiterModal, setShowSendToRecruiterModal] = useState(false);
 
   const {
     cv: cvData, templateId, primaryColor, fontFamily, isSaving,
@@ -1538,6 +1540,67 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     } catch (err) {
       showToast(uiLang === "sw" ? "Imeshindwa kusabiti matokeo." : "Couldn't save outcome.");
       track("outcome_submit_error", { error: err instanceof Error ? err.message : "unknown" });
+    }
+  };
+
+  // Send CV to recruiter via email with tracking
+  const handleSendToRecruiter = async (data: {
+    recipientEmail: string;
+    recipientName: string;
+    customMessage: string;
+    jobTitle: string;
+    company: string;
+    jobDescription: string;
+    includeCV: boolean;
+    includeCoverLetter: boolean;
+    includeTrackingPixel: boolean;
+    saveToProfile: boolean;
+  }) => {
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
+      const res = await fetch("/api/ai/email-document", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          recipientEmail: data.recipientEmail,
+          recipientName: data.recipientName,
+          customMessage: data.customMessage,
+          jobTitle: data.jobTitle,
+          company: data.company,
+          jobDescription: data.jobDescription,
+          cvId: lastExportedCvId,
+          includeTrackingPixel: data.includeTrackingPixel,
+          saveToProfile: data.saveToProfile,
+        }),
+      });
+      if (res.ok) {
+        showToast(
+          uiLang === "sw"
+            ? "CV imetumwa kwa " + data.recipientEmail + " ✓"
+            : "CV sent to " + data.recipientEmail + " ✓"
+        );
+        setShowSendToRecruiterModal(false);
+        track("cv_sent_to_recruiter", {
+          recipientEmail: data.recipientEmail,
+          cvId: lastExportedCvId,
+        });
+      } else {
+        showToast(
+          uiLang === "sw"
+            ? "Imeshindwa kutuma CV."
+            : "Couldn't send CV."
+        );
+      }
+    } catch (err) {
+      showToast(
+        uiLang === "sw"
+          ? "Imeshindwa kutuma CV."
+          : "Couldn't send CV."
+      );
+      track("send_cv_error", { error: err instanceof Error ? err.message : "unknown" });
     }
   };
 
@@ -2727,6 +2790,16 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           cvId={lastExportedCvId}
           sw={uiLang === "sw"}
           onSubmit={handleOutcomeSubmit}
+        />
+      )}
+
+      {showSendToRecruiterModal && lastExportedCvId && (
+        <SendToRecruiterModal
+          isOpen={showSendToRecruiterModal}
+          onClose={() => setShowSendToRecruiterModal(false)}
+          cvId={lastExportedCvId}
+          sw={uiLang === "sw"}
+          onSubmit={handleSendToRecruiter}
         />
       )}
 
