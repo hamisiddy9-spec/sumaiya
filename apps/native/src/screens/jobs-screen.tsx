@@ -9,7 +9,14 @@ import { Button, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonCard, S
 import { Icon } from "../components/icon";
 import { confirmAndOpenUrl } from "../lib/external-link";
 import { isExpiredListing } from "../lib/job-listing";
+import { reportError } from "../lib/reporting";
+import { track } from "../lib/analytics";
 import type { JobsScreenProps } from "../navigation/types";
+
+interface FeedJob extends JobListing {
+  matchScore?: number;
+  matchReason?: string;
+}
 
 function MatchBadge({ score }: { score: number }) {
   const c = useThemeColors();
@@ -67,32 +74,44 @@ function JobCard({
 export function JobsScreen({ navigation }: JobsScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
-  const [recs, setRecs] = useState<JobRecommendation[]>([]);
-  const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [feedJobs, setFeedJobs] = useState<FeedJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const [r, j] = await Promise.all([apiClient.getJobRecommendations(8), apiClient.getJobs()]);
-      // A listing past its own applicationDeadline was still being
-      // recommended, and the CTA walked the user straight to a dead advert
-      // (confirmed on device: HTTP 410 "Applications closed").
-      setRecs(r.filter((rec) => !isExpiredListing(rec.job.applicationDeadline)));
-      setJobs(j.filter((job) => !isExpiredListing(job.applicationDeadline)));
+      // Fetch personalized job feed from the new endpoint
+      // Falls back to local data if offline
+      const response = await fetch("/api/jobs/feed?limit=20&minScore=50");
+      if (!response.ok) {
+        // Fall back to old endpoints if feed endpoint not available
+        const [r, j] = await Promise.all([apiClient.getJobRecommendations(8), apiClient.getJobs()]);
+        const recs = r.filter((rec) => !isExpiredListing(rec.job.applicationDeadline));
+        const jobs = j.filter((job) => !isExpiredListing(job.applicationDeadline));
+
+        // Combine: recommendations first, then other jobs
+        const combined: FeedJob[] = [
+          ...recs.map(rec => ({ ...rec.job, matchScore: rec.score, matchReason: rec.reason })),
+          ...jobs.filter(j => !recs.some(r => r.job.id === j.id)),
+        ];
+        setFeedJobs(combined);
+      } else {
+        const data = await response.json();
+        if (data.data) {
+          setFeedJobs(data.data.filter((job: FeedJob) => !isExpiredListing(job.applicationDeadline)));
+        }
+      }
       setError(false);
-    } catch {
-      // The old code had no catch here at all: an offline/API failure was an
-      // unhandled promise rejection, and either way the empty-lists state
-      // would render "No openings right now" — indistinguishable from a
-      // genuinely empty feed, with no way to tell the user it actually
-      // failed or let them retry.
+      track("jobs_loaded", { count: feedJobs.length });
+    } catch (err) {
       setError(true);
+      reportError(err);
+      track("jobs_load_error");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [feedJobs.length]);
 
   useFocusEffect(useCallback(() => { void load(); }, [load]));
 
@@ -102,20 +121,21 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
     try { await load(); } finally { setRefreshing(false); }
   }, [load]);
 
-  const recIds = useMemo(() => new Set(recs.map((r) => r.jobId)), [recs]);
-  const rest = useMemo(() => jobs.filter((j) => !recIds.has(j.id)), [jobs, recIds]);
-
   const tailor = (job: JobListing) => {
     haptics.selection();
+    track("job_tailor_started", { jobId: job.id });
     navigation.navigate("JobApply", { jd: `${job.title}\n${job.company}\n\n${job.description}`.slice(0, 6000) });
   };
   const apply = (job: JobListing) => {
-    if (job.applyUrl) confirmAndOpenUrl(job.applyUrl, t);
+    if (job.applyUrl) {
+      track("job_apply_clicked", { jobId: job.id });
+      confirmAndOpenUrl(job.applyUrl, t);
+    }
   };
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
-      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings for you", "Nafasi kwako")}</ScreenTitle>
+      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Personalized for you", "Inaokufaa zaidi")}</ScreenTitle>
 
       {loading ? (
         <View style={{ gap: 10 }}>
@@ -123,7 +143,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
           <SkeletonCard />
           <SkeletonCard />
         </View>
-      ) : error && recs.length === 0 && jobs.length === 0 ? (
+      ) : error && feedJobs.length === 0 ? (
         <EmptyState
           icon="wifi-off"
           title={t("Couldn't load jobs", "Imeshindwa kupakia ajira")}
@@ -131,7 +151,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
           actionLabel={t("Retry", "Jaribu tena")}
           onAction={() => void load()}
         />
-      ) : recs.length === 0 && jobs.length === 0 ? (
+      ) : feedJobs.length === 0 ? (
         <EmptyState
           icon="briefcase"
           title={t("No openings right now", "Hakuna nafasi kwa sasa")}
@@ -140,61 +160,19 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
           onAction={() => navigation.navigate("JobApply")}
         />
       ) : (
-        <>
-          {recs.length > 0 ? (
-            <Animated.View entering={FadeIn.duration(300)}>
-              <SectionHeader title={t("Matched to your profile", "Zinazoendana na wasifu wako")} />
-              <View style={{ gap: 12 }}>
-                {recs.map((r, i) => (
-                  <Stagger key={r.jobId} index={i}>
-                    <JobCard
-                      job={r.job}
-                      score={r.score}
-                      reason={r.reason}
-                      onTailor={() => tailor(r.job)}
-                      onApply={() => apply(r.job)}
-                    />
-                  </Stagger>
-                ))}
-              </View>
-            </Animated.View>
-          ) : (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => { haptics.selection(); navigation.navigate("ProfileTab", { screen: "CareerProfile" }); }}
-              style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}
-            >
-              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
-                <Icon name="target" size={18} color={c.accent} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
-                  {t("Add your first job to get matched", "Ongeza kazi yako ya kwanza upate ulinganifu")}
-                </Text>
-                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
-                  {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>{t("Finish profile", "Kamilisha wasifu")}</Text>
-                <Icon name="chevron-right" size={18} color={c.accent} />
-              </View>
-            </Pressable>
-          )}
-
-          {rest.length > 0 ? (
-            <View>
-              <SectionHeader title={t("All openings", "Nafasi zote")} />
-              <View style={{ gap: 12 }}>
-                {rest.slice(0, 40).map((j, i) => (
-                  <Stagger key={j.id} index={i}>
-                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} />
-                  </Stagger>
-                ))}
-              </View>
-            </View>
-          ) : null}
-        </>
+        <Animated.View entering={FadeIn.duration(300)} style={{ gap: 12 }}>
+          {feedJobs.map((job, i) => (
+            <Stagger key={job.id} index={i}>
+              <JobCard
+                job={job}
+                score={job.matchScore}
+                reason={job.matchReason}
+                onTailor={() => tailor(job)}
+                onApply={() => apply(job)}
+              />
+            </Stagger>
+          ))}
+        </Animated.View>
       )}
     </Screen>
   );
