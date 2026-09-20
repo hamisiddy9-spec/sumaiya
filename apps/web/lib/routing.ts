@@ -110,3 +110,25 @@ export function classifyRoute(pathname: string, lang: "en" | "sw"): RouteDecisio
   if (isProtectedPath(pathname)) return { kind: "protected" };
   return { kind: "passthrough" };
 }
+
+/** The public (browser-visible) Supabase values the Edge middleware needs in
+ * order to build a server client. Kept as data so a missing one can be named
+ * precisely in the log instead of surfacing as a generic client error. */
+export const SUPABASE_PUBLIC_ENV = [
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+] as const;
+
+/**
+ * Which of the public Supabase env vars are missing or empty, given an env bag.
+ *
+ * Pure, so it is unit-testable. The middleware uses this to refuse to call
+ * createServerClient() with an undefined URL/key: that call throws, and Vercel
+ * renders an exception thrown in middleware as MIDDLEWARE_INVOCATION_FAILED,
+ * which is a 500 on EVERY protected route at once (see middleware.ts).
+ */
+export function missingSupabasePublicEnv(
+  env: Record<string, string | undefined>,
+): string[] {
+  return SUPABASE_PUBLIC_ENV.filter((key) => !env[key]);
+}

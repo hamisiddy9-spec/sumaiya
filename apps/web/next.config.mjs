@@ -69,6 +69,17 @@ const nextConfig = {
           "https://github.com/hamisiddy9-spec/sumaiya-releases/releases/latest/download/sumaiya.apk",
         permanent: true,
       },
+      // Sign-in aliases. The real auth route lives OUTSIDE the [locale] tree
+      // (app/(app)/(auth)/sign-in → "/sign-in"), so the localized and shorthand
+      // spellings — /en/signin, /en/sign-in, /signin, /login — all fell through
+      // to a hard 404 even though the page exists one segment away. /sw and /en
+      // are excluded from the middleware matcher, so these redirects are what
+      // makes the locale variants resolve. `/sign-in` and `/sign-up` are real
+      // routes and are deliberately NOT matched here (no redirect loop).
+      { source: "/signin", destination: "/sign-in", permanent: false },
+      { source: "/login", destination: "/sign-in", permanent: false },
+      { source: "/:locale(en|sw)/signin", destination: "/sign-in", permanent: false },
+      { source: "/:locale(en|sw)/sign-in", destination: "/sign-in", permanent: false },
     ];
   },
   experimental: {

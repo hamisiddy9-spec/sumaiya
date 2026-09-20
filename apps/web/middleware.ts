@@ -5,6 +5,7 @@ import {
   isAppPath,
   isFileLikePath,
   isProtectedPath,
+  missingSupabasePublicEnv,
 } from "@/lib/routing";
 
 // ─── CDN CACHING — verified against the live site, Aug 2026 ────────────────
@@ -93,6 +94,32 @@ export async function middleware(request: NextRequest) {
   }
 
   let response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  // Fail closed but GRACEFULLY when the public Supabase config is absent.
+  //
+  // createServerClient() throws on a missing or empty URL/key, and Vercel turns
+  // any exception thrown in middleware into MIDDLEWARE_INVOCATION_FAILED — a
+  // blanket 500 across EVERY protected route (/dashboard, /settings, /studio,
+  // /admin, /editor/<id>) rendered as a generic "A server error has occurred"
+  // with nothing in the UI pointing at the cause. That is exactly how the
+  // Sept 2026 production outage presented: the entire authenticated surface was
+  // down, while the marketing pages kept returning 200, so the site looked
+  // healthy from the outside.
+  //
+  // The Node runtime has had a boot-time env check since lib/env.ts — the Edge
+  // middleware had none, so it crashed instead of reporting. Naming the missing
+  // variable in the log and sending the visitor to /sign-in keeps the failure
+  // specific and survivable rather than an unexplained 500 everywhere.
+  const missingEnv = missingSupabasePublicEnv(process.env);
+  if (missingEnv.length) {
+    console.error(
+      `[middleware] ${missingEnv.join(", ")} is not set — the session cannot be ` +
+        `verified. Redirecting to /sign-in instead of failing the request.`,
+    );
+    const signInUrl = new URL("/sign-in", request.url);
+    signInUrl.searchParams.set("callbackUrl", pathname + (request.nextUrl.search ?? ""));
+    return NextResponse.redirect(signInUrl);
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

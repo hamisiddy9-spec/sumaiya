@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { classifyRoute, isAppPath, isMarketingPath, isProtectedPath } from "./routing";
+import {
+  classifyRoute,
+  isAppPath,
+  isMarketingPath,
+  isProtectedPath,
+  missingSupabasePublicEnv,
+  SUPABASE_PUBLIC_ENV,
+} from "./routing";
 
 describe("route classification", () => {
   it("marketing paths rewrite into the [locale] tree", () => {
@@ -45,5 +52,62 @@ describe("route classification", () => {
     expect(isAppPath("/assistant/history")).toBe(true);
     expect(isMarketingPath("/jobsxyz")).toBe(false);
     expect(isProtectedPath("/dashboardx")).toBe(false);
+  });
+});
+
+// Regression guard for the Sept 2026 production outage: the public Supabase env
+// vars were empty in the deploy, so createServerClient() threw inside the Edge
+// middleware. Vercel reports a middleware exception as
+// MIDDLEWARE_INVOCATION_FAILED, which took out EVERY protected route with a
+// generic 500 while the marketing pages stayed 200. The middleware now consults
+// this helper first and redirects to /sign-in instead of throwing.
+describe("missingSupabasePublicEnv", () => {
+  it("reports nothing when both public Supabase values are set", () => {
+    expect(
+      missingSupabasePublicEnv({
+        NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key",
+      }),
+    ).toEqual([]);
+  });
+
+  it("ignores unrelated env vars", () => {
+    expect(
+      missingSupabasePublicEnv({
+        NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key",
+        DATABASE_URL: "postgres://x",
+        SUPABASE_SERVICE_ROLE_KEY: "service-role",
+        PATH: "/usr/bin",
+      }),
+    ).toEqual([]);
+  });
+
+  it("treats an EMPTY value as missing — the exact prod failure mode", () => {
+    // The deploy had the variables defined but empty, so `!env[key]` is the
+    // condition that must catch it. A truthiness bug here would reproduce the
+    // outage.
+    expect(
+      missingSupabasePublicEnv({
+        NEXT_PUBLIC_SUPABASE_URL: "",
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
+      }),
+    ).toEqual([...SUPABASE_PUBLIC_ENV]);
+  });
+
+  it("names the specific variable that is absent", () => {
+    expect(missingSupabasePublicEnv({ NEXT_PUBLIC_SUPABASE_ANON_KEY: "anon-key" })).toEqual([
+      "NEXT_PUBLIC_SUPABASE_URL",
+    ]);
+    expect(missingSupabasePublicEnv({ NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" })).toEqual([
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    ]);
+  });
+
+  it("reports both when the env bag is empty", () => {
+    expect(missingSupabasePublicEnv({})).toEqual([
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    ]);
   });
 });
