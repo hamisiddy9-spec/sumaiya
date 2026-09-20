@@ -37,6 +37,18 @@ function anonKeyFromSource() {
   return m[1];
 }
 
+// The project ref is read from source too, so a rebuilt Supabase project never
+// leaves this file pointing at a ref that no longer exists.
+function projectRefFromSource() {
+  const src = readFileSync(path.join(ROOT, "src/lib/supabase-env.ts"), "utf8");
+  const m = /const FALLBACK_URL\s*=\s*"https:\/\/([a-z0-9]+)\.supabase\.co"/.exec(src);
+  return m ? m[1] : null;
+}
+
+// The dead project ref the 1.6.12 APK generation carried. If this ever shows up
+// in a fresh artefact, the build was made against a stale env.
+const DEAD_URL_REF = "ayczgaddnufdxnhizpcr";
+
 function bundleBytes(rel) {
   const abs = path.join(ROOT, rel);
   const buf = readFileSync(abs);
@@ -54,7 +66,17 @@ const failures = [];
 let checked = 0;
 
 const key = anonKeyFromSource();
-const urlRef = "ayczgaddnufdxnhizpcr";
+const urlRef = projectRefFromSource();
+
+console.log(`expected Supabase project ref: ${urlRef ?? "(could not be read)"}`);
+
+if (!urlRef) {
+  failures.push(
+    "src/lib/supabase-env.ts\n    Could not read a project ref out of FALLBACK_URL.\n" +
+      "    Without it this script cannot tell which project the artefact should\n" +
+      "    point at, so it cannot catch a build that shipped the wrong one.",
+  );
+}
 
 for (const rel of CANDIDATES) {
   const abs = path.join(ROOT, rel);
@@ -64,7 +86,8 @@ for (const rel of CANDIDATES) {
 
   const hasKey = bytes.includes(Buffer.from(key, "utf8"));
   const hasHeader = bytes.includes(Buffer.from("eyJhbGci", "utf8"));
-  const hasProject = bytes.includes(Buffer.from(urlRef, "utf8"));
+  const hasProject = urlRef ? bytes.includes(Buffer.from(urlRef, "utf8")) : false;
+  const hasDeadProject = bytes.includes(Buffer.from(DEAD_URL_REF, "utf8"));
 
   console.log(`\n${rel}`);
   console.log(`  ${bytes.length.toLocaleString()} bytes`);
@@ -80,6 +103,15 @@ for (const rel of CANDIDATES) {
         `    Check that src/lib/supabase-env.ts resolves FALLBACK_KEY and that\n` +
         `    EXPO_PUBLIC_SUPABASE_ANON_KEY is not set to an empty string in the\n` +
         `    build environment.`,
+    );
+  }
+
+  if (hasDeadProject) {
+    failures.push(
+      `${rel}\n    This artefact contains the DELETED Supabase project ref\n` +
+        `    "${DEAD_URL_REF}".\n` +
+        `    That project no longer exists, so an app built from this bundle\n` +
+        `    cannot reach Supabase at all. Rebuild from a clean environment.`,
     );
   }
 }
