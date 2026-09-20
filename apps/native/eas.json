@@ -11,7 +11,7 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://sumaiya.app",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://duywnmibgiqulqzunsmh.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com"
       }
@@ -25,7 +25,7 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://sumaiya.app",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://duywnmibgiqulqzunsmh.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com"
       }
@@ -36,7 +36,7 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://sumaiya.app",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://duywnmibgiqulqzunsmh.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com"
       }
@@ -44,7 +44,7 @@
     "production": {
       "env": {
         "EXPO_PUBLIC_API_URL": "https://sumaiya.app",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ayczgaddnufdxnhizpcr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://duywnmibgiqulqzunsmh.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com"
       }
