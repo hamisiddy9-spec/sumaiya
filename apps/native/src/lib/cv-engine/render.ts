@@ -16,6 +16,7 @@ import type { NativeTemplate } from "../templates/types";
 import type { Lang } from "./types";
 import { makeTokens, type DensityMode, type DesignTokens } from "./tokens";
 import { toEngineView, type EngineView } from "./view";
+import { fitSheet } from "./fit";
 import {
   accentBandLayout,
   headerLayout,
@@ -75,6 +76,12 @@ export interface RenderOptions {
   lang?: Lang;
   /** User-chosen density, when the app grows that control. */
   density?: DensityMode;
+  /**
+   * Display width in CSS px for a WebView preview. When set, the page is wrapped
+   * so it is SCALED TO FIT that width (see fit.ts) instead of leaving the fit to
+   * the WebView's own viewport handling. Omit for print/PDF export.
+   */
+  fitWidth?: number;
 }
 
 /** Which layout string the template declares → the function that draws it. */
@@ -131,11 +138,16 @@ export function renderTemplateHtml(
 
   const body = draw(view, tokens, config as never, lang);
 
-  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8"><meta name="viewport" content="width=${PAGE_W}">
+  // Preview path only: our own scale-to-frame wrapper, so a WebView of any width
+  // shows the whole sheet (see fit.ts for why the viewport meta alone was not a
+  // guarantee). Omitting fitWidth keeps this byte-identical for expo-print.
+  const fit = opts.fitWidth && opts.fitWidth > 0 ? fitSheet(body, opts.fitWidth) : null;
+
+  return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8">${fit ? fit.viewport : `<meta name="viewport" content="width=${PAGE_W}">`}
 <style>
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html, body { margin: 0; padding: 0; background: #fff; }
   body { color: ${tokens.color.text}; }
-  p { margin: 0; }
-</style></head><body>${body}</body></html>`;
+  p { margin: 0; }${fit ? fit.css : ""}
+</style></head><body>${fit ? fit.body : body}</body></html>`;
 }

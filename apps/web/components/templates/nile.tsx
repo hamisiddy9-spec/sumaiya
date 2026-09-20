@@ -243,9 +243,8 @@ export function NileTemplate({
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                   {languages.map((lang) => (
                     <div key={lang.id}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 10.5, color: "#374151" }}>{lang.name}</span>
-                        <span style={{ fontSize: 9.5, color: "#94a3b8" }}>{lang.proficiency}</span>
+                      <div style={{ display: "flex", marginBottom: 3, gap: 8 }}>
+                        <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10.5, color: "#374151"}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 9.5, color: "#94a3b8"}}>{lang.proficiency}</span>
                       </div>
                       <SkillBar
                         level={PROF[lang.proficiency] ?? 3}

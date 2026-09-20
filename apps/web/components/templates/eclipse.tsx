@@ -164,9 +164,8 @@ export function EclipseTemplate({ data, primaryColor, fontFamily, lang = "en" }:
               <SectionHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column" as const, gap: 5 }}>
                 {languages.map((lang) => (
-                  <div key={lang.id} style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 11, color: "#374151" }}>{lang.name}</span>
-                    <span style={{ fontSize: 10, color: "#6b7280" }}>{lang.proficiency}</span>
+                  <div key={lang.id} style={{ display: "flex", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 11, color: "#374151"}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 10, color: "#6b7280"}}>{lang.proficiency}</span>
                   </div>
                 ))}
               </div>

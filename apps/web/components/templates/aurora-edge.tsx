@@ -60,9 +60,8 @@ export function AuroraEdgeTemplate({ data, primaryColor, fontFamily, lang = "en"
               <p style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)", margin: "0 0 8px" }}>{L.languages}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((l) => (
-                  <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 9.5, color: "rgba(255,255,255,0.9)" }}>{l.name}</span>
-                    <span style={{ fontSize: 8, color: "rgba(255,255,255,0.55)", backgroundColor: "rgba(255,255,255,0.12)", padding: "1px 6px", borderRadius: 4 }}>{l.proficiency}</span>
+                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 9.5, color: "rgba(255,255,255,0.9)"}}>{l.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 8, color: "rgba(255,255,255,0.55)", backgroundColor: "rgba(255,255,255,0.12)", padding: "1px 6px", borderRadius: 4}}>{l.proficiency}</span>
                   </div>
                 ))}
               </div>

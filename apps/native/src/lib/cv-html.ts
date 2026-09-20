@@ -1,6 +1,7 @@
 import type { CV, CVData } from "@sumaiya/types";
 import { TEMPLATE_REGISTRY } from "./templates/registry";
 import { hasRenderer, renderTemplateHtml } from "./cv-engine/render";
+import { fitSheet } from "./cv-engine/fit";
 import type { NativeTemplate } from "./templates/types";
 
 /**
@@ -88,6 +89,12 @@ export interface CvHtmlOptions {
   template?: CvTemplateId;
   /** Only the engine-backed templates use this; the legacy six ignore it. */
   fontFamily?: string;
+  /**
+   * Display width in CSS px for a WebView preview. When set, the page is wrapped
+   * so it is SCALED TO FIT that width (see cv-engine/fit.ts). Omit it for the
+   * print/PDF path, which must keep the page at its native 794px.
+   */
+  fitWidth?: number;
 }
 
 const LABELS = {
@@ -166,7 +173,14 @@ const skillsBlock = ({ L, skills }: Parts) =>
 const languagesBlock = ({ L, languages }: Parts) =>
   languages.length
     ? `<div class="section"><div class="section-title">${L.languages}</div>${languages
-        .map((l) => `<div class="entry"><span class="entry-title">${esc(l.language)}</span> <span class="entry-sub">(${esc(l.proficiency)})</span></div>`)
+        .map((l) =>
+          // Same label/level treatment as the shared engine (see languagesSection
+          // in cv-engine/sections.ts): the level is right-aligned in its own
+          // column and a dotted leader connects it to the language, because a
+          // bare label/level pair spread across the row reads as two unrelated
+          // fragments in a wide column.
+          `<div class="entry lang-row"><span class="entry-title lang-name">${esc(l.language)}</span><span class="entry-sub lang-level">${esc(l.proficiency)}</span></div>`,
+        )
         .join("")}</div>`
     : "";
 
@@ -184,6 +198,10 @@ const BASE_CSS = `
   .skills { display: flex; flex-wrap: wrap; gap: 6px; }
   .photo { border-radius: 50%; object-fit: cover; display: block; flex-shrink: 0; }
   .head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  /* Languages: label + dotted leader + right-aligned level (see languagesBlock). */
+  .lang-row { display: flex; align-items: baseline; gap: 8px; }
+  .lang-name { flex: 1 1 auto; min-width: 0; border-bottom: 1px dotted currentColor; padding-bottom: 2px; }
+  .lang-level { flex: 0 0 auto; white-space: nowrap; }
 `;
 
 /** Wraps the name/headline block with the photo (if any) in a flex row — no
@@ -309,6 +327,7 @@ export function cvToHtml(cv: CV, opts: CvHtmlOptions = {}): string {
       accent: opts.accent,
       fontFamily: opts.fontFamily,
       lang: opts.lang,
+      fitWidth: opts.fitWidth,
     });
   }
 
@@ -327,6 +346,15 @@ export function cvToHtml(cv: CV, opts: CvHtmlOptions = {}): string {
     languages: d.languages ?? [],
   };
 
+  const html = templateBody(id, parts);
+  // Preview path only: fit the page to the WebView instead of relying on the
+  // WebView's own viewport handling (see cv-engine/fit.ts).
+  if (opts.fitWidth && opts.fitWidth > 0) {
+    const fit = fitSheet(html, opts.fitWidth);
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">${fit.viewport}
+<style>${templateCss(id, accent)}${fit.css}</style></head><body>${fit.body}</body></html>`;
+  }
+
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=794">
-<style>${templateCss(id, accent)}</style></head><body>${templateBody(id, parts)}</body></html>`;
+<style>${templateCss(id, accent)}</style></head><body>${html}</body></html>`;
 }

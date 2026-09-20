@@ -194,9 +194,8 @@ export function NovaTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
               <SectionHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
                 {languages.map((lang) => (
-                  <div key={lang.id} style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 10.5, color: dark, fontWeight: 600 }}>{lang.name}</span>
-                    <span style={{ fontSize: 10, color: muted }}>{lang.proficiency}</span>
+                  <div key={lang.id} style={{ display: "flex", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10.5, color: dark, fontWeight: 600}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 10, color: muted}}>{lang.proficiency}</span>
                   </div>
                 ))}
               </div>

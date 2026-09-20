@@ -650,6 +650,20 @@ export function skillsSection(
 
 // ─── Languages ────────────────────────────────────────────────────────────────
 
+/**
+ * Languages — a label/level PAIR per row.
+ *
+ * Mirrors LanguagesSection in
+ * apps/web/components/templates/engine/sections.tsx, including the reason the
+ * row is no longer `justify-content: space-between`: the pair is only joined by
+ * the row they share, so a wide row (a header layout's main column measures
+ * 560px+, a sidebar's aside 195–300px) pushed `Kiswahili` and `Native` so far
+ * apart that they read as two unrelated fragments — "language far left, level
+ * far right". The level still sits right-aligned in its own column (levels must
+ * line up), and a dotted leader on the label carries the eye across the gap at
+ * any width. Both apps must stay in step: the native WebView preview and the
+ * PDF export are generated from this file.
+ */
 export function languagesSection(
   view: EngineView,
   tokens: DesignTokens,
@@ -663,9 +677,19 @@ export function languagesSection(
     .map((l) =>
       el(
         "div",
-        { display: "flex", justifyContent: "space-between", alignItems: "center" },
-        tx(l.name, { fontSize: tokens.font.body, color: tokens.color.text, fontFamily: tokens.fontFamily }) +
+        { display: "flex", alignItems: "baseline", gap: 8 },
+        tx(l.name, {
+          flex: "1 1 auto",
+          minWidth: 0,
+          borderBottom: "1px dotted currentColor",
+          paddingBottom: 2,
+          fontSize: tokens.font.body,
+          color: tokens.color.text,
+          fontFamily: tokens.fontFamily,
+        }) +
           tx(l.proficiency, {
+            flexShrink: 0,
+            whiteSpace: "nowrap",
             fontSize: tokens.font.meta,
             color: tokens.color.muted,
             fontFamily: tokens.fontFamily,

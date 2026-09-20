@@ -228,9 +228,8 @@ export function KilimanjaroTemplate({ data, primaryColor, fontFamily, lang = "en
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 24, rowGap: 8 }}>
                   {languages.map((lang) => (
                     <div key={lang.id}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
-                        <span style={{ fontSize: 10, color: "#374151" }}>{lang.name}</span>
-                        <span style={{ fontSize: 9, color: "#9ca3af" }}>{lang.proficiency}</span>
+                      <div style={{ display: "flex", marginBottom: 3, gap: 8 }}>
+                        <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10, color: "#374151"}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 9, color: "#9ca3af"}}>{lang.proficiency}</span>
                       </div>
                       <SkillBar level={PROF[lang.proficiency] ?? 2} color={primaryColor} bgColor="#e5e7eb" width={120} height={4} />
                     </div>

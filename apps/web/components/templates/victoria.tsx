@@ -250,9 +250,8 @@ export function VictoriaTemplate({ data, primaryColor, fontFamily, lang = "en" }
             <SectionHeader title={sw ? "Lugha" : "Languages"} primaryColor={primaryColor} />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "9px 20px" }}>
               {languages.map((lang) => (
-                <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 10, color: "#374151", fontFamily: serifFont }}>{lang.name}</span>
-                  <span style={{ fontSize: 9, color: "#6b7280", fontStyle: "italic", fontFamily: serifFont }}>
+                <div key={lang.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10, color: "#374151", fontFamily: serifFont}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 9, color: "#6b7280", fontStyle: "italic", fontFamily: serifFont}}>
                     {lang.proficiency}
                   </span>
                 </div>

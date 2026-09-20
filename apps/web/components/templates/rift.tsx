@@ -84,9 +84,8 @@ export function RiftTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
               <SideLabel>{sw ? "Lugha" : "Languages"}</SideLabel>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((l) => (
-                  <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 10.5, color: "#eef2f1" }}>{l.name}</span>
-                    <span style={{ display: "flex", gap: 3 }}>
+                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10.5, color: "#eef2f1"}}>{l.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", display: "flex", gap: 3}}>
                       {[1, 2, 3, 4, 5].map((i) => (
                         <i key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= (PROF[l.proficiency] ?? 3) ? GOLD : "rgba(255,255,255,0.25)" }} />
                       ))}

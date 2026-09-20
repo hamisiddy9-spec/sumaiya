@@ -264,9 +264,8 @@ export function AscentTemplate({ data, primaryColor, fontFamily }: Props) {
               <SectionTitle title="Languages" color={primaryColor} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((lang) => (
-                  <div key={lang.id} style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 600, color: "#374151" }}>{lang.name}</span>
-                    <span style={{ fontSize: 9, color: "#9ca3af" }}>{lang.proficiency}</span>
+                  <div key={lang.id} style={{ display: "flex", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 9.5, fontWeight: 600, color: "#374151"}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 9, color: "#9ca3af"}}>{lang.proficiency}</span>
                   </div>
                 ))}
               </div>

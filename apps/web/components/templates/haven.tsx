@@ -120,7 +120,7 @@ export function HavenTemplate({ data, primaryColor, fontFamily, lang = "en" }: P
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((l) => (
                   <div key={l.id}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: "#4d4d4d", marginBottom: 4 }}><span>{l.name}</span><span style={{ color: "#9a9a9a" }}>{l.proficiency}</span></div>
+                    <div style={{ display: "flex", fontSize: 10.5, color: "#4d4d4d", marginBottom: 4, gap: 8 }}><span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2}}>{l.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", color: "#9a9a9a"}}>{l.proficiency}</span></div>
                     <div style={{ height: 5, borderRadius: 3, background: tint }}>
                       <div style={{ width: `${((PROF[l.proficiency] ?? 3) / 5) * 100}%`, height: "100%", borderRadius: 3, background: primaryColor }} />
                     </div>

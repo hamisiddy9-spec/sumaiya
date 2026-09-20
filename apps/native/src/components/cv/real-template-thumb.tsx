@@ -27,10 +27,17 @@ export function RealTemplateThumb({
   // draws the thin WebView scroll gutter. The container clips the buffer.
   const h = Math.ceil(width * (1123 / 794)) + 2;
   const html = useMemo(() => {
-    const base = cvToHtml({ ...SAMPLE_CV, templateId: id }, { template: id, accent, lang: "en" });
+    // fitWidth is the frame width: cvToHtml wraps the page so it is SCALED to
+    // fill exactly this frame. Without it the sheet's fit was whatever the
+    // Android WebView decided to do with the viewport meta, and a thumbnail was
+    // a left-hand slice of an unscaled A4 page.
+    const base = cvToHtml(
+      { ...SAMPLE_CV, templateId: id },
+      { template: id, accent, lang: "en", fitWidth: width },
+    );
     const style = `<style>html,body{margin:0;padding:0;overflow:hidden!important}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}</style>`;
     return base.includes("</head>") ? base.replace("</head>", `${style}</head>`) : style + base;
-  }, [id, accent]);
+  }, [id, accent, width]);
 
   return (
     <View style={{ width, height: h, borderRadius: 4, overflow: "hidden", backgroundColor: "#fff" }}>

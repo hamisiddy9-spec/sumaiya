@@ -70,7 +70,6 @@ export function CvPreviewCard({
   const [thumbReady, setThumbReady] = useState(false);
   const [dlError, setDlError] = useState(false);
 
-  const html = useMemo(() => cvToHtml(cv, { accent: color, lang, template }), [cv, color, lang, template]);
   // cvToHtml() renders a bare "&nbsp;" name line and skips every section
   // with no data — a CV this sparse (a short chat that gave Sumaiya little
   // to work with, a scan that mis-read) previews as a genuinely blank white
@@ -80,6 +79,19 @@ export function CvPreviewCard({
   const { width: screenW } = useWindowDimensions();
   const thumbW = Math.min(screenW - 64, 300);
   const thumbH = Math.round(thumbW * PAGE_RATIO);
+
+  // ONE HTML per frame width, each with the page scaled to that frame by our own
+  // code (cv-engine/fit.ts). The card's preview and the full-screen view are
+  // wildly different widths, so sharing one document meant one of them showed a
+  // left-hand slice of an unscaled 794px sheet.
+  const htmlThumb = useMemo(
+    () => cvToHtml(cv, { accent: color, lang, template, fitWidth: thumbW }),
+    [cv, color, lang, template, thumbW],
+  );
+  const htmlFull = useMemo(
+    () => cvToHtml(cv, { accent: color, lang, template, fitWidth: screenW }),
+    [cv, color, lang, template, screenW],
+  );
 
   const pickTemplate = (id: CvTemplateId, locked: boolean) => {
     haptics.selection();
@@ -248,7 +260,7 @@ export function CvPreviewCard({
       >
         <WebView
           originWhitelist={["*"]}
-          source={{ html }}
+          source={{ html: htmlThumb }}
           scrollEnabled={false}
           pointerEvents="none"
           onLoadEnd={() => setThumbReady(true)}
@@ -364,7 +376,7 @@ export function CvPreviewCard({
           </View>
           <View style={{ paddingHorizontal: 12, paddingBottom: 8 }}>{templateRow}</View>
           <Animated.View entering={FadeIn} style={{ flex: 1, backgroundColor: "#fff" }}>
-            <WebView originWhitelist={["*"]} source={{ html }} style={{ flex: 1, backgroundColor: "#fff" }} androidLayerType="software" />
+            <WebView originWhitelist={["*"]} source={{ html: htmlFull }} style={{ flex: 1, backgroundColor: "#fff" }} androidLayerType="software" />
           </Animated.View>
           <View style={{ padding: 16, paddingBottom: insets.bottom + 16 }}>
             <Button

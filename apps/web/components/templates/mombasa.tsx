@@ -285,8 +285,8 @@ export function MombasaTemplate({ data, primaryColor, fontFamily, lang = "en" }:
             <SideHeader title={L.languages} primaryColor={primaryColor} />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {languages.map((lang) => (
-                <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 9.5, color: "#374151", fontWeight: 500 }}>{lang.name}</span>
+                <div key={lang.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 9.5, color: "#374151", fontWeight: 500 }}>{lang.name}</span>
                   <SkillDots
                     level={PROF[lang.proficiency] ?? 3}
                     color={primaryColor}

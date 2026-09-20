@@ -6,6 +6,7 @@ import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { getSampleCV } from "@/lib/sample-cv";
 import { TemplateCanvas } from "@/components/templates/template-canvas";
+import { FitFrame } from "@/components/templates/fit-frame";
 import { resolveFontStack } from "@/lib/fonts";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
@@ -45,9 +46,12 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
   };
 }
 
-// A4 preview, scaled down to fit the page column.
-const PREVIEW_W = 380;
-const SCALE = PREVIEW_W / 794;
+// A4 preview. The sheet is FITTED to whatever column it lands in by FitFrame;
+// this constant is only the cap that keeps the preview from ballooning on a wide
+// screen. It used to be a fixed width with a matching hand-computed scale, which
+// pinned the sheet to the column's left edge and clipped it on any viewport
+// narrower than ~412px (measured at 390px: a 380px sheet in a 358px column).
+const MAX_PREVIEW_W = 380;
 
 export default function TemplateDetailPage({ params }: { params: { slug: string; locale: string } }) {
   const t = findTemplate(params.slug);
@@ -105,12 +109,10 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
           </div>
 
           {/* Live preview */}
-          <div className="mx-auto">
-            <div
-              style={{ width: PREVIEW_W, height: Math.round(1123 * SCALE), position: "relative", overflow: "hidden" }}
-              className="rounded-[3px] bg-white shadow-floating ring-1 ring-black/[0.05]"
+          <div className="mx-auto" style={{ maxWidth: MAX_PREVIEW_W }}>
+            <FitFrame
+              sheetClassName="rounded-[3px] bg-white shadow-floating ring-1 ring-black/[0.05]"
             >
-              <div style={{ width: 794, height: 1123, transform: `scale(${SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
                 <TemplateCanvas>
                   <Component
                     data={sample}
@@ -119,8 +121,7 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
                     lang={params.locale === "en" ? "en" : "sw"}
                   />
                 </TemplateCanvas>
-              </div>
-            </div>
+            </FitFrame>
           </div>
         </div>
 

@@ -168,9 +168,8 @@ export function NakuruTemplate({ data, primaryColor, fontFamily, lang = "en" }: 
             <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
               {languages.map((lang) => (
                 <div key={lang.id}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                    <span style={{ fontSize: 9.5, color: "rgba(255,255,255,0.9)" }}>{lang.name}</span>
-                    <span style={{ fontSize: 8.5, color: "rgba(255,255,255,0.55)" }}>{lang.proficiency}</span>
+                  <div style={{ display: "flex", alignItems: "center", marginBottom: 4, gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 9.5, color: "rgba(255,255,255,0.9)"}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 8.5, color: "rgba(255,255,255,0.55)"}}>{lang.proficiency}</span>
                   </div>
                   <SkillDots
                     level={PROF[lang.proficiency] ?? 2}

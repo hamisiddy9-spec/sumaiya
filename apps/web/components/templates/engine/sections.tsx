@@ -490,6 +490,26 @@ export function SkillsSection({
 
 // ─── Languages ────────────────────────────────────────────────────────────────
 
+/**
+ * Languages — a label/level PAIR per row.
+ *
+ * `justify-content: space-between` on that pair is wrong, and it is wrong in a
+ * way the rendered geometry can prove: the two halves are only associated by
+ * the row they share, so as the row's width grows the level drifts away from
+ * the language it belongs to. Measured on the live apex template before this
+ * change: the row was 103.4px wide and `Kiswahili` → `Native` sat 58.9px apart —
+ * 57% of the row was void, and in a full-width main column (the aside layouts
+ * are 195–300px; a header layout's main column is 560px+) the void is several
+ * times the label's own width. That reads as "language far left, level far
+ * right" rather than "Swahili — Native".
+ *
+ * The fix keeps the level right-aligned (levels must line up as a column, which
+ * is why space-between was there in the first place) but CONNECTS the pair with
+ * a dotted leader: the label takes the free space and draws the dots under
+ * itself, so the eye follows the leader across any gap. That is the standard
+ * typographic treatment for exactly this pair, and it works at every width —
+ * narrow aside, wide main column, or a magnified SmartFit sheet.
+ */
 export function LanguagesSection({
   data, tokens, style, lang = "en",
 }: { data: CVData; tokens: DesignTokens; style: SectionStyle; lang?: Lang }) {
@@ -500,9 +520,13 @@ export function LanguagesSection({
       <SectionLabel label={heading("languages", lang)} tokens={tokens} style={style} />
       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
         {items.map(lang => (
-          <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: tokens.font.body, color: tokens.color.text, fontFamily: tokens.fontFamily }}>{lang.name}</span>
-            <span style={{ fontSize: tokens.font.meta, color: tokens.color.muted, fontFamily: tokens.fontFamily }}>{lang.proficiency}</span>
+          <div key={lang.id} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{
+              flex: 1, minWidth: 0,
+              borderBottom: "1px dotted currentColor", paddingBottom: 2,
+              fontSize: tokens.font.body, color: tokens.color.text, fontFamily: tokens.fontFamily,
+            }}>{lang.name}</span>
+            <span style={{ flexShrink: 0, whiteSpace: "nowrap", fontSize: tokens.font.meta, color: tokens.color.muted, fontFamily: tokens.fontFamily }}>{lang.proficiency}</span>
           </div>
         ))}
       </div>

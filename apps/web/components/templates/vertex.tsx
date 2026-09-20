@@ -348,16 +348,13 @@ export function VertexTemplate({
               <DiamondHeader title={L.languages} />
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {languages.map((lang) => (
-                  <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 10, color: "#374151", fontWeight: 500 }}>{lang.name}</span>
-                    <span style={{
-                      fontSize: 8.5,
+                  <div key={lang.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10, color: "#374151", fontWeight: 500}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 8.5,
                       color: "#fff",
                       backgroundColor: primaryColor,
                       padding: "1px 6px",
                       borderRadius: 8,
-                      fontWeight: 600,
-                    }}>
+                      fontWeight: 600,}}>
                       {lang.proficiency}
                     </span>
                   </div>

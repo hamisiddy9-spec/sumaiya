@@ -233,15 +233,12 @@ export function ZanzibarTemplate({ data, primaryColor, fontFamily, lang = "en" }
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {languages.map((lang) => (
-                  <div key={lang.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 10, color: "#1e293b", fontWeight: 600 }}>{lang.name}</span>
-                    <span style={{
-                      fontSize: 8.5,
+                  <div key={lang.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10, color: "#1e293b", fontWeight: 600}}>{lang.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 8.5,
                       color: primaryColor,
                       fontWeight: 700,
                       letterSpacing: "0.04em",
-                      textTransform: "uppercase" as const,
-                    }}>
+                      textTransform: "uppercase" as const,}}>
                       {lang.proficiency}
                     </span>
                   </div>

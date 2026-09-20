@@ -149,9 +149,8 @@ export function SiliconProTemplate({ data, primaryColor, fontFamily, lang = "en"
               <SectionHeader title="Languages" />
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((l) => (
-                  <div key={l.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 10.5, color: "#334155", fontWeight: 500 }}>{l.name}</span>
-                    <span style={{ fontSize: 9, color: "#94a3b8", backgroundColor: "#f1f5f9", padding: "2px 7px", borderRadius: 4 }}>{l.proficiency}</span>
+                  <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2, fontSize: 10.5, color: "#334155", fontWeight: 500}}>{l.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", fontSize: 9, color: "#94a3b8", backgroundColor: "#f1f5f9", padding: "2px 7px", borderRadius: 4}}>{l.proficiency}</span>
                   </div>
                 ))}
               </div>

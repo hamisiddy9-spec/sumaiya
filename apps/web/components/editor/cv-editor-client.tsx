@@ -59,6 +59,7 @@ import { metaTrack } from "@/components/meta-pixel";
 import { getPairingTip, getFamilyForCv, getCoverLetterForCv } from "@/lib/template-families";
 import { DOC_FONTS, INTER_STACK, resolveFontStack } from "@/lib/fonts";
 import { TemplateCanvas } from "@/components/templates/template-canvas";
+import { FitFrame } from "@/components/templates/fit-frame";
 import { getSampleCV } from "@/lib/sample-cv";
 import { PreviewWatermark } from "@/components/editor/preview-watermark";
 import { Button } from "@/components/ui/button";
@@ -804,19 +805,18 @@ const PREVIEW_CV: CVData = {
 
 // ─── Template mini-preview (renders actual template at readable scale) ──────────
 // Right sidebar is w-64 (256px). 2-col grid with p-4 padding + gap-3:
-// available = 256 - 32 - 12 = 212px → each cell ≈ 106px wide
-const THUMB_SCALE = 106 / 794;
-const THUMB_W = 106;
-const THUMB_H = Math.round(1123 * THUMB_SCALE);
-
+// available = 256 - 32 - 12 = 212px → each cell ≈ 106px wide. The sheet is fitted
+// to the cell by FitFrame, so the cell size (and the grid) can change without
+// the hand-computed `106 / 794` constant going stale.
 function TemplateMiniPreview({ templateId, color }: { templateId: TemplateId; color: string }) {
   const Component = TEMPLATE_COMPONENTS[templateId] ?? NakuruTemplate;
   return (
-    <div style={{ width: THUMB_W, height: THUMB_H, overflow: "hidden", position: "relative", pointerEvents: "none", flexShrink: 0 }}>
-      <div style={{ width: 794, height: 1123, transform: `scale(${THUMB_SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
-        <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
-      </div>
-    </div>
+    <FitFrame
+      style={{ pointerEvents: "none", flexShrink: 0 }}
+      sheetStyle={{ pointerEvents: "none" }}
+    >
+      <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
+    </FitFrame>
   );
 }
 
@@ -855,18 +855,18 @@ const COLOR_PALETTES = [
 const FONTS = DOC_FONTS;
 
 // ─── Template modal thumbnail (3-col grid inside max-w-3xl) ──────────────────
-const MODAL_THUMB_SCALE = 200 / 794;
-const MODAL_THUMB_W = 200;
-const MODAL_THUMB_H = Math.round(1123 * MODAL_THUMB_SCALE);
+// Fitted to the cell by FitFrame (see TemplateMiniPreview).
+const MODAL_THUMB_H = Math.round(1123 * (200 / 794));
 
 function TemplateLargePreview({ templateId, color }: { templateId: TemplateId; color: string }) {
   const Component = TEMPLATE_COMPONENTS[templateId] ?? NakuruTemplate;
   return (
-    <div style={{ width: MODAL_THUMB_W, height: MODAL_THUMB_H, overflow: "hidden", position: "relative", pointerEvents: "none", flexShrink: 0 }}>
-      <div style={{ width: 794, height: 1123, transform: `scale(${MODAL_THUMB_SCALE})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}>
-        <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
-      </div>
-    </div>
+    <FitFrame
+      style={{ maxWidth: 200, margin: "0 auto", pointerEvents: "none", flexShrink: 0 }}
+      sheetStyle={{ pointerEvents: "none" }}
+    >
+      <Component data={PREVIEW_CV} primaryColor={color} fontFamily={INTER_STACK} />
+    </FitFrame>
   );
 }
 
@@ -991,7 +991,6 @@ interface Props { initialDoc: CV; userId: string; guestMode?: boolean; requested
 export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, requestedTemplateId, isPremium: isPremiumProp = false, uiLang = "en", backHref }: Props & { accessToken?: string }) {
   const isPremium = true; // payment temporarily disabled
   const previewRef = useRef<HTMLDivElement>(null);
-  const previewContainerRef = useRef<HTMLDivElement>(null);
   const autoSaveRef = useRef<ReturnType<typeof setTimeout>>();
   const prevSavingRef = useRef(false);
   const [savedFlash, setSavedFlash] = useState(false);
@@ -1008,7 +1007,6 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview" | "design">("edit");
   const [wizardStep, setWizardStep] = useState(0);
-  const [previewScale, setPreviewScale] = useState(1);
   const [isEnhancing, setIsEnhancing] = useState(false);
   // AI enhance is non-destructive: the suggestion lands in this preview so the
   // user can compare and Apply / Discard / Regenerate — never a silent overwrite.
@@ -1313,19 +1311,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
   useEffect(() => { if (accessToken) setAccessToken(accessToken); }, [accessToken]);
 
-  useEffect(() => {
-    const el = previewContainerRef.current;
-    if (!el) return;
-    // Floor the scale so a hidden→visible tab switch (offsetWidth briefly 0)
-    // can't produce a negative/zero scale and leave the A4 canvas at native
-    // 794px inside a narrow column → horizontal scroll on mobile. Recompute
-    // synchronously when the Preview tab opens.
-    const update = () => setPreviewScale(Math.max(0.28, Math.min(1, (el.offsetWidth - 32) / 794)));
-    update();
-    const obs = new ResizeObserver(update);
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [mobileTab]);
+  // The preview's fit-to-column scale used to be hand-computed here
+  // (`(offsetWidth - 32) / 794`) and re-applied through a wrapper sized by the
+  // same expression. FitFrame owns that now — one mechanism, which measures the
+  // column's real content box instead of assuming a 32px padding (it is 64px
+  // at the `lg` breakpoint, which is why the sheet was clipped on both sides).
 
   // Identify user + fire session-start events on mount
   useEffect(() => {
@@ -3113,21 +3103,28 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <StepNav />
         </div>
 
-        {/* CENTER — A4 Preview on sand bg */}
-        <div ref={previewContainerRef}
+        {/* CENTER — A4 Preview on sand bg.
+            The sheet's fit/centring is owned by FitFrame: it measures THIS
+            column (padding included, which is why the old `offsetWidth - 32`
+            was 32px too generous at the lg padding of 64px and clipped the
+            sheet on both sides) and sizes the box to exactly 794 × scale. */}
+        <div
           className={`${mobileTab === "preview" ? "flex" : "hidden"} lg:flex flex-1 flex-col items-center overflow-auto p-4 lg:p-8 bg-sand`}>
-          <div style={{ width: `${794 * previewScale}px`, height: `${1123 * previewScale}px`, position: "relative", flexShrink: 0 }}>
-            <div ref={previewRef} id="cv-preview"
-              style={{ width: "794px", minHeight: "1123px", fontFamily, transform: `scale(${previewScale})`, transformOrigin: "top left", position: "absolute", top: 0, left: 0 }}
-              className="bg-card shadow-floating ring-1 ring-black/[0.04] rounded-[2px]">
-              <TemplateCanvas>
-                <TemplateComponent data={visibleData} primaryColor={primaryColor} fontFamily={resolveFontStack(fontFamily)} lang={uiLang} />
-              </TemplateCanvas>
-            </div>
-            {/* Sibling of #cv-preview (the captured element) so downloads stay
-                clean while the on-screen preview / any screenshot is marked. */}
-            <PreviewWatermark active={!isPremium} />
-          </div>
+          <FitFrame
+            sheetRef={previewRef}
+            sheetId="cv-preview"
+            sheetClassName="bg-card shadow-floating ring-1 ring-black/[0.04] rounded-[2px]"
+            sheetStyle={{ fontFamily }}
+            overlay={
+              /* Sibling of #cv-preview (the captured element) so downloads stay
+                 clean while the on-screen preview / any screenshot is marked. */
+              <PreviewWatermark active={!isPremium} />
+            }
+          >
+            <TemplateCanvas>
+              <TemplateComponent data={visibleData} primaryColor={primaryColor} fontFamily={resolveFontStack(fontFamily)} lang={uiLang} />
+            </TemplateCanvas>
+          </FitFrame>
           {/* Download — a split button: click to make a PDF, or open the menu for
               Word / text / share (same actions as the top-bar Export menu). */}
           <div className="mt-6 mb-4 flex flex-col items-center gap-1.5">

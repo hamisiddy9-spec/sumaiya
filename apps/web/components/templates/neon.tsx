@@ -141,7 +141,7 @@ export function NeonTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {languages.map((l) => (
                   <div key={l.id}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10.5, color: TXT, marginBottom: 3 }}><span>{l.name}</span><span style={{ color: DIM }}>{l.proficiency}</span></div>
+                    <div style={{ display: "flex", fontSize: 10.5, color: TXT, marginBottom: 3, gap: 8 }}><span style={{flex: 1, minWidth: 0, borderBottom: "1px dotted currentColor", paddingBottom: 2}}>{l.name}</span><span style={{flexShrink: 0, whiteSpace: "nowrap", color: DIM}}>{l.proficiency}</span></div>
                     <div style={{ height: 4, borderRadius: 2, background: "rgba(255,255,255,0.1)" }}>
                       <div style={{ width: `${((PROF[l.proficiency] ?? 3) / 5) * 100}%`, height: "100%", borderRadius: 2, background: grad }} />
                     </div>
