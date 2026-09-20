@@ -196,7 +196,7 @@ export default async function BriefPage() {
                       href={`/snap?job=${encodeURIComponent(m.title)}`}
                       className="inline-flex items-center gap-1.5 bg-ember text-cream text-xs font-semibold px-3.5 py-2 rounded-[10px] transition hover:bg-ember-hover"
                     >
-                      {sw ? "Lenga CV yangu" : "Tailor my CV"}
+                      {sw ? "Lenga CV yako" : "Tailor my CV"}
                     </Link>
                   )}
                   <Link

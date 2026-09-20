@@ -38,7 +38,7 @@ export function MarketingNav() {
     { href: "/assistant", label: "Sumaiya" },
     { href: "/jobs", label: lang === "sw" ? "Ajira" : "Jobs" },
     { href: "/tools", label: tr.nav.tools },
-    { href: "/ats-checker", label: lang === "sw" ? "Kagua ATS" : "ATS Checker" },
+    { href: "/ats-checker", label: lang === "sw" ? "Kagua CV" : "ATS Checker" },
     { href: "/snap-to-apply", label: lang === "sw" ? "Snap-to-Apply" : "Snap to Apply" },
     // Pricing hidden while everything is free (see lib/features.ts).
     ...(PAYMENTS_ENABLED ? [{ href: "/pricing", label: tr.nav.pricing }] : []),
@@ -107,7 +107,7 @@ export function MarketingNav() {
           </div>
 
           <Link href="/ats-checker" className="flex items-center gap-1.5 text-sm font-medium text-cream/80 hover:text-cream transition-colors duration-150">
-            {lang === "sw" ? "Kagua ATS" : "ATS Checker"}
+            {lang === "sw" ? "Kagua CV" : "ATS Checker"}
             <span className="text-[9px] font-bold uppercase tracking-wider bg-gold/20 text-gold rounded-full px-1.5 py-0.5">
               {lang === "sw" ? "Bure" : "Free"}
             </span>

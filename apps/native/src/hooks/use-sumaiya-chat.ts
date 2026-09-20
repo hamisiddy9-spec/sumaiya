@@ -244,8 +244,8 @@ export function useSumaiyaChat() {
       add('practice', 'Interview prep', 'Maandalizi ya usaili', '🎤', 'practice', { skills: response.data.skills });
     }
     if (has('cv', 'resume', 'wasifu', 'summary', 'muhtasari', 'experience', 'uzoefu')) {
-      add('open-cv', 'Open my CV', 'Fungua CV yangu', '📄', 'open-cv');
-      add('ats', 'Check ATS', 'Kagua ATS', '🛡️', 'edit-cv', { section: 'ats' });
+      add('open-cv', 'Open my CV', 'Fungua CV yako', '📄', 'open-cv');
+      add('ats', 'Check ATS', 'Kagua CV', '🛡️', 'edit-cv', { section: 'ats' });
     }
     if (has('job', 'kazi', 'apply', 'omba', 'advert', 'tangazo', 'tailor', 'lenga')) {
       add('tailor', 'Tailor to a job', 'Lenga kwenye kazi', '🎯', 'open-cv', { section: 'jobs' });

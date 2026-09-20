@@ -272,7 +272,7 @@ export function EditorProfileMenu({
             >
               <User size={15} className="text-ember mt-0.5 shrink-0" />
               <span>
-                <span className="block text-xs font-semibold text-espresso">{sw ? "Tumia Wasifu Wangu" : "Use My Profile"}</span>
+                <span className="block text-xs font-semibold text-espresso">{sw ? "Tumia Wasifu Wako" : "Use My Profile"}</span>
                 <span className="block text-[10px] text-text-muted">{sw ? "Jaza kutoka data ya wasifu iliyohifadhiwa" : "Fill from saved profile data"}</span>
               </span>
             </button>

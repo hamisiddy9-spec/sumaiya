@@ -404,3 +404,176 @@ any template or photo rendering.
 - **BrighterMonday Tanzania and Fuzu Swahili** — both unreachable (§2 of the standard), so the
   commercial half of the market vocabulary rests on government documents plus two sites.
 - **Whether `werevu` is safe to use** — see the standard's §5.3. Only the owner can settle it.
+
+---
+
+## 8. Addendum, same day — the VOICE audit (`zako` / `zangu`)
+
+**The observation that started it (device evidence, not opinion):** two `uiautomator` dumps
+of the installed app (`pro.sumaiya.app`, Kiswahili) show the home screen's tile reading
+**`CV zako`** (your CV) and the screen that tile opens headed **`CV zangu`** (my CVs). The
+same feature was named in the second person on one surface and the first person on the
+other. **Both strings are correct Swahili** — `CV` is a borrowed noun taking `zi-`
+agreement, so `zako` and `zangu` are equally grammatical. This is a *voice* fault, and the
+grammar guards in §3 could not see it: only the pair is wrong, never either string.
+
+Convention decided, applied and guarded: **`docs/SWAHILI-STANDARD-2026-09-20.md` §4.1**.
+House voice = second person on the user's own objects; first person is reserved for the
+user's own words/consent/question/authored text and for the assistant speaking about
+herself. Chosen on the measurement below, not because it was listed first: making
+everything first-person would have meant rewriting 407 strings to match a translation of
+English marketing copy, and would have contradicted the assistant's own *"nimeandaa CV
+yako"*.
+
+### 8.1 The counts (both languages' slots, all surfaces)
+
+Swept mechanically — every string literal in native `screens/ components/ lib/ navigation/`
+and web `lib/ components/ app/ lib/i18n/`, matched as `<noun> <possessive>` for the user's
+own objects (`CV`, `wasifu`, `maombi`, `kazi`, `akaunti`, `nyaraka`, `picha`, `barua`,
+`ujuzi`, `uzoefu`, `taarifa`, `alama`, `jina`, `simu`, `kiungo`, `nafasi`), then classified
+per occurrence as second person (`zako/yako/wako/…`) or first person (`zangu/yangu/wangu/…`).
+
+| Surface | PRE 2nd | PRE 1st | FINAL 2nd | FINAL 1st |
+|---|---|---|---|---|
+| native/screens | 80 | 16 | 84 | 10 |
+| native/components | 5 | 4 | 8 | 1 |
+| native/lib | 31 | 9 | 38 | 2 |
+| native/navigation | 0 | 1 | 1 | 0 |
+| web/components | 139 | 29 | 157 | 11 |
+| web/app | 76 | 11 | 85 | 1 |
+| web/lib | 64 | 8 | 67 | 5 |
+| web/lib/i18n | 12 | 5 | 16 | 1 |
+| **TOTAL** | **407** | **83** | **456** | **31** |
+
+PRE = HEAD `1fc5bfa` (the commit the device build came from). FINAL = working tree.
+**The split is not close: first person was already a minority in every single surface, and
+4.9:1 overall.** The remaining 31 are the four legitimate classes, each with a written
+reason in the lint's exemption list (native 8 entries / 13 occurrences, web 15 / 18).
+
+Nouns that appeared in BOTH voices (the defect class), PRE → FINAL unexempted:
+`cv` 58→0 · `wasifu` 4→0 · `akaunti` 5→0 · `barua` 8→0 · `picha` 2→0 · `kazi` 1→0 ·
+`maombi` 1→0 · `alama` 1→0 · `taarifa` 1→0 · `uzoefu` 2→0.
+
+### 8.2 Two audit-instrument faults, stated plainly
+
+1. **The first extractor under-counted its own finding.** Its classifier tested the
+   possessive with a case-sensitive regex, so every capitalised `Yangu`/`Wangu`/`Zangu`
+   (`"CV Yangu"`, `"Akaunti Yangu"`, `"Tumia Wasifu Wangu"`) was written down as second
+   person. Fixed and re-run; the numbers above are the corrected ones. **The lesson: when
+   a machine classification disagrees with a human reading, suspect the classifier first.**
+2. **The grep sweep still missed five chrome strings that the new lint guard found**
+   (`hooks/use-sumaiya-chat.ts` was outside the audited directories, and the strict
+   adjacency in the JS guard caught `CV Yangu` in three places the sweep's looser pattern
+   had classified by hand). Both instruments are now in the repo and they cross-check each
+   other; neither alone was sufficient.
+
+### 8.3 Changes applied (60 strings, 42 files, both apps)
+
+All chrome on the user's own objects moved to the second person. The observed pair and its
+class, quoted before → after:
+
+| Was | Now | Where |
+|---|---|---|
+| `CV zangu` | `CV zako` | native tab bar · **native CV screen heading (the defect)** · web dashboard tab + heading · web sidebar nav · assistant nav |
+| `Ona CV zangu` | `Ona CV zako` | native home tile accessibility label |
+| `Hifadhi kwenye CV zangu` | `Hifadhi kwenye CV zako` | native save-to-library control |
+| `Fungua CV zangu` / `Moja ya CV zangu` | `…CV zako` | lesson CTA · chat attach picker |
+| `Lenga CV yangu` | `Lenga CV yako` | native job-apply + jobs feed, web brief/workspace/snap/assistant |
+| `Tengeneza CV yangu` | `Tengeneza CV yako` | native chat button, web about/tools/snap CTAs |
+| `Unda CV yangu` | `Unda CV yako` | web home hero CTA |
+| `Kagua CV yangu` | `Kagua CV yako` | native lesson CTA + next-step CTA, web ats-checker/tools/assistant chips |
+| `Fungua maombi yangu` / `Fungua wasifu wangu` / `Andika barua yangu` | `…yako` | native lesson CTAs |
+| `Barua Zangu za Maombi` / `Kadi Zangu za Biashara` / `Barua Zangu Rasmi` | `Barua zako… / Kadi zako… / Barua zako…` | web dashboard headings |
+| `Akaunti Yangu` | `Akaunti yako` | web nav |
+| `Hifadhi kwenye akaunti yangu` | `…akaunti yako` | web snap save |
+| `Tumia Wasifu Wangu` | `Tumia Wasifu Wako` | web editor profile menu |
+| `Jenga kutoka CV yangu kamili zaidi` | `Jenga kutoka CV yako kamili zaidi` | web career-profile backfill (its own empty state already said `CV yako`) |
+| `Jenga CV yangu nami` | `Jenga CV yako nami` | web snap CTA |
+| `CV Yangu` / `Barua Yangu` (default doc titles) | `CV yako` / `Barua yako` | web assistant + editor |
+| `Weka kwenye CV yangu` / `Acha CV yangu kama ilivyo` / `Ongeza kwenye CV yangu` | `…CV yako…` | web assistant proposal controls |
+| `Fungua CV yangu` | `Fungua CV yako` | native chat quick-action (found by the new guard, not by the sweep) |
+| `CV yangu lengwa` (shared card title) | `CV iliyolengwa` | share page — the card belongs to the **sender**, so naming the object with no owner was the honest fix |
+
+**Left in the first person, deliberately** (they are the user's own words, consent,
+questions or authored text, or are never rendered): the FAQ questions, the chat/lesson
+prompts the user sends, the consent control `Ndiyo, futa akaunti yangu`, letter bodies,
+share/invite messages, document titles the user shares, and two assistant-prompt files
+(`lib/assistant/tools.ts`, `lib/assistant/intent.ts`). Each is an entry with a written
+reason in the lint; each must still match live text or the suite fails.
+
+**Same-class items found and left flagged, not changed** (no possessive, so the guard does
+not cover them — the owner's call):
+`apps/web/components/assistant/cv-assistant-client.tsx` — `"Kazi zinazofanana na mimi"`
+("Jobs matching me") sits on the same chip row as the corrected `"Kagua CV yako"`;
+`apps/web/components/ui/footer.tsx` / `marketing-nav.tsx` — the `/ats-checker` link is
+labelled `Kagua CV` now, while the page it opens is still titled with the English "ATS
+Checker" concept in its metadata.
+
+### 8.4 One extra defect of class C, found while sweeping hooks/
+
+`apps/native/src/hooks/use-sumaiya-chat.ts` — a quick-action chip reading **`Kagua ATS`**
+(the mechanism named in Swahili, in the Swahili slot) had shipped because the §4.1-era
+`ATS_IN_SWAHILI` pattern listed `kikagua` but **not** `kagua`. The string is now `Kagua CV`
+and the pattern in **both** lints carries `kagua`. The widened pattern then failed on
+**five more** live strings on the web that the narrow one had never seen:
+`components/ui/marketing-nav.tsx:41,110`, `components/ui/footer.tsx:14`,
+`components/editor/cv-editor-client.tsx:3322` (AI-tool tile) and
+`components/admin/campaign-funnel-view.tsx:256` (poster instructions) — all now `Kagua CV`.
+`apps/native/src/screens/ats-checker-screen.tsx:105` keeps an internal `ATS …` note in the
+assistant's **memory** record (not rendered to a user) and was left alone.
+
+### 8.5 The guard, and proof it fires
+
+`voice agreement on the user's own objects` — in **both** `apps/web/lib/swahili-lint.test.ts`
+and `apps/native/src/lib/swahili-lint.test.ts`. It fails when one of the user-object nouns
+appears with **both** a first- and a second-person possessive anywhere in the app's copy,
+unless the occurrence is one of the bounded, live-asserted exemptions. The exemption list is
+the tolerance: capped at `MAX_FIRST_PERSON_EXEMPT = 20` per app, every entry must still match
+real text, the exempted first-person share must stay under 15% of all possessive occurrences,
+and a corpus sanity check fails if the scan stops finding occurrences.
+
+**Proven failing, then restored** (the run that counts — a guard never seen to fail is not
+evidence). `CV zangu` was re-introduced on the native home tile and `CV Zangu` on the web
+dashboard, both guards failed with the exact file and line, both files were restored and
+their md5s verified unchanged:
+
+```
+native EXIT=1
+  "cv" is named in BOTH voices.
+    second person (the house voice, 60x, first at components/chat/attach-sheet.tsx:24): "cv zako"
+    first person WITHOUT an exemption (1x):
+      screens/app/home-screen.tsx:365  <Text …>{t("Your CVs", "CV zangu")}</Text>
+web EXIT=1
+  "cv" is named in BOTH voices.
+    second person (the house voice, 210x, first at lib/api/snap-apply.ts:234): "cv yako"
+    first person WITHOUT an exemption (1x):
+      lib/i18n/translations.ts:184  myCVs: "CV Zangu",
+```
+
+### 8.6 Gates after the change
+
+| app | command | result |
+|---|---|---|
+| native | `npx tsc --noEmit` | **exit 0**, no output |
+| native | `npx jest` | **1216 passed, 1217 total**, 43 suites — the one failure is the pre-existing, untracked `src/components/ui/motion-tokens.test.ts` (the concurrent motion workstream), untouched |
+| native | `npx jest src/lib/swahili-lint.test.ts` | **371 passed** (was 367) |
+| web | `npx tsc --noEmit` | **exit 0**, no output |
+| web | `npx vitest run` | **2192 passed, 3 skipped, 0 failed**, 139 files (was 2188 / 139) |
+| web | `npx vitest run lib/swahili-lint.test.ts lib/i18n/no-ats-jargon.test.ts` | **728 passed** |
+
+### 8.7 NOT verified
+
+- **A native speaker's ear.** Every string here is the owner's to approve. The ones most
+  worth his eye: the corrected CTAs (`Lenga CV yako`, `Kagua CV yako`, `Tengeneza CV yako`)
+  now read as the *product* addressing the user, where the old first-person forms read as
+  the *user's own request*; `Acha CV yako kama ilivyo` as a dismiss control; `Picha zako`
+  for the attach picker's "Photo library" (the English names a library, the Swahili now
+  names the user's photos); and `CV iliyolengwa` as the shared card's default title.
+- **The rendered screens.** No device or browser walk was performed in this pass; the
+  changes are source-verified and unit-tested only. The web changes are a Vercel deploy;
+  the native changes need the next APK.
+- **The assistant's own generated Swahili** — still the largest unmeasured surface (§1).
+- **English chrome**, deliberately untouched: it keeps idiomatic `My CVs` for a library
+  destination, so a pair like EN *"Build my CV"* / SW *"Tengeneza CV yako"* now differ in
+  person by design. Flagged in the standard's §4.1 for the owner; a one-pass alignment is
+  available if he wants it.

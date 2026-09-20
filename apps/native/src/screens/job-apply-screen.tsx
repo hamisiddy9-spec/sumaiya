@@ -20,7 +20,7 @@ type Want = "cv" | "letter" | "both";
 type Result = Awaited<ReturnType<typeof apiClient.applyToJob>>;
 
 const WANT_OPTS: { id: Want; en: string; sw: string; icon: string }[] = [
-  { id: "cv", en: "Tailor my CV", sw: "Lenga CV yangu", icon: "file-text" },
+  { id: "cv", en: "Tailor my CV", sw: "Lenga CV yako", icon: "file-text" },
   { id: "letter", en: "Cover letter", sw: "Barua ya maombi", icon: "mail" },
   { id: "both", en: "Both", sw: "Zote mbili", icon: "layers" },
 ];
@@ -168,7 +168,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
             ) : null}
             <View style={{ marginTop: 14 }}>
               <Button
-                label={applied ? t("Applied — open editor", "Imewekwa — fungua kihariri") : t(`Apply to "${targetCv?.title || "my CV"}"`, `Weka kwenye "${targetCv?.title || "CV yangu"}"`)}
+                label={applied ? t("Applied — open editor", "Imewekwa — fungua kihariri") : t(`Apply to "${targetCv?.title || "my CV"}"`, `Weka kwenye "${targetCv?.title || "CV yako"}"`)}
                 onPress={applyCvChanges}
               />
             </View>

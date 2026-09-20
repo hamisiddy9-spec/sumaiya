@@ -23,7 +23,7 @@ describe("toolCatalogPrompt — export knowledge", () => {
 
   it("names both real export paths, so she points at the right button", () => {
     const prompt = toolCatalogPrompt({ hasCv: true });
-    expect(prompt).toContain("CV zangu");
+    expect(prompt).toContain("CV zako");
     expect(prompt).toContain("Cover letter");
     expect(prompt).toContain("Sambaza");
   });

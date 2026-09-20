@@ -114,7 +114,7 @@ function stashGuestCv(cv: CVData, templateId: string, primaryColor: string, sw: 
   try {
     localStorage.setItem("sumaiya-guest-cv", JSON.stringify({
       cv,
-      title: cv.personal?.fullName ? `${cv.personal.fullName} — CV` : (sw ? "CV Yangu" : "My CV"),
+      title: cv.personal?.fullName ? `${cv.personal.fullName} — CV` : (sw ? "CV yako" : "My CV"),
       templateId,
       primaryColor,
       fontFamily: "Inter",
@@ -1169,7 +1169,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           website: or(cvData.personal.website ?? "", p?.website),
         };
         endpoint = "/api/cv";
-        payload = { title: cvData.personal.fullName ? `${cvData.personal.fullName} — CV` : (sw ? "CV Yangu" : "My CV"), data: cvData };
+        payload = { title: cvData.personal.fullName ? `${cvData.personal.fullName} — CV` : (sw ? "CV yako" : "My CV"), data: cvData };
         editorBase = "/editor/cv/";
         builtCvData = cvData;
         // NOTE: deliberately NOT seeding `summary` into the profile. The summary
@@ -1217,7 +1217,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           closing: s(d.closing) || base.closing,
         };
         endpoint = "/api/letter";
-        payload = { title: letterData.subject || (sw ? "Barua Yangu" : "My Letter"), letterType, data: letterData };
+        payload = { title: letterData.subject || (sw ? "Barua yako" : "My Letter"), letterType, data: letterData };
         editorBase = "/editor/letter/";
         seed = { fullName: fromMerged.name, jobTitle: fromMerged.title, email: fromMerged.email, phone: fromMerged.phone, location: fromMerged.address };
       }
@@ -2488,7 +2488,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   <Link href="/dashboard" onClick={() => setShowConvos(false)}
                     className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
                     <FileText className="w-3.5 h-3.5 text-ember" />
-                    {sw ? "CV zangu" : "My CVs"}
+                    {sw ? "CV zako" : "My CVs"}
                   </Link>
                 </li>
                 <li>
@@ -2727,7 +2727,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               <button onClick={runAtsCheck}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
                 <Bolt className="w-4 h-4 text-ember" />
-                {sw ? "Kagua CV yangu" : "Run an ATS check"}
+                {sw ? "Kagua CV yako" : "Run an ATS check"}
               </button>
               <button onClick={startJobs}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
@@ -3211,7 +3211,7 @@ function MatchResultCard({ score, matched, missing, composite, explanation, sw, 
           </>
         }
         action={{
-          label: tailorBusy ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Lenga CV yangu kwa kazi hii" : "Tailor my CV to this job"),
+          label: tailorBusy ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Lenga CV yako kwa kazi hii" : "Tailor my CV to this job"),
           onClick: onTailor,
           busy: tailorBusy,
         }}
@@ -3262,7 +3262,7 @@ function MatchResultCard({ score, matched, missing, composite, explanation, sw, 
       {onDismiss && (
         <button onClick={onDismiss}
           className="w-full py-2 rounded-input-lg border border-border-input text-text-muted hover:text-ember hover:border-ember text-xs font-medium transition">
-          {sw ? "Acha CV yangu kama ilivyo" : "Keep my CV as it is"}
+          {sw ? "Acha CV yako kama ilivyo" : "Keep my CV as it is"}
         </button>
       )}
       </div>
@@ -3346,7 +3346,7 @@ function TailorPreviewCard({ summary, count, applied, sw, onApply, onDismiss, ap
           <button onClick={onApply} disabled={applyBusy || needsConfirm}
             className="flex-1 flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
             {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {applyBusy ? (sw ? "Inahifadhi…" : "Applying…") : (sw ? "Weka kwenye CV yangu" : "Apply to my CV")}
+            {applyBusy ? (sw ? "Inahifadhi…" : "Applying…") : (sw ? "Weka kwenye CV yako" : "Apply to my CV")}
           </button>
           {onDismiss && (
             <button onClick={onDismiss}
@@ -3436,7 +3436,7 @@ function SummaryPreviewCard({ summary, applied, sw, onApply, applyBusy, editHref
         <button onClick={onApply} disabled={applyBusy || needsConfirm}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {applyBusy ? (sw ? "Inahifadhi…" : "Saving…") : (sw ? "Weka kwenye CV yangu" : "Save to my CV")}
+          {applyBusy ? (sw ? "Inahifadhi…" : "Saving…") : (sw ? "Weka kwenye CV yako" : "Save to my CV")}
         </button>
       ) : (
         <div className="bg-sand-2 border border-border rounded-input px-3 py-2.5 text-[11.5px] text-text-muted leading-snug">
@@ -3471,7 +3471,7 @@ function SkillsPreviewCard({ skills, applied, sw, onApply, applyBusy, editHref, 
         <button onClick={onApply} disabled={applyBusy}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {applyBusy ? (sw ? "Inahifadhi…" : "Adding…") : (sw ? "Ongeza kwenye CV yangu" : "Add to my CV")}
+          {applyBusy ? (sw ? "Inahifadhi…" : "Adding…") : (sw ? "Ongeza kwenye CV yako" : "Add to my CV")}
         </button>
       ) : (
         <div className="bg-sand-2 border border-border rounded-input px-3 py-2.5 text-[11.5px] text-text-muted leading-snug">

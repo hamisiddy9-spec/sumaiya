@@ -183,7 +183,7 @@ export function AtsCheckerClient() {
                   onClick={analyzePaste}
                   className="inline-flex items-center gap-2 bg-ember text-cream font-semibold rounded-input-lg px-6 py-2.5 text-sm shadow-ember-hard hover:scale-[1.02] active:scale-[0.97] transition"
                 >
-                  <CheckCircle2 className="w-4 h-4" /> {sw ? "Kagua CV yangu" : "Check my CV"}
+                  <CheckCircle2 className="w-4 h-4" /> {sw ? "Kagua CV yako" : "Check my CV"}
                 </button>
               </div>
             </div>

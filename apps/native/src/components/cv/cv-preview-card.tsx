@@ -308,7 +308,7 @@ export function CvPreviewCard({
 
       {onSave ? (
         <Button
-          label={saved ? t("Saved to My CVs", "Imehifadhiwa kwenye CV zangu") : t("Save to My CVs", "Hifadhi kwenye CV zangu")}
+          label={saved ? t("Saved to My CVs", "Imehifadhiwa kwenye CV zako") : t("Save to My CVs", "Hifadhi kwenye CV zako")}
           onPress={async () => {
             if (saving || saved) return;
             setSaving(true);

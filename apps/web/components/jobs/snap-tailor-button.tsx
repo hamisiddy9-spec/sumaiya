@@ -41,7 +41,7 @@ export function SnapTailorButton({ lang, title, company, description }: SnapTail
   return (
     <Button variant="secondary" size="sm" onClick={tailor} className="shrink-0" title={sw ? "Fungua Snap-to-Apply na maelezo haya ya kazi" : "Open Snap-to-Apply with this job description"}>
       <Icon name="spark" size={14} className="text-ember" />
-      {sw ? "Tengeneza CV yangu kwa kazi hii" : "Tailor my CV for this job"}
+      {sw ? "Tengeneza CV yako kwa kazi hii" : "Tailor my CV for this job"}
     </Button>
   );
 }

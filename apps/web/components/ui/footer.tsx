@@ -11,7 +11,7 @@ const productLinks = [
   { href: "/assistant", label: "Sumaiya (AI assistant)", labelSw: "Sumaiya (msaidizi wa AI)" },
   { href: "/editor/cv/try", label: "CV builder", labelSw: "Tengeneza CV" },
   { href: "/editor/cover-letter/try", label: "Cover letters", labelSw: "Barua za maombi" },
-  { href: "/ats-checker", label: "ATS Checker", labelSw: "Kagua ATS" },
+  { href: "/ats-checker", label: "ATS Checker", labelSw: "Kagua CV" },
   { href: "/tools", label: "PDF tools", labelSw: "Zana za PDF" },
   { href: "/jobs", label: "Jobs", labelSw: "Ajira" },
   // Pricing hidden while everything is free (matches the nav — see lib/features.ts).

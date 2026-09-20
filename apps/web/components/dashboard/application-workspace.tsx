@@ -486,7 +486,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                 <span className="text-sm font-bold text-espresso">{sw ? "Ulinganifu na kazi hii" : "Match to this job"}</span>
                 {aiMatch && <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-ember-tint text-ember-hover uppercase tracking-wide">AI</span>}
                 <Link href={`/editor/cv/${cvId}?fromApp=${app.id}`} className="ml-auto text-[11px] font-semibold text-ember-hover hover:underline">
-                  {sw ? "Lenga CV yangu →" : "Tailor my CV →"}
+                  {sw ? "Lenga CV yako →" : "Tailor my CV →"}
                 </Link>
               </div>
               <div className="flex items-center gap-3 mb-2">

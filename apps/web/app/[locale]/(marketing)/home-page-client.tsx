@@ -866,7 +866,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'bottom_cta' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Unda CV yangu" : "Build my CV"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Unda CV yako" : "Build my CV"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
             </div>

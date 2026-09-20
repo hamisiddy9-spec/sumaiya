@@ -145,6 +145,88 @@ data. Clarity beats cleverness, and a word with a second meaning (or a regional 
 sense) costs the reader more than a plain word costs in elegance. The owner's own standing
 instruction to this project is the same note: *"use the simplest of words and actions."*
 
+### 4.1 Voice: whose things are whose — the `zako` / `zangu` convention
+
+**Status: CONVENTION, decided 2026-09-20.** The owner asked for one voice in the
+chrome; this is the one, with the measurement behind it. It is a *voice* rule,
+not a grammar rule — see the note at the end of this section before "correcting"
+anything against it.
+
+**The rule.**
+
+> The product's chrome names the user's own things in the **second person**:
+> `CV zako`, `wasifu wako`, `maombi yako`, `akaunti yako`, `picha zako`,
+> `nyaraka zako`, `kazi yako`. The **first person** is reserved for the user's own
+> words and for the assistant speaking about *herself* — never for the product
+> describing the user's objects.
+
+Two speakers exist in this product, and the distinction is between them, not
+between "polite" and "friendly":
+
+| Speaker | First person | Second person |
+|---|---|---|
+| **The product** — every tab, heading, button, label, empty state, dialog, score band, error | never, about the user's objects | always: *"CV zako"*, *"Huna CV bado"*, *"Pakia CV"*, *"Kagua CV yako"* |
+| **Sumaiya** — the assistant, when the sentence is hers | about **herself**: *"nimeandaa CV yako"* (I have prepared your CV), *"Ongea nami"* (talk to me), *"niandikie"* (write for me) | still, about the user's objects: *"nimeandaa **CV yako**"* — she does **not** say *"CV yangu"* for someone else's CV |
+
+**First person on the user's own object is correct in exactly four places.**
+Anything else is the defect. (These four are also the allow-list in the lint —
+each entry carries its reason; see §7.)
+
+| # | Where | Example |
+|---|---|---|
+| 1 | **What the user says** — a message they send, a prompt they type or tap | *"Nisaidie kutengeneza CV yangu."* · *"Niulize maswali 6 … na upe alama majibu yangu."* |
+| 2 | **What the user consents to** — the affirmative control of a confirm dialog | *"Ndiyo, futa akaunti yangu"* (EN: *"Yes, delete my account"* — the English slot does the same) |
+| 3 | **What the user asks** — an FAQ entry phrased as the user's question, a question chip | *"Ninawezaje kufuta akaunti yangu?"* (EN: *"How do I delete my account?"*) |
+| 4 | **What the user authors or sends** — a letter body, a share message, an invite, a document title they carry | *"… jinsi ujuzi na uzoefu wangu unavyolingana …"* · *"Natumia Sumaiya kutengeneza CV yangu …"* · *"Barua yangu ya maombi — Sumaiya"* |
+
+**Examples of the defect and its fix** (all applied 2026-09-20, both apps):
+
+| Surface | Was (first person) | Now (second person) | Why |
+|---|---|---|---|
+| Home tile → CV screen heading | `CV zako` … `CV zangu` | `CV zako` … `CV zako` | the observed defect: the tile and the screen it opens disagreed |
+| Tab bar (`CVsTab`) | `CV zangu` | `CV zako` | chrome |
+| Home tile a11y label | `Ona CV zangu` | `Ona CV zako` | chrome |
+| Save-to-library control | `Hifadhi kwenye CV zangu` | `Hifadhi kwenye CV zako` | chrome |
+| Web dashboard tab + heading | `CV Zangu` | `CV zako` | chrome, and the same object as the tab above |
+| Web nav / footer / AI-tool tile | `Kagua ATS` | `Kagua CV` | chrome, and §6 rule 5 (never name the mechanism) |
+| Lesson CTA | `Fungua CV zangu` | `Fungua CV zako` | chrome |
+| Chat screen button | `Tengeneza CV yangu kutoka mazungumzo haya` | `Tengeneza CV yako …` | a control the product renders, not a message the user sends |
+| Shared-card default title | `CV yangu lengwa` | `CV iliyolengwa` | the card belongs to the sender, not to the reader — naming the object with no owner was the honest fix |
+
+**Why the second person and not "my" everywhere** (the alternative was seriously
+considered, and this is the evidence that decided it):
+
+- Measured at HEAD `1fc5bfa` across native `screens/ components/ lib/
+  navigation/` and web `lib/ components/ app/ lib/i18n/`: **407 second-person
+  occurrences against 83 first-person** (~4.9:1). After the 2026-09-20 fixes the
+  same sweep reads **456 against 31** (~14.7:1), the 31 being the four legitimate
+  classes above. Full table in `docs/SWAHILI-AUDIT-2026-09-20.md` §8.
+- The 83 first-person occurrences were not one voice: they were (a) the four
+  legitimate classes, and (b) a family of CTAs mirrored word-for-word from their
+  English twins — EN *"Build my CV"* → SW *"Tengeneza CV yangu"*, EN *"Tailor my
+  CV"* → *"Lenga CV yangu"*. That is translation drift, not a Swahili voice
+  decision: the product's own natively-written Swahili (empty states, privacy,
+  the dashboard prose, the mail copy) is second person, and the assistant uses
+  the second person for the user's objects as well.
+- Going the other way would have meant rewriting 407 strings to match a
+  translation of English marketing copy, and it would have broken the assistant
+  convention *"nimeandaa CV yako"*. So the first-person strings were the drift,
+  not the house style.
+
+**Flagged for the owner (not changed):** English chrome keeps the idiomatic
+*"My CVs"* for a library destination, so the English and Swahili slots of the
+same pair are now deliberately different in person (EN *"Build my CV"* / SW
+*"Tengeneza CV yako"*). English is a separate convention and the owner's call; if
+he wants the English aligned too, the direction the audit supports is the same
+(second person) and it is one pass over the same file list.
+
+**Do not "fix" grammar against this rule.** Swahili noun-class agreement makes
+both forms correct for these nouns: `CV` is a borrowed noun taking `zi-`
+agreement, so `CV zako` and `CV zangu` are *both* grammatical, and `wasifu` (u-)
+takes `wako`/`wangu`. The fault was never agreement — it was the same user object
+being named in two different voices on two different screens. A grammar checker
+cannot see it; only a per-noun voice check can (§7).
+
 ---
 
 ## 5. Words to avoid — loaded street register
@@ -229,6 +311,13 @@ exists to prevent** — a non-native writer picking the cleverer-sounding option
    *"kiungo"*; *"barua ya maombi"*, not *"barua"*).
 8. **The owner decides.** This document ranks options and cites sources; it does not
    overrule a native speaker's ear.
+9. **One noun, one voice** (§4.1). The product names the user's own things in the second
+   person (`CV zako`, `wasifu wako`, `akaunti yako`); the first person belongs to the
+   assistant speaking about herself and to sentences that are genuinely the user's — their
+   own message, their own consent, their own question, their own authored or shared text.
+   Never `CV zangu` in chrome while `CV zako` sits on the tile next to it. Do not "fix"
+   the agreement instead: both forms are grammatical, so this is a voice fault and only a
+   voice check can catch it.
 
 ---
 
@@ -236,9 +325,32 @@ exists to prevent** — a non-native writer picking the cleverer-sounding option
 
 | Guard | File | Covers |
 |---|---|---|
-| Swahili copy lint (web) | `apps/web/lib/swahili-lint.test.ts` | kwa/wa agreement, plural-with-one, calques, `tajriba`, `barua ya kazi`, `Wathibitishaji`/`Marejeo`, malformed verbs, bare `Hakiki`, **ATS in Swahili**, **loaded street words (ujanja/mjanja/janja)**, **fabricated `mgusiko`**, **`link ya`** |
-| Swahili copy lint (native) | `apps/native/src/lib/swahili-lint.test.ts` | the native mirror. Until 2026-09-20 it carried the calques only, which is why 15 ATS strings shipped in the native UI; it now carries the four guards added this session |
+| Swahili copy lint (web) | `apps/web/lib/swahili-lint.test.ts` | kwa/wa agreement, plural-with-one, calques, `tajriba`, `barua ya kazi`, `Wathibitishaji`/`Marejeo`, malformed verbs, bare `Hakiki`, **ATS in Swahili**, **loaded street words (ujanja/mjanja/janja)**, **fabricated `mgusiko`**, **`link ya`**, **voice agreement on the user's own objects** (§4.1) |
+| Swahili copy lint (native) | `apps/native/src/lib/swahili-lint.test.ts` | the native mirror. Until 2026-09-20 it carried the calques only, which is why 15 ATS strings shipped in the native UI; it now carries the four guards added that session plus the **voice-agreement guard** |
 | No ATS jargon in the Swahili tree | `apps/web/lib/i18n/no-ats-jargon.test.ts` | walks the whole `translations.sw` string tree |
 
+### 7.1 The voice guard, and why it is per noun
+
+`voice agreement on the user's own objects` runs in **both** lints. It scans every
+non-test source file in its tree, finds `<noun> <possessive>` for the user's own objects
+(`CV`, `wasifu`, `maombi`, `kazi`, `akaunti`, `nyaraka`, `picha`, `barua`, `ujuzi`,
+`uzoefu`, `taarifa`, `alama`, `jina`, `simu`, `kiungo`, `nafasi`, …), classifies each as
+first or second person, and **fails when the same noun appears in both** — the exact shape
+of the shipped defect, where `CV zako` and `CV zangu` are each fine alone.
+
+It is a real assertion with a small tolerance, not a blanket ban:
+
+- first-person copy is **allowed** — it is not the thing being banned;
+- a **bounded, explicit exemption list** (`FIRST_PERSON_EXEMPT`, capped by
+  `MAX_FIRST_PERSON_EXEMPT = 20` per app) tolerates the four legitimate classes of §4.1,
+  each entry carrying the reason it exists;
+- every exemption must still **match a live occurrence** — a stale or aspirational entry
+  fails the suite, so the list cannot be padded;
+- the exempted first-person occurrences must stay **under 15%** of all possessive
+  occurrences, so the list cannot be grown into a blanket ban;
+- a **corpus sanity check** fails if the scan ever finds too few occurrences, so a broken
+  regex cannot silently pass.
+
 Every guard added on 2026-09-20 shipped with `bad`/`good` samples so it is proven both ways
-in the same run.
+in the same run, and the voice guard was additionally watched **failing** on a re-introduced
+`CV zangu` before being accepted.

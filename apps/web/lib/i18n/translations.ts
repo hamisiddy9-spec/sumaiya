@@ -154,7 +154,7 @@ export const translations = {
     nav: {
       home: "Nyumbani", templates: "Miundo", tools: "Zana za PDF", pricing: "Bei",
       signIn: "Ingia", getStarted: "Anza", dashboard: "Nyumbani",
-      myAccount: "Akaunti Yangu",
+      myAccount: "Akaunti yako",
     },
     hero: {
       badge: "Jukwaa lako la ajira lenye AI",
@@ -181,10 +181,10 @@ export const translations = {
       newCoverLetter: "Barua Mpya ya Maombi",
       newBusinessCard: "Kadi Mpya ya Biashara",
       newLetter: "Barua Rasmi Mpya",
-      myCVs: "CV Zangu",
-      myCoverLetters: "Barua Zangu za Maombi",
-      myBusinessCards: "Kadi Zangu za Biashara",
-      myLetters: "Barua Zangu Rasmi",
+      myCVs: "CV zako",
+      myCoverLetters: "Barua zako za Maombi",
+      myBusinessCards: "Kadi zako za Biashara",
+      myLetters: "Barua zako Rasmi",
       noCVs: "Bado huna CV",
       noLetters: "Bado huna barua rasmi.",
       noBusinessCards: "Bado huna kadi za biashara.",

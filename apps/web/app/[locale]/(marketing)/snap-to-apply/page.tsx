@@ -117,7 +117,7 @@ export default async function SnapToApplyPage({ params }: { params: { locale: st
               href="/snap"
               className="inline-flex items-center gap-2 bg-ember hover:bg-ember-hover text-cream font-semibold px-7 py-3.5 rounded-input-lg transition active:scale-[0.98] shadow-ember-hard active:shadow-ember-active active:translate-y-[2px] w-full sm:w-auto justify-center"
             >
-              {sw ? "Lenga CV yangu sasa — ni bure" : "Tailor my CV now — it's free"}
+              {sw ? "Lenga CV yako sasa — ni bure" : "Tailor my CV now — it's free"}
               <Icon name="chevron-right" size={18} />
             </Link>
             <Link

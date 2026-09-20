@@ -102,7 +102,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           ) : undefined
         }
       >
-        {t("My CVs", "CV zangu")}
+        {t("My CVs", "CV zako")}
       </ScreenTitle>
 
       {storageBlocked && cvs.length > 0 ? (

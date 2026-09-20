@@ -108,7 +108,7 @@ export const STARTER_STEPS: CourseUnit[] = [
       en: "Send the CV and the letter tuned to that advert, then write the deadline in your applications so nothing slips past you.",
       sw: "Tuma CV na barua iliyolengwa kwa tangazo hilo, kisha andika tarehe ya mwisho kwenye maombi yako ili kitu kisikupite.",
     },
-    cta: { en: "Open my applications", sw: "Fungua maombi yangu" },
+    cta: { en: "Open my applications", sw: "Fungua maombi yako" },
   },
 ];
 
@@ -172,7 +172,7 @@ export const APP_TOUR_COURSE: ShortCourse = {
         en: "Already have a CV? She keeps your words and makes them stronger. No CV yet? She writes one from a few questions.",
         sw: "Una CV tayari? Anaacha maneno yako na kuyaongeza nguvu. Hauna? Anaitengeneza kwa maswali machache.",
       },
-      cta: { en: "Open my CVs", sw: "Fungua CV zangu" },
+      cta: { en: "Open my CVs", sw: "Fungua CV zako" },
     },
     {
       id: "tour:upload",
@@ -194,7 +194,7 @@ export const APP_TOUR_COURSE: ShortCourse = {
         en: "Big employers read CVs with software first. This shows your score out of 100 and exactly what to fix.",
         sw: "Waajiri wakubwa husoma CV kwa programu kwanza. Hii inaonyesha alama yako kati ya 100 na cha kurekebisha.",
       },
-      cta: { en: "Check my CV", sw: "Kagua CV yangu" },
+      cta: { en: "Check my CV", sw: "Kagua CV yako" },
     },
     {
       id: "tour:profile",
@@ -205,7 +205,7 @@ export const APP_TOUR_COURSE: ShortCourse = {
         en: "Your work history and skills in one place. Everything I write comes from here, so the better it is, the better I am.",
         sw: "Historia yako ya kazi na ujuzi mahali pamoja. Kila ninachoandika kinatoka hapa, kwa hivyo kikamilike, nitakuwa bora zaidi.",
       },
-      cta: { en: "Open my profile", sw: "Fungua wasifu wangu" },
+      cta: { en: "Open my profile", sw: "Fungua wasifu wako" },
     },
     {
       id: "tour:letter",
@@ -216,7 +216,7 @@ export const APP_TOUR_COURSE: ShortCourse = {
         en: "Bring me the advert and I'll write a letter that answers it — using only what is true about you.",
         sw: "Niletee tangazo na niandike barua inayolijibu — kwa kutumia yale ya kweli kukuhusu.",
       },
-      cta: { en: "Write my letter", sw: "Andika barua yangu" },
+      cta: { en: "Write my letter", sw: "Andika barua yako" },
     },
   ],
 };
@@ -262,7 +262,7 @@ export const EXPERIENCE_COURSE: ShortCourse = {
         en: "How many customers did you serve in a day? How much stock did you arrange? Numbers show an employer the size of the job you already handled.",
         sw: "Ulihudumia wateja wangapi kwa siku? Ulipanga bidhaa kiasi gani? Namba zinaonyesha kwa mwajiri ukubwa wa kazi uliyokwisha shughulikia.",
       },
-      cta: { en: "Open my CV", sw: "Fungua CV yangu" },
+      cta: { en: "Open my CV", sw: "Fungua CV yako" },
     },
     {
       id: "exp:proof",

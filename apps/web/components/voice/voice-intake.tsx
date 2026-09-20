@@ -123,7 +123,7 @@ export function VoiceIntake({ lang = "sw" }: { lang?: Lang }) {
       const created = await fetch("/api/cv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: json.data, title: sw ? "CV yangu" : "My CV" }),
+        body: JSON.stringify({ data: json.data, title: sw ? "CV yako" : "My CV" }),
       });
       const cj = await created.json().catch(() => null);
       const id = cj?.data?.id;

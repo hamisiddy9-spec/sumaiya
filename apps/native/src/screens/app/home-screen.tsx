@@ -355,7 +355,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
         <Card
           onPress={() => navigation.navigate("CVsTab")}
-          accessibilityLabel={t("View my CVs", "Ona CV zangu")}
+          accessibilityLabel={t("View my CVs", "Ona CV zako")}
           style={{ width: COL_W, minHeight: 116, justifyContent: "space-between" }}
         >
           <Icon name="file-text" size={18} color={c.accent} />

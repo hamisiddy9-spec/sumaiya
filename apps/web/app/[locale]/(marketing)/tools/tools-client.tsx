@@ -606,7 +606,7 @@ export default function ToolsClient() {
           </div>
           <a href="/ats-checker"
             className="relative shrink-0 inline-flex items-center gap-2.5 bg-espresso text-cream font-semibold rounded-input-lg px-7 py-3.5 text-sm shadow-floating hover:bg-espresso-2 hover:scale-[1.02] active:scale-[0.97] transition-all duration-200">
-            <Icon name="target" size={16} /> {lang === "sw" ? "Kagua CV yangu" : "Check my CV"}
+            <Icon name="target" size={16} /> {lang === "sw" ? "Kagua CV yako" : "Check my CV"}
           </a>
         </div>
       </section>

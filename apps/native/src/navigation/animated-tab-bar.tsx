@@ -103,7 +103,7 @@ export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarP
   // the app's primary navigation rendered untranslated. Translate here instead.
   const TAB_LABELS: Record<string, string> = {
     HomeTab: t("Home", "Nyumbani"),
-    CVsTab: t("My CVs", "CV zangu"),
+    CVsTab: t("My CVs", "CV zako"),
     SumaiyaTab: t("Sumaiya", "Sumaiya"),
     ImportTab: t("Import", "Pakia"),
     ProfileTab: t("Profile", "Wasifu"),

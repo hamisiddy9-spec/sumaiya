@@ -33,12 +33,12 @@ const STRINGS = {
   sw: {
     badge: "Imetengenezwa kwa Sumaiya",
     kicker: "Ulinganifu na Kazi",
-    genericTitle: "CV yangu lengwa",
+    genericTitle: "CV iliyolengwa",
     sub: "Lenga CV yako kwa kazi yoyote kwa sekunde 30 — bure. Hakuna ukweli uliobuniwa, ni uzoefu wako halisi unaosisitizwa.",
-    cta: "Lenga CV yangu — bure",
+    cta: "Lenga CV yako — bure",
     unavailableTitle: "Kiungo hiki cha kushiriki hakipatikani tena",
     unavailableHint: "Viungo vya kushiriki vinaisha baada ya siku 90. Snap matokeo mapya wakati wowote — inachukua sekunde 30.",
-    trySnap: "Lenga CV yangu — bure",
+    trySnap: "Lenga CV yako — bure",
   },
 } as const;
 

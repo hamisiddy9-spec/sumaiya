@@ -91,7 +91,7 @@ export const STRINGS = {
     notJobTitle: "Hii haionekani kama maelezo ya kazi",
     notJobHint: "Weka tangazo zima — pamoja na sehemu za mahitaji na majukumu.",
     noProfileTitle: "Tunahitaji CV yako kwanza",
-    buildCv: "Jenga CV yangu nami",
+    buildCv: "Jenga CV yako nami",
     scoreLabel: "Ulinganifu na Kazi",
     scoreBefore: "CV yako",
     scoreAfter: "Iliyolengwa",
@@ -107,7 +107,7 @@ export const STRINGS = {
     coverSub: "Kila madai yanatokana na uzoefu wako halisi.",
     copyLetter: "Nakili barua",
     copied: "Imenakiliwa!",
-    save: "Hifadhi kwenye akaunti yangu",
+    save: "Hifadhi kwenye akaunti yako",
     saving: "Inahifadhi…",
     saved: "Imehifadhiwa! Fungua kwenye mhariri →",
     // M1 — the save also opens a tracker entry; this link lands in the workspace.

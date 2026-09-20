@@ -56,7 +56,7 @@ export function signalAction(s: MobileSignal, lang: Lang): SignalAction {
       };
     case "ats.check":
       return {
-        cta: { en: "Check my CV", sw: "Kagua CV yangu" },
+        cta: { en: "Check my CV", sw: "Kagua CV yako" },
         target: { screen: "AtsChecker" },
       };
     case "career.skillGap": {

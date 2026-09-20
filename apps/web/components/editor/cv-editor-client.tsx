@@ -2879,7 +2879,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             value={title}
             onChange={(e) => { setTitle(e.target.value); triggerAutoSave(); }}
             className="text-sm font-semibold text-cream bg-transparent hover:bg-espresso-2 focus:bg-espresso-2 focus:outline-none rounded-md px-1.5 py-0.5 min-w-0 flex-1 transition-colors placeholder:text-cream/40"
-            placeholder={uiLang === "sw" ? "CV Yangu" : "My CV"}
+            placeholder={uiLang === "sw" ? "CV yako" : "My CV"}
           />
           {/* Save status — visible on mobile too (label collapses on small
               screens), with a persistent resting state and a visible failure. */}
@@ -3319,7 +3319,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <div className="space-y-1">
                     {([
                       { id: "ai-tool-jobmatch", icon: "target", label: { sw: "Linganisha na kazi", en: "Match to a job" }, desc: { sw: "Alama ya kufanana + mabadiliko yanayopendekezwa", en: "Fit score + recommended changes" } },
-                      { id: "ai-tool-ats", icon: "bolt", label: { sw: "Kagua ATS", en: "ATS check" }, desc: { sw: "Ona kama mifumo ya waajiri itasoma CV yako", en: "See how ATS systems read your CV" } },
+                      { id: "ai-tool-ats", icon: "bolt", label: { sw: "Kagua CV", en: "ATS check" }, desc: { sw: "Ona kama mifumo ya waajiri itasoma CV yako", en: "See how ATS systems read your CV" } },
                       { id: "ai-tool-rewrite", icon: "magic", label: { sw: "Boresha maandishi", en: "Improve writing" }, desc: { sw: "AI iandike upya muhtasari wako", en: "Let AI rewrite your summary" } },
                     ] as const).map((t) => (
                       <button

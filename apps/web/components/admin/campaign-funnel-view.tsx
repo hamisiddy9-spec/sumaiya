@@ -24,7 +24,7 @@ const STEP_LABELS: Record<CampaignFunnelStep, { sw: string; en: string; note: st
     note: "QR ilipofungua ukurasa",
   },
   ats_checked: {
-    sw: "Walikagua ATS",
+    sw: "Walikagua CV",
     en: "ATS check",
     note: "ukurasa ulitumika",
   },
@@ -253,7 +253,7 @@ export function CampaignFunnelView({ report }: { report: CampaignFunnelReport })
             <li>
               Bango halisi lina QR ya{" "}
               <code className="font-mono">/ats-checker?src=poster</code> — fungua link hiyo kwenye
-              simu, kagua ATS, kisha ujiunge, na bango litaonekana hapa.
+              simu, kagua CV, kisha ujiunge, na bango litaonekana hapa.
             </li>
             <li>
               Kama bango linaonekana kwenye mitaa lakini hapa ni tupu, basi hakuna mtu aliyescan (au

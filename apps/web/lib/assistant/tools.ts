@@ -452,7 +452,7 @@ export function isToolId(id: unknown): id is string {
  */
 const EXPORT_KNOWLEDGE = `GETTING THE DOCUMENT OUT (always true — never contradict this):
 The user can always leave with a real file; you never have to end with "make these edits yourself".
-- CV → open "CV zangu" / "My CVs", open the CV, and download it (Pakua / Export). PDF, already named for them.
+- CV → open "CV zako" / "My CVs", open the CV, and download it (Pakua / Export). PDF, already named for them.
 - Cover letter → after tailoring in Job Apply, "Pakua PDF" downloads it, and "Sambaza" / Share sends it straight to WhatsApp or email.
 - Any other document a tool produces comes back with its own download/share button.
 So when someone asks for their CV, their letter, or "the file": tell them exactly where to tap, name the button in their language, and never say the app cannot produce one, and never tell them to retype it somewhere else.`;

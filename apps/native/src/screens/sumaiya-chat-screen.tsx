@@ -466,7 +466,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
           >
             <SumaiyaMark size={16} color={c.accentText} state={buildingCv ? "thinking" : "static"} />
             <Text style={{ color: c.accentText, fontSize: 14, fontWeight: "800" }}>
-              {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build my CV from this chat", "Tengeneza CV yangu kutoka mazungumzo haya")}
+              {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build my CV from this chat", "Tengeneza CV yako kutoka mazungumzo haya")}
             </Text>
           </Pressable>
         ) : null}

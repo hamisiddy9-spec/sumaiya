@@ -346,7 +346,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   </p>
                   <Button onClick={handleTailorCv} disabled={tailorCvBusy || !jd.trim()} size="sm" className="w-full">
                     <Icon name="magic" size={14} />
-                    {tailorCvBusy ? (sw ? "Inaboresha CV…" : "Tailoring your CV…") : (sw ? "Boresha CV yangu" : "Tailor my CV")}
+                    {tailorCvBusy ? (sw ? "Inaboresha CV…" : "Tailoring your CV…") : (sw ? "Boresha CV yako" : "Tailor my CV")}
                   </Button>
                 </>
               ) : (

@@ -23,7 +23,7 @@
  * workstream is finished, so the limit is gone.)
  */
 import { readFileSync, readdirSync, statSync } from "fs";
-import { join, extname } from "path";
+import { join, extname, relative, sep } from "path";
 
 const SRC_ROOT = join(__dirname, "..", "..", "src");
 const SKIP_DIRS = new Set(["node_modules", "__tests__"]);
@@ -108,7 +108,16 @@ const LINK_FOR_KIUNGO = /\blink ya\b/i;
 // native shipped 15 user-visible Swahili strings with ATS in them ("Ukaguzi wa
 // ATS" on the home tile, "Salama kwa ATS" as a CV preset, "Tayari kwa ATS" as a
 // score band). English copy is still allowed to say "ATS".
-const ATS_IN_SWAHILI = /\b(?:wa|ya|kwa|za|la|cha|na|kwenye|kikagua)\s+ATS\b/i;
+//
+// `kagua` was added 2026-09-20: the alternation had `kikagua` but not `kagua`,
+// so a quick-action chip reading "Kagua ATS" in
+// src/hooks/use-sumaiya-chat.ts sailed past the guard — the same class of
+// string this pattern exists to stop. (The string is now "Kagua CV".)
+//
+// The verb half became `\w*kagua` for the same reason: "Walikagua ATS" (the
+// admin campaign funnel's Swahili label) has the verb inflected with a subject
+// prefix, so a bare `kagua` alternative never matched it either.
+const ATS_IN_SWAHILI = /\b(?:\w*kagua\s+ATS|(?:wa|ya|kwa|za|la|cha|na|kwenye)\s+ATS)\b/i;
 
 // One entry per tripwire. `pattern` is the bad string; `message` names the
 // pattern that tripped, the replacement to use, and the file and line, so the
@@ -200,5 +209,169 @@ describe("Swahili grammar lint (regression guard)", () => {
         if (match) throw new Error(guard.message(match[0], file, i + 1));
       }
     });
+  });
+});
+
+// ── Voice agreement on the user's OWN objects ───────────────────────────────
+/**
+ * The defect this guards: the home screen's tile read "CV zako" (your CV) and
+ * the screen it opens was headed "CV zangu" (my CVs) — the same feature named
+ * in the second person on one surface and the first person on the other, which
+ * reads as two different products. Seen on the device, 2026-09-20.
+ *
+ * Both strings are correct Swahili. "CV" is a borrowed noun taking zi-
+ * agreement, so "zako" and "zangu" are equally grammatical: this is a VOICE
+ * fault, not a grammar fault, and the grammar checks above cannot see it. Only
+ * the PAIR of strings is wrong, so the check is per noun over the whole corpus.
+ *
+ * The house voice is the SECOND person — chrome speaks TO the user about the
+ * user's own things ("CV zako", "wasifu wako", "maombi yako", "akaunti yako").
+ * The measurement behind that choice, taken across native + web copy on
+ * 2026-09-20, was 456 second-person occurrences against 31 first-person, and
+ * the assistant herself does the same thing when she speaks for herself
+ * ("nimeandaa CV yako"). First person on the user's own objects survives in
+ * exactly four places, and each one is written down in FIRST_PERSON_EXEMPT:
+ *
+ *   1. the user's own words — a message they send, a prompt they issue;
+ *   2. the user's own consent — the affirmative control of a confirm dialog
+ *      ("Ndiyo, futa akaunti yangu");
+ *   3. the user's own questions — FAQ entries phrased as the user asking;
+ *   4. the user's own authored text — a document/letter body, share and invite
+ *      messages that carry the user's name to a third party.
+ *
+ * The exemption list is the tolerance: it is bounded by
+ * MAX_FIRST_PERSON_EXEMPT (so it cannot quietly become a list of every string)
+ * and every entry must still match a live occurrence — a stale exemption fails
+ * this suite too. Anything first-person that is NOT on the list, on a noun the
+ * product also names in the second person, fails.
+ */
+const USER_OBJECT_NOUNS = [
+  "CV", "wasifu", "maombi", "kazi", "akaunti", "nyaraka", "waraka", "picha",
+  "barua", "ujuzi", "uzoefu", "taarifa", "alama", "historia", "maelezo",
+  "jina", "simu", "kiungo", "nafasi",
+];
+const FIRST_PERSON_POSS = "zangu|yangu|wangu|langu|changu|pangu|vyangu|mwangu|kwangu";
+const SECOND_PERSON_POSS = "zako|yako|wako|lako|chako|pako|vyako|mwako|kwako";
+const NOUN_WITH_POSSESSIVE = new RegExp(
+  `\\b(${USER_OBJECT_NOUNS.join("|")})\\b\\s+(${FIRST_PERSON_POSS}|${SECOND_PERSON_POSS})\\b`,
+  "gi",
+);
+const IS_FIRST_PERSON = new RegExp(`^(?:${FIRST_PERSON_POSS})$`, "i");
+const MAX_FIRST_PERSON_EXEMPT = 20;
+
+interface VoiceExemption {
+  /** Path relative to src/, matched as a suffix (posix separators). */
+  file: string;
+  /** Substring the exempt line must contain. */
+  contains: string;
+  /** Why the first person is right here. Required — it is shown on failure. */
+  why: string;
+}
+
+const FIRST_PERSON_EXEMPT: VoiceExemption[] = [
+  {
+    file: "components/chat/chat-types.ts",
+    contains: "labelSw: 'Tengeneza CV yangu'",
+    why: "chat quick-action chip: the label is the user's own request, and tapping it sends that request as the user's message",
+  },
+  {
+    file: "lib/courses.ts",
+    contains: "Niandikie sehemu fupi",
+    why: "practice prompt the learner sends to Sumaiya verbatim",
+  },
+  {
+    file: "screens/app/help-faq-screen.tsx",
+    contains: "q: { en:",
+    why: "FAQ question written in the user's own voice (the English slot does the same: \"How do I delete my account?\")",
+  },
+  {
+    file: "screens/invite-screen.tsx",
+    contains: "Natumia Sumaiya kutengeneza CV yangu",
+    why: "invite message the user sends, carrying the user's own name",
+  },
+  {
+    file: "screens/learning-hub-screen.tsx",
+    contains: "Niboresheje CV yangu",
+    why: "suggested question rendered as the question the user would ask",
+  },
+  {
+    file: "screens/sumaiya-chat-screen.tsx",
+    contains: 't("My CV", "CV yangu")',
+    why: "the jobseeker's CV pasted into the chat as their own message body",
+  },
+  {
+    file: "screens/sumaiya-chat-screen.tsx",
+    contains: "Nisaidie kutengeneza CV yangu.",
+    why: "the message the user sends when they tap the Build-my-CV chip",
+  },
+];
+
+const voiceHits = walk(SRC_ROOT).flatMap((file) => {
+  const rel = relative(SRC_ROOT, file).split(sep).join("/");
+  return readFileSync(file, "utf8")
+    .split("\n")
+    .flatMap((line, i) => {
+      if (line.includes("swahili-lint-ignore")) return [];
+      const trimmed = line.trimStart();
+      // A comment is not copy: the guard is about what a user reads.
+      if (trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*")) return [];
+      return [...line.matchAll(NOUN_WITH_POSSESSIVE)].map((m) => ({
+        noun: m[1],
+        poss: m[2],
+        firstPerson: IS_FIRST_PERSON.test(m[2]),
+        file: rel,
+        line: i + 1,
+        text: line.trim(),
+        exemption: FIRST_PERSON_EXEMPT.find((e) => rel.endsWith(e.file) && line.includes(e.contains)),
+      }));
+    });
+});
+
+describe("voice agreement on the user's own objects (zako/zangu regression guard)", () => {
+  it("scanned a real corpus of possessive constructions", () => {
+    // A regex or walker that silently stops matching would make every check
+    // below a false pass — same reason as the "found source files" check above.
+    expect(voiceHits.length).toBeGreaterThan(100);
+    expect(voiceHits.filter((h) => h.firstPerson).length).toBeGreaterThan(5);
+  });
+
+  it("names no user object in both a first-person and a second-person possessive", () => {
+    const byNoun = new Map<string, typeof voiceHits>();
+    for (const hit of voiceHits) {
+      const key = hit.noun.toLowerCase();
+      byNoun.set(key, [...(byNoun.get(key) ?? []), hit]);
+    }
+    const mixed: string[] = [];
+    for (const [noun, list] of byNoun) {
+      const second = list.filter((h) => !h.firstPerson);
+      const first = list.filter((h) => h.firstPerson && !h.exemption);
+      if (!second.length || !first.length) continue;
+      mixed.push(
+        `"${noun}" is named in BOTH voices.\n` +
+          `  second person (the house voice, ${second.length}x, first at ${second[0].file}:${second[0].line}): "${noun} ${second[0].poss}"\n` +
+          `  first person WITHOUT an exemption (${first.length}x):\n` +
+          first.map((h) => `    ${h.file}:${h.line}  ${h.text}`).join("\n") +
+          `\n  Rewrite to "${noun} ${second[0].poss}", or add an entry to FIRST_PERSON_EXEMPT saying why the user's own voice is intended here.`,
+      );
+    }
+    expect(mixed).toEqual([]);
+  });
+
+  it("keeps every first-person exemption live — a stale one fails too", () => {
+    const used = new Set(
+      voiceHits.filter((h) => h.exemption).map((h) => `${h.exemption!.file}|${h.exemption!.contains}`),
+    );
+    const dead = FIRST_PERSON_EXEMPT.filter((e) => !used.has(`${e.file}|${e.contains}`))
+      .map((e) => `${e.file} :: ${e.contains} (${e.why})`);
+    expect(dead).toEqual([]);
+  });
+
+  it("keeps the exemption list a tolerance, not a blanket ban", () => {
+    expect(FIRST_PERSON_EXEMPT.length).toBeLessThanOrEqual(MAX_FIRST_PERSON_EXEMPT);
+    // The exempted first-person occurrences must stay a small fraction of the
+    // corpus they are exempted inside.
+    const first = voiceHits.filter((h) => h.firstPerson);
+    expect(voiceHits.length).toBeGreaterThan(0);
+    expect(first.length / voiceHits.length).toBeLessThan(0.15);
   });
 });

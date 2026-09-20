@@ -176,7 +176,7 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
             href="/editor/cv/try"
             className="inline-flex items-center gap-2 bg-ember text-cream font-semibold text-sm px-6 py-3 rounded-[10px] hover:bg-ember-hover transition"
           >
-            {sw ? "Tengeneza CV yangu" : "Build my CV"} →
+            {sw ? "Tengeneza CV yako" : "Build my CV"} →
           </Link>
         </section>
 

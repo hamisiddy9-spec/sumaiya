@@ -112,7 +112,7 @@ export default async function AboutPage({ params }: { params: { locale: string }
           <p className="text-text-muted mb-8 max-w-md mx-auto text-sm">{sw ? "Tengeneza hati yako ya kwanza bila malipo — hakuna kadi inayohitajika." : "Build your first document free — no card needed."}</p>
           <CreateEntryButton docType="cv" lang={lang as "en" | "sw"}
             className="inline-flex items-center gap-2 bg-ember hover:bg-ember-hover text-cream font-semibold px-8 py-3.5 rounded-input-lg transition active:scale-[0.98] shadow-ember-hard active:shadow-ember-active active:translate-y-[2px]">
-            {sw ? "Tengeneza CV yangu" : "Build my CV"} <ChevronRight className="w-5 h-5" />
+            {sw ? "Tengeneza CV yako" : "Build my CV"} <ChevronRight className="w-5 h-5" />
           </CreateEntryButton>
         </div>
       </main>

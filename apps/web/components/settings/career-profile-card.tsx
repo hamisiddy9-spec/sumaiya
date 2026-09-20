@@ -41,7 +41,7 @@ const STRINGS = {
   sw: {
     title: "Wasifu wa Kazi",
     hint: "Wasifu mmoja uliothibitishwa — chanzo cha kweli ambacho CV zako hujengwa kutoka.",
-    backfill: "Jenga kutoka CV yangu kamili zaidi",
+    backfill: "Jenga kutoka CV yako kamili zaidi",
     backfilling: "Inajenga…",
     interview: "Anza Mahojiano ya Kazi",
     done: "Wasifu umesasishwa — umejazwa: ",

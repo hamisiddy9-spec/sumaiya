@@ -58,7 +58,7 @@ export function DashboardHeader({
   const DOC_NAV: NavItem[] = [
     { label: dashboardLabel,                          href: "/dashboard",                    icon: "grid" },
     { label: "Sumaiya",                               href: "/assistant",                    icon: "spark" },
-    { label: sw ? "CV Zangu" : "My CVs",              href: "/dashboard?tab=cv",             icon: "cv",     match: "/dashboard?tab=cv" },
+    { label: sw ? "CV zako" : "My CVs",              href: "/dashboard?tab=cv",             icon: "cv",     match: "/dashboard?tab=cv" },
     { label: sw ? "Barua za Maombi" : "Cover Letters", href: "/dashboard?tab=cover-letter",  icon: "mail",   match: "/dashboard?tab=cover-letter" },
     { label: sw ? "Kadi za Biashara" : "Business Cards", href: "/dashboard?tab=business-card", icon: "card", match: "/dashboard?tab=business-card" },
     { label: sw ? "Barua Rasmi" : "Formal Letters",   href: "/dashboard?tab=letter",         icon: "letter", match: "/dashboard?tab=letter" },
