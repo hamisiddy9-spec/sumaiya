@@ -29,7 +29,19 @@ jest.mock("@sumaiya/utils", () => ({
 
 jest.mock("./reporting", () => ({ reportError: jest.fn() }));
 
-import { registerForPush } from "./push";
+import { isPushAvailable, registerForPush } from "./push";
+
+describe("isPushAvailable", () => {
+  it("is false with no EAS projectId", () => {
+    mockProjectId = undefined;
+    expect(isPushAvailable()).toBe(false);
+  });
+
+  it("is true once a projectId exists", () => {
+    mockProjectId = "real-project-id";
+    expect(isPushAvailable()).toBe(true);
+  });
+});
 
 describe("registerForPush", () => {
   beforeEach(() => {

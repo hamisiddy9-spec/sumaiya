@@ -4,7 +4,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
-import { registerForPush } from "../../lib/push";
+import { isPushAvailable, registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
@@ -42,6 +42,13 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [notifications, setNotifications] = useState(false);
   const [busy, setBusy] = useState<"signout" | "delete" | "cache" | null>(null);
 
+  // Push can only register a token once app.json carries an Expo/EAS projectId
+  // (extra.eas.projectId). Without one `registerForPush` returns false BEFORE it
+  // reaches the token call, so asking for the Android notification permission
+  // here would show a real system prompt and deliver nothing. The row stays,
+  // dimmed, with the reason in plain Swahili — see lib/push.ts.
+  const pushReady = isPushAvailable();
+
   // One reader for Profile, the update prompt and telemetry — a second inline
   // read of the config is how the displayed version drifted from the installed
   // one. See lib/app-version.ts.
@@ -51,6 +58,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   useEffect(() => {
     (async () => {
       try {
+        if (!pushReady) {
+          setNotifications(false);
+          return;
+        }
         // Reflect the real OS permission, not just a stored flag — the user
         // may have changed it in system settings.
         const perm = await Notifications.getPermissionsAsync();
@@ -60,7 +71,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         /* ignore */
       }
     })();
-  }, []);
+  }, [pushReady]);
 
   const setDark = async (v: boolean) => {
     setColorScheme(v ? "dark" : "light");
@@ -77,6 +88,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   };
 
   const setNotif = async (v: boolean) => {
+    // Never ask for a permission the app cannot use — see pushReady above.
+    if (!pushReady) return;
     if (v) {
       const perm = await Notifications.requestPermissionsAsync();
       if (perm.granted && user?.id) {
@@ -330,8 +343,17 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             last
             icon="bell"
             label={t("Push notifications", "Arifa za simu")}
-            sublabel={t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")}
-            toggle={{ value: notifications, onValueChange: setNotif }}
+            sublabel={
+              pushReady
+                ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
+                : t(
+                    "Not available yet — this version of Sumaiya can't send alerts to your phone.",
+                    "Bado haipatikani — toleo hili la Sumaiya haliwezi kutuma arifa kwenye simu yako.",
+                  )
+            }
+            value={pushReady ? undefined : t("Not yet", "Bado")}
+            toggle={pushReady ? { value: notifications, onValueChange: setNotif } : undefined}
+            disabled={!pushReady}
           />
         </View>
 

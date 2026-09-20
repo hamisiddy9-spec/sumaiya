@@ -143,9 +143,9 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
     <Screen scroll keyboardAvoiding contentContainerStyle={{ gap: 14, paddingBottom: 40 }}>
       <ScreenTitle>{isNew ? t("New application", "Ombi jipya") : role || t("Application", "Ombi")}</ScreenTitle>
 
-      <TextField label={t("Role / job title", "Cheo / jina la kazi")} value={role} onChangeText={setRole} placeholder="Warehouse Supervisor" />
-      <TextField label={t("Company", "Kampuni")} value={company} onChangeText={setCompany} placeholder="Brookside" />
-      <TextField label={t("Location", "Eneo")} value={location} onChangeText={setLocation} placeholder="Nairobi" />
+      <TextField label={t("Role / job title", "Cheo / jina la kazi")} value={role} onChangeText={setRole} placeholder={t("e.g. Warehouse Supervisor", "Mfano: Mfanyakazi wa Ghala")} />
+      <TextField label={t("Company", "Kampuni")} value={company} onChangeText={setCompany} placeholder={t("e.g. Ubungo Distributors", "Mfano: Ubungo Distributors")} />
+      <TextField label={t("Location", "Eneo")} value={location} onChangeText={setLocation} placeholder={t("e.g. Dar es Salaam", "Mfano: Dar es Salaam")} />
       <TextField label={t("Job link (optional)", "Kiungo cha ajira (si lazima)")} value={jobUrl} onChangeText={setJobUrl} autoCapitalize="none" keyboardType="url" />
 
       {/* Status */}

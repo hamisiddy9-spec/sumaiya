@@ -132,6 +132,16 @@ const ATS_IN_SWAHILI = /\b(?:\w*kagua\s+ATS|(?:wa|ya|kwa|za|la|cha|na|kwenye)\s+
 // on correct copy — the opposite of useful.
 const BARE_NAFASI_FOR_A_JOB = /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa)"/;
 
+// "Fonti" is a calque of "Font" — Swahili does not form a noun by adding -i. The
+// word is "Herufi" (letters / type). English keeps "Font" so the mapping is
+// learnable, which is exactly why the Swahili side must not be the English word.
+const FONTI_CALQUE = /\bfonti\b/i;
+// "Msongamano" is congestion / crowding; the owner's word for CV density is
+// "Ujazo" (fill / volume), and the English side keeps "Density". Only the LABEL
+// forms are caught: "bila msongamano" ("without clutter") in
+// src/lib/template-suggestions.ts is correct prose and must stay legal.
+const MSONGAMANO_DENSITY_CALQUE = /\bMsongamano\s*:|Msongamano wa (compact|airy|normal|kubana|kawaida)/i;
+
 // One entry per tripwire. `pattern` is the bad string; `message` names the
 // pattern that tripped, the replacement to use, and the file and line, so the
 // failure tells the next person exactly what to type instead.
@@ -192,6 +202,14 @@ const CALQUE_GUARDS: CalqueGuard[] = [
   {
     pattern: BARE_NAFASI_FOR_A_JOB,
     message: (m, file, line) => `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi" in ${file}:${line}`,
+  },
+  {
+    pattern: FONTI_CALQUE,
+    message: (m, file, line) => `"${m}" — calque of "Font": use "Herufi" in ${file}:${line}`,
+  },
+  {
+    pattern: MSONGAMANO_DENSITY_CALQUE,
+    message: (m, file, line) => `"${m}" — "msongamano" is congestion; the CV density label is "Ujazo" (English keeps "Density") in ${file}:${line}`,
   },
 ];
 

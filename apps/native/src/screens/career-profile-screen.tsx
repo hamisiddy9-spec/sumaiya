@@ -152,8 +152,8 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       </View>
 
       <TextField label={t("Full name", "Jina kamili")} value={p.fullName} onChangeText={set("fullName")} autoCapitalize="words" />
-      <TextField label={t("Headline / target role", "Kichwa / cheo lengwa")} value={p.headline} onChangeText={set("headline")} placeholder="Warehouse Supervisor" />
-      <TextField label={t("Location", "Eneo")} value={p.location} onChangeText={set("location")} placeholder="Nairobi" />
+      <TextField label={t("Headline / target role", "Kichwa / cheo lengwa")} value={p.headline} onChangeText={set("headline")} placeholder={t("e.g. Warehouse Supervisor", "Mfano: Mfanyakazi wa Ghala")} />
+      <TextField label={t("Location", "Eneo")} value={p.location} onChangeText={set("location")} placeholder={t("e.g. Dar es Salaam", "Mfano: Dar es Salaam")} />
       <TextField label={t("Phone", "Simu")} value={p.phone} onChangeText={set("phone")} keyboardType="phone-pad" />
       <TextField label={t("Email", "Barua pepe")} value={p.email} onChangeText={set("email")} keyboardType="email-address" autoCapitalize="none" />
 

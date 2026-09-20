@@ -10,8 +10,11 @@ import { reportError } from "./reporting";
  * Push registration.
  *
  * Env-gated: does nothing until an EAS `projectId` exists in app config
- * (`extra.eas.projectId`, set by `eas init`). Until then this is a clean no-op
- * — the permission toggle in Profile still works, it just won't send a token.
+ * (`extra.eas.projectId`, set by `eas init`). While no projectId exists, the
+ * Profile notifications row is shown as unavailable with a plain-Swahili
+ * reason, and nothing asks for the OS permission — see isPushAvailable()
+ * below. The moment `extra.eas.projectId` exists the row works with no code
+ * change.
  *
  * When provisioned: after the user is signed in and has granted notifications,
  * fetch the Expo push token and register it with the backend
@@ -33,6 +36,15 @@ function projectId(): string | null {
     (Constants.expoConfig as { extra?: { eas?: { projectId?: string } } })?.extra?.eas?.projectId ??
     (Constants as { easConfig?: { projectId?: string } }).easConfig?.projectId;
   return id ?? null;
+}
+
+/** Is push provisioned for THIS build? True only when app config carries an Expo
+ *  project id (`extra.eas.projectId`, written by `eas init`/the EAS project).
+ *  The Profile row must not request the Android notification permission while
+ *  this is false: the permission would be granted, no token could be fetched,
+ *  and no alert could ever arrive. */
+export function isPushAvailable(): boolean {
+  return projectId() !== null;
 }
 
 async function deviceId(): Promise<string> {

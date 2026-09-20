@@ -204,7 +204,7 @@ export function TemplateGallery({
               opacity: locked ? 0.55 : 1,
             }}
           >
-            <RealTemplateThumb id={item.id} accent={c.accent} width={cell - 12} />
+            <RealTemplateThumb id={item.id} accent={c.accent} lang={lang} width={cell - 12} />
           </View>
           <Text
             numberOfLines={1}
@@ -399,7 +399,7 @@ export function TemplateGallery({
           </View>
 
           <ScrollView style={{ flex: 1 }} contentContainerStyle={{ alignItems: "center", paddingHorizontal: PAD, paddingVertical: 8 }}>
-            <RealTemplateThumb id={previewFor.id} accent={c.accent} width={width - PAD * 2} />
+            <RealTemplateThumb id={previewFor.id} accent={c.accent} lang={lang} width={width - PAD * 2} />
           </ScrollView>
 
           <Animated.View

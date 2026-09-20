@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { View } from "react-native";
 import { WebView } from "react-native-webview";
 import { cvToHtml, type CvTemplateId } from "../../lib/cv-html";
-import { SAMPLE_CV } from "../../lib/sample-cv";
+import { sampleCv } from "../../lib/sample-cv";
 import { TemplateThumb } from "./template-thumb";
 
 /**
@@ -11,14 +11,19 @@ import { TemplateThumb } from "./template-thumb";
  *
  * The schematic TemplateThumb sits underneath as the instant placeholder while
  * the WebView loads, so a grid of these never flashes empty.
+ *
+ * The sample follows the reader's language, because the thumbnail is a
+ * promise about what THEIR CV will look like.
  */
 export function RealTemplateThumb({
   id,
   accent,
+  lang,
   width = 46,
 }: {
   id: CvTemplateId;
   accent: string;
+  lang: "en" | "sw";
   width?: number;
 }) {
   const [ready, setReady] = useState(false);
@@ -32,12 +37,12 @@ export function RealTemplateThumb({
     // Android WebView decided to do with the viewport meta, and a thumbnail was
     // a left-hand slice of an unscaled A4 page.
     const base = cvToHtml(
-      { ...SAMPLE_CV, templateId: id },
-      { template: id, accent, lang: "en", fitWidth: width },
+      { ...sampleCv(lang), templateId: id },
+      { template: id, accent, lang, fitWidth: width },
     );
     const style = `<style>html,body{margin:0;padding:0;overflow:hidden!important}*::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}</style>`;
     return base.includes("</head>") ? base.replace("</head>", `${style}</head>`) : style + base;
-  }, [id, accent, width]);
+  }, [id, accent, lang, width]);
 
   return (
     <View style={{ width, height: h, borderRadius: 4, overflow: "hidden", backgroundColor: "#fff" }}>

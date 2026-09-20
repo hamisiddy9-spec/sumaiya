@@ -567,7 +567,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           </View>
         </View>
         <TextField label={t("Full name", "Jina kamili")} value={data.personalInfo?.fullName || ""} onChangeText={(t) => patchPersonal("fullName", t)} autoCapitalize="words" />
-        <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "mf. Mhandisi wa Programu")} value={data.personalInfo?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
+        <TextField label={t("Headline", "Kichwa cha kazi")} placeholder={t("e.g. Software Engineer", "Mfano: Mhandisi wa Programu")} value={data.personalInfo?.headline || ""} onChangeText={(t) => patchPersonal("headline", t)} />
         <TextField label={t("Email", "Barua pepe")} value={data.personalInfo?.email || ""} onChangeText={(t) => patchPersonal("email", t)} keyboardType="email-address" autoCapitalize="none" />
         <TextField label={t("Phone", "Simu")} value={data.personalInfo?.phone || ""} onChangeText={(t) => patchPersonal("phone", t)} keyboardType="phone-pad" />
         <TextField label={t("Location", "Eneo")} value={data.personalInfo?.location || ""} onChangeText={(t) => patchPersonal("location", t)} />

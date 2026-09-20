@@ -418,8 +418,8 @@ export function FirstRunScreen({ onDone }: Props) {
             value={recent}
             onChangeText={setRecent}
             placeholder={t(
-              "Storekeeper at Brookside, 2021–2024. Ran stock, GRNs and a team of 4.",
-              "Karani wa Duka, Brookside, 2021–2024. Nilisimamia bidhaa, GRN na timu ya watu 4.",
+              "Example: Storekeeper at Ubungo Distributors, 2021–2024. Ran stock, GRNs and a team of 4.",
+              "Mfano: Mfanyakazi wa Ghala, Ubungo Distributors, 2021–2024. Nilisimamia bidhaa, GRN na timu ya watu 4.",
             )}
             multiline
             numberOfLines={5}
