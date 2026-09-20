@@ -82,34 +82,49 @@ export function Screen({
     </View>
   );
 
+  const footerNode = footer ? (
+    <View
+      style={{
+        paddingHorizontal: px,
+        paddingTop: 10,
+        // A floor, not just the raw inset: some Android devices report a
+        // near-zero bottom inset even with gesture nav, which put the
+        // footer buttons close enough to the nav bar to cause mis-taps.
+        paddingBottom: Math.max(edges.bottom ? insets.bottom : 0, 16) + 8,
+        borderTopWidth: 1,
+        borderTopColor: c.border,
+        backgroundColor: bg,
+      }}
+    >
+      {footer}
+    </View>
+  ) : null;
+
+  // The footer belongs INSIDE the KeyboardAvoidingView, not beside it.
+  //
+  // Measured on the Pixel 8 Pro (1.6.24, 2026-09-21): with the footer as a
+  // sibling of the KAV, the KAV shrank the scroll body but the footer stayed at
+  // the bottom of the full-height outer View — underneath the soft keyboard.
+  // The accessibility tree still reported the button's real layout bounds
+  // (y 2566-2682 on that screen) while the IME occupied y 1959-2992 (its own
+  // reported inset height is 1033px), so every tap at the button's own
+  // reported bounds was delivered to the keyboard: three taps at "Lenga ajira
+  // hii" typed three characters into the focused field instead of firing it
+  // (the same field's counter went 2329 -> 2332 herufi), with no progress and
+  // no error. Nothing about the handler was wrong — the control was simply
+  // covered by the keyboard. Every screen with a footer had this, because the
+  // footer is this component's.
   const content = keyboardAvoiding ? (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardAvoidingBehavior()}>
       {body}
+      {footerNode}
     </KeyboardAvoidingView>
   ) : (
-    body
+    <>
+      {body}
+      {footerNode}
+    </>
   );
 
-  return (
-    <View style={{ flex: 1, backgroundColor: bg }}>
-      {content}
-      {footer ? (
-        <View
-          style={{
-            paddingHorizontal: px,
-            paddingTop: 10,
-            // A floor, not just the raw inset: some Android devices report a
-            // near-zero bottom inset even with gesture nav, which put the
-            // footer buttons close enough to the nav bar to cause mis-taps.
-            paddingBottom: Math.max(edges.bottom ? insets.bottom : 0, 16) + 8,
-            borderTopWidth: 1,
-            borderTopColor: c.border,
-            backgroundColor: bg,
-          }}
-        >
-          {footer}
-        </View>
-      ) : null}
-    </View>
-  );
+  return <View style={{ flex: 1, backgroundColor: bg }}>{content}</View>;
 }
