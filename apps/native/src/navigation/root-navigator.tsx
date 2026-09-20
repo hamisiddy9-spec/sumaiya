@@ -60,7 +60,6 @@ const linking: LinkingOptions<RootStackParamList> = {
     // lib/app-hosts.ts rather than typed out here, so moving the domain again
     // is a one-line change.
     ...DEEP_LINK_PREFIXES,
-    "https://sumaiyaai.vercel.app",
   ],
   config: {
     screens: {
