@@ -185,9 +185,10 @@ app's heaviest screen.
 3. **`components/ui/async-slot.tsx` (new)** implementing the hand-off
    (§A.3.3): `pending`, `children`, `minVisibleMs=300`, `holdMs=220`; exit with
    the existing `.swap-out` (140ms) **while** the content enters with `.swap-in`
-   (300ms). `.swap-in` already exists (`globals.css:312`) and is used in three
-   places; **`.swap-out` exists (`:313`) and is used in none** — that is the
-   half-beat to finish. Zero layout shift is the acceptance criterion.
+   (300ms). **Both classes exist only in the uncommitted working tree**
+   (`git show HEAD:apps/web/app/globals.css | grep -c swap-in` → `0`); entry is
+   applied in six places and **exit in none** — that is the half-beat to finish,
+   and the pair must be landed together with its first real caller.
 4. **Per-screen skeletons, exactly as specified in §A.4**: auth (`A.4.1`),
    job feed (`A.4.2`), dashboard — **3 cards below `md`, 6 at `md`, 8 at `xl`**
    (`A.4.3`), templates picker replacing both `Loader2`s

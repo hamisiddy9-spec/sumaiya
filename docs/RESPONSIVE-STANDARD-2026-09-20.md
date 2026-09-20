@@ -9,6 +9,19 @@
 `apps/web/app/globals.css` carry the numbers. If a number changes it changes
 here, in those two files, and in the test that pins them — in one commit.
 
+**Evidence state (read this before trusting a line number).** Every `file:line`
+in this document was read from the **working tree of
+`C:\Users\hamis\projects\sumaiya` on 2026-09-20**, at a moment when six
+`apps/web` files carried *uncommitted* edits from another agent
+(`app/globals.css`, `app/(app)/(auth)/sign-in/sign-in-form.tsx`,
+`components/editor/cv-editor-client.tsx`, `components/editor/template-picker.tsx`,
+`components/editor/template-selection-modal.tsx`,
+`components/settings/career-profile-card.tsx`). Where a claim depends on
+something that exists **only** in the working tree and not in `main`, the text
+says so explicitly — the two `.swap-*` classes in §A.3.3 are the important case.
+Line numbers in those six files can differ from `main` by roughly ten lines;
+search by the quoted class or identifier, not by the number alone.
+
 **Scope:** every reachable web surface. The Android app (`apps/native`) is a
 separate product with its own standard and is only referenced where a behaviour
 must NOT be copied to web.
@@ -216,17 +229,22 @@ relationship to the placeholder it replaced. The motion standard calls this a
 "boom" (`docs/MOTION-STANDARD-2026-09-20.md` §2.4, §3.5 "Loading → content:
 placeholder `FadeOut` 140ms **while** content enters").
 
-The web implementation of that row, already half-built:
+The web implementation of that row already exists **in the working tree, not in
+`main`** (an uncommitted sibling edit; `git show HEAD:apps/web/app/globals.css`
+contains neither class — verify before relying on it):
 
 ```
-.swap-out { animation: swap-out 0.14s cubic-bezier(0.32, 0, 0.67, 0) both; }   /* globals.css:313 */
-.swap-in  { animation: snap-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }    /* globals.css:312 */
+.swap-out { animation: swap-out 0.14s cubic-bezier(0.32, 0, 0.67, 0) both; }   /* globals.css:313 (wt) */
+.swap-in  { animation: snap-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }    /* globals.css:312 (wt) */
 ```
 
-`.swap-in` is used in exactly three places (`template-picker.tsx:130`,
-`template-selection-modal.tsx:135`, `career-profile-card.tsx:142`) and **the
-matching `.swap-out` is used in none** — so the placeholder is deleted instantly
-and only the arrival is animated. That is half a beat.
+In the working tree `.swap-in` is applied in six places
+(`template-picker.tsx:130,134`, `template-selection-modal.tsx:137,141`,
+`career-profile-card.tsx:142,144`) and **the matching `.swap-out` is applied in
+none** — so the placeholder is deleted instantly and only the arrival is
+animated. That is half a beat, and whoever authored `.swap-in` left the other
+half of the pair unused. Land both classes with their first real caller
+(`AsyncSlot`), or neither.
 
 The rule:
 
