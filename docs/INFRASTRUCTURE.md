@@ -42,7 +42,7 @@ data, and by the ref in the live browser bundle.
 
 | Ref | What it is | Status |
 |---|---|---|
-| `ayczgaddnufdxnhizpcr.supabase.co` | **The project the LIVE app uses today** — confirmed from the live JS bundle | Live |
+| `duywnmibgiqulqzunsmh.supabase.co` | **The project the LIVE app uses today** — confirmed from the live JS bundle | Live |
 | `fskokfnunjlrvxspkftx.supabase.co` | A newer Supabase project named "sumaiya" | Being set up fresh |
 | `round-sunset-45714155` (Neon) | Postgres target | Set up, schema only |
 
@@ -76,7 +76,7 @@ Evidence it already misfires: **25 `auth.users` rows but only 15 `profile` rows.
 
 - **Google Cloud project:** `811013224847`
 - **Consent screen** must read **`Sumaiya`** — unbranded, users see
-  `ayczgaddnufdxnhizpcr.supabase.co wants access`, which reads as a phishing attempt.
+  `duywnmibgiqulqzunsmh.supabase.co wants access`, which reads as a phishing attempt.
 - **Web client redirect URI** must be the ref of the app's Supabase project:
   `https://<ref>.supabase.co/auth/v1/callback` — no trailing slash, ref spelled exactly.
 - **Android client:** package `pro.sumaiya.app` + the signing SHA-1.
