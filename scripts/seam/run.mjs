@@ -598,28 +598,59 @@ async function main() {
   // they agree. Neither component's own test can see this.
   const webSignInPath = path.join(REPO, "apps", "web", "app", "(app)", "(auth)", "sign-in", "sign-in-form.tsx");
   const nativeCodePath = path.join(REPO, "apps", "native", "src", "lib", "auth-code.ts");
+  // The number itself has ONE home now (packages/utils) — both surfaces read it,
+  // so neither may carry a literal of its own. Resolve the declaration first,
+  // then check each surface DERIVES from it: a literal in either file is the
+  // drift this step exists to catch, and it is caught whether or not it happens
+  // to agree today.
+  const sharedCodePath = path.join(REPO, "packages", "utils", "src", "auth-code.ts");
+  const SHARED_MARKER = "@sumaiya/utils/auth-code";
+  let sharedDigits = null;
+  try {
+    sharedDigits = /EMAIL_OTP_DIGITS\s*=\s*(\d+)/.exec(fs.readFileSync(sharedCodePath, "utf8"))?.[1] ?? null;
+  } catch (err) {
+    report.unverified(`could not read the shared code-length declaration in ${path.relative(REPO, sharedCodePath)}: ${err.message}`);
+  }
   let webRule = null;
   let nativeRule = null;
   try {
     const form = fs.readFileSync(webSignInPath, "utf8");
-    webRule = { maxLength: /maxLength=\{(\d+)\}/.exec(form)?.[1] ?? null, gate: /code\.length < (\d+)/.exec(form)?.[1] ?? null };
+    // `maxLength={8}` (a second copy of the number) or `maxLength={EMAIL_OTP_DIGITS}`
+    // (derived). Both are parsed; only the second is healthy.
+    const literalMax = /maxLength=\{(\d+)\}/.exec(form)?.[1] ?? null;
+    const derives = /maxLength=\{EMAIL_OTP_DIGITS\}/.test(form) && form.includes(SHARED_MARKER);
+    webRule = {
+      maxLength: literalMax ?? (derives ? sharedDigits : null),
+      gate: /code\.length < (\d+)/.exec(form)?.[1] ?? (derives ? sharedDigits : null),
+      literal: literalMax,
+      derives,
+    };
   } catch (err) {
     report.unverified(`could not read the web sign-in form to check its digit rule: ${err.message}`);
   }
   try {
     const native = fs.readFileSync(nativeCodePath, "utf8");
-    nativeRule = { digits: /EMAIL_OTP_DIGITS\s*=\s*(\d+)/.exec(native)?.[1] ?? null };
+    const literalDigits = /EMAIL_OTP_DIGITS\s*=\s*(\d+)/.exec(native)?.[1] ?? null;
+    const derives = native.includes(SHARED_MARKER);
+    nativeRule = { digits: literalDigits ?? (derives ? sharedDigits : null), literal: literalDigits, derives };
   } catch (err) {
     report.unverified(`could not read the native email-code rule: ${err.message}`);
   }
-  artifacts.otpDigits = { web: webRule, native: nativeRule };
-  report.observed(`web sign-in form: maxLength=${webRule?.maxLength}, submit gate "${webRule?.gate} digits"`);
-  report.observed(`native (apps/native/src/lib/auth-code.ts): EMAIL_OTP_DIGITS=${nativeRule?.digits}`);
-  if (webRule?.maxLength && webRule.gate === webRule.maxLength) {
+  artifacts.otpDigits = { shared: sharedDigits, web: webRule, native: nativeRule };
+  report.observed(`shared code length (${path.relative(REPO, sharedCodePath)}): EMAIL_OTP_DIGITS=${sharedDigits}`);
+  report.observed(`web sign-in form: maxLength=${webRule?.maxLength} (own literal: ${webRule?.literal ?? "none"}), submit gate "${webRule?.gate} digits"`);
+  report.observed(`native (apps/native/src/lib/auth-code.ts): email OTP digits=${nativeRule?.digits} (own literal: ${nativeRule?.literal ?? "none"})`);
+  if (webRule?.literal || nativeRule?.literal) {
+    report.fail(
+      `a surface carries its OWN copy of the code length (web: ${webRule?.literal ?? "none"}, native: ${nativeRule?.literal ?? "none"}) — the shared declaration is ${sharedDigits}, and a second copy is how the web came to accept 6 digits while the server sent 8`,
+      { evidence: EVIDENCE.SOURCE, detail: `both surfaces must read ${SHARED_MARKER}` },
+    );
+  } else if (webRule?.maxLength && webRule.gate === webRule.maxLength) {
     report.pass(`web's email-code field expects exactly ${webRule.maxLength} digits and its submit gate agrees`, { evidence: EVIDENCE.SOURCE });
   } else if (webRule) {
     report.fail(`web's email-code field is internally inconsistent: maxLength=${webRule.maxLength}, gate=${webRule.gate}`, { evidence: EVIDENCE.SOURCE });
   }
+
   if (webRule?.maxLength && nativeRule?.digits && webRule.maxLength === nativeRule.digits) {
     report.pass(`both surfaces demand the SAME number of digits (${webRule.maxLength})`, { evidence: EVIDENCE.SOURCE });
   } else if (webRule?.maxLength && nativeRule?.digits) {
