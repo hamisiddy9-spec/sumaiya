@@ -25,97 +25,212 @@ export const personalInfoSchema = z.object({
   photo: z.string().optional(),
 });
 
+// ─── The row rule: a wrong type costs the FIELD, never the row ───────────────
+//
+// A stored CV is written by the editor, the native app, an import adapter and
+// older builds. Any of them can get ONE scalar wrong (a `level` as "3", a
+// `current` as "yes", a date as a number) while the row as a whole is perfectly
+// good — so a malformed scalar is REPAIRED, and only a row that carries no
+// content at all is dropped. See `keepRow` for the drop half of the rule.
+
+/**
+ * Text as the candidate typed it.
+ *
+ * A primitive with the wrong type is coerced losslessly — `String(v)`, exactly
+ * what `@sumaiya/utils/cv-shape`'s `str()` does, so `startDate: 2020` survives
+ * as "2020" rather than taking the row (and, at the document level, the CV) with
+ * it. An object/array/null is NOT stringified: "[object Object]" is not what
+ * anyone typed, so it becomes "".
+ */
+const text = () =>
+  z.preprocess((v) => (typeof v === "string" ? v : v == null || typeof v === "object" ? "" : String(v)), z.string());
+
+/** The same, for an optional field: absence stays absent. A malformed optional
+ *  is dropped as a field rather than invented as "". */
+const textOpt = () =>
+  z.preprocess(
+    (v) => (v == null || typeof v === "object" ? undefined : typeof v === "string" ? v : String(v)),
+    z.string().optional(),
+  );
+
+/** A boolean that survives a wrong type. "true"/"yes"/1 are what a client means
+ *  by true; anything unrecognisable is false, never invented as true. */
+const bool = () => z.preprocess((v) => v === true || v === "true" || v === "yes" || v === 1 || v === "1", z.boolean());
+
 export const experienceEntrySchema = z.object({
-  id: z.string().default(""),
-  company: z.string().default(""),
-  position: z.string().default(""),
-  location: z.string().optional(),
-  startDate: z.string().default(""),
-  endDate: z.string().default(""),
-  current: z.boolean().default(false),
-  description: z.string().default(""),
+  id: text().default(""),
+  company: text().default(""),
+  position: text().default(""),
+  location: textOpt(),
+  startDate: text().default(""),
+  endDate: text().default(""),
+  // "yes"/"true"/1 all mean true; an unrecognisable value means false, never
+  // an invented "still here".
+  current: bool().default(false),
+  description: text().default(""),
 });
 
 export const educationEntrySchema = z.object({
-  id: z.string().default(""),
-  institution: z.string().default(""),
-  degree: z.string().default(""),
-  field: z.string().default(""),
-  startDate: z.string().default(""),
-  endDate: z.string().default(""),
-  grade: z.string().optional(),
-  description: z.string().optional(),
+  id: text().default(""),
+  institution: text().default(""),
+  degree: text().default(""),
+  field: text().default(""),
+  startDate: text().default(""),
+  endDate: text().default(""),
+  grade: textOpt(),
+  description: textOpt(),
 });
 
+export const SKILL_LEVEL_DEFAULT = 3;
+/**
+ * A skill's level arrives from the editor, the native app, an import, or an older build.
+ * `z.union([literal(1)…literal(5)])` rejected anything else, `looseArray` then dropped the
+ * row, and losing every row deleted the whole section from the page and the ATS layer.
+ * A number (or numeric string) is CLAMPED into 1–5 — 0 → 1, 7 → 5, "3" → 3 — so the
+ * candidate's intent survives; anything else falls back to 3. One malformed level must
+ * cost one skill's precision, never a section.
+ */
+const skillLevelSchema = z.preprocess((v) => {
+  const n = typeof v === "string" ? Number(v.trim()) : v;
+  if (typeof n !== "number" || !Number.isFinite(n)) return SKILL_LEVEL_DEFAULT;
+  return Math.min(5, Math.max(1, Math.round(n)));
+}, z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]).catch(SKILL_LEVEL_DEFAULT));
 export const skillEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  level: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+  id: text().default(""),
+  name: text().default(""),
+  level: skillLevelSchema,
 });
+
+export const LANGUAGE_PROFICIENCIES = ["Native", "Fluent", "Advanced", "Intermediate", "Basic"] as const;
+/**
+ * Three vocabularies reach this field and none of them is the other's:
+ * the editor writes the five tokens below, the native AI route writes
+ * `elementary|limited|professional|fluent|native` (`lib/api/routes/mobile.ts`),
+ * and `@sumaiya/types` declares yet another set. Rejecting a value outside the
+ * five used to drop the whole language row; now a known token is normalised to
+ * its canonical spelling, an unknown one is KEPT as the candidate wrote it
+ * (a human can read "professional"), and only a non-string becomes "".
+ * Nothing is invented here — unlike `lib/cv/from-parsed.ts`'s
+ * `normalizeProficiency`, which answers "Fluent" for an unstated value. That is
+ * the right call for AI output, and the wrong one for a stored row.
+ */
+const proficiencySchema = z.preprocess((v) => {
+  if (typeof v !== "string") return "";
+  const raw = v.trim();
+  return LANGUAGE_PROFICIENCIES.find((p) => p.toLowerCase() === raw.toLowerCase()) ?? raw;
+}, z.string().default(""));
 
 export const languageEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  proficiency: z.enum(["Native", "Fluent", "Advanced", "Intermediate", "Basic"]),
+  id: text().default(""),
+  name: text().default(""),
+  proficiency: proficiencySchema,
 });
 
 export const certificationEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  issuer: z.string(),
-  date: z.string(),
-  url: z.string().optional(),
+  id: text().default(""),
+  name: text().default(""),
+  issuer: text().default(""),
+  date: text().default(""),
+  url: textOpt(),
 });
 
 export const projectEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  role: z.string().optional(),
-  url: z.string().optional(),
-  date: z.string().optional(),
+  id: text().default(""),
+  name: text().default(""),
+  description: text().default(""),
+  role: textOpt(),
+  url: textOpt(),
+  date: textOpt(),
 });
 
 export const refereeEntrySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  title: z.string(),
-  company: z.string(),
-  email: z.string(),
-  phone: z.string(),
+  id: text().default(""),
+  name: text().default(""),
+  title: text().default(""),
+  company: text().default(""),
+  email: text().default(""),
+  phone: text().default(""),
 });
 
+// ─── THE ROW RULE ────────────────────────────────────────────────────────────
+//
+// ONE rule, applied to every array section (skills, experience, education,
+// projects, languages, certifications, referees) and to the write boundary:
+//
+//   1. the row is not a plain object                      -> DROPPED
+//      (a string, a number, null: not a row at all)
+//   2. the row's IDENTITY fields hold no readable text    -> DROPPED
+//      (nothing but blanks and junk is corruption, not the candidate's data:
+//       kept, it renders as an empty bullet in their CV)
+//   3. the row carries content but has a missing or
+//      malformed SCALAR (a skill's `level`, a job's
+//      `current`, a date as a number)                     -> KEPT, scalar REPAIRED
+//
+// Rule 3 is the defect this rule exists for. `z.array(itemSchema)` fails the
+// WHOLE document when one row is off, and `parseCVData` answers a failed
+// document with an EMPTY CV — so a skill written without `level` (an older
+// client, an import, the mobile writer) deleted the entire Skills section from
+// the rendered CV AND from the exported PDF's ATS text layer. Measured, fixture
+// `docs/qa-fixtures-2026-09-20/parsecvdata-proof.txt`
+// (docs/QA-IO-MATRIX-2026-09-20.md D8): 9 skills in, 9 out with `level: 3`;
+// **0 out** without `level`, with `"3"`, with `0`, with `7`.
+//
+// Rule 2 is the other half, and it is why this is a RULE and not a blanket
+// `keep everything`: the first attempt at rule 3 kept every row it was handed,
+// which put empty-name skills into the CV as blank bullets. A row with nothing
+// readable is not the candidate's data.
+
+/** The fields that make a row THAT row. `cvSections()` in
+ *  `@sumaiya/utils/cv-shape` already defines "this section carries content"
+ *  with these same keys, so the reader and the content check agree. */
+const CV_ROW_IDENTITY: Record<string, readonly string[]> = {
+  experience: ["company", "position"],
+  education: ["institution", "degree", "field"],
+  skills: ["name"],
+  projects: ["name"],
+  languages: ["name"],
+  certifications: ["name"],
+  referees: ["name"],
+};
+
+const isRow = (v: unknown): v is Record<string, unknown> =>
+  !!v && typeof v === "object" && !Array.isArray(v);
+const readable = (v: unknown): boolean => typeof v === "string" && v.trim().length > 0;
+
 /**
- * An array whose items are validated INDIVIDUALLY, dropping only what cannot be
- * read.
+ * Apply the row rule to ONE row. Returns the parsed (repaired) row, or null when
+ * the row is corruption.
+ *
+ * `identity` is the list of fields whose readable text makes the row worth
+ * keeping; a row with none of them is dropped whatever else it holds.
+ */
+function keepRow<T extends z.ZodTypeAny>(
+  item: T,
+  identity: readonly string[],
+  row: unknown,
+): z.infer<T> | null {
+  if (!isRow(row)) return null; // rule 1
+  if (!identity.some((key) => readable(row[key]))) return null; // rule 2
+  const parsed = item.safeParse(row);
+  return parsed.success ? (parsed.data as z.infer<T>) : null; // rule 3
+}
+
+/**
+ * An array whose items are validated INDIVIDUALLY under the row rule above,
+ * dropping only what carries no content and repairing what it can.
  *
  * `z.array(x)` fails the WHOLE array when a single item fails, which fails the
- * whole object, which makes `parseCVData` return an empty CV. So one bad entry
- * — an older client's shape, a half-written row, a skill whose `level` arrived
- * as a string instead of 1–5 — cost the user the entire document. The
- * `personal` block already had this protection via `.catch`; the arrays did
- * not, which is the same defect one level deeper.
- *
- * Measured 2026-09-13: a CV whose only fault was one unrecognised `projects`
- * entry (`{ nonsense: true }`) parsed as completely blank.
- *
- * Also note the sub-schemas below (`skillEntrySchema`, `languageEntrySchema`,
- * `certificationEntrySchema`, `projectEntrySchema`, `refereeEntrySchema`)
- * require EVERY field — only `experienceEntrySchema` and `educationEntrySchema`
- * carry defaults. So this is not a rare edge: any item missing `id`, or naming
- * a language with a `proficiency` outside the five listed values, takes the
- * whole CV with it.
+ * whole object, which makes `parseCVData` return an empty CV. Measured
+ * 2026-09-13: a CV whose only fault was one unrecognised `projects` entry
+ * (`{ nonsense: true }`) parsed as completely blank; measured 2026-09-20: a
+ * skill without `level` blanked the whole Skills section (D8).
  */
-function looseArray<T extends z.ZodTypeAny>(item: T) {
+function rowArray<T extends z.ZodTypeAny>(section: string, item: T) {
+  const identity = CV_ROW_IDENTITY[section] ?? ["name"];
   return z
     .array(z.unknown())
     .default([])
-    .transform((raw) =>
-      raw.flatMap((entry) => {
-        const parsed = item.safeParse(entry);
-        return parsed.success ? [parsed.data as z.infer<T>] : [];
-      }),
-    );
+    .transform((raw) => raw.flatMap((row) => (keepRow(item, identity, row) ?? []) as z.infer<T>[]));
 }
 
 /** Same, for the sections that must stay ABSENT rather than become `[]`. */
@@ -138,16 +253,16 @@ export const cvDataSchema = z.object({
   // not just a missing one. Losing a name is survivable; losing the CV is not.
   personal: personalInfoSchema.catch({ fullName: "", jobTitle: "", email: "", phone: "", location: "" }),
   summary: z.string().default(""),
-  // Each array drops the entries it cannot read instead of failing, so one
-  // malformed row costs the user that entry and nothing else.
-  experience: looseArray(experienceEntrySchema),
-  education: looseArray(educationEntrySchema),
-  skills: looseArray(skillEntrySchema),
+  // Each array repairs what it can and drops only contentless rows (the rule
+  // above), so one malformed row costs the user that row and nothing else.
+  experience: rowArray("experience", experienceEntrySchema),
+  education: rowArray("education", educationEntrySchema),
+  skills: rowArray("skills", skillEntrySchema),
   // Optional-with-default so CVs saved before projects existed still parse.
-  projects: looseArray(projectEntrySchema),
-  languages: looseArray(languageEntrySchema),
-  certifications: looseArray(certificationEntrySchema),
-  referees: looseArray(refereeEntrySchema),
+  projects: rowArray("projects", projectEntrySchema),
+  languages: rowArray("languages", languageEntrySchema),
+  certifications: rowArray("certifications", certificationEntrySchema),
+  referees: rowArray("referees", refereeEntrySchema),
   hobbies: z.string().default(""),
   hiddenSections: looseOptionalArray(z.string()),
   sectionOrder: looseOptionalArray(z.string()),
@@ -223,6 +338,39 @@ const CV_ARRAY_SECTIONS: Array<[string, z.ZodTypeAny]> = [
 ];
 
 /**
+ * Repair the array sections of a CV payload at the write boundary, under the
+ * same row rule the reader uses (`keepRow`) — so what a client can STORE is
+ * always a shape the renderer can read, and the reader is no longer the only
+ * place the rule is applied.
+ *
+ * The API validated `data` only as `z.record(z.unknown())`, so a skill written
+ * with no `level` (or `"3"`, or `0`) was storable while every subsequent read
+ * dropped it — the D8 silent section loss, reintroduced from the client.
+ *
+ * Two properties this must keep:
+ *   • it MERGES (`{ ...row, ...repaired }`), so keys this file does not know —
+ *     the native app's `title`, `keyAchievements`, anything added later — are
+ *     preserved, not stripped by a schema that never declared them;
+ *   • it only touches the seven known sections, and only when the value really
+ *     is an array. Every other key passes through by reference, and a row that
+ *     still cannot be parsed is left exactly as it arrived rather than deleted.
+ */
+export function repairCvArraySections(data: unknown): Record<string, unknown> {
+  if (!isRow(data)) return (data ?? {}) as Record<string, unknown>;
+  const repaired: Record<string, unknown> = { ...data };
+  for (const [section, rowSchema] of CV_ARRAY_SECTIONS) {
+    const rows = data[section];
+    if (!Array.isArray(rows)) continue;
+    const identity = CV_ROW_IDENTITY[section] ?? ["name"];
+    repaired[section] = rows.flatMap((row) => {
+      const kept = keepRow(rowSchema, identity, row);
+      return kept === null ? [] : [{ ...(isRow(row) ? row : {}), ...kept }];
+    });
+  }
+  return repaired;
+}
+
+/**
  * Second-chance parse: keep every row that parses, drop only the rows that do
  * not, then parse the document again.
  *
@@ -251,8 +399,11 @@ function salvageCvData(candidate: unknown): CVData | null {
   for (const [section, rowSchema] of CV_ARRAY_SECTIONS) {
     const rows = raw[section];
     if (rows === undefined) continue; // let the schema's default handle "missing"
+    // The SAME row rule as the schema: repair what can be read, drop only rows
+    // that carry no readable content (or are not rows at all).
+    const identity = CV_ROW_IDENTITY[section] ?? ["name"];
     salvaged[section] = Array.isArray(rows)
-      ? rows.filter((row) => rowSchema.safeParse(row).success)
+      ? rows.flatMap((row) => (keepRow(rowSchema, identity, row) ?? []) as unknown[])
       : [];
   }
   // Scalars: a wrong type here used to take the entire CV down with it.
@@ -332,7 +483,16 @@ export interface SkillEntry {
 export interface LanguageEntry {
   id: string;
   name: string;
-  proficiency: "Native" | "Fluent" | "Advanced" | "Intermediate" | "Basic";
+  /**
+   * Usually one of "Native" | "Fluent" | "Advanced" | "Intermediate" | "Basic",
+   * but a stored row can hold any word a client wrote — the native AI route
+   * writes `professional` (`lib/api/routes/mobile.ts`), and `@sumaiya/types`
+   * declares a third vocabulary again. Widened from the five-token union on
+   * purpose: the candidate's own value is preserved rather than the row being
+   * dropped for not speaking the editor's dialect. An unrecognisable value is
+   * left as-is, never invented.
+   */
+  proficiency: string;
 }
 
 export interface CertificationEntry {

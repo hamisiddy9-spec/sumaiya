@@ -8,7 +8,7 @@ import { PAYMENTS_ENABLED } from "@/lib/features";
 
 const productLinks = [
   { href: "/templates", label: "Looks", labelSw: "Miundo" },
-  { href: "/assistant", label: "Sumaiya (AI assistant)", labelSw: "Sumaiya (msaidizi wa AI)" },
+  { href: "/assistant", label: "Sumaiya", labelSw: "Sumaiya" },
   { href: "/editor/cv/try", label: "CV builder", labelSw: "Tengeneza CV" },
   { href: "/editor/cover-letter/try", label: "Cover letters", labelSw: "Barua za maombi" },
   { href: "/ats-checker", label: "ATS Checker", labelSw: "Kagua CV" },
@@ -46,8 +46,8 @@ export function Footer() {
             <Logo className="text-cream [&_span]:!text-cream" />
             <p className="mt-3 text-sm text-cream/60 leading-relaxed max-w-xs">
               {sw
-                ? "Msaidizi wako wa kazi wa AI — CV, barua za maombi, ajira na ushauri, mahali pamoja."
-                : "Your AI career assistant — CVs, cover letters, jobs and advice in one place."}
+                ? "Msaidizi wako wa kazi — CV, barua za maombi, ajira na ushauri, mahali pamoja."
+                : "Your career assistant — CVs, cover letters, jobs and advice in one place."}
             </p>
           </div>
 

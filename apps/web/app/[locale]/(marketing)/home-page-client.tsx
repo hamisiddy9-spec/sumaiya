@@ -492,8 +492,8 @@ export default function LandingPage() {
               <SumaiyaMark size={26} state="idle" className="text-ember shrink-0 mt-1" />
               <span>
                 {lang === "sw"
-                  ? "Bandika tangazo la kazi. Sumaiya anakusaidia kuandika CV inayolingana nalo, kwa Kiswahili — kwenye simu yako, bila malipo, bila akaunti."
-                  : "Paste the job advert. Sumaiya helps you write the CV that matches it, in Swahili — on your phone, free, with no account."}
+                  ? "Bandika tangazo la kazi. Mimi ni Sumaiya — nitakuandikia CV inayolingana nalo, kwa Kiswahili, kwenye simu yako, bila malipo, bila akaunti."
+                  : "Paste the job advert. I'm Sumaiya — I'll write the CV that matches it, in Swahili, on your phone, free, with no account."}
               </span>
             </p>
 
@@ -517,7 +517,7 @@ export default function LandingPage() {
                 onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
-                {lang === "sw" ? "au ongea na Sumaiya" : "or talk to Sumaiya"}
+                {lang === "sw" ? "au ongea nami" : "or talk to me"}
                 <Icon name="chevron-right" size={14} />
               </Link>
             </div>
@@ -642,8 +642,8 @@ export default function LandingPage() {
             },
             {
               icon: "magic" as const,
-              en: { t: "2. Fill in your details", d: "Type them in, or answer Sumaiya's questions and she writes each section for you. You do not need professional wording to start." },
-              sw: { t: "2. Jaza maelezo yako", d: "Andika mwenyewe, au jibu maswali ya Sumaiya naye anaandika kila sehemu. Huhitaji maneno ya kitaalamu ili kuanza." },
+              en: { t: "2. Fill in your details", d: "Type them in, or answer my questions and I write each section for you. You do not need professional wording to start." },
+              sw: { t: "2. Jaza maelezo yako", d: "Andika mwenyewe, au jibu maswali yangu nami ninaandika kila sehemu. Huhitaji maneno ya kitaalamu ili kuanza." },
             },
             {
               icon: "download" as const,

@@ -1526,6 +1526,14 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       return;
     }
     setShowJobChoice(true);
+    // The approved design's line, and the question the picker answers. Our
+    // listings lead; the user's own advert is one tap away.
+    setMessages((m) => [...m, {
+      role: "assistant",
+      content: convoSw
+        ? "Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?"
+        : "Sure. Which job do you want to aim at — choose from our listings, or use your own?",
+    }]);
   };
 
   // Branch 2 — the user brings their own job. Unchanged behaviour, unchanged

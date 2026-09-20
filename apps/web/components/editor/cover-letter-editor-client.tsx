@@ -234,7 +234,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       const data = await res.json().catch(() => ({})) as { success?: boolean; data?: { enhanced: string }; error?: string };
       if (data.success && data.data?.enhanced) {
         setAiPreview({
-          subtitle: sw ? "AI imeandika upya barua yako iwe wazi na yenye nguvu zaidi." : "AI rewrote your letter to be clearer and more impactful.",
+          subtitle: sw ? "Nimeandika upya barua yako iwe wazi na yenye nguvu zaidi." : "I rewrote your letter to be clearer and more impactful.",
           original: base,
           suggested: data.data.enhanced,
           regenerate: () => handleEnhance(opts),
@@ -274,7 +274,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
         setGenerateError(json.error || (sw ? "Imeshindwa kuboresha sasa. Jaribu tena." : "Couldn't tailor right now. Please try again."));
       } else {
         setAiPreview({
-          subtitle: sw ? "AI imeboresha barua kulenga kazi hii." : "AI tailored your letter to this job.",
+          subtitle: sw ? "Nimeiboresha barua hii iilenge kazi hii." : "I tailored your letter to this job.",
           original: content,
           suggested: json.data.content,
           regenerate: handleTailorToJob,
@@ -308,7 +308,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
         setGenerateError(json.error || (sw ? "Imeshindwa kutengeneza rasimu sasa. Jaribu tena." : "Couldn't generate a draft right now. Please try again."));
       } else {
         setAiPreview({
-          subtitle: sw ? "AI imetengeneza rasimu mpya kutokana na maelezo yako." : "AI wrote a fresh draft from your details.",
+          subtitle: sw ? "Nimetengeneza rasimu mpya kutokana na maelezo yako." : "I wrote a fresh draft from your details.",
           original: content,
           suggested: json.data.content,
           regenerate: handleGenerate,
@@ -399,7 +399,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
     companyName: companyName || undefined,
     date: today,
     content: content || (sw
-      ? "Barua yako itaonekana hapa.\n\nBonyeza “Tengeneza kwa AI” au anza kuandika."
+      ? "Barua yako itaonekana hapa.\n\nBonyeza “Niandikie” au anza kuandika."
       : "Your cover letter content will appear here.\n\nStart writing in the panel on the left."),
     primaryColor,
     fontFamily,
@@ -525,11 +525,11 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
                 <div className="flex items-center gap-3">
                   <button onClick={() => void handleGenerate()} disabled={isGenerating}
                     className="flex items-center gap-1 text-xs text-ember-hover hover:text-ember disabled:opacity-50 transition font-medium">
-                    <Sparkles className="w-3 h-3" /> {isGenerating ? (sw ? "Inatengeneza…" : "Generating…") : (sw ? "Tengeneza kwa AI" : "AI Generate")}
+                    <Sparkles className="w-3 h-3" /> {isGenerating ? (sw ? "Inatengeneza…" : "Generating…") : (sw ? "Niandikie" : "Write it for me")}
                   </button>
                   <button onClick={() => void handleEnhance()} disabled={isEnhancing || !content.trim()}
                     className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium">
-                    <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha kwa AI" : "AI Enhance")}
+                    <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                   </button>
                 </div>
               </div>
@@ -539,8 +539,8 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
               {generateError && <p className="text-xs text-red-600 mt-1">{generateError}</p>}
               <p className="text-xs text-text-muted mt-1">
                 {sw
-                  ? "Mstari mtupu = aya mpya. “Tengeneza kwa AI” huandaa rasimu kutoka jina, nafasi na kampuni yako."
-                  : "Blank line = new paragraph. AI Generate drafts from your name, role & company; add notes to the body to guide it."}
+                  ? "Mstari mtupu = aya mpya. “Niandikie” huandaa rasimu kutoka jina, nafasi na kampuni yako."
+                  : "Blank line = new paragraph. \"Write it for me\" drafts from your name, role & company; add notes to the body to guide it."}
               </p>
               {sw && (
                 <p className="text-[11px] text-text-muted/80 mt-1.5 flex items-start gap-1">

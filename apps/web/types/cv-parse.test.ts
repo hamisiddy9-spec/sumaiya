@@ -159,14 +159,24 @@ describe("parseCVData — the stored shape keeps working (no regression)", () =>
     });
     const cv = parseCVData(mixed);
     expect(cv.personal.fullName).toBe("Asha M.");
-    expect(cv.skills.map((s) => s.name)).toEqual(["Excel", "Hesabu"]);
+    // Three of the four rows carry a NAME, which is the candidate's data, so all
+    // three survive: a skill whose `level` is unusable is kept with the level
+    // defaulted (losing the level costs precision, not the skill). Only the row
+    // with no readable name — `{ nonsense: true }` — is dropped: kept, it would
+    // render as an empty bullet in the CV. That single row used to take the
+    // whole Skills section with it (docs/QA-IO-MATRIX-2026-09-20.md D8).
+    expect(cv.skills.map((s) => s.name)).toEqual(["Excel", "Broken", "Hesabu"]);
+    expect(cv.skills.map((s) => s.level)).toEqual([3, 3, 5]);
   });
 
-  it("survives a language whose proficiency is outside the enum", () => {
+  it("keeps a language whose proficiency is outside the enum", () => {
     // Not hypothetical: the mobile route's own CV prompt writes
-    // `"proficiency": "professional"`, and the schema accepts only
-    // Native / Fluent / Advanced / Intermediate / Basic. Before the per-item
-    // drop, that ONE field blanked the entire CV.
+    // `"proficiency": "professional"` (lib/api/routes/mobile.ts:393), and the
+    // schema used to accept only Native / Fluent / Advanced / Intermediate /
+    // Basic. Before the per-item drop, that ONE field blanked the entire CV;
+    // then it dropped the whole language row. Neither is right — the language
+    // NAME is what the candidate told us, so the row is kept and their own word
+    // is preserved as written (nothing is invented in its place).
     const cv = parseCVData(
       JSON.stringify({
         personalInfo: { fullName: "Asha M.", email: "", phone: "", location: "" },
@@ -174,7 +184,8 @@ describe("parseCVData — the stored shape keeps working (no regression)", () =>
       }),
     );
     expect(cv.personal.fullName).toBe("Asha M.");
-    expect(cv.languages).toEqual([]);
+    // `toStoredCvData` maps the app's `language` onto the stored `name`.
+    expect(cv.languages).toEqual([{ id: "l1", name: "Kiswahili", proficiency: "professional" }]);
   });
 });
 

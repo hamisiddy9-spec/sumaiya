@@ -240,8 +240,8 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                   </Text>
                   <Text style={{ color: c.textMuted, fontSize: 13, lineHeight: 19 }}>
                     {t(
-                      "Deterministic checks — the same ones a real ATS runs. No AI, nothing sent anywhere.",
-                      "Ukaguzi wa uhakika — sawa na mifumo halisi ya kuajiri. Hakuna AI, hakuna kinachotumwa popote.",
+                      "Deterministic checks — the same ones a real ATS runs. Nothing is sent anywhere.",
+                      "Ukaguzi wa uhakika — sawa na mifumo halisi ya kuajiri. Hakuna kinachotumwa popote.",
                     )}
                   </Text>
                 </View>

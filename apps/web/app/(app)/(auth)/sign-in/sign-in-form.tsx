@@ -236,7 +236,7 @@ function SignInForm({ lang }: { lang: string }) {
             <ul className="space-y-3 text-cream/80 text-sm">
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Miundo yanayopitishwa na mifumo ya kuajiri" : "ATS-friendly designs"}</li>
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Tengeneza na pakua PDF bila malipo" : "Build & download a polished PDF — free"}</li>
-              <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Msaada wa AI kwa muhtasari na uzoefu" : "AI writing help for your summary & experience"}</li>
+              <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Msaada wa kuandika muhtasari na uzoefu" : "Writing help for your summary & experience"}</li>
               <li className="flex items-start gap-2.5"><Icon name="check" size={16} className="text-gold mt-0.5 shrink-0" /> {sw ? "Inapatikana kwa Kiingereza na Kiswahili" : "Available in English & Swahili"}</li>
             </ul>
           </div>

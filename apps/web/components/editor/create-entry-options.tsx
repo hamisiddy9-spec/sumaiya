@@ -29,8 +29,8 @@ interface OptionDef {
 const ASSISTANT_OPTION: OptionDef = {
   id: "assistant",
   icon: "magic",
-  en: { label: "Chat with AI", hint: "Easiest — answer a few questions" },
-  sw: { label: "Zungumza na AI", hint: "Rahisi zaidi — jibu maswali machache" },
+  en: { label: "Chat with me", hint: "Easiest — answer a few questions" },
+  sw: { label: "Zungumza nami", hint: "Rahisi zaidi — jibu maswali machache" },
 };
 
 const OPTIONS: OptionDef[] = [

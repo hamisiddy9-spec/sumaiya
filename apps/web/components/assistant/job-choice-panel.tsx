@@ -154,10 +154,12 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
             aria-expanded={openPath === "ours"}
             onClick={() => { setOpenPath(openPath === "ours" ? null : "ours"); setNotice(""); }}
             className={`flex items-start gap-2.5 text-left rounded-card-lg border p-3 transition ${
-              openPath === "ours" ? "border-ember bg-ember-tint/30" : "border-border-input hover:border-ember hover:bg-ember-tint/20"
+              openPath === "ours"
+                ? "border-ember bg-ember-tint/50"
+                : "border-ember/50 bg-ember-tint/25 hover:border-ember hover:bg-ember-tint/40"
             }`}
           >
-            <span className="shrink-0 w-8 h-8 rounded-xl bg-ember-tint text-ember flex items-center justify-center">
+            <span className="shrink-0 w-8 h-8 rounded-xl bg-ember text-cream flex items-center justify-center">
               <Briefcase className="w-4 h-4" />
             </span>
             <span className="min-w-0">
@@ -184,7 +186,7 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
               {sw ? "Weka kazi yako mwenyewe" : "Use your own job"}
             </span>
             <span className="block text-[11px] text-text-body mt-0.5 leading-snug">
-              {sw ? "Bandika tangazo la kazi uliyoiona, au kiungo chake." : "Paste the advert you saw, or its link."}
+              {sw ? "Bandika tangazo, au kiungo chake." : "Paste the advert, or its link."}
             </span>
           </span>
         </button>
@@ -219,6 +221,15 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
                 {rows === null || q.trim()
                   ? (sw ? `Hakuna kazi inayolingana na “${q.trim()}”. Jaribu neno lingine, au weka kazi yako mwenyewe.` : `Nothing matches “${q.trim()}”. Try another word, or use your own job.`)
                   : (sw ? "Hakuna nafasi za kazi zilizoorodheshwa sasa. Weka kazi yako mwenyewe." : "No openings are listed right now. Use your own job.")}
+                {/* The escape hatch, not just the words for it: a search that
+                    finds nothing must never dead-end. */}
+                <button
+                  type="button"
+                  onClick={() => { setOpenPath("own"); onOwnSource(); }}
+                  className="ml-1 font-semibold text-ember hover:text-ember-hover underline"
+                >
+                  {sw ? "Weka kazi yako mwenyewe" : "Use your own job"}
+                </button>
               </p>
             )}
             {phase === "ready" && rows?.map((row) => (

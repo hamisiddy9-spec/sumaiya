@@ -63,8 +63,8 @@ export function MemoryScreen() {
     Alert.alert(
       t("Turn off and delete?", "Zima na kufuta?"),
       t(
-        "Sumaiya will stop learning about you, and everything she has noted so far will be permanently deleted. She will still work — she just won't remember between visits.",
-        "Sumaiya ataacha kujifunza kukuhusu, na kila alichokumbuka kufikia sasa kitafutwa kabisa. Ataendelea kufanya kazi — hatawahi kukumbuka kati ya ziara.",
+        "I will stop learning about you, and everything I have noted so far will be permanently deleted. I will still work — I just won't remember between visits.",
+        "Nitaacha kujifunza kukuhusu, na kila nilichokumbuka kufikia sasa kitafutwa kabisa. Nitaendelea kufanya kazi — sitakumbuka kati ya ziara.",
       ),
       [
         { text: t("Cancel", "Ghairi"), style: "cancel" },
@@ -106,12 +106,12 @@ export function MemoryScreen() {
           disclosure nobody understands is not a disclosure. */}
       <View style={{ gap: 8 }}>
         <Text style={{ color: c.text, fontSize: 22, fontWeight: "800" }}>
-          {t("What Sumaiya knows", "Anachojua Sumaiya")}
+          {t("What I know about you", "Ninachokujua")}
         </Text>
         <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 21 }}>
           {t(
-            "So she can help you better over time, Sumaiya keeps short notes about your activity and draws conclusions from them. Everything below is stored on this phone, is never sold, and is never used for advertising. She only advises — the decisions are always yours.",
-            "Ili akusaidie zaidi kadiri muda unavyopita, Sumaiya anaweka kumbukumbu fupi za matumizi yako na kutoa hitimisho kutoka humo. Kila kitu hapa chini kimehifadhiwa kwenye simu hii, hakiuza, na hakitumiki kwa matangazo. Anashauri tu — maamuzi ni yako daima.",
+            "So I can help you better over time, I keep short notes about your activity and draw conclusions from them. Everything below is stored on this phone, is never sold, and is never used for advertising. I only advise — the decisions are always yours.",
+            "Ili nikusaidie zaidi kadiri muda unavyopita, ninaweka kumbukumbu fupi za matumizi yako na kutoa hitimisho kutoka humo. Kila kitu hapa chini kimehifadhiwa kwenye simu hii, hakiuza, na hakitumiki kwa matangazo. Nashauri tu — maamuzi ni yako daima.",
           )}
         </Text>
       </View>

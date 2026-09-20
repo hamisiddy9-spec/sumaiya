@@ -12,14 +12,14 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: alternatesFor("/about", params.locale),
     title: sw ? "Kuhusu Sisi" : "About",
     description: sw
-      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita vichujio vya waajiri, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."
-      : "Sumaiya helps job seekers build professional, ATS-ready CVs, cover letters, business cards and formal letters — in minutes, with an AI assistant, in English or Kiswahili.",
+      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita vichujio vya waajiri, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa kazi, kwa Kiingereza au Kiswahili."
+      : "Sumaiya helps job seekers build professional, ATS-ready CVs, cover letters, business cards and formal letters — in minutes, with a career assistant, in English or Kiswahili.",
   };
 }
 
 const values = (sw: boolean) => [
   {
-    title: sw ? "Msaidizi wa AI upande wako" : "An AI assistant on your side",
+    title: sw ? "Msaidizi wa kazi upande wako" : "A career assistant on your side",
     body: sw
       ? "Msaidizi anayekuandikia, kuboresha na kulinganisha CV yako na kazi unayotaka — kama mshauri wa kazi mfukoni mwako, bila malipo."
       : "An assistant that writes, refines and matches your CV to the job you want — like a career coach in your pocket, for free.",
@@ -65,11 +65,11 @@ export default async function AboutPage({ params }: { params: { locale: string }
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
           <p className="font-mono text-[11px] text-ember-hover tracking-[0.2em] uppercase mb-4">{sw ? "Hadithi yetu" : "Our story"}</p>
           <h1 className="font-display text-3xl md:text-5xl font-bold text-cream mb-5 tracking-tight">
-            {sw ? "Hati za kitaalamu, pamoja na msaidizi wa AI" : "Professional documents, with an AI assistant"}
+            {sw ? "Hati za kitaalamu, pamoja na msaidizi wa kazi" : "Professional documents, with a career assistant"}
           </h1>
           <p className="text-text-muted max-w-2xl mx-auto text-sm md:text-lg leading-relaxed">
             {sw
-              ? "Kutuma maombi ya nafasi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inaipamba CV yako kwa muundo unaoidhinishwa na waajiri, msaidizi wa kuandika wa AI na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
+              ? "Kutuma maombi ya nafasi hakupaswi kumaanisha kupambana na programu ya kuandika saa saba usiku. Sumaiya inaipamba CV yako kwa muundo unaoidhinishwa na waajiri, msaidizi wa kuandika na uhamishaji wa PDF kwa mguso mmoja — ili uonekane bora zaidi na kupita programu ya uchujaji inayosoma CV yako kwanza."
               : "Applying for a job shouldn’t mean fighting with a word processor at 1am. Sumaiya gives you recruiter-friendly templates, an AI writing assistant and one-tap PDF export — so you can look your best and get past the screening software that reads your CV first."}
           </p>
         </div>
@@ -91,8 +91,8 @@ export default async function AboutPage({ params }: { params: { locale: string }
           <h2 className="font-display font-bold text-2xl md:text-3xl text-espresso mb-4">{sw ? "Kwa nini tulijenga hii" : "Why we built this"}</h2>
           <p className="text-text-body leading-relaxed">
             {sw
-              ? "Watu wenye vipaji wanakosa fursa si kwa sababu hawana sifa, bali kwa sababu maombi yao yanachujwa kabla ya mtu kuyaona — picha iliyopigwa skana ya CV, muundo usiosomeka, au kutokuwa na barua ya maombi kabisa. Tuliamua kurekebisha hilo: kumpa kila mtu zana ambazo washauri wa kazi hutoza pesa, kwa njia ambayo ni ya haraka, nafuu na inayosaidiwa na AI."
-              : "Talented people everywhere miss opportunities not because they aren’t qualified, but because their application gets filtered out before a person ever sees it — a scanned photo of a CV, an unreadable layout, or no cover letter at all. We set out to fix that: give everyone the tools that expensive career coaches charge for, in a form that’s fast, affordable and guided by AI."}
+              ? "Watu wenye vipaji wanakosa fursa si kwa sababu hawana sifa, bali kwa sababu maombi yao yanachujwa kabla ya mtu kuyaona — picha iliyopigwa skana ya CV, muundo usiosomeka, au kutokuwa na barua ya maombi kabisa. Tuliamua kurekebisha hilo: kumpa kila mtu zana ambazo washauri wa kazi hutoza pesa, kwa njia ambayo ni ya haraka, nafuu na yenye msaada wa kuandika."
+              : "Talented people everywhere miss opportunities not because they aren’t qualified, but because their application gets filtered out before a person ever sees it — a scanned photo of a CV, an unreadable layout, or no cover letter at all. We set out to fix that: give everyone the tools that expensive career coaches charge for, in a form that’s fast, affordable and comes with writing help."}
           </p>
         </div>
 

@@ -53,24 +53,24 @@ describe("computeSignals", () => {
   });
 
   // A fact derived from a CV (or from the editor) is stamped needs-confirmation
-  // too — the copy must not tell the user Sumaiya drafted it "from your chat"
+  // too — the copy must not tell the user she drafted it "from our chat"
   // when no chat ever happened, and must not say it in Swahili either.
   it("does not claim a chat when the pending fact came from a CV", () => {
     const ctx = baseCtx();
     ctx.unconfirmed = [{ key: "summary", section: "summary", field: "summary", label: { en: "S", sw: "S" }, value: "v", source: "cv:abc-123" }];
     const sig = computeSignals(ctx, NOW)[0];
     expect(sig.type).toBe("confirmations");
-    expect(sig.detail.en.toLowerCase()).not.toContain("from your chat");
+    expect(sig.detail.en.toLowerCase()).not.toContain("from our chat");
     expect(sig.detail.sw.toLowerCase()).not.toContain("mazungumzo");
     // and it still says what to do
     expect(sig.detail.en.toLowerCase()).toContain("confirm");
   });
 
-  it("still says 'from your chat' when the fact really did come from a conversation", () => {
+  it("still says 'from our chat' when the fact really did come from a conversation", () => {
     const ctx = baseCtx();
     ctx.unconfirmed = [{ key: "summary", section: "summary", field: "summary", label: { en: "S", sw: "S" }, value: "v", source: "conversation" }];
     const sig = computeSignals(ctx, NOW)[0];
-    expect(sig.detail.en.toLowerCase()).toContain("from your chat");
+    expect(sig.detail.en.toLowerCase()).toContain("from our chat");
     expect(sig.detail.sw.toLowerCase()).toContain("mazungumzo");
   });
 

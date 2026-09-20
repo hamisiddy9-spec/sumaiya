@@ -44,15 +44,20 @@ function PathCard({
   title,
   hint,
   active,
+  primary,
   onPress,
 }: {
   icon: string;
   title: string;
   hint: string;
   active?: boolean;
+  /** The leading path (our listings): filled, so it reads as the default. */
+  primary?: boolean;
   onPress: () => void;
 }) {
   const c = useThemeColors();
+  const fg = primary ? c.accentText : c.text;
+  const sub = primary ? c.accentText : c.textMuted;
   return (
     <Pressable
       onPress={onPress}
@@ -61,22 +66,22 @@ function PathCard({
       accessibilityState={{ selected: !!active }}
       style={{
         borderWidth: 1.5,
-        borderColor: active ? c.accent : c.border,
-        backgroundColor: active ? c.accent + "12" : c.bgElevated,
+        borderColor: c.accent,
+        backgroundColor: primary ? c.accentFill : active ? c.accent + "12" : c.bgElevated,
         borderRadius: 14,
         padding: 12,
         marginBottom: 8,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
-          <Icon name={icon} size={19} color={c.accent} />
+        <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: primary ? "rgba(255,255,255,0.22)" : c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+          <Icon name={icon} size={19} color={primary ? c.accentText : c.accent} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{title}</Text>
-          <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }}>{hint}</Text>
+          <Text style={{ color: fg, fontSize: 15, fontWeight: "700" }}>{title}</Text>
+          <Text style={{ color: sub, fontSize: 12.5, marginTop: 2, opacity: primary ? 0.9 : 1 }}>{hint}</Text>
         </View>
-        {active ? <Icon name="check" size={18} color={c.accent} /> : null}
+        {active ? <Icon name="check" size={18} color={fg} /> : null}
       </View>
     </Pressable>
   );
@@ -203,7 +208,7 @@ export function JobChoiceSheet({
         }}
       >
         <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 14 }} />
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginHorizontal: 8, marginBottom: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginHorizontal: 8, marginBottom: 4 }}>
           <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>
             {t("Which job do you want to aim at?", "Unataka kulenga kazi ipi?")}
           </Text>
@@ -211,6 +216,13 @@ export function JobChoiceSheet({
             <Icon name="x" size={18} color={c.textMuted} />
           </Pressable>
         </View>
+        {/* The approved design's line: our listings lead, your own is one tap away. */}
+        <Text style={{ color: c.textBody, fontSize: 12.5, marginHorizontal: 8, marginBottom: 10, lineHeight: 18 }}>
+          {t(
+            "Sure. Which job do you want to aim at — choose from our listings, or use your own?",
+            "Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?",
+          )}
+        </Text>
 
         <ScrollView bounces={false} keyboardShouldPersistTaps="handled">
           {oursFirst ? (
@@ -219,6 +231,7 @@ export function JobChoiceSheet({
               title={t("Choose one of our listings", "Chagua kutoka kwenye kazi zetu")}
               hint={t("Real openings we have right now.", "Nafasi za kazi zilizopo sasa.")}
               active={path === "ours"}
+              primary
               onPress={() => { haptics.selection(); setPath(path === "ours" ? null : "ours"); setNotice(""); }}
             />
           ) : null}
@@ -226,7 +239,7 @@ export function JobChoiceSheet({
           <PathCard
             icon="link"
             title={t("Use your own job", "Weka kazi yako mwenyewe")}
-            hint={t("Paste the advert you saw, or its link.", "Bandika tangazo la kazi uliyoiona, au kiungo chake.")}
+            hint={t("Paste the advert, or its link.", "Bandika tangazo, au kiungo chake.")}
             active={path === "own"}
             onPress={() => { haptics.selection(); setPath("own"); onOwnSource(); }}
           />
@@ -273,14 +286,24 @@ export function JobChoiceSheet({
               ) : null}
 
               {phase === "empty" ? (
-                <Text style={{ color: c.textBody, fontSize: 13, paddingTop: 10 }}>
-                  {rows === null || q.trim()
-                    ? t(
-                        `Nothing matches “${q.trim()}”. Try another word, or use your own job.`,
-                        `Hakuna kazi inayolingana na “${q.trim()}”. Jaribu neno lingine, au weka kazi yako mwenyewe.`,
-                      )
-                    : t("No openings are listed right now. Use your own job.", "Hakuna nafasi za kazi zilizoorodheshwa sasa. Weka kazi yako mwenyewe.")}
-                </Text>
+                <View style={{ paddingTop: 10 }}>
+                  <Text style={{ color: c.textBody, fontSize: 13, marginBottom: 10 }}>
+                    {rows === null || q.trim()
+                      ? t(
+                          `Nothing matches “${q.trim()}”. Try another word, or use your own job.`,
+                          `Hakuna kazi inayolingana na “${q.trim()}”. Jaribu neno lingine, au weka kazi yako mwenyewe.`,
+                        )
+                      : t("No openings are listed right now. Use your own job.", "Hakuna nafasi za kazi zilizoorodheshwa sasa. Weka kazi yako mwenyewe.")}
+                  </Text>
+                  {/* The escape hatch, not just the words for it: a search that
+                      finds nothing must never dead-end. */}
+                  <Button
+                    label={t("Use your own job", "Weka kazi yako mwenyewe")}
+                    variant="secondary"
+                    size="sm"
+                    onPress={() => { haptics.selection(); setPath("own"); onOwnSource(); }}
+                  />
+                </View>
               ) : null}
 
               {phase === "ready"

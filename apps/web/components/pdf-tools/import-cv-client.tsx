@@ -82,7 +82,7 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
     ready: sw ? "Tayari kuingizwa" : "Ready to import",
     reading: sw ? "Inasoma faili…" : "Reading your file…",
     ocr: sw ? "Inasoma picha (OCR)" : "Reading the image (OCR)",
-    understanding: sw ? "AI inaelewa CV yako…" : "AI is understanding your CV…",
+    understanding: sw ? "Ninaichambua CV yako…" : "Working out what is in your CV…",
     opening: sw ? "Inafungua kihariri…" : "Opening the editor…",
     // Per-failure messages — never collapse everything into one generic error,
     // so the user knows what to actually do next.
@@ -102,11 +102,11 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
       ? "Tumeshindwa kusoma maandishi ya PDF hii. Hakikisha si iliyoskaniwa."
       : "We couldn't read this PDF's text. Make sure it isn't a scan.",
     aiOff: sw
-      ? "Huduma ya AI haipatikani kwa sasa. Jaribu tena baadaye."
-      : "The AI service is unavailable right now. Please try again later.",
+      ? "Siwezi kufanya hivi kwa sasa. Jaribu tena baadaye."
+      : "I can't do this right now. Please try again later.",
     aiBusy: sw
-      ? "AI ina shughuli nyingi kwa sasa. Subiri dakika moja kisha ujaribu tena."
-      : "The AI is busy right now. Wait a minute and try again.",
+      ? "Nina shughuli nyingi kwa sasa. Subiri dakika moja kisha ujaribu tena."
+      : "I'm busy right now. Wait a minute and try again.",
     timeout: sw
       ? "Imechukua muda mrefu mno. Jaribu tena — mara nyingi hufaulu mara ya pili."
       : "This is taking too long. Please try again — it usually works on a second attempt.",
@@ -116,8 +116,8 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
     failed: sw ? "Imeshindikana. Jaribu tena." : "Something went wrong. Please try again.",
     go: sw ? "Igeuze kuwa CV unayoweza kuhariri" : "Convert to an editable CV",
     steps: sw
-      ? ["Pakia PDF", "AI inasoma", "Hariri & pakua"]
-      : ["Upload PDF", "AI reads it", "Edit & export"],
+      ? ["Pakia PDF", "Ninasoma", "Hariri & pakua"]
+      : ["Upload PDF", "I read it", "Edit & export"],
   };
 
   const [file, setFile] = useState<File | null>(null);

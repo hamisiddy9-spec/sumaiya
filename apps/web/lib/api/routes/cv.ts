@@ -8,6 +8,7 @@ import { nanoid, customAlphabet } from "nanoid";
 import { recordExport } from "@/lib/documents/export-ledger";
 import { createHash } from "node:crypto";
 import { parseCvLoose } from "@/lib/career-profile/mapper";
+import { repairCvArraySections } from "@/types";
 import { seedProfileFromCv } from "@/lib/career-profile/sync";
 import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 
@@ -100,12 +101,24 @@ async function mintPublicSlug(fullName: string, title: string): Promise<string> 
   return `cv-${slugSuffix()}${slugSuffix()}`;
 }
 
+/**
+ * `data` arrives from four clients and every one of them can get one scalar
+ * wrong. A bare `z.record(z.unknown())` accepted ANY shape while the renderer
+ * could only read some of them — a skill stored without `level` was accepted
+ * here and then dropped on every read, which deleted the whole Skills section
+ * from the CV and from the PDF's ATS text layer (docs/QA-IO-MATRIX-2026-09-20.md
+ * D8). This repairs the seven known array sections at the boundary under the
+ * same row rule `parseCVData` uses, so the stored shape is always one the
+ * renderer can read and the defect cannot be reintroduced from a client.
+ */
+const cvDataPayloadSchema = z.record(z.unknown()).transform((d) => repairCvArraySections(d));
+
 const cvUpdateSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   templateId: z.string().optional(),
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   fontFamily: z.string().optional(),
-  data: z.record(z.unknown()).optional(),
+  data: cvDataPayloadSchema.optional(),
   status: z.enum(["draft", "complete"]).optional(),
 });
 
@@ -114,7 +127,7 @@ const cvCreateSchema = z.object({
   templateId: z.string().optional(),
   primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
   fontFamily: z.string().optional(),
-  data: z.record(z.unknown()).optional(),
+  data: cvDataPayloadSchema.optional(),
   // Optional idempotency key from the guest-CV migration flow. When present the
   // new CV's id is derived deterministically from (userId, clientId), so a
   // retried migration (lost response, back-nav, double-invoked effect) creates

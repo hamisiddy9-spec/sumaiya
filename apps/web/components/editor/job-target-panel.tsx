@@ -102,7 +102,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { keywords?: AiKeyword[] }; error?: string };
       if (!res.ok || !json.success || !json.data?.keywords?.length) {
-        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji wa AI. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the AI match. Showing the quick match instead."));
+        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
       } else {
         setAiKeywords(json.data.keywords);
         setAnalyzed(true);
@@ -260,7 +260,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
             className="flex-1"
           >
             <Icon name="magic" size={14} />
-            {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha kwa AI" : "Smart match")}
+            {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
           </Button>
         </div>
         {aiError && <p className="text-[10px] text-gold-text mt-1.5">{aiError}</p>}
@@ -341,8 +341,8 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                 <>
                   <p className="text-[10px] text-text-muted mb-2.5">
                     {sw
-                      ? "AI itaandika upya muhtasari wako na sehemu za uzoefu kuangazia yanayolingana na kazi hii — kwa ukweli, kutoka ulichonacho. Haitatunga uongo."
-                      : "AI rewrites your summary and experience bullets to match this job — truthfully, from what you already have. It invents nothing."}
+                      ? "Nitaandika upya muhtasari wako na sehemu za uzoefu kuangazia yanayolingana na kazi hii — kwa ukweli, kutoka ulichonacho. Sitabuni kitu."
+                      : "I rewrite your summary and experience bullets to match this job — truthfully, from what you already have. I invent nothing."}
                   </p>
                   <Button onClick={handleTailorCv} disabled={tailorCvBusy || !jd.trim()} size="sm" className="w-full">
                     <Icon name="magic" size={14} />
@@ -367,7 +367,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                     <div className={`border rounded-input px-3 py-2 space-y-1.5 ${tailorConfirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
                       <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
                         <Icon name="alert-triangle" size={11} className="shrink-0" />
-                        {sw ? "Haya hayapo kwenye CV yako — yameongezwa na AI. Thibitisha kama ni kweli:" : "These aren't in your CV — AI added them. Confirm if true:"}
+                        {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
                       </p>
                       <ul className="space-y-0.5">
                         {tailorEvidence.map((c, i) => (
@@ -422,10 +422,10 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
             <div className="bg-card rounded-card p-4 border border-border">
               <div className="flex items-center gap-2 mb-2.5">
                 <Icon name="magic" size={14} className="text-ember" />
-                <span className="text-xs font-semibold text-espresso">{sw ? "Boresha muhtasari kwa AI" : "Tailor summary with AI"}</span>
+                <span className="text-xs font-semibold text-espresso">{sw ? "Boresha muhtasari" : "Tailor summary"}</span>
               </div>
               {!data.summary.trim() ? (
-                <p className="text-[10px] text-text-muted">{sw ? "Andika muhtasari wa kitaalamu kwanza, kisha AI itauandika upya kulenga kazi hii." : "Write a professional summary first, then AI can rewrite it to target this job."}</p>
+                <p className="text-[10px] text-text-muted">{sw ? "Andika muhtasari wa kitaalamu kwanza, kisha nitaandika upya kulenga kazi hii." : "Write a professional summary first, then I can rewrite it to target this job."}</p>
               ) : (
                 <>
                   <p className="text-[10px] text-text-muted mb-2.5">{sw ? "Andika upya muhtasari wako kujumuisha mahitaji muhimu ya kazi hii — kwa ukweli, kutoka ulichonacho." : "Rewrite your summary to weave in this job’s key requirements — truthfully, from what you already have."}</p>

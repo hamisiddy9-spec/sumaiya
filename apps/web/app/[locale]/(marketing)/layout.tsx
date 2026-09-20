@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     ? "Tengeneza CV Bila Malipo — Kwa Kiswahili"
     : "Sumaiya — write a CV that reaches the employer";
   const description = sw
-    ? "Andika CV yako kwa Kiswahili, kwenye simu yako, bila malipo. Bandika tangazo la kazi na Sumaiya anakusaidia kuandika CV inayolingana nalo — kisha pakua PDF yako bila akaunti."
-    : "Write your CV in Swahili or English, on your phone, free. Paste the job advert and Sumaiya helps you write the CV that matches it — then download your PDF with no account.";
+    ? "Andika CV yako kwa Kiswahili, kwenye simu yako, bila malipo. Bandika tangazo la kazi nami nitakuandikia CV inayolingana nalo — kisha pakua PDF yako bila akaunti."
+    : "Write your CV in Swahili or English, on your phone, free. Paste the job advert and I'll write the CV that matches it — then download your PDF with no account.";
   const keywords = sw
     ? ["tengeneza CV", "kutengeneza CV", "jinsi ya kutengeneza CV", "CV bila malipo", "msaidizi wa CV AI", "AI ya kutengeneza CV", "barua ya maombi ya kazi", "kadi ya biashara", "barua rasmi", "mfano wa CV", "CV ya kazi", "wasifu", "template ya CV", "CV builder", "resume builder"]
     : ["AI CV assistant", "AI resume writer", "CV", "resume", "cover letter", "business card", "formal letter", "ATS checker", "job application", "get hired"];
