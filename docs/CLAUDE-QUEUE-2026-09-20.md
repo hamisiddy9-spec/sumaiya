@@ -146,6 +146,197 @@ where neither environment was considered - forms, tables, modals, the editor can
 template picker, error and empty states, and anything described as "responsive" that is
 merely unstyled.
 
+**THE FULL BRIEF, THE AUDIT AND THE NUMBERS ARE IN
+`docs/RESPONSIVE-STANDARD-2026-09-20.md`.** Read that document before starting
+anything below; every item here cites a section of it. **Sections 0.7.1–0.7.5
+are the implementable work.** Do them in order — 0.7.1 alone removes the user's
+actual complaint.
+
+#### 0.7.1. Kill the "illustrations of boxes" — the skeleton system (doc §A.3, §A.4)
+
+**The defect, with lines:** the loading states are abstract boxes, not the page
+that is coming. Worst instance:
+`apps/web/components/dashboard/dashboard-skeleton.tsx:5` — **nine** placeholder
+cards (A4-shaped grey rectangle + 2 bars each) in a `grid-cols-2` on a phone.
+Second instance: `apps/web/app/(app)/loading.tsx:7`,
+`apps/web/app/[locale]/loading.tsx:10` and
+`apps/web/app/[locale]/(marketing)/loading.tsx:11` render a **2px bar over an
+empty page** (NN/g's documented anti-pattern, doc §0). Third:
+`apps/web/app/(app)/(auth)/sign-in/sign-in-form.tsx:389` is a `<Suspense>` **with
+no `fallback`** → the sign-in body is blank until hydration. Fourth:
+`apps/web/app/(app)/(dashboard)/editor/loading.tsx:9` and
+`apps/web/app/(app)/editor/loading.tsx:9` show a bar over an empty page for the
+app's heaviest screen.
+
+**Build:**
+
+1. **`components/ui/skeleton.tsx` — rewrite** around `<Sk/>`, `<SkText lines/>`,
+   `<SkBox ratio/>`, `<SkShimmer>`; keep the current exports
+   (`Skeleton`, `CardSkeleton`, `GridSkeleton`) as aliases so no caller breaks.
+   Geometry must be copied from the real component and named in a comment
+   (`// mirrors components/dashboard/dashboard-cv-grid.tsx:110`).
+2. **One shimmer:** move `.skeleton-shimmer` into `app/globals.css` as the single
+   sweep (§A.3.2 has the exact keyframes, 1.4s linear, `background-position`,
+   `contain: content`, reduced-motion holds static). **Do not add
+   `animate-pulse` to any skeleton** — `globals.css:87-91` already owns the right
+   class (`.skeleton`) and nothing uses it. Replace the four bare `animate-pulse`
+   stand-ins: `dashboard-skeleton.tsx:9`, `settings/career-profile-card.tsx:139`,
+   `jobs/targeted-cv-drawer.tsx:275`, `editor/shared-profile-panel.tsx:142`.
+3. **`components/ui/async-slot.tsx` (new)** implementing the hand-off
+   (§A.3.3): `pending`, `children`, `minVisibleMs=300`, `holdMs=220`; exit with
+   the existing `.swap-out` (140ms) **while** the content enters with `.swap-in`
+   (300ms). `.swap-in` already exists (`globals.css:312`) and is used in three
+   places; **`.swap-out` exists (`:313`) and is used in none** — that is the
+   half-beat to finish. Zero layout shift is the acceptance criterion.
+4. **Per-screen skeletons, exactly as specified in §A.4**: auth (`A.4.1`),
+   job feed (`A.4.2`), dashboard — **3 cards below `md`, 6 at `md`, 8 at `xl`**
+   (`A.4.3`), templates picker replacing both `Loader2`s
+   (`template-picker.tsx:126`, `template-selection-modal.tsx:132`) (`A.4.4`),
+   **editor** (`A.4.5`, desktop = the real 290/flex/280 panes from
+   `cv-editor-client.tsx:3068,3118,3184`; mobile = preview pane + the real 56px
+   tri-tab bar), assistant transcript bubbles + real composer (`A.4.6`), settings
+   field rows (`A.4.7`), public CV keep + toolbar + shimmer (`A.4.8`),
+   applications/drawer (`A.4.9`), studio/snap/import/interview/voice (`A.4.10`).
+5. **Marketing routes keep the bar and get NO skeleton** except `/jobs`
+   (it is `force-dynamic`, `app/[locale]/(marketing)/jobs/page.tsx:26,44-50`) —
+   §A.4.11. Prerendered routes arrive in <1s (measured, doc §C.5); a skeleton
+   there would flash.
+6. **The two timing gates** (§A.6): `minVisibleMs=300` so a fast route never
+   flashes a skeleton, `holdMs=220` so a shown skeleton is never a one-frame
+   flash, and one line of real text + retry after 8s.
+7. **Accessibility:** skeleton shapes `aria-hidden="true"`, one `role="status"`
+   + Swahili label per group (not 40 announcements). Reduced motion collapses,
+   never removes (`app/globals.css:203-208` already does this — verify it covers
+   the new keyframes).
+
+**Acceptance:** at ~400 kbps / 400 ms RTT, screenshot each of the 12 surfaces at
+0.5 s / 1.5 s / 3 s — **no screenshot may show an empty content region**, and
+each must be recognisable as that screen. CLS = 0 on `/dashboard`, `/jobs`,
+`/cv/[slug]` at 390×844 and 1440×900. Report the screenshots.
+
+#### 0.7.2. Page and view transitions (doc §B)
+
+- `apps/web/app/(app)/(dashboard)/template.tsx:7` and
+  `apps/web/app/[locale]/template.tsx:8` currently apply the same `.route-enter`
+  to every navigation in the subtree — forward, back and lateral are visually
+  identical. Add direction: new `lib/nav-direction.ts` (path-depth comparison
+  plus a `popstate`/`router.back()` signal), and the three cases in §B.2 Rule 1
+  (deeper = 6px rise; back = reverse, 140ms; lateral tab switch = cross-fade
+  only, 220ms, no position change).
+- The pane animation must **not** wrap the scroll container (§B.2 Rule 5) — wrap
+  an inner element, so a restored scroll position is not animated.
+- **Nothing may depend on the View Transition API alone** (MDN: cross-document
+  transitions "have historically been impossible", and co-present old/new content
+  causes "loss of reading position, focus confusion, and strange live region
+  announcement behavior" — doc §B.2). Ship the CSS-class fallback first; add
+  `view-transition-name` as an enhancement only.
+- **Zero `framer-motion` `AnimatePresence` around a route**: CSS animation on a
+  mounted node is interruptible by construction; a queued exit is not.
+- `components/ui/route-progress.tsx:14` is `role="status" aria-live="polite"`
+  (correct) but its 2px bar is `position: fixed; top: 0` — it must not sit under
+  the sticky header; render it inside the content shell with
+  `top: 0` of the shell, or offset by `var(--safe-t)`.
+
+#### 0.7.3. The template picker → editor entry (doc §B.2 Rule 4)
+
+The strongest affordance in the product (a page-shaped thumbnail) leads to the
+emptiest response (a bar over a blank screen). Make it origin-aware: the tapped
+thumbnail and the editor's new A4-shaped skeleton **occupy the same box**, so the
+page travels from thumbnail size to page size, then the real canvas
+`.swap-in`s over the skeleton. Reduced motion: replaced in place, no scale.
+Files: `components/editor/template-picker.tsx`,
+`components/editor/template-selection-modal.tsx`,
+`app/(app)/(dashboard)/editor/loading.tsx`,
+`app/(app)/(dashboard)/editor/cv/[id]/page.tsx:44-45`.
+
+#### 0.7.4. Two environments, not one stretched layout (doc §D)
+
+1. **Breakpoint rules bind:** `md` 768 / `lg` 1024 / `xl` 1280 / **`2xl` 1536
+   (currently 0 uses app-wide)**; no ad-hoc media queries; no `max-sm:`/`max-md:`;
+   layout changes only at those rungs (doc §D.1).
+2. **Fix the landscape-phone zoom bug:** `app/globals.css:262` keys the 16px
+   input rule off `max-width: 767px`, so a phone in landscape (844×390) still
+   zooms on focus (css-tricks, doc §C.1.4). Re-key it to
+   `(hover: none) and (pointer: coarse)`.
+3. **`h-screen`/`100vh` → `dvh`** on anything that fills the visual viewport
+   (41 occurrences; `dvh` is already used 18 times, e.g.
+   `cv-editor-client.tsx:893`). `min-h-screen` on the page wrapper → `min-h-dvh`.
+4. **Safe-area tokens:** add `--safe-t/-b/-l/-r`, `--tabbar-h: 56px`,
+   `--tabbar` to `app/globals.css`; replace the magic `pb-28`
+   (`app/(app)/cv/[slug]/loading.tsx:7`) and the repeated raw `env()` calls.
+5. **Mobile-web navigation (doc §D.4):** keep the five-slot bottom bar
+   (`components/dashboard/mobile-tab-bar.tsx:26-66`); give the **marketing routes
+   a 3-slot bottom bar** (today they have only a top-right hamburger,
+   `components/ui/marketing-nav.tsx:151` — the least reachable corner for the 49%
+   who use one hand); bump every tab to `min-height: 48px` (the create pill at
+   `:156` is a 36px `h-9 w-9` span); make the editor's own 56px tri-tab bar
+   (`cv-editor-client.tsx:3692`) visually consistent with the main bar instead of
+   being a second navigation language.
+6. **Desktop IA (doc §D.3):** the editor keeps three panes and gains a `2xl`
+   width; the templates picker gets a persistent family rail (today the family
+   chips scroll the grid off screen); the dashboard goes 5–6 up at `2xl`; the job
+   feed gets list + detail at `2xl`; the assistant gets a context rail at `lg:`
+   (the data is already assembled server-side,
+   `app/(app)/assistant/page.tsx:52-56`). **Settings, auth, the public CV and
+   marketing copy stay centred — they do not earn width.**
+7. **Hover is a capability, not a default (doc §D.5):** 692 `hover:` uses vs 59
+   `focus-visible:` in `apps/web`. Any state that is *only* available on hover is
+   a defect; wrap desktop-only flourishes in
+   `@media (hover: hover) and (pointer: fine)` and give every interactive element
+   a `:focus-visible` ring (WCAG 2.4.11, doc §C.2.2).
+8. **`<= 11px` text is below the floor** — `mobile-tab-bar.tsx:180` and
+   `shared-profile-panel.tsx:142` are 10px (Apple's minimum is 11pt, doc §C.1.2/§D.7).
+
+#### 0.7.5. The gaps the audit found (doc §E)
+
+- **Empty states:** `components/ui/empty-state.tsx` is used in only two places;
+  every grid's empty case is ad-hoc or absent, and its action button has no
+  `focus-visible` (`:24`). Make it the only empty treatment (4 variants) and let
+  it arrive with `.swap-in` like content.
+- **Error states are English.** `app/global-error.tsx` is a bare inline-styled
+  page (`#fff`, `100vh`, `lang="en"`, "Something went wrong") in a
+  **Swahili-first** product; `app/[locale]/error.tsx:33` picks its language with
+  `document.cookie.includes("lang=sw")` — a substring test that works by luck.
+  Give both the same two-environment treatment (short thumb-reachable retry on
+  mobile; digest visible/copyable at `md:+`) and real Swahili.
+- **Forms:** 14 `<form>` / 90 `<label>` but only **2** `aria-invalid`/
+  `aria-describedby` combined, and **no `inputmode` anywhere** — the phone
+  keyboard is wrong for every numeric field in the editor (doc §C.1.4, §E.1).
+  Add `inputmode` (`tel`, `email`, `numeric`, `url`), `enterkeyhint`, and
+  programmatic error association; two-column field rows at `md:`.
+- **Modals:** 25 `fixed inset-0` surfaces, only 7 files with `aria-modal`, and
+  **zero** focus traps. Build one `<Sheet>` (below `md`) + one `<Dialog>`
+  (`md:+`) with focus trap, `role="dialog"`, `aria-labelledby`, Escape, scroll
+  lock (`lib/hooks/use-body-scroll-lock` exists), `max-h-[90dvh]`.
+- **Admin tables:** `app/(app)/admin/page.tsx:78` has no overflow wrapper while
+  `admin/users/page.tsx:47,51` does — build one `<DataTable>` (table at `md:`,
+  labelled cards below) and use it everywhere.
+- **The editor canvas on a phone is unreadable** (doc §E.2): an A4 page designed
+  at 794px scaled into ~350px renders 12px CV text at ~5px. Ship a
+  read-at-full-size mode + guaranteed pinch-zoom (`touch-action` is undeclared —
+  0 occurrences app-wide). This is the biggest non-skeleton mobile defect.
+- **Print:** 0 `print:` rules app-wide; `Ctrl+P` prints the app chrome. Add
+  `@media print` to the public CV and the editor preview (sheet only, A4
+  794×1123).
+- **Multi-tab:** silent last-writer-wins. `BroadcastChannel` notice, as a small
+  item, not now.
+
+#### 0.7.6. Numbers to pin, and how this is verified
+
+- Put the breakpoint/target numbers behind a test the way motion is pinned
+  (extend `apps/web/lib/ui-tokens.test.ts`, the existing home for token tests —
+  do not add a parallel file): breakpoints, `--tabbar-h`, 44px target minimum,
+  11px text minimum, `minVisibleMs=300` / `holdMs=220`.
+- Verification gates are listed in full in doc §F.1 (screenshots at 360/414/640/
+  768/1024/1280/1536/1920/2560 with no horizontal page scroll; the two-frame
+  interpolation test; CLS = 0; a 44×44 hit-box sweep at 390×844; keyboard-only
+  pass; 200% zoom at 360px; print).
+- **Do not change any number in `docs/MOTION-STANDARD-2026-09-20.md`** — the
+  timings reused here (140/220/300ms) are that standard's existing tokens
+  (`dur.fast`/`dur.base`/`dur.slow`), and they are mirrored in
+  `apps/native/src/components/ui/motion.tsx` + `apps/web/lib/motion.ts` and
+  pinned by tests. Reuse, do not redefine.
+
 ### 0.8. PROFILE PHOTO WITH CAMERA, GUIDES, AND AI ADJUSTMENT — all versions
 **User's words:** *"thought a take profile picture and AI adjust so camera and guides for a good profile photo feature research and add to list for all versions"*
 
