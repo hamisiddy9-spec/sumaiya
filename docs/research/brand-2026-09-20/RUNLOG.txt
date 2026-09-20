@@ -1,0 +1,9 @@
+START a-market 18:18:57
+PASS a-market exit=0 bytes=26902 18:24:27
+START b-structure 18:24:27
+PASS b-structure exit=0 bytes=20790 18:27:40
+START c-stranger-read 18:27:40
+PASS c-stranger-read exit=0 bytes=10091 18:30:45
+START d-voice 18:30:45
+PASS d-voice exit=0 bytes=29020 18:36:05
+ALLDONE

@@ -13,12 +13,16 @@ import { alternatesFor } from "@/lib/seo";
 // its children are statically prerendered at build time.
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
+  // The description is what a WhatsApp link preview shows, so it is the most
+  // forwarded string this product owns — it must not name the mechanism in
+  // Swahili. It used to read "Miundo inayopita ATS", which the lint pattern
+  // missed (it looks for a preposition before "ATS"; "inayopita ATS" has none).
   const title = sw
-    ? "Jukwaa la Ajira lenye AI — Tengeneza CV Bila Malipo"
-    : "Sumaiya — AI Career Platform: CV, Jobs & Interview Prep";
+    ? "Tengeneza CV Bila Malipo — Kwa Kiswahili"
+    : "Sumaiya — write a CV that reaches the employer";
   const description = sw
-    ? "Ongea na msaidizi wa AI kwa Kiswahili au Kiingereza akuandikie CV, barua ya maombi, kadi ya biashara au barua rasmi kwa dakika — bila malipo. Miundo inayopita ATS, upakuaji wa PDF."
-    : "Chat with an AI assistant in English or Swahili to create your CV, cover letter, business card or formal letter in minutes — free. ATS-ready templates, PDF download.";
+    ? "Andika CV yako kwa Kiswahili, kwenye simu yako, bila malipo. Bandika tangazo la kazi na Sumaiya anakusaidia kuandika CV inayolingana nalo — kisha pakua PDF yako bila akaunti."
+    : "Write your CV in Swahili or English, on your phone, free. Paste the job advert and Sumaiya helps you write the CV that matches it — then download your PDF with no account.";
   const keywords = sw
     ? ["tengeneza CV", "kutengeneza CV", "jinsi ya kutengeneza CV", "CV bila malipo", "msaidizi wa CV AI", "AI ya kutengeneza CV", "barua ya maombi ya kazi", "kadi ya biashara", "barua rasmi", "mfano wa CV", "CV ya kazi", "wasifu", "template ya CV", "CV builder", "resume builder"]
     : ["AI CV assistant", "AI resume writer", "CV", "resume", "cover letter", "business card", "formal letter", "ATS checker", "job application", "get hired"];
@@ -53,7 +57,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: "Sumaiya — Professional CV & document builder with an AI assistant",
+          alt: "Sumaiya — write a CV that reaches the employer, in Swahili",
         },
       ],
     },

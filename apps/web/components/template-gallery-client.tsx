@@ -26,6 +26,7 @@ import {
 import { PremiumTemplateModal } from "@/components/premium-template-modal";
 import { usePremium } from "@/lib/use-premium";
 import { INTER_STACK } from "@/lib/fonts";
+import { getSampleCV } from "@/lib/sample-cv";
 
 // The gallery offers the curated, genuinely-distinct CV layouts (not every
 // recolor variant). Existing documents still render via the full registry.
@@ -34,127 +35,57 @@ const TEMPLATES = CURATED_CV_TEMPLATES;
 // Inline SVG avatar — darker skin tone, short natural hair
 const SAMPLE_PHOTO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8d5c0'/%3E%3Ccircle cx='100' cy='75' r='45' fill='%238B5E3C'/%3E%3Cellipse cx='100' cy='46' rx='32' ry='20' fill='%233D2314'/%3E%3Cpath d='M15 200 C15 148 55 130 100 130 C145 130 185 148 185 200Z' fill='%238B5E3C'/%3E%3C/svg%3E";
 
-// Rich sample data so every template looks fully populated
-const SAMPLE_CV: CVData = {
-  personal: {
-    fullName: "James Kariuki",
-    jobTitle: "Senior Software Engineer",
-    email: "james.kariuki@gmail.com",
-    phone: "+254 712 345 678",
-    location: "Nairobi, Kenya",
-    linkedin: "linkedin.com/in/jameskariuki",
-    website: "jameskariuki.dev",
-    photo: SAMPLE_PHOTO,
-  },
-  summary:
-    "Passionate software engineer with 7+ years of experience building scalable web applications for fintech and e-commerce. Expert in React, Node.js, and cloud infrastructure. Led teams of 8 engineers and delivered products used by 2M+ users worldwide.",
-  experience: [
-    {
-      id: "_x1",
-      company: "Zuri Fintech",
-      position: "Senior Software Engineer",
-      location: "Nairobi",
-      startDate: "2021-03",
-      endDate: "",
-      current: true,
-      description:
-        "Led development of a nationwide mobile-money platform serving 30M+ customers. Architected microservices reducing API latency by 60%. Mentored 5 junior engineers and established code review standards.",
-    },
-    {
-      id: "_x2",
-      company: "Kito Labs",
-      position: "Software Engineer",
-      location: "Remote",
-      startDate: "2018-06",
-      endDate: "2021-02",
-      current: false,
-      description:
-        "Built React frontend for enterprise SaaS product serving 200+ B2B clients. Improved test coverage from 40% to 92%. Collaborated across 3 time zones with US-based product team.",
-    },
-    {
-      id: "_x3",
-      company: "Baraka Payments",
-      position: "Junior Developer",
-      location: "Nairobi",
-      startDate: "2016-09",
-      endDate: "2018-05",
-      current: false,
-      description:
-        "Developed payment gateway integrations for 12 African countries. Maintained RESTful APIs processing $50M+ monthly transactions.",
-    },
-  ],
-  education: [
-    {
-      id: "_ed1",
-      institution: "University of Nairobi",
-      degree: "B.Sc.",
-      field: "Computer Science",
-      startDate: "2012-09",
-      endDate: "2016-06",
-      grade: "First Class Honours",
-      description: "Thesis: Machine Learning for Mobile Money Fraud Detection.",
-    },
-  ],
-  skills: [
-    { id: "_s1", name: "React / Next.js", level: 5 },
-    { id: "_s2", name: "Node.js", level: 5 },
-    { id: "_s3", name: "TypeScript", level: 4 },
-    { id: "_s4", name: "PostgreSQL", level: 4 },
-    { id: "_s5", name: "AWS / GCP", level: 4 },
-    { id: "_s6", name: "Docker & Kubernetes", level: 3 },
-  ],
-  languages: [
-    { id: "_l1", name: "English", proficiency: "Native" },
-    { id: "_l2", name: "Swahili", proficiency: "Native" },
-    { id: "_l3", name: "French", proficiency: "Basic" },
-  ],
-  certifications: [
-    { id: "_c1", name: "AWS Solutions Architect", issuer: "Amazon Web Services", date: "2023-04", url: "" },
-    { id: "_c2", name: "Google Cloud Professional", issuer: "Google", date: "2022-11", url: "" },
-  ],
-  projects: [],
-  referees: [],
-  hobbies: "Open Source, Mentoring, Chess, Trail Running",
-  hiddenSections: [],
+// The gallery shows the SAME example CV as the homepage, from one shared
+// source (lib/sample-cv.ts). It used to carry its own third copy —
+// "James Kariuki", Nairobi, +254, University of Nairobi, 2M+ users — which the
+// brand review found on the live gallery and named as a Tanzanian reader's
+// reason to assume the product was not for her.
+const SAMPLE_CV_BY_LANG = {
+  en: { ...getSampleCV("en"), personal: { ...getSampleCV("en").personal, photo: SAMPLE_PHOTO } },
+  sw: { ...getSampleCV("sw"), personal: { ...getSampleCV("sw").personal, photo: SAMPLE_PHOTO } },
 };
 
 const SAMPLE_BUSINESS_CARD: BusinessCardData = {
-  name: "Amara Osei",
-  title: "Software Engineer",
-  company: "Zuri Fintech",
-  email: "amara@zurifintech.co.ke",
-  phone: "+254 712 345 678",
-  website: "amaraosei.dev",
-  address: "Nairobi, Kenya",
+  name: "Neema Joseph",
+  title: "Office Administrator",
+  company: "Kilimanjaro Retail Ltd",
+  email: "neema.joseph@gmail.com",
+  phone: "+255 712 345 678",
+  website: "linkedin.com/in/neemajoseph",
+  address: "Dar es Salaam, Tanzania",
 };
 
 const SAMPLE_LETTER: LetterData = {
   letterType: "reference",
   from: {
-    name: "Amara Osei",
-    title: "Engineering Manager",
-    company: "Zuri Fintech",
-    address: "Nairobi, Kenya",
-    email: "amara@zurifintech.co.ke",
+    name: "Neema Joseph",
+    title: "Office Administrator",
+    company: "Kilimanjaro Retail Ltd",
+    address: "Dar es Salaam, Tanzania",
+    email: "neema.joseph@gmail.com",
   },
   to: {
     name: "Hiring Manager",
-    company: "Google Africa",
+    company: "Pamoja Distributors",
   },
   date: "19 June 2025",
   subject: "Letter of Reference",
-  body: "I am pleased to write this letter of reference for a truly exceptional colleague.\n\nDuring their time at Zuri Fintech, they consistently demonstrated outstanding technical ability and leadership. Their contributions to our core platform were instrumental in scaling our services to millions of users worldwide.",
+  body: "I am pleased to write this letter of reference for a colleague I worked with closely.\n\nAt Kilimanjaro Retail she kept the daily sales, stock and staff records for a shop with twelve employees, and the weekly stock report was always ready before the manager asked for it. She is careful with money, calm with customers, and she trains new staff without being asked.",
   closing: "Yours sincerely",
 };
 
-// Sample Cover Letter data for gallery previews
-const SAMPLE_COVER_LETTER_CONTENT = `I am writing to express my strong interest in the Senior Product Manager position at Google. With 7+ years of experience in product strategy and development across the fintech industry, I bring a unique combination of technical depth and market insight.
+// Sample Cover Letter data for gallery previews.
+// Written for the same Tanzanian persona as the CV sample: an early-career
+// office administrator applying to a real-shaped local advert, not a 7-year
+// product manager writing to Google. The old sample was the second half of the
+// same relevance problem the CV sample had.
+const SAMPLE_COVER_LETTER_CONTENT = `I am writing to apply for the Office Administrator position advertised at your Dar es Salaam branch. I have three years of experience keeping sales, stock and staff records for a retail business, and I would like to bring that to your team.
 
-At Zuri Fintech, I led the M-Pesa Business API product from concept to launch, growing it to serve over 15,000 merchants across 6 countries. This required close collaboration with engineering, compliance, and partner success teams — exactly the cross-functional leadership this role demands.
+At Kilimanjaro Retail Ltd I keep the daily records for a shop with twelve employees and I prepare the weekly stock and sales report in Excel for the manager. Before that, at Pamoja Distributors, I served customers on the shop floor and balanced the till at closing, so I understand both the paperwork and the customer side of the business.
 
-I am particularly drawn to Google Africa's mission of building products that solve uniquely African challenges. My background in mobile money infrastructure and last-mile delivery logistics aligns directly with the problems you are solving.
+I completed a Diploma in Business Administration at VETA (NTA Level 6) in 2021 and I am comfortable working on my own initiative. I am available to start at short notice.
 
-I would welcome the opportunity to discuss how my experience can contribute to Google Africa's product roadmap.`;
+I would welcome the chance to discuss how I can support your office team.`;
 
 // Cover Letter: 794x1123 native; render at 200px wide
 const CL_SCALE = 200 / 794;
@@ -173,7 +104,7 @@ const LTR_PREVIEW_H = Math.round(1123 * LTR_SCALE); // ~ 283
 
 // Warm Confidence category pill styles
 const STYLE_CHIP: Record<string, { label: string; className: string }> = {
-  sidebar:  { label: "ATS-Friendly", className: "bg-pine-tint text-pine" },
+  sidebar:  { label: "Easy to read", className: "bg-pine-tint text-pine" },
   minimal:  { label: "Minimal",      className: "bg-sand text-text-body" },
   header:   { label: "Header",       className: "bg-pine-tint text-pine" },
   creative: { label: "Creative",     className: "bg-purple-tint text-purple-glow" },
@@ -182,7 +113,7 @@ const STYLE_CHIP: Record<string, { label: string; className: string }> = {
 
 // Swahili labels for the style categories (shared by chips + filters)
 const STYLE_LABEL_SW: Record<string, string> = {
-  sidebar: "ATS-Rafiki",
+  sidebar: "Inasomeka",
   minimal: "Sahili",
   header: "Kichwa",
   creative: "Kibunifu",
@@ -253,7 +184,7 @@ function PreviewCard({ template, cardScale, premium }: { template: typeof TEMPLA
             pointerEvents: "none",
           }}
         >
-          <Component data={SAMPLE_CV} primaryColor={template.previewColor} fontFamily={INTER_STACK} />
+          <Component data={SAMPLE_CV_BY_LANG[lang]} primaryColor={template.previewColor} fontFamily={INTER_STACK} />
         </div>
 
         {/* Hover overlay */}
@@ -468,7 +399,7 @@ function CoverLetterGalleryCard({ template }: { template: typeof COVER_LETTER_TE
             }}
           >
             <Component
-              senderName="James Kariuki"
+              senderName="Neema Joseph"
               senderTitle="Senior Software Engineer"
               recipientName="Hiring Manager"
               recipientCompany="Google Africa"

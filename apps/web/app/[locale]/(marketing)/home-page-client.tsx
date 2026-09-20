@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, type Ref } from "react";
+import { useState, useRef, useEffect, useMemo, type Ref } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,80 +18,21 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Footer } from "@/components/ui/footer";
 import { ScanToApp } from "@/components/marketing/scan-to-app";
 import { PDF_TOOL_LINKS, pdfToolHref } from "@/lib/pdf-tools-list";
-import { TESTIMONIALS, CVS_CREATED } from "@/lib/testimonials";
+import { getSampleCV } from "@/lib/sample-cv";
 import { INTER_STACK } from "@/lib/fonts";
 
-// ─── Sample CV data (Amara Osei) ──────────────────────────────────────────────
+// ─── Sample CV data ───────────────────────────────────────────────────────────
 
+// The example CV comes from the shared lib/sample-cv.ts, so the homepage, the
+// template gallery and the editor's "start from an example" flow cannot drift
+// apart. It used to be a second, hand-maintained copy of the same Kenyan persona
+// ("Amara Osei", Nairobi, +254) — which is exactly the trust problem the brand
+// review found: a stranger in Dar es Salaam saw a Nairobi phone number and
+// concluded the product was not for her. SAMPLE_PHOTO is all that is left here:
+// a decorative avatar with no person behind it.
 const SAMPLE_PHOTO =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23e8d5c0'/%3E%3Ccircle cx='100' cy='75' r='45' fill='%238B5E3C'/%3E%3Cellipse cx='100' cy='46' rx='32' ry='20' fill='%233D2314'/%3E%3Cpath d='M15 200 C15 148 55 130 100 130 C145 130 185 148 185 200Z' fill='%238B5E3C'/%3E%3C/svg%3E";
 
-const SAMPLE_CV: CVData = {
-  personal: {
-    fullName: "Amara Osei",
-    jobTitle: "Software Engineer",
-    email: "amara.osei@gmail.com",
-    phone: "+254 722 987 654",
-    location: "Nairobi, Kenya",
-    linkedin: "linkedin.com/in/amaraosei",
-    website: "amaraosei.dev",
-    photo: SAMPLE_PHOTO,
-  },
-  summary:
-    "Results-driven software engineer with 6+ years of experience designing and shipping scalable web applications for fintech and telecommunications. Skilled in React, Node.js, and cloud infrastructure. Led cross-functional teams of 6 engineers delivering products adopted by 1M+ users worldwide.",
-  experience: [
-    {
-      id: "_x1",
-      company: "Zuri Fintech",
-      position: "Software Engineer",
-      location: "Nairobi, Kenya",
-      startDate: "2020-05",
-      endDate: "",
-      current: true,
-      description:
-        "Architected and shipped key features for a nationwide mobile-money platform serving millions of users. Reduced API response latency by 55% through caching and query optimisation. Mentored 4 junior engineers and championed test-driven development practices.",
-    },
-    {
-      id: "_x2",
-      company: "Kito Labs",
-      position: "Full-Stack Developer",
-      location: "Remote",
-      startDate: "2017-08",
-      endDate: "2020-04",
-      current: false,
-      description:
-        "Built React frontends and Node.js APIs for enterprise SaaS clients across the US and Europe. Raised test coverage from 38% to 90%. Collaborated with distributed teams across 3 time zones to meet aggressive release schedules.",
-    },
-  ],
-  education: [
-    {
-      id: "_ed1",
-      institution: "University of Nairobi",
-      degree: "B.Sc.",
-      field: "Computer Science",
-      startDate: "2013-09",
-      endDate: "2017-06",
-      grade: "First Class Honours",
-      description: "Thesis: Fraud Detection in Mobile Money Networks Using Machine Learning.",
-    },
-  ],
-  skills: [
-    { id: "_s1", name: "React / Next.js", level: 5 },
-    { id: "_s2", name: "Node.js", level: 5 },
-    { id: "_s3", name: "TypeScript", level: 4 },
-    { id: "_s4", name: "PostgreSQL", level: 4 },
-    { id: "_s5", name: "AWS / GCP", level: 4 },
-  ],
-  languages: [{ id: "_l1", name: "English", proficiency: "Native" }],
-  certifications: [
-    { id: "_c1", name: "AWS Solutions Architect", issuer: "Amazon Web Services", date: "2023-04", url: "" },
-    { id: "_c2", name: "Google Cloud Professional", issuer: "Google", date: "2022-11", url: "" },
-  ],
-  projects: [],
-  referees: [],
-  hobbies: "Open Source, Mentoring, Chess, Trail Running",
-  hiddenSections: [],
-};
 
 // ─── Hero cycle templates ─────────────────────────────────────────────────────
 
@@ -115,11 +56,13 @@ function HeroCVPanel({
   color,
   opacity,
   floatDelay,
+  data,
 }: {
   templateId: TemplateId;
   color: string;
   opacity: number;
   floatDelay: string;
+  data: CVData;
 }) {
   const Component = HERO_TEMPLATE_COMPONENTS[templateId];
   return (
@@ -151,7 +94,7 @@ function HeroCVPanel({
           pointerEvents: "none",
         }}
       >
-        <Component data={SAMPLE_CV} primaryColor={color} fontFamily={INTER_STACK} />
+        <Component data={data} primaryColor={color} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -163,10 +106,12 @@ function TemplatePreview({
   templateId,
   primaryColor,
   scale,
+  data,
 }: {
   templateId: TemplateId;
   primaryColor: string;
   scale: number;
+  data: CVData;
 }) {
   const Component = HERO_TEMPLATE_COMPONENTS[templateId];
   const previewH = Math.round(1123 * scale);
@@ -184,7 +129,7 @@ function TemplatePreview({
           pointerEvents: "none",
         }}
       >
-        <Component data={SAMPLE_CV} primaryColor={primaryColor} fontFamily={INTER_STACK} />
+        <Component data={data} primaryColor={primaryColor} fontFamily={INTER_STACK} />
       </div>
     </div>
   );
@@ -192,13 +137,14 @@ function TemplatePreview({
 
 // One showcase cell that crossfades through its lane of templates on a timer.
 function CyclingCell({
-  lane, delayMs, intervalMs, scale, lang, innerRef,
+  lane, delayMs, intervalMs, scale, lang, data, innerRef,
 }: {
   lane: (typeof TEMPLATES)[number][];
   delayMs: number;
   intervalMs: number;
   scale: number;
   lang: "en" | "sw";
+  data: CVData;
   innerRef?: Ref<HTMLDivElement>;
 }) {
   const [idx, setIdx] = useState(0);
@@ -229,7 +175,7 @@ function CyclingCell({
             exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <TemplatePreview templateId={cur.id} primaryColor={cur.previewColor} scale={scale} />
+            <TemplatePreview templateId={cur.id} primaryColor={cur.previewColor} scale={scale} data={data} />
           </motion.div>
         </AnimatePresence>
       </div>
@@ -278,17 +224,17 @@ interface ProductItem {
 const PRODUCTS_EN: ProductItem[] = [
   {
     iconName: "cv",
-    title: "CV Builder",
-    desc: "47+ curated, ATS-optimized templates with live preview, AI writing suggestions, and one-click PDF download.",
-    count: "47+ curated looks",
+    title: "CV builder",
+    desc: "Write it once, aim it at the advert you are applying for, and download a PDF you own. Free.",
+    count: "47 looks",
     href: "/editor/cv/try",
     bgColor: "bg-ember-tint",
     iconColor: "text-ember",
   },
   {
     iconName: "mail",
-    title: "Cover Letters",
-    desc: "Write a cover letter that pairs with your CV. AI-powered content tailored to your job target.",
+    title: "Cover letters",
+    desc: "The letter that goes with your CV, written to match the same advert.",
     count: "27 looks",
     href: "/editor/cover-letter/try",
     bgColor: "bg-pine-tint",
@@ -296,8 +242,8 @@ const PRODUCTS_EN: ProductItem[] = [
   },
   {
     iconName: "card",
-    title: "Business Cards",
-    desc: "29 business card designs. Add your details, pick your color, download as PDF. Ready to print.",
+    title: "Business cards",
+    desc: "A card with your name, phone and email, ready to print or to send as a PDF.",
     count: "29 designs",
     href: "/editor/business-card/try",
     bgColor: "bg-gold-tint",
@@ -305,8 +251,8 @@ const PRODUCTS_EN: ProductItem[] = [
   },
   {
     iconName: "letter",
-    title: "Formal Letters",
-    desc: "Reference, application, resignation, and formal letters — professionally structured and ready to send.",
+    title: "Formal letters",
+    desc: "Application, reference and resignation letters in the format employers expect.",
     count: "17 looks",
     href: "/editor/letter/try",
     bgColor: "bg-purple-tint",
@@ -318,8 +264,8 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "cv",
     title: "Kuunda CV",
-    desc: "Miundo ya kitaalamu inayopita vichujio vya waajiri. Hakiki ya moja kwa moja, mapendekezo ya AI, PDF kamili.",
-    count: "Miundo 47+",
+    desc: "Andika mara moja, ilenge kwa tangazo la kazi unayoomba, kisha pakua PDF yako mwenyewe. Bure.",
+    count: "Miundo 47",
     href: "/editor/cv/try",
     bgColor: "bg-ember-tint",
     iconColor: "text-ember",
@@ -327,7 +273,7 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "mail",
     title: "Barua za Maombi",
-    desc: "Barua za maombi zinazovutia zinazolingana na CV yako. Inasaidiwa na AI, imeandikwa kwa ufundi.",
+    desc: "Barua inayoenda na CV yako, iliyoandikwa kwa tangazo hilo hilo.",
     count: "Miundo 27",
     href: "/editor/cover-letter/try",
     bgColor: "bg-pine-tint",
@@ -336,7 +282,7 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "card",
     title: "Kadi za Biashara",
-    desc: "Miundo 29 ya kadi za biashara za kitaalamu, iliyobinafsishwa kwa maelezo yako.",
+    desc: "Kadi yenye jina lako, simu na barua pepe, tayari kuchapishwa au kutumwa kama PDF.",
     count: "Miundo 29",
     href: "/editor/business-card/try",
     bgColor: "bg-gold-tint",
@@ -345,7 +291,7 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "letter",
     title: "Barua Rasmi",
-    desc: "Barua za mapendekezo, maombi, kujiuzulu, na barua rasmi 17 — za kitaalamu na ziko tayari kutumwa.",
+    desc: "Barua za maombi, mapendekezo na kujiuzulu — kwa muundo unaotarajiwa na waajiri.",
     count: "Miundo 17",
     href: "/editor/letter/try",
     bgColor: "bg-purple-tint",
@@ -475,22 +421,37 @@ export default function LandingPage() {
 
   const PRODUCTS = lang === "sw" ? PRODUCTS_SW : PRODUCTS_EN;
 
+  // The example CV follows the interface language, from the single shared source.
+  // The decorative avatar is merged in here rather than living in lib/sample-cv.ts,
+  // which is deliberately photo-less.
+  const SAMPLE_CV: CVData = useMemo(() => {
+    const cv = getSampleCV(lang as "en" | "sw");
+    return { ...cv, personal: { ...cv.personal, photo: SAMPLE_PHOTO } };
+  }, [lang]);
+
   // Landing FAQ — handles the common objections AND earns FAQ rich results.
+  //
+  // Ordered by what the stranger-read pass said the page hides: money, the
+  // account ask, whether it works on a bad connection, and where it is available.
+  // Every answer is checkable against the product today — notably, nothing here
+  // promises that an employer will reply.
   const FAQS = lang === "sw"
     ? [
-        { q: "Je, Sumaiya ni bure kweli?", a: "Ndiyo. Unaweza kuunda CV, barua ya maombi, kadi ya biashara au barua rasmi na kupakua PDF bila malipo — bila kadi ya benki." },
-        { q: "Je, CV zenu zinapita vichujio vya waajiri?", a: "Ndiyo. Miundo yetu imeundwa kuwa rahisi kusomwa na mifumo ya waajiri — safu moja, vichwa wazi, na PDF yenye maandishi halisi. Pia kuna kikagua CV bure cha kupima CV yako." },
-        { q: "Je, naweza kuitumia kwa Kiswahili?", a: "Ndiyo. Programu nzima inapatikana kwa Kiingereza na Kiswahili — badilisha wakati wowote kwa kitufe cha lugha." },
-        { q: "Je, ninahitaji kufungua akaunti?", a: "Unaweza kuanza kuunda CV mara moja bila akaunti. Unahitaji tu kuingia unapotaka kuhifadhi kazi yako mtandaoni au kuipata kwenye kifaa kingine." },
-        { q: "Je, naweza kuitumia popote duniani?", a: "Ndiyo. Imejengwa kwa waombaji kazi popote — miundo inayopita vichujio vya waajiri, ushauri wa msaidizi wa AI, na miundo inayofaa waajiri wa kimataifa." },
+        { q: "Je, Sumaiya ni bure kweli?", a: "Ndiyo. Unaunda CV yako na kupakua PDF bila kulipa kitu. Kwa sasa malipo hayajawashwa kabisa, ndiyo maana hutaona bei yoyote mahali popote." },
+        { q: "Je, ninahitaji kufungua akaunti?", a: "Hapana. Unaweza kuandika CV yako na kupakua faili lako bila akaunti. Unaingia tu ukitaka kuhifadhi kazi yako mtandaoni au kuipata kwenye simu nyingine." },
+        { q: "Je, inafanya kazi kwenye simu ya kawaida na bando la kawaida?", a: "Ndiyo. Hakuna cha kupakua, na PDF yako inatengenezwa ndani ya simu yako. Ukurasa wenyewe unahitaji mtandao mara moja ili ufunguke; baada ya hapo, kuandika na kupakua hakuhitaji bando lingine." },
+        { q: "Je, naweza kuitumia kwa Kiswahili?", a: "Ndiyo — Kiswahili ni lugha ya kwanza ya Sumaiya. Menyu, maelekezo, mfano wa CV na ukurasa huu wote vipo kwa Kiswahili, na Kiingereza kinapatikana ukitaka." },
+        { q: "Je, CV inaonekanaje kwa mwajiri?", a: "CV yako ina safu moja, vichwa wazi na maandishi halisi, ili mtu na programu ziweze kuisoma kwa urahisi. Hatuwezi kuahidi kuwa mwajiri atakujibu — hakuna zana inayoweza kuahidi hilo. Tunachoweza kuhakikisha ni kwamba CV yako inasomeka, ina sehemu zote mwajiri anazotafuta, na inalingana na tangazo uliloomba." },
+        { q: "Je, Sumaiya inapatikana wapi?", a: "Tunaanza Tanzania. Kutoka hapa tunapanua Afrika Mashariki na Afrika nzima. Kila kitu kinapatikana kwa Kiswahili na Kiingereza tangu sasa." },
         { q: "Je, naweza kupata faili la Word (DOCX)?", a: "Ndiyo. Mbali na PDF safi, unaweza kupakua CV yako kama faili la Word linalohaririwa." },
       ]
     : [
-        { q: "Is Sumaiya really free?", a: "Yes. You can build a CV, cover letter, business card or formal letter and download a polished PDF for free — no credit card required." },
-        { q: "Are your CVs ATS-friendly?", a: "Yes. Every template is built to be read cleanly by Applicant Tracking Systems — single column, clear headings, and a real text-layer PDF. There's also a free ATS checker to score your own CV." },
-        { q: "Can I use it in Swahili?", a: "Yes. The whole app is available in English and Swahili — switch any time with the language toggle." },
-        { q: "Do I need to create an account?", a: "You can start building a CV instantly with no account. You only sign in when you want to save your work online or pick it up on another device." },
-        { q: "Can I use it anywhere in the world?", a: "Yes. It's built for job seekers everywhere — ATS-friendly designs, AI-assistant guidance, and formats that work for employers worldwide." },
+        { q: "Is Sumaiya really free?", a: "Yes. You build your CV and download the PDF without paying anything. Payments are not switched on at all yet, which is why you will not see a price anywhere." },
+        { q: "Do I need to create an account?", a: "No. You can write your CV and download your file without one. You sign in only if you want to save your work online or pick it up on another phone." },
+        { q: "Does it work on a normal phone and a normal bundle?", a: "Yes. There is nothing to install, and your PDF is produced inside your phone. The page itself needs a connection once, to open; after that, typing and downloading do not need another bundle." },
+        { q: "Can I use it in Swahili?", a: "Yes — Swahili is Sumaiya's first language. The menus, the guidance, the example CV and this whole page exist in Swahili, with English available whenever you want it." },
+        { q: "How does a CV look to an employer?", a: "Single column, clear headings, real text — so a person and a screening program can both read it easily. We cannot promise that an employer will reply; no tool can promise that. What we can make sure of is that your CV is readable, has the sections employers look for, and matches the advert you applied to." },
+        { q: "Where is Sumaiya available?", a: "We are starting in Tanzania. From there we are expanding across East Africa and the rest of Africa. Everything is in Swahili and English today." },
         { q: "Can I get a Word (DOCX) file?", a: "Yes. Alongside a clean PDF, you can download your CV as an editable Word document." },
       ];
 
@@ -510,60 +471,84 @@ export default function LandingPage() {
             {/* Eyebrow pill */}
             <div className="inline-flex items-center gap-1.5 bg-ember-tint text-ember-hover font-mono text-[10px] font-semibold uppercase tracking-[2px] px-3 py-1 rounded-pill mb-6">
               <Icon name="bolt" size={12} className="text-ember" />
-              {lang === "sw" ? "MSAIDIZI WA AJIRA WA AI · AFRIKA MASHARIKI" : "AI CAREER ASSISTANT · EAST AFRICA"}
+              {lang === "sw" ? "KWA WATAFUTA KAZI — TANZANIA" : "FOR JOB SEEKERS — TANZANIA"}
             </div>
 
-            {/* Headline — Sumaiya IS the product; the CV is what she produces. */}
-            <h1 className="font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5 flex items-center gap-3 flex-wrap">
-              <SumaiyaMark size={56} state="idle" className="text-ember shrink-0" />
-              <span>{lang === "sw" ? "Kutana na " : "Meet "}<span className="text-ember">Sumaiya</span></span>
+            {/* Headline — the outcome, not the product's name.
+                It used to read "Kutana na Sumaiya" / "Meet Sumaiya", which told a
+                stranger nothing: the stranger-read pass could not tell whether
+                Sumaiya was a chatbot, a voice, or a person. The name now appears in
+                the sentence directly below, where it has a job to do.
+
+                Deliberately a bare string: this h1 is painted pre-hydration (see
+                `hero-reveal` above), so it must not gain markup that JS has to
+                resolve before the LCP element can render. */}
+            <h1 className="font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
+              {lang === "sw" ? "CV inayokufikisha kwa mwajiri." : "The CV that reaches the employer."}
             </h1>
 
-            {/* Sub-headline — what she does, plainly */}
-            <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
-              {lang === "sw"
-                ? "Msaidizi wako wa AI anayekuandikia CV, kuilenga kwa kila kazi, kukagua CV yako, na kukuandaa kwa usaili — kwa Kiswahili au Kiingereza."
-                : "Your AI assistant — writes your CV, targets it to every job, checks it against ATS, and preps you for the interview. In English or Swahili."}
+            {/* Sub-headline — who does it, and how, in one sentence. */}
+            <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8 flex gap-3">
+              <SumaiyaMark size={26} state="idle" className="text-ember shrink-0 mt-1" />
+              <span>
+                {lang === "sw"
+                  ? "Bandika tangazo la kazi. Sumaiya anakusaidia kuandika CV inayolingana nalo, kwa Kiswahili — kwenye simu yako, bila malipo, bila akaunti."
+                  : "Paste the job advert. Sumaiya helps you write the CV that matches it, in Swahili — on your phone, free, with no account."}
+              </span>
             </p>
 
-            {/* Primary action = start with Sumaiya. Manual builder is the fallback. */}
+            {/* Primary action = the guest CV editor: the one thing a stranger can
+                finish today without an account, and the product's own non-negotiable
+                ("a guest must be able to finish a CV and download it BEFORE being
+                asked for an account").
+                It used to be /assistant — but the assistant's AI is dark in
+                production (`/api/ai/status` → {"configured":false,"provider":null},
+                live) and returns 401 to a guest, so the largest button on the page
+                led to a surface that could not answer. Sumaiya the assistant is
+                still here, named, as the secondary. */}
             <div className="flex flex-wrap items-center gap-4 mb-3">
-              <Link href="/assistant" onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}>
+              <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_build' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Anza na Sumaiya — Bure" : "Start with Sumaiya — free"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Anza CV yako — Bure" : "Start your CV — free"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
               <Link
-                href="/editor/cv/try"
-                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_build' })}
+                href="/assistant"
+                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
-                {lang === "sw" ? "au tengeneza CV mwenyewe" : "or build a CV yourself"}
+                {lang === "sw" ? "au ongea na Sumaiya" : "or talk to Sumaiya"}
                 <Icon name="chevron-right" size={14} />
               </Link>
             </div>
 
-            {/* Free reassurance */}
+            {/* Free reassurance — the stranger-read pass, having criticised almost
+                every other line, named this the single line worth keeping. Kept, and
+                made exact: payments are off (lib/features.ts), so this is a fact
+                about today rather than a discount claim. */}
             <p className="flex items-center gap-2 text-sm font-semibold text-pine mb-9">
               <Icon name="check" size={16} className="text-pine shrink-0" />
               {lang === "sw"
-                ? "Hakuna kadi ya benki. Hakuna usajili wa lazima. Anza papo hapo."
-                : "No credit card. No sign-up required. Start right now."}
+                ? "Hakuna akaunti. Hakuna kadi ya benki. Hakuna malipo."
+                : "No account. No card. Nothing to pay."}
             </p>
 
-            {/* Simple trust row — three things people actually care about */}
+            {/* Three claims a reader can check in the next minute. The old row led
+                with "Passes employer screening (ATS)" — a certainty no CV tool can
+                back, naming the mechanism in the one language the house rule says
+                must never name it. */}
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <div className="flex items-center gap-1.5">
-                <Icon name="target" size={14} className="text-pine" />
-                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "Inapita vichujio vya waajiri" : "Passes employer screening (ATS)"}</span>
+                <Icon name="download" size={14} className="text-pine" />
+                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "PDF yako inatengenezwa kwenye simu yako" : "Your PDF is made on your phone"}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Icon name="globe-lang" size={14} className="text-ember" />
-                <span className="text-xs text-ember-hover font-bold">{lang === "sw" ? "Kiswahili na Kiingereza" : "English & Swahili"}</span>
+                <span className="text-xs text-ember-hover font-bold">{lang === "sw" ? "Kiswahili kwanza" : "Swahili first"}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Icon name="download" size={14} className="text-pine" />
-                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "Pakua PDF au Word" : "Download as PDF or Word"}</span>
+                <Icon name="check" size={14} className="text-pine" />
+                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "Hakuna kupakua programu" : "Nothing to install"}</span>
               </div>
             </div>
 
@@ -599,12 +584,14 @@ export default function LandingPage() {
                 <HeroCVPanel
                   templateId={HERO_CYCLE[panelIdxs[0]].id}
                   color={HERO_CYCLE[panelIdxs[0]].color}
+                  data={SAMPLE_CV}
                   opacity={dimPanel === 0 ? 0 : 1}
                   floatDelay=""
                 />
                 <HeroCVPanel
                   templateId={HERO_CYCLE[panelIdxs[1]].id}
                   color={HERO_CYCLE[panelIdxs[1]].color}
+                  data={SAMPLE_CV}
                   opacity={dimPanel === 1 ? 0 : 1}
                   floatDelay="animation-delay-1000"
                 />
@@ -613,12 +600,14 @@ export default function LandingPage() {
                 <HeroCVPanel
                   templateId={HERO_CYCLE[panelIdxs[2]].id}
                   color={HERO_CYCLE[panelIdxs[2]].color}
+                  data={SAMPLE_CV}
                   opacity={dimPanel === 2 ? 0 : 1}
                   floatDelay="animation-delay-500"
                 />
                 <HeroCVPanel
                   templateId={HERO_CYCLE[panelIdxs[3]].id}
                   color={HERO_CYCLE[panelIdxs[3]].color}
+                  data={SAMPLE_CV}
                   opacity={dimPanel === 3 ? 0 : 1}
                   floatDelay="animation-delay-1500"
                 />
@@ -647,19 +636,19 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             {
-              icon: "grid" as const,
-              en: { t: "1. Pick a design", d: "Sumaiya picks a design that fits — or you pick. Change it any time, your details stay." },
-              sw: { t: "1. Chagua muundo", d: "Sumaiya anachagua muundo unaokufaa — au chagua wewe. Unaweza kubadilisha baadaye, maelezo yako yanabaki." },
+              icon: "text" as const,
+              en: { t: "1. Paste the job advert", d: "Copy the advert you have seen — on a noticeboard, in a WhatsApp group, or on a website. Paste it in, and the CV is aimed at that job." },
+              sw: { t: "1. Bandika tangazo la kazi", d: "Nakili tangazo uliloliona — kwenye ubao wa matangazo, kwenye kikundi cha WhatsApp, au kwenye tovuti. Bandika hapa, na CV yako ilenge kazi hiyo." },
             },
             {
               icon: "magic" as const,
-              en: { t: "2. Fill it in", d: "Type your details, or just chat with Sumaiya and she writes each section for you — in English or Swahili." },
-              sw: { t: "2. Jaza maelezo", d: "Andika maelezo yako, au ongea tu na Sumaiya naye anaandika kila sehemu — kwa Kiingereza au Kiswahili." },
+              en: { t: "2. Fill in your details", d: "Type them in, or answer Sumaiya's questions and she writes each section for you. You do not need professional wording to start." },
+              sw: { t: "2. Jaza maelezo yako", d: "Andika mwenyewe, au jibu maswali ya Sumaiya naye anaandika kila sehemu. Huhitaji maneno ya kitaalamu ili kuanza." },
             },
             {
               icon: "download" as const,
-              en: { t: "3. Download & send", d: "Download a clean PDF or Word file, ready to attach to any job application. Free." },
-              sw: { t: "3. Pakua na tuma", d: "Pakua PDF safi au faili la Word, tayari kuambatanisha na maombi yoyote ya kazi. Bure." },
+              en: { t: "3. Download your PDF", d: "Download a clean PDF, ready to send by email or WhatsApp. No account, nothing to pay." },
+              sw: { t: "3. Pakua PDF yako", d: "Pakua PDF safi, tayari kuituma kwa barua pepe au WhatsApp. Bila akaunti, bila malipo." },
             },
           ].map((step, i) => (
             <div key={i} className={`reveal delay-${i + 1} bg-card border border-border rounded-card p-7`}>
@@ -685,41 +674,114 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF (testimonials + a real stat) ── */}
-      {TESTIMONIALS.length > 0 && (
-        <section className="bg-espresso border-y border-espresso-line py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            <p className="text-center text-[11px] font-mono uppercase tracking-widest text-gold/70 mb-3">
-              {lang === "sw" ? "Watu halisi, kazi halisi" : "Real people, real jobs"}
+      {/* ── ON YOUR PHONE (the absence the stranger-read pass found first) ──
+          A prepaid-data user's first question is whether this costs them a
+          bundle. The page never answered it. What is said here is deliberately
+          the provable half: the PDF is produced in the browser (lib/pdf.ts
+          lazy-imports jspdf/html2canvas), and the draft autosaves to
+          localStorage. It does NOT claim "works offline" flat — the native
+          app's offline path has never been tested in airplane mode
+          (docs/FEATURE-INVENTORY.md §5) and native still has no guest mode, so
+          that headline would be the loudest false claim on the site. */}
+      <section className="bg-espresso/[0.03] border-y border-border">
+        <div className="px-4 sm:px-6 lg:px-8 py-20 lg:py-24 max-w-7xl mx-auto">
+          <div className="reveal mb-12 max-w-2xl">
+            <p className="text-xs font-mono uppercase tracking-wider text-ember-hover mb-4">
+              {lang === "sw" ? "KWENYE SIMU YAKO" : "ON YOUR PHONE"}
             </p>
-            {CVS_CREATED > 0 && (
-              <p className="text-center text-cream/90 text-lg font-semibold mb-10">
-                {lang === "sw"
-                  ? `Zaidi ya CV ${CVS_CREATED.toLocaleString()} zimetengenezwa`
-                  : `Over ${CVS_CREATED.toLocaleString()} CVs built`}
-              </p>
-            )}
-            <div className="grid sm:grid-cols-3 gap-5 mt-8">
-              {TESTIMONIALS.map((t) => (
-                <figure key={t.name} className="bg-espresso-line/40 border border-espresso-line rounded-card-lg p-6">
-                  <blockquote className="text-cream/90 text-sm leading-relaxed mb-4">
-                    &ldquo;{lang === "sw" ? t.quote.sw : t.quote.en}&rdquo;
-                  </blockquote>
-                  <figcaption className="text-xs">
-                    <span className="font-bold text-gold">{t.name}</span>
-                    <span className="text-cream/50"> — {lang === "sw" ? t.detail.sw : t.detail.en}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-            <p className="text-center text-cream/40 text-xs mt-8">
+            <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
+              {lang === "sw" ? "Imeundwa kwa simu ya kawaida, na bando la kawaida" : "Built for a normal phone, and a normal bundle"}
+            </h2>
+            <p className="text-lg text-text-body">
               {lang === "sw"
-                ? "Dhamana ya kurudisha pesa ndani ya saa 48 · Ghairi wakati wowote"
-                : "48-hour money-back guarantee · Cancel anytime"}
+                ? "Watu wengi wanaotafuta kazi Tanzania wanafanya kila kitu kwenye simu. Kwa hiyo Sumaiya haihitaji kompyuta, na hakuna cha kupakua."
+                : "Most people looking for work in Tanzania do all of it on a phone. So Sumaiya does not need a computer, and there is nothing to install."}
             </p>
           </div>
-        </section>
-      )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: "wifi-off" as const,
+                en: { t: "Your PDF is made on your phone", d: "Your file is produced inside your phone, not on a server. Once the page has opened, typing and downloading do not need another bundle." },
+                sw: { t: "PDF yako inatengenezwa kwenye simu yako", d: "Faili lako linatengenezwa ndani ya simu yako, si kwenye seva. Ukishaifungua ukurasa, kuandika na kupakua hakuhitaji bando lingine." },
+              },
+              {
+                icon: "download" as const,
+                en: { t: "Nothing to install", d: "You start in the browser. No app store, no waiting for a large file before you have seen anything." },
+                sw: { t: "Hakuna kupakua programu", d: "Unaanza kwenye kivinjari. Hakuna app store, hakuna kusubiri faili kubwa kabla ya kuona kitu." },
+              },
+              {
+                icon: "check" as const,
+                en: { t: "Your work stays on your phone", d: "What you type is saved on your own device as you go, so a dropped connection does not cost you the CV." },
+                sw: { t: "Kazi yako inabaki kwenye simu yako", d: "Unachoandika kinahifadhiwa kwenye kifaa chako wakati unaandika, hivyo mtandao ukikatika hupotezi kazi yako." },
+              },
+            ].map((card, i) => (
+              <div key={i} className={`reveal delay-${i + 1} bg-card border border-border rounded-card p-7`}>
+                <div className="w-12 h-12 rounded-xl bg-ember-tint flex items-center justify-center mb-5">
+                  <Icon name={card.icon} size={22} className="text-ember" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-espresso mb-2 tracking-tight">
+                  {lang === "sw" ? card.sw.t : card.en.t}
+                </h3>
+                <p className="text-sm text-text-body leading-relaxed">
+                  {lang === "sw" ? card.sw.d : card.en.d}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* The honest limit, said plainly rather than implied. */}
+          <p className="mt-10 text-sm text-text-muted max-w-2xl">
+            {lang === "sw"
+              ? "Ukurasa wenyewe unahitaji mtandao mara moja ili ufunguke. Baada ya hapo, kuandika na kupakua hakuhitaji bando lingine."
+              : "The page itself needs a connection once, to open. After that, typing and downloading do not need another bundle."}
+          </p>
+        </div>
+      </section>
+
+      {/* ── PROOF — only what the product can demonstrate today ──
+          This replaces a testimonials band carrying three quotes under a heading
+          that asserted "Real people, real jobs". They were composite examples
+          (lib/testimonials.ts said so in its own header), so the band was removed
+          rather than softened. Nothing here is a number we have not measured. */}
+      <section className="px-4 sm:px-6 lg:px-8 py-20 lg:py-24 max-w-7xl mx-auto border-t border-border">
+        <div className="reveal mb-12 max-w-2xl">
+          <p className="text-xs font-mono uppercase tracking-wider text-ember-hover mb-4">
+            {lang === "sw" ? "USHAHIDI" : "PROOF"}
+          </p>
+          <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
+            {lang === "sw" ? "Usiniamini. Jaribu." : "Don't take our word for it. Try it."}
+          </h2>
+          <p className="text-lg text-text-body">
+            {lang === "sw"
+              ? "Hakuna namba za kubuni hapa. Hivi ni vitu vitatu unavyoweza kuvithibitisha mwenyewe katika dakika moja."
+              : "No invented numbers here. These are three things you can verify yourself in one minute."}
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-5">
+          {[
+            {
+              en: { t: "A real CV, a real PDF", d: "Start from the example, change it to your own details, download. What you get is a complete PDF with real selectable text — not a screenshot of a CV." },
+              sw: { t: "CV halisi, PDF halisi", d: "Anza na mfano, badilisha uweke maelezo yako, pakua. Unachopata ni PDF kamili yenye maandishi halisi — si picha ya skrini." },
+            },
+            {
+              en: { t: "No account in the way", d: "There is no sign-in page between you and your file. You are asked to sign in only after you already have what you came for." },
+              sw: { t: "Hakuna akaunti inayokuzuia", d: "Hakuna ukurasa wa kuingia kati yako na faili lako. Unaombwa kuingia baada tu ya kupata kile ulichokuja kukichukua." },
+            },
+            {
+              en: { t: "In Swahili, properly", d: "The menus, the guidance, the example CV and the FAQ are all written in Swahili first. Swahili is not a translation layer on top of an English product." },
+              sw: { t: "Kwa Kiswahili, kweli", d: "Menyu, maelekezo, mfano wa CV na maswali — vyote vimeandikwa kwa Kiswahili kwanza. Kiswahili si tafsiri iliyowekwa juu ya bidhaa ya Kiingereza." },
+            },
+          ].map((card, i) => (
+            <div key={i} className={`reveal delay-${i + 1} bg-card border border-border rounded-card p-6`}>
+              <h3 className="font-display font-bold text-espresso mb-1.5">{lang === "sw" ? card.sw.t : card.en.t}</h3>
+              <p className="text-sm text-text-body leading-relaxed">{lang === "sw" ? card.sw.d : card.en.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── PRODUCT GRID (What you can build) ── */}
       <section className="px-4 sm:px-6 lg:px-8 py-24 max-w-7xl mx-auto">
@@ -728,12 +790,12 @@ export default function LandingPage() {
             {lang === "sw" ? "UNACHOWEZA KUTENGENEZA" : "WHAT YOU CAN BUILD"}
           </p>
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
-            {lang === "sw" ? "Kila hati unayohitaji kupata ajira" : "Every document you need to get hired"}
+            {lang === "sw" ? "Hati za maombi, zote mahali pamoja" : "The documents an application needs, in one place"}
           </h2>
           <p className="text-lg text-text-body max-w-lg">
             {lang === "sw"
-              ? "CV, barua ya maombi, kadi za biashara na barua rasmi — zote zinaendana, zimeundwa kwa mwonekano sawa."
-              : "CV, cover letter, business card, and formal letters — built together, styled to match."}
+              ? "CV ni ya kwanza. Barua ya maombi inaenda nayo. Kadi na barua rasmi zinakuja baadaye — zote kwa mwonekano mmoja."
+              : "The CV comes first. The cover letter goes with it. A card and formal letters come after — all in one consistent look."}
           </p>
         </div>
 
@@ -773,12 +835,12 @@ export default function LandingPage() {
             {lang === "sw" ? "MUONEKANO WA CV" : "THE LOOK"}
           </p>
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
-            {lang === "sw" ? "Sumaiya anaipamba CV yako iwapendeze waajiri" : "Sumaiya designs your CV to impress employers"}
+            {lang === "sw" ? "Miundo 47 — chagua mmoja, uanze" : "47 looks — pick one and start"}
           </h2>
           <p className="text-lg text-text-body">
             {lang === "sw"
-              ? "Yeye huchagua muundo unaokufaa — unaweza kuubadilisha wakati wowote, na maudhui yako yanabaki."
-              : "She picks the design that fits you — change it any time, your content stays put."}
+              ? "Mfano unaoona hapa ni wa Neema, msimamizi wa ofisi Dar es Salaam. Maudhui yako hayabadiliki ukibadilisha muundo."
+              : "The example you see here is Neema, an office administrator in Dar es Salaam. Your content does not change when you switch designs."}
           </p>
         </div>
 
@@ -791,6 +853,7 @@ export default function LandingPage() {
               intervalMs={4200}
               scale={cardScale}
               lang={lang}
+              data={SAMPLE_CV}
               innerRef={i === 0 ? firstCardRef : undefined}
             />
           ))}
@@ -818,8 +881,8 @@ export default function LandingPage() {
             </h2>
             <p className="text-lg text-text-body max-w-2xl">
               {lang === "sw"
-                ? "Unganisha, gawanya, zungusha, bana na zaidi — moja kwa moja kwenye kivinjari chako. Hakuna usajili, faili zako hazihifadhiwi."
-                : "Merge, split, rotate, convert and more — right in your browser. No sign-up, and your files are never stored."}
+                ? "Maombi mengi yanahitaji PDF: vyeti vyako vilivyoskaniwa, vitabu vya vyeti, na faili moja unayotuma. Hizi ni zana zilezile unazohitaji kwa hilo — moja kwa moja kwenye kivinjari chako. Hakuna usajili, na faili zako hazihifadhiwi."
+                : "Most applications need PDFs: your scanned certificates, your transcripts, and one file to send. These are the same tools you need for that — right in your browser. No sign-up, and your files are never stored."}
             </p>
           </div>
 
@@ -855,18 +918,18 @@ export default function LandingPage() {
           <div className="max-w-2xl mx-auto">
             <h2 className="font-display font-extrabold tracking-tight text-cream text-3xl sm:text-4xl lg:text-5xl mb-4">
               {lang === "sw"
-                ? "Anza leo. Unda CV yako ya kwanza bila malipo."
-                : "Your next job starts with the right CV."}
+                ? "Andika CV yako ya kwanza. Bure."
+                : "Write your first CV. Free."}
             </h2>
             <p className="text-lg text-gold/80 leading-relaxed mb-10 max-w-lg mx-auto">
               {lang === "sw"
-                ? "CV, barua za maombi, kadi za biashara — vifaa vyote katika mfumo mmoja. Bure kuanza."
-                : "Build for free, download when you're ready — made for job seekers everywhere."}
+                ? "Hakuna akaunti, hakuna kadi, hakuna malipo. Pakua faili lako kisha anza kutuma maombi."
+                : "No account, no card, nothing to pay. Download your file, then start applying."}
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'bottom_cta' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Unda CV yako" : "Build my CV"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Anza CV yako" : "Start my CV"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
             </div>

@@ -12,32 +12,28 @@ export interface Testimonial {
   detail: { en: string; sw: string };
 }
 
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    quote: {
-      en: "I had no idea how to lay out a CV. Sumaiya wrote each section from a few notes and I had three callbacks in two weeks.",
-      sw: "Sikujua namna ya kupanga CV. Sumaiya aliandika kila sehemu kutoka maelezo machache na nikapata simu tatu ndani ya wiki mbili.",
-    },
-    name: "Amina",
-    detail: { en: "Marketing assistant · Dar es Salaam", sw: "Msaidizi wa masoko · Dar es Salaam" },
-  },
-  {
-    quote: {
-      en: "The ATS checker told me exactly what was missing. Fixed it, re-downloaded, got the interview.",
-      sw: "Kikagua cha CV kiliniambia hasa kilichokosekana. Nilirekebisha, nikapakua tena, nikapata mahojiano.",
-    },
-    name: "Brian",
-    detail: { en: "Logistics · Nairobi", sw: "Usafirishaji · Nairobi" },
-  },
-  {
-    quote: {
-      en: "Did the whole thing on my phone during lunch. Free, in Swahili, and it actually looked professional.",
-      sw: "Nilifanya yote kwenye simu wakati wa chakula cha mchana. Bure, kwa Kiswahili, na ilionekana ya kitaalamu kweli.",
-    },
-    name: "Faith",
-    detail: { en: "Nursing graduate · Mwanza", sw: "Mhitimu wa uuguzi · Mwanza" },
-  },
-];
+/**
+ * EMPTY ON PURPOSE — do not add a quote until it is a real, named, consented
+ * person with a real outcome.
+ *
+ * The three entries that used to live here ("Amina", "Brian", "Faith") were
+ * composite examples, and this file's own header said so. The landing page
+ * rendered them under the heading "Watu halisi, kazi halisi" / "Real people,
+ * real jobs" — an assertion, above three quotes the visitor could not check,
+ * on the page where their trust is being earned. The stranger-read pass named
+ * that band the single worst section of the page.
+ *
+ * Fabricated testimonials are worse than none: they are a trust risk if noticed
+ * and they convert nobody. So the list is empty and the band is gone, replaced
+ * by three claims a reader can verify in a minute (the PDF is real, there is no
+ * account in the way, the Swahili is authored rather than translated).
+ *
+ * Every entry must be a real person who gave permission — a first name, their
+ * city, and a specific outcome. When the outcome ledger starts producing real
+ * results, ask those users; until then this stays empty.
+ */
+export const TESTIMONIALS: Testimonial[] = [];
 
 // ⚠️ REPLACE with the real number (round down, don't inflate). Set to 0 to hide.
+// Leave at 0 until the number is measured. There is no measurement behind it today.
 export const CVS_CREATED = 0;

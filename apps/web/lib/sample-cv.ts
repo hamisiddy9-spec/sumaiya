@@ -4,9 +4,20 @@ import type { Lang } from "@/lib/i18n/translations";
 /**
  * A complete, realistic sample CV used for the "Start from an example" flow, so
  * a first-time user sees a finished CV in a beautiful template instead of a
- * blank form. East-Africa flavoured (Zuri Fintech, M-Pesa, University of Nairobi)
- * to match the audience. No photo is included on purpose — the example is about
- * the content, and users add their own portrait.
+ * blank form.
+ *
+ * **Tanzanian on purpose.** This used to be a Kenyan senior software engineer
+ * ("Amara Osei", Nairobi, `+254`, University of Nairobi, "products used by more
+ * than a million people worldwide"). A stranger reading the homepage cold — the
+ * brand review read it as a 24-year-old in Dar es Salaam — saw a Nairobi phone
+ * number and concluded the product was not for her. An Africa-first product
+ * cannot open with another country's example. So the persona is now an
+ * early-career office administrator in Dar es Salaam, with a VETA diploma and
+ * TZS-scale work, which is what most of the audience actually is: employed
+ * informally or between jobs and looking for something better.
+ *
+ * No photo is included on purpose — the example is about the content, and users
+ * add their own portrait.
  *
  * Localised: Swahili users get a Swahili example, so it reads as *their* CV.
  */
@@ -14,68 +25,68 @@ function sampleEn(): CVData {
   return {
     ...createEmptyCVData(),
     personal: {
-      fullName: "Amara Osei",
-      jobTitle: "Software Engineer",
-      email: "amara.osei@gmail.com",
-      phone: "+254 722 987 654",
-      location: "Nairobi, Kenya",
-      linkedin: "linkedin.com/in/amaraosei",
-      website: "amaraosei.dev",
+      fullName: "Neema Joseph",
+      jobTitle: "Office Administrator",
+      email: "neema.joseph@gmail.com",
+      phone: "+255 712 345 678",
+      location: "Dar es Salaam, Tanzania",
+      linkedin: "",
+      website: "",
       photo: "",
     },
     summary:
-      "Software engineer with 6+ years building and shipping scalable web applications for fintech and telecoms. Strong in React, Node.js and cloud infrastructure. Led a team of 6 engineers on products used by more than a million people worldwide.",
+      "Office administrator with three years' experience supporting a busy sales team. I keep records in order, handle customer enquiries on the phone and in person, and prepare the daily sales and stock reports in Excel. I work on my own initiative and I learn new systems quickly.",
     experience: [
       {
         id: "_x1",
-        company: "Zuri Fintech",
-        position: "Software Engineer",
-        location: "Nairobi, Kenya",
-        startDate: "2020-05",
+        company: "Kilimanjaro Retail Ltd",
+        position: "Office Administrator",
+        location: "Dar es Salaam, Tanzania",
+        startDate: "2023-03",
         endDate: "",
         current: true,
         description:
-          "Shipped key features for a nationwide mobile-money platform serving millions of users.\nCut API response times by 55% through caching and query optimisation.\nMentored 4 junior engineers and championed test-driven development.",
+          "Keep daily sales, stock and staff records for a shop with 12 employees.\nPrepare the weekly stock and sales report in Excel for the manager.\nHandle customer enquiries and follow up supplier orders by phone and WhatsApp.",
       },
       {
         id: "_x2",
-        company: "Kito Labs",
-        position: "Full-Stack Developer",
-        location: "Remote",
-        startDate: "2017-08",
-        endDate: "2020-04",
+        company: "Pamoja Distributors",
+        position: "Sales Assistant",
+        location: "Mwanza, Tanzania",
+        startDate: "2021-06",
+        endDate: "2023-01",
         current: false,
         description:
-          "Built React frontends and Node.js APIs for enterprise SaaS clients in the US and Europe.\nRaised test coverage from 38% to 90%.\nWorked with distributed teams across three time zones to hit tight release dates.",
+          "Served more than 30 customers a day and balanced the till at closing.\nRecorded stock received and reported shortages to the supervisor.\nTrained two new shop assistants on the till and the stock book.",
       },
     ],
     education: [
       {
         id: "_ed1",
-        institution: "University of Nairobi",
-        degree: "B.Sc.",
-        field: "Computer Science",
-        startDate: "2013-09",
-        endDate: "2017-06",
-        grade: "First Class Honours",
+        institution: "VETA — Chuo cha Ufundi",
+        degree: "Diploma (NTA Level 6)",
+        field: "Business Administration",
+        startDate: "2019-09",
+        endDate: "2021-05",
+        grade: "Credit",
         description: "",
       },
     ],
     skills: [
-      { id: "_s1", name: "React / Next.js", level: 5 },
-      { id: "_s2", name: "Node.js", level: 5 },
-      { id: "_s3", name: "TypeScript", level: 4 },
-      { id: "_s4", name: "PostgreSQL", level: 4 },
-      { id: "_s5", name: "AWS / GCP", level: 4 },
+      { id: "_s1", name: "Excel / Spreadsheets", level: 5 },
+      { id: "_s2", name: "Record keeping", level: 5 },
+      { id: "_s3", name: "Customer service", level: 4 },
+      { id: "_s4", name: "Stock control", level: 4 },
+      { id: "_s5", name: "QuickBooks", level: 3 },
     ],
     languages: [
-      { id: "_l1", name: "English", proficiency: "Native" },
-      { id: "_l2", name: "Swahili", proficiency: "Native" },
+      { id: "_l1", name: "Kiswahili", proficiency: "Native" },
+      { id: "_l2", name: "English", proficiency: "Intermediate" },
     ],
     certifications: [
-      { id: "_c1", name: "AWS Solutions Architect", issuer: "Amazon Web Services", date: "2023-04", url: "" },
+      { id: "_c1", name: "Computer & Excel Certificate", issuer: "VETA", date: "2021-07", url: "" },
     ],
-    hobbies: "Open source, mentoring, chess, trail running",
+    hobbies: "Community football, church choir, reading",
   };
 }
 
@@ -83,27 +94,49 @@ function sampleSw(): CVData {
   const base = sampleEn();
   return {
     ...base,
-    personal: { ...base.personal, jobTitle: "Mhandisi wa Programu" },
+    personal: { ...base.personal, jobTitle: "Msimamizi wa Ofisi" },
     summary:
-      "Mhandisi wa programu mwenye uzoefu wa zaidi ya miaka 6 katika kujenga na kuzindua mifumo ya wavuti inayoweza kupanuka kwa sekta za fedha na mawasiliano. Nina ujuzi wa React, Node.js na miundombinu ya wingu. Niliongoza timu ya wahandisi 6 kwenye bidhaa zinazotumiwa na zaidi ya watu milioni moja duniani kote.",
+      "Msimamizi wa ofisi mwenye uzoefu wa miaka mitatu nikisaidia timu ya mauzo yenye shughuli nyingi. Ninalinda kumbukumbu zote kwa mpangilio, ninahudumia wateja kwa simu na ana kwa ana, na naandaa ripoti za mauzo na bidhaa za kila siku kwa Excel. Nafanya kazi kwa juhudi zangu mwenyewe na najifunza mifumo mipya haraka.",
     experience: [
       {
         ...base.experience[0],
-        position: "Mhandisi wa Programu",
+        position: "Msimamizi wa Ofisi",
         description:
-          "Nilizindua vipengele muhimu vya jukwaa la kitaifa la pesa za simu linalohudumia mamilioni ya watumiaji.\nNilipunguza muda wa majibu ya API kwa 55% kupitia caching na uboreshaji wa query.\nNiliwalea wahandisi 4 wachanga na kuhimiza utamaduni wa kupima programu (TDD).",
+          "Ninalinda kumbukumbu za mauzo, bidhaa na wafanyakazi wa kila siku kwa duka lenye wafanyakazi 12.\nNaandaa ripoti ya bidhaa na mauzo ya kila wiki kwa Excel kwa meneja.\nNahudumia wateja na kufuatilia oda za wauzaji kwa simu na WhatsApp.",
       },
       {
         ...base.experience[1],
-        position: "Msanidi Programu Kamili",
+        position: "Msaidizi wa Mauzo",
         description:
-          "Nilijenga sehemu za mbele za React na API za Node.js kwa wateja wa SaaS Marekani na Ulaya.\nNiliongeza ufunikaji wa majaribio kutoka 38% hadi 90%.\nNilifanya kazi na timu za maeneo tofauti katika saa tatu za dunia kufikia tarehe za kuzindua.",
+          "Nilihudumia wateja zaidi ya 30 kwa siku na kuhesabu fedha za duka kila jioni.\nNilirekodi bidhaa zilizoingia na kuripoti upungufu kwa msimamizi.\nNiliwafunza wasaidizi wawili wapya jinsi ya kutumia mashine ya fedha na kitabu cha bidhaa.",
       },
     ],
     education: [
-      { ...base.education[0], degree: "Shahada ya Kwanza (B.Sc.)", field: "Sayansi ya Kompyuta", grade: "Daraja la Kwanza" },
+      {
+        ...base.education[0],
+        degree: "Stashahada (NTA Level 6)",
+        field: "Utawala wa Biashara",
+        grade: "Credit",
+      },
     ],
-    hobbies: "Programu huria, ulezi, chess, mbio za mlimani",
+    skills: [
+      { id: "_s1", name: "Excel / Majedwali", level: 5 },
+      { id: "_s2", name: "Utunzaji wa kumbukumbu", level: 5 },
+      { id: "_s3", name: "Huduma kwa wateja", level: 4 },
+      { id: "_s4", name: "Usimamizi wa bidhaa", level: 4 },
+      { id: "_s5", name: "QuickBooks", level: 3 },
+    ],
+    // The five proficiency tokens are a closed enum the templates map to level
+    // bars (PROF[lang.proficiency] ?? 2), so they stay as-is in both languages —
+    // swapping in Swahili words here would silently drop every language to 2 bars.
+    languages: [
+      { id: "_l1", name: "Kiswahili", proficiency: "Native" },
+      { id: "_l2", name: "Kiingereza", proficiency: "Intermediate" },
+    ],
+    certifications: [
+      { id: "_c1", name: "Cheti cha Kompyuta na Excel", issuer: "VETA", date: "2021-07", url: "" },
+    ],
+    hobbies: "Mpira wa miguu wa jamii, kwaya ya kanisa, kusoma",
   };
 }
 
