@@ -7,7 +7,9 @@
 //      routes. This is pinned to Vercel's ~4.5 MB serverless request-body limit:
 //      the platform rejects a larger body at the edge, BEFORE any handler runs,
 //      so the route's own friendly 413 never executes and the request never
-//      settles. A 27 MB PDF sat on the assistant's "· inasoma…" chip for 177 s
+//      settles. A 27 MB PDF sat on the assistant's old machine-register progress
+//      line (swahili-lint-ignore: it read "· inasoma…", the copy the lint bans)
+//      for 177 s
 //      with no error, no completion and no way forward; the raw platform body
 //      took 91,377 ms to appear (measured 2026-09-20, results-recheck-huge.json
 //      + results-server-extract.json). Therefore NO client may ever POST a body

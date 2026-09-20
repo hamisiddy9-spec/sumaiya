@@ -1033,7 +1033,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     //   • over the local-reader cap (25 MB) → we never even try to read it;
     //   • over the network cap (4 MB) → it may still be read locally, but it
     //     must NEVER be sent to the server, because such a request never
-    //     settles (177 s of "· inasoma…" with no end, measured 2026-09-20).
+    //     settles (177 s of the old machine-register progress line, measured
+    //     2026-09-20; swahili-lint-ignore: that line read "· inasoma…").
     // Either way the user gets one visible, actionable message within a beat —
     // no spinner, no request, no silence.
     const sizeMb = file.size / (1024 * 1024);
@@ -1112,7 +1113,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           : sizeVerdict.kind === "too-large-to-send" ? (sw ? `Sikuweza kulisona faili hili kwenye kifaa hiki, na ni kubwa mno kutuma mtandaoni (kikomo ${MAX_PDF_UPLOAD_MB} MB). Pakua PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa.` : `I couldn't read this file on your device, and it's too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Save a shorter PDF (1–3 pages), or type/paste your details here.`)
           : aborted || code === "TIMEOUT" || code === "MEMORY" ? (sw ? "Kusoma faili hili kulichukua muda mrefu mno. Jaribu PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa." : "Reading this file took too long. Try a shorter CV (1–3 pages), or just type/paste your details here.")
           : code === "OCR_FAILED" || code === "NO_TEXT" ? (sw ? "Sikuweza kusoma maandishi kwenye faili hii." : "Couldn't read text from that file.")
-          : (sw ? "Imeshindwa kusoma faili. Jaribu tena." : "Couldn't read the file. Try again.")
+          : (sw ? "Sikuweza kusoma faili. Jaribu tena." : "Couldn't read the file. Try again.")
       );
     }
   };
@@ -1429,7 +1430,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       setError(
         err instanceof ExportOverflowError
           ? exportOverflowMessage(sw, err.overflow)
-          : (sw ? "Imeshindwa kutengeneza PDF. Jaribu tena." : "Couldn't create the PDF. Try again."),
+          : (sw ? "Sikuweza kutengeneza PDF. Jaribu tena." : "Couldn't create the PDF. Try again."),
       );
     } finally {
       setExporting(null);

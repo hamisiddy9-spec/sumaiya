@@ -1676,7 +1676,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         // Long toast, so it is read: the message is the whole point.
         showToast(err instanceof ExportOverflowError
           ? exportOverflowMessage(uiLang === "sw", err.overflow)
-          : (uiLang === "sw" ? "Imeshindwa kushiriki kwa sasa. Tumia Pakua badala yake." : "Couldn't share right now. Try Download instead."));
+          : (uiLang === "sw" ? "Sikuweza kushiriki kwa sasa. Tumia Pakua badala yake." : "Couldn't share right now. Try Download instead."));
       }
     } finally {
       setIsSharing(false);
