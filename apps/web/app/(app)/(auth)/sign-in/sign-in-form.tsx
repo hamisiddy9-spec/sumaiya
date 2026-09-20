@@ -9,6 +9,7 @@ import posthog from "@/lib/analytics";
 import { Logo } from "@/components/ui/logo";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
+import { EMAIL_OTP_DIGITS, normalizeEmailOtp, isCompleteEmailOtp, emailOtpPlaceholder } from "@sumaiya/utils/auth-code";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -71,7 +72,7 @@ function SignInForm({ lang }: { lang: string }) {
   const [googleErrorMessage, setGoogleErrorMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [hasDraft, setHasDraft] = useState(false);
-  // "code" = email a 6-digit code the user types here (stays inside an
+  // "code" = email a code the user types here (stays inside an
   // installed PWA); "link" = classic magic link (fine in a normal browser).
   const [mode, setMode] = useState<"link" | "code">("link");
   const [code, setCode] = useState("");
@@ -175,8 +176,8 @@ function SignInForm({ lang }: { lang: string }) {
 
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = code.replace(/\D/g, "");
-    if (token.length < 6) return;
+    const token = normalizeEmailOtp(code);
+    if (!isCompleteEmailOtp(token)) return;
     setVerifying(true);
     setErrorMsg("");
     try {
@@ -247,23 +248,23 @@ function SignInForm({ lang }: { lang: string }) {
                 {sw ? "Weka msimbo" : "Enter your code"}
               </h2>
               <p className="text-text-body text-sm text-center mb-6">
-                {sw ? "Tumetuma msimbo wa tarakimu 6 kwa" : "We sent a 6-digit code to"}{" "}
+                {sw ? `Tumetuma msimbo wa tarakimu ${EMAIL_OTP_DIGITS} kwa` : `We sent a ${EMAIL_OTP_DIGITS}-digit code to`}{" "}
                 <strong className="text-espresso">{email}</strong>.
               </p>
               <input
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 autoFocus
-                maxLength={6}
+                maxLength={EMAIL_OTP_DIGITS}
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="••••••"
+                onChange={(e) => setCode(normalizeEmailOtp(e.target.value))}
+                placeholder={emailOtpPlaceholder()}
                 className="w-full text-center tracking-[0.5em] text-2xl font-semibold rounded-input-lg border border-border-input bg-sand-2 px-4 py-3 text-espresso placeholder:text-text-muted placeholder:tracking-[0.3em] focus:outline-none focus:ring-[3px] focus:ring-ember-tint focus:border-ember transition"
               />
               {errorMsg && (
                 <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-input-lg px-3 py-2 mt-3">{errorMsg}</p>
               )}
-              <Button type="submit" variant="primary" className="w-full mt-4" disabled={verifying || code.length < 6}>
+              <Button type="submit" variant="primary" className="w-full mt-4" disabled={verifying || !isCompleteEmailOtp(code)}>
                 {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : sw ? "Ingia" : "Sign in"}
               </Button>
               <button
@@ -283,7 +284,7 @@ function SignInForm({ lang }: { lang: string }) {
               </h2>
               <p className="text-text-body text-sm mb-6">
                 {mode === "code"
-                  ? (sw ? "Hakuna nywila — tutakutumia msimbo wa tarakimu 6 kwa barua pepe." : "No password — we'll email you a 6-digit code.")
+                  ? (sw ? `Hakuna nywila — tutakutumia msimbo wa tarakimu ${EMAIL_OTP_DIGITS} kwa barua pepe.` : `No password — we'll email you a ${EMAIL_OTP_DIGITS}-digit code.`)
                   : (sw ? "Hakuna nywila — tutakutumia kiungo cha kuingia." : "No password needed — we'll send you a magic link.")}
               </p>
 
@@ -361,7 +362,7 @@ function SignInForm({ lang }: { lang: string }) {
                 >
                   {mode === "code"
                     ? (sw ? "Ungependa kiungo cha barua pepe badala yake?" : "Prefer a link by email instead?")
-                    : (sw ? "Ungependa msimbo wa tarakimu 6 badala yake?" : "Prefer a 6-digit code instead?")}
+                    : (sw ? `Ungependa msimbo wa tarakimu ${EMAIL_OTP_DIGITS} badala yake?` : `Prefer a ${EMAIL_OTP_DIGITS}-digit code instead?`)}
                 </button>
               </form>
 

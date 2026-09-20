@@ -10,7 +10,8 @@
     "./ocr": "./src/ocr.ts",
     "./template-matcher": "./src/template-matcher.ts",
     "./sync-queue": "./src/sync-queue.ts",
-    "./cv-shape": "./src/cv-shape.ts"
+    "./cv-shape": "./src/cv-shape.ts",
+    "./auth-code": "./src/auth-code.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
