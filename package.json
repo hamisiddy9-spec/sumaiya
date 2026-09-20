@@ -22,6 +22,9 @@
     "native:test": "npm -C apps/native run test",
     "native:export": "npm -C apps/native run export",
     "native:install": "npm -C apps/native install",
+    "seam": "node scripts/seam/run.mjs",
+    "seam:http-only": "node scripts/seam/run.mjs --http-only",
+    "seam:skip-evals": "node scripts/seam/run.mjs --skip-evals",
     "whatsapp": "npm -C apps/whatsapp start",
     "whatsapp:test": "npm -C apps/whatsapp test"
   },
