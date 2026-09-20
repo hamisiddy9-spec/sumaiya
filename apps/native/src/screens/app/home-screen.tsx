@@ -8,7 +8,7 @@ import { signalAction, signalText } from "../../lib/signal-actions";
 import { apiClient } from "../../lib/api-client";
 import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
-import { useLang, type Lang } from "../../lib/i18n";
+import { useLang } from "../../lib/i18n";
 import { GUIDES } from "../../lib/guides";
 import { relativeDate } from "../../lib/relative-date";
 import { cvErrorCopy } from "../../lib/cv-fetch-error";
@@ -32,6 +32,9 @@ import { loadProfile } from "../../lib/profile-store";
 import { recommendNextMoves, type NextMoves } from "../../lib/recommendations";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
+// The greeting lives in lib/greeting.ts so its new-vs-returning rule is
+// unit-testable on its own (see __tests__/onboarding-greeting.test.ts).
+import { greeting } from "../../lib/greeting";
 
 // One shared horizontal margin (Screen pads 20 each side) → every block on this
 // screen spans exactly the same width. Quick-action cards are sized to fill the
@@ -39,34 +42,6 @@ import type { HomeScreenProps } from "../../navigation/types";
 // else.
 const GUTTER = 12;
 const SIDE = 20;
-
-// A few natural variants per time-of-day bucket instead of one fixed phrase
-// repeated on every single visit — the same phrase every evening, forever,
-// reads robotic rather than like a warm greeting. The pick is stable for the
-// whole day (keyed on the date, not random per render) so it never flickers
-// between variants on a re-render or a pull-to-refresh within the same day.
-const GREETINGS: Record<Lang, string[][]> = {
-  sw: [
-    ["Habari za asubuhi", "Habari za leo asubuhi"], // < 12:00
-    ["Habari za mchana", "Habari za leo"], // < 16:00
-    ["Habari za jioni", "Karibu jioni hii"], // < 21:00
-    ["Habari za usiku", "Karibu tena"], // >= 21:00
-  ],
-  en: [
-    ["Good morning", "Morning"],
-    ["Good afternoon", "Afternoon"],
-    ["Good evening", "Evening"],
-    ["Good evening", "Welcome back"],
-  ],
-};
-
-function greeting(lang: Lang): string {
-  const h = new Date().getHours();
-  const bucket = h < 12 ? 0 : h < 16 ? 1 : h < 21 ? 2 : 3;
-  const variants = GREETINGS[lang][bucket];
-  const pick = new Date().getDate() % variants.length;
-  return variants[pick];
-}
 
 export function HomeScreen({ navigation }: HomeScreenProps) {
   const c = useThemeColors();
@@ -295,9 +270,14 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
+  // NEW vs RETURNING for the greeting. `nextMoves === undefined` means the
+  // profile has not loaded yet — treated as "new" on purpose: saying "Karibu"
+  // a beat early is harmless, telling a first-timer "welcome back" is not.
+  const isReturningUser = nextMoves !== null || cvs.length > 0;
+
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 24 }} refreshing={refreshing} onRefresh={onRefresh}>
-      <ScreenTitle eyebrow={`${greeting(lang)},`}>{name}</ScreenTitle>
+      <ScreenTitle eyebrow={`${greeting(lang, isReturningUser)},`}>{name}</ScreenTitle>
 
       {/* Rotating hint — one proactive suggestion at a time. The shuffle control
           cycles to the next; tapping the card acts on the current one. */}

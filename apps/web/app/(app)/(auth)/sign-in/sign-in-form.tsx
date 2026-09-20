@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Mail, Loader2, KeyRound } from "lucide-react";
 import { signIn, getSession } from "@/lib/auth-client";
@@ -80,6 +81,10 @@ function SignInForm({ lang }: { lang: string }) {
   const searchParams = useSearchParams();
   const rawCallbackUrl = searchParams.get("callbackUrl");
   const errorParam = searchParams.get("error");
+  // Why the user was sent here (e.g. "voice" — an AI route that needs a
+  // session). Rendering the reason is what turns a silent bounce into an
+  // answer.
+  const reason = searchParams.get("reason");
 
   useEffect(() => {
     setHasDraft(!!localStorage.getItem("sumaiya-guest-cv"));
@@ -287,6 +292,28 @@ function SignInForm({ lang }: { lang: string }) {
                   ? (sw ? `Hakuna nywila — tutakutumia msimbo wa tarakimu ${EMAIL_OTP_DIGITS} kwa barua pepe.` : `No password — we'll email you a ${EMAIL_OTP_DIGITS}-digit code.`)
                   : (sw ? "Hakuna nywila — tutakutumia kiungo cha kuingia." : "No password needed — we'll send you a magic link.")}
               </p>
+
+              {/* The one gate left in an otherwise-open guest path: /voice (and
+                  the other AI routes that need a session) redirect here. It
+                  used to land a signed-out visitor on a bare sign-in screen
+                  with no explanation of what they had asked for — and no way
+                  to do the thing they actually wanted without an account. */}
+              {reason === "voice" && (
+                <div className="mb-6 flex items-start gap-3 bg-sand-2 border border-border rounded-card-lg px-4 py-3">
+                  <Icon name="mic" size={16} className="text-ember mt-0.5 shrink-0" />
+                  <p className="text-sm text-text-body">
+                    <strong className="text-espresso">
+                      {sw ? "Kuandika CV kwa sauti kunahitaji akaunti." : "Building a CV by voice needs an account."}
+                    </strong>{" "}
+                    {sw
+                      ? "Lakini unaweza kuanza CV yako bila akaunti — na kuipakua bure."
+                      : "But you can start your CV with no account — and download it free."}{" "}
+                    <Link href="/editor/cv/try" className="font-semibold text-ember-hover hover:underline">
+                      {sw ? "Anza bila akaunti" : "Start without an account"}
+                    </Link>
+                  </p>
+                </div>
+              )}
 
               {hasDraft && (
                 <div className="mb-6 flex items-start gap-3 bg-ember-tint border border-ember/15 rounded-card-lg px-4 py-3">

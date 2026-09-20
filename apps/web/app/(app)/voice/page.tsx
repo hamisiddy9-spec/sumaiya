@@ -17,7 +17,7 @@ export default async function VoicePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in?callbackUrl=%2Fvoice");
+  if (!user) redirect("/sign-in?callbackUrl=%2Fvoice&reason=voice");
 
   const lang = ((await headers()).get("x-lang") ?? "sw") as Lang;
 

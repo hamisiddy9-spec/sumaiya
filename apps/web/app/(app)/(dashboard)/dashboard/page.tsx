@@ -25,6 +25,7 @@ import { CreateMenu } from "@/components/dashboard/create-menu";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
 import { RecommendedJobsSection } from "@/components/jobs/recommended-jobs-section";
 import { label } from "@/lib/i18n/labels";
+import { isReturningUser, dashboardGreetingKey } from "@/lib/dashboard/returning";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -119,15 +120,22 @@ export default async function DashboardPage({ searchParams }: Props) {
   // need for the main fetch to query the same row again).
   // Non-fatal: a failure means no banner, no signals, no profile flag.
   let unconfirmedCount = 0;
+  // Provenance of each pending fact. The banner used to assert "Sumaiya wrote
+  // these from your chat" unconditionally, which is false for a fact derived
+  // from a CV (mapper stamps `cv:<id>` prose needs-confirmation) and
+  // doubly false for a user who has never chatted.
+  let unconfirmedSources: string[] = [];
   let signals: Signal[] = [];
   try {
     const ctx = await assembleUserContext(userId);
     unconfirmedCount = ctx.unconfirmed.length;
+    unconfirmedSources = ctx.unconfirmed.map((u) => u.source);
     signals = computeSignals(ctx);
     hasCareerProfile = !!ctx.profile;
     careerProfileFullName = ctx.profile ? String(ctx.profile?.personal?.fullName ?? "") : "";
   } catch {
     unconfirmedCount = 0;
+    unconfirmedSources = [];
     signals = [];
   }
 
@@ -159,6 +167,19 @@ export default async function DashboardPage({ searchParams }: Props) {
   const sw = lang === "sw";
   const appPipe = appStatuses.reduce((acc, a) => { acc[a.status] = (acc[a.status] ?? 0) + 1; return acc; }, {} as Record<string, number>);
   const followUpCount = appStatuses.filter(needsFollowUp).length;
+
+  // ── NEW vs RETURNING ─────────────────────────────────────────────────────
+  // Every input below is already fetched for this page, so telling a first run
+  // from a return visit costs nothing extra. See lib/dashboard/returning.ts.
+  const isFirstRun = !isReturningUser({
+    docCount,
+    hasCareerProfile,
+    applicationCount: appStatuses.length,
+    downloadCount: totalDownloads,
+  });
+  // "Karibu tena!" (welcome BACK) on a fresh account was the clearest case of
+  // the app greeting a new user as a returning one.
+  const welcomeKey = dashboardGreetingKey(!isFirstRun);
 
   const quickCreateItems = [
     {
@@ -256,7 +277,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             </div>
             <div>
               <h1 className="font-display font-extrabold text-2xl md:text-3xl tracking-tight text-espresso">
-                {t(lang, "dashboard.welcome")}{firstName ? `, ${firstName}` : ""}!
+                {t(lang, welcomeKey)}{firstName ? `, ${firstName}` : ""}!
               </h1>
               <p className="text-text-muted text-sm mt-0.5">{t(lang, "dashboard.manage")}</p>
             </div>
@@ -291,8 +312,11 @@ export default async function DashboardPage({ searchParams }: Props) {
           </div>
         </div>
 
-        {/* ── Job-search pipeline — the journey, made the hero ── */}
-        {!dbError && (
+        {/* ── Job-search pipeline — the journey, made the hero ──
+            Hidden on a first run: an account with nothing in it has no
+            pipeline to show, and the card pushed the one action a new user
+            needs below two blocks of chrome that describe later stages. */}
+        {!dbError && !isFirstRun && (
           <Link href="/dashboard?tab=applications" className="group block mb-8">
             <div className="bg-espresso rounded-card-lg p-5 border border-espresso-line flex items-center justify-between gap-4 hover:border-gold/30 transition-colors">
               <div className="min-w-0">
@@ -342,7 +366,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* ── E3: Your Daily Brief — the career agent's morning read. One tap
             to the honest daily summary: new matching roles (real scores), 
             applications due a follow-up, ready-to-tailor CVs. */}
-        {!dbError && (
+        {!dbError && !isFirstRun && (
           <Link href="/brief" className="group block mb-8">
             <div className="bg-card border border-border rounded-card-lg p-4 hover:border-ember/40 transition-colors flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -413,9 +437,16 @@ export default async function DashboardPage({ searchParams }: Props) {
                       : `${unconfirmedCount} ${unconfirmedCount === 1 ? "fact" : "facts"} need your confirmation`}
                   </p>
                   <p className="text-text-body text-[13px] mt-0.5">
-                    {sw
-                      ? "Sumaiya aliziandika kutokana na mazungumzo yenu — thibitisha ziwe rasmi, au uziondoe."
-                      : "Sumaiya drafted these from your chat — confirm them to make them official, or remove them."}
+                    {/* Name the real provenance. "from your chat" was asserted
+                        even for facts derived from a CV, and for a user who
+                        had never opened the assistant. */}
+                    {unconfirmedSources.every((src) => src === "conversation")
+                      ? (sw
+                          ? "Sumaiya aliziandika kutokana na mazungumzo yenu — thibitisha ziwe rasmi, au uziondoe."
+                          : "Sumaiya drafted these from your chat — confirm them to make them official, or remove them.")
+                      : (sw
+                          ? "Zilitokana na taarifa ulizotoa — thibitisha ziwe rasmi, au uziondoe."
+                          : "These came from information you provided — confirm them to make them official, or remove them.")}
                   </p>
                 </div>
               </div>

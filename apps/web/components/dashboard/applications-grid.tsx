@@ -178,16 +178,22 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
 
   if (loading) {
     return (
-      <div className="space-y-4" role="status" aria-live="polite">
+      <div
+        className="space-y-4"
+        role="status"
+        aria-live="polite"
+        aria-label={sw ? "Inapakia maombi…" : "Loading your applications…"}
+      >
+        <span className="sr-only">{sw ? "Inapakia maombi…" : "Loading your applications…"}</span>
         {/* Filter pills skeleton */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-6 w-16 rounded-pill bg-sand-2 motion-safe:animate-pulse" />
           ))}
           <div className="ml-auto h-6 w-14 rounded-pill bg-sand-2 motion-safe:animate-pulse" />
         </div>
         {/* Application cards skeleton — mirrors the real sm:grid-cols-2 layout */}
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-card border border-border rounded-card p-4 shadow-card motion-safe:animate-pulse">
               <div className="flex items-start justify-between gap-3 mb-3">

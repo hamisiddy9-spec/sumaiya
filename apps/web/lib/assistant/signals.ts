@@ -123,6 +123,10 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
   // 1. Trust loop — AI-drafted facts awaiting confirmation (highest priority:
   //    Sumaiya can't move first on a profile she doesn't trust).
   if (context.unconfirmed.length) {
+    // Provenance, not a slogan: the copy must not claim a chat that never
+    // happened (a CV-derived fact is stamped needs-confirmation too, and a
+    // first-run account may have no conversation at all).
+    const fromChat = context.unconfirmed.every((u) => u.source === "conversation");
     signals.push({
       type: "confirmations",
       tool: "confirmations",
@@ -132,8 +136,12 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
         sw: "Taarifa zinasubiri uthibitisho",
       },
       detail: {
-        en: `Sumaiya drafted ${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} from your chat — confirm each to make them official.`,
-        sw: `Sumaiya alikwambia taarifa ${context.unconfirmed.length} kutokana na mazungumzo — thibitisha kila moja ziwe rasmi.`,
+        en: fromChat
+          ? `Sumaiya drafted ${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} from your chat — confirm each to make them official.`
+          : `${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} came from information you gave — confirm each to make them official.`,
+        sw: fromChat
+          ? `Sumaiya alikwambia taarifa ${context.unconfirmed.length} kutokana na mazungumzo — thibitisha kila moja ziwe rasmi.`
+          : `Taarifa ${context.unconfirmed.length} zilitokana na ulizotoa — thibitisha kila moja iwe rasmi.`,
       },
       trigger: `${context.unconfirmed.length} needs-confirmation facts`,
       confirmations: context.unconfirmed.length,

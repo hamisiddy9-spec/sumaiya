@@ -27,6 +27,9 @@ export const translations = {
     },
     dashboard: {
       welcome: "Welcome back",
+      // Shown when the account has never produced anything — a brand-new
+      // account greeted "Welcome back" reads as someone else's session.
+      welcomeFirst: "Welcome",
       manage: "Your CVs, cover letters, and business cards — all in one place.",
       newCV: "New CV",
       newCoverLetter: "New Cover Letter",
@@ -118,7 +121,7 @@ export const translations = {
       protect: "Protect PDF",
       protectDesc: "Lock your PDF with a password to keep your documents secure and private.",
       extractText: "Extract Text",
-      extractTextDesc: "Pull all text content from a PDF document. Works with scanned and digital PDFs.",
+      extractTextDesc: "Pull all text content from a PDF document. Works with PDFs that have a text layer (exported from Word, Google Docs…); a scan or a photo has no text to pull — the AI Assistant reads those.",
       rotate: "Rotate PDF",
       rotateDesc: "Turn pages the right way up. Rotate the whole document or just the pages you choose.",
       watermark: "Watermark PDF",
@@ -140,7 +143,7 @@ export const translations = {
       mergeHint: "Select multiple PDF files to merge. Order them as you want them in the final document.",
       splitHint: "Enter page ranges to extract. Example: 1,3,5-7 extracts pages 1, 3, 5, 6, and 7.",
       protectHint: "Choose a strong password. The recipient will need this password to open the PDF.",
-      extractHint: "Upload a PDF to extract its text content. Supports both digital and scanned PDFs.",
+      extractHint: "Upload a PDF to extract its text content. The PDF needs a text layer (exported from Word, Google Docs…); scans and photos are read by the AI Assistant.",
       imageHint: "Select images to convert to PDF. Supported formats: PNG, JPG.",
       rotateHint: "Leave pages blank to rotate the whole document, or list pages like 1,3-4.",
       watermarkHint: "Keep it short — DRAFT, CONFIDENTIAL, or your name works best.",
@@ -176,6 +179,10 @@ export const translations = {
     },
     dashboard: {
       welcome: "Karibu tena",
+      // Shown when the account has never produced anything — "Karibu tena"
+      // (welcome BACK) on a first run is the clearest instance of the app
+      // greeting a new user as if they had been here before.
+      welcomeFirst: "Karibu",
       manage: "Simamia nyaraka zako zote mahali pamoja.",
       newCV: "CV Mpya",
       newCoverLetter: "Barua Mpya ya Maombi",
@@ -267,7 +274,7 @@ export const translations = {
       protect: "Kinga PDF",
       protectDesc: "Funga PDF yako kwa nenosiri ili kuilinda na kuiweka salama.",
       extractText: "Toa Maandishi",
-      extractTextDesc: "Vuta maandishi yote kutoka kwenye hati ya PDF. Inafanya kazi na PDF za skani na za dijitali.",
+      extractTextDesc: "Vuta maandishi yote kutoka kwenye hati ya PDF. Inafanya kazi na PDF yenye safu ya maandishi (iliyotolewa kutoka Word, Google Docs…); skani au picha haina maandishi ya kuvuta — Msaidizi wa AI husoma hizo.",
       rotate: "Zungusha PDF",
       rotateDesc: "Elekeza kurasa vizuri. Zungusha hati nzima au kurasa unazochagua tu.",
       watermark: "Weka Alama ya Maji",
@@ -289,7 +296,7 @@ export const translations = {
       mergeHint: "Chagua faili nyingi za PDF kuunganisha. Panga kwa mpangilio unavyotaka kwenye hati ya mwisho.",
       splitHint: "Weka safu za kurasa kutoa. Mfano: 1,3,5-7 inatoa kurasa 1, 3, 5, 6, na 7.",
       protectHint: "Chagua nenosiri imara. Mpokeaji atahitaji nenosiri hili kufungua PDF.",
-      extractHint: "Pakia PDF kutoa maandishi yake. Inasaidia PDF za dijitali na za skani.",
+      extractHint: "Pakia PDF kutoa maandishi yake. PDF inahitaji safu ya maandishi (iliyotolewa kutoka Word, Google Docs…); skani na picha husomwa na Msaidizi wa AI.",
       imageHint: "Chagua picha kubadilisha kuwa PDF. Miundo inayokubalika: PNG, JPG.",
       rotateHint: "Acha kurasa tupu kuzungusha hati nzima, au orodhesha kurasa kama 1,3-4.",
       watermarkHint: "Iweke fupi — DRAFT, SIRI, au jina lako linafaa zaidi.",
