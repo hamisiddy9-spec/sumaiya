@@ -5,12 +5,20 @@
 //
 //   1. CONTENT THAT DOESN'T FIT. Tier 1 (overflow ≤ 8%): tighten spacing via
 //      CSS custom props. Tier 2 (8–22%): clamp descriptions + tighter spacing.
-//      Tier 3 (> 22%): scale down (floor 0.84) + a "CV too long" warning.
+//      Tier 3 (> 22%): scale down (floor 0.92) + a "CV too long" warning.
 //   2. A SHEET THAT ISN'T FILLED. A two-role CV used to occupy 52–71% of A4 and
 //      a new graduate's 45% — half a blank page on almost every template
 //      (docs/CV_DESIGN_AUDIT.md). SmartFit now *fills*: the design is laid out
 //      at a narrower width and magnified, so short content is poured into the
 //      sheet instead of huddled at the top of it.
+//
+// The magnification is held inside a NARROW BAND (FIT_BAND, 0.92–1.12). It used
+// to run 0.84–1.5, which meant the same 10px body text rendered at 15px on a
+// short CV and 8.4px on a long one — adding a bullet visibly changed the
+// typography and two CVs from one template read as two designs. The band is the
+// product decision; the preview and the PDF must both use it (never `fill:false`
+// for a preview — a preview that disagrees with the download is worse than an
+// inflated one).
 //
 // Both directions are driven by MEASURING THE REAL DOM (the bottom edge of the
 // lowest element that contains text) and iterating, never by guessing from the
@@ -34,14 +42,36 @@ const PAGE_H = 1123;
 // that already fills the sheet (sahara, 90%) completely alone.
 const FILL_TARGET = 0.9;
 const FILL_TOLERANCE = 0.03;
-// Never magnify past this. Beyond ~1.5× the body text of an already-roomy
-// template starts to read as a poster rather than a CV.
-const FILL_MAX = 1.5;
-// Minimum shrink — unchanged from the original tier-3 floor.
-const SHRINK_MIN = 0.84;
+// Never magnify past this, and never shrink past SHRINK_MIN. The band is
+// deliberately NARROW (1.12 / 0.92 = a 1.22x spread, where it used to be
+// 1.5 / 0.84 = 1.79x).
+//
+// The defect was never magnification as such — it was VARIANCE. At 1.5x a
+// two-role CV rendered its 10px body text at 15px (a poster, not a CV) while a
+// long CV rendered the same 10px at 8.4px; adding or deleting one bullet
+// visibly changed the typography, and two CVs from one template looked like two
+// different designs. Narrowing the band costs slice on very short CVs and
+// accepts slight overflow on very long ones, and buys back a stable type size.
+const FILL_MAX = 1.12;
+// Minimum shrink — was the old tier-3 floor of 0.84, which made the same body
+// text 16% smaller on a long CV than on a short one from the same design.
+const SHRINK_MIN = 0.92;
 // Templates are at least this tall, so a per-iteration step can't run away.
 const STEP_MAX = 0.22;
 const ITERATIONS = 7;
+
+/**
+ * The magnification band, exported so it can be pinned by a test
+ * (components/templates/engine/fit-band.test.ts). `max / min` is the spread:
+ * the same body text is never rendered more than that much larger or smaller
+ * than the design intends, whichever CV it is on.
+ */
+export const FIT_BAND = { min: SHRINK_MIN, max: FILL_MAX } as const;
+
+/** Clamp a candidate scale into the band — the ONE place the band is applied. */
+export function clampFitScale(scale: number): number {
+  return Math.min(FILL_MAX, Math.max(SHRINK_MIN, scale));
+}
 
 // Context lets sections read fit state and adapt their own rendering
 export interface FitContextValue {
@@ -159,7 +189,7 @@ export function AutoFitPage({ children, fill = true }: AutoFitPageProps) {
         Math.max(raw, scale * (1 - STEP_MAX)),
         scale * (1 + STEP_MAX),
       );
-      const next = Math.min(FILL_MAX, Math.max(SHRINK_MIN, stepped));
+      const next = clampFitScale(stepped);
       if (Math.abs(next - scale) < 0.005) break;
       scale = next;
       apply(scale);
@@ -213,7 +243,8 @@ export function AutoFitPage({ children, fill = true }: AutoFitPageProps) {
           {children}
         </div>
         {fitResult.warn && (
-          <div style={{
+          // UI only — never part of an exported document (see lib/pdf.ts).
+          <div data-pdf-exclude="" style={{
             position: "absolute", bottom: 10, right: 10,
             backgroundColor: "#FEF2F2", border: "1px solid #FCA5A5",
             borderRadius: 6, padding: "3px 8px",
