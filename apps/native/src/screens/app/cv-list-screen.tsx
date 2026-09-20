@@ -11,7 +11,7 @@ import {
   EmptyState,
   Screen,
   ScreenTitle,
-  SkeletonCard,
+  SkeletonList,
   Stagger,
   haptics,
   useThemeColors,
@@ -21,6 +21,7 @@ import { useLang } from "../../lib/i18n";
 import { relativeDate } from "../../lib/relative-date";
 import { dialog } from "../../components/ui";
 import { exportCVAsPDF } from "../../services/pdf-export";
+import { fileNameFromUri, saveToPhone } from "../../services/save-to-device";
 import type { CvTemplateId } from "../../lib/cv-html";
 import { shareCV } from "../../services/share";
 import type { CvListScreenProps } from "../../navigation/types";
@@ -38,8 +39,18 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
 
   // Export used to live only inside the editor and the preview card — a CV
   // the user just wants to grab a copy of, without editing it, had no path
-  // to a download button at all. Reuses the exact same export+share call the
+  // to a download button at all. Reuses the exact same export call the
   // editor's own "Export PDF" button makes.
+  //
+  // What "Pakua" DOES changed on 2026-09-21, after the device sweep: the label
+  // said download and the button opened the Android share sheet instead
+  // ("Sharing 1 file"), leaving /sdcard/Download byte-identical before and
+  // after — nothing was saved anywhere the user could find it. For this
+  // audience the flow is save the file, then attach it in WhatsApp, so the
+  // button now saves for real (the user picks the folder; see
+  // services/save-to-device.ts) and then offers to share it in one tap. The
+  // share sheet is still one tap away — it is just no longer mistaken for a
+  // download.
   const downloadCV = async (cv: CV) => {
     setDownloading(cv.id);
     haptics.light();
@@ -48,8 +59,28 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
       // for anything unrecognised, so this cast is safe even for a stray
       // stored id from an older template set.
       const uri = await exportCVAsPDF(cv, { lang, template: cv.templateId as CvTemplateId });
+      const saved = await saveToPhone(uri, fileNameFromUri(uri));
+      // The folder picker was dismissed: the user chose not to save, which is
+      // not a failure and needs no dialog.
+      if (saved.status === "cancelled") return;
       haptics.success();
-      await shareCV(cv, uri);
+      if (saved.status === "unsupported") {
+        // No SAF here — the system share sheet is this platform's own way to
+        // save a file, so it is still the honest action to take.
+        await shareCV(cv, uri);
+        return;
+      }
+      dialog.alert(
+        t("Saved to your phone", "Imehifadhiwa kwenye simu yako"),
+        t(
+          `${saved.fileName} is in the folder you chose. Open Files to attach it in WhatsApp.`,
+          `${saved.fileName} iko kwenye folda uliyochagua. Fungua Files ili kuipachika WhatsApp.`,
+        ),
+        [
+          { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+          { text: t("Done", "Sawa"), style: "cancel" },
+        ],
+      );
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
@@ -115,11 +146,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
       ) : null}
 
       {loading && cvs.length === 0 ? (
-        <>
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </>
+        <SkeletonList count={3} />
       ) : error && cvs.length === 0 ? (
         /* Never claim the user has no CVs when the real problem is that we
            couldn't reach the server — that is indistinguishable from data loss. */
