@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Image, Linking, Pressable, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
@@ -10,13 +11,13 @@ import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
 import { APP_VERSION } from "../../lib/app-version";
 import { SUPPORT_EMAIL } from "../../lib/app-hosts";
+import { loadProfile } from "../../lib/profile-store";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { Icon } from "../../components/icon";
 import type { ProfileScreenProps } from "../../navigation/types";
 import {
-  Button,
   ListGroupLabel,
   ListRow,
   Screen,
@@ -41,6 +42,33 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const [notifications, setNotifications] = useState(false);
   const [busy, setBusy] = useState<"signout" | "delete" | "cache" | null>(null);
+
+  /**
+   * The headshot the app asked for, on the screen where the user looks for it.
+   *
+   * Career Profile asks for a photo and tells them "It shows next to your name
+   * and on your CVs" — but this identity card rendered initials and nothing
+   * else, so the one screen that shows their name never showed the photo they
+   * had picked. The CV got it; the identity block could not. Loaded on focus,
+   * not just on mount, so returning from Career Profile after adding the photo
+   * shows it immediately instead of after an app restart.
+   */
+  const [photo, setPhoto] = useState("");
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      loadProfile()
+        .then((p) => {
+          if (alive) setPhoto(p.photo || "");
+        })
+        .catch(() => {
+          /* no local profile yet — the initials stand in */
+        });
+      return () => {
+        alive = false;
+      };
+    }, []),
+  );
 
   // Push can only register a token once app.json carries an Expo/EAS projectId
   // (extra.eas.projectId). Without one `registerForPush` returns false BEFORE it
@@ -248,20 +276,53 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             padding: 16,
           }}
         >
-          <View
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 18,
-              backgroundColor: c.accent,
-              alignItems: "center",
-              justifyContent: "center",
+          {/* The photo the user picked in Career Profile, where they look for
+              it — the initials are the fallback when there is none (and for a
+              user who never added one, the circle is still the control that
+              takes them to do it, like the one on that screen). */}
+          <Pressable
+            onPress={() => {
+              haptics.selection();
+              navigation.navigate("CareerProfile");
             }}
+            accessibilityRole="button"
+            accessibilityLabel={
+              photo
+                ? t("Change your photo", "Badilisha picha yako")
+                : t("Add your photo", "Weka picha yako")
+            }
+            style={{ width: 56, height: 56, borderRadius: 18 }}
           >
-            <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
-              {initials(user?.name, user?.email)}
-            </Text>
-          </View>
+            {photo ? (
+              <Image
+                source={{ uri: photo }}
+                accessibilityLabel={t("Your photo", "Picha yako")}
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.bg,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                }}
+              />
+            ) : (
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.accent,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
+                  {initials(user?.name, user?.email)}
+                </Text>
+              </View>
+            )}
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
               {user?.name || user?.email?.split("@")[0] || t("Your account", "Akaunti yako")}
@@ -403,6 +464,28 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={clearCache}
             chevron
           />
+          {/* Sign out lives HERE, in Account, not only at the bottom of the
+              screen below "Delete account".
+              The device sweep reported "a user cannot sign out" from a dump of
+              this tab: the AKAAUNTI group held exactly two rows and the bundle
+              supposedly never contained "Toka". Both were artifacts — the dump
+              is clipped to the viewport (the tree ends at "Msaada na Maswali",
+              and scrolling reveals the real button), and the shipped 1.6.24
+              bundle does contain "Toka" once as a deduplicated Hermes string.
+              The control existed; it was one and a half screens down, under the
+              one row nobody taps casually, on a screen where users look for it
+              in the first group. On a shared phone that is the difference
+              between signing out and handing the phone over signed in, so it
+              also moved above the fold and the shadow button at the bottom was
+              removed rather than duplicated. */}
+          <ListRow
+            icon="log-out"
+            label={t("Sign out", "Toka")}
+            sublabel={t("You can sign back in any time", "Unaweza kuingia tena wakati wowote")}
+            disabled={busy === "signout"}
+            onPress={confirmSignOut}
+            chevron
+          />
           <ListRow last icon="alert-circle" label={t("Version", "Toleo")} value={version} />
         </View>
 
@@ -460,9 +543,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           />
         </View>
 
-        <View style={{ marginTop: 26 }}>
-          <Button label={t("Sign out", "Toka")} variant="secondary" loading={busy === "signout"} onPress={confirmSignOut} />
-        </View>
+        {/* The shadow "Toka" button that used to sit here is gone: sign-out is
+            a row in Account now, above the fold, with the same confirm dialog. */}
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
           {t("Sumaiya · Your career, guided", "Sumaiya · Kazi yako, inaongozwa")}{"\n"}{SUPPORT_EMAIL}
