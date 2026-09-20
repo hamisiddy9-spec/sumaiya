@@ -9,7 +9,7 @@ import {
   LayoutGrid, Type, Sparkles, PartyPopper, AlertTriangle, History, RotateCcw, type LucideIcon,
 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorMessage, googleSignInErrorMessage } from "@/lib/auth-errors";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -133,8 +133,18 @@ function SignUpModal({ onClose, sw, intent = "account" }: { onClose: () => void;
   const handleGoogle = async () => {
     setIsLoading(true);
     posthog.capture('sign_in_triggered', { source: 'guest_editor', method: 'google' });
-    const callbackURL = saveGuestAndGetCallback();
-    await signIn.social({ provider: "google", callbackURL });
+    // Persist the draft first — Google Identity Services signs the user in
+    // IN this tab (no OAuth redirect, no Supabase-hosted client secret), so we
+    // can send them straight to the migration page that reads it back.
+    saveGuestAndGetCallback();
+    const result = await signIn.google();
+    if (result.error) {
+      setIsLoading(false);
+      setError(googleSignInErrorMessage(result.error.code, sw));
+      return;
+    }
+    posthog.capture("sign_in_completed", { method: "google", isNew: false });
+    window.location.assign("/migrate-guest");
   };
 
   const handleEmail = async (e: React.FormEvent) => {

@@ -83,27 +83,56 @@ Rules to encode with it:
 - The repo already ships `npm run evals` (anti-fabrication harness). It did not run today.
   Put it in the seam test.
 
-### 0.6. GOOGLE SIGN-IN ON THE WEB — still broken, reproduced
+### 0.6. GOOGLE SIGN-IN ON THE WEB — FIXED (2026-09-20, no Supabase secret needed)
+
+**Status: implemented + gated + probed on a real page. One owner action left to see a
+completed sign-in** (see "Remaining" at the end of this item).
+
 `{"code":400,"error_code":"validation_failed","msg":"Unsupported provider: missing OAuth secret"}`
+was reproduced again before the fix (curl, `…/auth/v1/authorize?provider=google`, HTTP 400).
 
-The two clients use **different** code paths:
-- **web** `apps/web/lib/auth-client.ts:49` → `supabase.auth.signInWithOAuth({provider:"google"})`
+The two clients used **different** code paths:
+- **web** `apps/web/lib/auth-client.ts` → `supabase.auth.signInWithOAuth({provider:"google"})`
   → goes **through Supabase** → needs the **Supabase Google CLIENT SECRET**, which is unset.
-- **native** `apps/native/src/contexts/auth-context.tsx:15` → `@react-native-google-signin`
-  → talks to **Google directly**, gets an ID token, hands it to Supabase → **needs no secret**.
-  That is why sign-in worked on the phone and fails on the web.
+- **native** `apps/native/src/contexts/auth-context.tsx` → `@react-native-google-signin`
+  → talks to **Google directly**, gets an ID token, hands it to Supabase → **needs no secret.**
 
-Two possible fixes, in order of cost:
-1. **Paste the client secret** into Supabase → Auth → Providers → Google (owner action; the
-   page and the Google Cloud credentials page for project `811013224847` are already open
-   in the phone's Chrome).
-2. **Remove the dependency entirely**: use Google Identity Services in the browser to obtain
-   an ID token and call `supabase.auth.signInWithIdToken({provider:"google", token})` — the
-   same shape the working native path already uses. **Claude can build this; it does not
-   need the secret at all.** Prefer this: it makes web and native use one mechanism.
+**Fix taken: option 2 (remove the dependency).** The web app now uses Google Identity
+Services in the browser to obtain an ID token and calls
+`supabase.auth.signInWithIdToken({provider:"google", token})` — the same shape as native.
+No Supabase-hosted secret is involved anywhere on the web path any more.
 
-Redirect URI that must exist in Google Cloud (verified: the Supabase callback returns 303):
-`https://duywnmibgiqulqzunsmh.supabase.co/auth/v1/callback`
+- New: `apps/web/lib/google-identity.ts` (GIS loader + `requestGoogleIdToken`, all DOM
+  injected so it is unit-testable; ships the public web client ID as a fallback so the
+  button works with no env change).
+- `apps/web/lib/auth-client.ts`: `signIn.social` (OAuth redirect) **deleted**, replaced by
+  `signIn.google()`. Both call sites updated (`sign-in-form.tsx`, `cv-editor-client.tsx`).
+- `apps/web/lib/security/csp.mjs`: GIS needs `https://accounts.google.com` in `script-src`,
+  `style-src`, `connect-src` AND `frame-src` (there was no `frame-src` at all, so
+  `default-src 'self'` was silently blocking Google's sheet).
+- **Seam test** (the point of §0.5): `apps/web/lib/signin-mechanism-parity.test.ts` reads
+  BOTH source trees and fails if web and native stop using the same shape, if the OAuth
+  redirect comes back, if the two client IDs differ, or if CSP stops allowing Google.
+  Verified by mutation: reintroducing `signInWithOAuth` into `auth-client.ts` fails 2 of
+  its assertions; reverting makes them pass.
+- Email/OTP untouched and still covered (`apps/web/lib/auth-client.test.ts`).
+
+**Evidence:** `npx tsc --noEmit` → exit 0; `npx vitest run` → 139 files passed | 1 skipped,
+2188 tests passed | 3 skipped (baseline was 2157 | 3). Real page probe (headless Chrome on
+`next dev`): clicking the button loads `https://accounts.google.com/gsi/client` (200) and
+runs the FedCM flow (`gsi/fedcm.json` 200, `listaccounts` 200); **no request to
+`*.supabase.co`** is made any more. Supabase side: `POST /auth/v1/token?grant_type=id_token`
+now answers `400 "Bad ID token"` for a fake token — i.e. the route works and only the token
+was fake — versus the old route's `missing OAuth secret`.
+
+**Remaining (owner action, cannot be done from code):**
+1. Google Cloud → OAuth client `811013224847-…` → **Authorized JavaScript origins** must
+   list the sites that serve the button (`https://sumaiya.app`, `https://www.sumaiya.app`,
+   and `http://localhost:3000` for dev). Until then GIS answers
+   `Provider's accounts list is empty` / `FedCM get() rejects with NetworkError`, which is
+   the exact observed failure in the probe — sign-in stops at Google, not at Supabase.
+2. Deploy the web app (the live site still runs the old bundle).
+
 
 ### 0.7. MOBILE WEB vs DESKTOP — never designed, only stretched
 **User's words:** *"web page transition loading show illustrations of boxes when loading pages ... audit also find a way to make mobile web and desktop environments research them individually against the world and adjust to best as you can ... i feel the web versions mobile and desktop have not been given thought to"*

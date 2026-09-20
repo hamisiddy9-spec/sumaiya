@@ -16,14 +16,28 @@
 1. `BETTER_AUTH_SECRET` → Run: `npx auth secret` → copy output
 2. `BETTER_AUTH_URL` → Your production URL (e.g., https://www.templatehub.pro)
 
-### Google OAuth (2 values)
+### Google OAuth (2 values + 1 public)
 1. Go to https://console.cloud.google.com → Credentials
 2. Create OAuth 2.0 Client ID (Web application)
 3. Add authorized redirect URI: `https://YOUR-SUPABASE-URL.supabase.co/auth/v1/callback`
 4. Copy:
+   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` → the Web client ID (PUBLIC by design)
    - `GOOGLE_CLIENT_ID`
    - `GOOGLE_CLIENT_SECRET`
-5. Enable Google provider in Supabase: Authentication → Providers → Google
+
+**Web sign-in does NOT need the client secret.** The web app uses Google Identity
+Services in the browser: Google mints an ID token, and Supabase only verifies it via
+`signInWithIdToken` (`apps/web/lib/google-identity.ts` → `apps/web/lib/auth-client.ts`).
+That is the same mechanism the native app uses, and it works while the Supabase Google
+provider has no secret configured. The OLD route (`signInWithOAuth`, i.e.
+`/auth/v1/authorize?provider=google`) requires the secret in Supabase and returns
+400 `Unsupported provider: missing OAuth secret` without it — do not reintroduce it;
+`apps/web/lib/signin-mechanism-parity.test.ts` fails if you do.
+
+With `NEXT_PUBLIC_GOOGLE_CLIENT_ID` unset, the app falls back to the same Web client ID
+the native app ships, so no env change is required to make the button work. What IS
+required: the site's origins must be authorized for that client ID in Google Cloud
+(Authorized JavaScript origins), or Google refuses to render the prompt.
 
 ### Stripe (3 values)
 1. Go to https://dashboard.stripe.com → Developers → API keys

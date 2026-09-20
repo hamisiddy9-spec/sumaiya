@@ -77,3 +77,41 @@ export function authErrorMessage(
   }
   return sw ? "Kuna hitilafu imetokea. Jaribu tena." : "Something went wrong. Try again.";
 }
+
+/**
+ * Localized copy for the Google Identity Services failure reasons
+ * (`GoogleIdTokenFailure` in lib/google-identity.ts, delivered as `code`).
+ *
+ * Every branch necessarily points at the email code path, because that is the
+ * route that must keep working no matter what Google or the browser does: a
+ * jobseeker on a cheap Android phone with a blocked third-party context must
+ * still be able to get in.
+ */
+export function googleSignInErrorMessage(reason: string | undefined, sw: boolean): string {
+  switch (reason) {
+    case "dismissed":
+      return sw
+        ? "Kuingia kwa Google kumeghairiwa. Jaribu tena, au tumia barua pepe hapa chini."
+        : "Google sign-in was cancelled. Try again, or use email below.";
+    case "timeout":
+      return sw
+        ? "Google haikujibu kwa wakati. Jaribu tena, au tumia barua pepe hapa chini."
+        : "Google didn't answer in time. Try again, or use email below.";
+    case "script_unavailable":
+      return sw
+        ? "Sikuweza kufikia Google — angalia mtandao wako, au tumia barua pepe hapa chini."
+        : "I couldn't reach Google — check your connection, or use email below.";
+    case "not_supported":
+      return sw
+        ? "Kivinjari chako hakiruhusu kuingia kwa Google. Tumia barua pepe hapa chini — inafanya kazi kwa kila kifaa."
+        : "This browser won't allow Google sign-in. Use email below — it works on every device.";
+    case "not_configured":
+      return sw
+        ? "Kuingia kwa Google hakujasanidiwa bado. Tumia barua pepe hapa chini."
+        : "Google sign-in isn't set up yet. Use email below.";
+    default:
+      return sw
+        ? "Kuingia kwa Google kumeshindikana. Tumia barua pepe hapa chini."
+        : "Google sign-in failed. Use email below.";
+  }
+}

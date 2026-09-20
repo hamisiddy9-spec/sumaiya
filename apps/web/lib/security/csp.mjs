@@ -14,6 +14,7 @@ export function buildCsp(dev = false) {
     "'wasm-unsafe-eval'", // tesseract OCR core
     "https://cdn.jsdelivr.net", // tesseract worker/core
     "https://connect.facebook.net", // Meta Pixel (inert unless NEXT_PUBLIC_META_PIXEL_ID)
+    "https://accounts.google.com", // Google Identity Services client (gsi/client)
     "https://us-assets.i.posthog.com", // posthog-js loader (array.js / config.js)
     "https://eu-assets.i.posthog.com",
     ...(dev ? ["'unsafe-eval'"] : []), // react-refresh runtime — dev only
@@ -22,10 +23,19 @@ export function buildCsp(dev = false) {
   return [
     "default-src 'self'",
     `script-src ${scriptSrc.join(" ")}`,
-    "style-src 'self' 'unsafe-inline'",
+    // GIS also pulls its own stylesheet (accounts.google.com/gsi/style) — without
+    // this origin in style-src the prompt renders unstyled and the console shows a
+    // CSP violation. Found by driving the real page, not by reading the spec.
+    "style-src 'self' 'unsafe-inline' https://accounts.google.com",
     "img-src 'self' data: blob: https://*.supabase.co https://lh3.googleusercontent.com https://www.facebook.com",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://www.facebook.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://accounts.google.com https://www.facebook.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com",
+    // Google Identity Services renders its account sheet in an accounts.google.com
+    // iframe. There was no frame-src before, so `default-src 'self'` applied and
+    // the sheet was blocked — the button would fail with a CSP console error and
+    // no visible reason. (Google sign-in must NOT go through Supabase: see
+    // lib/google-identity.ts.)
+    "frame-src 'self' https://accounts.google.com",
     "worker-src 'self' blob: https://cdn.jsdelivr.net",
     "manifest-src 'self'",
     "frame-ancestors 'self'",

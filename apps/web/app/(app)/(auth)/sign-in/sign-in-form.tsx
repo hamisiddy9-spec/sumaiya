@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Mail, Loader2, KeyRound } from "lucide-react";
 import { signIn, getSession } from "@/lib/auth-client";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { authErrorMessage, googleSignInErrorMessage } from "@/lib/auth-errors";
 import posthog from "@/lib/analytics";
 import { Logo } from "@/components/ui/logo";
 import { Icon } from "@/components/ui/icon";
@@ -68,6 +68,7 @@ function SignInForm({ lang }: { lang: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "code-sent" | "error">("idle");
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState(false);
+  const [googleErrorMessage, setGoogleErrorMessage] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [hasDraft, setHasDraft] = useState(false);
   // "code" = email a 6-digit code the user types here (stays inside an
@@ -197,6 +198,25 @@ function SignInForm({ lang }: { lang: string }) {
     }
   };
 
+  const handleGoogle = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
+    setGoogleError(false);
+    setGoogleErrorMessage("");
+    posthog.capture('sign_in_triggered', { source: 'sign_in_page', method: 'google' });
+    // Google Identity Services mints the ID token in THIS browser and Supabase
+    // only verifies it — no Supabase-hosted client secret, no OAuth redirect.
+    const result = await signIn.google();
+    if (result.error) {
+      setGoogleLoading(false);
+      setGoogleError(true);
+      setGoogleErrorMessage(googleSignInErrorMessage(result.error.code, sw));
+      return;
+    }
+    posthog.capture("sign_in_completed", { method: "google", isNew: false });
+    window.location.replace(callbackUrl || "/dashboard");
+  };
+
   return (
     <div className="min-h-screen bg-sand flex items-center justify-center p-4">
       <div className="max-w-4xl w-full grid md:grid-cols-5 rounded-card-lg shadow-floating overflow-hidden">
@@ -285,36 +305,15 @@ function SignInForm({ lang }: { lang: string }) {
               <button
                 type="button"
                 disabled={googleLoading}
-                onClick={async () => {
-                  if (googleLoading) return;
-                  setGoogleLoading(true);
-                  setGoogleError(false);
-                  posthog.capture('sign_in_triggered', { source: 'sign_in_page', method: 'google' });
-                  signIn.social({
-                    provider: "google",
-                    callbackURL: supabaseCallbackURL,
-                  });
-                  setTimeout(() => {
-                    setGoogleLoading(false);
-                    setGoogleError(true);
-                  }, 15000);
-                }}
+                onClick={handleGoogle}
                 className="w-full flex items-center justify-center gap-3 bg-white border border-border hover:border-[#C6B6A5] hover:bg-cream disabled:opacity-60 disabled:cursor-not-allowed text-espresso font-medium py-3 rounded-input-lg transition mb-6"
               >
                 {googleLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <GoogleIcon className="w-5 h-5" />}
-                {googleLoading ? (sw ? "Inakupeleka Google..." : "Redirecting to Google...") : (sw ? "Endelea na Google" : "Continue with Google")}
+                {googleLoading ? (sw ? "Inasubiri Google..." : "Waiting for Google...") : (sw ? "Endelea na Google" : "Continue with Google")}
               </button>
               {googleError && (
                 <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-input-lg px-3 py-2 -mt-4 mb-6">
-                  {sw ? "Kuhamishwa kunachukua muda mrefu kuliko ilivyotarajiwa." : "Redirect is taking longer than expected."}{" "}
-                  <button
-                    type="button"
-                    className="underline font-medium"
-                    onClick={() => { setGoogleError(false); setGoogleLoading(false); }}
-                  >
-                    {sw ? "Jaribu tena" : "Try again"}
-                  </button>{" "}
-                  {sw ? "au tumia kuingia kwa barua pepe hapa chini." : "or use email sign-in below."}
+                  {googleErrorMessage || (sw ? "Kuingia kwa Google kumeshindikana." : "Google sign-in failed.")}
                 </p>
               )}
 

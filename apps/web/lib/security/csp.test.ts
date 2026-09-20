@@ -11,7 +11,7 @@ describe("buildCsp", () => {
   it("omits 'unsafe-eval' in production — the allowlist stays strict", () => {
     const prod = buildCsp(false);
     expect(prod).not.toContain("'unsafe-eval'");
-    expect(prod).toContain("script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://connect.facebook.net https://us-assets.i.posthog.com https://eu-assets.i.posthog.com");
+    expect(prod).toContain("script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://connect.facebook.net https://accounts.google.com https://us-assets.i.posthog.com https://eu-assets.i.posthog.com");
   });
 
   it("keeps all the security directives in both modes", () => {
@@ -23,7 +23,21 @@ describe("buildCsp", () => {
       expect(csp).toContain("form-action 'self'");
       expect(csp).toContain("upgrade-insecure-requests");
       expect(csp).toContain("worker-src 'self' blob: https://cdn.jsdelivr.net");
-      expect(csp).toContain("connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://www.facebook.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com");
+      expect(csp).toContain("connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://accounts.google.com https://www.facebook.com https://us.i.posthog.com https://us-assets.i.posthog.com https://eu.i.posthog.com https://eu-assets.i.posthog.com");
+    }
+  });
+
+  // Google Identity Services loads its client script, calls back to
+  // accounts.google.com, and renders the account sheet in an
+  // accounts.google.com IFRAME. Block any of the three and the "Continue with
+  // Google" button fails with only a console error. This is the CSP half of the
+  // seam that sign-in lives on (lib/google-identity.ts is the other half).
+  it("allows Google Identity Services to load, call home, and render its iframe", () => {
+    for (const csp of [buildCsp(true), buildCsp(false)]) {
+      expect(csp).toContain("https://accounts.google.com");
+      expect(csp).toMatch(/script-src [^;]*https:\/\/accounts\.google\.com/);
+      expect(csp).toMatch(/connect-src [^;]*https:\/\/accounts\.google\.com/);
+      expect(csp).toMatch(/frame-src [^;]*https:\/\/accounts\.google\.com/);
     }
   });
 
