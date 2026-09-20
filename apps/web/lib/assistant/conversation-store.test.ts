@@ -10,6 +10,7 @@ import {
   migrateLegacy,
   openConversation,
   pruneConversations,
+  searchConversations,
   upsertConversation,
 } from "./conversation-store";
 
@@ -141,6 +142,51 @@ describe("migrateLegacy", () => {
 
   it("returns an empty store for an empty legacy thread", () => {
     expect(migrateLegacy({ messages: [], docType: null, done: false }, now)).toEqual(emptyStore());
+  });
+});
+
+describe("searchConversations", () => {
+  const list = [
+    { ...convo("a", now, "Bank teller CV"), messages: [{ role: "user", content: "I need a CV for a bank job" }] },
+    { ...convo("b", now, "Mazungumzo mapya"), messages: [{ role: "user", content: "Tengeneza barua ya kufunika" }] },
+  ];
+
+  it("returns everything for an empty query", () => {
+    expect(searchConversations(list, "")).toEqual(list);
+  });
+
+  it("returns everything for a whitespace-only query", () => {
+    expect(searchConversations(list, "   ")).toEqual(list);
+  });
+
+  it("matches on the conversation title, case-insensitively", () => {
+    expect(searchConversations(list, "BANK").map((c) => c.id)).toEqual(["a"]);
+  });
+
+  it("matches on a message body, case-insensitively", () => {
+    expect(searchConversations(list, "kufunika").map((c) => c.id)).toEqual(["b"]);
+  });
+
+  it("returns an empty array when nothing matches", () => {
+    expect(searchConversations(list, "nonexistent query")).toEqual([]);
+  });
+
+  it("preserves input order", () => {
+    const reordered = [list[1], list[0]];
+    expect(searchConversations(reordered, "").map((c) => c.id)).toEqual(["b", "a"]);
+    expect(searchConversations(reordered, "cv").map((c) => c.id)).toEqual(["a"]);
+  });
+
+  it("does not throw on malformed messages", () => {
+    const malformed = [
+      { ...convo("c", now, "No content field"), messages: [{ role: "user" }] },
+      { ...convo("d", now, "Numeric content"), messages: [{ role: "user", content: 42 }] },
+      { ...convo("e", now, "Object content"), messages: [{ role: "user", content: { text: "hidden" } }] },
+      { ...convo("f", now, "Non-array messages"), messages: "not an array" as unknown as unknown[] },
+    ];
+    expect(() => searchConversations(malformed, "anything")).not.toThrow();
+    expect(searchConversations(malformed, "anything")).toEqual([]);
+    expect(searchConversations(malformed, "content field").map((c) => c.id)).toEqual(["c"]);
   });
 });
 

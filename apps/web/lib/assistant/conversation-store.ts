@@ -138,6 +138,30 @@ export function migrateLegacy(legacy: LegacyThread, now = Date.now(), sw = false
   return pruneConversations({ conversations: [convo], activeId: "legacy" }, now);
 }
 
+/**
+ * Filter conversations by a free-text query against title and message bodies.
+ * A saved-chat list that outgrows one screen is unusable on a phone — this is
+ * the only way back to a chat from three weeks ago once "Chats" stops being a
+ * short list you can just scan. Messages are `unknown[]` by design, so this
+ * inspects each one defensively and never throws on a malformed entry.
+ */
+export function searchConversations(
+  conversations: readonly StoredConversation[],
+  query: string,
+): StoredConversation[] {
+  if (typeof query !== "string" || !query.trim()) return [...conversations];
+  const needle = query.trim().toLowerCase();
+  return conversations.filter((c) => {
+    if (typeof c.title === "string" && c.title.toLowerCase().includes(needle)) return true;
+    if (!Array.isArray(c.messages)) return false;
+    return c.messages.some((m) => {
+      if (!m || typeof m !== "object") return false;
+      const content = (m as Record<string, unknown>).content;
+      return typeof content === "string" && content.toLowerCase().includes(needle);
+    });
+  });
+}
+
 /** Shape-validate a stored conversation — tampered storage never crashes render. */
 export function isValidConversation(c: unknown): c is StoredConversation {
   if (!c || typeof c !== "object") return false;

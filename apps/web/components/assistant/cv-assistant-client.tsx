@@ -14,7 +14,7 @@ import { useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } fr
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
-import { ChevronLeft, Send, Loader2, Sparkles, RotateCcw, FileText, Mail, CreditCard, ScrollText, Paperclip, Bolt, CheckCircle2, AlertTriangle, XCircle, Target, Check, Volume2, VolumeX, Mic, MicOff, Briefcase, History, Trash2, Plus, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, Send, Loader2, Sparkles, RotateCcw, FileText, Mail, CreditCard, ScrollText, Paperclip, Bolt, CheckCircle2, AlertTriangle, XCircle, Target, Check, Volume2, VolumeX, Mic, MicOff, Briefcase, History, Trash2, Plus, SlidersHorizontal, Search, LayoutTemplate, Settings } from "lucide-react";
 import { nanoid } from "nanoid";
 import { computeComposerHeight, COMPOSER_MAX_HEIGHT_PX } from "@/lib/assistant/composer-height";
 import { micErrorMessage } from "@/lib/assistant/mic-error";
@@ -54,6 +54,7 @@ import {
   migrateLegacy,
   openConversation,
   pruneConversations,
+  searchConversations,
   upsertConversation,
   type ConversationStoreData,
   type LegacyThread,
@@ -215,6 +216,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // v4 — multi-conversation store (list + active pointer) + the list drawer.
   const [convos, setConvos] = useState<ConversationStoreData>({ conversations: [], activeId: null });
   const [showConvos, setShowConvos] = useState(false);
+  const [convoQuery, setConvoQuery] = useState("");
   // Built-document downloads: after build succeeds the user stays in the chat
   // and picks a format (PDF / Word / TXT) right there — instant, no editor hop.
   type BuiltDoc =
@@ -1294,6 +1296,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setError("");
     setInput("");
     setShowConvos(false);
+    setConvoQuery("");
     setBuiltDoc(null);
   };
 
@@ -1323,6 +1326,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     const pasted = findLastJobInHistory(msgs);
     if (pasted) lastJdRef.current = pasted;
     setShowConvos(false);
+    setConvoQuery("");
     setBuiltDoc(null);
   };
 
@@ -2375,7 +2379,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           <p className="text-[11px] text-cream/50 leading-tight">{cockpit ? (sw ? `Ninafanyia kazi CV yako${activeCvTitle ? ` — ${activeCvTitle}` : ""}` : `Working on your CV${activeCvTitle ? ` — ${activeCvTitle}` : ""}`) : (sw ? "Tuongee — nitakutengenezea hati yako" : "Let's chat — I'll create your document")}</p>
         </div>
         {/* Conversations: open the saved-chat list; Restart = a NEW chat. */}
-        <button onClick={() => setShowConvos((v) => !v)} disabled={cockpit}
+        <button onClick={() => setShowConvos((v) => { if (v) setConvoQuery(""); return !v; })} disabled={cockpit}
           className={`flex items-center gap-1 text-[11px] transition disabled:opacity-40 shrink-0 ${showConvos ? "text-ember" : "text-cream/50 hover:text-cream"}`}
           aria-label={sw ? "Mazungumzo yako" : "Your conversations"}>
           <History className="w-3.5 h-3.5" />
@@ -2391,9 +2395,12 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         )}
       </div>
 
-      {/* Conversation list — open a saved chat, start fresh, or delete. */}
+      {/* Conversation list — search, open a saved chat, start fresh, or delete. */}
       {showConvos && (
-        <div className="border-b border-border bg-card max-h-80 overflow-y-auto flex-shrink-0 shadow-card z-10">
+        <div className="border-b border-border bg-card flex flex-col max-h-96 flex-shrink-0 shadow-card z-10">
+          {/* The list scrolls; the "go to" nav below stays put, so the pinned
+              feature links are reachable no matter how long the chat list gets. */}
+          <div className="overflow-y-auto flex-1 min-h-0">
           <div className="px-4 pt-3 pb-1.5 flex items-center justify-between gap-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
               {sw ? "Mazungumzo yako" : "Your conversations"}
@@ -2405,40 +2412,109 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               {sw ? "Mpya" : "New"}
             </button>
           </div>
-          {convos.conversations.length === 0 ? (
-            <p className="px-4 pb-3 text-xs text-text-muted">
-              {sw ? "Hakuna mazungumzo bado — anza mpya hapo juu." : "No conversations yet — start a new one above."}
-            </p>
-          ) : (
-            <ul>
-              {convos.conversations.map((c) => {
-                const lastMsg = [...c.messages].reverse().find((m) => m && typeof (m as Msg).content === "string" && (m as Msg).content);
-                const isActive = c.id === convos.activeId;
-                return (
-                  <li key={c.id} className="flex items-center gap-1 px-2">
-                    <button onClick={() => openConvo(c.id)}
-                      className={`flex-1 min-w-0 text-left px-2 py-2 rounded-lg transition ${isActive ? "bg-sand" : "hover:bg-sand/60"}`}>
-                      <span className="block text-[13px] font-semibold text-espresso truncate">{c.title}</span>
-                      <span className="block text-[11px] text-text-muted truncate">
-                        {(lastMsg as Msg | undefined)?.content ?? (sw ? "Hakuna maudhui" : "No content")}
-                      </span>
-                      <span className="block text-[10px] text-text-muted/70 mt-0.5">{convoTimeAgo(c.updatedAt)}</span>
-                    </button>
-                    <button onClick={() => removeConvo(c.id)}
-                      className="shrink-0 p-2 rounded-lg text-text-muted hover:text-red-600 hover:bg-red-50 transition"
-                      aria-label={sw ? "Futa mazungumzo" : "Delete conversation"}>
-                      <Trash2 size={14} />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+          {convos.conversations.length > 0 && (
+            <div className="px-4 pt-2 pb-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input type="search" value={convoQuery} onChange={(e) => setConvoQuery(e.target.value)}
+                  placeholder={sw ? "Tafuta mazungumzo…" : "Search conversations…"}
+                  aria-label={sw ? "Tafuta mazungumzo" : "Search conversations"}
+                  className="w-full bg-sand rounded-lg pl-8 pr-3 py-2 text-[13px] text-espresso placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-ember" />
+              </div>
+            </div>
           )}
+          {(() => {
+            const filtered = searchConversations(convos.conversations, convoQuery);
+            if (convos.conversations.length === 0) {
+              return (
+                <p className="px-4 pb-3 text-xs text-text-muted">
+                  {sw ? "Hakuna mazungumzo bado — anza mpya hapo juu." : "No conversations yet — start a new one above."}
+                </p>
+              );
+            }
+            if (filtered.length === 0) {
+              return (
+                <p className="px-4 pb-3 text-xs text-text-muted">
+                  {sw ? "Hakuna mazungumzo yanayolingana." : "No conversations match your search."}
+                </p>
+              );
+            }
+            return (
+              <ul>
+                {filtered.map((c) => {
+                  const lastMsg = [...c.messages].reverse().find((m) => m && typeof (m as Msg).content === "string" && (m as Msg).content);
+                  const isActive = c.id === convos.activeId;
+                  return (
+                    <li key={c.id} className="flex items-center gap-1 px-2">
+                      <button onClick={() => openConvo(c.id)}
+                        className={`flex-1 min-w-0 text-left px-2 py-2 rounded-lg transition ${isActive ? "bg-sand" : "hover:bg-sand/60"}`}>
+                        <span className="block text-[13px] font-semibold text-espresso truncate">{c.title}</span>
+                        <span className="block text-[11px] text-text-muted truncate">
+                          {(lastMsg as Msg | undefined)?.content ?? (sw ? "Hakuna maudhui" : "No content")}
+                        </span>
+                        <span className="block text-[10px] text-text-muted/70 mt-0.5">{convoTimeAgo(c.updatedAt)}</span>
+                      </button>
+                      <button onClick={() => removeConvo(c.id)}
+                        className="shrink-0 p-2 rounded-lg text-text-muted hover:text-red-600 hover:bg-red-50 transition"
+                        aria-label={sw ? "Futa mazungumzo" : "Delete conversation"}>
+                        <Trash2 size={14} />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            );
+          })()}
           <p className="px-4 pb-2.5 text-[10px] text-text-muted">
             {sw
               ? "Mazungumzo yasiyotumiwa kwa siku 30 yanafutwa kiotomatiki. Huhifadhiwi kwenye seva."
               : "Conversations idle for 30 days are auto-deleted. Stored on this device only."}
           </p>
+          </div>
+          {!guest && (
+            <div className="border-t border-border px-2 pt-2 pb-2">
+              <span className="block px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+                {sw ? "Nenda kwenye" : "Go to"}
+              </span>
+              <ul>
+                <li>
+                  <Link href="/templates" onClick={() => setShowConvos(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
+                    <LayoutTemplate className="w-3.5 h-3.5 text-ember" />
+                    {sw ? "Miundo" : "Templates"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard" onClick={() => setShowConvos(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
+                    <FileText className="w-3.5 h-3.5 text-ember" />
+                    {sw ? "CV zangu" : "My CVs"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/ats-checker" onClick={() => setShowConvos(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
+                    <Bolt className="w-3.5 h-3.5 text-ember" />
+                    {sw ? "Kagua ATS" : "ATS check"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/jobs" onClick={() => setShowConvos(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
+                    <Briefcase className="w-3.5 h-3.5 text-ember" />
+                    {sw ? "Ajira" : "Jobs"}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/settings" onClick={() => setShowConvos(false)}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
+                    <Settings className="w-3.5 h-3.5 text-ember" />
+                    {sw ? "Mipangilio" : "Settings"}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
