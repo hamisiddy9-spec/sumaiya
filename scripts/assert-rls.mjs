@@ -20,8 +20,15 @@
  *   2. `anon` must hold no INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER on
  *      ANY public table — the product has no anonymous write path.
  *   3. `anon` may hold SELECT only on tables covered by a deliberate public-read
- *      policy (cv's published share, the job feed). This list is the allowlist;
- *      adding a table to it is a product decision, not a drive-by grant.
+ *      policy (the job feed). This list is the allowlist; adding a table to it is a
+ *      product decision, not a drive-by grant.
+ *   3b. `cv` was REMOVED from that allowlist on 2026-09-20, and must stay out. A
+ *      policy restricting anon to published rows does NOT make those rows unlisted:
+ *      PostgREST filters are client-supplied, so any holder of the anon key - which
+ *      ships in the web bundle and the APK - could request `is_public=eq.true` and
+ *      list every published CV in full, photo included, without a slug. The public
+ *      share page reads server-side as `postgres`, so anon needs no grant at all.
+ *      See apps/web/drizzle/migrations/0021_lock_down_cv_enumeration.sql.
  *   4. No deny-by-default telemetry table may grow a policy.
  *
  * `service_role` and `postgres` are intentionally NOT checked: both hold
@@ -49,8 +56,11 @@ if (!DB) {
 
 /** Tables the product deliberately exposes for public read, with the reason. */
 const PUBLIC_READ_ALLOWLIST = {
-  cv: 'cv_public_share_select — an explicitly shared CV (is_public = true AND public_slug IS NOT NULL)',
   job: 'job_public_feed_select — the job feed; public listings, no personal data',
+};
+/** Tables that must NEVER be anon-readable, and why. Guards a hole that was closed. */
+const NEVER_ANON_READABLE = {
+  cv: 'an anon SELECT on cv exposes every published CV and its photo, because the client chooses the filter — see 0021_lock_down_cv_enumeration.sql',
 };
 /** Server-side telemetry: RLS on, deliberately zero policies. */
 const DENY_BY_DEFAULT = ['app_event', 'app_release', 'campaign_event', 'eval_sample', 'outcome_event'];
@@ -102,6 +112,10 @@ for (const [t, privs] of Object.entries(anonPriv)) {
 for (const t of Object.keys(PUBLIC_READ_ALLOWLIST)) {
   if (!(anonPriv[t] ?? []).includes('SELECT')) failures.push(`public.${t} lost anon SELECT — the public surface is broken`);
   if (!policyCount[t]) failures.push(`public.${t} has no policy at all — the public-read surface would return nothing`);
+}
+// ...and a table that was deliberately closed to anon must stay closed
+for (const [t, why] of Object.entries(NEVER_ANON_READABLE)) {
+  if ((anonPriv[t] ?? []).includes('SELECT')) failures.push(`public.${t} is anon-readable again — ${why}`);
 }
 // ...and nothing else may hold a policy that mentions anon or public
 for (const r of await q(`select tablename, policyname from pg_policies
