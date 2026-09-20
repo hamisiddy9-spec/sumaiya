@@ -8,7 +8,7 @@ name: Health check (cron)
 #
 # Needs repo secrets:
 #   CRON_SECRET   — must match the web app's CRON_SECRET env
-#   PROD_URL      — e.g. https://www.templatehub.pro (defaults to the vercel URL)
+#   PROD_URL      — e.g. https://www.templatehub.pro (defaults to https://sumaiya.app)
 
 on:
   schedule:
@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Hit /api/cron/health
         run: |
-          BASE="${{ secrets.PROD_URL || 'https://sumaiyaai.vercel.app' }}"
+          BASE="${{ secrets.PROD_URL || 'https://sumaiya.app' }}"
           code=$(curl -s -o /tmp/body -w "%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "$BASE/api/cron/health")
