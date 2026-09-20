@@ -13,6 +13,7 @@ import { Footer } from "@/components/ui/footer";
 import { Icon } from "@/components/ui/icon";
 import { useLang } from "@/lib/i18n/context";
 import { translations } from "@/lib/i18n/translations";
+import { MAX_PDF_UPLOAD_BYTES, MAX_PDF_UPLOAD_MB } from "@/lib/upload-limits";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type ToolId =
@@ -228,15 +229,14 @@ function ToolSection({ tool, visible }: { tool: ToolConfig; visible: boolean }) 
     // at the edge with a non-JSON 413 before our handler runs, which would
     // otherwise surface as an opaque "Something went wrong". We check BOTH each
     // file and the combined total (merge sends several files in one request).
-    const MAX_BYTES = 4 * 1024 * 1024; // 4 MB, safely under Vercel's ~4.5 MB
-    const tooBig = files.find((f) => f.size > MAX_BYTES);
+    const tooBig = files.find((f) => f.size > MAX_PDF_UPLOAD_BYTES);
     if (tooBig) {
-      set((p) => ({ ...p, loading: false, error: sw ? `"${tooBig.name}" ni kubwa mno (kiwango cha juu 4 MB). Jaribu faili ndogo zaidi.` : `"${tooBig.name}" is too large (max 4 MB). Try a smaller file.` }));
+      set((p) => ({ ...p, loading: false, error: sw ? `"${tooBig.name}" ni kubwa mno (kiwango cha juu ${MAX_PDF_UPLOAD_MB} MB). Jaribu faili ndogo zaidi.` : `"${tooBig.name}" is too large (max ${MAX_PDF_UPLOAD_MB} MB). Try a smaller file.` }));
       return;
     }
     const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-    if (totalBytes > MAX_BYTES) {
-      set((p) => ({ ...p, loading: false, error: sw ? "Jumla ya faili ni kubwa mno (kiwango cha juu 4 MB kwa jumla). Tumia faili ndogo zaidi." : "The files are too large in total (max 4 MB combined). Use smaller files." }));
+    if (totalBytes > MAX_PDF_UPLOAD_BYTES) {
+      set((p) => ({ ...p, loading: false, error: sw ? `Jumla ya faili ni kubwa mno (kiwango cha juu ${MAX_PDF_UPLOAD_MB} MB kwa jumla). Tumia faili ndogo zaidi.` : `The files are too large in total (max ${MAX_PDF_UPLOAD_MB} MB combined). Use smaller files.` }));
       return;
     }
 

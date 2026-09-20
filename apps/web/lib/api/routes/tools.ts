@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 import { PDFDocument, degrees, rgb, StandardFonts } from "pdf-lib";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
+import { MAX_PDF_UPLOAD_BYTES, MAX_PDF_UPLOAD_MB } from "@/lib/upload-limits";
 // Text extraction uses `unpdf` — a serverless-safe build of pdfjs. Unlike
 // `pdf-parse`/`pdfjs-dist`, it does NOT touch the browser-only `DOMMatrix` at
 // load and imports in ~1ms (pdf-parse cost ~2.8s of cold-start time, which on a
@@ -12,7 +13,7 @@ import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 // platform edge, before this handler runs — so a larger cap here was never
 // actually reachable. Cap at 4 MB so our own 413 is consistent with reality
 // and the message is friendly rather than an opaque platform error.
-const MAX_PDF_BYTES = 4 * 1024 * 1024; // 4 MB (under Vercel's ~4.5 MB body limit)
+const MAX_PDF_BYTES = MAX_PDF_UPLOAD_BYTES;
 
 // pdf-lib can only embed PNG and JPEG. WEBP is intentionally excluded — it was
 // previously accepted here but fell through to embedJpg and threw a 500
@@ -494,7 +495,7 @@ writer.write(sys.argv[2])
       }
 
       if (buffer.length > MAX_PDF_BYTES) {
-        return c.json({ error: "That file is too large (max 4 MB). Send a smaller one, or paste the text." }, 413);
+        return c.json({ error: `That file is too large (max ${MAX_PDF_UPLOAD_MB} MB). Send a smaller one, or paste the text.` }, 413);
       }
 
       const head = buffer.subarray(0, 8);

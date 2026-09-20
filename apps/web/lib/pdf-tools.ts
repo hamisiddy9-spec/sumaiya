@@ -110,8 +110,8 @@ export const PDF_TOOLS: PdfToolSeo[] = [
       {
         q: { en: "How many PDFs can I merge at once?", sw: "Naweza kuunganisha PDF ngapi kwa mara moja?" },
         a: {
-          en: "You can merge several PDFs in one go. Keep the total under 15 MB for the fastest results.",
-          sw: "Unaweza kuunganisha PDF kadhaa kwa mara moja. Weka jumla chini ya MB 15 kwa matokeo ya haraka zaidi.",
+          en: "You can merge several PDFs in one go. Keep the total under 4 MB for the fastest results.",
+          sw: "Unaweza kuunganisha PDF kadhaa kwa mara moja. Weka jumla chini ya MB 4 kwa matokeo ya haraka zaidi.",
         },
       },
       {

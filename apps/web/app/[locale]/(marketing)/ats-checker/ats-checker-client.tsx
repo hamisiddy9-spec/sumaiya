@@ -6,8 +6,7 @@ import { FileUp, Loader2, AlertCircle, CheckCircle2, Wand2, FileText, RefreshCw 
 import { useLang } from "@/lib/i18n/context";
 import { track } from "@/lib/analytics";
 import { scoreResumeText, type AtsTextResult } from "@/lib/ats-text";
-
-const MAX_BYTES = 15 * 1024 * 1024;
+import { MAX_PDF_UPLOAD_BYTES, MAX_PDF_UPLOAD_MB } from "@/lib/upload-limits";
 
 function ScoreRing({ score }: { score: number }) {
   const R = 54;
@@ -64,8 +63,8 @@ export function AtsCheckerClient() {
       setError(sw ? "Tafadhali pakia faili la PDF." : "Please upload a PDF file.");
       return;
     }
-    if (file.size > MAX_BYTES) {
-      setError(sw ? "Faili ni kubwa mno (kiwango cha juu 15 MB)." : "That file is too large (max 15 MB).");
+    if (file.size > MAX_PDF_UPLOAD_BYTES) {
+      setError(sw ? `Faili ni kubwa mno (kiwango cha juu ni ${MAX_PDF_UPLOAD_MB} MB).` : `That file is too large (max ${MAX_PDF_UPLOAD_MB} MB).`);
       return;
     }
     setFileName(file.name);
