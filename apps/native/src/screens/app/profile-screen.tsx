@@ -347,8 +347,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               pushReady
                 ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
                 : t(
-                    "Not available yet — this version of Sumaiya can't send alerts to your phone.",
-                    "Bado haipatikani — toleo hili la Sumaiya haliwezi kutuma arifa kwenye simu yako.",
+                    "Not available yet — this version can't send alerts to your phone.",
+                    "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
                   )
             }
             value={pushReady ? undefined : t("Not yet", "Bado")}

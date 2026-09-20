@@ -142,7 +142,7 @@ Sumaiya:`;
       const raw = await callAi(prompt, { temperature: 0.6, maxTokens: 400, timeoutMs: 25_000 });
       if (!raw) {
         await refundAiUsage(userId);
-        return c.json({ error: "Sumaiya is taking too long to respond. Try again." }, 502);
+        return c.json({ error: "I'm taking too long to respond. Try again." }, 502);
       }
 
       // Deterministic backstop (same as the web assistant): the prompt says
@@ -400,7 +400,7 @@ ${sanitizePromptText(transcript, 12000)}
       const raw = await callAi(prompt, { temperature: 0.3, maxTokens: 2200, jsonMode: true, timeoutMs: 45_000 });
       if (!raw) {
         await refundAiUsage(userId);
-        return c.json({ error: "Sumaiya is taking too long. Try again." }, 502);
+        return c.json({ error: "I'm taking too long. Try again." }, 502);
       }
       const parsed = safeParseJson(raw) as Record<string, unknown> | null;
       if (!parsed || typeof parsed !== "object") {

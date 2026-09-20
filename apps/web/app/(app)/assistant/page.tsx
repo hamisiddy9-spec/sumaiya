@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 export async function generateMetadata(): Promise<Metadata> {
   const lang = ((await headers()).get("x-lang") ?? "sw") as Lang;
   return {
-    title: lang === "sw" ? "Sumaiya — Msaidizi wako wa AI wa Kazi" : "Sumaiya — Your AI Career Assistant",
+    Sumaiya — Msaidizi wako wa Kazi
   };
 }
 export const dynamic = "force-dynamic";

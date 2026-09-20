@@ -51,8 +51,18 @@ describe("Home greeting — new vs returning", () => {
     expect(line).toBe("Karibu usiku huu");
   });
 
+  it("the small hours are NIGHT, not morning (device-observed at 00:26)", () => {
+    // The Home screen said "Habari za leo asubuhi," (good morning) at 00:26.
+    for (const h of [0, 1, 2, 3, 4]) expect(greetingBucket(h)).toBe(3);
+    expect(greetingBucket(5)).toBe(0);
+    const line = greeting("sw", false, new Date(2026, 8, 3, 0, 26, 0));
+    expect(line).not.toMatch(/asubuhi|mchana|jioni/);
+    expect(line).toMatch(/usiku/);
+  });
+
   it("buckets are hours-of-day boundaries", () => {
-    expect(greetingBucket(0)).toBe(0);
+    expect(greetingBucket(4)).toBe(3);
+    expect(greetingBucket(5)).toBe(0);
     expect(greetingBucket(11)).toBe(0);
     expect(greetingBucket(12)).toBe(1);
     expect(greetingBucket(15)).toBe(1);

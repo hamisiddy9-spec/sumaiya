@@ -237,14 +237,14 @@ export function snapNoProfileMessage(sw: boolean): string {
 
 export function snapAiUnavailableMessage(sw: boolean): string {
   return sw
-    ? "Huduma ya AI haipatikani kwa sasa — alama ya CV yako na mpangilio wa CV lengwa ziko hapa, lakini uandishi wa AI umekosekana. Jaribu tena baada ya dakika chache."
-    : "AI writing is temporarily unavailable — your ATS score and reordered CV are here, but the AI-drafted parts couldn't be generated. Please try again in a few minutes.";
+    ? "Siwezi kuandika kwa sasa — alama ya CV yako na mpangilio wa CV lengwa ziko hapa, lakini sehemu nilizokuwa nikiandika hazipo. Jaribu tena baada ya dakika chache."
+    : "I can't write right now — your ATS score and reordered CV are here, but the parts I draft couldn't be generated. Please try again in a few minutes.";
 }
 
 export function snapAiPartialMessage(sw: boolean): string {
   return sw
-    ? "Sehemu moja ya AI haikufanikiwa — angalia matokeo yaliyopo na jaribu tena kama kuna kitu kinakosekana."
-    : "One part of the AI output didn't come through — check what's here and retry if something is missing.";
+    ? "Sehemu moja haikufanikiwa — angalia matokeo yaliyopo na jaribu tena kama kuna kitu kinakosekana."
+    : "One part didn't come through — check what's here and retry if something is missing.";
 }
 
 /** Evidence labels surfaced in the UI (from the shared engine vocabulary). */

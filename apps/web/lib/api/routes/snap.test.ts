@@ -125,7 +125,10 @@ describe("snap route — quota refunded on every no-AI-value path", () => {
     expect(body.success).toBe(true);
     expect(body.data.match.before.score).toBeGreaterThanOrEqual(0);
     expect(body.data.warnings.length).toBe(1);
-    expect(body.data.warnings[0]).toMatch(/AI writing is temporarily unavailable/i);
+    // The warning is Sumaiya speaking in the first person (see
+    // docs/SUMAIYA-VOICE-RULE-2026-09-20.md) — it used to read "AI writing is
+    // temporarily unavailable".
+    expect(body.data.warnings[0]).toMatch(/I can't write right now/i);
     expect(mocks.refundAiUsage).toHaveBeenCalledTimes(1);
     expect(mocks.refundAiUsage).toHaveBeenCalledWith("u1");
   });

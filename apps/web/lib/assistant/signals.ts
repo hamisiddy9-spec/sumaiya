@@ -137,10 +137,10 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
       },
       detail: {
         en: fromChat
-          ? `Sumaiya drafted ${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} from your chat — confirm each to make them official.`
+          ? `I drafted ${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} from our chat — confirm each to make them official.`
           : `${context.unconfirmed.length} ${context.unconfirmed.length === 1 ? "fact" : "facts"} came from information you gave — confirm each to make them official.`,
         sw: fromChat
-          ? `Sumaiya alikwambia taarifa ${context.unconfirmed.length} kutokana na mazungumzo — thibitisha kila moja ziwe rasmi.`
+          ? `Nilikwambia taarifa ${context.unconfirmed.length} kutokana na mazungumzo yetu — thibitisha kila moja ziwe rasmi.`
           : `Taarifa ${context.unconfirmed.length} zilitokana na ulizotoa — thibitisha kila moja iwe rasmi.`,
       },
       trigger: `${context.unconfirmed.length} needs-confirmation facts`,

@@ -626,7 +626,7 @@ export function LetterEditorClient({
                   disabled={isEnhancing || !letterData.body.trim()}
                   className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium"
                 >
-                  <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha kwa AI" : "AI Enhance")}
+                  <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                 </button>
               </div>
               {enhanceError && <p className="text-[11px] text-red-600 mb-1.5">{enhanceError}</p>}
@@ -820,7 +820,7 @@ export function LetterEditorClient({
 
       <AiSuggestionModal
         open={!!aiPreview}
-        subtitle={sw ? "AI imeandika upya barua yako iwe wazi na yenye nguvu zaidi." : "AI rewrote your letter to be clearer and more impactful."}
+        subtitle={sw ? "Nimeandika upya barua yako iwe wazi na yenye nguvu zaidi." : "I rewrote your letter to be clearer and more impactful."}
         original={aiPreview?.original ?? ""}
         suggested={aiPreview?.suggested ?? ""}
         busy={isEnhancing}

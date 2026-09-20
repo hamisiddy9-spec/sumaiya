@@ -293,7 +293,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             <Link href="/assistant">
               <Button variant="secondary" size="sm">
                 <Icon name="spark" size={14} className="text-ember" />
-                {lang === "sw" ? "Msaidizi wa AI" : "AI Assistant"}
+                {lang === "sw" ? "Sumaiya" : "Sumaiya"}
               </Button>
             </Link>
             <Link href="/import-cv">
@@ -442,8 +442,8 @@ export default async function DashboardPage({ searchParams }: Props) {
                         had never opened the assistant. */}
                     {unconfirmedSources.every((src) => src === "conversation")
                       ? (sw
-                          ? "Sumaiya aliziandika kutokana na mazungumzo yenu — thibitisha ziwe rasmi, au uziondoe."
-                          : "Sumaiya drafted these from your chat — confirm them to make them official, or remove them.")
+                          ? "Niliziandika kutokana na mazungumzo yetu — thibitisha ziwe rasmi, au uziondoe."
+                          : "I drafted these from our chat — confirm them to make them official, or remove them.")
                       : (sw
                           ? "Zilitokana na taarifa ulizotoa — thibitisha ziwe rasmi, au uziondoe."
                           : "These came from information you provided — confirm them to make them official, or remove them.")}
@@ -521,7 +521,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-cream text-sm flex items-center gap-1">
-                  {lang === "sw" ? "Unda CV kwa kuzungumza na AI" : "Build a CV by chatting with AI"}
+                  {lang === "sw" ? "Unda CV kwa kuzungumza nami" : "Build a CV by chatting with me"}
                   <Icon name="chevron-right" size={12} className="text-cream group-hover:translate-x-0.5 transition-transform" />
                 </p>
                 <p className="text-xs text-cream/70 mt-0.5">

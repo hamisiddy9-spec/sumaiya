@@ -25,16 +25,16 @@ export async function generateMetadata({
   return {
     alternates: alternatesFor("/pro", params.locale),
     title: sw
-      ? "TemplateHub Pro — miundo ya CV iliyoundwa kwa zama za AI"
-      : "TemplateHub Pro — CV designs built for the age of AI",
+      ? "TemplateHub Pro — miundo ya CV ya kitaalamu"
+      : "TemplateHub Pro — professional CV designs",
     description: sw
-      ? "Chagua kutoka miundo 260+ ya CV, kisha Sumaiya — msaidizi wa AI — anaandika kila sehemu na kukupatia PDF inayopita ATS. Pakua bure kwa Android, kwa Kiswahili au Kiingereza."
-      : "Choose from 260+ CV designs, then Sumaiya — your AI assistant — writes every section and hands you an ATS-ready PDF. Free on Android, in Swahili or English.",
+      ? "Chagua kutoka miundo 260+ ya CV, kisha Sumaiya anakusaidia kuandika kila sehemu na kukupatia PDF inayosomeka kwa mifumo ya kuajiri. Pakua bure kwa Android, kwa Kiswahili au Kiingereza."
+      : "Choose from 260+ CV designs, then Sumaiya writes every section and hands you an ATS-ready PDF. Free on Android, in Swahili or English.",
     openGraph: {
       title: sw ? "TemplateHub Pro" : "TemplateHub Pro",
       description: sw
-        ? "Miundo ya CV iliyoundwa kwa zama za AI. Chagua muundo, Sumaiya anaandika, pakua PDF."
-        : "CV designs built for the age of AI. Pick a design, Sumaiya writes it, download the PDF.",
+        ? "Chagua muundo, Sumaiya anakusaidia kuandika, nawe unapakua PDF yako."
+        : "Professional CV designs. Pick a design, Sumaiya writes it, download the PDF.",
       type: "website",
     },
   };

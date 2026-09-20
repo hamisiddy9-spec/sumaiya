@@ -484,7 +484,7 @@ ${cleanText}
     // under the 60s function cap (the free-form call could otherwise run long
     // enough to be hard-killed, which surfaced to users as "took too long").
     const raw = await callAi(prompt, { temperature: 0.2, maxTokens: 2600, jsonMode: true, timeoutMs: 52_000 });
-    if (!raw) { await refundAiUsage(userId); return c.json({ error: "The AI took too long to read this CV. Please try again." }, 502); }
+    if (!raw) { await refundAiUsage(userId); return c.json({ error: "I ran out of time reading that CV. Please try again." }, 502); }
 
     const parsed = safeParseJson(raw);
     if (!parsed) { await refundAiUsage(userId); return c.json({ error: "Couldn't structure this CV — try a text-based (not scanned) PDF." }, 422); }
@@ -909,7 +909,7 @@ ${transcript}`;
     // A pasted JD/transcript can carry HTML — the model should read clean text.
     const cleanText = sanitizePromptText(text, 20000);
     const raw = await callAi(cvWriterPrompt(cleanText, lang), { temperature: 0.5, maxTokens: 2800, jsonMode: true, timeoutMs: 52_000 });
-    if (!raw) { await refundAiUsage(userId); return c.json({ error: "The AI took too long. Please try again." }, 502); }
+    if (!raw) { await refundAiUsage(userId); return c.json({ error: "I ran out of time. Please try again." }, 502); }
 
     const parsed = safeParseJson(raw);
     if (!parsed) { await refundAiUsage(userId); return c.json({ error: "Couldn't build the CV. Please try again." }, 422); }
@@ -1009,7 +1009,7 @@ ${cleanText}
 
     const maxTokens = docType === "business-card" ? 900 : 2800;
     const raw = await callAi(prompt, { temperature: 0.5, maxTokens, jsonMode: true, timeoutMs: 52_000 });
-    if (!raw) { if (userId) await refundAiUsage(userId); return c.json({ error: "The AI took too long. Please try again." }, 502); }
+    if (!raw) { if (userId) await refundAiUsage(userId); return c.json({ error: "I ran out of time. Please try again." }, 502); }
 
     const parsed = safeParseJson(raw);
     if (!parsed) { if (userId) await refundAiUsage(userId); return c.json({ error: "Couldn't build the document. Please try again." }, 422); }

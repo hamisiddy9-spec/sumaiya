@@ -378,8 +378,8 @@ export const PDF_TOOLS: PdfToolSeo[] = [
       sw: "Vuta maandishi yote kutoka kwa PDF",
     },
     description: {
-      en: "Extract text from a PDF free. Copy all the text content out of a digital or scanned PDF — then turn it straight into an editable CV with our AI importer if you like.",
-      sw: "Toa maandishi kutoka kwa PDF bila malipo. Nakili maudhui yote ya maandishi kutoka kwa PDF ya dijitali au ya skani — kisha uyageuze moja kwa moja kuwa CV inayohaririwa kwa kutumia kiingizaji chetu cha AI ukipenda.",
+      en: "Extract text from a PDF free. Copy all the text content out of a digital or scanned PDF — then turn it straight into an editable CV with me, if you like.",
+      sw: "Toa maandishi kutoka kwa PDF bila malipo. Nakili maudhui yote ya maandishi kutoka kwa PDF ya dijitali au ya skani — kisha uyageuze moja kwa moja kuwa CV inayohaririwa nami ukipenda.",
     },
     keywords: ["extract text from pdf", "pdf to text", "copy text from pdf", "get text out of pdf free", "pdf text extractor", "convert pdf to editable"],
     steps: {
@@ -405,8 +405,8 @@ export const PDF_TOOLS: PdfToolSeo[] = [
       {
         q: { en: "Can I edit the text afterwards?", sw: "Je, naweza kuhariri maandishi baadaye?" },
         a: {
-          en: "Yes — if the text is a CV, you can send it straight to our AI importer and get an editable, ready-to-format CV.",
-          sw: "Ndiyo — ikiwa maandishi ni CV, unaweza kuyatuma moja kwa moja kwa kiingizaji chetu cha AI na kupata CV inayohaririwa, tayari kupangwa.",
+          en: "Yes — if the text is a CV, you can send it straight to me and get an editable, ready-to-format CV.",
+          sw: "Ndiyo — ikiwa maandishi ni CV, unaweza kuyatuma moja kwa moja kwangu na kupata CV inayohaririwa, tayari kupangwa.",
         },
       },
       {

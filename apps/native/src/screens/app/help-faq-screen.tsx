@@ -45,8 +45,8 @@ const FAQS: Faq[] = [
   {
     q: { en: "What does Sumaiya Premium include?", sw: "Sumaiya Premium inajumuisha nini?" },
     a: {
-      en: "Premium unlocks advanced CV templates, deep career guides and more tailored AI help. Everything essential — building, tailoring and exporting your CV — stays free.",
-      sw: "Premium inafungua miundo ya hali ya juu ya CV, miongozo ya kina ya kazi na usaidizi zaidi wa AI. Kila kitu muhimu — kuandaa, kurekebisha na kuhamisha CV yako — kinabaki bure.",
+      en: "Premium unlocks advanced CV templates, deep career guides and more tailored writing help. Everything essential — building, tailoring and exporting your CV — stays free.",
+      sw: "Premium inafungua miundo ya hali ya juu ya CV, miongozo ya kina ya kazi na usaidizi zaidi wa kuandika. Kila kitu muhimu — kuandaa, kurekebisha na kuhamisha CV yako — kinabaki bure.",
     },
   },
   {

@@ -256,7 +256,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
   const quickActions = [
-    { icon: "sumaiya", label: t("Career AI", "AI ya kazi"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
+    { icon: "sumaiya", label: t("Sumaiya", "Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
     { icon: "target", label: t("Find jobs", "Tafuta kazi"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
     { icon: "shield-check", label: t("ATS check", "Ukaguzi wa CV"), tint: c.success, onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },

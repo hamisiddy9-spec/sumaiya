@@ -114,7 +114,7 @@ export function EditorProfileMenu({
       }
 
       // Step 2 — AI parsing (same endpoint as import-cv)
-      setUploadDetail(sw ? "AI inasoma…" : "AI is reading…");
+      setUploadDetail(sw ? "Ninasoma…" : "I'm reading…");
       const parseRes = await fetch("/api/ai/parse-cv", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

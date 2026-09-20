@@ -252,8 +252,8 @@ export default async function BriefPage() {
       {/* Trust footer */}
       <p className="mt-8 text-[11px] text-text-muted">
         {sw
-          ? "Briefi hii inajengwa kutoka kwa data yako halisi pekee — hakuna nafasi au alama inayobuniwa. Kila hatua inahitaji kubofya kwako; Sumaiya haitumi kitu peke yake."
-          : "This brief is built from your real data only — no job, match or score is invented. Every action needs your tap; Sumaiya never sends anything on her own."}
+          ? "Briefi hii inajengwa kutoka kwa data yako halisi pekee — hakuna nafasi au alama inayobuniwa. Kila hatua inahitaji kubofya kwako; situmi kitu peke yangu."
+          : "This brief is built from your real data only — no job, match or score is invented. Every action needs your tap; I never send anything on my own."}
       </p>
     </main>
   );

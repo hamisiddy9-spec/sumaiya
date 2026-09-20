@@ -228,7 +228,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { keywords?: AiKw[] }; error?: string };
       if (!res.ok || !json.success || !json.data?.keywords?.length) {
-        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji wa AI. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the AI match. Showing the quick match instead."));
+        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
       } else {
         setAiKw(json.data.keywords);
       }
@@ -592,7 +592,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                 <button onClick={handleSmartMatch} disabled={aiLoading}
                   className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-ember-hover hover:text-ember disabled:opacity-50 transition">
                   <Sparkles className="w-3.5 h-3.5" />
-                  {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha kwa AI" : "Smart match (AI)")}
+                  {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
                 </button>
               )}
               {aiError && <p className="text-[11px] text-gold-text mt-1.5">{aiError}</p>}

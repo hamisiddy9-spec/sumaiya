@@ -568,7 +568,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
             </Text>
             <Card
               onPress={() => { haptics.selection(); navigation.navigate("SumaiyaTab"); }}
-              accessibilityLabel={t("Ask Sumaiya anything", "Muulize Sumaiya chochote")}
+              accessibilityLabel={t("Ask me anything", "Niulize chochote")}
               style={{ gap: 10 }}
             >
               <View style={{ flexDirection: "row", gap: 6, flexWrap: "wrap" }}>
@@ -585,7 +585,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
               <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
                 <SumaiyaMark size={15} state="static" color={c.accent} />
                 <Text style={{ color: c.accent, fontSize: 13, fontWeight: "800" }}>
-                  {t("Ask Sumaiya anything", "Muulize Sumaiya chochote")} →
+                  {t("Ask me anything", "Niulize chochote")} →
                 </Text>
               </View>
             </Card>

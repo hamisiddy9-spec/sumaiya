@@ -317,13 +317,13 @@ export function TemplateHubProLanding() {
               <>
                 Miundo ya CV iliyoundwa kwa
                 <br />
-                zama za AI.
+                uangalifu mkubwa.
               </>
             ) : (
               <>
                 CV designs built for
                 <br />
-                the age of AI.
+                real care.
               </>
             )}
           </h1>

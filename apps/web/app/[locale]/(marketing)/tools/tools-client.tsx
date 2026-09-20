@@ -564,7 +564,7 @@ export default function ToolsClient() {
               <div className="inline-flex items-center gap-1.5 bg-ember/15 border border-ember/25 rounded-pill px-3 py-1 mb-2.5">
                 <Sparkles className="w-3 h-3 text-gold" />
                 <span className="text-[11px] font-semibold text-cream/70 tracking-wider uppercase">
-                  {lang === "sw" ? "Inaendeshwa na AI" : "AI-powered"}
+                  {lang === "sw" ? "Naifanya mimi" : "I do this one"}
                 </span>
               </div>
               <h2 className="font-display font-extrabold text-xl md:text-2xl text-cream tracking-tight">
@@ -619,7 +619,7 @@ export default function ToolsClient() {
           </h2>
           <p className="text-text-body mb-8 max-w-md mx-auto">
             {lang === "sw"
-              ? "Miundo ya kitaalamu inayopita ATS, pamoja na msaidizi wa AI."
+              ? "Miundo ya kitaalamu inayopita vichujio vya waajiri, pamoja na msaidizi wa kazi."
               : "Professional ATS-optimized templates with an AI assistant."}
           </p>
           <a href="/templates"

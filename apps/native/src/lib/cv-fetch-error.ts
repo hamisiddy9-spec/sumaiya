@@ -51,14 +51,14 @@ const COPY: Record<CvErrorKind, CvErrorCopy> = {
   unauthorized: {
     title: { en: "Sign in again", sw: "Ingia tena" },
     body: {
-      en: "Your session has expired, so Sumaiya couldn't open your CVs. Sign in again and they'll be here.",
-      sw: "Kipindi chako kimeisha, hivyo Sumaiya haikuweza kufungua CV zako. Ingia tena na zitakuwa hapa.",
+      en: "Your session has expired, so I couldn't open your CVs. Sign in again and they'll be here.",
+      sw: "Kipindi chako kimeisha, hivyo sikuweza kufungua CV zako. Ingia tena na zitakuwa hapa.",
     },
     action: { en: "Sign in", sw: "Ingia" },
     actionKind: "signin",
   },
   server: {
-    title: { en: "Sumaiya is having trouble", sw: "Sumaiya ina hitilafu" },
+    title: { en: "I'm having trouble", sw: "Nina hitilafu" },
     body: {
       en: "This is on our side, not your account. Try again in a minute.",
       sw: "Tatizo liko upande wetu, si kwenye akaunti yako. Jaribu tena baada ya dakika moja.",

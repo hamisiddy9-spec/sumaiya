@@ -52,7 +52,7 @@ app.use("/ai/*", async (c, next) => {
   const ip = clientIp(c.req.raw);
   const result = await rateLimitDurable(`ai:${ip}`, { max: 10, windowMs: 60_000 });
   if (!result.allowed) {
-    return c.json({ error: "AI rate limit exceeded. Try again in a minute." }, 429);
+    return c.json({ error: "I can't take any more requests right now. Try again in a minute." }, 429);
   }
   await next();
 });

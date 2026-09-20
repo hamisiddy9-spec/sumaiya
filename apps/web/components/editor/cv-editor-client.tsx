@@ -240,11 +240,11 @@ function UpgradeModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
           <Icon name="download" className="text-cream" size={22} />
         </div>
         <h2 className="text-xl font-bold text-espresso mb-2">{sw ? "Boresha ili kupakua" : "Upgrade to download"}</h2>
-        <p className="text-text-muted text-sm mb-6">{sw ? "Pata upakuaji wa PDF bila kikomo, miundo yote, na maboresho ya AI." : "Get unlimited PDF downloads, every look, and AI-powered enhancements."}</p>
+        <p className="text-text-muted text-sm mb-6">{sw ? "Pata upakuaji wa PDF bila kikomo, miundo yote, na msaada wa kuboresha maandishi yako." : "Get unlimited PDF downloads, every look, and help with your wording."}</p>
         <ul className="text-left space-y-2 mb-6">
           {(sw
-            ? ["Upakuaji wa PDF bila kikomo", "Miundo yote ya kitaalamu", "Uboreshaji wa maudhui kwa AI", "Zana za kuridhisha waajiri"]
-            : ["Unlimited PDF downloads", "Every professional look", "AI content enhancement", "ATS optimization tools"]
+            ? ["Upakuaji wa PDF bila kikomo", "Miundo yote ya kitaalamu", "Uboreshaji wa maudhui", "Zana za kuridhisha waajiri"]
+            : ["Unlimited PDF downloads", "Every professional look", "Content enhancement", "ATS optimization tools"]
           ).map((f) => (
             <li key={f} className="flex items-center gap-2.5 text-sm text-text-body">
               <Icon name="check" className="text-pine" size={16} />
@@ -1738,8 +1738,8 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     const background = parts.join("\n").trim();
     if (!background) {
       showToast(uiLang === "sw"
-        ? "Ongeza cheo cha kazi, uzoefu au ujuzi kwanza — kisha AI itaandika muhtasari wako."
-        : "Add a job title, some experience or skills first — then AI can write your summary.");
+        ? "Ongeza cheo cha kazi, uzoefu au ujuzi kwanza — kisha nitaandika muhtasari wako."
+        : "Add a job title, some experience or skills first — then I can write your summary.");
       return;
     }
     setIsEnhancing(true);
@@ -2016,15 +2016,15 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-espresso">
-              {uiLang === "sw" ? "Hutaki kujaza fomu? Acha Sumaiya aandike CV yako" : "Don't want to fill in a form? Let Sumaiya write your CV"}
+              {uiLang === "sw" ? "Hutaki kujaza fomu? Niambie na ninaandika CV yako" : "Don't want to fill in a form? Tell me and I'll write your CV"}
             </p>
             <p className="text-[11px] text-text-body leading-snug mt-0.5">
               {uiLang === "sw"
-                ? "Jibu maswali machache kwa maneno yako mwenyewe — naye anaandika kila sehemu. Unarudi hapa kuhariri."
-                : "Answer a few questions in your own words — she writes every section. You come back here to edit."}
+                ? "Jibu maswali machache kwa maneno yako mwenyewe — nami ninaandika kila sehemu. Unarudi hapa kuhariri."
+                : "Answer a few questions in your own words — I write every section. You come back here to edit."}
             </p>
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-glow mt-1.5 group-hover:gap-1.5 transition-all">
-              {uiLang === "sw" ? "Anza na Sumaiya" : "Start with Sumaiya"} →
+              {uiLang === "sw" ? "Anza nami" : "Start with me"} →
             </span>
           </div>
         </Link>
@@ -2179,7 +2179,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <button onClick={handleEnhance} disabled={isEnhancing || !cvData.summary.trim()}
             className="flex items-center gap-1.5 text-xs font-medium text-purple-glow hover:text-purple-glow/80 disabled:opacity-40 transition">
             {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Icon name="spark" className="w-3 h-3" />}
-            {uiLang === "sw" ? "Boresha na AI" : "Enhance with AI"}
+            {uiLang === "sw" ? "Boresha" : "Improve"}
           </button>
           <span className={`text-[10px] ${cvData.summary.length > 300 ? "text-red-500" : cvData.summary.length > 150 ? "text-ember-hover" : "text-text-muted"}`}>
             {cvData.summary.length}/300
@@ -2270,7 +2270,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                         disabled={isEnhancing}
                         className="mt-1 flex items-center gap-1 text-[10px] font-medium text-purple-glow hover:text-purple-glow/80 disabled:opacity-40 transition">
                         {isEnhancing ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Icon name="spark" size={10} />}
-                        {uiLang === "sw" ? "Boresha na AI" : "Improve with AI"}
+                        {uiLang === "sw" ? "Boresha" : "Improve"}
                       </button>
                     )}
                   </div>
@@ -2765,7 +2765,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 <span className="text-sm font-bold text-espresso">
                   {enhancePreview.source === "local"
                     ? (uiLang === "sw" ? "Usafishaji wa msingi" : "Basic cleanup")
-                    : (uiLang === "sw" ? "Pendekezo la AI" : "AI suggestion")}
+                    : (uiLang === "sw" ? "Pendekezo langu" : "My suggestion")}
                 </span>
                 <span className="text-[11px] text-text-muted">· {enhancePreview.label}</span>
                 <button onClick={() => setEnhancePreview(null)} className="ml-auto text-text-muted hover:text-espresso p-1.5 -m-1.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember/60 focus-visible:ring-offset-1"><X className="w-4 h-4" /></button>
@@ -2773,11 +2773,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <p className="text-[11px] text-text-muted mt-1">
                 {enhancePreview.source === "local"
                   ? (uiLang === "sw"
-                      ? "AI haipatikani kwa sasa, kwa hivyo tumefanya usafi mdogo wa maandishi tu. Kagua kisha uweke ukipenda."
-                      : "AI is unavailable right now, so this is a light tidy-up only — not an AI rewrite. Review, then apply if you like it.")
+                      ? "Siwezi kuandika upya kwa sasa, kwa hivyo nimefanya usafi mdogo wa maandishi tu. Kagua kisha uweke ukipenda."
+                      : "I can't rewrite right now, so this is a light tidy-up only — not a full rewrite. Review, then apply if you like it.")
                   : (uiLang === "sw"
-                      ? "AI imeandika upya maandishi yako yawe wazi na yenye nguvu zaidi. Kagua kisha uweke ukipenda."
-                      : "AI rewrote your text to be clearer and more impactful. Review, then apply if you like it.")}
+                      ? "Nimeandika upya maandishi yako yawe wazi na yenye nguvu zaidi. Kagua kisha uweke ukipenda."
+                      : "I rewrote your text to be clearer and more impactful. Review, then apply if you like it.")}
               </p>
             </div>
             <div className="p-5 space-y-3 flex-1 min-h-0 overflow-y-auto">
@@ -3293,9 +3293,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <button onClick={handleEnhance} disabled={isEnhancing}
                     className="w-full flex items-center justify-center gap-2 bg-purple-tint text-purple-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-purple-tint/80 disabled:opacity-50 border border-purple-glow/20">
                     {isEnhancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="spark" size={16} className="text-purple-glow" />}
-                    {isEnhancing ? (uiLang === "sw" ? "Inaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha na AI" : "Enhance with AI")}
+                    {isEnhancing ? (uiLang === "sw" ? "Inaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha" : "Improve")}
                   </button>
-                  <p className="text-xs text-text-muted text-center mt-2">{uiLang === "sw" ? "Boresha muhtasari wako na AI" : "Improve your summary with AI"}</p>
+                  <p className="text-xs text-text-muted text-center mt-2">{uiLang === "sw" ? "Nitakuandikia muhtasari wako upya" : "I'll rewrite your summary"}</p>
                 </div>
               </>
             ) : (
@@ -3309,7 +3309,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       <Icon name="spark" size={14} className="text-purple-glow" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-espresso leading-tight">{uiLang === "sw" ? "Zana za AI" : "AI Tools"}</p>
+                      <p className="text-xs font-semibold text-espresso leading-tight">{uiLang === "sw" ? "Nikusaidie nini?" : "What can I help with?"}</p>
                       <p className="text-[10px] text-text-muted leading-tight">{uiLang === "sw" ? "Chagua kazi moja — wewe unadhibiti" : "Pick one task — you stay in control"}</p>
                     </div>
                   </div>
@@ -3317,7 +3317,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     {([
                       { id: "ai-tool-jobmatch", icon: "target", label: { sw: "Linganisha na kazi", en: "Match to a job" }, desc: { sw: "Alama ya kufanana + mabadiliko yanayopendekezwa", en: "Fit score + recommended changes" } },
                       { id: "ai-tool-ats", icon: "bolt", label: { sw: "Kagua CV", en: "ATS check" }, desc: { sw: "Ona kama mifumo ya waajiri itasoma CV yako", en: "See how ATS systems read your CV" } },
-                      { id: "ai-tool-rewrite", icon: "magic", label: { sw: "Boresha maandishi", en: "Improve writing" }, desc: { sw: "AI iandike upya muhtasari wako", en: "Let AI rewrite your summary" } },
+                      { id: "ai-tool-rewrite", icon: "magic", label: { sw: "Boresha maandishi", en: "Improve writing" }, desc: { sw: "Niandike upya muhtasari wako", en: "Let me rewrite your summary" } },
                     ] as const).map((t) => (
                       <button
                         key={t.id}
@@ -3333,7 +3333,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     ))}
                   </div>
                   <p className="text-[10px] text-text-muted mt-2.5 pt-2.5 border-t border-border">
-                    {uiLang === "sw" ? "Kidokezo: kila sehemu (Muhtasari, Uzoefu) ina kitufe chake cha AI kwenye kichupo cha Yaliyomo." : "Tip: each section (Summary, Experience) has its own AI button in the Content tab."}
+                    {uiLang === "sw" ? "Kidokezo: kila sehemu (Muhtasari, Uzoefu) ina kitufe changu kwenye kichupo cha Yaliyomo." : "Tip: each section (Summary, Experience) has my button in the Content tab."}
                   </p>
                 </div>
 
@@ -3409,7 +3409,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-semibold text-purple-glow">{uiLang === "sw" ? "Msaidizi wa AI" : "AI Assistant"}</p>
+                          <p className="text-xs font-semibold text-purple-glow">{uiLang === "sw" ? "Sumaiya" : "Sumaiya"}</p>
                           <span className="text-[8px] font-bold uppercase tracking-wider bg-purple-glow text-white px-1.5 py-0.5 rounded-pill leading-none">PRO</span>
                         </div>
                         <p className="text-[10px] text-text-body">{uiLang === "sw" ? "Boresha maandishi yako" : "Rewrite to be more impactful"}</p>
