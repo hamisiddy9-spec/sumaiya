@@ -391,8 +391,8 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             first
             icon="help-circle"
             iconColor={c.accent}
-            label={t("Help & FAQ", "Msaada na Maswali")}
-            sublabel={t("How to scan, score, export and more", "Jinsi ya kuchanganua, kutoa alama, kuhamisha na zaidi")}
+            label={t("Help & FAQ", "Maswali ya kawaida")}
+            sublabel={t("How to scan, score, export and more", "Jinsi ya kupakia, kukagua alama na kupakua")}
             onPress={() => navigation.navigate("HelpFaq")}
             chevron
           />

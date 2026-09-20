@@ -97,6 +97,6 @@ export function useLang(): LangContextValue {
 /** Sumaiya's opening line, in the user's language. */
 export function greetingFor(lang: Lang): string {
   return lang === "sw"
-    ? "Habari, mimi ni Sumaiya. Naweza kuandika CV yako, kuisawazisha na kazi fulani, kuandaa barua ya maombi, au tuongee tu. Unafanya nini leo?"
+    ? "Habari, mimi ni Sumaiya. Naweza kuandika CV yako, kuilenga kwa ajira fulani, kuandaa barua ya maombi, au tuzungumze tu. Unafanya nini leo?"
     : "Hi, I'm Sumaiya. I can write your CV, tailor it to a job, draft a cover letter, or just talk it through — in English or Kiswahili. What are you working on?";
 }

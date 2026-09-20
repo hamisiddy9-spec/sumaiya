@@ -152,8 +152,8 @@ export function friendlyApiError(
   // offering one is honest here (unlike the 500 branch below).
   if (status === 502 || status === 503 || status === 504) {
     return pick({
-      en: "Sumaiya is busy right now. Try again in a moment.",
-      sw: "Sumaiya ana shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi.",
+      en: "I'm busy right now. Try again in a moment.",
+      sw: "Nina shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi.",
     });
   }
 
