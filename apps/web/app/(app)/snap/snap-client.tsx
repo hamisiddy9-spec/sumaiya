@@ -43,7 +43,7 @@ import { STRINGS } from "@/lib/snap-strings";
 import { readJdPrefill, clearJdPrefill } from "@/lib/snap-prefill";
 import { buildShareUrl, snapShareText } from "@/lib/snap-share";
 import { snapApplicationPayload } from "@/lib/snap-application";
-import { exportElementToPdf, buildCvText } from "@/lib/pdf";
+import { exportElementToPdf, buildCvText, ExportOverflowError, exportOverflowMessage } from "@/lib/pdf";
 import { snapExportFilename } from "@/lib/snap-export";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import type { CVData } from "@/types";
@@ -460,9 +460,15 @@ export function SnapClient({ lang }: { lang: Lang }) {
       await exportElementToPdf(el, {
         filename: snapExportFilename("cv", result.match.jobTitle, sw),
         textLayer: buildCvText(result.tailoredCv, lang),
+        // The CV target wraps TemplateCanvas (a fixed A4 sheet that hides its
+        // own overflow): refuse to deliver a clipped page rather than let the
+        // text layer describe a document the employer never receives.
+        refuseIfClipped: true,
       });
-    } catch {
-      setHardError(s.pdfError);
+    } catch (err) {
+      setHardError(err instanceof ExportOverflowError
+        ? exportOverflowMessage(sw, err.overflow)
+        : s.pdfError);
     } finally {
       setExporting(null);
     }

@@ -40,7 +40,7 @@ import { MARKETPLACE_ENABLED } from "@/lib/flags";
 import confetti from "canvas-confetti";
 import { track, identify, type ExportSource } from "@/lib/analytics";
 import posthog from "@/lib/analytics";
-import { renderElementToPdfBlob, exportCvToText, buildCvText, triggerBlobDownload } from "@/lib/pdf";
+import { renderElementToPdfBlob, exportCvToText, buildCvText, triggerBlobDownload, ExportOverflowError, exportOverflowMessage } from "@/lib/pdf";
 import {
   PHOTO_ACCEPT_ATTR,
   MAX_PHOTO_SOURCE_MB,
@@ -364,13 +364,15 @@ const EXPORT_STEPS: Array<{ label: string; Icon: LucideIcon; color: string; bg: 
   { label: "Finalising",        Icon: Sparkles,   color: "#059669", bg: "#ECFDF5" },
 ];
 
-function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, onGenerateCoverLetter, onTrackApplication, onShareOnline, nextBusy }: {
+function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, detail, onGenerateCoverLetter, onTrackApplication, onShareOnline, nextBusy }: {
   state: "exporting" | "success" | "error";
   stepIdx: number;
   onClose: () => void;
   onRetry: () => void;
   name?: string;
   sw?: boolean;
+  /** Why it failed, when the reason is specific (e.g. a CV too long to fit). */
+  detail?: string;
   onGenerateCoverLetter?: () => void;
   onTrackApplication?: () => void;
   onShareOnline?: () => void;
@@ -378,7 +380,7 @@ function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, onGenerateC
 }) {
   const pct = Math.round(((stepIdx + 1) / EXPORT_STEPS.length) * 100);
   const current = EXPORT_STEPS[Math.min(stepIdx, EXPORT_STEPS.length - 1)];
-  const stepLabel = (en: string) => !sw ? en : (({ "Preparing layout": "Inaandaa muundo", "Rendering fonts": "Inapakia fonti", "Generating PDF": "Inatengeneza PDF", "Finalising": "Inakamilisha" } as Record<string, string>)[en] ?? en);
+  const stepLabel = (en: string) => !sw ? en : (({ "Preparing layout": "Ninaandaa muundo", "Rendering fonts": "Ninapakia fonti", "Generating PDF": "Ninatengeneza PDF", "Finalising": "Ninakamilisha" } as Record<string, string>)[en] ?? en);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-[3px] flex items-center justify-center p-4">
@@ -391,7 +393,7 @@ function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, onGenerateC
               <current.Icon className="w-8 h-8 animate-bounce" style={{ color: current.color }} />
             </div>
             <p className="text-sm font-bold text-espresso mb-0.5">
-              {name ? (sw ? `Inatengeneza CV ya ${name.split(" ")[0]}` : `Building ${name.split(" ")[0]}'s CV`) : (sw ? "Inatengeneza CV yako" : "Building your CV")}
+              {name ? (sw ? `Ninatengeneza CV ya ${name.split(" ")[0]}` : `Building ${name.split(" ")[0]}'s CV`) : (sw ? "Ninatengeneza CV yako" : "Building your CV")}
             </p>
             <p key={stepIdx} className="text-xs font-medium mb-5 transition-all duration-300" style={{ color: current.color }}>
               {stepLabel(current.label)}…
@@ -483,11 +485,11 @@ function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, onGenerateC
             <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-8 h-8 text-red-500" />
             </div>
-            <p className="text-sm font-bold text-espresso mb-1">{sw ? "Imeshindwa kutoa" : "Export failed"}</p>
+            <p className="text-sm font-bold text-espresso mb-1">{sw ? "Sikuweza kutoa" : "Export failed"}</p>
             <div className="h-2 bg-red-100 rounded-full overflow-hidden mb-4">
               <div className="h-full bg-red-400 rounded-full" style={{ width: `${pct}%` }} />
             </div>
-            <p className="text-xs text-text-muted mb-5">{sw ? "Hitilafu imetokea. Tafadhali jaribu tena." : "Something went wrong. Please try again."}</p>
+            <p className="text-xs text-text-muted mb-5">{detail || (sw ? "Hitilafu imetokea. Tafadhali jaribu tena." : "Something went wrong. Please try again.")}</p>
             <button onClick={onRetry}
               className="w-full bg-ember hover:bg-ember-hover text-cream text-sm font-semibold py-2.5 rounded-xl transition mb-2">
               {sw ? "Jaribu tena" : "Try again"}
@@ -1073,9 +1075,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         posthog.capture('application_created', { source: 'save_as_application' });
         window.location.href = "/dashboard?tab=applications"; return;
       }
-      showToast(json.error || (uiLang === "sw" ? "Imeshindwa kuhifadhi ombi. Jaribu tena." : "Couldn't save the application. Please try again."));
+      showToast(json.error || (uiLang === "sw" ? "Sikuweza kuhifadhi ombi. Jaribu tena." : "Couldn't save the application. Please try again."));
     } catch {
-      showToast(uiLang === "sw" ? "Imeshindwa kuhifadhi ombi. Jaribu tena." : "Couldn't save the application. Please try again.");
+      showToast(uiLang === "sw" ? "Sikuweza kuhifadhi ombi. Jaribu tena." : "Couldn't save the application. Please try again.");
     }
     setSavingApp(false);
   };
@@ -1130,7 +1132,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { id?: string }; error?: string };
       if (json.success && json.data?.id) { window.location.href = `/editor/cover-letter/${json.data.id}`; return; }
-      showToast(json.error || (uiLang === "sw" ? "Imeshindwa kutengeneza barua. Jaribu tena." : "Couldn't create the cover letter. Please try again."));
+      showToast(json.error || (uiLang === "sw" ? "Sikuweza kutengeneza barua. Jaribu tena." : "Couldn't create the cover letter. Please try again."));
     } catch {
       showToast(uiLang === "sw" ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
     }
@@ -1156,7 +1158,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         window.location.href = id ? `/applications/${id}` : "/dashboard?tab=applications";
         return;
       }
-      showToast(json.error || (uiLang === "sw" ? "Imeshindwa kuhifadhi ombi. Jaribu tena." : "Couldn't start tracking. Please try again."));
+      showToast(json.error || (uiLang === "sw" ? "Sikuweza kuhifadhi ombi. Jaribu tena." : "Couldn't start tracking. Please try again."));
     } catch {
       showToast(uiLang === "sw" ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
     }
@@ -1193,9 +1195,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
       if (json.success) { setShowTplModal(false); showToast(uiLang === "sw" ? "Imewasilishwa kwa ukaguzi. Asante!" : "Submitted for review. Thanks!", "success"); }
-      else showToast(json.error || (uiLang === "sw" ? "Imeshindwa kuwasilisha kwa sasa. Jaribu tena." : "Couldn't submit right now. Please try again."));
+      else showToast(json.error || (uiLang === "sw" ? "Sikuweza kuwasilisha kwa sasa. Jaribu tena." : "Couldn't submit right now. Please try again."));
     } catch {
-      showToast(uiLang === "sw" ? "Imeshindwa kuwasilisha kwa sasa. Jaribu tena." : "Couldn't submit right now. Please try again.");
+      showToast(uiLang === "sw" ? "Sikuweza kuwasilisha kwa sasa. Jaribu tena." : "Couldn't submit right now. Please try again.");
     }
     setSubmittingTpl(false);
   };
@@ -1210,6 +1212,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   const [savingVersion, setSavingVersion] = useState(false);
   const [centerMenu, setCenterMenu] = useState(false);
   const [exportOverlay, setExportOverlay] = useState<"hidden" | "exporting" | "success" | "error">("hidden");
+  // Why an export failed, when we know exactly why (an over-long CV that would
+  // be clipped — see lib/pdf.ts ExportOverflowError). Rendered in the overlay
+  // INSTEAD of the generic "something went wrong", because "remove some
+  // content" is a thing the user can actually do.
+  const [exportErrorDetail, setExportErrorDetail] = useState("");
   const [exportStepIdx, setExportStepIdx] = useState(0);
   const [showAtsPanel, setShowAtsPanel] = useState(false);
   const [showJobTarget, setShowJobTarget] = useState(false);
@@ -1452,6 +1459,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     setIsDownloading(true);
     setExportStepIdx(0);
     setExportOverlay("exporting");
+    setExportErrorDetail("");
     // Guarantee at least 1.4s experience so user sees ≥2 steps even on fast machines.
     // Promise.all means we don't pad beyond what the export actually needs.
     const MIN_MS = 1400;
@@ -1492,6 +1500,12 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     } catch (err) {
       timers.forEach(clearTimeout);
       setExportOverlay("error");
+      // An over-long CV is refused (never silently clipped) and the user is told
+      // exactly what to do about it — not "something went wrong".
+      if (err instanceof ExportOverflowError) {
+        setExportErrorDetail(exportOverflowMessage(uiLang === "sw", err.overflow));
+        track("export_refused_too_long", { source, overflowPx: Math.round(err.overflow.overflowPx) });
+      }
       track("export_failed", { source, error: err instanceof Error ? err.message : "unknown" });
     } finally {
       setIsDownloading(false);
@@ -1549,7 +1563,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       });
       if (!opts?.silent) { await loadVersions(); showToast(uiLang === "sw" ? "Toleo limehifadhiwa ✓" : "Version saved ✓"); }
     } catch {
-      if (!opts?.silent) showToast(uiLang === "sw" ? "Imeshindwa kuhifadhi toleo." : "Couldn't save version.");
+      if (!opts?.silent) showToast(uiLang === "sw" ? "Sikuweza kuhifadhi toleo." : "Couldn't save version.");
     } finally { if (!opts?.silent) setSavingVersion(false); }
   };
   const openHistory = () => {
@@ -1567,7 +1581,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       const res = await fetch(`/api/versions/item/${id}`, { headers });
       const json = await res.json().catch(() => ({})) as { data?: { snapshot?: { title?: string; templateId?: string; primaryColor?: string; fontFamily?: string; data?: unknown } } };
       const snap = json?.data?.snapshot;
-      if (!snap) { showToast(uiLang === "sw" ? "Imeshindwa kurejesha." : "Couldn't restore."); return; }
+      if (!snap) { showToast(uiLang === "sw" ? "Sikuweza kurejesha." : "Couldn't restore."); return; }
       // Snapshot the current state first, so restoring is undoable too.
       await saveVersion({ silent: true });
       if (snap.title) setTitle(snap.title);
@@ -1578,7 +1592,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
       triggerAutoSave();
       setShowHistory(false);
       showToast(uiLang === "sw" ? "Toleo limerejeshwa ✓" : "Version restored ✓");
-    } catch { showToast(uiLang === "sw" ? "Imeshindwa kurejesha." : "Couldn't restore."); }
+    } catch { showToast(uiLang === "sw" ? "Sikuweza kurejesha." : "Couldn't restore."); }
   };
 
   // Word (.docx) export — a genuine, ATS-optimised Word file built from the CV
@@ -1605,7 +1619,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         fetch(`/api/cv/${cvId}/download`, { method: "POST", headers }).catch(() => {});
       }
     } catch {
-      showToast(uiLang === "sw" ? "Kutoa Word kumeshindwa. Jaribu tena." : "Word export failed. Please try again.");
+      showToast(uiLang === "sw" ? "Sikuweza kutoa Word. Jaribu tena." : "Word export failed. Please try again.");
     } finally {
       setIsDocx(false);
     }
@@ -1632,7 +1646,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     const base = (title || cvData.personal.fullName || "CV").replace(/\s+/g, "_");
     setIsSharing(true);
     try {
-      const blob = await renderElementToPdfBlob(previewRef.current, { filename: `${base}.pdf`, textLayer: buildCvText(cvData, uiLang) });
+      const blob = await renderElementToPdfBlob(previewRef.current, { filename: `${base}.pdf`, textLayer: buildCvText(cvData, uiLang), refuseIfClipped: true });
       const file = new File([blob], `${base}.pdf`, { type: "application/pdf" });
       const nav = navigator as unknown as { canShare?: (d: unknown) => boolean; share?: (d: unknown) => Promise<void> };
       if (nav.canShare && nav.share && nav.canShare({ files: [file] })) {
@@ -1658,7 +1672,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     } catch (err) {
       // User cancelling the native sheet throws AbortError — that's not an error.
       if (!(err instanceof DOMException && err.name === "AbortError")) {
-        showToast(uiLang === "sw" ? "Imeshindwa kushiriki kwa sasa. Tumia Pakua badala yake." : "Couldn't share right now. Try Download instead.");
+        // A refused export (over-long CV) is not a share failure — say what to do.
+        // Long toast, so it is read: the message is the whole point.
+        showToast(err instanceof ExportOverflowError
+          ? exportOverflowMessage(uiLang === "sw", err.overflow)
+          : (uiLang === "sw" ? "Imeshindwa kushiriki kwa sasa. Tumia Pakua badala yake." : "Couldn't share right now. Try Download instead."));
       }
     } finally {
       setIsSharing(false);
@@ -1703,7 +1721,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           refine: (directive: Directive) => runEnhance({ ...opts, content: enhancedText, directive }),
         });
       } else {
-        showToast(data.error || (uiLang === "sw" ? "Imeshindwa kuboresha kwa sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
+        showToast(data.error || (uiLang === "sw" ? "Sikuweza kuboresha kwa sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
       }
     } catch {
       showToast(uiLang === "sw" ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -1771,7 +1789,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           }),
         });
       } else {
-        showToast(data.error || (uiLang === "sw" ? "Imeshindwa kutengeneza muhtasari. Jaribu tena." : "Couldn't write a summary right now. Please try again."));
+        showToast(data.error || (uiLang === "sw" ? "Sikuweza kutengeneza muhtasari. Jaribu tena." : "Couldn't write a summary right now. Please try again."));
       }
     } catch {
       showToast(uiLang === "sw" ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -1820,14 +1838,14 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     try {
       // One batch call for all fields: a single quota unit, and atomic —
       // either every field is translated or none is (no half-translated doc).
-      setTranslateProgress(uiLang === "sw" ? "Inatafsiri…" : "Translating…");
+      setTranslateProgress(uiLang === "sw" ? "Ninatafsiri…" : "Translating…");
       const res = await fetch("/api/ai/translate", {
         method: "POST", headers,
         body: JSON.stringify({ texts: capped.map((j) => j.text), target: translateTarget }),
       });
       const data = await res.json().catch(() => ({})) as { success?: boolean; data?: { texts?: string[] }; error?: string };
       if (!res.ok || !data.success || !data.data?.texts || data.data.texts.length !== capped.length) {
-        showToast(data.error || (uiLang === "sw" ? "Imeshindwa kutafsiri. Jaribu tena." : "Couldn't translate right now. Please try again."));
+        showToast(data.error || (uiLang === "sw" ? "Sikuweza kutafsiri. Jaribu tena." : "Couldn't translate right now. Please try again."));
         return;
       }
       // Apply all at once, then save.
@@ -2839,7 +2857,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         </div>
       )}
       {exportOverlay !== "hidden" && (
-        <ExportOverlay state={exportOverlay} stepIdx={exportStepIdx} onClose={() => setExportOverlay("hidden")} onRetry={() => handleDownload("retry")} name={cvData.personal.fullName ?? undefined} sw={uiLang === "sw"} onShareOnline={guestMode ? undefined : () => { setExportOverlay("hidden"); setShowShareModal(true); }} onGenerateCoverLetter={generateCoverLetterFromExport} onTrackApplication={trackApplicationFromExport} nextBusy={exportNextBusy} />
+        <ExportOverlay state={exportOverlay} stepIdx={exportStepIdx} detail={exportErrorDetail} onClose={() => setExportOverlay("hidden")} onRetry={() => handleDownload("retry")} name={cvData.personal.fullName ?? undefined} sw={uiLang === "sw"} onShareOnline={guestMode ? undefined : () => { setExportOverlay("hidden"); setShowShareModal(true); }} onGenerateCoverLetter={generateCoverLetterFromExport} onTrackApplication={trackApplicationFromExport} nextBusy={exportNextBusy} />
       )}
       {showTemplateModal && (
         <TemplateModal
@@ -2874,15 +2892,15 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           {/* Save status — visible on mobile too (label collapses on small
               screens), with a persistent resting state and a visible failure. */}
           {isSaving ? (
-            <span className="flex items-center gap-1.5 text-[10px] font-medium text-cream/50 flex-shrink-0" title={uiLang === "sw" ? "Inahifadhi…" : "Saving…"}>
+            <span className="flex items-center gap-1.5 text-[10px] font-medium text-cream/50 flex-shrink-0" title={uiLang === "sw" ? "Ninahifadhi…" : "Saving…"}>
               <Loader2 className="w-2.5 h-2.5 animate-spin" />
-              <span className="hidden sm:inline">{uiLang === "sw" ? "Inahifadhi…" : "Saving…"}</span>
+              <span className="hidden sm:inline">{uiLang === "sw" ? "Ninahifadhi…" : "Saving…"}</span>
             </span>
           ) : saveError ? (
             <button
               onClick={() => { guestMode ? triggerAutoSave() : saveCv(initialDoc.id); }}
               className="flex items-center gap-1.5 text-[10px] font-semibold text-gold flex-shrink-0 hover:text-gold/80 transition"
-              title={uiLang === "sw" ? "Kuhifadhi kumeshindwa — gusa kujaribu tena" : "Save failed — tap to retry"}
+              title={uiLang === "sw" ? "Sikuweza kuhifadhi — gusa kujaribu tena" : "Save failed — tap to retry"}
             >
               <AlertTriangle className="w-3 h-3 text-gold" />
               <span className="hidden sm:inline">{uiLang === "sw" ? "Jaribu tena" : "Retry save"}</span>
@@ -3009,7 +3027,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <button onClick={handleShare} disabled={isSharing} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60">
                     <Share2 size={15} className="text-ember mt-0.5 shrink-0" />
                     <span>
-                      <span className="block text-xs font-semibold text-espresso">{isSharing ? (uiLang === "sw" ? "Inaandaa…" : "Preparing…") : (uiLang === "sw" ? "Shiriki faili…" : "Share file…")}</span>
+                      <span className="block text-xs font-semibold text-espresso">{isSharing ? (uiLang === "sw" ? "Ninaandaa…" : "Preparing…") : (uiLang === "sw" ? "Shiriki faili…" : "Share file…")}</span>
                       <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Barua pepe, Drive, WhatsApp…" : "Email, Google Drive, WhatsApp…"}</span>
                     </span>
                   </button>
@@ -3136,7 +3154,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 className="flex items-center gap-2 bg-ember hover:bg-ember-hover disabled:opacity-60 text-cream text-sm font-semibold pl-6 pr-4 py-2.5 rounded-l-input shadow-ember-hard active:translate-y-[2px] transition-all"
               >
                 {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="download" size={16} />}
-                {isDownloading ? (uiLang === "sw" ? "Inatengeneza…" : "Generating…") : (uiLang === "sw" ? "Pakua PDF" : "Download PDF")}
+                {isDownloading ? (uiLang === "sw" ? "Ninatengeneza…" : "Generating…") : (uiLang === "sw" ? "Pakua PDF" : "Download PDF")}
               </button>
               <button
                 onClick={() => setCenterMenu((v) => !v)}
@@ -3293,7 +3311,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <button onClick={handleEnhance} disabled={isEnhancing}
                     className="w-full flex items-center justify-center gap-2 bg-purple-tint text-purple-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-purple-tint/80 disabled:opacity-50 border border-purple-glow/20">
                     {isEnhancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="spark" size={16} className="text-purple-glow" />}
-                    {isEnhancing ? (uiLang === "sw" ? "Inaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha" : "Improve")}
+                    {isEnhancing ? (uiLang === "sw" ? "Ninaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha" : "Improve")}
                   </button>
                   <p className="text-xs text-text-muted text-center mt-2">{uiLang === "sw" ? "Nitakuandikia muhtasari wako upya" : "I'll rewrite your summary"}</p>
                 </div>
@@ -3429,7 +3447,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     className="w-full"
                   >
                     {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Icon name="spark" size={14} />}
-                    {isEnhancing ? (uiLang === "sw" ? "Inaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha muhtasari" : "Enhance summary")}
+                    {isEnhancing ? (uiLang === "sw" ? "Ninaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha muhtasari" : "Enhance summary")}
                   </Button>
                   <button
                     onClick={handleTranslate}
@@ -3437,7 +3455,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     className="mt-2 w-full flex items-center justify-center gap-2 border border-purple-glow/25 text-purple-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-purple-tint/60 disabled:opacity-50"
                   >
                     {translateProgress !== null
-                      ? <><Loader2 className="w-3 h-3 animate-spin" /> {uiLang === "sw" ? "Inatafsiri" : "Translating"} {translateProgress}…</>
+                      ? <><Loader2 className="w-3 h-3 animate-spin" /> {uiLang === "sw" ? "Ninatafsiri" : "Translating"} {translateProgress}…</>
                       : <><Icon name="globe" size={14} /> {translateTarget === "sw" ? (uiLang === "sw" ? "Tafsiri maudhui kwa Kiswahili" : "Translate content to Swahili") : (uiLang === "sw" ? "Tafsiri maudhui kwa Kiingereza" : "Translate content to English")}</>}
                   </button>
                 </div>

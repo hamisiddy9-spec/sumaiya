@@ -3,7 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { nanoid } from "nanoid";
 import { createEmptyCVData, parseCVData, isTemplateId, type CVData, type TemplateId, type PersonalInfo, type ExperienceEntry, type EducationEntry, type SkillEntry, type LanguageEntry, type CertificationEntry, type RefereeEntry, type ProjectEntry } from "@/types";
 import type { CV } from "@/lib/db/schema";
-import { exportElementToPdf, buildCvText } from "@/lib/pdf";
+import { exportElementToPdf, buildCvText, ExportOverflowError, exportOverflowMessage } from "@/lib/pdf";
 import type { Lang } from "@/lib/i18n/translations";
 
 // Bounded auto-retry for a failed autosave. A transient network blip used to
@@ -283,10 +283,23 @@ export const useEditorStore = create<EditorState>()(
           filename: `${safeName}.pdf`,
           // Embed an invisible, ATS-readable text layer from the structured CV.
           textLayer: buildCvText(cv, lang),
+          // NEVER deliver a page-box-clipped CV: the A4 sheet hides its own
+          // overflow, so an over-long CV used to export ONE page cut off
+          // mid-sentence while the invisible text layer still carried all 7,347
+          // characters — the applicant's own ATS score describing a document
+          // that was never delivered (measured 2026-09-20, QA-IO-MATRIX D9).
+          // With this flag the export refuses, visibly, instead.
+          refuseIfClipped: true,
         });
       } catch (err) {
-        set((s) => { s.saveError = err instanceof Error ? err.message : "PDF export failed"; });
-        return;
+        const message = err instanceof ExportOverflowError
+          ? exportOverflowMessage(lang === "sw", err.overflow)
+          : err instanceof Error ? err.message : "PDF export failed";
+        set((s) => { s.saveError = message; });
+        // Rethrow so the caller cannot report success (the editor shows its
+        // export-failed overlay with this same message). Silently returning
+        // here is how a refusal would turn into a second silent failure.
+        throw err;
       }
       // Fire-and-forget download log
       const cvId = typeof window !== "undefined"

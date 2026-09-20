@@ -26,10 +26,17 @@ import { JobChoicePanel } from "@/components/assistant/job-choice-panel";
 import { ChatCard } from "@/components/assistant/chat-card";
 import { CvReadyCard } from "@/components/assistant/cv-ready-card";
 import { NakuruTemplate } from "@/components/templates/nakuru";
-import { exportElementToPdf, buildCvText, exportCvToText, triggerBlobDownload } from "@/lib/pdf";
+import { exportElementToPdf, buildCvText, exportCvToText, triggerBlobDownload, ExportOverflowError, exportOverflowMessage } from "@/lib/pdf";
 import { downloadCvDocx } from "@/lib/docx";
 import { toCvData } from "@/lib/cv/from-parsed";
 import { extractTextFromFile, ExtractionError } from "@/lib/client-cv-extract";
+import {
+  MAX_PDF_UPLOAD_BYTES,
+  MAX_PDF_UPLOAD_MB,
+  MAX_LOCAL_PARSE_BYTES,
+  MAX_LOCAL_PARSE_MB,
+  SERVER_EXTRACT_TIMEOUT_MS,
+} from "@/lib/upload-limits";
 import { analyzeCv, atsScore, type AtsCheck } from "@/lib/ats-score";
 import { matchCvToJd, looksLikeJobDescription, findLastJobInHistory } from "@/lib/job-match";
 import { computeCompositeScore } from "@/lib/score/composite";
@@ -901,7 +908,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       // Surface the server's real error (quota 429, AI unconfigured 503, …) so
       // the user sees WHY the turn failed instead of a generic retry loop.
       // Never leak a raw object ("[object Object]") — errorMsg coerces.
-      setError(errorMsg(err, convoSw, convoSw ? "Samahani, imeshindwa kupata jibu. Jaribu tena." : "Sorry, I couldn't get a reply. Please try again."));
+      setError(errorMsg(err, convoSw, convoSw ? "Samahani, sikuweza kupata jibu. Jaribu tena." : "Sorry, I couldn't get a reply. Please try again."));
     } finally {
       setSending(false);
       sendingRef.current = false;
@@ -1019,8 +1026,28 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       return;
     }
     setError("");
+    // ── Size gate, BEFORE anything else ──────────────────────────────────────
+    // Two different caps, checked here so no path can pick the wrong one (see
+    // lib/upload-limits.ts):
+    //   • over the local-reader cap (25 MB) → we never even try to read it;
+    //   • over the network cap (4 MB) → it may still be read locally, but it
+    //     must NEVER be sent to the server, because such a request never
+    //     settles (177 s of "· inasoma…" with no end, measured 2026-09-20).
+    // Either way the user gets one visible, actionable message within a beat —
+    // no spinner, no request, no silence.
+    const sizeMb = file.size / (1024 * 1024);
+    if (file.size > MAX_LOCAL_PARSE_BYTES) {
+      setUploading(null);
+      setAttachState("error");
+      setError(
+        sw
+          ? `Faili hili ni kubwa mno (${sizeMb.toFixed(1)} MB). Kikomo ni ${MAX_LOCAL_PARSE_MB} MB — pakua PDF yenye kurasa 1–3, au andika/bandika taarifa zako hapa.`
+          : `That file is too large (${sizeMb.toFixed(1)} MB). The limit is ${MAX_LOCAL_PARSE_MB} MB — save a shorter PDF (1–3 pages), or just type/paste your details here.`,
+      );
+      return;
+    }
     setAttachState("reading");
-    setUploading(sw ? "Inasoma faili yako…" : "Reading your file…");
+    setUploading(sw ? "Ninasoma faili yako…" : "Reading your file…");
     const isPdfOrDoc =
       /pdf|wordprocessingml|msword/.test(file.type) || /\.(pdf|docx?)$/i.test(file.name);
     try {
@@ -1029,19 +1056,34 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         ({ text } = await extractTextFromFile(file, (p) => {
           setUploading(
             p.stage === "ocr"
-              ? (sw ? `Inasoma picha… ${p.pct}%` : `Reading image… ${p.pct}%`)
-              : (sw ? "Inasoma faili yako…" : "Reading your file…")
+              ? (sw ? `Ninasoma picha… ${p.pct}%` : `Reading image… ${p.pct}%`)
+              : (sw ? "Ninasoma faili yako…" : "Reading your file…")
           );
         }));
       } catch (clientErr) {
         // Browser extraction is fragile (pdf.js worker, WASM OCR, mammoth). For
         // PDFs and Word docs the server has a reliable path (unpdf / mammoth) —
-        // fall back to it before giving up.
-        if (!isPdfOrDoc) throw clientErr;
-        setUploading(sw ? "Inasoma faili yako…" : "Reading your file…");
+        // fall back to it before giving up. BUT only for a body the server can
+        // actually answer: above MAX_PDF_UPLOAD_BYTES the platform eats the
+        // request at the edge and no response ever arrives, so the fallback is
+        // skipped (the message below explains it) and the request can never be
+        // issued in the first place.
+        const clientCode = clientErr instanceof ExtractionError ? clientErr.code : "";
+        if (!isPdfOrDoc || clientCode === "TOO_LARGE" || file.size > MAX_PDF_UPLOAD_BYTES) throw clientErr;
+        setUploading(sw ? "Ninasoma faili yako…" : "Reading your file…");
         const form = new FormData();
         form.append("file", file);
-        const res = await fetch("/api/tools/extract-text", { method: "POST", body: form });
+        // An AbortController so the wait is BOUNDED. Without it a request the
+        // platform never answers keeps the chip reading forever (the defect this
+        // fixes); with it the user is told, and can try something else.
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), SERVER_EXTRACT_TIMEOUT_MS);
+        let res: Response;
+        try {
+          res = await fetch("/api/tools/extract-text", { method: "POST", body: form, signal: controller.signal });
+        } finally {
+          clearTimeout(timer);
+        }
         const json = (await res.json().catch(() => ({}))) as { text?: string; error?: string };
         if (!res.ok || !json.text) throw clientErr;
         text = json.text;
@@ -1060,9 +1102,13 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       setUploading(null);
       setAttachState("error");
       const code = e instanceof ExtractionError ? e.code : "";
+      const aborted = e instanceof DOMException && e.name === "AbortError";
       setError(
-        code === "TOO_LARGE" ? (sw ? "Faili ni kubwa mno (kiwango 25MB)." : "That file is too large (max 25MB).")
-          : code === "TIMEOUT" || code === "MEMORY" ? (sw ? "Faili hii ni kubwa au ngumu sana kuisoma kwenye simu. Jaribu CV fupi (kurasa 1–3), au andika/bandika taarifa zako hapa." : "This file is too large or complex to read on a phone. Try a shorter CV (1–3 pages), or just type/paste your details here.")
+        code === "TOO_LARGE" ? (sw ? `Faili ni kubwa mno (${MAX_LOCAL_PARSE_MB} MB). Pakua PDF yenye kurasa 1–3, au bandika maandishi yako hapa.` : `That file is too large (max ${MAX_LOCAL_PARSE_MB} MB). Save a shorter PDF (1–3 pages), or paste your details here.`)
+          // Readable locally, not sendable: retrying changes nothing, so say so
+          // instead of the generic "try again".
+          : file.size > MAX_PDF_UPLOAD_BYTES ? (sw ? `Sikuweza kulisona faili hili kwenye kifaa hiki, na ni kubwa mno kutuma mtandaoni (kikomo ${MAX_PDF_UPLOAD_MB} MB). Pakua PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa.` : `I couldn't read this file on your device, and it's too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Save a shorter PDF (1–3 pages), or type/paste your details here.`)
+          : aborted || code === "TIMEOUT" || code === "MEMORY" ? (sw ? "Kusoma faili hili kulichukua muda mrefu mno. Jaribu PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa." : "Reading this file took too long. Try a shorter CV (1–3 pages), or just type/paste your details here.")
           : code === "OCR_FAILED" || code === "NO_TEXT" ? (sw ? "Sikuweza kusoma maandishi kwenye faili hii." : "Couldn't read text from that file.")
           : (sw ? "Imeshindwa kusoma faili. Jaribu tena." : "Couldn't read the file. Try again.")
       );
@@ -1073,7 +1119,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   const onAttachUrl = async (url: string) => {
     if (sending || building || uploading) return;
     setError("");
-    setUploading(sw ? "Inasoma kiungo…" : "Reading the link…");
+    setUploading(sw ? "Ninasoma kiungo…" : "Reading the link…");
     try {
       const res = await fetch("/api/ai/read-url", {
         method: "POST",
@@ -1090,7 +1136,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       feedAttachment(`🔗 ${json.data.title || host}`, json.data.text, `a link (${url})`);
     } catch {
       setUploading(null);
-      setError(sw ? "Imeshindwa kusoma kiungo. Jaribu tena." : "Couldn't read the link. Try again.");
+      setError(sw ? "Sikuweza kusoma kiungo. Jaribu tena." : "Couldn't read the link. Try again.");
     }
   };
 
@@ -1117,7 +1163,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       .map((m) => `${m.role === "user" ? (sw ? "MIMI" : "ME") : (sw ? "MSAIDIZI" : "ASSISTANT")}: ${m.apiContent ?? m.content}`)
       .join("\n");
 
-    const fail = (msg?: unknown) => { setError(errorMsg(msg, sw, sw ? "Imeshindwa. Jaribu tena." : "Something went wrong. Try again.")); setBuilding(false); };
+    const fail = (msg?: unknown) => { setError(errorMsg(msg, sw, sw ? "Sikuweza. Jaribu tena." : "Something went wrong. Try again.")); setBuilding(false); };
 
     try {
       const buildRes = await fetch("/api/ai/build-doc", {
@@ -1127,7 +1173,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const buildJson = (await buildRes.json().catch(() => ({}))) as { success?: boolean; data?: Record<string, unknown>; error?: string };
       if (!buildRes.ok || !buildJson.success || !buildJson.data) {
-        return fail(sw ? "Imeshindwa kuandika hati. Jaribu tena." : "Couldn't write the document. Please try again.");
+        return fail(sw ? "Sikuweza kuandika hati. Jaribu tena." : "Couldn't write the document. Please try again.");
       }
       const d = buildJson.data;
 
@@ -1234,7 +1280,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const createJson = (await createRes.json().catch(() => ({}))) as { success?: boolean; data?: { id?: string }; error?: string };
       if (!createRes.ok || !createJson.success || !createJson.data?.id) {
-        return fail(errorMsg(createJson.error, sw, sw ? "Imeshindwa kuhifadhi. Jaribu tena." : "Couldn't save it. Please try again."));
+        return fail(errorMsg(createJson.error, sw, sw ? "Sikuweza kuhifadhi. Jaribu tena." : "Couldn't save it. Please try again."));
       }
 
       // Learn: fill any BLANK profile fields from this document (the /seed route
@@ -1370,9 +1416,19 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       await exportElementToPdf(el, {
         filename: `${builtDoc.title}.pdf`,
         textLayer: builtDoc.kind === "cv" ? buildCvText(builtDoc.cvData, lang) : undefined,
+        // The CV target is the fixed A4 sheet (TemplateCanvas/AutoFitPage), which
+        // hides its own overflow — an over-long CV would export ONE clipped page
+        // while the invisible text layer still carried everything. Refuse,
+        // visibly, instead. (The letter target has no fixed page box: it grows
+        // with its content, so there is nothing to clip.)
+        refuseIfClipped: builtDoc.kind === "cv",
       });
-    } catch {
-      setError(sw ? "Imeshindwa kutengeneza PDF. Jaribu tena." : "Couldn't create the PDF. Try again.");
+    } catch (err) {
+      setError(
+        err instanceof ExportOverflowError
+          ? exportOverflowMessage(sw, err.overflow)
+          : (sw ? "Imeshindwa kutengeneza PDF. Jaribu tena." : "Couldn't create the PDF. Try again."),
+      );
     } finally {
       setExporting(null);
     }
@@ -1384,7 +1440,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     try {
       await downloadCvDocx(builtDoc.cvData, `${builtDoc.title}.docx`);
     } catch {
-      setError(sw ? "Imeshindwa kutengeneza faili ya Word. Jaribu tena." : "Couldn't create the Word file. Try again.");
+      setError(sw ? "Sikuweza kutengeneza faili ya Word. Jaribu tena." : "Couldn't create the Word file. Try again.");
     } finally {
       setExporting(null);
     }
@@ -1403,7 +1459,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         );
       }
     } catch {
-      setError(sw ? "Imeshindwa kutengeneza faili. Jaribu tena." : "Couldn't create the file. Try again.");
+      setError(sw ? "Sikuweza kutengeneza faili. Jaribu tena." : "Couldn't create the file. Try again.");
     } finally {
       setExporting(null);
     }
@@ -1635,7 +1691,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         error?: string;
       };
       if (!res.ok || !json.success || !json.data) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuboresha sasa. Jaribu tena." : "Couldn't tailor it right now. Please try again.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuboresha sasa. Jaribu tena." : "Couldn't tailor it right now. Please try again.") }]);
       } else {
         const data = json.data;
         const unconfirmed = json.evidence?.unconfirmed ?? [];
@@ -1687,7 +1743,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
       if (!res.ok || !json.success) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
       } else {
         setCv(nextCv);
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "tailor" ? { ...msg, card: { ...msg.card, applied: true } } : msg))
@@ -1724,7 +1780,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { enhanced: string }; error?: string };
       const enhanced = json.data?.enhanced;
       if (!res.ok || !json.success || !enhanced) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuboresha muhtasari sasa." : "Couldn't improve the summary right now.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuboresha muhtasari sasa." : "Couldn't improve the summary right now.") }]);
       } else {
         // Anti-fabrication: scan the AI rewrite against the real CV. Claims the
         // user's own text doesn't support (invented metrics/skills/employers)
@@ -1773,7 +1829,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
       if (!res.ok || !json.success) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
       } else {
         setCv(nextCv);
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "summary" ? { ...msg, card: { ...msg.card, applied: true } } : msg))
@@ -1818,7 +1874,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
       if (!res.ok || !json.success) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuhifadhi. Jaribu tena." : "Couldn't save that. Please try again.") }]);
       } else {
         setCv(nextCv);
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "skills" ? { ...msg, card: { ...msg.card, applied: true } } : msg))
@@ -1854,11 +1910,31 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       setActionBusy("pdf");
       try {
         const targets = INTEL[toolId]?.multi ? files : [files[0]];
+        // Same network cap as the import path: a body above MAX_PDF_UPLOAD_BYTES
+        // is refused at the edge, so the request would never settle. Say so
+        // instead of firing it (see lib/upload-limits.ts).
+        const oversize = targets.find((f) => f.size > MAX_PDF_UPLOAD_BYTES);
+        if (oversize) {
+          setMessages((m) => [...m, {
+            role: "assistant",
+            content: sw
+              ? `Faili "${oversize.name}" ni kubwa mno kutuma (kikomo ${MAX_PDF_UPLOAD_MB} MB). Tumia faili dogo zaidi, au andika/bandika maandishi yake hapa.`
+              : `"${oversize.name}" is too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Use a smaller file, or type/paste its text here.`,
+          }]);
+          return;
+        }
         const texts: string[] = [];
         for (const f of targets) {
           const fd = new FormData();
           fd.append("file", f);
-          const r = await fetch("/api/tools/extract-text", { method: "POST", body: fd });
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), SERVER_EXTRACT_TIMEOUT_MS);
+          let r: Response;
+          try {
+            r = await fetch("/api/tools/extract-text", { method: "POST", body: fd, signal: controller.signal });
+          } finally {
+            clearTimeout(timer);
+          }
           const j = (await r.json().catch(() => ({}))) as { success?: boolean; text?: string; error?: string };
           texts.push(j.success && j.text ? j.text : "");
         }
@@ -1889,7 +1965,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         if (json.success && text) {
           setMessages((m) => [...m, { role: "assistant", content: text, card: { kind: "docIntel", op: INTEL[toolId]!.op, text } }]);
         } else {
-          setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuchambua faili. Jaribu tena." : "Couldn't analyze the file. Please try again.") }]);
+          setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuchambua faili. Jaribu tena." : "Couldn't analyze the file. Please try again.") }]);
         }
       } catch {
         setMessages((m) => [...m, { role: "assistant", content: sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again." }]);
@@ -1921,6 +1997,19 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     }
     setActionBusy("pdf");
     try {
+      // No tool call may POST a body the platform will refuse at the edge —
+      // such a request never settles and the user is left with a spinner.
+      const totalBytes = files.reduce((n, f) => n + f.size, 0);
+      if (totalBytes > MAX_PDF_UPLOAD_BYTES) {
+        const biggest = files.reduce((a, b) => (a.size >= b.size ? a : b));
+        setMessages((m) => [...m, {
+          role: "assistant",
+          content: sw
+            ? `Faili "${biggest.name}" ni kubwa mno kutuma (kikomo ${MAX_PDF_UPLOAD_MB} MB kwa faili). Tumia faili dogo zaidi, au andika/bandika maandishi yake hapa.`
+            : `"${biggest.name}" is too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Use a smaller file, or type/paste its text here.`,
+        }]);
+        return;
+      }
       const fd = new FormData();
       if (op.multi) files.forEach((f) => fd.append("files", f));
       else fd.append("file", files[0]);
@@ -1928,7 +2017,14 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         const v = args?.[key];
         if (v != null && String(v).trim()) fd.append(key, String(v));
       }
-      const res = await fetch(`/api/tools/${op.endpoint}`, { method: "POST", body: fd });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), SERVER_EXTRACT_TIMEOUT_MS);
+      let res: Response;
+      try {
+        res = await fetch(`/api/tools/${op.endpoint}`, { method: "POST", body: fd, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
 
       if (op.endpoint === "extract-text") {
         const json = await res.json().catch(() => ({})) as { success?: boolean; text?: string; error?: string };
@@ -1943,7 +2039,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
 
       if (!res.ok) {
         const j = await res.json().catch(() => ({})) as { error?: string };
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(j.error, sw, sw ? "Imeshindwa kuchakata faili. Jaribu tena." : "Couldn't process the file. Please try again.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(j.error, sw, sw ? "Sikuweza kuchakata faili. Jaribu tena." : "Couldn't process the file. Please try again.") }]);
         return;
       }
       const blob = await res.blob();
@@ -1985,7 +2081,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { content: string }; error?: string };
       const content = json.data?.content;
       if (!res.ok || !json.success || !content) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuandika barua sasa." : "Couldn't write the letter right now.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuandika barua sasa." : "Couldn't write the letter right now.") }]);
       } else {
         setMessages((m) => [...m, {
           role: "assistant",
@@ -2016,7 +2112,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { id: string }; error?: string };
       if (!res.ok || !json.success || !json.data?.id) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuhifadhi barua." : "Couldn't save the letter.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuhifadhi barua." : "Couldn't save the letter.") }]);
       } else {
         const id = json.data.id;
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "coverLetter" ? { ...msg, card: { ...msg.card, savedId: id } } : msg))
@@ -2066,7 +2162,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { id?: string }; error?: string };
       if (!res.ok || !json.success) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kuanzisha maombi." : "Couldn't start the application.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kuanzisha maombi." : "Couldn't start the application.") }]);
       } else {
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "trackJob" ? { ...msg, card: { ...msg.card, tracked: true } } : msg))
           .concat([{ role: "assistant", content: sw ? "Nimeianzisha. Iko kwenye maombi yako. ✅" : "Started — it's in your applications. ✅" }]));
@@ -2114,7 +2210,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; error?: string };
       if (!res.ok || !json.success) {
-        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Imeshindwa kusasisha ombi." : "Couldn't update the application.") }]);
+        setMessages((m) => [...m, { role: "assistant", content: errorMsg(json.error, sw, sw ? "Sikuweza kusasisha ombi." : "Couldn't update the application.") }]);
       } else {
         setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card?.kind === "trackUpdate" ? { ...msg, card: { ...msg.card, updated: true } } : msg))
           .concat([{ role: "assistant", content: sw ? "Nimesasisha hali ya ombi. ✅" : "Application status updated. ✅" }]));
@@ -2169,7 +2265,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           card: { kind: "docIntel", op, text, section: typeof args.section === "string" ? args.section : undefined, target: typeof args.target === "string" ? args.target : undefined, evidence: unconfirmed.length ? unconfirmed : undefined },
         }]);
       } else {
-        setError(errorMsg(json.error, sw, sw ? "Imeshindwa kuchambua hati. Jaribu tena." : "Couldn't analyze the document. Please try again."));
+        setError(errorMsg(json.error, sw, sw ? "Sikuweza kuchambua hati. Jaribu tena." : "Couldn't analyze the document. Please try again."));
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
@@ -2212,7 +2308,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         if (json.success && json.data?.id) {
           setMessages((m) => m.map((msg, i) => (i === msgIndex ? { ...msg, card: { ...msg.card, applied: true, savedId: json.data?.id } as CardData } : msg)));
         } else {
-          setError(errorMsg(json.error, sw, sw ? "Imeshindwa kuunda hati. Jaribu tena." : "Couldn't create the document. Please try again."));
+          setError(errorMsg(json.error, sw, sw ? "Sikuweza kuunda hati. Jaribu tena." : "Couldn't create the document. Please try again."));
         }
       }
       return;
@@ -2233,7 +2329,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         setCv(next);
         setMessages((m) => m.map((msg, i) => (i === msgIndex ? { ...msg, card: { ...msg.card, applied: true } as CardData } : msg)));
       } else {
-        setError(sw ? "Imeshindwa kusasisha CV. Jaribu tena." : "Couldn't update the CV. Please try again.");
+        setError(sw ? "Sikuweza kusasisha CV. Jaribu tena." : "Couldn't update the CV. Please try again.");
       }    }
   };
 
@@ -2268,7 +2364,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       setCv(nextData as CVData);
       setMessages((m) => m.map((msg, i) => (i === msgIndex ? { ...msg, card: { ...msg.card, applied: true } as CardData } : msg)));
     } else {
-      setError(sw ? "Imeshindwa kusasisha muundo. Jaribu tena." : "Couldn't update the design. Please try again.");    }
+      setError(sw ? "Sikuweza kusasisha muundo. Jaribu tena." : "Couldn't update the design. Please try again.");    }
   };
 
   // ── Skill-gap check (career.skillGap) ──────────────────────────────────────
@@ -2315,7 +2411,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           },
         }]);
       } else {
-        setError(errorMsg(json.error, sw, sw ? "Imeshindwa kuchambua mapungufu. Jaribu tena." : "Couldn't analyze skill gaps. Please try again."));
+        setError(errorMsg(json.error, sw, sw ? "Sikuweza kuchambua mapungufu. Jaribu tena." : "Couldn't analyze skill gaps. Please try again."));
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
@@ -2369,7 +2465,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           },
         }]);
       } else {
-        setError(errorMsg(json.error, sw, sw ? "Imeshindwa kulinganisha CV. Jaribu tena." : "Couldn't compare the CVs. Please try again."));
+        setError(errorMsg(json.error, sw, sw ? "Sikuweza kulinganisha CV. Jaribu tena." : "Couldn't compare the CVs. Please try again."));
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
@@ -2823,7 +2919,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           {(sending || analyzing) && (
             <div className="flex justify-start">
               <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5" aria-label={sw ? "Anaandika" : "Typing"}>
-                {analyzing && <span className="text-[11px] text-text-muted mr-1">{sw ? "Inachambua" : "Analyzing"}</span>}
+                {analyzing && <span className="text-[11px] text-text-muted mr-1">{sw ? "Ninachambua" : "Analyzing"}</span>}
                 <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce [animation-delay:-0.3s]" />
                 <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce [animation-delay:-0.15s]" />
                 <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce" />
@@ -2981,11 +3077,11 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                     <Paperclip className="w-3 h-3 text-ember shrink-0" />
                     {attachedFilesRef.current[0]?.name ?? (sw ? "Faili" : "File")}
                     {attachState === "reading" || attachState === "waiting" ? (
-                      <span className="text-text-muted">· {sw ? "inasoma…" : "reading…"}</span>
+                      <span className="text-text-muted">· {sw ? "ninasoma…" : "reading…"}</span>
                     ) : attachState === "read" ? (
                       <Check className="w-3 h-3 text-pine" />
                     ) : attachState === "error" ? (
-                      <span className="text-ember-hover">· {sw ? "imeshindwa" : "failed"}</span>
+                      <span className="text-ember-hover">· {sw ? "sikuweza" : "failed"}</span>
                     ) : null}
                   </span>
                   {attachState === "error" ? (
@@ -3270,7 +3366,7 @@ function MatchResultCard({ score, matched, missing, composite, explanation, sw, 
           </>
         }
         action={{
-          label: tailorBusy ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Lenga CV yako kwa kazi hii" : "Tailor my CV to this job"),
+          label: tailorBusy ? (sw ? "Ninaboresha…" : "Tailoring…") : (sw ? "Lenga CV yako kwa kazi hii" : "Tailor my CV to this job"),
           onClick: onTailor,
           busy: tailorBusy,
         }}
@@ -3405,7 +3501,7 @@ function TailorPreviewCard({ summary, count, applied, sw, onApply, onDismiss, ap
           <button onClick={onApply} disabled={applyBusy || needsConfirm}
             className="flex-1 flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
             {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-            {applyBusy ? (sw ? "Inahifadhi…" : "Applying…") : (sw ? "Weka kwenye CV yako" : "Apply to my CV")}
+            {applyBusy ? (sw ? "Ninahifadhi…" : "Applying…") : (sw ? "Weka kwenye CV yako" : "Apply to my CV")}
           </button>
           {onDismiss && (
             <button onClick={onDismiss}
@@ -3495,7 +3591,7 @@ function SummaryPreviewCard({ summary, applied, sw, onApply, applyBusy, editHref
         <button onClick={onApply} disabled={applyBusy || needsConfirm}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {applyBusy ? (sw ? "Inahifadhi…" : "Saving…") : (sw ? "Weka kwenye CV yako" : "Save to my CV")}
+          {applyBusy ? (sw ? "Ninahifadhi…" : "Saving…") : (sw ? "Weka kwenye CV yako" : "Save to my CV")}
         </button>
       ) : (
         <div className="bg-sand-2 border border-border rounded-input px-3 py-2.5 text-[11.5px] text-text-muted leading-snug">
@@ -3530,7 +3626,7 @@ function SkillsPreviewCard({ skills, applied, sw, onApply, applyBusy, editHref, 
         <button onClick={onApply} disabled={applyBusy}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {applyBusy ? (sw ? "Inahifadhi…" : "Adding…") : (sw ? "Ongeza kwenye CV yako" : "Add to my CV")}
+          {applyBusy ? (sw ? "Ninahifadhi…" : "Adding…") : (sw ? "Ongeza kwenye CV yako" : "Add to my CV")}
         </button>
       ) : (
         <div className="bg-sand-2 border border-border rounded-input px-3 py-2.5 text-[11.5px] text-text-muted leading-snug">
@@ -3563,7 +3659,7 @@ function CoverLetterPreviewCard({ content, savedId, sw, onSave, saveBusy }: {
         <button onClick={onSave} disabled={saveBusy}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {saveBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {saveBusy ? (sw ? "Inahifadhi…" : "Saving…") : (sw ? "Hifadhi kama hati" : "Save as a document")}
+          {saveBusy ? (sw ? "Ninahifadhi…" : "Saving…") : (sw ? "Hifadhi kama hati" : "Save as a document")}
         </button>
       )}
     </div>
@@ -3588,7 +3684,7 @@ function TrackJobCard({ jobTitle, companyName, tracked, sw, onConfirm, confirmBu
         <button onClick={onConfirm} disabled={confirmBusy}
           className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
           {confirmBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-          {confirmBusy ? (sw ? "Inaanzisha…" : "Starting…") : (sw ? "Anzisha maombi" : "Start tracking")}
+          {confirmBusy ? (sw ? "Ninaanzisha…" : "Starting…") : (sw ? "Anzisha maombi" : "Start tracking")}
         </button>
       )}
     </div>
@@ -3663,7 +3759,7 @@ function DocIntelCard({ op, text, section, target, applied, savedId, sw, onApply
             className="w-full flex items-center justify-center gap-2 bg-pine hover:bg-pine/90 text-cream text-sm font-semibold py-2.5 rounded-input-lg transition disabled:opacity-50">
             {applyBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {applyBusy
-              ? (sw ? "Inahifadhi…" : "Applying…")
+              ? (sw ? "Ninahifadhi…" : "Applying…")
               : canConvert
                 ? (sw ? "Hifadhi kama barua ya maombi" : "Save as cover letter")
                 : (sw ? "Tumia kwenye CV" : "Apply to CV")}

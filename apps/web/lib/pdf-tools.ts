@@ -378,8 +378,8 @@ export const PDF_TOOLS: PdfToolSeo[] = [
       sw: "Vuta maandishi yote kutoka kwa PDF",
     },
     description: {
-      en: "Extract text from a PDF free. Copy all the text content out of a digital or scanned PDF — then turn it straight into an editable CV with me, if you like.",
-      sw: "Toa maandishi kutoka kwa PDF bila malipo. Nakili maudhui yote ya maandishi kutoka kwa PDF ya dijitali au ya skani — kisha uyageuze moja kwa moja kuwa CV inayohaririwa nami ukipenda.",
+      en: "Extract text from a PDF free. Copy the text content out of a PDF that carries a text layer — one exported from Word, Google Docs, Canva or another app. A scan or a photo has no text inside it, so send the document itself rather than a picture of it; I can read a photo of a CV for you.",
+      sw: "Toa maandishi kutoka kwa PDF bila malipo. Nakili maudhui ya maandishi kutoka kwa PDF yenye safu ya maandishi — ile iliyotolewa kutoka Word, Google Docs, Canva au programu nyingine. Skani au picha haina maandishi ndani yake, hivyo tuma hati yenyewe badala ya picha yake; Mimi naweza kukusomea picha ya CV.",
     },
     keywords: ["extract text from pdf", "pdf to text", "copy text from pdf", "get text out of pdf free", "pdf text extractor", "convert pdf to editable"],
     steps: {

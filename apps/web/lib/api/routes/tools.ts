@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { PDFDocument, degrees, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, degrees, rgb, PDFName, StandardFonts } from "pdf-lib";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 import { MAX_PDF_UPLOAD_BYTES, MAX_PDF_UPLOAD_MB } from "@/lib/upload-limits";
 // Text extraction uses `unpdf` — a serverless-safe build of pdfjs. Unlike
@@ -20,6 +20,81 @@ const MAX_PDF_BYTES = MAX_PDF_UPLOAD_BYTES;
 // ("something went wrong"). Reject it up front with a clear message instead.
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg"];
 const ALLOWED_IMAGE_EXTS = [".png", ".jpg", ".jpeg"];
+
+/**
+ * Sniff image magic bytes. The extractor reads TEXT, so an image is not a
+ * document it can process — but "Couldn't read that file type. Send a PDF, a
+ * Word (.docx) file, a photo, or paste the text" told users to send a photo to
+ * the route that had just refused the photo they sent (a JPEG, PNG and WebP all
+ * came back as the same unsupported-type 415, measured 2026-09-20). Naming the
+ * real type and pointing at the path that DOES read photos is the honest fix.
+ * Sniffed, never taken from the name or the client-supplied MIME type.
+ */
+function sniffImageKind(buffer: Buffer): string | null {
+  const b = buffer;
+  if (b.length >= 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "JPEG";
+  if (b.length >= 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "PNG";
+  if (b.length >= 12 && b.subarray(0, 4).toString("latin1") === "RIFF" && b.subarray(8, 12).toString("latin1") === "WEBP") return "WebP";
+  if (b.length >= 6 && b.subarray(0, 4).toString("latin1") === "GIF8") return "GIF";
+  if (b.length >= 12 && b.subarray(4, 8).toString("latin1") === "ftyp") {
+    const brand = b.subarray(8, 12).toString("latin1").toLowerCase();
+    if (brand.startsWith("hei") || brand.startsWith("mif1") || brand.startsWith("hevc") || brand.startsWith("msf1")) return "HEIC";
+  }
+  return null;
+}
+
+/**
+ * Why a PDF could not be parsed, in terms a non-technical user can act on — and
+ * as its own status instead of the blanket 500 both cases used to get
+ * (2026-09-20: a corrupt PDF and a password-protected PDF returned an identical
+ * "Couldn't read that file. Try a PDF or paste the text.", which never mentions a
+ * password and so left the user with no way forward).
+ *
+ * Returns null for anything unrecognised, so a genuine server fault still
+ * surfaces as a 500 rather than being mislabelled as the user's file.
+ */
+function classifyPdfReadFailure(err: unknown): { status: 422; message: string } | null {
+  const name = typeof (err as { name?: unknown })?.name === "string" ? (err as { name: string }).name : "";
+  const message = err instanceof Error ? err.message : typeof err === "string" ? err : "";
+  if (/password/i.test(name) || /password|encrypt/i.test(message)) {
+    return {
+      status: 422,
+      message: "That PDF is password-protected, so its text can't be read. Open it, save or export a copy without the password, then send that copy.",
+    };
+  }
+  if (/invalidpdf/i.test(name) || /invalid pdf|structure|xref|not a valid pdf|format error/i.test(message)) {
+    return {
+      status: 422,
+      message: "That PDF is damaged — it isn't a valid PDF, so nothing can be read out of it. Save it again from the app that made it (Word, Google Docs…), or send a different copy.",
+    };
+  }
+  return null;
+}
+
+/**
+ * Does this PDF carry page images? A PDF with no text is either an IMAGE SCAN
+ * (there is something to look at, but no text layer) or genuinely BLANK. Telling
+ * a blank-PDF user "it's a scan — send a clear photo of it instead" is a
+ * misdiagnosis: there is no page to photograph (measured 2026-09-20, D5).
+ */
+async function pdfHasPageImages(buffer: Buffer): Promise<boolean> {
+  try {
+    const doc = await PDFDocument.load(buffer, { ignoreEncryption: true, updateMetadata: false });
+    for (const page of doc.getPages()) {
+      const resources = page.node.Resources();
+      const xobjects = resources ? resources.lookup(PDFName.of("XObject")) : undefined;
+      const keys = xobjects && typeof (xobjects as { keys?: unknown }).keys === "function"
+        ? (xobjects as unknown as { keys: () => unknown[] }).keys()
+        : null;
+      if (keys && keys.length > 0) return true;
+    }
+  } catch {
+    // Unreadable by pdf-lib — stay with the neutral "no text" answer rather than
+    // claiming it is a scan we cannot see.
+  }
+  return false;
+}
+
 
 function isImageFile(file: File): boolean {
   const contentType = file.type.toLowerCase();
@@ -494,8 +569,25 @@ writer.write(sys.argv[2])
         buffer = Buffer.from(await file.arrayBuffer());
       }
 
+      if (buffer.length === 0) {
+        return c.json(
+          { error: "That file is empty (0 bytes) — it didn't upload properly. Choose the file again, or send a different copy." },
+          400,
+        );
+      }
+
       if (buffer.length > MAX_PDF_BYTES) {
         return c.json({ error: `That file is too large (max ${MAX_PDF_UPLOAD_MB} MB). Send a smaller one, or paste the text.` }, 413);
+      }
+
+      // An image is not a document: say which image it is and where photos ARE
+      // read, instead of the generic "send a photo" that contradicted itself.
+      const imageKind = sniffImageKind(buffer);
+      if (imageKind) {
+        return c.json(
+          { error: `That's a photo (${imageKind}), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.` },
+          415,
+        );
       }
 
       const head = buffer.subarray(0, 8);
@@ -514,11 +606,41 @@ writer.write(sys.argv[2])
 
       if (isPdf) {
         const { extractText, getDocumentProxy } = await import("unpdf");
-        const pdf = await getDocumentProxy(new Uint8Array(buffer));
-        const { totalPages, text } = await extractText(pdf, { mergePages: true });
+        // Parse and extract inside the classifier, so a damaged or
+        // password-protected file answers with ITS OWN status and message rather
+        // than the blanket "Couldn't read that file. Try a PDF or paste the text."
+        // 500 that told the user nothing (and never mentioned a password).
+        let pdf: Awaited<ReturnType<typeof getDocumentProxy>>;
+        try {
+          pdf = await getDocumentProxy(new Uint8Array(buffer));
+        } catch (err) {
+          const classified = classifyPdfReadFailure(err);
+          if (!classified) throw err;
+          return c.json({ error: classified.message }, classified.status);
+        }
+        let totalPages: number;
+        let text: string | string[];
+        try {
+          ({ totalPages, text } = await extractText(pdf, { mergePages: true }));
+        } catch (err) {
+          const classified = classifyPdfReadFailure(err);
+          if (!classified) throw err;
+          return c.json({ error: classified.message }, classified.status);
+        }
         const clean = (typeof text === "string" ? text : (text as string[]).join("\n")).trim();
         if (!clean) {
-          return c.json({ error: "That PDF has no selectable text — it's a scan. Send a clear photo of it instead." }, 422);
+          // Two genuinely different situations, and telling a blank-PDF user to
+          // photograph the page is a dead end: a scan has something to look at,
+          // a blank page has nothing.
+          const hasImages = await pdfHasPageImages(buffer);
+          return c.json(
+            {
+              error: hasImages
+                ? "That PDF is a scan — its pages are pictures, so there is no text to copy out of it. Send the original PDF (exported from Word, Google Docs…, not photographed), or attach the photo in the AI Assistant, which reads photos."
+                : "There's no text in that PDF — it looks blank (no words on any page). Send the document you meant to upload.",
+            },
+            422,
+          );
         }
         return c.json({ success: true, text: clean, pages: totalPages });
       }
@@ -555,7 +677,7 @@ writer.write(sys.argv[2])
       }
 
       return c.json(
-        { error: "Couldn't read that file type. Send a PDF, a Word (.docx) file, a photo, or paste the text." },
+        { error: "Couldn't read that file. Send a PDF, a Word (.docx) file, or paste the text instead." },
         415,
       );
     } catch (err) {
