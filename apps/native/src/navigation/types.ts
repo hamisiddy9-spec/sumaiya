@@ -2,6 +2,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { CompositeNavigationProp, NavigatorScreenParams, ParamListBase, RouteProp } from "@react-navigation/native";
 import type { CVData } from "@sumaiya/types";
+import type { JobListing } from "@sumaiya/api-client";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -9,6 +10,10 @@ export type HomeStackParamList = {
   Guide: { id: string };
   Invite: undefined;
   Jobs: undefined;
+  /** The advert behind a job card — the card's own route. The listing is
+   *  passed whole: it is already in memory from the feed, and re-fetching it
+   *  by id would make a tap on a card wait on the network. */
+  JobDetail: { job: JobListing; score?: number; reason?: string };
   JobApply: { jd?: string; want?: "cv" | "letter" | "both" } | undefined;
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
@@ -101,6 +106,7 @@ export type LearningHubScreenProps = Screen<HomeStackParamList, "LearningHub">;
 export type GuideScreenProps = Screen<HomeStackParamList, "Guide">;
 export type InviteScreenProps = Screen<HomeStackParamList, "Invite">;
 export type JobsScreenProps = Screen<HomeStackParamList, "Jobs">;
+export type JobDetailScreenProps = Screen<HomeStackParamList, "JobDetail">;
 
 // CV stack
 export type CvListScreenProps = Screen<CvStackParamList, "CvListMain">;

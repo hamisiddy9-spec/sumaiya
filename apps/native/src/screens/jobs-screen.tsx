@@ -5,10 +5,11 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import type { JobListing, JobRecommendation } from "@sumaiya/api-client";
 import { apiClient } from "../lib/api-client";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, Card, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { confirmAndOpenUrl } from "../lib/external-link";
 import { isExpiredListing } from "../lib/job-listing";
+import { closingLabel } from "../lib/deadline";
 import type { JobsScreenProps } from "../navigation/types";
 
 function MatchBadge({ score }: { score: number }) {
@@ -28,17 +29,29 @@ function JobCard({
   reason,
   onTailor,
   onApply,
+  onOpen,
 }: {
   job: JobListing;
   score?: number;
   reason?: string;
   onTailor: () => void;
   onApply: () => void;
+  onOpen: () => void;
 }) {
   const c = useThemeColors();
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const closing = closingLabel(job.applicationDeadline, lang);
   return (
-    <View style={{ backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, gap: 10 }}>
+    /* The card body is a real control now, not a View that looked like one.
+       Measured on the device against 1.6.24: the only clickable nodes on this
+       screen were the two buttons and the tab bar, so a user tapping the card
+       — the same shape every other tappable card in the app has — got nothing
+       back. It opens the advert it is showing, and says so. */
+    <Card
+      onPress={onOpen}
+      accessibilityLabel={`${job.title}. ${t("See the full advert", "Ona tangazo kamili")}`}
+      style={{ gap: 10 }}
+    >
       <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }} numberOfLines={2}>{job.title}</Text>
@@ -49,6 +62,16 @@ function JobCard({
         {typeof score === "number" ? <MatchBadge score={score} /> : null}
       </View>
       {reason ? <Text style={{ color: c.textBody, fontSize: 12.5 }} numberOfLines={2}>{reason}</Text> : null}
+      {/* The deadline decides whether this is worth doing today, and the feed
+          has always used it to filter — the card just never said it. */}
+      {closing ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Icon name="calendar-clock" size={13} color={c.textMuted} />
+          <Text style={{ color: c.textMuted, fontSize: 12 }}>
+            {t("Apply by", "Mwisho wa maombi")} — <Text style={{ color: c.textBody, fontWeight: "700" }}>{closing}</Text>
+          </Text>
+        </View>
+      ) : null}
       <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
         <View style={{ flex: 1 }}>
           {/* Tailoring is the app's real value-add over just browsing a
@@ -60,7 +83,13 @@ function JobCard({
           <Button label={t("Open the advert", "Fungua tangazo")} size="sm" variant="secondary" onPress={onApply} />
         </View>
       </View>
-    </View>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
+        <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>
+          {t("See the full advert", "Ona tangazo kamili")}
+        </Text>
+        <Icon name="chevron-right" size={16} color={c.accent} />
+      </View>
+    </Card>
   );
 }
 
@@ -112,6 +141,10 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   const apply = (job: JobListing) => {
     if (job.applyUrl) confirmAndOpenUrl(job.applyUrl, t);
   };
+  // The card's own route. A tap on the card body used to do nothing at all.
+  const open = (job: JobListing, score?: number, reason?: string) => {
+    navigation.navigate("JobDetail", { job, score, reason });
+  };
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
@@ -149,6 +182,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
                       reason={r.reason}
                       onTailor={() => tailor(r.job)}
                       onApply={() => apply(r.job)}
+                      onOpen={() => open(r.job, r.score, r.reason)}
                     />
                   </Stagger>
                 ))}
@@ -184,7 +218,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               <View style={{ gap: 12 }}>
                 {rest.slice(0, 40).map((j, i) => (
                   <Stagger key={j.id} index={i}>
-                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} />
+                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} onOpen={() => open(j)} />
                   </Stagger>
                 ))}
               </View>

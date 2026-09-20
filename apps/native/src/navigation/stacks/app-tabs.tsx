@@ -41,6 +41,7 @@ import { LearningHubScreen } from "../../screens/learning-hub-screen";
 import { GuideScreen } from "../../screens/guide-screen";
 import { InviteScreen } from "../../screens/invite-screen";
 import { JobsScreen } from "../../screens/jobs-screen";
+import { JobDetailScreen } from "../../screens/job-detail-screen";
 import { ApplicationsScreen } from "../../screens/applications-screen";
 import { ApplicationDetailScreen } from "../../screens/application-detail-screen";
 import { AtsCheckerScreen } from "../../screens/ats-checker-screen";
@@ -72,6 +73,7 @@ function HomeStackScreen() {
       />
       <HomeStack.Screen name="Guide" component={GuideScreen} />
       <HomeStack.Screen name="Jobs" component={JobsScreen} />
+      <HomeStack.Screen name="JobDetail" component={JobDetailScreen} />
       <HomeStack.Screen name="Invite" component={InviteScreen} />
     </HomeStack.Navigator>
   );
