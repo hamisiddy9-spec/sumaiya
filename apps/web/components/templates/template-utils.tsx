@@ -56,6 +56,51 @@ export function IcoCalendar({ size = 9, color = "currentColor" }: { size?: numbe
 
 // ─── Photo component ──────────────────────────────────────────────────────────
 
+/**
+ * CoverImg — the ONE way a photo is drawn inside a frame: `background-size: cover`.
+ *
+ * WHY NOT `<img style="object-fit: cover">` (what shipped until now):
+ * the exported PDF is not a vector render — lib/pdf.ts rasterizes the sheet with
+ * html2canvas 1.4.1, and that library's dist contains NO `object-fit` handling at
+ * all (grep node_modules/html2canvas/dist/html2canvas.js: "object-fit" ABSENT).
+ * It draws the decoded bitmap into the element's BOX, so when the box aspect is
+ * not the photo's aspect the face is stretched. Measured on a passport-style
+ * 600x900 headshot (scripts/photo-aspect-dom.mjs + scripts/photo-cover-mechanism-probe.mjs):
+ *
+ *   <img object-fit:cover> in a 200x200 frame  -> face disc aspect 1.493 (squashed)
+ *   background-size:cover in the same frame    -> face disc aspect 1.000
+ *
+ * html2canvas DOES implement background-size: cover (calculateBackgroundSize,
+ * and it preloads the background image through its own resource loader), so the
+ * browser, the on-screen preview and the PDF all draw the same crop. A square
+ * frame hides the bug for a square photo and shows it the moment the candidate
+ * uploads a real passport photo, which is exactly what this market requires.
+ *
+ * `role="img"` + `aria-label` keep the portrait announced to assistive tech even
+ * though the visual is no longer an <img>.
+ */
+export function CoverImg({
+  url, name, style,
+}: {
+  url: string; name: string; style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      role="img"
+      aria-label={name}
+      style={{
+        width: "100%",
+        height: "100%",
+        backgroundImage: `url("${url.replace(/"/g, '\\"')}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        ...style,
+      }}
+    />
+  );
+}
+
 export function PhotoCircle({
   url, name, size = 80, bgColor = "#2563EB", borderColor = "#fff", borderWidth = 3,
 }: {
@@ -70,7 +115,7 @@ export function PhotoCircle({
       boxSizing: "border-box",
     }}>
       {url ? (
-        <img src={url} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <CoverImg url={url} name={name} />
       ) : (
         <div style={{ width: "100%", height: "100%", backgroundColor: bgColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ color: "#fff", fontSize: size * 0.32, fontWeight: 700, letterSpacing: "0.02em" }}>{initials}</span>
@@ -94,7 +139,7 @@ export function PhotoSquare({
       boxSizing: "border-box",
     }}>
       {url ? (
-        <img src={url} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        <CoverImg url={url} name={name} />
       ) : (
         <div style={{ width: "100%", height: "100%", backgroundColor: bgColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ color: "#fff", fontSize: size * 0.32, fontWeight: 700 }}>{initials}</span>
@@ -116,9 +161,12 @@ export function PhotoSquare({
 // NOTHING when there is not, so a template can offer a photo without leaving a
 // hole or an invented placeholder when the user skips it.
 //
-// The frame is a fixed square and the image is objectFit:"cover", so the aspect
-// ratio is preserved and the square is what gets cropped, never the face
-// stretched. `radius: 50` gives a circle, `0` a square, anything else a px radius.
+// The image is drawn as a background with `background-size: cover` (CoverImg),
+// NOT as an <img> with object-fit. The square frame keeps the crop central; but
+// the mechanism matters because object-fit is invisible to the PDF rasterizer
+// (html2canvas 1.4.1 has no object-fit support at all), which silently
+// stretched every non-square photo. `radius: 50` gives a circle, `0` a square,
+// anything else a px radius.
 export function CvPhoto({
   url, name, size = 84, radius = 50, borderColor, borderWidth = 0, style,
 }: {
@@ -133,11 +181,7 @@ export function CvPhoto({
       border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor ?? "#fff"}` : undefined,
       ...style,
     }}>
-      <img
-        src={url}
-        alt={name}
-        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-      />
+      <CoverImg url={url} name={name} />
     </div>
   );
 }

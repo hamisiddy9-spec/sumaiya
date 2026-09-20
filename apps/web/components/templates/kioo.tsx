@@ -3,6 +3,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   fmtDate, dateRange, CVData,
   visibleSkills,
+  CoverImg,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
@@ -57,7 +58,7 @@ export function KiooTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
         {/* Full-bleed portrait */}
         <div style={{ width: "100%", height: 300, overflow: "hidden", flexShrink: 0 }}>
           {personal.photo ? (
-            <img src={personal.photo} alt={personal.fullName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <CoverImg url={personal.photo} name={personal.fullName} />
           ) : (
             <div style={{ width: "100%", height: "100%", background: primaryColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: 72, fontWeight: 800, color: "rgba(255,255,255,0.9)" }}>{initials}</span>

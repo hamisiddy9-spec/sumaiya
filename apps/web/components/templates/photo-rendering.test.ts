@@ -10,9 +10,12 @@
  * only way to know is to render each template and look at the markup.
  *
  * Two contracts are asserted per template:
- *   1. with a photo   -> the photo is in the markup, drawn with object-fit:cover
- *                        (cover is what keeps the face undistorted; the square
- *                        frame itself is pinned in CvPhoto's own test).
+ *   1. with a photo   -> the photo is in the markup, drawn with
+ *                        `background-size: cover` (cover is what keeps the face
+ *                        undistorted; the rasterizer the PDF export uses has no
+ *                        object-fit support, so an <img> would export a
+ *                        squashed face — see photoFrames below and
+ *                        scripts/photo-cover-mechanism-probe.mjs).
  *   2. without a photo -> NO image is emitted at all. This is the "must not
  *                        break or leave a hole" requirement: no broken src, no
  *                        orphan frame, no reserved gap.
@@ -97,14 +100,26 @@ function render(id: string, photo?: string): string {
   return renderToStaticMarkup(createElement(Component, props));
 }
 
-/** Every <img> whose src is the photo, and whether it is drawn with cover. */
-function photoImages(html: string): Array<{ src: string; style: string }> {
-  const out: Array<{ src: string; style: string }> = [];
-  const re = /<img\b[^>]*>/g;
-  for (const tag of html.match(re) ?? []) {
-    const src = /\bsrc="([^"]*)"/.exec(tag)?.[1] ?? "";
-    if (src.startsWith("data:image/")) {
-      out.push({ src, style: /\bstyle="([^"]*)"/.exec(tag)?.[1] ?? "" });
+/**
+ * Every element that draws the photo, in the form the templates now use: a
+ * frame whose background is the photo with `background-size: cover`.
+ *
+ * The contract changed from "an <img> with object-fit: cover". object-fit is
+ * NOT a contract the PDF can honour — the export rasterizes with html2canvas
+ * 1.4.1, whose dist contains no object-fit support at all, so an <img> is drawn
+ * into its element box and a non-square photo comes out with a squashed face.
+ * `background-size: cover` IS implemented by html2canvas, and browsers render
+ * the identical crop, so it is the only mechanism that makes the preview and the
+ * download agree. Measured: scripts/photo-cover-mechanism-probe.mjs.
+ */
+function photoFrames(html: string): Array<{ background: string; size: string }> {
+  const out: Array<{ background: string; size: string }> = [];
+  for (const tag of html.match(/<[a-z]+\b[^>]*>/g) ?? []) {
+    const style = /\bstyle="([^"]*)"/.exec(tag)?.[1] ?? "";
+    const bg = /background-image:\s*url\(&quot;?(data:image\/[^)"&]*)/.exec(style)
+      ?? /background-image:\s*url\(([^)]*)\)/.exec(style);
+    if (bg && bg[1].startsWith("data:image/")) {
+      out.push({ background: bg[1], size: /background-size:\s*([a-z-]+)/.exec(style)?.[1] ?? "" });
     }
   }
   return out;
@@ -137,16 +152,39 @@ describe("curated templates: the photo is really rendered", () => {
   });
 
   it("every curated photo-capable template emits the photo when one is set", () => {
-    const missing = PHOTO_CAPABLE.filter((id) => photoImages(render(id, PHOTO)).length === 0);
+    const missing = PHOTO_CAPABLE.filter((id) => photoFrames(render(id, PHOTO)).length === 0);
     expect(missing).toEqual([]);
   });
 
-  it("draws the photo with object-fit:cover everywhere, so no face is stretched", () => {
+  it("draws the photo with background-size:cover everywhere, so no face is stretched", () => {
+    // The mechanism matters, not the styling: html2canvas (the PDF rasterizer)
+    // ignores object-fit and stretches an <img> to its box, so an <img> here
+    // would export a squashed face for any photo whose aspect is not the
+    // frame's. background-size:cover is the one mechanism both the browser and
+    // html2canvas honour identically.
     const stretched = PHOTO_CAPABLE.filter((id) => {
-      const imgs = photoImages(render(id, PHOTO));
-      return imgs.length === 0 || imgs.some((i) => !i.style.includes("object-fit:cover"));
+      const frames = photoFrames(render(id, PHOTO));
+      return frames.length === 0 || frames.some((f) => f.size !== "cover");
     });
     expect(stretched).toEqual([]);
+  });
+
+  it("never draws the photo as an <img> with object-fit — the rasterizer ignores it", () => {
+    const viaImg = PHOTO_CAPABLE.filter((id) => {
+      const html = render(id, PHOTO);
+      return (html.match(/<img\b[^>]*>/g) ?? []).some(
+        (tag) => /src="data:image\//.test(tag) || /object-fit/.test(tag),
+      );
+    });
+    expect(viaImg).toEqual([]);
+  });
+
+  it("keeps the portrait announced to assistive tech (role=img + the candidate's name)", () => {
+    const silent = PHOTO_CAPABLE.filter((id) => {
+      const html = render(id, PHOTO);
+      return !/role="img"/.test(html) || !/aria-label="Asha Mwinyi"/.test(html);
+    });
+    expect(silent).toEqual([]);
   });
 
   it("emits NO image at all when the candidate has not added a photo", () => {
@@ -155,11 +193,11 @@ describe("curated templates: the photo is really rendered", () => {
   });
 
   it("each newly photo-capable template leaves no empty frame when there is no photo", () => {
-    // CvPhoto returns null without a url, so these templates must not render an
-    // object-fit:cover image (a reserved, empty portrait box) at all.
+    // CvPhoto returns null without a url, so these templates must not render a
+    // reserved, empty portrait box at all.
     const holes = NEWLY_PHOTO_CAPABLE.filter((id) => {
       const html = render(id, undefined);
-      return photoImages(html).length > 0 || html.includes("object-fit:cover");
+      return photoFrames(html).length > 0 || html.includes("background-size:cover");
     });
     expect(holes).toEqual([]);
   });
@@ -197,7 +235,7 @@ describe("curated templates: the 7 premium flagships are all photo-capable", () 
     // Checked in Swahili because that is the primary locale (Swahili first).
     const missing = PREMIUM.filter((id) => {
       const html = render(id, PHOTO);
-      return !html.includes(PHOTO) || photoImages(html).length === 0;
+      return !html.includes(PHOTO) || photoFrames(html).length === 0;
     });
     expect(missing).toEqual([]);
   });
