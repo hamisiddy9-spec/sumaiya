@@ -190,10 +190,10 @@ description of a CV layout; it was a word-by-word rendering of English *"strict"
 
 ---
 
-## 4. Changes implemented (21 strings, 17 files)
+## 4. Changes implemented (22 strings, 17 files)
 
 Commit: see §7. Every edit was applied by exact-match script with a per-edit `OK/FAIL` report
-(21 applied, 0 failed), then re-grepped for residuals: `ujanja` 0, `Mgusiko` 0, `link ya` 0,
+(22 applied, 0 failed), then re-grepped for residuals: `ujanja` 0, `Mgusiko` 0, `link ya` 0,
 Swahili-side `ATS` 0 across `apps/native/src` and `apps/web`.
 
 | file:line | before | after | why |
