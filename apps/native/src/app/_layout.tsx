@@ -17,7 +17,7 @@ import { LangProvider } from "../lib/i18n";
 import { LanguageSync } from "../lib/language-sync";
 import { RootNavigator } from "../navigation/root-navigator";
 import { UpdatePrompt } from "../components/update-prompt";
-import { DialogHost } from "../components/ui";
+import { DialogHost, ToastHost } from "../components/ui";
 import { ConnectivityGate } from "../components/connectivity-gate";
 import { ErrorBoundary } from "../components/error-boundary";
 
@@ -122,6 +122,7 @@ export default function RootLayout() {
               <ConnectivityGate />
               <UpdatePrompt />
               <DialogHost />
+              <ToastHost />
               <StatusBar />
             </LangProvider>
           </AuthProvider>

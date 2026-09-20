@@ -159,7 +159,7 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
               ? "Kila kazi imepimwa dhidi ya CV yako. Bofya “Fuatilia” kuanzisha ombi lako mara moja."
               : "Every job is scored against your CV. Tap “Track” to start an application instantly."
             : sw
-              ? "Vinjari kazi kisha uunganishe CV yako uone jinsi inavyofanana na kila nafasi."
+              ? "Vinjari ajira kisha uunganishe CV yako uone jinsi inavyofanana na kila nafasi ya kazi."
               : "Browse roles, then attach your CV to see how well you match each one."}
         </p>
       </div>
@@ -304,12 +304,12 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
           </div>
           <p className="text-sm font-semibold text-espresso">
             {jobs.length === 0
-              ? sw ? "Bado hakuna nafasi zilizoorodheshwa." : "No jobs listed yet."
-              : sw ? "Hakuna nafasi zinazolingana na utafutaji wako." : "No jobs match your search."}
+              ? sw ? "Bado hakuna nafasi za kazi zilizoorodheshwa." : "No jobs listed yet."
+              : sw ? "Hakuna nafasi za kazi zinazolingana na utafutaji wako." : "No jobs match your search."}
           </p>
           <p className="text-xs text-text-muted mt-1">
             {jobs.length === 0
-              ? sw ? "Rudi hivi karibuni — tunaongeza nafasi mpya." : "Check back soon — we're adding new roles."
+              ? sw ? "Rudi hivi karibuni — tunaongeza nafasi mpya za kazi." : "Check back soon — we're adding new roles."
               : sw ? "Jaribu neno lingine au ondoa vichujio." : "Try a different term or clear the filters."}
           </p>
         </div>

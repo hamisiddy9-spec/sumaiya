@@ -883,10 +883,10 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           setMessages((m) => [...m, {
             role: "assistant",
             content: top.length
-              ? (sw ? "Hizi hapa nafasi zinazoendana — bofya kuona zote na kuomba:" : "Here are some matching openings — tap through to see all of them and apply:")
+              ? (sw ? "Hizi hapa nafasi za kazi zinazoendana — bofya kuona zote na kuomba:" : "Here are some matching openings — tap through to see all of them and apply:")
               : all.length === 0
-                ? (sw ? "Hakuna nafasi zilizoorodheshwa bado. Nitakuandalia CV yenye nguvu ili uwe tayari zitakapokuja." : "There aren't any jobs listed yet. Let's get your CV strong so you're ready when they land.")
-                : (sw ? `Sikupata inayoendana na "${q}". Angalia nafasi zote → /jobs` : `Nothing matched "${q}". Browse everything on the jobs page → /jobs`),
+                ? (sw ? "Hakuna nafasi za kazi zilizoorodheshwa bado. Nitakuandalia CV yenye nguvu ili uwe tayari zitakapokuja." : "There aren't any jobs listed yet. Let's get your CV strong so you're ready when they land.")
+                : (sw ? `Sikupata inayoendana na "${q}". Angalia nafasi zote za kazi → /jobs` : `Nothing matched "${q}". Browse everything on the jobs page → /jobs`),
             ...(top.length ? { card: { kind: "jobs" as const, query: q, jobs: top } } : {}),
           }]);
           markExecuted({ tool: "jobs.search", args: act.args ?? {} });
@@ -2753,7 +2753,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               <button onClick={startJobs}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
                 <Briefcase className="w-4 h-4 text-ember" />
-                {sw ? "Ona nafasi zinazofanana" : "Matching jobs"}
+                {sw ? "Ona nafasi za kazi zinazofanana" : "Matching jobs"}
               </button>
               <button onClick={() => pickDoc("business-card")}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm shrink-0">
@@ -3775,7 +3775,7 @@ function SkillGapCard({ jobTitle, strengths, gaps, score, learningPlan, summary,
       )}
       {gaps.length === 0 && (
         <p className="text-[12px] font-semibold text-pine flex items-center gap-1.5">
-          <Check className="w-4 h-4" /> {sw ? "Hakuna mapungufu makubwa — tayari uko tayari kuomba nafasi hii." : "No major gaps — you're ready to apply for this role."}
+          <Check className="w-4 h-4" /> {sw ? "Hakuna mapungufu makubwa — tayari uko tayari kuomba nafasi hii ya kazi." : "No major gaps — you're ready to apply for this role."}
         </p>
       )}
       </div>

@@ -31,7 +31,7 @@ import { TemplateThumb } from "../components/cv/template-thumb";
 import { TemplateGallery } from "../components/cv/template-gallery";
 import { PremiumSheet } from "../components/premium-sheet";
 import { SumaiyaMark } from "../components/sumaiya-mark";
-import { Button, ProgressBar, TextField, dialog, haptics, useThemeColors } from "../components/ui";
+import { Button, ProgressBar, TextField, dialog, haptics, toast, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
@@ -604,7 +604,15 @@ export function FirstRunScreen({ onDone }: Props) {
       <TemplateGallery
         visible={galleryOpen}
         selected={template}
-        onSelect={(id) => setTemplate(id)}
+        onSelect={(id) => {
+          setTemplate(id);
+          toast.show(
+            t(
+              "This design has been applied to the CV you're creating.",
+              "Mtindo huu umewekwa kwenye CV unayounda.",
+            ),
+          );
+        }}
         onClose={() => setGalleryOpen(false)}
       />
       <PremiumSheet visible={premiumOpen} onClose={() => setPremiumOpen(false)} feature="templates" />

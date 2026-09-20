@@ -19,7 +19,7 @@
  *   5. "ailenge" / "iipitishe" (malformed verbs)  → "ilenge" / "ipitishe"
  *   6. a Preview label reading exactly "Hakiki"   → "Onyesho" ("hakiki" = verify)
  *   7. "ATS" named directly in Swahili copy       → describe the outcome
- *      ("mifumo ya kuajiri" / "vichujio vya waajiri" / "kikagua CV"), never
+ *      ("mifumo ya kuajiri" / "vigezo vya waajiri" / "kikagua CV"), never
  *      the mechanism. English copy may still say "ATS".
  *
  * Scope: every non-test .ts/.tsx file under apps/web/{lib,app,components}. Test
@@ -218,7 +218,7 @@ const GUARDS: Guard[] = [
     // same file.
     pattern: /\b(?:\w*kagua\s+ATS|(?:wa|ya|kwa|za|la|cha|na|kwenye)\s+ATS)\b/i,
     message: (m) =>
-      `"${m}" — names the ATS mechanism directly in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vichujio vya waajiri", "kikagua CV") — the product rule is sell the outcome, never the mechanism, and English copy is allowed to keep "ATS"`,
+      `"${m}" — names the ATS mechanism directly in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vigezo vya waajiri", "kikagua CV") — the product rule is sell the outcome, never the mechanism, and English copy is allowed to keep "ATS"`,
     bad: [
       "ikague utayari wa ATS",
       "akili ya ATS",
@@ -231,7 +231,7 @@ const GUARDS: Guard[] = [
       "Check your ATS readiness",
       "ATS-ready template",
       "Sumaiya checks your CV",
-      "ikague kama CV yako itavuka vichujio vya waajiri",
+      "ikague kama CV yako itavuka vigezo vya waajiri",
       "kikagua CV bila malipo",
     ],
     // The two page-level `keywords:` arrays are search terms, not rendered
@@ -283,6 +283,30 @@ const GUARDS: Guard[] = [
       `"${m}" — English "link" inside Swahili copy; use "kiungo" ("Bandika kiungo cha ajira", "tuma kiungo")`,
     bad: ["Bandika link ya ajira", "Link ya ajira"],
     good: ["Bandika kiungo cha ajira", "Kiungo cha ajira", "tuma kiungo"],
+  },
+  {
+    id: "bare-nafasi-for-a-job",
+    // Owner's instruction, verbatim: "isiwe nafasi kwakomiwe nafasi za kazi tu".
+    // Swahili "nafasi" alone can mean space, room, a chance or a seat as well as
+    // a job opening, so a label reading only "Nafasi" leaves the reader guessing
+    // which is meant; where the job sense is meant it must say "nafasi za kazi"
+    // / "nafasi ya kazi".
+    //
+    // Deliberately a CLOSED SET of the exact labels that were wrong, NOT a bare
+    // /\bNafasi\b/: "nafasi" is the correct word for whitespace ("Bila rangi.
+    // Muundo na nafasi tu.", ~30 template blurbs) and for a seat ("Nafasi 50
+    // zimechukuliwa"), so a broad guard would fail the build on correct copy.
+    pattern: /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa)"/,
+    message: (m) =>
+      `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi"`,
+    bad: ['sw ? "Nafasi mpya" : "New roles"', '"Nafasi zote"', '"Nafasi kwako"'],
+    good: [
+      '"Nafasi za kazi"',
+      '"Nafasi mpya za kazi"',
+      '"Nafasi zote za kazi"',
+      '"Bila rangi. Muundo na nafasi tu."',
+      '"Nafasi 50 zimechukuliwa"',
+    ],
   },
 ];
 

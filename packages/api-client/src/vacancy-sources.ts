@@ -30,7 +30,7 @@ export const VACANCY_SOURCES: VacancySource[] = [
     name: { en: "Ajira Portal (PSRS)", sw: "Ajira Portal (Utumishi)" },
     note: {
       en: "Government vacancies — the official Public Service Recruitment Secretariat portal.",
-      sw: "Nafasi za serikali — tovuti rasmi ya Sekretarieti ya Ajira (Utumishi).",
+      sw: "Nafasi za serikali — tovuti rasmi ya Sekretarieti ya Ajira katika Utumishi wa Umma.",
     },
   },
   {

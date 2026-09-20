@@ -5,6 +5,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useLang } from "../lib/i18n";
+import { requestCameraAccess, showCameraRefusal } from "../lib/permissions";
 import { Button, Screen, ScreenTitle, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
@@ -28,8 +29,16 @@ export function PdfToolsScreen() {
       // first-time user tapping Camera before ever granting permission would
       // hit an unhandled rejection with zero feedback.
       if (fromCamera) {
-        const perm = await ImagePicker.requestCameraPermissionsAsync();
-        if (!perm.granted) return;
+        const access = await requestCameraAccess();
+        if (access !== "granted") {
+          // Never a silent return. The old code did `if (!perm.granted) return;`
+          // — the user tapped Camera, refused, and absolutely nothing happened,
+          // with no way to tell the app was waiting on a permission. Now the
+          // refusal explains itself and offers the phone's own photo library,
+          // which re-enters this same function on the non-camera path.
+          showCameraRefusal(access, () => { void add(false); });
+          return;
+        }
       }
       const opts: ImagePicker.ImagePickerOptions = { quality: 0.7, base64: true };
       const res = fromCamera

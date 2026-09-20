@@ -79,7 +79,7 @@ export function briefHeadline(
   }
   const top = matches[0];
   if (sw) {
-    return `${matches.length} nafasi ${matches.length === 1 ? "mpya inakufaa" : "mpya zinakufaa"}; mwenye nguvu zaidi ni ${top.title} — ${top.score}%.`;
+    return `${matches.length} nafasi za kazi ${matches.length === 1 ? "mpya inakufaa" : "mpya zinakufaa"}; iliyo bora zaidi ni ${top.title} — ${top.score}%.`;
   }
   return `${matches.length} new role${matches.length === 1 ? "" : "s"} fit you; strongest match is ${top.title} — ${top.score}%.`;
 }

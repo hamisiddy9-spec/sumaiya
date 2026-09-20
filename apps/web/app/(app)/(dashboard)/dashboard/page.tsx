@@ -355,7 +355,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                   </p>
                   <p className="text-text-body text-[13px] mt-0.5">
                     {sw
-                      ? "Nafasi mpya zinazokufaa, maombi ya kufuatilia, na CV tayari kulengwa — kila asubuhi."
+                      ? "Nafasi mpya za kazi zinazokufaa, maombi ya kufuatilia, na CV tayari kulengwa — kila asubuhi."
                       : "New roles that fit you, applications to follow up on, ready-to-tailor CVs — every morning."}
                   </p>
                 </div>

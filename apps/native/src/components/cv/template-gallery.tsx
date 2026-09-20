@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
 import { useEntitlements } from "../../lib/entitlements";
 import { loadProfile } from "../../lib/profile-store";
@@ -9,7 +9,7 @@ import { fieldLabel, suggestTemplates } from "../../lib/template-suggestions";
 import { useLang } from "../../lib/i18n";
 import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
-import { haptics, TextField, useThemeColors } from "../ui";
+import { haptics, enterDurationMs, MOTION, TextField, useMotionReduced, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
 import { track } from "../../lib/analytics";
 
@@ -64,8 +64,17 @@ export function TemplateGallery({
   const { width } = useWindowDimensions();
   const { t, lang } = useLang();
   const { premium } = useEntitlements();
+  // Reduced motion collapses every entrance to `dur.instant` (1ms) — never to
+  // zero, and never by removing the transition. See MOTION-STANDARD §5.
+  const reduce = useMotionReduced();
+  const enterMs = enterDurationMs(reduce);
 
   const [query, setQuery] = useState("");
+  // The input stays instant (MOTION-STANDARD §4 — a keystroke must produce its
+  // glyph on the next frame) while the filter runs on the deferred value. Before
+  // this, every keystroke re-filtered 218 designs and rebuilt the row chunks on
+  // the JS thread of a low-end phone.
+  const deferredQuery = useDeferredValue(query);
   const [family, setFamily] = useState<string | null>(null);
   const [premiumFor, setPremiumFor] = useState<string | null>(null);
   const [previewFor, setPreviewFor] = useState<CvTemplateMeta | null>(null);
@@ -96,7 +105,7 @@ export function TemplateGallery({
   const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
 
   const sections = useMemo<Section[]>(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     const matches = (tpl: CvTemplateMeta) =>
       (!q ||
         tpl.id.includes(q) ||
@@ -152,7 +161,7 @@ export function TemplateGallery({
     }
 
     return out;
-  }, [query, family, suggestion, lang, t]);
+  }, [deferredQuery, family, suggestion, lang, t]);
 
   const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
@@ -227,15 +236,26 @@ export function TemplateGallery({
   );
 
   const renderSectionHeader = useCallback(
-    ({ section }: { section: Section }) => (
-      <View style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 8 }}>
-        <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }}>{section.title}</Text>
-        {section.subtitle ? (
-          <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2, lineHeight: 16 }}>{section.subtitle}</Text>
-        ) : null}
-      </View>
-    ),
-    [c],
+    ({ section }: { section: Section }) => {
+      // The recommendation section is DERIVED from the user's profile, which is
+      // read asynchronously — so it used to materialise into the list a beat
+      // after the user had already started reading (MOTION-STANDARD §1: nothing
+      // appears, everything arrives). Only this header animates; the curated and
+      // premium headers are present from the first frame and must stay still.
+      const arriving = section.key === "recs";
+      return (
+        <Animated.View
+          entering={arriving ? FadeInDown.duration(enterMs) : undefined}
+          style={{ paddingHorizontal: PAD, paddingTop: 14, paddingBottom: 8 }}
+        >
+          <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }}>{section.title}</Text>
+          {section.subtitle ? (
+            <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2, lineHeight: 16 }}>{section.subtitle}</Text>
+          ) : null}
+        </Animated.View>
+      );
+    },
+    [c, enterMs],
   );
 
   const chip = (key: string, label: string, active: boolean, onPress: () => void) => (
@@ -261,16 +281,16 @@ export function TemplateGallery({
   );
 
   const total = useMemo(() => {
-    if (query.trim()) {
+    if (deferredQuery.trim()) {
       // Searching: count the single flat results section.
       return sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0);
     }
     // Browsing: unique designs — the recommended section overlaps its own tier.
     return ALL_TEMPLATES.length;
-  }, [sections, query]);
+  }, [sections, deferredQuery]);
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={visible} animationType={reduce ? "none" : "slide"} onRequestClose={onClose} statusBarTranslucent>
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
         {/* Header */}
         <Animated.View
@@ -288,7 +308,7 @@ export function TemplateGallery({
               {t("TemplateHub", "TemplateHub")}
             </Text>
             <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-              {query.trim()
+              {deferredQuery.trim()
                 ? t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)
                 : t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
             </Text>
@@ -328,7 +348,11 @@ export function TemplateGallery({
           </FlatListRow>
         </View>
 
-        {/* Collections grid */}
+        {/* Collections grid. Every cell is a real WebView rendering a full A4
+            page (see real-template-thumb.tsx). The old defaults mounted 12 ROWS =
+            36 WebViews before the gallery was usable — which is most of what
+            "not smooth" was. Mount two rows, then grow the window as the user
+            scrolls instead of all at once. */}
         <SectionList
           sections={sections}
           keyExtractor={(item, idx) => (item[0]?.id ?? "row") + idx}
@@ -336,8 +360,10 @@ export function TemplateGallery({
           renderSectionHeader={renderSectionHeader}
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{ paddingBottom: insets.bottom + 28 }}
-          initialNumToRender={COLUMNS * 4}
-          windowSize={5}
+          initialNumToRender={COLUMNS * 2}
+          maxToRenderPerBatch={COLUMNS}
+          updateCellsBatchingPeriod={50}
+          windowSize={4}
           removeClippedSubviews
           keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
@@ -353,7 +379,10 @@ export function TemplateGallery({
       {/* Full-screen preview — tap a thumbnail to see the design large, then
           commit with "Use this design" (or dismiss). */}
       {previewFor ? (
-        <View style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top }}>
+        <Animated.View
+          entering={FadeIn.duration(MOTION.dur.base)}
+          style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top }}
+        >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: PAD, paddingVertical: 12 }}>
             <View style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
               <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }} numberOfLines={1}>
@@ -373,7 +402,10 @@ export function TemplateGallery({
             <RealTemplateThumb id={previewFor.id} accent={c.accent} width={width - PAD * 2} />
           </ScrollView>
 
-          <View style={{ paddingHorizontal: PAD, paddingBottom: insets.bottom + 12, paddingTop: 4 }}>
+          <Animated.View
+            entering={FadeInDown.duration(enterMs)}
+            style={{ paddingHorizontal: PAD, paddingBottom: insets.bottom + 12, paddingTop: 4 }}
+          >
             <Pressable
               onPress={() => {
                 haptics.selection();
@@ -388,8 +420,8 @@ export function TemplateGallery({
                 {t("Use this design", "Tumia muundo huu")}
               </Text>
             </Pressable>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       ) : null}
 
       <PremiumSheet visible={premiumFor !== null} onClose={() => setPremiumFor(null)} feature="templates" />

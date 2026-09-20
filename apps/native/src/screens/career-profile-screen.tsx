@@ -87,25 +87,54 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       </Text>
 
       <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
-        {p.photo ? (
-          <Image
-            source={{ uri: p.photo }}
-            style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.bg, borderWidth: 1, borderColor: c.border }}
-            accessibilityLabel={t("Your photo", "Picha yako")}
-          />
-        ) : (
-          <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
-            <Icon name="user" size={28} color={c.accent} />
+        {/* The photo IS the control. The owner's call: "after adding photo the
+            badilisha picha button i dont think is needed" — a user can tap the
+            photo itself. So the small camera badge below is the affordance that
+            tells them so, and the separate button is gone once a photo exists.
+            It stays when there is NO photo: an empty circle with a user glyph
+            is not a discoverable target on its own. */}
+        <Pressable
+          onPress={pickPhoto}
+          disabled={photoBusy}
+          accessibilityRole="button"
+          accessibilityLabel={p.photo ? t("Change photo", "Badilisha picha") : t("Add your photo", "Weka picha yako")}
+          style={{ width: 68, height: 68, borderRadius: 34 }}
+        >
+          {p.photo ? (
+            <Image
+              source={{ uri: p.photo }}
+              style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.bg, borderWidth: 1, borderColor: c.border }}
+              accessibilityLabel={t("Your photo", "Picha yako")}
+            />
+          ) : (
+            <View style={{ width: 68, height: 68, borderRadius: 34, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="user" size={28} color={c.accent} />
+            </View>
+          )}
+          <View
+            style={{
+              position: "absolute", right: -2, bottom: -2, width: 24, height: 24, borderRadius: 12,
+              backgroundColor: c.accent, alignItems: "center", justifyContent: "center",
+              borderWidth: 2, borderColor: c.bg,
+            }}
+          >
+            {photoBusy ? (
+              <ActivityIndicator size="small" color={c.accentText} />
+            ) : (
+              <Icon name="camera" size={13} color={c.accentText} />
+            )}
           </View>
-        )}
+        </Pressable>
         <View style={{ flex: 1, gap: 6 }}>
-          <Button
-            size="sm"
-            variant="secondary"
-            loading={photoBusy}
-            label={p.photo ? t("Change photo", "Badilisha picha") : t("Add your photo", "Weka picha yako")}
-            onPress={pickPhoto}
-          />
+          {!p.photo ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              loading={photoBusy}
+              label={t("Add your photo", "Weka picha yako")}
+              onPress={pickPhoto}
+            />
+          ) : null}
           {p.photo ? (
             <Pressable onPress={() => { haptics.selection(); setP((s) => ({ ...s, photo: "" })); }}>
               <Text style={{ color: c.textMuted, fontSize: 12, fontWeight: "700", textDecorationLine: "underline" }}>
@@ -164,7 +193,7 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       />
 
       <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 10 }}>
-        {t("Default CV look", "Muonekano chaguo-msingi wa CV")}
+        {t("Default CV look", "Muundo chaguo-msingi wa CV")}
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 6 }}>
         {CV_TEMPLATES.filter((tpl) => tpl.tier === "free").map((tpl) => {

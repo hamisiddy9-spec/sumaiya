@@ -165,7 +165,12 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       return;
     }
     try {
-      const picked = await resolveAttachment(kind);
+      const picked = await resolveAttachment(kind, {
+        // The camera was refused and the user took the offered alternative —
+        // a photo they already have. It has to land in the same place as a
+        // camera shot, or the offer is a lie.
+        onDeferred: (atts) => setAttachments((prev) => [...prev, ...atts].slice(0, 6)),
+      });
       if (picked?.length) setAttachments((prev) => [...prev, ...picked].slice(0, 6));
     } catch {
       haptics.error();

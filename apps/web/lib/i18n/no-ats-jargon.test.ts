@@ -28,7 +28,7 @@ describe("no ATS jargon in Swahili copy", () => {
   it("translations.sw contains no 'ATS' anywhere in its string tree", () => {
     const hits: string[] = [];
     walk(translations.sw, "sw", hits);
-    expect(hits, `found "ATS" in Swahili copy at: ${hits.join(", ")} — describe the outcome instead (e.g. "mifumo ya kuajiri" / "vichujio vya waajiri"), never the mechanism`).toEqual([]);
+    expect(hits, `found "ATS" in Swahili copy at: ${hits.join(", ")} — describe the outcome instead (e.g. "mifumo ya kuajiri" / "vigezo vya waajiri"), never the mechanism`).toEqual([]);
   });
 
   it("translations.en is allowed to contain 'ATS' (the guard is scoped to Swahili only)", () => {

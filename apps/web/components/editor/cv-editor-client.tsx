@@ -3252,7 +3252,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
                 {/* Font */}
                 <div>
-                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Fonti" : "Font"}</h3>
+                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Herufi" : "Font"}</h3>
                   <div className="space-y-1.5">
                     {FONTS.map((font) => {
                       const isActive = fontFamily === font.stack || fontFamily === font.name;
@@ -3270,7 +3270,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
                 {/* Density */}
                 <div>
-                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Msongamano" : "Density"}</h3>
+                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Ujazo" : "Density"}</h3>
                   <div className="grid grid-cols-3 gap-1.5">
                     {([
                       { id: "compact", label: uiLang === "sw" ? "Fupi" : "Compact", desc: uiLang === "sw" ? "Maudhui zaidi" : "More content" },
@@ -3622,7 +3622,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <div className="w-full max-w-md rounded-card-lg bg-card border border-border shadow-card-hover p-6 max-h-[calc(100dvh-2rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}>
             <h3 className="font-display font-extrabold text-lg text-espresso mb-1">{uiLang === "sw" ? "Wasilisha kama templeti" : "Submit as template"}</h3>
-            <p className="text-xs text-text-muted mb-4">{uiLang === "sw" ? "Inashiriki mtindo wa muundo huu (rangi, fonti, mpangilio wa sehemu) — kamwe si maudhui yako binafsi. Huenda kwa ukaguzi kabla ya kuonekana kwenye galeri." : "Shares this design's style (colors, font, section order) — never your personal content. It goes to review before appearing in the gallery."}</p>
+            <p className="text-xs text-text-muted mb-4">{uiLang === "sw" ? "Inashiriki mtindo wa CV hii (rangi, herufi, mpangilio wa sehemu) — kamwe si maudhui yako binafsi. Huenda kwa ukaguzi kabla ya kuonekana kwenye galeri." : "Shares this design's style (colors, font, section order) — never your personal content. It goes to review before appearing in the gallery."}</p>
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-espresso mb-1">{uiLang === "sw" ? "Jina la templeti" : "Template name"}</label>

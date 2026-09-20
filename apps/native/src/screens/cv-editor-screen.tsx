@@ -544,11 +544,19 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
             )}
           </Pressable>
           <View style={{ flex: 1, gap: 4 }}>
-            <Pressable onPress={pickPhoto} disabled={photoBusy} hitSlop={6} accessibilityRole="button">
-              <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
-                {data.personalInfo?.profilePhoto ? t("Change photo", "Badilisha picha") : t("Add profile photo", "Ongeza picha ya wasifu")}
-              </Text>
-            </Pressable>
+            {/* One control, not two. The circle on the left already opens the
+                picker; this text link repeated it verbatim ("Badilisha picha"
+                over a photo that is itself tappable) — owner: "after adding
+                photo the badilisha picha button i dont think is needed". It
+                stays only while there is no photo, where the circle alone (a
+                bare camera glyph) is not yet a discoverable target. */}
+            {!data.personalInfo?.profilePhoto ? (
+              <Pressable onPress={pickPhoto} disabled={photoBusy} hitSlop={6} accessibilityRole="button">
+                <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+                  {t("Add profile photo", "Ongeza picha ya wasifu")}
+                </Text>
+              </Pressable>
+            ) : null}
             {data.personalInfo?.profilePhoto ? (
               <Pressable onPress={removePhoto} hitSlop={6} accessibilityRole="button">
                 <Text style={{ color: c.textMuted, fontSize: 12.5 }}>{t("Remove", "Ondoa")}</Text>

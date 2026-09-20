@@ -11,7 +11,7 @@ import { getDefaultTemplate } from "../../lib/prefs";
 import { exportCVAsPDF } from "../../services/pdf-export";
 import { shareCV } from "../../services/share";
 import { Icon } from "../icon";
-import { Button, haptics, useThemeColors } from "../ui";
+import { Button, ScreenTitle, haptics, toast, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
 import { PremiumSheet } from "../premium-sheet";
 import { TemplateThumb } from "./template-thumb";
@@ -89,6 +89,11 @@ export function CvPreviewCard({
     }
     setTemplate(id);
     onTemplateChange?.(id);
+    // Say what just happened, and to WHAT. A design tap used to close the
+    // gallery and change the page with no acknowledgement at all — the owner:
+    // "after choosing templatehub template user should get some feedback that
+    // template applied to your profiile or cv".
+    toast.show(t("This design has been applied to this CV.", "Mtindo huu umewekwa kwenye CV hii."));
   };
 
   const download = async () => {
@@ -288,7 +293,7 @@ export function CvPreviewCard({
               onColorChange?.(col);
             }}
             accessibilityRole="button"
-            accessibilityLabel={t("Accent colour", "Rangi ya mwangaza")}
+            accessibilityLabel={t("Accent colour", "Rangi ya msisitizo")}
             accessibilityState={{ selected: color === col }}
             hitSlop={9}
             style={{

@@ -39,7 +39,7 @@ export default async function BriefPage() {
           </h1>
           <p className="text-sm text-text-body mb-5">
             {sw
-              ? "Ingia ili nikupe nafasi mpya za kazi, maombi ya kufuatilia, na CV tayari kulengwa."
+              ? "Ingia ili nikupe nafasi mpya za kazi zinazokufaa, maombi ya kufuatilia, na CV tayari kulengwa."
               : "Sign in so I can surface new roles, applications to follow up on, and ready-to-tailor CVs."}
           </p>
           <Link
@@ -128,7 +128,7 @@ export default async function BriefPage() {
           </h1>
           <p className="text-xs text-text-muted mt-1.5">
             {sw
-              ? `Imetengenezwa leo — nafasi ${brief.jobsScanned} zilichunguzwa. Hakuna kinachotumwa bila kibali chako.`
+              ? `Imetengenezwa leo — nafasi za kazi ${brief.jobsScanned} zimechunguzwa. Hakuna kinachotumwa bila kibali chako.`
               : `Generated today — ${brief.jobsScanned} roles scanned. Nothing is sent without your approval.`}
           </p>
         </div>
@@ -158,17 +158,17 @@ export default async function BriefPage() {
       <section className="mb-8">
         <h2 className="text-sm font-bold text-espresso mb-3 flex items-center gap-2">
           <Icon name="spark" size={16} className="text-ember" />
-          {sw ? "Nafasi mpya zinazokufaa" : "New roles that fit you"}
+          {sw ? "Nafasi mpya za kazi zinazokufaa" : "New roles that fit you"}
         </h2>
         {brief.matches.length === 0 ? (
           <div className="bg-card rounded-card border border-border px-5 py-6 text-center">
             <p className="text-sm text-text-body">
               {brief.hasProfile
                 ? sw
-                  ? "Hakuna nafasi mpya zinazokufaa leo — njoo tena kesho."
+                  ? "Hakuna nafasi mpya za kazi zinazokufaa leo — njoo tena kesho."
                   : "No new roles fit you today — check back tomorrow."
                 : sw
-                  ? "Tengeneza wasifu ili kuona nafasi zinazokufaa."
+                  ? "Tengeneza wasifu wako ili kuona nafasi za kazi zinazokufaa."
                   : "Build your profile to see roles that fit you."}
             </p>
           </div>

@@ -9,6 +9,7 @@
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import type { Attachment, AttachmentKind } from "../components/chat/chat-types";
+import { requestCameraAccess, showCameraRefusal } from "./permissions";
 
 let counter = 0;
 const id = () => `att-${Date.now()}-${++counter}`;
@@ -17,9 +18,22 @@ function fromImage(uri: string, name?: string): Attachment {
   return { id: id(), kind: "image", uri, name: name || "photo.jpg", mimeType: "image/jpeg", status: "ready" };
 }
 
-export async function pickFromCamera(): Promise<Attachment[] | null> {
-  const perm = await ImagePicker.requestCameraPermissionsAsync();
-  if (!perm.granted) return null;
+export async function pickFromCamera(
+  /**
+   * Called when the user refuses the camera but takes the offered alternative
+   * (pick a photo they already have). Without this the refusal ended in a bare
+   * `return null` — no message and no route forward, which is a dead end.
+   */
+  onDeferred?: (atts: Attachment[]) => void,
+): Promise<Attachment[] | null> {
+  const access = await requestCameraAccess();
+  if (access !== "granted") {
+    showCameraRefusal(
+      access,
+      onDeferred ? () => { void pickFromLibrary().then((a) => { if (a?.length) onDeferred(a); }); } : undefined,
+    );
+    return null;
+  }
   const res = await ImagePicker.launchCameraAsync({ quality: 0.85 });
   if (res.canceled || !res.assets?.length) return null;
   return res.assets.map((a) => fromImage(a.uri, a.fileName ?? undefined));
@@ -66,10 +80,13 @@ export function cvAttachment(cvId: string, title: string): Attachment {
   return { id: id(), kind: "cv", uri: cvId, name: title, status: "ready" };
 }
 
-export async function resolveAttachment(kind: AttachmentKind | "camera" | "photo" | "file"): Promise<Attachment[] | null> {
+export async function resolveAttachment(
+  kind: AttachmentKind | "camera" | "photo" | "file",
+  opts?: { onDeferred?: (atts: Attachment[]) => void },
+): Promise<Attachment[] | null> {
   switch (kind) {
     case "camera":
-      return pickFromCamera();
+      return pickFromCamera(opts?.onDeferred);
     case "photo":
       return pickFromLibrary();
     case "file":

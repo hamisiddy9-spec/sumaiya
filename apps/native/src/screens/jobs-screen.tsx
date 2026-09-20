@@ -5,7 +5,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import type { JobListing, JobRecommendation } from "@sumaiya/api-client";
 import { apiClient } from "../lib/api-client";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { confirmAndOpenUrl } from "../lib/external-link";
 import { isExpiredListing } from "../lib/job-listing";
@@ -115,14 +115,10 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
-      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings for you", "Nafasi kwako")}</ScreenTitle>
+      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings for you", "Nafasi za kazi kwako")}</ScreenTitle>
 
       {loading ? (
-        <View style={{ gap: 10 }}>
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </View>
+        <SkeletonList count={3} gap={10} />
       ) : error && recs.length === 0 && jobs.length === 0 ? (
         <EmptyState
           icon="wifi-off"
@@ -134,8 +130,8 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
       ) : recs.length === 0 && jobs.length === 0 ? (
         <EmptyState
           icon="briefcase"
-          title={t("No openings right now", "Hakuna nafasi kwa sasa")}
-          body={t("New listings are pulled in daily. Check back soon, or paste a job link and I'll tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika kiungo cha ajira nikutengenezee CV iliyolengwa.")}
+          title={t("No openings right now", "Hakuna nafasi za kazi kwa sasa")}
+          body={t("New listings are pulled in daily. Check back soon, or paste a job link and I'll tailor your CV to it.", "Nafasi mpya za kazi zinaingizwa kila siku. Rudi hivi karibuni, au bandika kiungo cha ajira nikutengenezee CV iliyolengwa.")}
           actionLabel={t("Ask me", "Niulize")}
           onAction={() => navigation.navigate("JobApply")}
         />
@@ -172,7 +168,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
                   {t("Add your first job to get matched", "Ongeza kazi yako ya kwanza upate ulinganifu")}
                 </Text>
                 <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
-                  {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
+                  {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi za kazi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
                 </Text>
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
@@ -184,7 +180,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
 
           {rest.length > 0 ? (
             <View>
-              <SectionHeader title={t("All openings", "Nafasi zote")} />
+              <SectionHeader title={t("All openings", "Nafasi zote za kazi")} />
               <View style={{ gap: 12 }}>
                 {rest.slice(0, 40).map((j, i) => (
                   <Stagger key={j.id} index={i}>

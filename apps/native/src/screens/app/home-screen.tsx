@@ -17,9 +17,11 @@ import {
   Screen,
   ScreenTitle,
   SectionHeader,
-  SkeletonCard,
+  Reveal,
+  SkeletonList,
   Stagger,
   haptics,
+  toast,
   useThemeColors,
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
@@ -96,6 +98,15 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const chooseTemplate = (id: CvTemplateId) => {
     setDefaultTemplateId(id);
     void setDefaultTemplate(id);
+    // Scoped to the PROFILE, not to a CV: from Home this sets the look new CVs
+    // start from. Saying "your CV" here would be a different claim than what
+    // the tap actually does.
+    toast.show(
+      t(
+        "This design is now the default look for your profile.",
+        "Mtindo huu sasa ndio mtindo wa kawaida wa wasifu wako.",
+      ),
+    );
   };
 
   const onRefresh = React.useCallback(async () => {
@@ -230,7 +241,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         title: t("Add your first job to get career advice", "Ongeza kazi yako ya kwanza upate ushauri wa kazi"),
         detail: t(
           "Tell me the role you're aiming for and I'll match jobs, skills and advice to it.",
-          "Niambie nafasi unayolenga nami nitaoanisha ajira, ujuzi na ushauri nayo.",
+          "Niambie nafasi ya kazi unayolenga nami nitaoanisha ajira, ujuzi na ushauri nayo.",
         ),
         cta: t("Find jobs", "Tafuta kazi"),
         icon: "compass",
@@ -420,7 +431,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       {jobRecs.length > 0 ? (
         <Animated.View entering={FadeInDown.duration(320).delay(170)}>
           <SectionHeader
-            title={t("New openings", "Nafasi mpya")}
+            title={t("New openings", "Nafasi mpya za kazi")}
             actionLabel={t("See all", "Ona zote")}
             onAction={() => navigation.navigate("Jobs")}
           />
@@ -460,16 +471,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
         />
 
         {loading && cvs.length === 0 ? (
-          <View style={{ gap: 10 }}>
-            <SkeletonCard />
-            <SkeletonCard />
-          </View>
+          <SkeletonList count={2} gap={10} />
         ) : error && cvs.length === 0 ? (
           // The CV list screen was fixed to stop claiming "no CVs" when the real
           // problem is an unreachable server — this screen kept the data-loss
           // illusion. On a fresh install, offline, it told a user with CVs on the
           // server that they had none.
-          <View
+          //
+          // Reveal, not a bare View: this is the failure of a load the user is
+          // watching, and it used to appear in one frame where the skeletons had
+          // been. Nothing an error says is communicated by appearing instantly.
+          <Reveal
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -511,7 +523,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
                 {cvError ? t(cvError.action.en, cvError.action.sw) : t("Try again", "Jaribu tena")}
               </Text>
             </Pressable>
-          </View>
+          </Reveal>
         ) : recent.length === 0 ? (
           // Inline, card-shaped, same width and rhythm as everything else — not a
           // full-screen hero. The "New CV" tile above and the "Import a CV" quick

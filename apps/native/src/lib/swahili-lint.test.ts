@@ -119,6 +119,19 @@ const LINK_FOR_KIUNGO = /\blink ya\b/i;
 // prefix, so a bare `kagua` alternative never matched it either.
 const ATS_IN_SWAHILI = /\b(?:\w*kagua\s+ATS|(?:wa|ya|kwa|za|la|cha|na|kwenye)\s+ATS)\b/i;
 
+// A bare "nafasi" where the word means a JOB. Owner's instruction, verbatim:
+// "isiwe nafasi kwakomiwe nafasi za kazi tu". Swahili "nafasi" alone can mean
+// space, room, a chance or a seat as well as a job opening, so a label reading
+// only "Nafasi" leaves the reader guessing which one is meant; where the job
+// sense is meant it has to say "nafasi za kazi" / "nafasi ya kazi".
+//
+// Deliberately a CLOSED SET of the exact labels that were wrong, NOT a bare
+// /\bNafasi\b/. "nafasi" is correct Swahili for whitespace ("Bila rangi.
+// Muundo na nafasi tu.", ~30 template blurbs) and for a seat ("Nafasi 50
+// zimechukuliwa", early-access places), so a broad guard would fail the build
+// on correct copy — the opposite of useful.
+const BARE_NAFASI_FOR_A_JOB = /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa)"/;
+
 // One entry per tripwire. `pattern` is the bad string; `message` names the
 // pattern that tripped, the replacement to use, and the file and line, so the
 // failure tells the next person exactly what to type instead.
@@ -174,7 +187,11 @@ const CALQUE_GUARDS: CalqueGuard[] = [
   },
   {
     pattern: ATS_IN_SWAHILI,
-    message: (m, file, line) => `"${m}" — names the ATS mechanism in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vichujio vya waajiri", "kikagua CV", "waajiri") in ${file}:${line}`,
+    message: (m, file, line) => `"${m}" — names the ATS mechanism in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vigezo vya waajiri", "kikagua CV", "waajiri") in ${file}:${line}`,
+  },
+  {
+    pattern: BARE_NAFASI_FOR_A_JOB,
+    message: (m, file, line) => `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi" in ${file}:${line}`,
   },
 ];
 

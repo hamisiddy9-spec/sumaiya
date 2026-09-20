@@ -12,7 +12,7 @@ import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
 import { apiClient } from "../lib/api-client";
-import { Button, EmptyState, ProgressBar, Screen, ScreenTitle, TextField, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, ProgressBar, Screen, ScreenTitle, SkeletonList, TextField, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import type { AtsCheckerScreenProps } from "../navigation/types";
@@ -83,10 +83,13 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
       const failing = analysis.checks.filter((ch) => !ch.pass).map((ch) => ch.label).join("; ");
       const prompt =
         `${sw ? "Jibu kwa Kiswahili." : "Answer in English."} ` +
-        `You are Sumaiya reviewing a CV. ATS score ${analysis.score}/100. Failing checks: ${failing || "none"}. ` +
+        // The verdict is written in Swahili, and naming the mechanism in the
+        // prompt invites her to echo it back — the one term the product bans
+        // from Swahili copy. Describe the outcome instead, and say so outright.
+        `You are Sumaiya reviewing a CV. The employer-screening check scored ${analysis.score}/100. Failing checks: ${failing || "none"}. ` +
         `Summary: "${(d.summary ?? "").slice(0, 400)}". Roles: ${(d.experience ?? []).map((e) => `${e.title} at ${e.company}`).join(", ") || "none"}. ` +
         `Skills: ${(d.skills ?? []).map((s) => s.name).join(", ") || "none"}. ` +
-        `Give a short honest verdict (max 90 words) then the 3 highest-impact fixes as a numbered list. Ground everything in what's above — invent nothing.`;
+        `Give a short honest verdict (max 90 words) then the 3 highest-impact fixes as a numbered list. Ground everything in what's above — invent nothing. Never write the letters "ATS" in your answer; if you must name those systems, write "mifumo ya kuajiri".`;
       const { message } = await apiClient.sendChatMessage([{ role: "user", content: prompt }]);
       setVerdict(message.trim());
       haptics.success();
@@ -102,7 +105,17 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
           .replace(/[^a-z0-9]+/g, "_")
           .slice(0, 30)}`;
         updateMemory((m) =>
-          addEpisode(m, topic, `ATS ${analysis.score}/100, losing points on "${firstFailure.label}"`),
+          // NOT internal. This string reaches the user by three routes, which is
+          // why the acronym must not be here:
+          //   1. memory-screen.tsx:182 renders `e.detail` verbatim under
+          //      "MATUKIO YA HIVI KARIBUNI" / "RECENT ACTIVITY SHE NOTED";
+          //   2. ai-memory.ts renderMemoryBlock() puts it in the chat prompt as
+          //      "Recently: - <detail>", so she can paraphrase it back in Swahili;
+          //   3. consolidate() promotes it to a Fact `value`, which is then
+          //      injected into EVERY later conversation as "Known: - <value>".
+          // Naming the mechanism here put it in front of the user through the
+          // memory layer instead of the UI layer, where no lint looks.
+          addEpisode(m, topic, `CV check scored ${analysis.score}/100, losing points on "${firstFailure.label}"`),
         ).catch(() => {});
       }
     } catch {
@@ -122,8 +135,32 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
     <Screen scroll keyboardAvoiding contentContainerStyle={{ gap: 18 }}>
       <ScreenTitle>{t("ATS check", "Ukaguzi wa CV")}</ScreenTitle>
 
+      {/* What this page IS, in plain language, before any score.
+          Owner: "ukaguzi wa ats on the page ongeza hata maelezo kidogo mtu ajue  swahili-lint-ignore
+          nini anatumia kwa simple language" (quoted verbatim; the marker above
+          exempts this line, which CITES the banned term rather than shipping
+          it — the guard is line-scoped for exactly this). It sits above the
+          states below so it is readable even for someone who has no CV yet —
+          which is exactly the person most likely to be puzzled by the page. */}
+      <View
+        style={{
+          padding: 14, borderRadius: 14, borderWidth: 1,
+          borderColor: c.border, backgroundColor: c.bgElevated, gap: 6,
+        }}
+      >
+        <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
+          {t("What is the ATS check?", "Ukaguzi wa CV ni nini?")}
+        </Text>
+        <Text style={{ color: c.textBody, fontSize: 13, lineHeight: 19 }}>
+          {t(
+            "This review compares the wording and layout of your CV with what employers' screening programs use to filter job applications. You get a score, along with the exact things to fix in your CV, such as words to add or layout to change. This is guidance to help you, not a guarantee of being hired. No employer sees the results of this review, and it is not a hiring decision. No one is rejected or accepted for a job because of this review.",
+            "Ukaguzi huu unalinganisha maneno na mpangilio wa CV yako na yale ambayo programu za waajiri hutumia kuchuja maombi ya kazi. Utapata alama, pamoja na mambo halisi ya kurekebisha katika CV yako, kama vile maneno ya kuongeza au mpangilio wa kubadilisha. Haya ni maelekezo tu ya kukusaidia, si uhakika wa kuajiriwa. Hakuna mwajiri anayeona matokeo ya ukaguzi huu, wala si uamuzi wa kuajiri. Hakuna anayekataliwa au kukubaliwa kazi kwa sababu ya ukaguzi huu.",
+          )}
+        </Text>
+      </View>
+
       {loading && cvs.length === 0 ? (
-        <Text style={{ color: c.textMuted }}>{t("Loading your CVs…", "Inapakia CV zako…")}</Text>
+        <SkeletonList count={2} />
       ) : error && cvs.length === 0 ? (
         /* Never claim the user has no CVs when the real problem is that we
            couldn't reach the server — that is indistinguishable from data loss. */
