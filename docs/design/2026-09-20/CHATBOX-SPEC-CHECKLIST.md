@@ -126,10 +126,58 @@ wireframe. Every finding acted on above was independently reproducible — the t
 clipping defects by measurement, the chip and card findings by reasoning about the
 transcript.
 
+## 5b. The real device — captured live, both sides of the AI coming back
+
+The owner's phone was available, and the chat **as it exists today** was captured from
+it rather than inferred. Device: Pixel-class, `1344×2992` physical, **override density
+408** → the app renders in **527×1173 dp** (my mockups were also re-rendered at that
+geometry; nothing clips at either width).
+
+```
+ADB="C:/Users/hamis/tools/android-sdk/platform-tools/adb.exe"; S=10.229.114.105:5555
+"$ADB" connect $S
+"$ADB" -s $S shell svc power stayon true          # or every dump returns the lock screen
+"$ADB" -s $S shell input keyevent KEYCODE_WAKEUP
+"$ADB" -s $S shell screencap -p /sdcard/x.png && "$ADB" -s $S pull /sdcard/x.png <out>
+# in-app typing only — NEVER sign out, uninstall, clear data, or message a real contact
+"$ADB" -s $S shell input tap <x> <y>              # the Sumaiya tab, then the composer
+"$ADB" -s $S shell input text "word%sanother"     # %s is a space; %20 is typed literally
+```
+
+Captures, all in `%LOCALAPPDATA%\Temp\chat-device\`:
+
+| File | What it shows |
+| --- | --- |
+| `01-chat-empty.png` | The chat **while the AI was unset**: a real thread in which the user sent `Hi` four times unanswered, two near-duplicate requests, a `.docx` attachment, two chip rows and the floating build bar |
+| `13-typed-clean.png` | The composer **with the keyboard up** on the real device: the field grows to two lines, the build bar stays pinned, the tab bar yields to the keyboard, and the keyboard takes ~half the screen |
+| `16-waiting.png` | **The waiting state, live**: one small dark bubble, three grey dots, no words, no timer, no stop |
+| `17-answer.png` | **The answer, live**: her reply in 1.79 s-class time, with **four rows of tappable controls** below it and the chip row repeated verbatim |
+
+Three things this changed in the deliverables:
+
+1. **The premise was corrected.** The assistant **works** now
+   (`/api/ai/status` → `{"configured":true,"provider":"deepseek"}`), so mockup
+   `05-unavailable.html` was **re-framed from “today's condition” to the failure
+   path** — same six rules, demoted priority — and the spec opens by saying so.
+2. **The waiting-state finding was promoted** from a code reading to a device
+   observation: a user cannot tell a healthy wait from a stalled one.
+3. **The control-row count became a finding** — four rows below the last message, with
+   the chip row repeating verbatim.
+
+**Device discipline observed:** the phone was in the owner's hands when I first
+connected (Facebook in the foreground), so nothing was captured or launched until it
+was free; no screencap of his other app was ever taken; no sign-out, no uninstall, no
+data clear, no message to a human contact. The only network spend was **one short
+Swahili turn in the app's own chat**, to capture the answering state on request.
+
 ## 6. What was NOT verified
 
-- **No device run.** No `scripts/motion-frames.py` verdict and no `dumpsys gfxinfo`
-  numbers exist for this redesign: it is a spec, not code.
+- **No device run of the redesign.** The device captured the product **as it is**, not
+  the proposal. No `scripts/motion-frames.py` verdict and no `dumpsys gfxinfo` numbers
+  exist for these mockups: it is a spec, not code.
+- **The keyboard-up state was not driven by me.** The composer-with-keyboard capture is
+  the app's own (`apps/native/qa/2026-09-11/42-chat-sent.png` and `13-typed-clean.png`),
+  not a mockup of the redesigned composer with an inset keyboard.
 - **No live session.** `/assistant` needs a signed-in account and no saved credential
   exists for the owner's; the live AI-off behaviour is cited from the sibling agents'
   captures, not reproduced here.

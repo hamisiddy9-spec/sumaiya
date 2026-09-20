@@ -26,7 +26,7 @@
 html,body{margin:0}
 body{background:var(--cream);color:var(--espresso);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .page{max-width:1400px;margin:0 auto;padding:40px 24px 96px}
-.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember-shadow)}
 h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
 .lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:78ch;margin:0}
 .rule{height:1px;background:var(--border);margin:28px 0 32px}
@@ -74,7 +74,8 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
 .pathcard .ic.grey{background:var(--sand-2);color:var(--espresso-2)}
 .pathcard h4{margin:0;font-size:15px;font-weight:700}
 .pathcard p{margin:2px 0 0;font-size:12.5px;color:var(--text-muted)}
-.pathcard .tick{margin-left:auto;color:var(--ember);font-weight:800}
+.pathcard .tick{margin-left:auto;color:var(--text-muted);font-weight:800;font-size:16px}
+.pathcard .default{margin-left:auto;flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ember-shadow);background:var(--ember-tint);border:1px solid rgba(218,74,28,.35);border-radius:var(--r-pill);padding:3px 8px}
 .search{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;background:var(--sand-2);padding:0 10px;min-height:44px}
 .search input{border:0;background:transparent;font:inherit;font-size:14px;outline:none;flex:1;color:var(--espresso)}
 .search input::placeholder{color:var(--text-muted)}
@@ -98,7 +99,7 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
 .two{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:36px}
 .col-notes{display:flex;flex-direction:column}
 .callout{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);padding:18px;box-shadow:var(--sh-card);margin-top:20px}
-.callout h4{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ember)}
+.callout h4{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ember-shadow)}
 .callout p{margin:0 0 8px;font-size:13.5px;line-height:1.55;color:var(--text-body)}
 .callout p:last-child{margin-bottom:0}
 @keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
@@ -125,13 +126,13 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
   <div class="phones">
     <!-- ============ PHONE A: choose ours ============ -->
     <div class="phonewrap">
-      <div class="caption"><span class="tag">A · baada ya kugusa</span> “Chagua kutoka kwenye kazi zetu” — the path the tap opened</div>
+      <div class="caption"><span class="tag">A · njia ya kwanza</span> OPTION A — “Chagua kutoka kwenye kazi zetu” is the default: the list is already loaded when the sheet opens</div>
       <div class="phone">
         <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
         <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div><div style="margin-left:auto;color:var(--text-muted)">✕</div></div>
         <div class="transcript">
           <div class="bubble me">Nataka kulenga CV yangu kwenye kazi.</div>
-          <div class="bubble her">Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?</div>
+          <div class="bubble her">Nina nafasi za kazi tulizo nazo sasa. <b>Chagua moja hapa chini</b> — au, kama una tangazo lako, bandika na nitailenga.</div>
           <div class="chiprow"><span class="chip active">Lenga kwenye kazi</span></div>
         </div>
         <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
@@ -145,12 +146,13 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
           <div class="pathcard on">
             <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span>
             <span style="min-width:0"><h4>Chagua kutoka kwenye kazi zetu</h4><p>Nafasi halisi za kazi tulizo nazo sasa.</p></span>
-            <span class="tick">✓</span>
+            <span class="default">Chaguo la kwanza</span>
           </div>
 
           <div class="pathcard">
             <span class="ic grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
             <span style="min-width:0"><h4>Weka kazi yako mwenyewe</h4><p>Bandika tangazo, au kiungo chake.</p></span>
+            <span class="tick">›</span>
           </div>
 
           <div class="expand" style="display:flex;flex-direction:column;gap:8px">
@@ -158,7 +160,7 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#756A5E" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
               <input value="mauzo" aria-label="Tafuta kazi" />
             </div>
-            <p class="progressbar"><span class="spin"></span> Inatafuta…</p>
+            <p class="sheetsub" style="margin-top:-2px">Kazi 3 zinaonekana. Andika neno lingine kuchuja.</p>
             <div class="jobs">
               <div class="job"><div class="t">Sales Officer <span class="sample">sampuli</span></div><div class="s">CCBRT · Dar es Salaam</div></div>
               <div class="job"><div class="t">Sales Representative <span class="sample">sampuli</span></div><div class="s">Nafasi za mauzo · Mwanza</div></div>
@@ -172,13 +174,13 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;l
 
     <!-- ============ PHONE B: own job ============ -->
     <div class="phonewrap">
-      <div class="caption"><span class="tag alt">B · njia ya pili</span> “Weka kazi yako mwenyewe” — the path that hands the composer the job</div>
+      <div class="caption"><span class="tag alt">B · njia ya pili</span> “Weka kazi yako mwenyewe” — one tap away, for a user who already has an advert</div>
       <div class="phone">
         <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
         <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div><div style="margin-left:auto;color:var(--text-muted)">✕</div></div>
         <div class="transcript">
           <div class="bubble me">Nataka kulenga CV yangu kwenye kazi.</div>
-          <div class="bubble her">Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?</div>
+          <div class="bubble her">Nina nafasi za kazi tulizo nazo sasa. <b>Chagua moja hapa chini</b> — au, kama una tangazo lako, bandika na nitailenga.</div>
 
           <div style="align-self:stretch;border:1px solid var(--border);background:var(--card);border-radius:var(--r-card);padding:12px;display:flex;flex-direction:column;gap:7px">
             <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)">Tangazo lako</p>

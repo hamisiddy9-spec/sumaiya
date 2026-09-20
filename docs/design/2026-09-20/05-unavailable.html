@@ -26,7 +26,7 @@
 html,body{margin:0}
 body{background:var(--cream);color:var(--espresso);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .page{max-width:1620px;margin:0 auto;padding:40px 24px 96px}
-.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember-shadow)}
 h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:42px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
 .lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:82ch;margin:0}
 .rule{height:1px;background:var(--border);margin:28px 0 32px}
@@ -136,9 +136,9 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:42px;l
 </head>
 <body>
 <div class="page">
-  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20 · STATE, not error page</div>
+  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20 · THE FAILURE PATH, not an error page</div>
   <h1 class="title">05 — “Sina uwezo wa kufikiri sasa hivi.”</h1>
-  <p class="lede">Tonight the product's intelligence is off, and the chat replies <code>AI is not configured.</code> in English inside a Swahili screen, or <code>Sumaiya ana shughuli nyingi sasa hivi</code> in the third person, while a button labelled “Boresha na AI” returns the user's own text unchanged and reports success. Every one of those is a lie by omission. This is what she says instead — in her own voice, in their language, with what still works named, and never a dead end.</p>
+  <p class="lede"><b>The assistant works.</b> As of 2026-09-20 <code>/api/ai/status</code> returns <code>{"configured":true,"provider":"deepseek"}</code> and a real Swahili turn answered in 1.79&nbsp;s on the device. So this screen is <b>the failure path, not today's condition</b>: a provider goes down, a rate limit lands, the phone's data runs out, a key is rotated. It is designed now, and never met by surprise. Before it was designed, the app answered in English inside a Swahili screen (<code>AI is not configured.</code>), or in the third person (<code>Sumaiya ana shughuli nyingi sasa hivi</code>), while a button labelled “Boresha na AI” returned the user's own text unchanged and reported success. On the device tonight a user who got no reply at all sent <b>“Hi” four times</b> — that is what this state costs when it is silent.</p>
   <div class="rule"></div>
 
   <div class="phones">
@@ -255,7 +255,7 @@ h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:42px;l
 
   <div class="quoteblock">
     <div class="wrong">
-      <h4>What the product says tonight — quoted from the live build</h4>
+      <h4>What the product said while the key was unset — quoted from the live build</h4>
       <p class="q">"AI is not configured."</p>
       <p>English, inside a Swahili screen, in Sumaiya's own bubble. This is the raw JSON body of an 18-site 503 (<code>apps/web/lib/api/routes/ai.ts:157</code> and 17 siblings), rendered as if she had said it. Captured live: <code>QA-WEB-JOURNEYS-2026-09-20.md</code> §D3.</p>
       <p class="q">"Sumaiya ana shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi."</p>

@@ -12,6 +12,39 @@ spec a developer can build plus five standalone HTML mockups the owner can judge
 | Android / iOS (the real product) | `apps/native/src/screens/sumaiya-chat-screen.tsx` + `apps/native/src/components/chat/*` |
 | Web | `apps/web/components/assistant/cv-assistant-client.tsx` (3,913 lines) + `apps/web/components/assistant/*` |
 
+## 0. The premise, and the one line that changed tonight
+
+**The assistant works.** As of 2026-09-20, `GET /api/ai/status` returns
+`{"configured":true,"provider":"deepseek"}`, and a real Swahili turn on the device
+answered in 1.79 s:
+
+> “Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja.”
+> → “Nzuri, hiyo ni kazi nzuri. Niambie kwanza — unafanya kazi gani kwa sasa au
+> ulifanya mara ya mwisho, na kwa kampuni gani?”
+
+**So the redesign assumes a working assistant**, not an outage: the reply arrives, the
+document card is produced, the job flow completes. Everything in §3 is the product
+with its intelligence on.
+
+**The unavailable state (§3.6, mockup 05) is kept and demoted** from “today's
+condition” to **the failure path** — a provider goes down, a rate limit lands, data
+runs out, a key is rotated. Its principles are unchanged and non-negotiable (never
+beg, never lie, never dead-end), and it is designed *now* so the first real outage is
+not met by surprise. Two pieces of evidence keep it honest:
+
+- **Before it was designed**, the app answered `AI is not configured.` in English
+  inside a Swahili screen, or `Sumaiya ana shughuli nyingi sasa hivi` in the third
+  person, and a button labelled “Boresha na AI” returned the user's own text unchanged
+  while reporting success.
+- **On the device**, a user who received no reply sent **`Hi` four times** (§3.6c).
+  That is the measured cost of the silent version of this state.
+
+**Her reply above is first person** (`Niambie…`, `unafanya kazi gani…`): she speaks,
+she is not described. The message taxonomy in §3.2 is built on that, and §3.6's voice
+rules apply to the chat's own copy in every state, working or not.
+
+---
+
 **Hard constraints obeyed.** No colour changed, no logo changed, the product is not
 renamed, the product's AI is DeepSeek and never Claude, Swahili-first, sell the
 outcome and never the mechanism, nothing proposed is a *new capability* without a
@@ -94,7 +127,7 @@ editing this tree, so treat a line number as a pointer, not a contract.
 | # | Where | What it is | The problem |
 | --- | --- | --- | --- |
 | E1 | `sumaiya-chat-screen.tsx:431-447` | A full-width card, `c.error` tint, `alert-circle`, the raw `error` string | **No retry control. No next step. No cause.** To retry, the user must retype — and retyping a turn that the model already received is how a metered-data user pays twice for nothing. |
-| E2 | `use-sumaiya-chat.ts:198-209` → `app-errors.ts:153-158` | 502/503/504 → *“Nina shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi.”* | Correct first person at HEAD, but the **shipped bundle carries the third-person** `Sumaiya ana shughuli nyingi` (`QA-NATIVE-DEVICE:190`), and the sentence blames her workload for a provider that is switched off. |
+| E2 | `use-sumaiya-chat.ts:198-209` → `app-errors.ts:153-158` | 502/503/504 → *“Nina shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi.”* | Correct first person at HEAD, but the **shipped bundle carries the third-person** `Sumaiya ana shughuli nyingi` (`QA-NATIVE-DEVICE:190`), and the sentence blames her workload for a provider that is unreachable — the wrong cause, and the one it taught users to believe. |
 | E3 | `apps/web/lib/api/routes/ai.ts:157` (+17 identical sites) | `503 {"error":"AI is not configured."}` | The chat renders that **English JSON body** as Sumaiya's own bubble in a Swahili UI (`QA-WEB-JOURNEYS:63`). |
 | E4 | `QA-WEB-JOURNEYS:37` | `/api/ai/enhance` returns 200 with the input unchanged and `{"source":"local"}` | A button labelled **“Boresha na AI”** reports success and changes nothing. |
 | E5 | `QA-WEB-JOURNEYS:36` | Snap-to-apply renders `Hifadhi kwenye akaunti yako` **disabled, with no tooltip** | A dead end produced by the product's own primary journey. |
@@ -130,6 +163,9 @@ editing this tree, so treat a line number as a pointer, not a contract.
 
 ## 1.10 What the user cannot do or understand today, plainly
 
+*(These are surface findings and they hold whether the assistant is answering or not —
+the device captures in §3.6c were taken on both sides of that line.)*
+
 1. **Cannot stop her.** No control anywhere in either app cancels an in-flight turn.
 2. **Cannot keep typing** while she works — the field is disabled.
 3. **Cannot tell whether their message was delivered.** No `Imetumwa` / `Haijatumwa`.
@@ -140,7 +176,7 @@ editing this tree, so treat a line number as a pointer, not a contract.
 8. **Cannot tell whether the conversation is kept.** It is (40 turns on disk) and the UI is silent about it.
 9. **Cannot trust `Boresha na AI`.** It returned their own text with a 200 and a success path.
 10. **Cannot explain the failure.** *“AI is not configured.”* is English, and it is not their fault.
-11. **Cannot see what still works** when the AI is off, though ATS scoring, PDF export, OCR and the job feed all keep working.
+11. **Cannot see what still works** when the model is unreachable, though ATS scoring, PDF export, OCR and the job feed all keep working without it.
 12. **Cannot open the CV she built as *their* CV** — the editor gets a copy with no id, so the save creates a second one.
 
 **And the two things that waste the user's data or time:**
@@ -583,7 +619,35 @@ Then the action stack: primary `Fungua kwenye kihariri`, secondary
    artifacts do).
 5. Reduced motion: the FLIP is replaced by a **cross-fade**.
 
-## 3.5 The `lenga kwenye kazi` flow
+## 3.5 The `lenga kwenye kazi` flow — **OPTION A: ours is the primary path**
+
+> **Decision, 2026-09-20.** The owner chose *“lenga kwa kazi option a”*. Option A is
+> read as: **“Chagua kutoka kwenye kazi zetu” is the default path** — our live
+> listings lead — and *“Weka kazi yako mwenyewe”* is one tap away for a user who
+> already has an advert. **If that reading is wrong, the flip is one line:** swap the
+> two `PathCard` blocks in `job-choice-sheet.tsx` / `job-choice-panel.tsx` so the
+> “own job” card renders first and is the one `path` initialises to. Nothing else in
+> this section changes, because the sheet is symmetric by construction
+> (`job-choice-sheet.tsx:216-232`, `model.paths[0]`).
+
+Consequences of ours being primary, and they are deliberate:
+
+1. **The list is loaded when the sheet opens** — no tap first. That costs **one
+   request (~1–2 KB**, the server's `?light=1` projection**)**, where the current
+   implementation costs zero until “ours” is tapped. This is the only added network
+   cost in the whole redesign and it is the price of “ours leads”; it is stated
+   because the sheet's own cost note (`job-choice-sheet.tsx:25-26`) otherwise
+   promises zero, and the promise must be updated with the behaviour.
+2. **The assistant's question leads with ours and names both paths in one breath:**
+   *“Nina nafasi za kazi tulizo nazo sasa. **Chagua moja hapa chini** — au, kama una
+   tangazo lako, bandika na nitailenga.”* The second clause keeps the option honest
+   without giving it equal visual weight.
+3. **Path A carries a ``Chaguo la kwanza`` marker** (ember-tint pill, `#A8330F` text)
+   instead of a bare ✓. A check reads as “you already chose this”; a label reads as
+   “this is where we start”. Path B carries a quiet `›`.
+4. **The search field is populated and results are already listed**, with the honest
+   count line (`Kazi 3 zinaonekana. Andika neno lingine kuchuja.`) rather than a
+   spinner, because there is no in-flight request to report on first paint.
 
 - **Entry, always available:** a fifth row in the `+` sheet, `Lenga kwenye kazi`,
   beneath `Moja ya CV zako` (`attach-sheet.tsx:19-25`). The chip from
@@ -656,6 +720,163 @@ edited by this task — a sibling agent owns the app-wide sweep):
 | Errors and the unavailable card | third-person busy line shipped | First person, always |
 | Chips | `Tengeneza CV yangu` / `Lenga CV kwa kazi` / `Ongea nami` | Name an outcome, or be her speaking. `Tengeneza CV yako`; `Lenga kwenye kazi` |
 | Home tile `AI ya kazi` (`home-screen.tsx:284`), `Msaidizi wa AI` (`dashboard/page.tsx:275`, `cv-editor-client.tsx:3412`) | third-party feature labels | **Outside the chat** — flagged for the sibling agent's sweep, and the reason the chat's own chips must not join that register |
+
+## 3.6b The overlay language — one popup across the platform
+
+The owner: *“match the pop up boxes accross the platform like share na sehemu
+nyingine.”* The platform-wide overlay system is owned by a sibling agent
+(`docs/design/2026-09-20/REDESIGN-SPEC-2026-09-20.md`); that document currently
+specifies **elevation for the floating layer** (§5.4: `shadow.floating` belongs to
+dialogs, sheets, toasts and the sticky action bar) and **the motion for dialogs and
+sheets** (§7.0, from the motion standard), but it does **not yet define named
+overlay *variants*.** So the five variants below are **ASSUMED** — derived from the
+components already shipping in `apps/native/src/components/ui/` plus that spec's
+elevation and motion rules. **They are assumptions, stated as assumptions**: if the
+sibling names different variants, the mapping column is what changes, not the chat.
+
+| # | Assumed variant | Surface + motion | Already in the tree |
+| --- | --- | --- | --- |
+| **V1** | **Bottom sheet** — backdrop + panel rising from the bottom, top radius 24, grabber, `shadow.floating`, optional title 15.5/700 and ✕ | backdrop opacity `220 ease.out`; panel `translateY 360→0`, `220 ease.out`; out `140 ease.in` | `premium-sheet.tsx`, `lesson-sheet.tsx` |
+| **V2** | **Confirm dialog** — centred card, backdrop, `radius card-lg 20`, `spring.gentle`; destructive action in the error/`accentPressed` tone, cancel as ghost; **may contain a single text field** | card `scale .94→1` `spring.gentle {20,180,.9}`; out `140 ease.in` | `dialog.tsx:122` (spring `{20,240,.8}`), `prompt-modal.tsx` |
+| **V3** | **Inline notice** — *not floating*: a surface inside the scroll content. Three tones: `sand-2` (system note), `gold-tint` (degraded/limited), error tint + 3 px left edge (fault) | `rise 300 ease.out` in; `140 ease.in` out | `connectivity-gate.tsx`, `auth-error-banner.tsx` |
+| **V4** | **Full-screen task page** — a *push*, not an overlay, when the task is a document | `slide_from_right 260` | the CV editor, the snap screen |
+| **V5** | **OS share sheet** — outside our system; our own V2 names the file *before* handing off | platform-owned | `expo-sharing` |
+
+**Every overlay the chat owns, mapped:**
+
+| Chat overlay | Variant | Motion it must use | Today |
+| --- | --- | --- | --- |
+| `AttachSheet` — “Ongeza kwenye mazungumzo” | **V1** | V1 composite | `attach-sheet.tsx:49` `if (!visible) return null` — **appears and vanishes on one frame. Conflict.** |
+| `JobChoiceSheet` — “Unataka kulenga kazi ipi?” | **V1**, tall body (`maxHeight 86%`) | V1 composite | `job-choice-sheet.tsx:156` — same instant swap. **Conflict.** |
+| `AttachmentPreviewSheet` — “Nilichosoma” | **V1** | V1 composite | already animates, but at `220` in / **`160` out** (`:44-47`) — 160 is not a token; must be `140 ease.in`. **Off-token conflict.** |
+| Document card actions (open / save / download) | **none — inline.** The card is a V3-family surface in the transcript; a produced file is not a popup | card arrival per §3.8 #4 | correct today (it is a card, not a modal) |
+| PDF / share hand-off for a produced document | **V2**, naming the file → then **V5** | V2 composite | no confirmation today; the OS chooser appears with no context |
+| `PromptModal` — “Bandika kiungo cha ajira” | **V2 with one text field** | V2 composite | exists; the shared system must keep an input slot or this overlay has no home |
+| `Futa mazungumzo` (clear conversation) | **V2** | V2 composite | **no confirmation at all** (`sumaiya-chat-screen.tsx:346-355`) — a destructive action with 40 turns behind a 17 px icon. **Conflict.** |
+| Unavailable notice | **V3**, `gold-tint`, in the thread | `rise 300 ease.out`, self-retires at `140 ease.in` | n/a — it does not exist |
+| Error on a turn | **V3**, error tone with the 3 px left edge | `rise 300 ease.out` | the current card is a styled `<View>`, not a variant (`:431-447`) |
+| Mic / listening state (web) | **V3**, amber | inline | exists, inline |
+| The sheet's own loading / empty / error states | inline inside V1's body, never a second overlay | per §3.8 | exists inside the job sheet |
+
+### Overlay conflicts to see, not paper over
+
+1. **Two incompatible overlay housings in one app.** `attach-sheet.tsx:27-35` records
+   that this codebase had to abandon RN `<Modal>` because the New Architecture drops
+   `flexDirection: row` on nested Pressables — so the attach sheet and the job sheet
+   are **absolute overlays rendered at the screen root**, while
+   `attachment-preview-sheet.tsx:69` uses a real `<Modal transparent>`. A shared
+   overlay system must pick **one housing** or the chat will go on containing two
+   kinds of sheet that animate and dismiss differently. *This is the single biggest
+   consistency risk in this list.*
+2. **`maxHeight` is three values** — attach `80%`, preview `78%`, job `85%`. One
+   variant needs one scale (`sm 60 / md 80 / lg 88`).
+3. **A confirm dialog inside the chat must not be pushed by the keyboard**, and must
+   render above the composer. There is no precedent for V2 inside the chat today.
+4. **Static-surface shadow.** The sibling's §5.2 says a static content block is white
+   + 1 px border **with no shadow**, and §5.4 reserves `shadow.floating` for the
+   floating layer. Three of my chat cards (the step rail, the document card, the
+   unavailable card) carry `shadow.card` at rest. **One-line resolution:** delete the
+   resting shadow from those three — the reviewer-approved pixels barely move and the
+   system becomes consistent. **Left as-is in the mockups on purpose** so the owner
+   can see the conflict rather than have it silently resolved.
+5. **Small ember text.** The sibling's §1.2/§1.3 measured `#DA4A1C` at 3.89:1 on
+   cream — **a fill and icon colour, never small text**; small ember text uses
+   `#A8330F`. **Applied in the mockups** (eyebrows, callout headings, the `›` chip
+   prefix, the “Done” text button all moved to `ember-shadow`; every ember *fill* and
+   *icon* is unchanged). No colour was invented — one existing token replaced another,
+   in text only.
+
+## 3.6c The device — what the real phone showed, and what it cost
+
+Captured from the owner's phone on 2026-09-20, app **1.6.24**, `pro.sumaiya.app` in
+the foreground: `1344×2992` physical, **override density 408** → the app actually
+renders in **527×1173 dp**. The mockups were then re-rendered at that geometry as
+well as at 390×844; **nothing clips at either width** (checked by measurement, not by
+eye). The device was **in use by the owner** when I first connected (Facebook in the
+foreground); I did not take it over, did not sign anything out, and read only the
+chat surface — the screencap of his other app was never taken.
+
+### The outage capture (a user whose screen said nothing)
+
+The conversation as it stood while the key was unset, in order:
+
+1. *“Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja”*
+2. *“Andika muhtasari mfupi wa CV”* — the same request again
+3. **`Hi` · `Hi` · `Hi` · `Hi`** — four consecutive sends, **no reply to any of them**
+4. then her answer, the chip row, a `.docx` attachment, her correction, her questions
+
+**A user on metered data paid to say `Hi` four times because the screen told them
+nothing.** That is the cost §3.6 exists to remove, caught on the device rather than
+argued from the code, and it is the completion of audit findings E1/E2: the error
+card has no action, so repeating the message is the only tool the user has.
+
+### The live capture (the assistant answering)
+
+With the assistant live, one short Swahili turn was sent from the chat and captured
+**two seconds in** and **eight seconds later**: the waiting state and the answer.
+
+**The waiting state, in pixels:** one small dark bubble containing **three grey dots**
+— no words, no elapsed time, no stop control. It is also *small*: a marginal mark in
+the corner of a large dark screen. Asked directly whether a user could tell a healthy
+wait from a stalled one, the independent reading was: *“No — the only signal is the
+three-dot pill, which is a generic ‘thinking’ indicator with no progress, no timer, no
+cancellation option. If it stalls, it looks the same.”* **I verified the pixels myself
+before using this** — the three-dot pill is there, above the ember build bar, with
+nothing else. This is audit T1/T2 confirmed on the device while the product is at its
+best, and it is exactly what mockup 04 replaces. Asked the same question of mockup 04,
+the same model said it “makes it clearer that the assistant is working… the progress
+line, the active dot and the elapsed-time text give explicit progress, and `Acha`
+gives the user a way to stop”.
+
+**The answer state, in pixels — three real defects:**
+
+1. **Four rows of tappable control on one screen, and the chip row repeats verbatim.**
+   Below the last two messages a user meets: a chip row, the full-width
+   `Tengeneza CV yangu kutoka mazungumzo haya` bar, the composer, and the 5-tab bar.
+   The chips under her earlier bubble and the chips under her newest reply are the
+   **same three chips in the same order** (`Fungua CV yangu · Kagua ATS · Lenga kwenye
+   kazi`). A vision pass measured the screen as roughly **65% conversation / 30%
+   controls**, and its verdict on the controls was “a lot of chrome for a chat screen,
+   especially on metered data”. The redesign's answer is not to delete the chips but
+   to **dock one row** and retire the floating bar into the document card (§3.2, §3.4).
+2. **Her prose names controls that do not exist under those names.** She writes
+   *“gusa hapa chini: ukaguzi wa CV, linganisha kazi, au tengeneza hati”* — while the
+   chips below her read `Kagua ATS`, `Fungua CV yangu`, `Lenga kwenye kazi`. A user
+   told to tap “ukaguzi wa CV” cannot find it. **This is a copy/control contract
+   defect**, and the fix belongs to the prompt and the chip table, not to layout.
+3. **The chip says `Kagua ATS`** — the mechanism named in Swahili, which the Swahili
+   standard §6 rule 5 forbids (the app's own replacement is `Kagua CV`).
+
+Worth reporting even though it is outside the chat's surface: **her reply was a
+deflection, not the deliverable.** Asked to *write* a short CV summary, she answered
+*“Umekwisha niambia hivyo, asante! Hebu tuende hatua inayofuata…”* and offered a menu.
+The surface's job is to make her words readable; the answer's job is to be an answer,
+and that is a prompt-quality finding for whoever owns the assistant turn.
+
+**What also holds in both captures, and belongs to other agents' sweeps:**
+
+- **Two chip rows on one screen** (`Kituo cha kujifunza · Fungua CV yangu · Kagua ATS`
+  mid-thread, and `Fungua CV yangu · Kagua ATS · Lenga kwenye kazi` above the build
+  bar) — the docking argument in §3.2 / mockup 02, in the wild.
+- The floating `Tengeneza CV yangu kutoka mazungumzo haya` bar (audit M6) occupying
+  full width directly above the composer.
+- **Dark mode's composer has a contrast problem**: the input pill is dark on a dark
+  background and the placeholder blends into it, so “where do I type” is answered
+  less clearly than in the light build. Independent vision reading, and it matches
+  what I see in the capture. The palette is fixed, so the fix is the field's
+  **border and fill role**, not a new colour — flagged for the sibling's dark-mode pass.
+- Strings that show **build 1.6.24 predates the 2026-09-20 sweeps**: the tab reads
+  `CV zangu` (the standard's §4.1 table records it as changed to `CV zako`), the
+  header reads `Omba kwa ujanja` (a word the standard **bans**), the home tile reads
+  `AI ya kazi` and a chip reads `Kagua ATS` (mechanism named in Swahili). **All four
+  are outside the chat** and are reported to the voice/terminology sweep, not fixed
+  here.
+- **At 527 dp the empty state is sparser than at 390 dp** — about half the screen is
+  cream below the four cards. I am **not** filling it. More cards is a menu, which is
+  exactly the criticism the sibling spec already makes of this screen (their N13),
+  and inventing content to fill a tall screen is the defect, not the fix. The
+  greeting and the four cards stay anchored to the top; if the owner wants density
+  there, the honest move is taller cards (60 → 78 dp), not a fifth thing to tap.
 
 ## 3.7 Accessibility contract
 
@@ -754,7 +975,7 @@ Google-Fonts link with a system fallback), phone viewport first.
 | `00-index.html` | The proposal cover: the five screens as links, the rules they obey, and the four ideas that carry the redesign |
 | `01-empty-chat.html` | Empty chat: her one first-person greeting, four outcome-named quick actions, and a composer that shows what a disabled send actually means |
 | `02-exchange-document-card.html` | A working exchange: delivery state, staged bubbles, a settled step receipt, the CV document card with a save that always completes, and chips docked to the composer |
-| `03-lenga-kwenye-kazi.html` | The job-targeting sheet on both paths — *chagua yetu* with a live search and *weka yako mwenyewe* with the advert pasted |
+| `03-lenga-kwenye-kazi.html` | The job-targeting sheet on **Option A** — *chagua yetu* is the default with the list already loaded (`Chaguo la kwanza`), and *weka yako mwenyewe* is one tap away |
 | `04-progress-and-reading.html` | Waiting done honestly: the four-step rail with a step-truthful bar and a stop control; the read that succeeded; the read that could not |
 | `05-unavailable.html` | The intelligence-unavailable state in three variants, beside the verbatim strings the product ships today and the six rules the state obeys |
 | `CHATBOX-SPEC-CHECKLIST.md` | How the mockups were rendered, measured and reviewed — the exact commands, and every fix a pixel review forced |
@@ -779,10 +1000,17 @@ Google-Fonts link with a system fallback), phone viewport first.
   for the owner's account; the evidence for the live AI-off behaviour is therefore
   the sibling agents' captures (`docs/QA-WEB-JOURNEYS-2026-09-20.md` §D1/§D3,
   `docs/QA-NATIVE-DEVICE-2026-09-20.md` §4b–§4d), not my own request.
-- **No device run.** Nothing in this document was driven on the Redmi. Every
-  animation duration is a spec, not a measurement: `scripts/motion-frames.py` and
-  `dumpsys gfxinfo` were **not** run on this redesign because it does not exist as
-  code.
+- **No device run of *this redesign*.** The device was used to capture the chat **as
+  it is today** (§3.6c) — that is real evidence about the current product, not about
+  the proposal. Every animation duration here is still a spec, not a measurement:
+  `scripts/motion-frames.py` and `dumpsys gfxinfo` were **not** run against the
+  redesign because it does not exist as code.
+- **The device geometry was matched (527×1173 dp) but not the device.** Rendering a
+  mockup at the right dp width in Chrome is not the same as running it in the APK:
+  no keyboard inset, no tab bar inset, no Android text rendering, no notification
+  shade. The keyboard-up composer state was therefore judged from the app's own
+  earlier real-device capture (`apps/native/qa/2026-09-11/42-chat-sent.png`), not from
+  my own tap — the owner was using the phone and I did not take it over.
 - **Dark mode was not mocked.** The existing palette has a dark set
   (`theme.ts:62-85`) and `QA-NATIVE-DEVICE` captured the chat in dark. One vision
   reviewer argued dark is *more* legible in bright daylight on cheap LCDs and on
