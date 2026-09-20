@@ -104,6 +104,19 @@ describe("cvToHtml fitWidth", () => {
     expect(cvToHtml(cv(), { template: "classic" })).not.toContain("cv-fit");
   });
 
+  it("keeps the legacy page margin INSIDE the frame (padding must not shift it)", () => {
+    // classic/minimal/… carry their page margin as `body { padding: 40px 44px }`.
+    // The frame is a child of that body: before this, the padding pushed the
+    // frame to left 44 on a 138px frame (box right 182) and clipped the sheet.
+    const html = cvToHtml(cv(), { template: "classic", fitWidth: 138 });
+    expect(html).toContain("body { padding: 0 !important; }");
+    expect(html).toContain("#cv-page { padding: 40px 44px; }");
+    // the page keeps its own margin, so the printed sheet's geometry is unchanged
+    const print = cvToHtml(cv(), { template: "classic" });
+    expect(print).toContain("padding: 40px 44px;");
+    expect(print).not.toContain("body { padding: 0 !important; }");
+  });
+
   it("treats a zero/absent width as 'not a preview'", () => {
     expect(cvToHtml(cv(), { template: "apex", fitWidth: 0 })).not.toContain("cv-fit");
     expect(cvToHtml(cv(), { template: "classic", fitWidth: 0 })).not.toContain("cv-fit");

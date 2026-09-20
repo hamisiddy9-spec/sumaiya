@@ -350,9 +350,17 @@ export function cvToHtml(cv: CV, opts: CvHtmlOptions = {}): string {
   // Preview path only: fit the page to the WebView instead of relying on the
   // WebView's own viewport handling (see cv-engine/fit.ts).
   if (opts.fitWidth && opts.fitWidth > 0) {
+    const css = templateCss(id, accent);
     const fit = fitSheet(html, opts.fitWidth);
+    // The legacy designs carry their page margin as `body { padding: 40px 44px }`.
+    // The fit frame is a child of that body, so the padding shoved it 44px right
+    // and off a 138px frame (measured: box left 0 -> 44, right 138 -> 182, i.e.
+    // 44px of the sheet clipped). Move the same padding INSIDE the frame — the
+    // page keeps its margins, and the frame keeps the whole frame.
+    const bodyPad = /body\s*\{[^}]*?padding:\s*([^;}]+)/.exec(css)?.[1]?.trim() ?? "0";
+    const shift = `\n  body { padding: 0 !important; }\n  #cv-page { padding: ${bodyPad}; }\n`;
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">${fit.viewport}
-<style>${templateCss(id, accent)}${fit.css}</style></head><body>${fit.body}</body></html>`;
+<style>${css}${fit.css}${shift}</style></head><body>${fit.body}</body></html>`;
   }
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=794">
