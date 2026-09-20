@@ -1,0 +1,11 @@
+START 1-category 23:40:30
+PASS 1-category exit=0 bytes=891 23:42:26
+START 2-jobseeker 23:42:26
+PASS 2-jobseeker exit=0 bytes=488 23:43:40
+START 3-hiring-manager 23:43:40
+PASS 3-hiring-manager exit=0 bytes=514 23:44:30
+START 4-competitor-growth 23:44:30
+PASS 4-competitor-growth exit=0 bytes=1713 23:45:59
+START 5-voice-critic 23:45:59
+PASS 5-voice-critic exit=0 bytes=836 23:48:30
+ALLDONE 23:48:30
