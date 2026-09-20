@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       title: `${tr.title} — Sumaiya`,
       description: tr.subtitle,
       type: "website",
-      images: [{ url: ogImage, width: 1200, height: 630, alt: "Sumaiya — Professional CV & document builder with an AI assistant" }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: "Sumaiya — Professional CV & document builder with a career-writing assistant" }],
     },
   };
 }

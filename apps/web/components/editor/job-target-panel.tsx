@@ -275,7 +275,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                 <Icon name="target" className="text-ember" size={14} />
                 <span className="text-xs font-semibold text-text-body">{sw ? "Alama ya Kufanana" : "Match Score"}</span>
                 {result.ai && (
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-ember-tint text-ember-hover uppercase tracking-wide">AI</span>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-ember-tint text-ember-hover uppercase tracking-wide">Sumaiya</span>
                 )}
               </div>
               <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${matchTone(result.score).tintBg} ${matchTone(result.score).text}`}>

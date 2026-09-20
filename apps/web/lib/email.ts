@@ -65,14 +65,14 @@ function welcomeHtml(name: string): string {
     </h1>
     <p style="margin:0 0 20px;font-size:16px;color:#374151;line-height:1.7;">
       Your account is ready. You can now create professional CVs and cover letters that stand out —
-      with 11 stunning templates, AI-powered content suggestions, and one-click PDF export.
+      with 11 stunning templates, writing help, and one-click PDF export.
     </p>
     <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
       <tr>
         <td style="background:${BRAND_BG};border-radius:8px;padding:20px 24px;">
           <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#374151;">Get started in 3 steps:</p>
           <p style="margin:0 0 8px;font-size:14px;color:#4b5563;">✦ &nbsp;Create your first CV and pick a template</p>
-          <p style="margin:0 0 8px;font-size:14px;color:#4b5563;">✦ &nbsp;Fill in your details — or let AI help you</p>
+          <p style="margin:0 0 8px;font-size:14px;color:#4b5563;">✦ &nbsp;Fill in your details — or let me help you</p>
           <p style="margin:0;font-size:14px;color:#4b5563;">✦ &nbsp;Export as a polished PDF and apply with confidence</p>
         </td>
       </tr>

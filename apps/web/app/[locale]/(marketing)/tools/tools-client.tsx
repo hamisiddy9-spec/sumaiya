@@ -620,7 +620,7 @@ export default function ToolsClient() {
           <p className="text-text-body mb-8 max-w-md mx-auto">
             {lang === "sw"
               ? "Miundo ya kitaalamu inayopita vichujio vya waajiri, pamoja na msaidizi wa kazi."
-              : "Professional ATS-optimized templates with an AI assistant."}
+              : "Professional ATS-optimized templates with a writing assistant."}
           </p>
           <a href="/templates"
             className="inline-flex items-center gap-2.5 bg-espresso hover:bg-espresso-2 text-cream font-semibold rounded-input-lg px-8 py-3.5 text-sm shadow-floating hover:shadow-card-hover transition-all duration-200 active:scale-[0.97]">

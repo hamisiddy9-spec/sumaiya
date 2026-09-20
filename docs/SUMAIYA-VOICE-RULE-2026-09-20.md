@@ -60,8 +60,8 @@ third person, `Sumaiya AI`, `AI ya kazi`, `Msaidizi wa AI`, `Zungumza na AI`, `n
 | `nami` / `naye` (first person address) | 26 | 20 |
 | `AI ya kazi` / `Career AI` | 1 | 1 (the native home-screen tile — the string the owner quoted) |
 | `Sumaiya AI` | 4 | 0 (all four are code comments) |
-| **Distinct user-facing strings in scope** | — | **142** |
-| **Distinct files touched** | — | **40** |
+| **Distinct user-facing strings in scope** | — | **157** |
+| **Distinct files touched** | — | **44** |
 
 ### The exemplar, and its siblings
 
@@ -86,7 +86,7 @@ Tonight's QA changed the busy line `Sumaiya ana shughuli nyingi sasa hivi` → `
 ## 3 · BEFORE → AFTER
 
 Every row was applied by exact-string replacement with a count check (`apply.py`, `fix2.py`, `fix3.py`,
-`fix4.py` in the working notes). 142 rows, 40 source files, plus 3 test files whose assertions quoted a changed string.
+`fix4.py` in the working notes). 157 rows, 44 source files, plus 3 test files whose assertions quoted a changed string.
 
 | # | file | before | after |
 |---|---|---|---|
@@ -230,6 +230,23 @@ Every row was applied by exact-string replacement with a count check (`apply.py`
 | Y03 | `apps/web/app/api/[[...route]]/route.ts` | AI rate limit exceeded. Try again in a minute. | I can't take any more requests right now. Try again in a minute. |
 | Y04 | `apps/web/lib/api/routes/ai.ts` | The AI took too long to read this CV. Please try again. | I ran out of time reading that CV. Please try again. |
 | Y05 | `apps/web/lib/api/routes/ai.ts` | The AI took too long. Please try again. | I ran out of time. Please try again. |
+| AA1 | `apps/web/lib/email.ts` | with 11 stunning templates, AI-powered content suggestions, and one-click PDF export. | with 11 stunning templates, writing help, and one-click PDF export. |
+| AA2 | `apps/web/lib/email.ts` | Fill in your details — or let AI help you | Fill in your details — or let me help you |
+| AA3 | `apps/web/app/[locale]/(marketing)/preview/page.tsx` | Mwambie AI unachohitaji. Inaongoza kutoka hapo | Niambie unachohitaji. Nitaongoza kutoka hapo |
+| AA4 | `apps/web/app/[locale]/(marketing)/preview/page.tsx` | Tell the AI what you need. It leads from there | Tell me what you need. I will lead from there |
+| AA5 | `apps/web/lib/api/routes/ai.ts` | …You are a highly capable professional on the user's side.` | …the user's side. + the VOICE clause (first person, no third person about herself, no 'AI' in Swahili) |
+| AA6 | `apps/web/lib/api/routes/mobile.ts` | …Stop on the one goal they came with; don't drift to a side topic.` | …side topic. + the same VOICE clause |
+| AA7 | `apps/web/lib/ai/prompts.ts` | assistant.system@v2.0 / assistant.mobile@v1.1 | assistant.system@v2.1 / assistant.mobile@v1.2 (version ledger bumped) |
+| AA8 | `apps/web/app/[locale]/(marketing)/templates/[slug]/page.tsx` | ✓ AI writing help for your summary &amp; experience | ✓ Writing help for your summary &amp; experience |
+| AA9 | `apps/web/app/[locale]/(marketing)/tools/tools-client.tsx` | Professional ATS-optimized templates with an AI assistant. | Professional ATS-optimized templates with a writing assistant. |
+| AA10 | `apps/web/app/[locale]/(marketing)/tools/[slug]/page.tsx` | an AI assistant that writes it with you / and an AI assistant. | a writing assistant that works on it with you / and a writing assistant. |
+| AA11 | `apps/web/app/[locale]/(marketing)/templates/page.tsx` | alt: … with an AI assistant | alt: … with a career-writing assistant |
+| AA12 | `apps/web/app/(app)/layout.tsx + apps/web/app/[locale]/layout.tsx` | Sumaiya — AI Career Platform: CV, Job Match & Interview Prep | Sumaiya — Career Platform: CV, Job Match & Interview Prep |
+| AA13 | `apps/web/components/dashboard/application-workspace.tsx` | …uppercase tracking-wide">AI</span>} | …uppercase tracking-wide">Sumaiya</span>} |
+| AA14 | `apps/web/components/editor/job-target-panel.tsx` | …uppercase tracking-wide">AI</span> | …uppercase tracking-wide">Sumaiya</span> |
+| AA15 | `apps/web/components/assistant/cv-assistant-client.tsx` | title: `AI: ${toolName} (…` | title: `Sumaiya: ${toolName} (…` |
+| AA16 | `apps/web/app/[locale]/(marketing)/about/page.tsx` | an AI writing assistant and one-tap PDF export | a writing assistant and one-tap PDF export |
+| AA17 | `apps/web/app/(app)/layout.tsx + apps/web/app/[locale]/layout.tsx` | with an AI assistant (og alt + JSON-LD x4) | with a career-writing assistant (og alt + JSON-LD x4) |
 
 ---
 
@@ -274,6 +291,52 @@ Every row was applied by exact-string replacement with a count check (`apply.py`
 
 ---
 
+## 5b · THE PROMPT GAP — where the rule was NOT, until now
+
+A string inventory cannot see the model's own output. The two conversational system prompts that define how
+Sumaiya speaks imposed a warm-human persona and banned English canned phrases (`"As an AI"`, `"I'm happy to
+help"`) — but **neither forbade the third person about herself and neither forbade the word `AI` in Swahili**.
+So a model could have answered *"Sumaiya anakusaidia kuandika CV"* or *"Mimi ni msaidizi wa AI"* and been
+compliant with its instructions while off-register with every string in the app.
+
+| what | where | was |
+|---|---|---|
+| `assistant.system` (web `/assistant-turn`) | `apps/web/lib/api/routes/ai.ts:670` | persona + English canned-phrase ban, no rule about the third person or `AI` in Swahili |
+| `assistant.mobile` (native `/chat`) | `apps/web/lib/api/routes/mobile.ts:136` | same gap |
+| prompt version ledger | `apps/web/lib/ai/prompts.ts` | `assistant.system@v2.0`, `assistant.mobile@v1.1` — no voice rule recorded |
+
+**Fixed here.** One `VOICE` clause was appended to both prompts, and both versions bumped
+(`assistant.system` → `v2.1`, `assistant.mobile` → `v1.2`, per the registry's own "bump on any wording change"
+rule). The clause, verbatim as it now sits in both prompts:
+
+> `VOICE — you are ONE person and you speak for yourself (non-negotiable): always use the FIRST PERSON about`
+> `yourself and your own actions — "ninaweza", "nitaandikia", "niambie", "nami", "nimeandika", "Mimi ni`
+> `Sumaiya". NEVER talk about yourself in the third person ("Sumaiya anaandika", "Sumaiya itakusaidia", "the`
+> `app can…") and never describe yourself as a feature or a product. In Swahili, NEVER use the word "AI" about`
+> `yourself or about anything the user can see — not "AI", not "Msaidizi wa AI", not "AI ya kazi", not`
+> `"Sumaiya AI". In Swahili you are "msaidizi wako wa kazi", and you always name what you DO, never what you`
+> `are made of. If the user calls you "AI", answer warmly as a person and move on — never adopt the label.`
+
+**Still in the prompt and deliberately so:** the opening line of both prompts calls her "the warm **AI**
+companion" / "a real, warm person behind the screen". That is an instruction addressed to the model, never
+text a user sees, and it is the sentence that tells the model *what it is* so it can behave like a person. It
+is not user-facing copy and the rule does not reach it.
+
+### And the model already does it
+
+Evidence that this rule is describing the product's own behaviour rather than imposing a house style: with the
+AI live (`/api/ai/status` → `{"configured":true,"provider":"deepseek"}`) a real Swahili turn was answered in
+1.79 s —
+
+> **user:** *"Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja."*
+> **Sumaiya:** *"Nzuri, hiyo ni kazi nzuri. **Niambie** kwanza — unafanya kazi gani kwa sasa au ulifanya mara
+> ya mwisho, na kwa kampuni gani?"*
+
+First person, a question rather than a self-description, no `AI`, no third person. The rest of the copy is
+being brought up to what the model already does.
+
+---
+
 ## 6 · WHAT I COULD NOT VERIFY
 
 * The judge is a free OpenRouter model, **not a native speaker and not a person**. Every Swahili string here
@@ -302,6 +365,20 @@ Every row was applied by exact-string replacement with a count check (`apply.py`
    **If the owner prefers the hero to stay company-voiced, the alternative is one line: keep the sentence in the
    third person and take the mark off it.**
 4. **`muundo rafiki kwa waajiri`** (tools page) — a calque of "employer-friendly". Left untouched, flagged.
-5. **`ukitumia muundo rafiki kwa waajiri`**, **`inayopita wakaguzi`** (`pata-kazi`) and
+5. **`the AI Assistant` in two tools-API error messages** — `apps/web/lib/api/routes/tools.ts:588,639`
+   (*"attach it in the AI Assistant (it reads photos on your device)"*, *"which reads photos"*). These ARE
+   user-facing and belong in the rule. **Deliberately not changed here**: the test that asserts on them,
+   `apps/web/lib/api/routes/tools-extract.test.ts`, is a *sibling agent's uncommitted work* (not in `HEAD`), so
+   the message and its test have to change together in that workstream. The change is one line each: the pointer
+   becomes *"attach it in my chat (I read photos on your device)"* and *"attach it in my chat — I read photos"*,
+   with the test's `/AI Assistant/i` becoming `/my chat/i`. **Note for whoever lands that file.**
+6. **Repo state, so it is on the record:** siblings were committing to `main` in this same working tree
+   throughout. `HEAD` moved four times while this task ran (`dafa760` → `8d2f2a6` → `4e6dd51` → `b8704a3` →
+   `6311136` → `ed6a9e0`), and a sibling's `git add` sweep swept most of this task's uncommitted string edits
+   into their own commits. The edits are in `HEAD` (verified: 145 of 149 checked `new` strings present, and the
+   remaining 4 are the judged overrides, also present) — but they are spread across sibling commit messages
+   rather than sitting in one commit of their own. The prompt clause and this document are the parts that land
+   in their own commit.
+7. **`ukitumia muundo rafiki kwa waajiri`**, **`inayopita wakaguzi`** (`pata-kazi`) and
    **`kuzungumza na Sumaiya`** (native FAQ) are third-person brand strings that pass under the rule but are
    worth a native read on their own Swahili.

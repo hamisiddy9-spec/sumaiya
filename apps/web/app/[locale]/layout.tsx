@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
 
   const title = sw
     ? "Jukwaa la Ajira lenye AI — Tengeneza CV Bila Malipo | Sumaiya"
-    : "Sumaiya — AI Career Platform: CV, Job Match & Interview Prep";
+    : "Sumaiya — Career Platform: CV, Job Match & Interview Prep";
   const description = sw
     ? "Tengeneza CV ya kitaalamu na barua za maombi ya kazi kwa dakika chache ukiwa na Sumaiya, msaidizi wako wa AI — miundo mizuri, upakuaji bila malipo, na kikagua CV. Lengo moja: kupata ajira."
     : "Meet Sumaiya, your AI career assistant. Create a recruiter-ready CV and cover letters in minutes, run a free ATS check, and get matched to jobs. Free CV & resume builder for East Africa.";
@@ -119,7 +119,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
           url: "/og-image.png",
           width: 1200,
           height: 630,
-          alt: "Sumaiya — Professional CV & document builder with an AI assistant",
+          alt: "Sumaiya — Professional CV & document builder with a career-writing assistant",
         },
       ],
     },
@@ -163,7 +163,7 @@ export default function LocaleRootLayout({
               "@type": "WebSite",
               name: "Sumaiya",
               url: "https://sumaiya.app",
-              description: "Create ATS-optimized CVs, cover letters, business cards and professional letters with an AI assistant that helps you get hired.",
+              description: "Create ATS-optimized CVs, cover letters, business cards and professional letters with a career-writing assistant that helps you get hired.",
               potentialAction: {
                 "@type": "SearchAction",
                 target: { "@type": "EntryPoint", urlTemplate: "https://sumaiya.app/templates?q={search_term_string}" },
@@ -182,7 +182,7 @@ export default function LocaleRootLayout({
               url: "https://sumaiya.app",
               logo: "https://sumaiya.app/icon.svg",
               sameAs: [],
-              description: "Professional document builder with an AI assistant — CVs, cover letters, business cards and formal letters.",
+              description: "Professional document builder with a career-writing assistant — CVs, cover letters, business cards and formal letters.",
             }),
           }}
         />

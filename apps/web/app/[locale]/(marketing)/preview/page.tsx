@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: alternatesFor("/preview", params.locale),
     title: sw ? "Msaidizi wa Kazi" : "Career Copilot",
     description: sw
-      ? "Mwambie AI unachohitaji. Inaongoza kutoka hapo — CV, ulinganishaji wa kazi, alama ya CV yako au mazoezi ya usaili."
-      : "Tell the AI what you need. It leads from there — CV, job match, ATS score or interview practice.",
+      ? "Niambie unachohitaji. Nitaongoza kutoka hapo — CV, ulinganishaji wa kazi, alama ya CV yako au mazoezi ya usaili."
+      : "Tell me what you need. I will lead from there — CV, job match, ATS score or interview practice.",
     robots: { index: false, follow: false },
   };
 }
