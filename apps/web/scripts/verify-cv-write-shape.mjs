@@ -125,7 +125,7 @@ try {
 
   // ── Any row still stored as a string is a row the database cannot query ────
   const legacy = await sql`select count(*)::int as n from cv where jsonb_typeof(data) = 'string'`;
-  check(legacy[0].n === 0, "no cv row anywhere is still stored as a jsonb string", `${legacy[0].n} row(s) still string-encoded (run scripts/repair-cv-jsonb-strings.mjs --apply)`);
+  check(legacy[0].n === 0, "no cv row anywhere is still stored as a jsonb string", `${legacy[0].n} row(s) still string-encoded (run scripts/repair-jsonb-strings.mjs --apply)`);
 } catch (err) {
   check(false, "verifier crashed", err.message);
 } finally {

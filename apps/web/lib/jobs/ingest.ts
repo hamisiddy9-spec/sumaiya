@@ -27,6 +27,9 @@ import { expireJobs } from "./lifecycle";
 import { verifyListing } from "./authenticity";
 import { runAllSources, summarizeRun } from "./sources/registry";
 import { dedupeJobs, corroboratingSources } from "./dedup";
+// Relative, like every import in this module: scripts/seed-jobs.ts runs it
+// directly under tsx, which does not resolve the "@/" alias.
+import { jsonbParam } from "../db/jsonb";
 import type { NormalizedJob } from "./sources/types";
 
 // Re-export the canonical shape so existing callers keep working.
@@ -164,7 +167,11 @@ export async function ingestJobs(): Promise<IngestResult> {
       sourceName: j.sourceName,
       sourceUrl: j.sourceUrl,
       externalId: j.externalId,
-      corroboratedSources: corroboratingSources(j, corroboration),
+      // `::text::jsonb` (lib/db/jsonb.ts) — a bare array here is stored as a
+      // JSON *string*, so `jsonb_array_length(corroborated_sources)` throws and
+      // containment queries (`@> '["ajira"]'`) match nothing on a row that
+      // plainly holds the source keys.
+      corroboratedSources: jsonbParam(corroboratingSources(j, corroboration)),
       status: "published",
       applicationDeadline: j.applicationDeadline ?? null,
       lastVerifiedAt: now,
