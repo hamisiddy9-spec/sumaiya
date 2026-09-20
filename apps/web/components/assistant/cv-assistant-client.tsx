@@ -33,9 +33,10 @@ import { extractTextFromFile, ExtractionError } from "@/lib/client-cv-extract";
 import {
   MAX_PDF_UPLOAD_BYTES,
   MAX_PDF_UPLOAD_MB,
-  MAX_LOCAL_PARSE_BYTES,
   MAX_LOCAL_PARSE_MB,
   SERVER_EXTRACT_TIMEOUT_MS,
+  attachmentSizeVerdict,
+  maySendToServer,
 } from "@/lib/upload-limits";
 import { analyzeCv, atsScore, type AtsCheck } from "@/lib/ats-score";
 import { matchCvToJd, looksLikeJobDescription, findLastJobInHistory } from "@/lib/job-match";
@@ -1036,7 +1037,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     // Either way the user gets one visible, actionable message within a beat —
     // no spinner, no request, no silence.
     const sizeMb = file.size / (1024 * 1024);
-    if (file.size > MAX_LOCAL_PARSE_BYTES) {
+    const sizeVerdict = attachmentSizeVerdict(file.size);
+    if (sizeVerdict.kind === "too-large-to-read") {
       setUploading(null);
       setAttachState("error");
       setError(
@@ -1069,7 +1071,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         // skipped (the message below explains it) and the request can never be
         // issued in the first place.
         const clientCode = clientErr instanceof ExtractionError ? clientErr.code : "";
-        if (!isPdfOrDoc || clientCode === "TOO_LARGE" || file.size > MAX_PDF_UPLOAD_BYTES) throw clientErr;
+        if (!isPdfOrDoc || clientCode === "TOO_LARGE" || !maySendToServer(file.size)) throw clientErr;
         setUploading(sw ? "Ninasoma faili yako…" : "Reading your file…");
         const form = new FormData();
         form.append("file", file);
@@ -1107,7 +1109,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         code === "TOO_LARGE" ? (sw ? `Faili ni kubwa mno (${MAX_LOCAL_PARSE_MB} MB). Pakua PDF yenye kurasa 1–3, au bandika maandishi yako hapa.` : `That file is too large (max ${MAX_LOCAL_PARSE_MB} MB). Save a shorter PDF (1–3 pages), or paste your details here.`)
           // Readable locally, not sendable: retrying changes nothing, so say so
           // instead of the generic "try again".
-          : file.size > MAX_PDF_UPLOAD_BYTES ? (sw ? `Sikuweza kulisona faili hili kwenye kifaa hiki, na ni kubwa mno kutuma mtandaoni (kikomo ${MAX_PDF_UPLOAD_MB} MB). Pakua PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa.` : `I couldn't read this file on your device, and it's too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Save a shorter PDF (1–3 pages), or type/paste your details here.`)
+          : sizeVerdict.kind === "too-large-to-send" ? (sw ? `Sikuweza kulisona faili hili kwenye kifaa hiki, na ni kubwa mno kutuma mtandaoni (kikomo ${MAX_PDF_UPLOAD_MB} MB). Pakua PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa.` : `I couldn't read this file on your device, and it's too large to send (limit ${MAX_PDF_UPLOAD_MB} MB). Save a shorter PDF (1–3 pages), or type/paste your details here.`)
           : aborted || code === "TIMEOUT" || code === "MEMORY" ? (sw ? "Kusoma faili hili kulichukua muda mrefu mno. Jaribu PDF fupi (kurasa 1–3), au andika/bandika taarifa zako hapa." : "Reading this file took too long. Try a shorter CV (1–3 pages), or just type/paste your details here.")
           : code === "OCR_FAILED" || code === "NO_TEXT" ? (sw ? "Sikuweza kusoma maandishi kwenye faili hii." : "Couldn't read text from that file.")
           : (sw ? "Imeshindwa kusoma faili. Jaribu tena." : "Couldn't read the file. Try again.")
