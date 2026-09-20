@@ -12,8 +12,9 @@
 |---|---|---|
 | Critical | 0 | — |
 | High | 2 | AI is off product-wide and the snap-to-apply journey dead-ends; the dashboard tells free users "everything is unlocked" |
-| Medium | 5 | Hydration failure on the authed shell; English error/explanations inside the Swahili UI; version history is inert; two-tab edits silently overwrite; a dead "Barua Rasmi Mpya" button |
-| Low | 6 | new-account copy, guest `/voice` gate, keyword-fragment noise, export filename, offline status wording, API shape drift |
+| Medium | 4 | Hydration failure on the authed shell; English error/explanations inside the Swahili UI; version history is inert; two-tab edits silently overwrite |
+| Low / Medium | 1 | a dead "Barua Rasmi Mpya" button (the path itself is reachable) |
+| Low | 5 | new-account copy, guest `/voice` gate, keyword-fragment noise, export filename, offline status wording (+ API shape drift in D12 = the fifth) |
 
 The core promise holds: **a signed-out visitor can build a CV and download a real PDF with no account, and the work is carried into the account after sign-in** (verified end to end, §5). The manual editor is solid — every section saves, survives a hard reload, and matches what the API returns. What is not usable today is everything sold as "AI".
 
