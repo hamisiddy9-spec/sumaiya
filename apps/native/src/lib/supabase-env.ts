@@ -28,12 +28,12 @@
  *      of failing silently at runtime on a user's phone.
  */
 
-const FALLBACK_URL = "https://ayczgaddnufdxnhizpcr.supabase.co";
+const FALLBACK_URL = "https://duywnmibgiqulqzunsmh.supabase.co";
 
 // Public by design — this is the anon key, it ships in every client bundle.
 // It still must match the project in FALLBACK_URL or nothing works.
 const FALLBACK_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF5Y3pnYWRkbnVmZHhuaGl6cGNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NTIyMTIsImV4cCI6MjA5NTAyODIxMn0.sd-zIEbdCY377YZSpXgy2LTYFjRbHhSTgO7WdYuLsho";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1eXdubWliZ2lxdWxxenVuc21oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MjQwMDYsImV4cCI6MjEwNTQwMDAwNn0.eYCmZ9NUHTnlVmeipkOuYBrtdCFbhtZtbFapYhmcZrE";
 
 export const SUPABASE_URL = (process.env.EXPO_PUBLIC_SUPABASE_URL || FALLBACK_URL).trim();
 export const SUPABASE_ANON_KEY = (
