@@ -3,13 +3,60 @@ import { zValidator } from "@hono/zod-validator";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 import { db, cv, debugEvent } from "@/lib/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { nanoid, customAlphabet } from "nanoid";
 import { recordExport } from "@/lib/documents/export-ledger";
 import { createHash } from "node:crypto";
 import { parseCvLoose } from "@/lib/career-profile/mapper";
 import { seedProfileFromCv } from "@/lib/career-profile/sync";
 import { toStoredCvData } from "@sumaiya/utils/cv-shape";
+
+/**
+ * ── Writing jsonb: JSON TEXT + an explicit cast, never a bare object ─────────
+ *
+ * Handing drizzle a plain object/array for a jsonb column DOUBLE-ENCODES it on
+ * this stack (drizzle + postgres-js): drizzle's jsonb mapper `JSON.stringify`s
+ * the value, then postgres-js serialises that *string* again — its jsonb
+ * serialiser is `JSON.stringify` — so the column ends up holding a JSON
+ * **string** (`jsonb_typeof(data) = 'string'`). Every SQL jsonb operator then
+ * returns NULL on a row that really holds the data:
+ *
+ *   select data->'personal'->>'fullName' from cv …   -- NULL
+ *
+ * Nothing looks wrong on screen, because the JS reader parses the string back
+ * into an object. That is the trap: the app looks right while the database
+ * cannot query its own content — no server-side report, migration or admin view
+ * over CV contents can ever see it.
+ *
+ * Probed against the live database (all four confirmed, 2026-09-20):
+ *   bare object                       → jsonb_typeof = 'string'   ✗
+ *   sql`${obj}::jsonb`                → 'object'                  ✓ (objects only)
+ *   sql`${JSON.stringify(obj)}::jsonb`→ 'string'                  ✗
+ *   sql`${JSON.stringify(obj)}::text::jsonb` → 'object'           ✓ objects, arrays,
+ *                                                  and DB-read values alike
+ * The `::text` in the middle matters: it pins the parameter to text so the
+ * driver sends the JSON verbatim, and Postgres does the one real parse.
+ *
+ * `jsonbText` also unwraps a value that arrives as a JSON *string* — every row
+ * written before this fix is one — so copying a legacy row (duplicate) repairs
+ * the copy instead of carrying the broken shape forward.
+ */
+export function jsonbText(value: unknown): string {
+  let v: unknown = value;
+  for (let i = 0; i < 2 && typeof v === "string"; i++) {
+    try {
+      v = JSON.parse(v);
+    } catch {
+      break;
+    }
+  }
+  return JSON.stringify(v ?? {});
+}
+
+/** The value to hand a jsonb column. See `jsonbText` for why this exists. */
+export function jsonbParam(value: unknown) {
+  return sql`${jsonbText(value)}::text::jsonb`;
+}
 
 // The native app's api-client normalizes to the stored (web) shape before
 // writing, but a row written by an older/unpatched client — or anything that
@@ -98,9 +145,9 @@ export const cvRoutes = new Hono()
       templateId: initialTemplateId,
       primaryColor: body.primaryColor ?? "#DA4A1C",
       fontFamily: body.fontFamily ?? "Inter",
-      data: body.data ?? {},
+      data: jsonbParam(body.data ?? {}),
       // Grandfather fix — see the PATCH handler below for the full reasoning.
-      templateHistory: [initialTemplateId],
+      templateHistory: jsonbParam([initialTemplateId]),
     };
 
     // THE SPINE: every CV write seeds the Career Profile (source "cv:<id>").
@@ -132,8 +179,8 @@ export const cvRoutes = new Hono()
           templateId: values.templateId,
           primaryColor: values.primaryColor,
           fontFamily: values.fontFamily,
-          data: values.data,
-          templateHistory: withTemplateInHistory(existingRow?.templateHistory, values.templateId),
+          data: jsonbParam(body.data ?? {}),
+          templateHistory: jsonbParam(withTemplateInHistory(existingRow?.templateHistory, values.templateId)),
           updatedAt: new Date(),
         })
         .where(and(eq(cv.id, id), eq(cv.userId, userId)))
@@ -217,9 +264,18 @@ export const cvRoutes = new Hono()
     // paywall something the owner already made for free.
     const nextHistory = withTemplateInHistory(existing.templateHistory, body.templateId);
 
+    // `data` is pulled OUT of the spread: handed over as a bare object in
+    // `...body` it is stored as a JSON string (see `jsonbText` above).
+    const { data: nextData, ...editable } = body;
+
     const [updated] = await db
       .update(cv)
-      .set({ ...body, templateHistory: nextHistory, updatedAt: new Date() })
+      .set({
+        ...editable,
+        ...(nextData === undefined ? {} : { data: jsonbParam(nextData) }),
+        templateHistory: jsonbParam(nextHistory),
+        updatedAt: new Date(),
+      })
       .where(and(eq(cv.id, c.req.param("id")), eq(cv.userId, userId)))
       .returning();
 
@@ -283,7 +339,7 @@ export const cvRoutes = new Hono()
       templateId: source.templateId,
       primaryColor: source.primaryColor,
       fontFamily: source.fontFamily,
-      data: source.data ?? {},
+      data: jsonbParam(source.data ?? {}),
     }).returning();
 
     return c.json({ success: true, data: copy }, 201);
