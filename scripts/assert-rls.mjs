@@ -54,13 +54,24 @@ if (!DB) {
   process.exit(2);
 }
 
-/** Tables the product deliberately exposes for public read, with the reason. */
-const PUBLIC_READ_ALLOWLIST = {
-  job: 'job_public_feed_select — the job feed; public listings, no personal data',
-};
-/** Tables that must NEVER be anon-readable, and why. Guards a hole that was closed. */
+/**
+ * Tables the product deliberately exposes for public read, with the reason.
+ *
+ * EMPTY ON PURPOSE as of 2026-09-20. The app never reads a public table over
+ * PostgREST — every product read goes through Drizzle as `postgres` — so no table
+ * needs an anon grant at all, and each one that had one leaked something:
+ *   cv  — anon could list every published CV and its photo;
+ *   job — anon could read internal columns (source, source_url, external_id) that
+ *         lib/api/routes/jobs.ts deliberately never exposes on a public endpoint.
+ * Adding a table here is a product decision, and it must come with a projection a
+ * client-supplied filter cannot bypass. Prefer a column-limited VIEW over a grant
+ * on the base table.
+ */
+const PUBLIC_READ_ALLOWLIST = {};
+/** Tables that must NEVER be anon-readable, and why. Guards holes that were closed. */
 const NEVER_ANON_READABLE = {
   cv: 'an anon SELECT on cv exposes every published CV and its photo, because the client chooses the filter — see 0021_lock_down_cv_enumeration.sql',
+  job: 'an anon SELECT on job exposes source / source_url / external_id, which the jobs API route deliberately withholds — see 0022_lock_down_job_columns.sql',
 };
 /** Server-side telemetry: RLS on, deliberately zero policies. */
 const DENY_BY_DEFAULT = ['app_event', 'app_release', 'campaign_event', 'eval_sample', 'outcome_event'];
@@ -145,5 +156,8 @@ if (failures.length) {
   await c.end();
   process.exit(1);
 }
-console.log(`OK — no public table is exposed to anon beyond ${Object.keys(PUBLIC_READ_ALLOWLIST).join(' + ')}`);
+const allow = Object.keys(PUBLIC_READ_ALLOWLIST);
+console.log(allow.length
+  ? `OK — no public table is exposed to anon beyond ${allow.join(' + ')}`
+  : 'OK — no public table is exposed to anon at all: the anon key has zero data access');
 await c.end();
