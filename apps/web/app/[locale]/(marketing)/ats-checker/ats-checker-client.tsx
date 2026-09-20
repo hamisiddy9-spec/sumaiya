@@ -162,7 +162,7 @@ export function AtsCheckerClient() {
                 {loading ? (sw ? "Inakagua CV yako…" : "Checking your CV…") : (sw ? "Pakia CV yako (PDF)" : "Upload your CV (PDF)")}
               </p>
               <p className="text-xs text-text-muted mt-1">
-                {loading ? fileName : (sw ? "Buruta hapa au bofya kuchagua · haifadhiwi" : "Drag here or click to choose · never stored")}
+                {loading ? fileName : (sw ? `Buruta hapa au bofya kuchagua · PDF hadi MB ${MAX_PDF_UPLOAD_MB} · haifadhiwi` : `Drag here or click to choose · PDF up to ${MAX_PDF_UPLOAD_MB} MB · never stored`)}
               </p>
               <input ref={inputRef} type="file" accept="application/pdf" className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) analyze(f); }} />
