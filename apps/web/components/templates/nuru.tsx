@@ -1,5 +1,5 @@
 import React from "react";
-import { fmtDate, dateRange, CVData } from "@/components/templates/template-utils";
+import { fmtDate, dateRange, CVData, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -62,9 +62,12 @@ export function NuruTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
       {/* Header band */}
       <div style={{ background: "linear-gradient(120deg, #1E1A16 0%, #3a2c22 100%)", color: "#fff", padding: "34px 40px 26px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 20 }}>
-          <div>
-            <div style={{ fontSize: 32, fontWeight: 800, margin: 0, letterSpacing: "-0.01em" }}>{personal.fullName}</div>
-            {personal.jobTitle && <div style={{ fontSize: 13, color: primaryColor, fontWeight: 600, letterSpacing: "0.04em", marginTop: 4 }}>{personal.jobTitle}</div>}
+          <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0 }}>
+            <CvPhoto url={personal.photo} name={personal.fullName} size={92} radius={50} borderColor={primaryColor} borderWidth={3} />
+            <div>
+              <div style={{ fontSize: 32, fontWeight: 800, margin: 0, letterSpacing: "-0.01em" }}>{personal.fullName}</div>
+              {personal.jobTitle && <div style={{ fontSize: 13, color: primaryColor, fontWeight: 600, letterSpacing: "0.04em", marginTop: 4 }}>{personal.jobTitle}</div>}
+            </div>
           </div>
           <div style={{ textAlign: "right", fontSize: 10.5, color: "#d9cfc2", lineHeight: 1.7 }}>
             {personal.email && <div>{personal.email}</div>}

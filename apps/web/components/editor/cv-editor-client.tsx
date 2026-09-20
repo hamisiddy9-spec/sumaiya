@@ -41,6 +41,12 @@ import confetti from "canvas-confetti";
 import { track, identify, type ExportSource } from "@/lib/analytics";
 import posthog from "@/lib/analytics";
 import { renderElementToPdfBlob, exportCvToText, buildCvText, triggerBlobDownload } from "@/lib/pdf";
+import {
+  PHOTO_ACCEPT_ATTR,
+  MAX_PHOTO_SOURCE_MB,
+  downscalePhotoFile,
+  validatePhotoFile,
+} from "@/lib/photo-upload";
 import { AutoTextarea } from "@/components/ui/auto-textarea";
 import { Icon } from "@/components/ui/icon";
 import { PremiumTemplateModal } from "@/components/premium-template-modal";
@@ -2047,7 +2053,8 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           className="w-full px-3 py-2 text-sm border border-border-input rounded-input focus:outline-none focus:shadow-focus-ember focus:border-ember bg-sand-2"
           placeholder={uiLang === "sw" ? "mf. Mbunifu Bidhaa wa Ngazi ya Juu" : "e.g. Senior Product Designer"} />
       </GlowField>
-      {/* Photo upload — secondary, not the opening ask */}
+      {/* Photo upload — secondary, not the opening ask. Optional by design:
+          never a gate, never a required field. */}
       <div>
         <label className="block text-xs font-medium text-text-body mb-2">{uiLang === "sw" ? "Picha ya wasifu" : "Profile photo"} <span className="text-text-muted font-normal">{uiLang === "sw" ? "(si lazima)" : "(optional)"}</span></label>
         <div className="flex items-center gap-3">
@@ -2061,14 +2068,33 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <div className="flex flex-col gap-1.5">
             <label className="cursor-pointer text-xs font-semibold text-ember-hover hover:text-ember transition">
               {cvData.personal.photo ? (uiLang === "sw" ? "Badilisha picha" : "Change photo") : (uiLang === "sw" ? "Pakia picha" : "Upload photo")}
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
-                onChange={(e) => {
+              <input type="file" accept={PHOTO_ACCEPT_ATTR} className="hidden"
+                onChange={async (e) => {
                   const file = e.target.files?.[0];
+                  // Reset immediately so re-picking the SAME file still fires.
+                  e.target.value = "";
                   if (!file) return;
-                  if (file.size > 2 * 1024 * 1024) { showToast(uiLang === "sw" ? "Picha lazima iwe chini ya 2MB." : "Photo must be under 2MB."); return; }
-                  const reader = new FileReader();
-                  reader.onload = (ev) => { updatePersonal({ photo: ev.target?.result as string }); triggerAutoSave(); };
-                  reader.readAsDataURL(file);
+                  const invalid = validatePhotoFile(file);
+                  if (invalid) {
+                    showToast(
+                      invalid === "too_large"
+                        ? (uiLang === "sw" ? `Picha ni kubwa mno. Chagua picha chini ya ${MAX_PHOTO_SOURCE_MB}MB.` : `That photo is too large. Choose one under ${MAX_PHOTO_SOURCE_MB}MB.`)
+                        : invalid === "unsupported_type"
+                          ? (uiLang === "sw" ? "Aina hii ya faili haitumiki. Tumia JPG, PNG au WebP." : "That file type is not supported. Use JPG, PNG or WebP.")
+                          : (uiLang === "sw" ? "Picha hii haikusomeka. Jaribu nyingine." : "That photo could not be read. Try another."),
+                    );
+                    return;
+                  }
+                  try {
+                    // Downscaled and centre-cropped HERE, on the device, before
+                    // it is stored — a camera original must never be what gets
+                    // saved (lib/photo-upload.ts explains why).
+                    const out = await downscalePhotoFile(file);
+                    updatePersonal({ photo: out.dataUrl });
+                    triggerAutoSave();
+                  } catch {
+                    showToast(uiLang === "sw" ? "Picha hii haikusomeka. Jaribu nyingine." : "That photo could not be read. Try another.");
+                  }
                 }}
               />
             </label>
@@ -2076,9 +2102,18 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <button onClick={() => { updatePersonal({ photo: undefined }); triggerAutoSave(); }}
                 className="text-xs text-red-500 hover:text-red-600 transition text-left">{uiLang === "sw" ? "Ondoa" : "Remove"}</button>
             )}
-            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? "Kiwango cha juu 2MB · JPG / PNG / WebP" : "Max 2MB · JPG / PNG / WebP"}</span>
+            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? `Hadi ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Huhifadhiwa kwa ukubwa mdogo` : `Up to ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Stored compact`}</span>
           </div>
         </div>
+        {/* Consent, plainly stated in both languages: uploading a photo is the
+            candidate's choice, it is never required, and neither choice is
+            penalised. The note exists because a photo request on a CV builder
+            otherwise reads as a demand. */}
+        <p className="text-[10px] text-text-muted mt-2 leading-relaxed">
+          {uiLang === "sw"
+            ? "Si lazima kuweka picha. Ukiweka, inabaki kwenye wasifu wako tu na unaweza kuiondoa wakati wowote. Nchi za Ghuba (UAE, Saudia, Qatar) mara nyingi zinatarajia picha, lakini haitahitajika kwako."
+            : "Adding a photo is optional. If you add one it stays in your CV, and you can remove it at any time. Gulf countries (UAE, Saudi Arabia, Qatar) often expect one, but it is never required of you."}
+        </p>
       </div>
       {/* Remaining contact fields */}
       {personalFields.filter(f => f.key !== "fullName" && f.key !== "jobTitle").map(({ key, type, inputMode, maxLength }) => {

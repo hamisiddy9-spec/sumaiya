@@ -3,6 +3,7 @@ import {
   ContactItem, SkillBar, dateRange, fmtDate,
   type CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 import { cvHeadings } from "@/lib/i18n/cv-headings";
@@ -19,6 +20,9 @@ export function TokyoGridTemplate({ data, primaryColor, fontFamily, lang = "en" 
       {/* Left sidebar — dark */}
       <div style={{ width: 180, minHeight: 1123, backgroundColor: SIDEBAR_BG, display: "flex", flexDirection: "column", flexShrink: 0, boxSizing: "border-box" }}>
         <div style={{ padding: "28px 16px", display: "flex", flexDirection: "column", gap: 22, flex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <CvPhoto url={personal.photo} name={personal.fullName} size={84} radius={50} borderColor={primaryColor} borderWidth={2} />
+          </div>
           {/* Contact */}
           <div>
             <p style={{ fontSize: 8.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.14em", color: primaryColor, margin: "0 0 10px" }}>{L.contact}</p>

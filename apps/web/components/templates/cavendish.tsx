@@ -1,5 +1,5 @@
 import React from "react";
-import { fmtDate, dateRange, visibleSkills, CVData } from "@/components/templates/template-utils";
+import { fmtDate, dateRange, visibleSkills, CVData, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -39,11 +39,14 @@ export function CavendishTemplate({ data, primaryColor, fontFamily, lang = "en" 
   return (
     <div style={{ width: 794, minHeight: 1123, backgroundColor: "#ffffff", fontFamily: body, color: "#2a2a2a", padding: "48px 56px", boxSizing: "border-box" }}>
       {/* Header */}
-      <div style={{ borderBottom: `2px solid ${primaryColor}`, paddingBottom: 12, marginBottom: 4 }}>
-        <div style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 700, color: "#111", letterSpacing: "0.01em" }}>{personal.fullName}</div>
-        {personal.jobTitle && <div style={{ fontSize: 12.5, color: primaryColor, marginTop: 3, fontStyle: "italic" }}>{personal.jobTitle}</div>}
-        <div style={{ fontSize: 10, color: "#6a6a6a", marginTop: 7 }}>
-          {[personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean).join("  |  ")}
+      <div style={{ borderBottom: `2px solid ${primaryColor}`, paddingBottom: 12, marginBottom: 4, display: "flex", alignItems: "center", gap: 18 }}>
+        <CvPhoto url={personal.photo} name={personal.fullName} size={72} radius={50} borderColor={primaryColor} borderWidth={1} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: SERIF, fontSize: 32, fontWeight: 700, color: "#111", letterSpacing: "0.01em" }}>{personal.fullName}</div>
+          {personal.jobTitle && <div style={{ fontSize: 12.5, color: primaryColor, marginTop: 3, fontStyle: "italic" }}>{personal.jobTitle}</div>}
+          <div style={{ fontSize: 10, color: "#6a6a6a", marginTop: 7 }}>
+            {[personal.email, personal.phone, personal.location, personal.linkedin, personal.website].filter(Boolean).join("  |  ")}
+          </div>
         </div>
       </div>
 

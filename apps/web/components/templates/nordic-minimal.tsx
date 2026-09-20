@@ -1,6 +1,7 @@
 import {
   fmtDate, dateRange, visibleSkills,
   type CVData,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 import { cvHeadings } from "@/lib/i18n/cv-headings";
@@ -28,8 +29,11 @@ export function NordicMinimalTemplate({ data, primaryColor, fontFamily, lang = "
   return (
     <div style={{ width: 794, minHeight: 1123, fontFamily, backgroundColor: "#fff", boxSizing: "border-box", padding: "64px 72px" }}>
       {/* Name */}
-      <div style={{ fontSize: 32, fontWeight: 800, color: "#0f172a", margin: "0 0 4px", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-        {personal.fullName}
+      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <CvPhoto url={personal.photo} name={personal.fullName} size={84} radius={0} borderColor="#e2e8f0" borderWidth={1} />
+        <div style={{ fontSize: 32, fontWeight: 800, color: "#0f172a", margin: "0 0 4px", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+          {personal.fullName}
+        </div>
       </div>
       <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 20px", fontWeight: 400, letterSpacing: "0.04em" }}>
         {personal.jobTitle}

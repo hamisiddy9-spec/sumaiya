@@ -5,6 +5,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   SkillDots, ContactItem, fmtDate, dateRange,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 
 interface Props { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang;
@@ -43,8 +44,11 @@ export function TitanTemplate({ data, primaryColor, fontFamily, lang = "en" }: P
         justifyContent: "space-between", padding: "0 36px",
         boxSizing: "border-box",
       }}>
-        <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "0.01em" }}>
-          {personal.fullName}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 0 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={44} radius={50} borderColor={primaryColor} borderWidth={2} />
+          <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "0.01em" }}>
+            {personal.fullName}
+          </div>
         </div>
         <div style={{ fontSize: 11.5, fontWeight: 500, color: "rgba(255,255,255,0.85)", letterSpacing: "0.04em" }}>
           {personal.jobTitle}

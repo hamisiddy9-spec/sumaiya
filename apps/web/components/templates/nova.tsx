@@ -5,6 +5,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   SkillDots, ContactItem, fmtDate, dateRange,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 
 interface Props { data: CVData; primaryColor: string; fontFamily: string; lang?: Lang;
@@ -46,13 +47,16 @@ export function NovaTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
           flex: "0 0 62%", maxWidth: "62%",
           padding: "24px 28px 24px 36px",
           boxSizing: "border-box",
-          display: "flex", flexDirection: "column" as const, justifyContent: "center",
+          display: "flex", flexDirection: "row" as const, alignItems: "center", gap: 18,
         }}>
-          <div style={{ fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em", lineHeight: 1.15 }}>
-            {personal.fullName}
-          </div>
-          <div style={{ fontSize: 12, fontWeight: 500, color: headerSubColor, marginTop: 6, letterSpacing: "0.03em" }}>
-            {personal.jobTitle}
+          <CvPhoto url={personal.photo} name={personal.fullName} size={76} radius={50} borderColor={headerSubColor} borderWidth={2} />
+          <div style={{ display: "flex", flexDirection: "column" as const, justifyContent: "center", minWidth: 0 }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: "-0.01em", lineHeight: 1.15 }}>
+              {personal.fullName}
+            </div>
+            <div style={{ fontSize: 12, fontWeight: 500, color: headerSubColor, marginTop: 6, letterSpacing: "0.03em" }}>
+              {personal.jobTitle}
+            </div>
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import {
   fmtDate, dateRange,
   CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 
 interface Props {
@@ -75,6 +76,9 @@ export function MetroTemplate({ data, primaryColor, fontFamily, lang = "en" }: P
         }} />
 
         <div style={{ padding: "32px 16px 32px 22px", display: "flex", flexDirection: "column", gap: 0 }}>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <CvPhoto url={personal.photo} name={personal.fullName} size={72} radius={50} borderColor={primaryColor} borderWidth={2} style={{ marginBottom: personal.photo ? 14 : 0 }} />
+          </div>
           {/* Name */}
           <div style={{
             fontSize: 16,

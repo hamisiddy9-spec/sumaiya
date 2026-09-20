@@ -3,6 +3,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   fmtDate, dateRange, CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
@@ -37,10 +38,13 @@ export function RegentTemplate({ data, primaryColor, fontFamily, lang = "en" }: 
   return (
     <div style={{ width: 794, minHeight: 1123, backgroundColor: "#ffffff", fontFamily: body, color: "#2a2a2a", boxSizing: "border-box" }}>
       {/* Header */}
-      <div style={{ background: primaryColor, color: "#fff", padding: "34px 48px 26px" }}>
-        <div style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.05 }}>{personal.fullName}</div>
-        {personal.jobTitle && <div style={{ fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.88)", marginTop: 8 }}>{personal.jobTitle}</div>}
-        <div style={{ height: 2, width: 64, background: GOLD, margin: "16px 0 0" }} />
+      <div style={{ background: primaryColor, color: "#fff", padding: "34px 48px 26px", display: "flex", alignItems: "center", gap: 26 }}>
+        <CvPhoto url={personal.photo} name={personal.fullName} size={96} radius={50} borderColor={GOLD} borderWidth={2} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.05 }}>{personal.fullName}</div>
+          {personal.jobTitle && <div style={{ fontSize: 13, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.88)", marginTop: 8 }}>{personal.jobTitle}</div>}
+          <div style={{ height: 2, width: 64, background: GOLD, margin: "16px 0 0" }} />
+        </div>
       </div>
 
       {/* Contact strip */}

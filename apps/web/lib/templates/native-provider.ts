@@ -17,6 +17,7 @@ import {
 import { TEMPLATE_REGISTRY } from './registry';
 import { TEMPLATE_FAMILIES } from './families';
 import { getCvTemplateTier } from './tiers';
+import { isImageDataUrl } from '@/lib/photo-upload';
 
 export class NativeTemplateProvider implements TemplateProvider {
   /**
@@ -167,6 +168,12 @@ export class NativeTemplateProvider implements TemplateProvider {
     const phone = personalInfo.phone || '';
     const location = personalInfo.location || '';
     const headline = personalInfo.headline || '';
+    // The profile photo. Only a strict image data URL is ever emitted into an
+    // attribute — see isImageDataUrl for why a prefix match is not enough here.
+    // Anything else is dropped, so a hostile value in the document can never
+    // reach the markup. Absent => the header renders exactly as it did before
+    // (no empty frame, no reserved gap).
+    const photo = isImageDataUrl(personalInfo.photo) ? personalInfo.photo : '';
 
     // Extract experience
     const experience = Array.isArray(userData.experience)
@@ -190,12 +197,15 @@ export class NativeTemplateProvider implements TemplateProvider {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${fullName} - CV</title>
+  <title>${this.escapeHtml(fullName)} - CV</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 8.5in; height: 11in; margin: 0 auto; padding: 0.5in; background: white; }
     .header { border-bottom: 2px solid #333; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .header-row { display: flex; align-items: center; gap: 16px; }
+    .photo { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; flex-shrink: 0; display: block; }
+    .identity { flex: 1 1 auto; min-width: 0; }
     .name { font-size: 24px; font-weight: bold; margin-bottom: 0.25rem; }
     .contact { font-size: 12px; color: #666; }
     .section { margin-bottom: 1.5rem; }
@@ -211,14 +221,19 @@ export class NativeTemplateProvider implements TemplateProvider {
 <body>
   <div class="container">
     <div class="header">
-      <div class="name">${this.escapeHtml(fullName)}</div>
-      ${headline ? `<div class="contact">${this.escapeHtml(headline)}</div>` : ''}
-      <div class="contact">
-        ${email ? `${this.escapeHtml(email)}` : ''}
-        ${email && phone ? ' • ' : ''}
-        ${phone ? `${this.escapeHtml(phone)}` : ''}
-        ${(email || phone) && location ? ' • ' : ''}
-        ${location ? `${this.escapeHtml(location)}` : ''}
+      <div class="header-row">
+        ${photo ? `<img class="photo" src="${photo}" alt="${this.escapeHtml(fullName)}" />` : ''}
+        <div class="identity">
+          <div class="name">${this.escapeHtml(fullName)}</div>
+          ${headline ? `<div class="contact">${this.escapeHtml(headline)}</div>` : ''}
+          <div class="contact">
+            ${email ? `${this.escapeHtml(email)}` : ''}
+            ${email && phone ? ' • ' : ''}
+            ${phone ? `${this.escapeHtml(phone)}` : ''}
+            ${(email || phone) && location ? ' • ' : ''}
+            ${location ? `${this.escapeHtml(location)}` : ''}
+          </div>
+        </div>
       </div>
     </div>
 

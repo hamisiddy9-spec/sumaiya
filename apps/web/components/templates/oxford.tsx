@@ -6,6 +6,7 @@ import {
   fmtDate, dateRange,
   CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 
 interface Props {
@@ -58,6 +59,9 @@ export function OxfordTemplate({ data, primaryColor, fontFamily, lang = "en" }: 
     }}>
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={88} radius={50} borderColor={primaryColor} borderWidth={2} style={{ marginBottom: personal.photo ? 14 : 0 }} />
+        </div>
         <div style={{
           fontSize: 30,
           fontWeight: 800,

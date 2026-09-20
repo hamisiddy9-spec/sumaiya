@@ -1,5 +1,6 @@
 import {
   fmtDate, dateRange,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
@@ -68,6 +69,10 @@ export function SaharaTemplate({
 
       {/* ── TYPOGRAPHIC HEADER ─────────────────────────────────────────── */}
       <div style={{ marginBottom: 44, textAlign: "center" as const }}>
+
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={92} radius={0} borderColor="#111827" borderWidth={1} style={{ marginBottom: personal.photo ? 20 : 0 }} />
+        </div>
 
         {/* Name — ultra light, huge letter-spacing */}
         <p style={{

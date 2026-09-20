@@ -1,5 +1,5 @@
 import React from "react";
-import { fmtDate, dateRange, CVData, visibleSkills } from "@/components/templates/template-utils";
+import { fmtDate, dateRange, CVData, visibleSkills, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -40,7 +40,10 @@ export function PembaTemplate({ data, primaryColor, fontFamily, lang = "en" }: P
           <span>{personal.location || ""}</span>
         </div>
       </div>
-      <div style={{ fontFamily: SERIF, fontSize: 54, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1, margin: "18px 0 6px", color: "#211A15" }}>{personal.fullName}</div>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 28 }}>
+        <div style={{ fontFamily: SERIF, fontSize: 54, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1, margin: "18px 0 6px", color: "#211A15" }}>{personal.fullName}</div>
+        <CvPhoto url={personal.photo} name={personal.fullName} size={104} radius={0} borderColor="#211A15" borderWidth={1} style={{ marginTop: 18 }} />
+      </div>
       {personal.jobTitle && (
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 4 }}>
           <span style={{ height: 2, width: 54, background: primaryColor }} />

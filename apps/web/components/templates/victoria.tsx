@@ -2,6 +2,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   SkillDots,
   fmtDate, dateRange,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
@@ -60,6 +61,9 @@ export function VictoriaTemplate({ data, primaryColor, fontFamily, lang = "en" }
         <div style={{ height: 1, backgroundColor: "#1e293b", marginBottom: 20 }} />
 
         {/* Name */}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={92} radius={50} borderColor={primaryColor} borderWidth={2} style={{ marginBottom: personal.photo ? 16 : 0 }} />
+        </div>
         <p style={{
           fontSize: 36,
           fontWeight: 400,

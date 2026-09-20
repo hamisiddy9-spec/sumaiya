@@ -1,5 +1,5 @@
 import React from "react";
-import { dateRange, fmtDate, CVData, visibleSkills } from "@/components/templates/template-utils";
+import { dateRange, fmtDate, CVData, visibleSkills, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -42,7 +42,10 @@ export function ZegeTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
     <div style={{ width: 794, minHeight: 1123, backgroundColor: "#FBFAF7", fontFamily: body, color: INK, padding: 30, boxSizing: "border-box" }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 42, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.0, textTransform: "uppercase", overflowWrap: "anywhere" }}>{personal.fullName}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={88} radius={0} borderColor={INK} borderWidth={2.5} />
+          <div style={{ flex: 1, minWidth: 0, fontSize: 42, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.0, textTransform: "uppercase", overflowWrap: "anywhere" }}>{personal.fullName}</div>
+        </div>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 12 }}>
           {personal.jobTitle && (
             <span style={{ background: primaryColor, color: "#fff", border: `2.5px solid ${INK}`, padding: "6px 14px", fontWeight: 800, fontSize: 13.5, letterSpacing: "0.02em" }}>{personal.jobTitle}</span>

@@ -3,6 +3,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   dateRange, fmtDate, CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
@@ -54,7 +55,10 @@ export function NeonTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
     <div style={{ width: 794, minHeight: 1123, backgroundColor: BG, fontFamily: body, color: TXT, padding: 30, boxSizing: "border-box" }}>
       {/* Header */}
       <div style={{ marginBottom: 22 }}>
-        <div style={{ fontSize: 38, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", lineHeight: 1.02, color: "#fff" }}>{personal.fullName}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={84} radius={50} borderColor={primaryColor} borderWidth={2} />
+          <div style={{ fontSize: 38, fontWeight: 800, margin: 0, letterSpacing: "-0.02em", lineHeight: 1.02, color: "#fff" }}>{personal.fullName}</div>
+        </div>
         {personal.jobTitle && (
           <div style={{ display: "inline-block", marginTop: 10, fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: BG, background: grad, padding: "5px 13px", borderRadius: 20 }}>{personal.jobTitle}</div>
         )}

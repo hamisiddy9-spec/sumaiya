@@ -1,5 +1,6 @@
 import {
   fmtDate, dateRange,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
@@ -64,6 +65,9 @@ export function MonarchTemplate({
 
       {/* ── Centered header ── */}
       <div style={{ padding: "36px 48px 20px 48px", textAlign: "center" }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={88} radius={50} borderColor={primaryColor} borderWidth={2} style={{ marginBottom: personal.photo ? 14 : 0 }} />
+        </div>
         <div style={{
           fontSize: 28,
           fontWeight: 800,

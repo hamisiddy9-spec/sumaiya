@@ -7,6 +7,7 @@ import {
   fmtDate, dateRange,
   CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 
 interface Props {
@@ -58,7 +59,8 @@ export function HorizonTemplate({ data, primaryColor, fontFamily, lang = "en" }:
         padding: "0 32px",
         boxSizing: "border-box",
       }}>
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, minWidth: 0 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={64} radius={50} borderColor="rgba(255,255,255,0.85)" borderWidth={2} />
           <div style={{
             fontSize: 26,
             fontWeight: 700,

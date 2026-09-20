@@ -123,6 +123,38 @@ function findCleanCut(
 }
 
 /**
+ * Resolve once every <img> inside `el` has decoded, or after `timeoutMs`.
+ *
+ * Best-effort by design: a single broken or slow image must never be able to
+ * hang an export, so every element is raced against an overall deadline and all
+ * failures are swallowed. The point is only to give a genuinely-loaded photo its
+ * chance to be on the canvas — never to block on one that will not arrive.
+ */
+export async function waitForImages(el: HTMLElement, timeoutMs = 2000): Promise<void> {
+  if (typeof el?.querySelectorAll !== "function") return;
+  const imgs = Array.from(el.querySelectorAll("img"));
+  if (imgs.length === 0) return;
+
+  const decodeOne = (img: HTMLImageElement): Promise<void> => {
+    // `decode()` is the accurate signal (it resolves when the bitmap is usable),
+    // but it is absent on older Safari and rejects on a broken src.
+    if (typeof img.decode === "function") {
+      return img.decode().catch(() => undefined);
+    }
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const done = () => resolve();
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+    });
+  };
+
+  const all = Promise.all(imgs.map(decodeOne)).then(() => undefined);
+  const deadline = new Promise<void>((resolve) => setTimeout(resolve, timeoutMs));
+  await Promise.race([all, deadline]);
+}
+
+/**
  * Rasterizes a DOM element and saves it as a PDF.
  *
  * For multi-page content (e.g. a CV or letter taller than one page) the image
@@ -181,6 +213,14 @@ async function renderPdfDoc(el: HTMLElement, opts: ExportOptions): Promise<any> 
       await document.fonts.ready;
     }
   } catch { /* ignore — proceed with whatever is loaded */ }
+
+  // Wait for images (the CV profile photo) to be DECODED before rasterizing.
+  // The photo is a base64 data URL held in React state: the moment it is set,
+  // the <img> exists in the DOM but its pixels may not be decoded yet, and
+  // html2canvas draws whatever is there. Without this the photo silently
+  // rasterizes blank in the PDF while looking perfect on screen — a defect the
+  // user only discovers in the file they sent to an employer.
+  await waitForImages(el);
 
   let canvas: HTMLCanvasElement;
   try {

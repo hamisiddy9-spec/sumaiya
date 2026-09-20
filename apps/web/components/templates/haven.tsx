@@ -3,6 +3,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   fmtDate, dateRange, CVData,
   visibleSkills,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
@@ -38,8 +39,13 @@ export function HavenTemplate({ data, primaryColor, fontFamily, lang = "en" }: P
     <div style={{ width: 794, minHeight: 1123, backgroundColor: "#ffffff", fontFamily: body, color: "#3d3d3d", padding: 30, boxSizing: "border-box" }}>
       {/* Soft header */}
       <div style={{ background: tint, borderRadius: 20, padding: "26px 30px", marginBottom: 22 }}>
-        <div style={{ fontSize: 30, fontWeight: 700, color: "#2a2a2a", letterSpacing: "-0.01em", lineHeight: 1.1 }}>{personal.fullName}</div>
-        {personal.jobTitle && <div style={{ fontSize: 13, color: primaryColor, fontWeight: 600, marginTop: 5 }}>{personal.jobTitle}</div>}
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={84} radius={50} borderColor={primaryColor} borderWidth={2} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 30, fontWeight: 700, color: "#2a2a2a", letterSpacing: "-0.01em", lineHeight: 1.1 }}>{personal.fullName}</div>
+            {personal.jobTitle && <div style={{ fontSize: 13, color: primaryColor, fontWeight: 600, marginTop: 5 }}>{personal.jobTitle}</div>}
+          </div>
+        </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "5px 18px", marginTop: 12 }}>
           {personal.email && <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10, color: "#5a5a5a" }}><IcoEmail size={11} color={primaryColor} />{personal.email}</span>}
           {personal.phone && <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 10, color: "#5a5a5a" }}><IcoPhone size={11} color={primaryColor} />{personal.phone}</span>}

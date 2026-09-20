@@ -2,6 +2,7 @@ import {
   IcoEmail, IcoPhone, IcoPin, IcoLinkedIn, IcoGlobe,
   SkillDots, ContactItem,
   fmtDate, dateRange,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
@@ -78,28 +79,32 @@ export function VertexTemplate({
           right: 240,
           padding: "24px 0 24px 32px",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 18,
           zIndex: 2,
         }}>
-          <div style={{
-            fontSize: 26,
-            fontWeight: 800,
-            color: "#111827",
-            lineHeight: 1.15,
-            letterSpacing: "-0.01em",
-          }}>
-            {personal.fullName}
-          </div>
-          <div style={{
-            fontSize: 11,
-            color: "#6b7280",
-            fontWeight: 500,
-            marginTop: 5,
-            textTransform: "uppercase" as const,
-            letterSpacing: "0.1em",
-          }}>
-            {personal.jobTitle}
+          <CvPhoto url={personal.photo} name={personal.fullName} size={72} radius={8} borderColor={primaryColor} borderWidth={2} />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+            <div style={{
+              fontSize: 26,
+              fontWeight: 800,
+              color: "#111827",
+              lineHeight: 1.15,
+              letterSpacing: "-0.01em",
+            }}>
+              {personal.fullName}
+            </div>
+            <div style={{
+              fontSize: 11,
+              color: "#6b7280",
+              fontWeight: 500,
+              marginTop: 5,
+              textTransform: "uppercase" as const,
+              letterSpacing: "0.1em",
+            }}>
+              {personal.jobTitle}
+            </div>
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import {
   fmtDate, dateRange,
+  CvPhoto,
 } from "@/components/templates/template-utils";
 import { visibleSkills } from "@/components/templates/template-utils";
 import type { CVData } from "@/components/templates/template-utils";
@@ -64,16 +65,19 @@ export function BerlinTemplate({
     }}>
 
       {/* ── Name ── */}
-      <div style={{
-        fontSize: 24,
-        fontWeight: 900,
-        color: "#111827",
-        textTransform: "uppercase" as const,
-        letterSpacing: "0.1em",
-        lineHeight: 1.1,
-        marginBottom: 4,
-      }}>
-        {personal.fullName}
+      <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <CvPhoto url={personal.photo} name={personal.fullName} size={80} radius={0} borderColor="#111827" borderWidth={1} />
+        <div style={{
+          fontSize: 24,
+          fontWeight: 900,
+          color: "#111827",
+          textTransform: "uppercase" as const,
+          letterSpacing: "0.1em",
+          lineHeight: 1.1,
+          marginBottom: 4,
+        }}>
+          {personal.fullName}
+        </div>
       </div>
 
       {/* Job title */}

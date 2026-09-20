@@ -1,5 +1,5 @@
 import React from "react";
-import { dateRange, fmtDate, CVData, visibleSkills } from "@/components/templates/template-utils";
+import { dateRange, fmtDate, CVData, visibleSkills, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -46,9 +46,12 @@ export function RisoTemplate({ data, primaryColor, fontFamily, lang = "en" }: Pr
       {/* Poster header with misregistered offset block */}
       <div style={{ position: "relative", marginBottom: 30, paddingTop: 6 }}>
         <div style={{ position: "absolute", left: 8, top: 14, right: -4, height: 118, background: primaryColor, opacity: 0.28 }} />
-        <div style={{ position: "relative", background: primaryColor, padding: "20px 24px", minHeight: 104, boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ fontSize: 46, fontWeight: 900, color: PAPER, lineHeight: 0.95, letterSpacing: "-0.03em", textTransform: "uppercase" }}>{personal.fullName}</div>
-          {personal.jobTitle && <div style={{ fontFamily: MONO, fontSize: 12, color: PAPER, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8, opacity: 0.95 }}>{personal.jobTitle}</div>}
+        <div style={{ position: "relative", background: primaryColor, padding: "20px 24px", minHeight: 104, boxSizing: "border-box", display: "flex", alignItems: "center", gap: 20 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={78} radius={0} borderColor={PAPER} borderWidth={3} />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", minWidth: 0 }}>
+            <div style={{ fontSize: 46, fontWeight: 900, color: PAPER, lineHeight: 0.95, letterSpacing: "-0.03em", textTransform: "uppercase" }}>{personal.fullName}</div>
+            {personal.jobTitle && <div style={{ fontFamily: MONO, fontSize: 12, color: PAPER, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 8, opacity: 0.95 }}>{personal.jobTitle}</div>}
+          </div>
         </div>
       </div>
 

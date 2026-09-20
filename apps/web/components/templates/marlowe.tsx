@@ -1,5 +1,5 @@
 import React from "react";
-import { fmtDate, dateRange, visibleSkills, CVData } from "@/components/templates/template-utils";
+import { fmtDate, dateRange, visibleSkills, CVData, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -34,6 +34,9 @@ export function MarloweTemplate({ data, primaryColor, fontFamily, lang = "en" }:
       {/* Header */}
       <div style={{ textAlign: "center" }}>
         <div style={{ height: 1, background: "#d8d8d8", marginBottom: 18 }} />
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={88} radius={50} borderColor="#d8d8d8" borderWidth={1} style={{ marginBottom: personal.photo ? 16 : 0 }} />
+        </div>
         <div style={{ fontFamily: SERIF, fontSize: 38, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#1a1a1a", lineHeight: 1.1 }}>{personal.fullName}</div>
         {personal.jobTitle && <div style={{ fontSize: 12.5, letterSpacing: "0.28em", textTransform: "uppercase", color: primaryColor, marginTop: 10 }}>{personal.jobTitle}</div>}
         <div style={{ height: 1, background: "#d8d8d8", margin: "18px 0 12px" }} />

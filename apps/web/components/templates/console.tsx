@@ -1,5 +1,5 @@
 import React from "react";
-import { dateRange, fmtDate, CVData, visibleSkills } from "@/components/templates/template-utils";
+import { dateRange, fmtDate, CVData, visibleSkills, CvPhoto } from "@/components/templates/template-utils";
 import type { Lang } from "@/lib/i18n/translations";
 
 interface Props {
@@ -61,8 +61,11 @@ export function ConsoleTemplate({ data, primaryColor, fontFamily, lang = "en" }:
 
       <div style={{ padding: "26px 30px 40px" }}>
         {/* Name / title */}
-        <div style={{ fontSize: 30, fontWeight: 700, color: "#fff", letterSpacing: "-0.01em" }}>
-          <span style={{ color: accent }}># </span>{personal.fullName}
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          <CvPhoto url={personal.photo} name={personal.fullName} size={80} radius={8} borderColor={FAINT} borderWidth={1} />
+          <div style={{ fontSize: 30, fontWeight: 700, color: "#fff", letterSpacing: "-0.01em", minWidth: 0 }}>
+            <span style={{ color: accent }}># </span>{personal.fullName}
+          </div>
         </div>
         {personal.jobTitle && <div style={{ fontSize: 13, color: DIM, marginTop: 4 }}><span style={{ color: accent }}>&gt; </span>{personal.jobTitle}</div>}
 

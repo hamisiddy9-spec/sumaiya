@@ -104,7 +104,44 @@ export function PhotoSquare({
   );
 }
 
-// ─── Skill visualization ───────────────────────────────────────────────────────
+// ─── CvPhoto — the opt-in header photo ───────────────────────────────────────
+//
+// PhotoCircle/PhotoSquare above always draw SOMETHING: with no photo they fall
+// back to initials on a coloured disc. That is right for a template that has
+// decided it wants a portrait slot, and wrong for the templates that reserve no
+// space at all — a tinted initials disc appearing unbidden in a minimalist
+// header is a visual lie about what the candidate supplied.
+//
+// CvPhoto is the opt-in variant: it renders the photo when there is one and
+// NOTHING when there is not, so a template can offer a photo without leaving a
+// hole or an invented placeholder when the user skips it.
+//
+// The frame is a fixed square and the image is objectFit:"cover", so the aspect
+// ratio is preserved and the square is what gets cropped, never the face
+// stretched. `radius: 50` gives a circle, `0` a square, anything else a px radius.
+export function CvPhoto({
+  url, name, size = 84, radius = 50, borderColor, borderWidth = 0, style,
+}: {
+  url?: string; name: string; size?: number; radius?: number;
+  borderColor?: string; borderWidth?: number; style?: React.CSSProperties;
+}): React.ReactElement | null {
+  if (!url) return null;
+  return (
+    <div style={{
+      width: size, height: size, flexShrink: 0, boxSizing: "border-box",
+      borderRadius: radius === 50 ? "50%" : radius, overflow: "hidden",
+      border: borderWidth > 0 ? `${borderWidth}px solid ${borderColor ?? "#fff"}` : undefined,
+      ...style,
+    }}>
+      <img
+        src={url}
+        alt={name}
+        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+      />
+    </div>
+  );
+}
+
 
 export function SkillDots({
   level, color = "#2563EB", emptyColor = "rgba(255,255,255,0.25)", size = 7,
