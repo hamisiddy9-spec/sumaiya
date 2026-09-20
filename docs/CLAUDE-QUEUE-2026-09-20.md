@@ -240,3 +240,353 @@ Whatever the QA pass found, and the ranked launch blockers from
   phone-to-phone (WhatsApp/Xender), they do not download APKs from websites. A
   "share the app" button turning the APK into a local file transfer costs ~a day and
   costs the receiver zero data. Awaiting the user's go.
+
+---
+
+# QUEUE II — from the unexamined-areas study (`docs/AREAS-AND-PARITY-2026-09-20.md`)
+
+**Two corrections to the notes above, both measured on 2026-09-20:**
+- *"5 commits are local, unpushed"* is **stale**. `git ls-remote origin HEAD` and
+  `git rev-parse HEAD` both return `28030721b471e16552f6420bb1547c751d54273b`.
+- The daily jobs/signals/follow-ups crons live in **`apps/web/vercel.json:18-22`**, not in the
+  repo-root `vercel.json`, which has no `crons` key and sets `outputDirectory: apps/web/.next`.
+  Whichever Vercel reads decides whether those crons exist (§7 below).
+
+Everything below was measured from the live database, the live site, the device, or the source,
+by the committed probe `scripts/live-state-probe.cjs`. Priorities: **P0** before any promotion,
+**P1** this week, **P2** next.
+
+---
+
+### 7. SECURITY — the whole database is readable **and writable** with the public key · P0
+
+**Measured, not inferred:**
+```
+public tables 33 · RLS on 0 · RLS off 33
+anon grants: DELETE=33 INSERT=33 REFERENCES=33 SELECT=33 TRIGGER=33 TRUNCATE=33 UPDATE=33
+default ACL for new tables: {postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,...}
+$ curl -s -o /dev/null -w "%{http_code}" "$URL/rest/v1/profile?select=*&limit=1" -H "apikey: <public anon key>"
+profile / cv / application / device_token / job / ai_usage → 200 (all six)
+```
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` ships in the browser bundle **by design** — `ci.yml:22-23` says so
+in a comment. So anyone who reads the bundle can read every table and, because INSERT/UPDATE/
+DELETE/TRUNCATE are granted to `anon` on all 33 (and to future tables via the default ACL), can
+alter or wipe them. The app never notices because all product reads/writes go through Drizzle as
+`postgres`, which bypasses RLS.
+
+**Build:**
+1. **Revoke (preferred — the app does not use PostgREST for `public` data):**
+   `REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;`
+   `ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;`
+   The only two PostgREST data routes are dead code — `app/api/applications/list/route.ts` and
+   `app/api/jobs/[id]/apply/route.ts` (they target a non-existent `applications` table; nothing
+   calls them). Delete them in the same change so nobody re-adds the grant "to fix" them.
+2. **Or enable RLS** on all 33 tables with per-table policies, if PostgREST is ever needed.
+3. **CI guard so it cannot silently return:** `scripts/assert-rls.mjs` (or a vitest file) that runs
+   `select relname, relrowsecurity from pg_class …` **and** the `anon` grant query above, and fails
+   if any public table has RLS off while `anon` holds a privilege. Wire it into `.github/workflows/ci.yml`
+   and into `scripts/verify-all.sh`. This is the check that belongs next to the release invariants.
+4. **Extend the health endpoint** (`app/api/health`) to prove it in production: it returns
+   `{"ok":true,"db":"connected"}` today; add a `security: {anonCanReadProtectedTable: false}` probe.
+
+**Acceptance test:** the probe prints `RLS off 0` + `anon grants: (none)`, every table still
+returns its expected count through the app (sign in on the web, open a CV), and the CI guard fails
+if you manually `GRANT SELECT ON public.cv TO anon`.
+
+### 8. THE PDF HAS NO TEXT LAYER — the web export is not ATS-parsable · P0 (assert) / P1 (fix)
+
+`lib/pdf.ts:166-280` rasterizes the DOM with html2canvas and embeds **JPEG** pages in jsPDF, so the
+exported CV is an image: no text layer, nothing for a parser to read — the one mechanism the
+product is sold on in English. Native uses `expo-print` (WebView print → real text), so the same
+template produces two structurally different files. No test anywhere extracts text from a PDF.
+
+**Build:**
+1. **Assert first (½ day), so the claim is decided by a command not an opinion:** a test that renders
+   the guest CV, exports the PDF, runs `pdfjs-dist` text extraction (already a dependency; the
+   server pattern exists in `lib/api/routes/tools.ts` `POST /tools/extract-text`) and asserts the
+   CV's name + job title appear. It will fail on web today — that is the point.
+2. **Then fix, cheapest-first:** (a) overlay a real text layer on the raster (a "sandwich" PDF via
+   `pdf-lib` — invisible but extractable, no template work), or (b) generate the PDF from structured
+   data with `pdf-lib` text primitives, or (c) print HTML through headless Chromium
+   (`@sparticuz/chromium` + `puppeteer-core` on Vercel). (a) is the smallest change that makes the
+   artifact parseable; (c) is the one that also fixes print fidelity.
+3. **Print-correctness:** there is **no** `@media print` / `@page` rule anywhere in `apps/web`
+   (`grep` → 0 matches), so Ctrl-P prints an unstyled page. Add a print stylesheet for the CV
+   preview routes.
+4. **Do not build any of this on `lib/templates/native-provider.ts`** — its `renderDocument()`
+   emits one generic string for all 266 template ids (`docs/FEATURE-INVENTORY.md:203-209`).
+
+**Acceptance test:** `node -e` / test extracts text from a generated PDF and finds `"<name>"`;
+the same test passes for a native-exported PDF pulled off the phone; the fix is recorded in
+`docs/CV_DESIGN_AUDIT.md` or a new entry here with the before/after extraction output.
+
+### 9. SUPPORT GOES TO ANOTHER COMPANY'S DOMAIN · P0
+
+Both surfaces send users for help to **`support@templatehub.pro`** — the parked product
+(`docs/DECISIONS.md` D3) — for help with Sumaiya: `apps/native/src/lib/app-hosts.ts:53`,
+`apps/web/app/[locale]/(marketing)/contact/page.tsx:26`. The guard test asserts only
+`expect(SUPPORT_EMAIL.startsWith("support@")).toBe(true)`
+(`apps/native/src/__tests__/app-hosts.test.ts:64`), so it stays green over the wrong domain.
+
+**Build:**
+1. Decide the real address (e.g. `msaada@sumaiya.app` / `support@sumaiya.app`) and create it.
+2. Change both call sites to one exported constant; **assert its identity** —
+   `expect(SUPPORT_EMAIL).toBe("support@sumaiya.app")` — not its shape. Add the same assertion for
+   the web copy so the two cannot diverge (this is the §2.4 rule in practice).
+3. Put the address on the paths users actually hit when something breaks: the sign-in error state,
+   the editor's export-failure toast, and settings ("Wasiliana nasi").
+4. Add a "report a problem" action that prefills app version + device + the request id from §12, and
+   keep the FAQ (`help-faq-screen.tsx`) as the first stop.
+5. WhatsApp remains the channel this market uses; the worker exists (`apps/whatsapp/`) but is
+   health-only without Meta provisioning — note it as an owner task rather than rebuilding it.
+
+**Acceptance test:** `grep -rn "templatehub" apps/web/app apps/native/src` returns nothing outside
+deliberate history notes; both tests assert the literal address; a mailto from the phone opens a
+composer addressed to the new domain.
+
+### 10. THE EMAIL OTP IS 8 DIGITS ON THE PHONE AND 6 ON THE WEB · P0
+
+`apps/native/src/lib/auth-code.ts:3` → `export const EMAIL_OTP_DIGITS = 8;` (with a comment saying
+Supabase production is configured for 8). `apps/web/app/(app)/(auth)/sign-in/sign-in-form.tsx:257,259`
+→ `maxLength={6}` and `.replace(/\D/g,"").slice(0, 6)`. One Supabase project, two expectations; the
+web form silently accepts 6 digits and fails verification, or blocks the 8th keystroke.
+
+**Build:**
+1. Confirm the truth on the project (Supabase → Auth → Email templates must contain `{{ .Token }}`,
+   and the token length is a project setting) — do not guess, read it.
+2. Move the constant into `packages/core` (`IDENTITY.EMAIL_OTP_DIGITS`) and have **both** apps
+   import it; delete the web literals.
+3. Add the **configuration contract test** from §2.4: one test asserting the deployed setting
+   equals the constant, so a dashboard change fails a build instead of a user.
+4. While in there: the same file's web `emailCode` path signs in with
+   `verifyOtp({ email, token, type: "email" })` (`lib/auth-client.ts:29-45`) — make sure the message
+   copy tells the user the length from the constant, in both languages.
+
+**Acceptance test:** a real code from a real email is accepted on the web **and** in the app; the
+test that asserts length identity fails if you change one side only.
+
+### 11. JOB FEED: EMPTY IN PRODUCTION, AND NOBODY CAN TELL WHY · P0
+
+```
+$ curl -s https://sumaiya.app/api/jobs      → {"success":true,"data":[]}
+live DB: count job = 0 · newest job = null
+```
+The cron is declared (`apps/web/vercel.json:19`, `0 6 * * *`) and 14 adapters exist, but "has never
+run", "ran and found nothing" and "failed silently" are indistinguishable. Sources that need keys
+(Adzuna, Jooble, Careerjet, Talent, USAJobs) are skipped silently. And a **dead mock still ships**:
+`app/api/jobs/feed/route.ts` returns 8 hardcoded jobs (Kilimanjaro Retail, Jangwani Telecom) and has
+zero references.
+
+**Build:**
+1. Delete `apps/web/app/api/jobs/feed/route.ts` (verify zero references first — the command is in
+   `docs/RESEARCH-2026-09-20.md` Appendix C).
+2. Give the cron a **run report**: one row per run (a `job_ingest_run` table or reuse `app_event`)
+   with `started_at, finished_at, per_source: [{source, fetched, accepted, rejected, skipped_reason,
+   error}]`. Surface it in `app/(app)/admin/jobs` — live vs skipped counts per source.
+3. Log the skipped-reason for every key-gated source instead of `if (!key) continue`.
+4. Only then decide about data: the feed needs real listings, and the terms of each board decide
+   whether they may be fetched (do not scrape against terms to pad a number).
+5. Until the feed has rows, drop `/jobs` from `app/sitemap.ts:29` (it is `priority: 0.8,
+   changeFrequency: "weekly"` and currently indexed while empty).
+
+**Acceptance test:** one cron run produces a report row the admin page renders, with at least one
+source showing `fetched > 0` or an explicit `skipped_reason`; `curl /api/jobs` returns non-empty
+data or the page states honestly that no jobs matched.
+
+### 12. NATIVE: GUEST MODE AND AUTOSAVE · P0
+
+**Guest mode.** Every native screen is behind `!user ? <Auth/>`
+(`apps/native/src/navigation/root-navigator.tsx:245`), so the rule "a guest finishes and downloads a
+CV before being asked for an account" is honoured on the web (`app/(app)/editor/cv/try/page.tsx`,
+live at `https://sumaiya.app/editor/cv/try` → 200) and violated on the surface that is the product.
+**Port it, using the web as the reference:** draft stashed locally → export → *then* the account ask →
+`lib/migrate-guest-failure.ts` (9 tests) + `app/(app)/migrate-guest/page.tsx` for the conversion step.
+
+**Autosave.** Searching `apps/native/src/screens/cv-editor-screen.tsx` and `src/hooks/use-cvs.ts`
+for `autosave|autoSave|debounce|saveDraft` returns **zero** matches — saving is an explicit button
+(`:309`) with an unsaved-work guard (`:101-123`). A user who backs out or loses battery loses the
+edit; the web autosaves. Reuse `use-offline-sync` + `offlineStorage` (the queue and retry already
+exist), debounce into SQLite, and flush on background.
+
+**Acceptance test:** fresh install, airplane mode **on**, build a CV, export it, sign in with Google,
+and see the CV in the list — on the phone. Plus: type in the editor, kill the app, reopen, and the
+text is still there.
+
+### 13. PARITY: MAKE `@sumaiya/core` REAL, AND STOP THE COPIES · P1
+
+Measured today (`grep -rhoE "@sumaiya/[a-z-]+"` per app):
+`@sumaiya/utils` — web 7 / native 26 · `@sumaiya/types` — web **0** / native 32 ·
+`@sumaiya/api-client` — web **0** / native 20 · `@sumaiya/core` — **0 everywhere**, despite its own
+header declaring it the home for shared non-UI logic. Meanwhile the same feature is implemented
+twice: ATS scoring (`lib/ats-score.ts`+`ats-text.ts`+`ats-explain.ts` vs `src/lib/ats.ts`), the
+Swahili lint, the OTP digit count, the support address, and **motion tokens created in both apps
+today and still untracked**.
+
+**Build:**
+1. Move into `packages/core` (with their existing tests): the ATS scoring engine, the Swahili lint
+   banned-word table, `IDENTITY.EMAIL_OTP_DIGITS`, the support address, route/status vocabularies,
+   and `sanitizeCampaignSource`. Both apps import them; delete the local copies.
+2. Move web's document types into `@sumaiya/types`; make web use `@sumaiya/api-client` for its
+   browser calls so endpoint paths exist once.
+3. Make `apps/web/tailwind.config.ts` **import** `@sumaiya/design-tokens` instead of mirroring it
+   (the package's own header admits the mirror is hand-maintained).
+4. Land the motion tokens as one shared file rather than two (see the uncommitted work in the tree —
+   coordinate, do not overwrite another writer).
+5. Add the **import-graph test**: assert both apps resolve a named list of modules from the packages
+   and that no file under `apps/*/src/lib` re-implements one. Cheap, and it catches the next copy on
+   the day it is written.
+6. Put the brief template + the per-surface definition of done from §2.3/§2.6 of the study into
+   `CLAUDE.md`, so the next feature starts with the rule instead of learning it again.
+
+**Acceptance test:** `grep -rn "EMAIL_OTP_DIGITS\|support@templatehub" apps/web apps/native` finds
+only package imports; the same CV scores identically through both apps' ATS calls; the import-graph
+test fails if you paste a copy of `ats-score.ts` into either app.
+
+### 14. GOOGLE SIGN-IN: ONE MECHANISM, THREE TESTS · P1 (this supersedes §0.6's option list)
+
+§0.6 already names the fix (use Google Identity Services in the browser → `signInWithIdToken`, the
+shape the working native path uses). What it does not yet say is what stops it recurring:
+
+**Build:**
+1. Implement the web path per Supabase's own guide
+   ([docs](https://supabase.com/docs/guides/auth/social-login/auth-google) shows GSI →
+   `handleSignInWithGoogle(response)` → `signInWithIdToken({provider:'google', token: response.credential})`,
+   the same exchange the app already uses), with the nonce when convenient.
+2. Extract the exchange to `packages/api-client/src/auth.ts` (`signInWithGoogleIdToken`), so web and
+   native call one function; each app keeps only the credential-acquisition file
+   (`lib/google-identity.ts`).
+3. **Source-graph test:** fail if `signInWithOAuth(` or `signInWithIdToken(` appears outside
+   `packages/api-client` — the test that would have caught this on day one.
+4. **Per-surface E2E:** Playwright `chromium-desktop` + `chromium-pixel7` (both already configured)
+   and the Maestro native flow; each asserts **server state** (a session exists, `/api/user/profile`
+   returns the same email), never "we are on /dashboard".
+5. Keep the Supabase client secret unset — the point is not to need it.
+
+**Acceptance test:** sign in with Google on desktop web, mobile web and the phone; all three land on
+the same account and the profile row has the same email; `grep` shows no second exchange call site.
+
+### 15. OBSERVABILITY: SOMEBODY HAS TO BE TOLD · P1
+
+`lib/observability/report-error.ts:26-41` writes one structured JSON line to the console and stops
+there — the docstring admits Vercel function logs are the only destination. Nothing watches them, so
+a route that starts 500ing is discovered when a user complains, and there is nowhere to complain
+(§9). The AI 503s are honest but uncounted (`lib/api/routes/ai.ts` × 8).
+
+**Build:** (1) a log drain or Sentry server-side — one destination, one alert rule on error rate;
+(2) a request id generated per API call, echoed in error responses, shown in the toast and prefilled
+into support messages; (3) `/api/health` → deep health (§7 item 4, plus AI-provider presence and the
+job-source key report); (4) an admin panel line showing today's error count by scope.
+
+**Acceptance test:** throw a test error on a staging route; it appears in the destination within a
+minute with a request id that also appears in the user-visible toast.
+
+### 16. NOTIFICATIONS: PROVE ONE, THEN GIVE A SWITCH · P1
+
+The machinery is real (`lib/push/expo.ts:45-97` chunks, prunes dead tokens; `dispatch-signals.ts`
+dedupes on `(user_id, notif_key)`; two crons in `apps/web/vercel.json:20-21`) and the live counters
+are all **zero**: `device_token 0`, `web_push_subscription 0`, `signal_notification 0`. So the
+registration path (`PUT /api/mobile/device-token`, `lib/api/routes/mobile.ts:583`) is unproven, and
+there is **no user-facing opt-out** anywhere (the only match for permissions is a comment in
+`src/lib/push.ts:55`).
+
+**Build:** register a token on the device and assert a row appears; fire one signal and assert one
+delivery (screenshot); add a notifications preference in settings with a matching server check;
+report the daily counts in admin.
+
+**Acceptance test:** `device_token` ≥ 1 after opening the app, a notification arrives on the Pixel
+from `/api/cron/signals`, and turning the preference off stops it.
+
+### 17. ARABIC / RTL: DECIDE NOW, PLUMB NOW, TRANSLATE LATER · P1 (decision) / P2
+
+`grep -rn "rtl\|I18nManager\|dir=\"rtl\""` over both apps → **no exact matches**. No direction
+plumbing, no logical CSS properties, no Arabic strings or fonts, no RTL template proof. RTL is a
+layout direction, not a translation: retrofitting it means touching all 266 templates and every
+physical margin in the codebase. The Gulf is the stated expansion and the market is bilingual
+(Naukrigulf runs an Arabic jobseeker section; see `docs/RESEARCH-2026-09-20.md` §1c).
+
+**Build:** (1) write the decision with a date — is Arabic in scope before a Gulf employer
+relationship exists? (2) If yes, the cheap irreversible-proofing: a `dir` attribute plumbed through
+the locale layout, logical CSS properties (`ms-`/`me-`/`ps-`/`pe-` or `margin-inline-start`),
+`I18nManager.forceRTL` wired on native, Arabic strings added to the shared catalogue, and **one**
+template rendered RTL as a proof; (3) add the Gulf CV fields the research identified as mandatory
+(nationality, visa status, availability-to-join) next to the photo that already landed.
+
+**Acceptance test:** `?lang=ar` renders right-to-left with mirrored layout and no clipped text on
+one real template, and `npx tsc --noEmit` passes on both apps.
+
+### 18. THE MOBILE-WEB / DESKTOP DEFINITION OF DONE GOES INTO CLAUDE.md · P1
+
+§2.3 (feature brief with numbered requirements + `FORKS`) and §2.6 (per-surface definition of done)
+are the parts that stop the next Google sign-in. They are worth nothing in a doc nobody opens at the
+start of a feature.
+
+**Build:** add both to the repo `CLAUDE.md` (and `apps/web/CLAUDE.md` if it exists) as the required
+shape of a feature PR; add the import-graph test (§13.5) and the RLS guard (§7.3) as named gates in
+the "before accepting anything" list at the top of this queue file.
+
+**Acceptance test:** a new feature started after this has a brief with requirement IDs and a PROOF
+block per surface.
+
+### 19. THE USER'S OWN DATA: EXPORT, DRAFTS, AND THE TRACKER · P1/P2
+
+No export path exists (`grep export-data|downloadData|exportAll|gdpr` → 0 matches) even though
+deletion is thorough (`lib/api/routes/user.ts:65-103` purges 14 tables then the auth user). The web
+guest draft is one `localStorage` key, so a second guest CV silently overwrites the first
+(`sumaiya-guest-cv`). The native application tracker is local SQLite only (`applications-store.ts`,
+`application` table = 0 rows) — change phone, lose the tracker.
+
+**Build:** `GET /api/user/export` returning one JSON of the user's rows + a "Download my data" row in
+settings; key guest drafts by id and list them; either sync the tracker to the server or stop
+describing it as durable.
+
+**Acceptance test:** the export downloads and contains the CV the user made; two guest CVs both
+survive; a tracker entry made on the phone appears on the web (once synced).
+
+### 20. PERFORMANCE: MEASURE, THEN CUT · P1 (measure) / P2 (cut)
+
+Dynamic imports are used for the heavy libraries (`lib/pdf.ts:167-170`), and repeat visits are cheap
+because the SW stale-while-revalidates statics (`public/sw.js:97-110`). The gaps: **no production
+bundle measurement**, **no export timing**, **no virtualization** (`jobs-feed.tsx:318-329` maps every
+job; native slices to 40 at `jobs-screen.tsx:185`; `applications-screen.tsx:74` maps the tracker;
+the only `FlatList` is the template gallery), and **no image pipeline** (`next/image` imported by 0
+files, 6 raw `<img>`, campaign posters served raw at 256–364 KB each, `pdf.worker.min.mjs` 1.4 MB).
+
+**Build:** record `next build`'s First Load JS per route in the repo (a committed table); add
+`performance.now()` around the rasterize and report it as an event property; virtualize the three
+long lists; pre-encode AVIF/WebP at two widths for the poster/marketing images and use `next/image`
+or explicit `srcset`.
+
+**Acceptance test:** a committed table of First Load JS per route with a before/after, and an export
+duration visible in `app_event` from the phone.
+
+### 21. FIRST-RUN ON THE WEB, AND THE ACTIVATION NUMBER · P2
+
+Native first-run is genuinely well built and instrumented — 8 steps with
+`firstrun.start` / `firstrun.step` and `prev_seconds`, no PII
+(`apps/native/src/screens/first-run-screen.tsx:45,146-147,169-178`). The web has no equivalent: a
+search visitor lands on a marketing page with no guided route to the guest editor, and with **0 CVs
+in the database** there is no evidence anyone has ever finished the journey.
+
+**Build:** define the aha-moment ("a CV they can send") and one event for it; mirror the native
+wizard's shape in 3–5 web steps that end at a downloaded CV; put the number in admin next to the
+guest→export conversion.
+
+**Acceptance test:** a fresh browser session reaches a downloaded CV through the guided path, and the
+event lands in `app_event`.
+
+### 22. MONETIZATION: WRITE THE BOUNDARY, MEASURE THE WALL · P2
+
+`PAYMENTS_ENABLED = false` (`lib/features.ts:8`), `/pricing` and `/checkout` 307 home
+(`next.config.mjs:59-60`), and `cv-editor-client.tsx:975-976` shadows the `isPremium` prop with
+`const isPremium = true`, which makes the upgrade modal dead code. No TZS price exists anywhere;
+nothing records a user *trying* a premium template, so the one number that would price the product
+is not collected. The market already pays on mobile money — Careergo TZS 600/hour, SwiftKazi
+KES 20/CV ([careergo.co/tz](https://careergo.co/tz), [swiftkazi.co.ke](https://swiftkazi.co.ke/)).
+
+**Build:** write down what is paid (Gulf pack? extra templates? AI volume?) and what is never paid
+(the guest's first CV and its download); instrument the attempt honestly — log it, allow it, no dark
+patterns; keep the rail as a plan until there is a receiving account.
+
+**Acceptance test:** a document with the boundary, and a premium-template attempt visible in
+analytics without the user being blocked.
+
