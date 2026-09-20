@@ -22,10 +22,10 @@ const FAQS: Faq[] = [
     },
   },
   {
-    q: { en: "How does the ATS score work?", sw: "Alama ya ATS inafanyaje kazi?" },
+    q: { en: "How does the ATS score work?", sw: "Alama ya CV yangu inafanyaje kazi?" },
     a: {
       en: "The ATS checker compares your CV against the words in a job posting — skills, titles and keywords — and scores how well they match. A higher score means an automated hiring system is more likely to pass your CV through. It's guidance, not a guarantee: a human still reads it.",
-      sw: "Kichunguzi cha ATS hulinganisha CV yako na maneno katika tangazo la kazi — ujuzi, vyeo na maneno muhimu — na kutoa alama ya jinsi zinavyolingana. Alama kubwa inamaanisha mfumo wa kiotomatiki una uwezekano mkubwa wa kupitisha CV yako. Ni mwongozo, si uhakika: binadamu bado ataisoma.",
+      sw: "Kikagua CV hulinganisha CV yako na maneno katika tangazo la kazi — ujuzi, vyeo na maneno muhimu — na kutoa alama ya jinsi zinavyolingana. Alama kubwa inamaanisha mfumo wa kiotomatiki una uwezekano mkubwa wa kupitisha CV yako. Ni mwongozo, si uhakika: binadamu bado ataisoma.",
     },
   },
   {
@@ -53,7 +53,7 @@ const FAQS: Faq[] = [
     q: { en: "How do I tailor my CV to a specific job?", sw: "Ninawezaje kurekebisha CV yangu kwa kazi fulani?" },
     a: {
       en: "Paste the job posting into Sumaiya and ask her to tailor your CV, or use the ATS checker to see which keywords to add. She rewrites your summary and highlights to match the role.",
-      sw: "Bandika tangazo la kazi kwa Sumaiya na umwombe akurekebishie CV yako, au tumia kichunguzi cha ATS kuona maneno muhimu ya kuongeza. Anaandika upya muhtasari na mambo muhimu yako ili kufanana na kazi hiyo.",
+      sw: "Bandika tangazo la kazi kwa Sumaiya na umwombe akurekebishie CV yako, au tumia kikagua CV kuona maneno muhimu ya kuongeza. Anaandika upya muhtasari na mambo muhimu yako ili kufanana na kazi hiyo.",
     },
   },
   {
@@ -67,7 +67,7 @@ const FAQS: Faq[] = [
     q: { en: "Can I use Sumaiya offline?", sw: "Naweza kutumia Sumaiya bila mtandao?" },
     a: {
       en: "Your saved CVs are available offline, and edits sync to the cloud when you reconnect. Some features — chatting with Sumaiya, checking ATS and fetching jobs — need a connection.",
-      sw: "CV zako zilizohifadhiwa zinapatikana bila mtandao, na mabadiliko husawazishwa kwenye wingu unapounganisha tena. Baadhi ya vipengele — kuzungumza na Sumaiya, kuangalia ATS na kupata ajira — vinahitaji mtandao.",
+      sw: "CV zako zilizohifadhiwa zinapatikana bila mtandao, na mabadiliko husawazishwa kwenye wingu unapounganisha tena. Baadhi ya vipengele — kuzungumza na Sumaiya, kukagua CV yako na kupata ajira — vinahitaji mtandao.",
     },
   },
   {

@@ -80,6 +80,36 @@ const MVIRINGO_VYA_CALQUE = /mviringo vya/i;
 const MBAO_CALQUE = /Mbao za muhtasari/i;
 const MANENO_MAPENZI_CALQUE = /MANENO YA MAPENZI/i;
 
+// ── Loaded street vocabulary ────────────────────────────────────────────────
+// The dictionary gloss makes these look right for "clever"/"shrewd" copy, but
+// live Tanzanian usage carries TRICKERY. A native speaker rejected the
+// button-title "Omba kwa ujanja" ("Apply smarter") on sight: "ujanja means
+// tricky in the streets". In a job-application product, instructing people to
+// apply by trickery is insulting and implies cheating employers.
+// Wiktionary glosses ujanja "cunning, craftiness" and mjanja "a cunning /
+// crafty person"; a Tanzanian interviewee in Vavrus (2015) notes mjanja "can
+// mean mlaghai — a cheat or a liar". Describe the outcome instead.
+const UJANJA_LOADED = /\b(ujanja|mjanja|wajanja|janja)\b/i;
+
+// "mgusiko" is not a Swahili word at all — the noun for a touch is "mguso".
+// Shipped as "Mgusiko mmoja, hakuna nywila." on the sign-in screen; the owner
+// caught it. The same app coins "kitone"/"vitone" into the guard list above,
+// so this is the same class of fabrication.
+const MGUSIKO_COINAGE = /\bmgusiko\b/i;
+
+// "link" sitting inside a Swahili sentence. The real word is "kiungo", which
+// the rest of the app already uses ("Kiungo cha ajira", "tuma kiungo"). The
+// owner corrected "tuma link" → "tuma kiungo" once already; four strings kept
+// the English word.
+const LINK_FOR_KIUNGO = /\blink ya\b/i;
+
+// Naming the ATS mechanism in Swahili copy — the native mirror of the web
+// lint's `ats-jargon-in-swahili` guard. Only the web tree carried this rule, so
+// native shipped 15 user-visible Swahili strings with ATS in them ("Ukaguzi wa
+// ATS" on the home tile, "Salama kwa ATS" as a CV preset, "Tayari kwa ATS" as a
+// score band). English copy is still allowed to say "ATS".
+const ATS_IN_SWAHILI = /\b(?:wa|ya|kwa|za|la|cha|na|kwenye|kikagua)\s+ATS\b/i;
+
 // One entry per tripwire. `pattern` is the bad string; `message` names the
 // pattern that tripped, the replacement to use, and the file and line, so the
 // failure tells the next person exactly what to type instead.
@@ -120,6 +150,22 @@ const CALQUE_GUARDS: CalqueGuard[] = [
   {
     pattern: MANENO_MAPENZI_CALQUE,
     message: (m, file, line) => `"${m}" — banned all-caps word-by-word headline calque; rewrite in sentence case in ${file}:${line}`,
+  },
+  {
+    pattern: UJANJA_LOADED,
+    message: (m, file, line) => `"${m}" — loaded street word: ujanja/mjanja gloss as "cunning"/"crafty" and read as TRICKERY (mjanja can mean a cheat or a liar). Never tell a jobseeker to apply "kwa ujanja" — name the outcome instead ("Omba vyema") in ${file}:${line}`,
+  },
+  {
+    pattern: MGUSIKO_COINAGE,
+    message: (m, file, line) => `"${m}" — not a Swahili word; the noun for a touch is "mguso" ("Mguso mmoja, hakuna nywila.") in ${file}:${line}`,
+  },
+  {
+    pattern: LINK_FOR_KIUNGO,
+    message: (m, file, line) => `"${m}" — English "link" inside Swahili copy; use "kiungo" ("Bandika kiungo cha ajira", "tuma kiungo") in ${file}:${line}`,
+  },
+  {
+    pattern: ATS_IN_SWAHILI,
+    message: (m, file, line) => `"${m}" — names the ATS mechanism in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vichujio vya waajiri", "kikagua CV", "waajiri") in ${file}:${line}`,
   },
 ];
 

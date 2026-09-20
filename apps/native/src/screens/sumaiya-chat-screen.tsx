@@ -508,7 +508,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
 
       <PromptModal
         visible={linkPrompt}
-        title={t("Paste the job link", "Bandika link ya ajira")}
+        title={t("Paste the job link", "Bandika kiungo cha ajira")}
         message={t("I'll keep the link as context — paste the advert text too if you can.", "Nitaihifadhi kama muktadha — bandika pia maandishi ya tangazo ukiweza.")}
         placeholder="https://…"
         confirmLabel={t("Add", "Ongeza")}

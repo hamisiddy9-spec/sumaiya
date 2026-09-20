@@ -232,7 +232,7 @@ export function SignInScreen(_props: Props) {
               {t("Sign in to Sumaiya", "Ingia Sumaiya")}
             </Text>
             <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
-              {t("One tap, no password.", "Mgusiko mmoja, hakuna nywila.")}
+              {t("One tap, no password.", "Mguso mmoja, hakuna nywila.")}
             </Text>
           </View>
 

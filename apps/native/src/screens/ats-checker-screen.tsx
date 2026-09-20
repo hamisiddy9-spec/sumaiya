@@ -116,11 +116,11 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const scoreColor = (s: number) => (s >= 75 ? c.success : s >= 50 ? c.warning : c.error);
   const scoreTone = (s: number): "success" | "warning" | "error" => (s >= 75 ? "success" : s >= 50 ? "warning" : "error");
   const statusWord = (s: number) =>
-    s >= 75 ? t("ATS-ready", "Tayari kwa ATS") : s >= 50 ? t("Needs work", "Inahitaji kazi") : t("High risk", "Hatari kubwa");
+    s >= 75 ? t("ATS-ready", "Tayari kwa waajiri") : s >= 50 ? t("Needs work", "Inahitaji kazi") : t("High risk", "Hatari kubwa");
 
   return (
     <Screen scroll keyboardAvoiding contentContainerStyle={{ gap: 18 }}>
-      <ScreenTitle>{t("ATS check", "Ukaguzi wa ATS")}</ScreenTitle>
+      <ScreenTitle>{t("ATS check", "Ukaguzi wa CV")}</ScreenTitle>
 
       {loading && cvs.length === 0 ? (
         <Text style={{ color: c.textMuted }}>{t("Loading your CVs…", "Inapakia CV zako…")}</Text>
@@ -204,7 +204,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                   <Text style={{ color: c.textMuted, fontSize: 13, lineHeight: 19 }}>
                     {t(
                       "Deterministic checks — the same ones a real ATS runs. No AI, nothing sent anywhere.",
-                      "Ukaguzi wa uhakika — sawa na ATS halisi. Hakuna AI, hakuna kinachotumwa popote.",
+                      "Ukaguzi wa uhakika — sawa na mifumo halisi ya kuajiri. Hakuna AI, hakuna kinachotumwa popote.",
                     )}
                   </Text>
                 </View>

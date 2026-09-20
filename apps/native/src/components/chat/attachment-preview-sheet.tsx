@@ -60,7 +60,7 @@ export function AttachmentPreviewSheet({
   const a = attachment;
 
   const kindLabel =
-    a?.kind === "link" ? t("Job link", "Link ya ajira")
+    a?.kind === "link" ? t("Job link", "Kiungo cha ajira")
     : a?.kind === "image" ? t("Photo", "Picha")
     : a?.kind === "cv" ? t("Your CV", "CV yako")
     : t("Document", "Faili");

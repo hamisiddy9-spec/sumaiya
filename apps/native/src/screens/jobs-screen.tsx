@@ -135,7 +135,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
         <EmptyState
           icon="briefcase"
           title={t("No openings right now", "Hakuna nafasi kwa sasa")}
-          body={t("New listings are pulled in daily. Check back soon, or paste a job link and I'll tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika link ya ajira nikutengenezee CV iliyolengwa.")}
+          body={t("New listings are pulled in daily. Check back soon, or paste a job link and I'll tailor your CV to it.", "Nafasi mpya zinaingizwa kila siku. Rudi hivi karibuni, au bandika kiungo cha ajira nikutengenezee CV iliyolengwa.")}
           actionLabel={t("Ask me", "Niulize")}
           onAction={() => navigation.navigate("JobApply")}
         />

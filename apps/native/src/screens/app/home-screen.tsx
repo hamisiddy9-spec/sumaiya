@@ -272,7 +272,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const quickActions = [
     { icon: "sumaiya", label: t("Career AI", "AI ya kazi"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
     { icon: "target", label: t("Find jobs", "Tafuta kazi"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
-    { icon: "shield-check", label: t("ATS check", "Ukaguzi wa ATS"), tint: c.success, onPress: () => navigation.navigate("AtsChecker") },
+    { icon: "shield-check", label: t("ATS check", "Ukaguzi wa CV"), tint: c.success, onPress: () => navigation.navigate("AtsChecker") },
     { icon: "briefcase", label: t("Applications", "Maombi"), tint: c.accent, onPress: () => navigation.navigate("Applications") },
     // Cover letters were only reachable buried inside the job-tailor flow or a
     // chat quick-action seed — no direct entry point at all. This opens the

@@ -83,7 +83,7 @@ export interface EnginePreset {
 
 export const ENGINE_PRESETS: Record<string, EnginePreset> = {
   ats: {
-    label: { en: "ATS Safe", sw: "Salama kwa ATS" },
+    label: { en: "ATS Safe", sw: "Salama kwa waajiri" },
     description: { en: "Compact, keyword-rich, machine-readable", sw: "Fupi, maneno muhimu, inasomwa na mashine" },
     density: "compact",
     icon: "🤖",

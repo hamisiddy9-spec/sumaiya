@@ -232,7 +232,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
         <Button label={loading ? t("Tailoring…", "Inalenga…") : t("Tailor to this job", "Lenga ajira hii")} onPress={generate} loading={loading} disabled={loading} />
       }
     >
-      <ScreenTitle trailing={<SumaiyaMark size={24} color={c.accent} />}>{t("Apply smarter", "Omba kwa ujanja")}</ScreenTitle>
+      <ScreenTitle trailing={<SumaiyaMark size={24} color={c.accent} />}>{t("Apply smarter", "Omba vyema")}</ScreenTitle>
       <Text style={{ color: c.textBody, fontSize: 14.5, lineHeight: 21, marginBottom: 18 }}>
         {t("Paste a job description. I retune your CV and write a matching cover letter — grounded in what I already know about you.", "Bandika maelezo ya ajira. Narekebisha CV yako na kuandika barua ya maombi inayolingana — kwa kutumia ninachokifahamu kukuhusu.")}
       </Text>

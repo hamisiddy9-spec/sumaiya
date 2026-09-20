@@ -242,6 +242,46 @@ const GUARDS: Guard[] = [
         file === "app/[locale]/(marketing)/snap-to-apply/page.tsx") &&
       line.includes('"alama ya ATS"'),
   },
+  {
+    id: "loaded-street-word",
+    // A word whose dictionary gloss sounds right but whose live Tanzanian
+    // register is loaded. The owner rejected the button-title "Omba kwa ujanja"
+    // ("Apply smarter") the moment he saw it: "ujanja means tricky in the
+    // streets". A job-application product telling people to apply by trickery
+    // reads as teaching them to cheat an employer, which is worse than a plain
+    // mistranslation. Wiktionary glosses ujanja "cunning, craftiness" and mjanja
+    // "a cunning / crafty person"; a Tanzanian interviewee quoted in Vavrus
+    // (2015) adds that mjanja "can mean mlaghai — a cheat or a liar".
+    // Before adopting ANY Swahili word, check its colloquial register, not just
+    // its dictionary gloss.
+    pattern: /\b(ujanja|mjanja|wajanja|janja)\b/i,
+    message: (m) =>
+      `"${m}" — loaded street word: it glosses as "cunning"/"crafty" and reads as TRICKERY (mjanja can mean a cheat or a liar). Do not tell a jobseeker to apply "kwa ujanja" — name the outcome instead ("Omba vyema")`,
+    bad: ["Omba kwa ujanja", "Omba kwa mjanja", "ujanja wa kuchakachua"],
+    good: ["Omba vyema", "Omba kwa uangalifu", "Tumia akili yako"],
+  },
+  {
+    id: "fabricated-word",
+    // Not a Swahili word at all. Shipped as "Mgusiko mmoja, hakuna nywila." on
+    // the sign-in screen; the noun for a touch is "mguso".
+    pattern: /\bmgusiko\b/i,
+    message: (m) =>
+      `"${m}" — not a Swahili word; the noun for a touch is "mguso" ("Mguso mmoja, hakuna nywila.")`,
+    bad: ["Mgusiko mmoja, hakuna nywila.", "mgusiko"],
+    good: ["Mguso mmoja, hakuna nywila.", "Gusa mara moja"],
+  },
+  {
+    id: "link-for-kiungo",
+    // English "link" inside a Swahili sentence. "kiungo" is the word the app
+    // already uses everywhere else ("Kiungo cha ajira (si lazima)", "tuma
+    // kiungo", "Kiungo hakitumiki tena"). The owner corrected "tuma link" ->
+    // "tuma kiungo" once already; four strings kept the English word.
+    pattern: /\blink ya\b/i,
+    message: (m) =>
+      `"${m}" — English "link" inside Swahili copy; use "kiungo" ("Bandika kiungo cha ajira", "tuma kiungo")`,
+    bad: ["Bandika link ya ajira", "Link ya ajira"],
+    good: ["Bandika kiungo cha ajira", "Kiungo cha ajira", "tuma kiungo"],
+  },
 ];
 
 function guardById(id: string): Guard {

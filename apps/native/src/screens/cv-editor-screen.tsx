@@ -502,7 +502,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
                 style={{ flexDirection: "row", alignItems: "center", gap: 5, paddingVertical: 6, paddingHorizontal: 11, borderRadius: 9, backgroundColor: c.accent + "16" }}
               >
                 <Icon name="shield-check" size={14} color={c.accent} />
-                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>ATS</Text>
+                <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "700" }}>{t("ATS", "Kagua CV")}</Text>
               </Pressable>
             ) : null}
           </View>

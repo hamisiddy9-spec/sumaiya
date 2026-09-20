@@ -49,7 +49,7 @@ const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   },
   verdict: {
     en: ["A written verdict on your CV, in plain language", "Your 3 highest-impact fixes, ranked", "The deterministic ATS score stays free"],
-    sw: ["Uamuzi ulioandikwa kuhusu CV yako, kwa lugha rahisi", "Marekebisho matatu yenye athari kubwa, yaliyopangwa", "Alama ya ATS ya uhakika inabaki bure"],
+    sw: ["Uamuzi ulioandikwa kuhusu CV yako, kwa lugha rahisi", "Marekebisho matatu yenye athari kubwa, yaliyopangwa", "Alama ya CV yako ya uhakika inabaki bure"],
   },
   general: {
     en: [
