@@ -15,6 +15,9 @@ import { TEMPLATES } from "@sumaiya/templates";
 // Subpath import on purpose: the package barrel pulls in offline-storage
 // (expo-sqlite), which neither the web build nor jest can resolve.
 import { toNativeCvData, toStoredCvData } from "@sumaiya/utils/cv-shape";
+// The chat's job picker (see ./job-pick.ts). Imported as well as re-exported,
+// because `export *` at the bottom of this file creates no local bindings.
+import { buildPickListUrl, buildPickRowUrl } from "./job-pick";
 
 /**
  * JSON has no date type — `createdAt`/`updatedAt` arrive over the wire as ISO
@@ -529,12 +532,19 @@ export class ApiClient {
 
   // ── Jobs (Hono /api/jobs) ─────────────────────────────────────────────────
   /** The public live-jobs feed. */
-  async getJobs(): Promise<JobListing[]> {
+  async getJobs(opts: { q?: string; limit?: number; light?: boolean; id?: string } = {}): Promise<JobListing[]> {
     // Deliberately NO internal `.catch(() => [])` here. Swallowing the failure
     // made a network error indistinguishable from a genuinely empty feed at
     // every call site: the Jobs screen rendered "No openings right now" while
     // offline, and its (correct) "Couldn't load jobs / Retry" branch was dead
     // code. All callers already handle rejection — let it propagate.
+    //
+    // The no-argument call is unchanged (the full public feed). The options
+    // exist for the chat's job picker: `light` drops every description so a
+    // phone on metered data can open a pick-list for a couple of KB instead of
+    // ~350 KB, and `id` fetches the ONE advert the user actually chose.
+    if (opts.id) return this.request<JobListing[]>(buildPickRowUrl(opts.id));
+    if (opts.light) return this.request<JobListing[]>(buildPickListUrl({ q: opts.q, limit: opts.limit }));
     return this.request<JobListing[]>("/api/jobs");
   }
 
@@ -688,5 +698,6 @@ export type CapabilityResult =
   | { status: "error"; tool: string; code: string };
 
 export * from "./vacancy-sources";
+export * from "./job-pick";
 
 export default ApiClient;

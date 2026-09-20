@@ -4,7 +4,7 @@ import { getAuthUser } from "@/lib/api/auth";
 import { isAdmin } from "@/lib/admin";
 import { z } from "zod";
 import { db, job, userProfile } from "@/lib/db";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and, or, ilike } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { LIVE_STATUSES } from "@/lib/jobs/constants";
 import { homeMarketFirst } from "@/lib/jobs/feed-filter";
@@ -12,6 +12,7 @@ import { getRecommendations } from "@/lib/jobs/recommend";
 import { enrichJob } from "@/lib/jobs/enrich";
 import { parseCareerProfile } from "@/types";
 import { buildTargetedCv } from "@/lib/targeted-cv";
+import { isPickRequest, normalizePickQuery, parsePickLimit } from "@sumaiya/api-client";
 
 const jobSchema = z.object({
   title: z.string().min(1).max(200),
@@ -39,8 +40,59 @@ export const jobRoutes = new Hono()
   // first. Auth not required to browse. Project only public-safe columns —
   // never expose postedBy (an internal user id) or source (internal notes) on
   // an unauthenticated endpoint.
+  //
+  // The chat's job picker ("chagua kutoka kwenye kazi zetu") uses the SAME
+  // endpoint with `?light=1&limit=N[&q=…]`: a projected list with no
+  // descriptions (the full feed is ~350 KB of advert text for 100 rows, which
+  // is not something a first-time jobseeker on a cheap Android phone should pay
+  // to see a list of job titles), and `?id=…` to fetch the one advert they
+  // actually chose. With no parameters the response is byte-for-byte what it
+  // has always been — the jobs page, the assistant's own job search and the
+  // Android jobs screen all depend on that.
   .get("/", async (c) => {
+    const pick = {
+      id: (c.req.query("id") ?? "").trim(),
+      q: normalizePickQuery(c.req.query("q")),
+      light: c.req.query("light"),
+      limit: c.req.query("limit"),
+    };
     try {
+      if (isPickRequest(pick)) {
+        const limit = parsePickLimit(pick.limit);
+        const where = [inArray(job.status, LIVE_STATUSES)];
+        // One row, by id — the advert the user chose. Still gated on LIVE_STATUSES
+        // so a listing that expired between the list and the tap is not served.
+        if (pick.id) where.push(eq(job.id, pick.id));
+        // Search across the fields a jobseeker would type: the role, the company,
+        // the place. LIKE wildcards are stripped in normalizePickQuery.
+        if (pick.q) {
+          where.push(
+            or(
+              ilike(job.title, `%${pick.q}%`),
+              ilike(job.company, `%${pick.q}%`),
+              ilike(job.location, `%${pick.q}%`),
+            )!,
+          );
+        }
+        const rows = await db
+          .select({
+            id: job.id, title: job.title, company: job.company, location: job.location,
+            category: job.category, employmentType: job.employmentType, applyUrl: job.applyUrl,
+            status: job.status, featured: job.featured, applicationDeadline: job.applicationDeadline,
+            sourceName: job.sourceName, createdAt: job.createdAt,
+            // The description is the expensive column: omitted ONLY for the
+            // projected pick-list (`light=1`), and always kept for a single-row
+            // lookup, which exists precisely to get the advert text.
+            ...(pick.light === "1" && !pick.id ? {} : { description: job.description }),
+          })
+          .from(job)
+          .where(and(...where))
+          .orderBy(desc(job.featured), desc(job.createdAt))
+          .limit(limit);
+        c.header("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+        return c.json({ success: true, data: homeMarketFirst(rows) });
+      }
+
       const rows = await db
         .select({
           id: job.id, title: job.title, company: job.company, location: job.location,

@@ -19,6 +19,7 @@ import { useSumaiyaChat } from "../hooks/use-sumaiya-chat";
 import { ChatMessageComponent } from "../components/chat/chat-message";
 import { AttachmentPreviewSheet } from "../components/chat/attachment-preview-sheet";
 import { AttachSheet } from "../components/chat/attach-sheet";
+import { JobChoiceSheet } from "../components/chat/job-choice-sheet";
 import { QuickActionsGrid } from "../components/chat/quick-actions-grid";
 import { ChatComposer } from "../components/chat/chat-composer";
 import { INITIAL_QUICK_ACTIONS } from "../components/chat/chat-types";
@@ -65,6 +66,9 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   const [preview, setPreview] = useState<Attachment | null>(null);
   const [linkPrompt, setLinkPrompt] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
+  // "Lenga kwenye kazi" must not assume which job — it opens the choice (our
+  // listings, searchable, or the user's own) at zero request cost.
+  const [jobChoiceOpen, setJobChoiceOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
 
@@ -211,7 +215,10 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       case "open-cv":
       case "edit-cv": {
         if (data?.section === "jobs") {
-          navigation.navigate("HomeTab", { screen: "JobApply" });
+          // The "Lenga kwenye kazi" chip. Never assume the job: offer our live
+          // listings (searchable) or the user's own advert, then hand the chosen
+          // one to the existing snap screen.
+          setJobChoiceOpen(true);
           break;
         }
         if (data?.section === "ats") {
@@ -509,6 +516,22 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         visible={attachOpen}
         onClose={() => setAttachOpen(false)}
         onPick={(kind) => onAttach(kind)}
+      />
+
+      {/* Which job? Our live listings (searchable, projected so it stays cheap)
+          or the user's own advert. Only a real listing ever reaches the snap
+          screen — and only after the user picked it. */}
+      <JobChoiceSheet
+        visible={jobChoiceOpen}
+        onClose={() => setJobChoiceOpen(false)}
+        onPickOurJob={(jd) => {
+          setJobChoiceOpen(false);
+          navigation.navigate("HomeTab", { screen: "JobApply", params: { jd } });
+        }}
+        onOwnSource={() => {
+          setJobChoiceOpen(false);
+          navigation.navigate("HomeTab", { screen: "JobApply" });
+        }}
       />
 
       <PromptModal

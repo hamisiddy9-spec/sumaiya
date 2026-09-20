@@ -22,6 +22,7 @@ import { s, errorMsg } from "@/lib/assistant/error-message";
 import { resolveTemplatePreview } from "@/lib/assistant/template-preview";
 import { TemplatePreviewCard } from "@/components/assistant/template-preview-card";
 import { StartChooser, type StartChoice } from "@/components/assistant/start-chooser";
+import { JobChoicePanel } from "@/components/assistant/job-choice-panel";
 import { ChatCard } from "@/components/assistant/chat-card";
 import { CvReadyCard } from "@/components/assistant/cv-ready-card";
 import { NakuruTemplate } from "@/components/templates/nakuru";
@@ -341,6 +342,10 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setMessages((m) => m.map((msg, i) => (i === msgIndex && msg.card ? { ...msg, card: { ...msg.card, dismissed: true } } : msg)));
   };
   const [awaitingJd, setAwaitingJd] = useState(false);
+  // "Lenga CV kwa kazi" opens the job choice (our listings vs the user's own),
+  // never a decision made for them. Local state only — opening it costs no
+  // request, and it renders above the composer rather than over it.
+  const [showJobChoice, setShowJobChoice] = useState(false);
   const [actionBusy, setActionBusy] = useState<null | "tailor" | "apply" | "summary" | "pdf" | "cover" | "track">(null);
   // Raw attached files, kept so the AI can run PDF tools on them (server-side).
   const attachedFilesRef = useRef<File[]>([]);
@@ -1510,19 +1515,52 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   }, [router]);
 
   // Cockpit: ask for the job, then show an instant (deterministic) match card.
+  // The chat's "target a job" entry point. It must not assume which job: when
+  // the thread has no job yet it opens the picker (our live listings, or the
+  // user's own), and only when a job is already in the thread does it go
+  // straight to the match — re-asking someone who already pasted their advert
+  // is the other way to get this wrong.
   const startMatch = () => {
-    // The thread already knows its target job (pasted earlier — even before a
-    // reload, thanks to thread memory) — run the match immediately. Asking
-    // again would make the user repeat themselves.
     if (looksLikeJobDescription(lastJdRef.current)) {
       void runMatch(lastJdRef.current);
       return;
     }
+    setShowJobChoice(true);
+  };
+
+  // Branch 2 — the user brings their own job. Unchanged behaviour, unchanged
+  // wording: hand them to the composer, where pasting the advert text and
+  // pasting its link both already work.
+  const chooseOwnSource = () => {
+    setShowJobChoice(false);
     setAwaitingJd(true);
     setMessages((m) => [...m, {
       role: "assistant",
       content: convoSw ? "Sawa — bandika maelezo ya kazi unayolenga, nami nitakuonyesha unavyolingana na nini cha kurekebisha." : "Great — paste the job you're targeting and I'll show your match and what to fix.",
     }]);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  // Branch 1 — the user picked one of OUR live listings. The advert text came
+  // from the feed exactly as the employer posted it; the match runs on it
+  // immediately (deterministic, no AI call).
+  const chooseOurJob = (jd: string, label: string) => {
+    setShowJobChoice(false);
+    if (!cv) {
+      // The match runs against a CV. With none yet, keep the choice instead of
+      // dropping it: the advert goes into the composer, ready to send once they
+      // have a CV.
+      setMessages((m) => [...m, {
+        role: "assistant",
+        content: convoSw
+          ? `Nimechukua "${label}". Tengeneza au pakia CV yako kwanza, kisha nikulinganishe na kazi hii.`
+          : `Got "${label}". Make or import your CV first, then I'll match it to this job.`,
+      }]);
+      setInput(jd);
+      setTimeout(() => inputRef.current?.focus(), 0);
+      return;
+    }
+    void runMatch(jd, label);
   };
 
   // THE SPINE: one-tap matched jobs inside the assistant — the profile/CV we
@@ -1541,10 +1579,12 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     void send(history, dt);
   };
 
-  const runMatch = async (jd: string) => {
+  const runMatch = async (jd: string, label?: string) => {
     if (!cv || analyzing) return;
     lastJdRef.current = jd;
-    setMessages((m) => [...m, { role: "user", content: jd.length > 80 ? jd.slice(0, 78) + "…" : jd }]);
+    // When the job came from the picker, name it — showing 78 characters of an
+    // advert the user never typed would read as if the app pasted something.
+    setMessages((m) => [...m, { role: "user", content: label ?? (jd.length > 80 ? jd.slice(0, 78) + "…" : jd) }]);
     setAnalyzing(true);
     await new Promise((r) => setTimeout(r, 350)); // a beat — feels considered
     const r = matchCvToJd(cv, jd);
@@ -3021,6 +3061,17 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   )}
                 </div>
               )}
+              {/* The job choice: our listings or the user's own. Sits above the
+                  composer (never over it), opens on zero requests, and only the
+                  path the user actually taps fetches anything. */}
+              {showJobChoice && (
+                <JobChoicePanel
+                  sw={sw}
+                  onPickOurJob={chooseOurJob}
+                  onOwnSource={chooseOwnSource}
+                  onClose={() => setShowJobChoice(false)}
+                />
+              )}
               {/* WS-6 — thinking effort selector: Haraka / Wastani / Kina.
                   WS-12 — collapsed to a single sliders icon so the composer stays
                   clean; the three options live in a compact popover above it.
@@ -3032,7 +3083,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   onClick={() => setShowEffort((v) => !v)}
                   disabled={sending || building}
                   aria-expanded={showEffort}
-                  aria-label={sw ? "Kiwango cha uchambuzi wa AI" : "AI thinking effort"}
+                  aria-label={sw ? "Kiwango cha uchambuzi" : "Thinking effort"}
                   className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition disabled:opacity-40 ${
                     showEffort
                       ? "bg-ember border-ember text-cream"
@@ -3314,7 +3365,7 @@ function TailorPreviewCard({ summary, count, applied, sw, onApply, onDismiss, ap
         <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
           <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
-            {sw ? "Haya hayapo kwenye CV yako — yameongezwa na AI. Thibitisha kama ni kweli:" : "These aren't in your CV — AI added them. Confirm if true:"}
+            {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
@@ -3405,7 +3456,7 @@ function SummaryPreviewCard({ summary, applied, sw, onApply, applyBusy, editHref
         <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
           <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
-            {sw ? "Haya hayapo kwenye CV yako — yameongezwa na AI. Thibitisha kama ni kweli:" : "These aren't in your CV — AI added them. Confirm if true:"}
+            {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
@@ -3565,7 +3616,7 @@ function DocIntelCard({ op, text, section, target, applied, savedId, sw, onApply
         <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
           <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
-            {sw ? "Haya hayapo kwenye CV yako — yameongezwa na AI. Thibitisha kama ni kweli:" : "These aren't in your CV — AI added them. Confirm if true:"}
+            {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
@@ -3730,7 +3781,7 @@ function SkillGapCard({ jobTitle, strengths, gaps, score, learningPlan, summary,
       {learningPlan && (
         <div className="border-t border-border pt-2 space-y-1.5">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-ember-hover">
-            {sw ? "Pendekezo la mpango wa kujifunza (AI)" : "Suggested learning plan (AI recommendation)"}
+            {sw ? "Pendekezo la mpango wa kujifunza" : "Suggested learning plan"}
           </p>
           {summary && <p className="text-[11.5px] text-espresso leading-relaxed">{summary}</p>}
           <ol className="space-y-1">
