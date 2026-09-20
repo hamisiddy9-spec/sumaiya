@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sumaiya · Chatbox redesign · 03 Lenga kwenye kazi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ember:#DA4A1C; --ember-hover:#C13E14; --ember-shadow:#A8330F; --ember-fill:#B83A12; --ember-tint:#FBE9E1;
+  --pine:#12433D; --pine-tint:#E4EDEA; --gold:#F2A93B; --gold-tint:#FBF3E2; --gold-text:#96630F;
+  --espresso:#211A15; --espresso-2:#2C231C; --espresso-line:#3A2E25;
+  --cream:#FAF5EE; --sand:#EFE7DA; --sand-2:#F4EEE4; --card:#FFFFFF;
+  --border:#E9E0D4; --border-input:#9C8D7B; --text-body:#6B5F54; --text-muted:#756A5E;
+  --error:#C13E14; --success:#12766A; --warning:#96630F;
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px; --r-device:18px; --r-phone:40px;
+  --sh-card:0 2px 8px rgba(33,26,21,.05); --sh-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --sh-device:0 30px 70px -30px rgba(33,26,21,.35); --sh-ember-hard:0 3px 0 #A8330F;
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-screen:260ms;
+  --ease-out:cubic-bezier(0.33,1,0.68,1); --ease-in:cubic-bezier(0.32,0,0.67,0);
+  --ease-inout:cubic-bezier(0.65,0,0.35,1); --ease-emph:cubic-bezier(0.16,1,0.3,1); --rise:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--cream);color:var(--espresso);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1400px;margin:0 auto;padding:40px 24px 96px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
+.lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:78ch;margin:0}
+.rule{height:1px;background:var(--border);margin:28px 0 32px}
+.phones{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.phonewrap{display:flex;flex-direction:column;gap:12px}
+.caption{font-size:13px;font-weight:700;color:var(--espresso);display:flex;align-items:center;gap:8px}
+.caption .tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember-hover);border:1px solid rgba(218,74,28,.35)}
+.caption .tag.alt{background:var(--sand-2);color:var(--text-body);border-color:var(--border)}
+.phone{width:390px;height:844px;flex:0 0 auto;background:var(--cream);border-radius:var(--r-phone);box-shadow:var(--sh-device),0 0 0 1px var(--border);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 0;font-size:13px;font-weight:700}
+.statusbar .icons{display:flex;gap:5px;align-items:center;opacity:.85}
+.chathead{display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.mark{width:38px;height:38px;border-radius:var(--r-input-lg);background:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mark svg{display:block}
+.chathead h2{margin:0;font-size:16px;font-weight:700}
+.chathead .sub{margin:1px 0 0;font-size:12px;color:var(--text-muted)}
+.transcript{flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:86%;border-radius:var(--r-device);padding:11px 14px;font-size:15px;line-height:22px}
+.bubble.me{align-self:flex-end;background:var(--ember-fill);color:var(--cream);border-bottom-right-radius:4px}
+.bubble.her{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--espresso);border-bottom-left-radius:4px}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap;padding:2px}
+.chip{border:1px solid rgba(218,74,28,.4);background:var(--ember-tint);color:var(--ember-hover);border-radius:var(--r-pill);padding:8px 13px;font-size:12.5px;font-weight:700}
+.chip.active{background:var(--ember-fill);color:var(--cream);border-color:var(--ember-fill)}
+
+/* composer */
+.composer{background:var(--card);border-top:1px solid var(--border);padding:10px 12px 12px}
+.rowinp{display:flex;align-items:flex-end;gap:8px}
+.plus{width:44px;height:44px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.field{flex:1;min-height:44px;border:1px solid var(--border);background:var(--sand-2);border-radius:22px;padding:11px 16px;font-size:14.5px;color:var(--text-muted);display:flex;align-items:center}
+.field.live{border-color:rgba(218,74,28,.45);color:var(--espresso)}
+.send{width:44px;height:44px;border-radius:var(--r-pill);background:var(--sand);color:var(--text-muted);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.send.on{background:var(--ember-fill);color:var(--cream);box-shadow:var(--sh-ember-hard)}
+
+/* sheet */
+.scrim{position:absolute;inset:0;background:rgba(33,26,21,.45);animation:fade var(--dur-base) var(--ease-out) both}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:86%;background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;border-top:1px solid var(--border);padding:8px 14px 16px;display:flex;flex-direction:column;gap:10px;animation:sheetin var(--dur-base) var(--ease-out) both;box-shadow:var(--sh-float)}
+@keyframes sheetin{from{transform:translateY(360px)}to{transform:none}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--border);align-self:center}
+.sheet head,h3.sheettitle{margin:0}
+.sheettitle{font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+.sheetsub{margin:-4px 0 0;font-size:11.5px;color:var(--text-muted)}
+.pathcard{border:1.5px solid var(--border);background:var(--card);border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center}
+.pathcard.on{border-color:var(--ember);background:rgba(251,233,225,.7)}
+.pathcard .ic{width:40px;height:40px;border-radius:12px;background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:18px}
+.pathcard .ic.grey{background:var(--sand-2);color:var(--espresso-2)}
+.pathcard h4{margin:0;font-size:15px;font-weight:700}
+.pathcard p{margin:2px 0 0;font-size:12.5px;color:var(--text-muted)}
+.pathcard .tick{margin-left:auto;color:var(--ember);font-weight:800}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;background:var(--sand-2);padding:0 10px;min-height:44px}
+.search input{border:0;background:transparent;font:inherit;font-size:14px;outline:none;flex:1;color:var(--espresso)}
+.search input::placeholder{color:var(--text-muted)}
+.jobs{display:flex;flex-direction:column}
+.job{padding:11px 2px;border-bottom:1px solid var(--border)}
+.job:last-child{border-bottom:0}
+.job .t{font-size:14.5px;font-weight:600;line-height:1.25}
+.job .s{font-size:12.5px;color:var(--text-muted);margin-top:2px}
+.job .sample{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.08em;color:var(--gold-text);background:var(--gold-tint);border:1px solid rgba(150,99,15,.3);border-radius:var(--r-pill);padding:1px 6px;margin-left:8px;text-transform:uppercase;vertical-align:1px}
+.notice{font-size:12.5px;color:var(--warning);font-weight:600}
+.progressbar{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-muted)}
+.spin{width:14px;height:14px;border-radius:var(--r-pill);border:2px solid var(--border);border-top-color:var(--ember);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.note{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--border)}
+.note:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:26px;border-radius:var(--r-pill);background:var(--espresso);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.note h3{margin:1px 0 4px;font-size:14px;font-weight:700}
+.note p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text-body)}
+.note code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;background:var(--sand-2);border-radius:5px;padding:1px 5px;color:var(--espresso-2)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:36px}
+.col-notes{display:flex;flex-direction:column}
+.callout{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);padding:18px;box-shadow:var(--sh-card);margin-top:20px}
+.callout h4{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ember)}
+.callout p{margin:0 0 8px;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.callout p:last-child{margin-bottom:0}
+@keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.enter{animation:rise var(--dur-slow) var(--ease-out) both}
+@keyframes expand{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.expand{animation:expand var(--dur-base) var(--ease-out) both}
+.pathcard,.chip{transition:transform var(--dur-micro) var(--ease-out),background-color var(--dur-micro) var(--ease-out),border-color var(--dur-micro) var(--ease-out)}
+.pathcard:active,.chip:active{transform:scale(.985)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  .enter,.expand,.scrim,.sheet{opacity:1;transform:none}.spin{animation:none}
+  .pathcard:active,.chip:active{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20</div>
+  <h1 class="title">03 — “Lenga kwenye kazi”: chagua yetu, au yako</h1>
+  <p class="lede">The owner's own requirement — <em>“iwe na option ya kuchagua kazi ya user yani atoe source au achague zetu”</em> — already exists in the code (<code>job-choice-sheet.tsx</code>, <code>job-choice-panel.tsx</code>) and is already good. It is simply impossible to find: it opens only if a keyword match happens to place a chip. The redesign makes it a door you can always walk through, gives it the entrance animation the motion standard already specifies for a sheet, and shows what happens on both paths.</p>
+  <div class="rule"></div>
+
+  <div class="phones">
+    <!-- ============ PHONE A: choose ours ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag">A · baada ya kugusa</span> “Chagua kutoka kwenye kazi zetu” — the path the tap opened</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div><div style="margin-left:auto;color:var(--text-muted)">✕</div></div>
+        <div class="transcript">
+          <div class="bubble me">Nataka kulenga CV yangu kwenye kazi.</div>
+          <div class="bubble her">Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?</div>
+          <div class="chiprow"><span class="chip active">Lenga kwenye kazi</span></div>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div style="display:flex;align-items:center;gap:8px"><h3 class="sheettitle">Unataka kulenga kazi ipi?</h3><span style="margin-left:auto;color:var(--text-muted)">✕</span></div>
+          <p class="sheetsub">Hatua moja. Nitalenga CV yako, si kubadilisha ukweli wake.</p>
+
+          <div class="pathcard on">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span>
+            <span style="min-width:0"><h4>Chagua kutoka kwenye kazi zetu</h4><p>Nafasi halisi za kazi tulizo nazo sasa.</p></span>
+            <span class="tick">✓</span>
+          </div>
+
+          <div class="pathcard">
+            <span class="ic grey"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span>
+            <span style="min-width:0"><h4>Weka kazi yako mwenyewe</h4><p>Bandika tangazo, au kiungo chake.</p></span>
+          </div>
+
+          <div class="expand" style="display:flex;flex-direction:column;gap:8px">
+            <div class="search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#756A5E" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input value="mauzo" aria-label="Tafuta kazi" />
+            </div>
+            <p class="progressbar"><span class="spin"></span> Inatafuta…</p>
+            <div class="jobs">
+              <div class="job"><div class="t">Sales Officer <span class="sample">sampuli</span></div><div class="s">CCBRT · Dar es Salaam</div></div>
+              <div class="job"><div class="t">Sales Representative <span class="sample">sampuli</span></div><div class="s">Nafasi za mauzo · Mwanza</div></div>
+              <div class="job"><div class="t">Account Manager <span class="sample">sampuli</span></div><div class="s">Kampuni ya usambazaji · Arusha</div></div>
+            </div>
+            <p class="sheetsub">Kazi 3. Ongeza neno lingine kama hizi si sahihi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PHONE B: own job ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag alt">B · njia ya pili</span> “Weka kazi yako mwenyewe” — the path that hands the composer the job</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div><div style="margin-left:auto;color:var(--text-muted)">✕</div></div>
+        <div class="transcript">
+          <div class="bubble me">Nataka kulenga CV yangu kwenye kazi.</div>
+          <div class="bubble her">Sawa. Unataka kulenga kazi ipi — chagua kwenye kazi zetu, au weka yako mwenyewe?</div>
+
+          <div style="align-self:stretch;border:1px solid var(--border);background:var(--card);border-radius:var(--r-card);padding:12px;display:flex;flex-direction:column;gap:7px">
+            <p style="margin:0;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)">Tangazo lako</p>
+            <p style="margin:0;font-size:13px;line-height:1.45;color:var(--text-body)">Bandika tangazo, au kiungo chake. Nitakubali kama nilivyopokea — nalenga CV yako kwa kilichoandikwa, si kwa ninachodhani.</p>
+          </div>
+
+          <div class="bubble her">Nimeisoma. Kuna maombi matatu ya lazima ambayo CV yako haionyeshi bado: <b>bidhaa za dawa</b>, <b>mauzo ya uwanda</b>, na <b>leseni ya udereva</b>. Nakubali kuyataja kama ukiyafanya; sitaleta kitu ambacho hukuniambia.</div>
+
+          <div class="submitrow" style="align-self:stretch;display:flex;gap:8px">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--ember-fill);color:var(--cream);border-radius:var(--r-input-lg);min-height:46px;font-size:14px;font-weight:700;box-shadow:var(--sh-ember-hard)">Lenga CV yako kwa kazi hii</div>
+          </div>
+          <p class="sheetsub" style="text-align:center;margin:0">Nitaonyesha kila nilichobadilisha kabla ya kuhifadhi.</p>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+      </div>
+    </div>
+
+    <!-- ============ NOTES ============ -->
+    <div class="col-notes" style="flex:1 1 340px;min-width:320px;max-width:460px">
+      <div class="note"><span class="num">1</span><div><h3>One always-available door</h3><p>Today this sheet only opens from a chip that a keyword test has to earn (<code>use-sumaiya-chat.ts:250-252</code>: <code>kazi</code>, <code>ajira</code>, <code>tangazo</code>, <code>lenga</code>). The composer's <code>+</code> menu gets a fifth row — <b>“Lenga kwenye kazi”</b> — so the capability exists whether or not the conversation happens to contain the right word. It replaces nothing; it reveals what was already built.</p></div></div>
+      <div class="note"><span class="num">2</span><div><h3>Two paths, side by side, at thumb height</h3><p>Both path cards sit in the bottom half of the screen, 56&nbsp;dp tall, and the second path says what it accepts (<em>“Bandika tangazo, au kiungo chake”</em>) before it is chosen — a link that is not read is not a link. Copy is the live app's, verbatim.</p></div></div>
+      <div class="note"><span class="num">3</span><div><h3>The search says what it is doing</h3><p><code>Inatafuta…</code> with the 350&nbsp;ms debounce already in the code. The empty branch stays honest: <em>“Hakuna kazi inayolingana na “mauzo”. Jaribu neno lingine, au weka kazi yako mwenyewe”</em> — the second clause matters more than the first.</p></div></div>
+      <div class="note"><span class="num">4</span><div><h3>A listing with no advert says so, and the offer stays open</h3><p>The live sheet already refuses to run the engine on a title alone (<code>job-choice-sheet.tsx:167-171</code>). That is the honest behaviour and it is kept: <em>“Tangazo hili halina maelezo ya kutosha. Bandika maandishi yenyewe.”</em> — and the second path is right there under it.</p></div></div>
+      <div class="note"><span class="num">5</span><div><h3>The sheet arrives like a sheet, not like a screenshot</h3><p>Backdrop fades <code>220ms ease-out</code>, panel rises <code>translateY 360→0, 220ms ease-out</code>; leaving is <code>140ms ease-in</code>. Both are already written into the motion standard (§3.5, “Sheet (bottom)”) — they are simply not implemented (<code>job-choice-sheet.tsx:156</code> returns <code>null</code> with no exit). Reduced motion: cross-fade only.</p></div></div>
+      <div class="note"><span class="num">6</span><div><h3>Choosing our listing loads one advert, on purpose</h3><p>Opening the sheet: zero requests. Opening “ours”: one <code>?light=1</code> call for titles and companies. Choosing a row: one call for that advert. Typing: debounced. Nothing else. The sheet's own comment (<code>job-choice-sheet.tsx:25-26</code>) already measures this; the redesign keeps it and says it in the UI so a user on metered data understands why the list is thin.</p></div></div>
+      <div class="note"><span class="num">7</span><div><h3>“Lenga ajira hii” never dead-ends again</h3><p>On the live build the equivalent control did not fire at all, and its sibling dead-ends on a disabled save (<code>QA-NATIVE-DEVICE</code> §4d, <code>QA-WEB-JOURNEYS</code> §D1). The rule the redesign imposes: the primary control's label names the outcome, it is never disabled without a stated reason, and the line under it promises exactly what happens next (<em>“Nitaonyesha kila nilichobadilisha kabla ya kuhifadhi”</em>).</p></div></div>
+
+      <div class="callout">
+        <h4>What this replaces</h4>
+        <p><b>Nothing is removed.</b> The sheet, both paths, the debounced search, the 12-row projection and the empty/error/notice branches are all already built. This screen adds one entry row in the <code>+</code> menu, unifies the chip label (native says <code>Lenga kwenye kazi</code>, web says <code>Lenga CV kwa kazi</code> — same action, two names), and gives the sheet the entrance the standard already specifies.</p>
+        <p><b>Deliberate non-change:</b> the two path labels keep their current first-example wording because a native speaker wrote them and the owner approved the phrasing.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

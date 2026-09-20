@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sumaiya · Chatbox redesign · 05 Sina uwezo wa kufikiri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ember:#DA4A1C; --ember-hover:#C13E14; --ember-shadow:#A8330F; --ember-fill:#B83A12; --ember-tint:#FBE9E1;
+  --pine:#12433D; --pine-tint:#E4EDEA; --gold:#F2A93B; --gold-tint:#FBF3E2; --gold-text:#96630F;
+  --espresso:#211A15; --espresso-2:#2C231C; --espresso-line:#3A2E25;
+  --cream:#FAF5EE; --sand:#EFE7DA; --sand-2:#F4EEE4; --card:#FFFFFF;
+  --border:#E9E0D4; --border-input:#9C8D7B; --text-body:#6B5F54; --text-muted:#756A5E;
+  --error:#C13E14; --success:#12766A; --warning:#96630F;
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px; --r-device:18px; --r-phone:40px;
+  --sh-card:0 2px 8px rgba(33,26,21,.05); --sh-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --sh-device:0 30px 70px -30px rgba(33,26,21,.35); --sh-ember-hard:0 3px 0 #A8330F;
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-screen:260ms;
+  --ease-out:cubic-bezier(0.33,1,0.68,1); --ease-in:cubic-bezier(0.32,0,0.67,0);
+  --ease-inout:cubic-bezier(0.65,0,0.35,1); --ease-emph:cubic-bezier(0.16,1,0.3,1); --rise:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--cream);color:var(--espresso);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1620px;margin:0 auto;padding:40px 24px 96px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:42px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
+.lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:82ch;margin:0}
+.rule{height:1px;background:var(--border);margin:28px 0 32px}
+.phones{display:flex;gap:34px;align-items:flex-start;flex-wrap:wrap}
+.phonewrap{display:flex;flex-direction:column;gap:12px}
+.caption{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;max-width:390px;line-height:1.35}
+.caption .tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember-hover);border:1px solid rgba(218,74,28,.35);flex:0 0 auto}
+.caption .tag.alt{background:var(--sand-2);color:var(--text-body);border-color:var(--border)}
+.caption .tag.gold{background:var(--gold-tint);color:var(--gold-text);border-color:rgba(150,99,15,.35)}
+.phone{width:390px;height:844px;flex:0 0 auto;background:var(--cream);border-radius:var(--r-phone);box-shadow:var(--sh-device),0 0 0 1px var(--border);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 0;font-size:13px;font-weight:700}
+.statusbar .icons{display:flex;gap:5px;align-items:center;opacity:.85}
+.chathead{display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.mark{width:38px;height:38px;border-radius:var(--r-input-lg);background:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mark svg{display:block}
+.mark.mute{background:var(--sand)}
+.mark.mute span{color:var(--text-muted)}
+.chathead h2{margin:0;font-size:16px;font-weight:700}
+.chathead .sub{margin:1px 0 0;font-size:12px;color:var(--text-muted)}
+.transcript{flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:86%;border-radius:var(--r-device);padding:11px 14px;font-size:15px;line-height:22px}
+.bubble.me{align-self:flex-end;background:var(--ember-fill);color:var(--cream);border-bottom-right-radius:4px}
+.bubble.her{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.sysnote{align-self:center;text-align:center;font-size:12px;color:var(--text-muted);background:var(--sand-2);border-radius:var(--r-pill);padding:6px 12px;max-width:88%}
+
+/* ---- the unavailable card: a first-class state, not an error page -------- */
+.unavail{align-self:stretch;background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);box-shadow:var(--sh-card);overflow:hidden}
+.unavail .hd{display:flex;gap:11px;align-items:flex-start;padding:14px 14px 12px}
+.unavail .glyph{width:34px;height:34px;border-radius:11px;background:var(--gold-tint);color:var(--gold-text);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;font-weight:800}
+.unavail h3{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.unavail .why{margin:5px 0 0;font-size:13.5px;line-height:1.5;color:var(--text-body)}
+.unavail .why b{color:var(--espresso)}
+.unavail .works{padding:0 14px 4px;display:flex;flex-direction:column;gap:8px}
+.unavail .works .lbl{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:2px 0 0}
+.workrow{display:flex;align-items:center;gap:11px;border:1px solid var(--border);background:var(--card);border-radius:var(--r-input-lg);padding:11px 12px;min-height:52px}
+.workrow .ic{width:30px;height:30px;border-radius:9px;background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.workrow .t{display:block;min-width:0;font-size:13.5px;font-weight:700;line-height:1.25}
+.workrow .s{display:block;font-size:11.5px;color:var(--text-muted);margin-top:2px;line-height:1.3}
+.workrow .arrow{margin-left:auto;color:var(--text-muted)}
+.off{padding:10px 14px 14px;display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--text-muted)}
+.off .x{width:16px;height:16px;border-radius:var(--r-pill);border:1px solid var(--border-input);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 auto;margin-top:1px}
+.unavail .ft{display:flex;align-items:center;gap:9px;padding:10px 14px;border-top:1px solid var(--border);background:var(--sand-2);font-size:11.5px;color:var(--text-body)}
+.unavail .ft .dot{width:7px;height:7px;border-radius:var(--r-pill);background:var(--gold);flex:0 0 auto}
+
+/* ---- the error attached to a turn --------------------------------------- */
+.turnerr{align-self:flex-end;max-width:92%;background:var(--card);border:1px solid rgba(193,62,20,.35);border-left:3px solid var(--error);border-radius:var(--r-card);padding:12px 13px;box-shadow:var(--sh-card)}
+.turnerr .t{display:flex;gap:9px;align-items:flex-start}
+.turnerr .glyph{color:var(--error);font-size:15px;line-height:1.2}
+.turnerr h4{margin:0;font-size:14px;font-weight:800}
+.turnerr p{margin:5px 0 0;font-size:13px;line-height:1.5;color:var(--text-body)}
+.turnerr .acts{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:var(--r-input-lg);font-size:13.5px;font-weight:700;padding:10px 14px;min-height:42px}
+.btn.primary{background:var(--ember-fill);color:var(--cream);box-shadow:var(--sh-ember-hard)}
+.btn.ghost{background:var(--card);color:var(--espresso);border:1px solid var(--border-input)}
+.promise{margin:10px 0 0;font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center}
+
+/* ---- document card with an honest provenance label ---------------------- */
+.doc{align-self:flex-start;width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);box-shadow:var(--sh-card);overflow:hidden}
+.doc .prov{display:flex;gap:8px;align-items:center;background:var(--gold-tint);border-bottom:1px solid rgba(150,99,15,.28);padding:9px 13px;font-size:11.5px;font-weight:800;color:var(--gold-text);letter-spacing:.02em}
+.doc .top{display:flex;gap:12px;padding:13px 14px 11px;align-items:flex-start}
+.doc .thumb{width:50px;height:64px;border-radius:var(--r-input);border:1px solid var(--border);background:var(--cream);flex:0 0 auto;padding:7px 6px;display:flex;flex-direction:column;gap:4px}
+.doc .thumb i{display:block;height:3px;border-radius:2px;background:var(--sand)}
+.doc .thumb i.b{background:var(--ember);height:4px;width:60%}
+.doc .thumb i.s{width:80%}
+.doc h3{margin:0;font-size:15px;font-weight:800}
+.doc .meta{margin:3px 0 0;font-size:11.5px;color:var(--text-muted)}
+.doc .says{margin:8px 0 0;font-size:12.5px;line-height:1.5;color:var(--text-body)}
+.doc .cta{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
+.doc .stateline{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--pine);padding:11px 14px;border-top:1px solid var(--border);background:var(--pine-tint)}
+
+.composer{background:var(--card);border-top:1px solid var(--border);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.rowinp{display:flex;align-items:flex-end;gap:8px}
+.plus{width:44px;height:44px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.field{flex:1;min-height:44px;border:1px solid var(--border);background:var(--sand-2);border-radius:22px;padding:11px 16px;font-size:14.5px;color:var(--espresso);display:flex;align-items:center}
+.send{width:44px;height:44px;border-radius:var(--r-pill);background:var(--ember-fill);color:var(--cream);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-ember-hard);flex:0 0 auto}
+.keeps{font-size:11.5px;color:var(--text-muted);padding:0 4px}
+
+/* notes */
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:0 40px;margin-top:38px}
+.note{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--border)}
+.num{flex:0 0 26px;height:26px;border-radius:var(--r-pill);background:var(--espresso);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.note h3{margin:1px 0 4px;font-size:14px;font-weight:700}
+.note p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text-body)}
+.note code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;background:var(--sand-2);border-radius:5px;padding:1px 5px;color:var(--espresso-2)}
+.quoteblock{margin-top:34px;display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px}
+.wrong{background:rgba(193,62,20,.045);border:1px solid rgba(193,62,20,.3);border-radius:var(--r-card-lg);padding:18px}
+.wrong h4{margin:0 0 10px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--error)}
+.wrong .q{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-input);padding:9px 11px;margin:0 0 8px;color:var(--espresso-2)}
+.wrong p{margin:0 0 8px;font-size:13px;line-height:1.5;color:var(--text-body)}
+.wrong p:last-child{margin-bottom:0}
+.right{background:var(--pine-tint);border:1px solid rgba(18,67,61,.25);border-radius:var(--r-card-lg);padding:18px}
+.right h4{margin:0 0 10px;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pine)}
+.right .q{font-size:13px;background:var(--card);border:1px solid rgba(18,67,61,.2);border-radius:var(--r-input);padding:9px 11px;margin:0 0 8px;color:var(--espresso-2)}
+.right p{margin:0 0 8px;font-size:13px;line-height:1.5;color:var(--espresso-2)}
+.right p:last-child{margin-bottom:0}
+
+@keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
+.enter{animation:rise var(--dur-slow) var(--ease-out) both}
+.d1{animation-delay:30ms}.d2{animation-delay:70ms}.d3{animation-delay:110ms}
+.btn{transition:transform var(--dur-micro) var(--ease-out)}
+.btn:active{transform:scale(.985)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  .enter{opacity:1;transform:none}.btn:active{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20 · STATE, not error page</div>
+  <h1 class="title">05 — “Sina uwezo wa kufikiri sasa hivi.”</h1>
+  <p class="lede">Tonight the product's intelligence is off, and the chat replies <code>AI is not configured.</code> in English inside a Swahili screen, or <code>Sumaiya ana shughuli nyingi sasa hivi</code> in the third person, while a button labelled “Boresha na AI” returns the user's own text unchanged and reports success. Every one of those is a lie by omission. This is what she says instead — in her own voice, in their language, with what still works named, and never a dead end.</p>
+  <div class="rule"></div>
+
+  <div class="phones">
+    <!-- ============ A: known-unavailable, before typing ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag gold">A · inajulikana mapema</span> She says it before you invest a message</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark mute"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#756A5E"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div><div class="headright" style="margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--gold-text);background:var(--gold-tint);border:1px solid rgba(150,99,15,.3);border-radius:var(--r-pill);padding:4px 9px">KWA SEHEMU</div></div>
+        <div class="transcript">
+          <div class="bubble her enter">Habari, mimi ni Sumaiya. Naweza kuandika CV yako, kuilenga kwa ajira fulani, kuandaa barua ya maombi, au tuzungumze tu. Unafanya nini leo?</div>
+
+          <div class="unavail enter d1">
+            <div class="hd">
+              <span class="glyph">!</span>
+              <div>
+                <h3>Sina uwezo wa kufikiri sasa hivi.</h3>
+                <p class="why">Huduma inayoniwezesha kuandika na kufikiri haipatikani kwa dakika hizi. <b>Sikutaka ujue kwa kuandika ombi na kusubiri bure</b> — kwa hivyo nakuambia kabla.</p>
+              </div>
+            </div>
+            <div class="works">
+              <p class="lbl">Ninachoweza kufanya sasa hivi</p>
+              <div class="workrow"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span style="display:block;min-width:0"><span class="t">Kagua CV yako</span><span class="s">Alama ya usomekaji na maneno yanayokosekana</span></span><span class="arrow">›</span></div>
+              <div class="workrow"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span><span style="display:block;min-width:0"><span class="t">Fungua kwenye kihariri</span><span class="s">Andika mwenyewe; kila kitu kinaendelea kufanya kazi</span></span><span class="arrow">›</span></div>
+              <div class="workrow"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.2"/></svg></span><span style="display:block;min-width:0"><span class="t">Soma picha ya CV yako</span><span class="s">Natoa maandishi kwenye picha</span></span><span class="arrow">›</span></div>
+            </div>
+            <div class="off"><span class="x">✕</span><span>Kinachokosekana: kuandika na kuboresha kwa maneno. Kadi hii inajibadilisha yenyewe nikirudi — huna haja ya kuuliza tena.</span></div>
+          </div>
+        </div>
+        <div class="composer">
+          <div class="rowinp">
+            <div class="plus">+</div>
+            <div class="field">Niandikie…</div>
+            <div class="send" aria-label="Tuma"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div>
+          </div>
+          <p class="keeps">Maneno yako yanahifadhiwa hata nikiwa siwezi kufikiri sasa hivi.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ B: mid-turn failure ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag">B · ikatokea katikati</span> The failure lands on the turn it belongs to</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div></div>
+        <div class="transcript">
+          <div class="bubble her">Sawa, Amina. Nimeanza kutoka CV yako ya awali — nina uzoefu wako wa mauzo na elimu yako.</div>
+
+          <div class="bubble me enter">Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja.<span style="display:block;text-align:right;font-size:10.5px;font-weight:700;color:rgba(250,245,238,.75);margin-top:5px">Haijatumwa</span></div>
+
+          <div class="turnerr enter d1">
+            <div class="t">
+              <span class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M10.3 4.3 2.6 17.5A1.6 1.6 0 0 0 4 20h16a1.6 1.6 0 0 0 1.4-2.5L13.7 4.3a1.6 1.6 0 0 0-2.8 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
+              <div>
+                <h4>Sikuweza kufikiri ombi hili.</h4>
+                <p>Sababu: huduma inayoniwezesha kufikiri haipatikani sasa hivi. <b>Si mtandao wako, na si maandishi yako</b> — ombi lako lilifika, jibu langu halikutoka.</p>
+              </div>
+            </div>
+            <div class="acts">
+              <span class="btn primary">Jaribu ombi hili tena</span>
+              <span class="btn ghost">Andika mwenyewe</span>
+            </div>
+            <p class="promise" style="display:flex;gap:7px;align-items:flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:block;flex:0 0 auto;margin-top:1px"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg> Nimehifadhi ulichoandika. “Jaribu tena” linatuma <b>ombi hili lile</b> — hutahitaji kuandika upya.</p>
+          </div>
+
+          <div class="sysnote enter d2">Kama ningekuwa na uhakika, ningekujibu. Sikubahatisha jibu ili kionekane kimefanya kazi.</div>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send" aria-label="Tuma"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+      </div>
+    </div>
+
+    <!-- ============ C: honest partial, labelled on the artifact ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag gold">C · kazi iliyofanyika nusu</span> A real result, labelled where it lives</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div></div>
+        <div class="transcript">
+          <div class="bubble me">Boresha muhtasari wangu.</div>
+
+          <div class="doc enter d1">
+            <div class="prov">◎ HUU NI USAFI MDOGO WA MAANDISHI — SI AI</div>
+            <div class="top">
+              <div class="thumb"><i class="b"></i><i></i><i class="s"></i><i></i><i class="s"></i><i></i></div>
+              <div style="min-width:0">
+                <h3>Muhtasari — CV yako</h3>
+                <p class="meta">Nilichobadilisha: nafasi zilizozidi, herufi kubwa, alama za uakifishaji</p>
+                <p class="says">“Nina uzoefu wa mauzo.” → “Nina uzoefu wa mauzo.”</p>
+              </div>
+            </div>
+            <div class="cta">
+              <div class="btn primary">Weka kwenye CV yangu</div>
+              <div class="btn ghost">Acha — nitaandika mwenyewe</div>
+            </div>
+            <div class="stateline">✓ Haijaharibu maandishi yako. Ukiukataa, yanabaki kama yalivyokuwa.</div>
+          </div>
+
+          <div class="unavail enter d2" style="align-self:stretch">
+            <div class="hd">
+              <span class="glyph">!</span>
+              <div>
+                <h3>Kuandika upya kwa maneno hakupatikani sasa hivi.</h3>
+                <p class="why">Nimefanya nilichoweza bila kufikiri — usafi mdogo. Kagua, kisha uweke ukipenda. <b>Nitaleta toleo la kweli nikirudi.</b></p>
+              </div>
+            </div>
+            <div class="ft"><span class="dot"></span><span>Hatua ipi ilishindikana: kuandika upya. Hatua ipi ilifanikiwa: usafi wa maandishi.</span></div>
+          </div>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send" aria-label="Tuma"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quoteblock">
+    <div class="wrong">
+      <h4>What the product says tonight — quoted from the live build</h4>
+      <p class="q">"AI is not configured."</p>
+      <p>English, inside a Swahili screen, in Sumaiya's own bubble. This is the raw JSON body of an 18-site 503 (<code>apps/web/lib/api/routes/ai.ts:157</code> and 17 siblings), rendered as if she had said it. Captured live: <code>QA-WEB-JOURNEYS-2026-09-20.md</code> §D3.</p>
+      <p class="q">"Sumaiya ana shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi."</p>
+      <p>Third person — the app describing her rather than her speaking — shipped in the bundle after the first-person fix (<code>QA-NATIVE-DEVICE-2026-09-20.md</code> §4b). It also blames her workload for a provider that is simply switched off.</p>
+      <p class="q">"Boresha na AI" → 200, input returned unchanged, <code>{"source":"local"}</code></p>
+      <p>A button that names AI, reports success, and changes nothing. The editor already knows how to be honest about this (<code>cv-editor-client.tsx:2774-2777</code>); the chat does not.</p>
+      <p class="q">"Hifadhi kwenye akaunti yako" — rendered disabled, no tooltip</p>
+      <p>The snap-to-apply dead end: the user is asked to want something the screen will not let them have, and is told nothing.</p>
+    </div>
+
+    <div class="right">
+      <h4>The rules this state obeys</h4>
+      <p><b>1. She speaks about herself in the first person, always.</b> <em>Sina uwezo…</em> · <em>Sikuweza…</em> · <em>Nitakujibu nikirudi.</em> Never her name in the third person from inside her own bubble (the Swahili standard's two-speaker rule, <code>SWAHILI-STANDARD-2026-09-20.md</code> §4.1, applied to the transcript).</p>
+      <p><b>2. Never beg, never blame.</b> No “please try later”, no apology loop. The reason is named, and the one thing that is <em>not</em> the cause is ruled out explicitly — because the app has a history of blaming the user's connection for our own faults (<code>app-errors.ts:200-204</code>).</p>
+      <p><b>3. Never dead-end.</b> Every state carries at least one control that genuinely works right now. A control may only be disabled with its reason printed beside it.</p>
+      <p><b>4. Never fake success.</b> If the work was local, the artifact says so, on the artifact. Silently returning the input under an AI label is the one failure a user cannot forgive.</p>
+      <p><b>5. The user's words are sacred.</b> They are never cleared, never require retyping, and “Jaribu tena” resends the same turn rather than asking for it again.</p>
+      <p><b>6. It is a state, not a page.</b> It arrives as a system card inside the thread (<code>rise 300ms ease-out</code>), it replaces the progress rail rather than being pasted over it, and it disappears by itself when it clears — with no toast to dismiss and no red.</p>
+    </div>
+  </div>
+
+  <div class="notes-grid">
+    <div class="note"><span class="num">1</span><div><h3>Detection is a probe, not a guess</h3><p><code>GET /api/ai/status</code> already returns <code>{configured, provider}</code> (<code>routes/ai.ts:113</code>). Screen&nbsp;A uses it on entry; screens&nbsp;B and&nbsp;C use the turn's own outcome. No connectivity heuristic, no “offline” cache-only logic — the app asks the thing that knows.</p></div></div>
+    <div class="note"><span class="num">2</span><div><h3>What still works is not marketing — it is a list of endpoints that do not call a model</h3><p>ATS scoring and the keyword diff are deterministic; PDF export is local; OCR runs on tesseract; the job feed is a database read. Those are the three rows offered. Nothing is offered that would fail.</p></div></div>
+    <div class="note"><span class="num">3</span><div><h3>“KWA SEHEMU” is a header badge, not a warning colour</h3><p>Gold (<code>#F2A93B</code> / <code>#96630F</code>) exists in the palette for exactly this: degraded, not broken. The error red is reserved for a real fault, so the two never mean the same thing on screen.</p></div></div>
+    <div class="note"><span class="num">4</span><div><h3>The card retires itself</h3><p>When the probe succeeds, the card exits at <code>140ms ease-in</code> while the normal composer state enters at <code>220ms ease-out</code> — the standard's “Loading → content” hand-off, in reverse. No confetti, no “AI is back!” toast.</p></div></div>
+    <div class="note"><span class="num">5</span><div><h3>Reduced motion keeps every word</h3><p>Nothing on these three screens is motion-only: the heading, the reason, the working list and the disabled-thing line are all static text. At <code>dur.instant</code> the state is still complete and still honest.</p></div></div>
+    <div class="note"><span class="num">7</span><div><h3>If this card has to shrink, the heading is the last thing to go</h3><p>A vision reviewer proposed cutting the “Sina uwezo wa kufikiri sasa hivi.” block because the three working actions below already imply it. That inverts the priority: <b>the sentence is the state; the list is the consolation.</b> The order to cut is (1) the ruled-out line, (2) the sub-lines under each working action, (3) the footer sentence — never the heading, and never a control.</p></div></div>
+      <div class="note"><span class="num">6</span><div><h3>One owner decision is avoided, not hidden</h3><p>If the 503 arrives because of an owner-side quota rather than a missing key, the same card shows the same first sentence and a different second one (<em>“Nimefikia kikomo cha matumizi ya leo.”</em>). The chat never has to know which, and the user never sees a status code.</p></div></div>
+  </div>
+</div>
+</body>
+</html>

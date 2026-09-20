@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sumaiya · Chatbox redesign · 04 Inaendelea kusoma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ember:#DA4A1C; --ember-hover:#C13E14; --ember-shadow:#A8330F; --ember-fill:#B83A12; --ember-tint:#FBE9E1;
+  --pine:#12433D; --pine-tint:#E4EDEA; --gold:#F2A93B; --gold-tint:#FBF3E2; --gold-text:#96630F;
+  --espresso:#211A15; --espresso-2:#2C231C; --espresso-line:#3A2E25;
+  --cream:#FAF5EE; --sand:#EFE7DA; --sand-2:#F4EEE4; --card:#FFFFFF;
+  --border:#E9E0D4; --border-input:#9C8D7B; --text-body:#6B5F54; --text-muted:#756A5E;
+  --error:#C13E14; --success:#12766A; --warning:#96630F;
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px; --r-device:18px; --r-phone:40px;
+  --sh-card:0 2px 8px rgba(33,26,21,.05); --sh-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --sh-device:0 30px 70px -30px rgba(33,26,21,.35); --sh-ember-hard:0 3px 0 #A8330F;
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-screen:260ms;
+  --ease-out:cubic-bezier(0.33,1,0.68,1); --ease-in:cubic-bezier(0.32,0,0.67,0); --ease-emph:cubic-bezier(0.16,1,0.3,1);
+  --rise:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--cream);color:var(--espresso);font-family:"Hanken Grotesk",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1400px;margin:0 auto;padding:40px 24px 96px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
+.lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:78ch;margin:0}
+.rule{height:1px;background:var(--border);margin:28px 0 32px}
+.phones{display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+.phonewrap{display:flex;flex-direction:column;gap:12px}
+.caption{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;max-width:390px}
+.caption .tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember-hover);border:1px solid rgba(218,74,28,.35);flex:0 0 auto}
+.caption .tag.alt{background:var(--sand-2);color:var(--text-body);border-color:var(--border)}
+.caption .tag.gold{background:var(--gold-tint);color:var(--gold-text);border-color:rgba(150,99,15,.35)}
+.phone{width:390px;height:844px;flex:0 0 auto;background:var(--cream);border-radius:var(--r-phone);box-shadow:var(--sh-device),0 0 0 1px var(--border);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 0;font-size:13px;font-weight:700}
+.statusbar .icons{display:flex;gap:5px;align-items:center;opacity:.85}
+.chathead{display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.mark{width:38px;height:38px;border-radius:var(--r-input-lg);background:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mark svg{display:block}
+.chathead h2{margin:0;font-size:16px;font-weight:700}
+.chathead .sub{margin:1px 0 0;font-size:12px;color:var(--text-muted)}
+.transcript{flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:86%;border-radius:var(--r-device);padding:11px 14px;font-size:15px;line-height:22px}
+.bubble.me{align-self:flex-end;background:var(--ember-fill);color:var(--cream);border-bottom-right-radius:4px}
+.bubble.her{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.sysnote{align-self:center;text-align:center;font-size:12px;color:var(--text-muted);background:var(--sand-2);border-radius:var(--r-pill);padding:6px 12px;max-width:86%}
+
+/* attachment chip inside the user's bubble */
+.attchip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.18);border-radius:9px;padding:6px 9px;margin-bottom:8px}
+.attchip .ph{width:26px;height:26px;border-radius:6px;background:rgba(250,245,238,.35)}
+.attchip .nm{font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---- the progress rail: the honest "what I am doing" surface ------------- */
+.rail{align-self:flex-start;width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);box-shadow:var(--sh-card);overflow:hidden}
+.rail .head{display:flex;align-items:center;gap:10px;padding:13px 14px;border-bottom:1px solid var(--border)}
+.rail .head .who{font-size:11px;font-weight:800;color:var(--text-muted);letter-spacing:.02em}
+.rail .head .live{margin-left:auto;font-size:11px;font-weight:700;color:var(--ember-hover)}
+.steps{padding:10px 14px 13px;display:flex;flex-direction:column;gap:2px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+.step .glyph{width:18px;height:18px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex:0 0 auto;margin-top:1px}
+.step.done .glyph{background:var(--pine);color:var(--cream)}
+.step.now .glyph{background:var(--ember-fill);color:var(--cream);display:flex;align-items:center;justify-content:center}
+.step.next .glyph{background:transparent;border:1.5px solid var(--border-input);color:transparent}
+.step .txt{font-size:13.5px;line-height:1.35}
+.step.done .txt{color:var(--text-muted)}
+.step.now .txt{color:var(--espresso);font-weight:700}
+.step.next .txt{color:var(--text-muted);opacity:.75}
+.step .sub{display:block;font-size:11.5px;font-weight:500;color:var(--text-muted);margin-top:1px}
+.rail .foot{display:flex;align-items:center;gap:10px;padding:11px 14px;border-top:1px solid var(--border);background:var(--sand-2)}
+.rail .foot .note{font-size:11.5px;color:var(--text-body);flex:1}
+.stopbtn{border:1px solid var(--border-input);background:var(--card);color:var(--espresso);border-radius:var(--r-pill);padding:7px 13px;font-size:12px;font-weight:700}
+
+/* Step-truthful bar. It reports finished steps over total steps — transform
+   only, never width — so it cannot claim more progress than has happened.
+   The unfinished part of the CURRENT step lives in that step's own glyph. */
+.bar{height:4px;background:var(--sand);overflow:hidden;position:relative;width:100%}
+.bar i{display:block;height:100%;background:var(--ember);transform-origin:left center;transform:scaleX(.5);transition:transform var(--dur-base) var(--ease-out)}
+.bar.done i{background:var(--pine);transform:scaleX(1)}
+.step.now .glyph i{display:block;width:8px;height:8px;border-radius:50%;background:var(--cream);animation:beat 1.05s var(--ease-inout) infinite}
+@keyframes beat{0%,100%{transform:scale(.72);opacity:.65}50%{transform:scale(1);opacity:1}}
+
+/* slow-connection card */
+.slow{display:flex;gap:10px;align-items:flex-start;background:var(--gold-tint);border:1px solid rgba(150,99,15,.32);border-radius:var(--r-input-lg);padding:11px 12px;font-size:12.5px;line-height:1.45;color:var(--gold-text);font-weight:600}
+
+/* sheet: what she read */
+.scrim{position:absolute;inset:0;background:rgba(33,26,21,.45);animation:fade var(--dur-base) var(--ease-out) both}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:80%;background:var(--card);border-top-left-radius:24px;border-top-right-radius:24px;border-top:1px solid var(--border);padding:8px 18px 16px;display:flex;flex-direction:column;gap:10px;animation:sheetin var(--dur-base) var(--ease-out) both;box-shadow:var(--sh-float)}
+@keyframes sheetin{from{transform:translateY(380px)}to{transform:none}}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--border);align-self:center}
+.sheet .head{display:flex;gap:10px;align-items:center}
+.sheet .ic{width:40px;height:40px;border-radius:12px;background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;font-size:18px}
+.sheet h3{margin:0;font-size:15.5px;font-weight:700}
+.sheet .kind{font-size:12.5px;color:var(--text-muted);margin-top:1px}
+.hr{height:1px;background:var(--border);margin:2px 0}
+.label{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin:0}
+pre.read{margin:0;font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:13.5px;line-height:1.5;color:var(--text-body);white-space:pre-wrap;background:var(--sand-2);border-radius:var(--r-input-lg);padding:12px;max-height:210px;overflow:hidden}
+.warnbox{background:rgba(150,99,15,.08);border-radius:var(--r-input-lg);padding:12px;display:flex;flex-direction:column;gap:10px}
+.warnbox .r{display:flex;gap:10px;font-size:13px;line-height:1.45;color:var(--text-body)}
+.retry{align-self:flex-start;display:flex;align-items:center;gap:7px;background:var(--ember-fill);color:var(--cream);border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700;min-height:40px}
+.donebtn{align-self:center;color:var(--ember);font-size:14px;font-weight:700;padding:8px 20px}
+
+/* composer */
+.composer{background:var(--card);border-top:1px solid var(--border);padding:10px 12px 12px}
+.rowinp{display:flex;align-items:flex-end;gap:8px}
+.plus{width:44px;height:44px;border-radius:var(--r-pill);background:var(--sand-2);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.field{flex:1;min-height:44px;border:1px solid var(--border);background:var(--sand-2);border-radius:22px;padding:11px 16px;font-size:14.5px;color:var(--text-muted);display:flex;align-items:center}
+.send{width:44px;height:44px;border-radius:var(--r-pill);background:var(--ember-fill);color:var(--cream);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-ember-hard);flex:0 0 auto}
+.send.stop{background:var(--espresso);color:var(--cream);box-shadow:none}
+
+/* notes */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-top:36px}
+.note{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--border)}
+.note:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:26px;border-radius:var(--r-pill);background:var(--espresso);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.note h3{margin:1px 0 4px;font-size:14px;font-weight:700}
+.note p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text-body)}
+.note code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;background:var(--sand-2);border-radius:5px;padding:1px 5px;color:var(--espresso-2)}
+.callout{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);padding:18px;box-shadow:var(--sh-card);margin-top:20px}
+.callout h4{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ember)}
+.callout p{margin:0 0 8px;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.callout p:last-child{margin-bottom:0}
+.callout.wrong h4{color:var(--error)}
+.callout.wrong{border-color:rgba(193,62,20,.35);background:rgba(193,62,20,.04)}
+
+@keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.enter{animation:rise var(--dur-slow) var(--ease-out) both}
+.d1{animation-delay:30ms}.d2{animation-delay:70ms}
+.stopbtn,.retry{transition:transform var(--dur-micro) var(--ease-out)}
+.stopbtn:active,.retry:active{transform:scale(.985)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  .enter,.scrim,.sheet{opacity:1;transform:none}
+  .bar i{animation:none;transform:scaleX(1);opacity:1}
+  .stopbtn:active,.retry:active{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20</div>
+  <h1 class="title">04 — Wakati anafanya kazi</h1>
+  <p class="lede">The waiting state, made of real steps instead of three pulsing dots. Today the app cycles three fixed sentences on a 1.8&nbsp;s timer while the sweep animation loops forever and nothing is tied to the request — so a dead request and a healthy one look identical for as long as the user is willing to wait. Here the rail reports what actually happened, the reading of a file reports its real stage, and a slow connection is stated rather than hidden behind a spinner.</p>
+  <div class="rule"></div>
+
+  <div class="phones">
+    <!-- ============ A: rail in the thread ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag">A · kanaendelea</span> The rail, with a stop control</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div></div>
+        <div class="transcript">
+          <div class="bubble me enter">
+            <span class="attchip"><span class="ph"></span><span class="nm">tangazo-ccbrt.jpg</span></span>
+            Unaweza kuniambia nini kutoka hapa?
+          </div>
+
+          <div class="rail enter d1">
+            <div class="head">
+              <span class="mark" style="width:22px;height:22px;border-radius:7px"><svg width="13" height="13" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></span>
+              <span class="who">SUMAIYA</span>
+              <span class="live">inaendelea · 6s</span>
+            </div>
+            <div class="bar" aria-hidden="true"><i></i></div>
+            <div class="steps">
+              <div class="step done"><span class="glyph">✓</span><span class="txt">Nimesoma picha yako<span class="sub">herufi 2,340 — nikasoma “Sales Officer, CCBRT”</span></span></div>
+              <div class="step done"><span class="glyph">✓</span><span class="txt">Nimeona mahitaji ya kazi<span class="sub">bidhaa za dawa · mauzo ya uwanda · leseni ya udereva</span></span></div>
+              <div class="step now"><span class="glyph"><i></i></span><span class="txt">Ninalinganisha na CV yako<span class="sub">naangalia ulichonacho tayari — sitakudanganya kwa kidole cha kutosha</span></span></div>
+              <div class="step next"><span class="glyph">–</span><span class="txt">Nitakupa kilichokosekana na kile tunachoweza kufanya</span></div>
+            </div>
+            <div class="foot">
+              <span class="note">Unaweza kuacha kusubiri wakati wowote — maneno yako yanabaki.</span>
+              <span class="stopbtn">Acha</span>
+            </div>
+          </div>
+
+          <div class="sysnote enter d2">Uko kwenye mtandao wa polepole. Nitatuma bila kupoteza ulichoniambia.</div>
+        </div>
+        <div class="composer">
+          <div class="rowinp">
+            <div class="plus">+</div>
+            <div class="field">Andika wakati akifanya kazi…</div>
+            <div class="send stop" aria-label="Acha"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ B: the read sheet ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag alt">B · nilichosoma</span> What she got from the file — and what she could not</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div></div>
+        <div class="transcript">
+          <div class="bubble me"><span class="attchip"><span class="ph"></span><span class="nm">wasifu-wangu.pdf</span></span>Unaweza kuniambia nini kutoka hapa?</div>
+          <div class="bubble her" style="opacity:.55">…</div>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="grab"></div>
+          <div class="head">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span>
+            <div style="flex:1;min-width:0"><h3>wasifu-wangu.pdf</h3><div class="kind">Faili · 412 KB</div></div>
+          </div>
+          <div class="hr"></div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="step done" style="padding:0"><span class="glyph">✓</span><span class="txt">Nimepakia faili<span class="sub">412 KB — imefika</span></span></div>
+            <div class="step now" style="padding:0"><span class="glyph">●</span><span class="txt">Ninasoma maandishi yake<span class="sub">PDF hii ina maandishi halisi — ninayachukua</span></span></div>
+          </div>
+          <div class="bar" aria-hidden="true"><i></i></div>
+
+          <div class="hr"></div>
+
+          <p class="label">Nilichosoma</p>
+          <pre class="read">AMINA JUMA
+Dar es Salaam · 07XX XXX XXX
+
+UZOEFU
+Mauzo — Duka la dawa, Kariakoo (2023–sasa)
+Niliuza bidhaa za dawa na kuhudumia wateja 40 kwa siku…
+
+ELIMU
+Shahada ya Biashara — UDSM, 2023</pre>
+          <p style="margin:0;font-size:12px;color:var(--text-muted)">Hii ndiyo niliyoipata. Kama namba au jina limekosewa, nibadilishe.</p>
+
+          <p style="margin:0;font-size:11.5px;color:var(--pine);font-weight:700;display:flex;gap:6px;align-items:center">✓ Niliisoma yote — herufi 1,204</p>
+
+          <span class="donebtn">Sawa</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ============ C: the read that failed ============ -->
+    <div class="phonewrap">
+      <div class="caption"><span class="tag">C · haikusoma</span> A failed read is its own screen, not a footnote to a success</div>
+      <div class="phone">
+        <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+        <div class="chathead"><div class="mark"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div><div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div></div>
+        <div class="transcript">
+          <div class="bubble me"><span class="attchip"><span class="ph"></span><span class="nm">wasifu-wangu.pdf</span></span>Unaweza kuniambia nini kutoka hapa?</div>
+          <div class="bubble her">Sikuweza kuusoma faili hili. Tafadhali angalia maelezo hapa chini.</div>
+        </div>
+        <div class="composer"><div class="rowinp"><div class="plus">+</div><div class="field">Niandikie…</div><div class="send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div></div></div>
+
+        <div class="scrim"></div>
+        <div class="sheet" style="border-top:3px solid var(--error)">
+          <div class="grab"></div>
+          <div class="head">
+            <span class="ic" style="background:rgba(193,62,20,.1);color:var(--error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M10.3 4.3 2.6 17.5A1.6 1.6 0 0 0 4 20h16a1.6 1.6 0 0 0 1.4-2.5L13.7 4.3a1.6 1.6 0 0 0-2.8 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></span>
+            <div style="flex:1;min-width:0"><h3>Sikuisoma — haikuwa maandishi</h3><div class="kind">Faili · 1.8 MB · PDF</div></div>
+          </div>
+          <div class="hr"></div>
+
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="step done" style="padding:0"><span class="glyph">✓</span><span class="txt">Faili yako imefika<span class="sub">1.8 MB — haijapotea</span></span></div>
+            <div class="step" style="padding:0"><span class="glyph" style="background:var(--error);color:var(--cream)">✕</span><span class="txt" style="color:var(--espresso);font-weight:700">Sikuweza kutoa maneno<span class="sub">PDF hii ni picha ya ukurasa, si maandishi halisi</span></span></div>
+          </div>
+
+          <div class="warnbox" style="background:rgba(193,62,20,.06);border-left:3px solid var(--error);border-radius:var(--r-input-lg)">
+            <div class="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:block"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.3 11 2 2 0 0 1 .8 1.6V17h5v-1.4a2 2 0 0 1 .8-1.6A6 6 0 0 0 12 3Z"/></svg> <span>Usirudie kile kilichoshindikana: badala ya PDF, <b>tuma picha ya ukurasa badala yake, nitaisoma</b>. Au bandika maandishi mwenyewe.</span></div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+            <span class="retry">↻ Jaribu kuisoma tena</span>
+            <span class="donebtn" style="align-self:auto">Sawa</span>
+          </div>
+          <p style="margin:0;font-size:11.5px;color:var(--text-muted)">Sababu hii inatoka kwa seva — sitabuni nyingine.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ NOTES ============ -->
+    <div class="phonewrap" style="flex:1 1 330px;min-width:320px;max-width:470px">
+      <div class="note"><span class="num">1</span><div><h3>Every step is a fact, not a timer</h3><p>Today the “ramp” is <code>setInterval(1800)</code> cycling three hard-coded sentences (<code>scan-processing-screen.tsx:27-28, 57-60</code>), looping back to step&nbsp;1 forever. It cannot be right, and it cannot be wrong. Each line here is emitted when the work behind it finishes — the OCR returns N characters, the advert yields its requirements, the comparison starts.</p></div></div>
+      <div class="note"><span class="num">2</span><div><h3>The unfinished steps are still named</h3><p>A step that has not run yet is not a blank future. <em>“Nitakupa kilichokosekana”</em> tells the user what is coming, so a 20-second wait is a plan rather than a silence.</p></div></div>
+      <div class="note"><span class="num">3</span><div><h3><code>Acha</code> — and the words survive it</h3><p>The rail carries a stop control from the first second, and the composer becomes the stop button. Interrupting takes the <b>partial</b> work (the file has already been read; that is not thrown away) and never discards what the user typed — today <code>editable={!loading}</code> locks the field (<code>chat-composer.tsx:142</code>) and the three dots are un-interruptible (<code>withRepeat(…,-1)</code>, <code>sumaiya-chat-screen.tsx:39-50</code>).</p></div></div>
+      <div class="note"><span class="num">4</span><div><h3>Elapsed time, quiet and small</h3><p><code>inaendelea · 6s</code>. It is the one number that makes a wait feel bounded, and it is a plain text node — no count-up animation (motion standard §4: numbers the user is comparing are not animated).</p></div></div>
+      <div class="note"><span class="num">5</span><div><h3>A slow connection is named, not hidden</h3><p>The app knows: the client retries twice with backoff (<code>attachment-extract.ts:42, 309</code>) and maps timeouts to their own reason (<code>:51-53</code>). That knowledge reaches the screen as one line. Nothing is queued silently and no spinner is allowed to run with no end.</p></div></div>
+      <div class="note"><span class="num">6</span><div><h3>“Nilichosoma” — the sheet the trust case demands</h3><p>The preview sheet already exists (<code>attachment-preview-sheet.tsx</code>) and already shows the extracted text and the real failure reason in Swahili. What it does not do is show the <em>stages</em>: today it prints a static <code>refresh-cw</code> icon beside <em>“Ninasoma faili…”</em> (<code>:127-128</code>) — an icon that never moves, over a state that can last a minute. Here the two stages are the actual upload and the actual extraction, and the failure box below them is the app's own cause-specific copy.</p></div></div>
+      <div class="note"><span class="num">7</span><div><h3>The bar counts finished steps — it cannot outrun the work</h3><p>Two of four done is <code>scaleX(.5)</code>, not a bar racing to the end while the third step is still running. The unfinished part of the current step lives in that step's own glyph (a bounded <code>1.05s</code> beat), so motion is attached to the thing that is actually moving. <code>transform</code> only, never <code>width</code>. The old sweep is <code>withRepeat(…, -1, true)</code> with no cleanup (<code>scan-processing-screen.tsx:43-45</code>) — an unbounded per-frame callback on a device with a third of a Pixel's throughput. Reduced motion: no beat, the text carries everything.</p></div></div>
+      <div class="note"><span class="num">8</span><div><h3>Screen&nbsp;B and screen&nbsp;C are two different screens, not one panel with a footnote</h3><p>A first draft of this mockup showed the extracted text <em>and</em> a “could not extract” warning together — two contradictory states in one sheet, reviewed and rejected. A succeeded read shows the text and a quiet <code>Niliisoma yote</code>. A failed read is screen&nbsp;C: error polarity on the sheet's top edge, the failure with its own icon and its own line, no extracted text, and the reason attributed to the server rather than invented (<em>“Sababu hii inatoka kwa seva — sitabuni nyingine”</em>) — exactly what <code>attachment-extract.ts:46-87</code> already provides per failure code.</p></div></div>
+
+      <div class="callout wrong">
+        <h4>What this replaces, and why it matters more than it looks</h4>
+        <p><b>A fake ramp is worse than no ramp.</b> A user who watches three sentences cycle twice learns that the animation is not about their request; the third time they stop believing the screen and leave. Everything here is either a fact from the request, or a promise the app can keep.</p>
+        <p><b>Replaced:</b> the 1.8&nbsp;s <code>setInterval</code> sentence carousel; the unbounded 1.6&nbsp;s sweep; the static <code>refresh-cw</code>; the un-interruptible three-dot bubble.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

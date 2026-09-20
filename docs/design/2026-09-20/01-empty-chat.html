@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sumaiya · Chatbox redesign · 01 Mazungumzo mapya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   Sumaiya — Warm Confidence. Every value below is READ FROM THE APP, not invented.
+   Palette  : apps/web/tailwind.config.ts  +  apps/native/src/components/ui/theme.ts
+   Radii    : tailwind.config.ts borderRadius (input 8, input-lg 12, card 16,
+              card-lg 20, pill 999, device 18, phone 40)
+   Motion   : apps/web/lib/motion.ts  +  docs/MOTION-STANDARD-2026-09-20.md
+   ========================================================================= */
+:root{
+  --ember:#DA4A1C; --ember-hover:#C13E14; --ember-shadow:#A8330F; --ember-fill:#B83A12; --ember-tint:#FBE9E1;
+  --pine:#12433D; --pine-tint:#E4EDEA;
+  --gold:#F2A93B; --gold-tint:#FBF3E2; --gold-text:#96630F;
+  --espresso:#211A15; --espresso-2:#2C231C; --espresso-line:#3A2E25;
+  --cream:#FAF5EE; --sand:#EFE7DA; --sand-2:#F4EEE4; --card:#FFFFFF;
+  --border:#E9E0D4; --border-input:#9C8D7B;
+  --text-body:#6B5F54; --text-muted:#756A5E;
+  --error:#C13E14; --success:#12766A; --warning:#96630F;
+
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px; --r-device:18px; --r-phone:40px;
+  --sh-card:0 2px 8px rgba(33,26,21,.05);
+  --sh-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --sh-device:0 30px 70px -30px rgba(33,26,21,.35);
+  --sh-ember-hard:0 3px 0 #A8330F;
+
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-screen:260ms; --dur-field:340ms;
+  --ease-out:cubic-bezier(0.33,1,0.68,1);
+  --ease-in:cubic-bezier(0.32,0,0.67,0);
+  --ease-inout:cubic-bezier(0.65,0,0.35,1);
+  --ease-emph:cubic-bezier(0.16,1,0.3,1);
+  --rise:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--cream); color:var(--espresso);
+  font-family:"Hanken Grotesk",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.display{font-family:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif}
+
+/* ---- the proposal page (this is a document, not the product) -------------- */
+.page{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+h1.title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:40px;line-height:1.05;letter-spacing:-.02em;font-weight:800;margin:10px 0 10px}
+.lede{font-size:17px;line-height:1.5;color:var(--text-body);max-width:70ch;margin:0}
+.rule{height:1px;background:var(--border);margin:28px 0 32px}
+.row{display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap}
+.col-notes{flex:1 1 380px;min-width:320px;max-width:520px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:var(--r-pill);border:1px solid var(--border-input);color:var(--text-muted)}
+.tag.ember{border-color:rgba(218,74,28,.4);background:var(--ember-tint);color:var(--ember-hover)}
+.tag.pine{border-color:rgba(18,67,61,.3);background:var(--pine-tint);color:var(--pine)}
+.tag.gold{border-color:rgba(150,99,15,.35);background:var(--gold-tint);color:var(--gold-text)}
+
+/* ---- phone --------------------------------------------------------------- */
+.phone{
+  width:390px;height:844px;flex:0 0 auto;background:var(--cream);border-radius:var(--r-phone);
+  box-shadow:var(--sh-device),0 0 0 1px var(--border);overflow:hidden;position:relative;
+  display:flex;flex-direction:column;
+}
+.statusbar{display:flex;justify-content:space-between;align-items:center;padding:12px 26px 0;font-size:13px;font-weight:700;color:var(--espresso)}
+.statusbar .icons{display:flex;gap:5px;align-items:center;opacity:.85}
+.bar{display:inline-block;width:3px;border-radius:1px;background:currentColor}
+.pillcap{width:34px;height:5px;border-radius:3px;background:rgba(33,26,21,.18)}
+
+/* chat chrome */
+.chathead{display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.mark{width:38px;height:38px;border-radius:var(--r-input-lg);background:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.mark svg{display:block}
+.chathead h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.chathead .sub{margin:1px 0 0;font-size:12px;color:var(--text-muted)}
+.iconbtn{width:40px;height:40px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;color:var(--text-muted);margin-left:auto;flex:0 0 auto}
+
+/* transcript */
+.transcript{flex:1;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:14px}
+.bubble{max-width:86%;border-radius:var(--r-device);padding:11px 14px;font-size:15px;line-height:22px}
+.bubble.me{align-self:flex-end;background:var(--ember-fill);color:var(--cream);border-bottom-right-radius:4px}
+.bubble.her{align-self:flex-start;background:var(--card);border:1px solid var(--border);color:var(--espresso);border-bottom-left-radius:4px}
+.bubble.her .lead{font-weight:700;margin-bottom:3px;display:block}
+.who{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.who b{font-size:11px;font-weight:800;letter-spacing:.02em;color:var(--text-muted)}
+.who .dot{width:16px;height:16px;border-radius:5px;background:var(--ember);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--cream);font-family:"Bricolage Grotesque",system-ui,sans-serif}
+
+/* section label + quick actions */
+.sectionlabel{margin:2px 0 0;font-size:12.5px;font-weight:700;color:var(--text-muted)}
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qa .card{display:flex;align-items:center;gap:10px;padding:13px 12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-input-lg);min-height:60px}
+.qa .ic{width:30px;height:30px;border-radius:9px;background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:15px}
+.qa .lbl{font-size:13px;font-weight:700;line-height:1.2}
+
+/* system note */
+.sysnote{align-self:center;text-align:center;font-size:12px;color:var(--text-muted);background:var(--sand-2);border-radius:var(--r-pill);padding:6px 12px;max-width:80%}
+
+/* composer */
+.composer{background:var(--card);border-top:1px solid var(--border);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px}
+.hintline{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-muted);padding:0 4px}
+.rowinp{display:flex;align-items:flex-end;gap:8px}
+.plus{width:44px;height:44px;border-radius:var(--r-pill);background:var(--ember-tint);color:var(--ember);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:400;flex:0 0 auto}
+.field{flex:1;min-height:44px;border:1px solid var(--border);background:var(--sand-2);border-radius:var(--r-pill);padding:11px 16px;font-size:15px;color:var(--text-muted);display:flex;align-items:center}
+.send{width:44px;height:44px;border-radius:var(--r-pill);background:transparent;border:1.5px solid var(--border-input);color:var(--text-muted);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.send.on{background:var(--ember-fill);color:var(--cream);box-shadow:var(--sh-ember-hard)}
+
+/* notes */
+.note{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--border)}
+.note:last-child{border-bottom:0}
+.num{flex:0 0 26px;height:26px;border-radius:var(--r-pill);background:var(--espresso);color:var(--cream);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.note h3{margin:1px 0 4px;font-size:14px;font-weight:700}
+.note p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text-body)}
+.note code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;background:var(--sand-2);border-radius:5px;padding:1px 5px;color:var(--espresso-2)}
+.callout{margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-card-lg);padding:18px;box-shadow:var(--sh-card)}
+.callout h4{margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ember)}
+.callout p{margin:0 0 8px;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.callout p:last-child{margin-bottom:0}
+.footer{margin-top:44px;font-size:12px;color:var(--text-muted)}
+
+/* ---- what the mockup animates. Every duration is a motion token. ---------- */
+@keyframes rise{from{opacity:0;transform:translateY(var(--rise))}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.enter{animation:rise var(--dur-slow) var(--ease-out) both}
+.enter-1{animation-delay:30ms}.enter-2{animation-delay:70ms}.enter-3{animation-delay:110ms}.enter-4{animation-delay:150ms}
+.fade-in{animation:fade var(--dur-base) var(--ease-out) both}
+.qa .card{transition:transform var(--dur-micro) var(--ease-out),border-color var(--dur-micro) var(--ease-out)}
+.qa .card:active{transform:scale(.985)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-delay:0ms !important;transition-duration:.01ms !important}
+  .enter,.fade-in{opacity:1;transform:none}
+  .qa .card,.qa .card:active{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="eyebrow">Sumaiya · Chatbox redesign · 2026-09-20</div>
+  <h1 class="title">01 — Mazungumzo mapya</h1>
+  <p class="lede">The first thing she says, and the four doors out of the blank field. The transcript tells the truth about what is kept; the four cards name an <em>outcome</em>, never a feature; the composer is big enough to hit with a thumb and honest about what a disabled send means.</p>
+  <div class="rule"></div>
+
+  <div class="row">
+    <!-- ================= PHONE ================= -->
+    <div class="phone" aria-label="Mazungumzo mapya">
+      <div class="statusbar"><span>09:41</span><span class="icons"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#211A15" opacity=".35"/></svg><svg width="24" height="11" viewBox="0 0 24 11"><rect x="0.5" y="0.5" width="19" height="10" rx="3" fill="none" stroke="#211A15" stroke-opacity=".5"/><rect x="2" y="2" width="14" height="7" rx="1.7" fill="#211A15"/><rect x="21" y="3.5" width="2" height="4" rx="1" fill="#211A15" opacity=".5"/></svg></span></div>
+
+      <div class="chathead">
+        <div class="mark" title="SumaiyaMark — unchanged geometry"><svg width="22" height="22" viewBox="0 0 24 24" role="img" aria-label="Sumaiya" style="display:block"><g fill="#FAF5EE"><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(0 12 12)"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(120 12 12)" opacity=".9"/><path d="M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z" transform="rotate(240 12 12)" opacity=".8"/></g></svg></div>
+        <div><h2>Sumaiya</h2><p class="sub">Msaidizi wako wa kazi</p></div>
+        <div class="iconbtn" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 18.5a6.5 6.5 0 0 0 6.5-6.5V8a6.5 6.5 0 1 0-13 0v4a6.5 6.5 0 0 0 6.5 6.5Z"/><path d="M12 18.5V21"/></svg></div>
+      </div>
+
+      <div class="transcript">
+        <div class="bubble her enter">
+          <span class="lead">Habari, mimi ni Sumaiya 👋</span>
+          Naweza kuandika CV yako, kuilenga kwa ajira fulani, kuandaa barua ya maombi, au tuzungumze tu. Unafanya nini leo?
+        </div>
+
+        <p class="sectionlabel enter-1 enter">Unataka nini leo?</p>
+
+        <div class="qa">
+          <div class="card enter enter-1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg></span><span class="lbl">Tengeneza CV yako</span></div>
+          <div class="card enter enter-2"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><span class="lbl">Barua ya maombi</span></div>
+          <div class="card enter enter-3"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 12h18"/></svg></span><span class="lbl">Jifunze ujuzi</span></div>
+          <div class="card enter enter-4"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M21 11.6a8.4 8.4 0 0 1-8.5 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.6A8.5 8.5 0 1 1 21 11.6Z"/></svg></span><span class="lbl">Ongea nami</span></div>
+        </div>
+
+        <div class="sysnote enter enter-4">Mazungumzo yanabaki kwenye simu hii.</div>
+      </div>
+
+      <div class="composer">
+        <div class="rowinp">
+          <div class="plus" aria-label="Ongeza picha au faili">+</div>
+          <div class="field">Niandikie…</div>
+          <div class="send" aria-label="Tuma"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= NOTES ================= -->
+    <div class="col-notes">
+      <div class="note"><span class="num">1</span><div><h3>She introduces herself in the first person, once</h3><p>The existing greeting (<code>i18n.tsx:100</code>) is already right: <em>“Habari, mimi ni Sumaiya…”</em>. It keeps the one place where a person-ness is earned. Everything else on this screen is chrome and stays second-person or names the outcome.</p></div></div>
+      <div class="note"><span class="num">2</span><div><h3>“Tengeneza CV yangu” → “Tengeneza CV yako”</h3><p>A control the product renders is chrome, not something the user said. The audit found this card first-person (<code>chat-types.ts:132</code>) beside a first-person-feature label elsewhere in the app. <span class="tag ember">copy change, not a behaviour change</span></p></div></div>
+      <div class="note"><span class="num">3</span><div><h3>“Ongea nami” stays exactly as it is</h3><p>That one <em>is</em> her speaking about herself (an invitation), which the Swahili voice rule permits. It is quoted here so nobody “fixes” it into a feature label.</p></div></div>
+      <div class="note"><span class="num">4</span><div><h3>Four cards, 60&nbsp;dp tall, one decision</h3><p>Tapping one seeds the conversation — unchanged behaviour, and the reason the empty state is not a blank field. The brief strip in the app keeps 2-up at every font scale; at 200% text the grid becomes one column, never clipped.</p></div></div>
+      <div class="note"><span class="num">5</span><div><h3>A system note that answers a real question</h3><p>The transcript already survives a process death (<code>use-sumaiya-chat.ts:50-75</code>) and nothing ever said so. This line says it in one short sentence. <span class="tag">a vision reviewer called this the one thing to cut on this screen</span> It is the first thing to remove if the empty state should be quieter — it is the lowest-value element here, and the same component carries the higher-value notes (“nimerudisha ombi lako”, “mazungumzo yamefutwa”, retry receipts) elsewhere.</p></div></div>
+      <div class="note"><span class="num">6</span><div><h3>The composer, made honest</h3><p><code>+</code> and send are 44&nbsp;dp (the audit measured 40). The field grows to 5 lines then scrolls, and Enter never sends (<code>chat-composer.tsx:148</code> — keep that). A disabled send is sand with a muted glyph <em>and</em> the placeholder says why it is disabled; it never becomes an invisible tap target.</p></div></div>
+      <div class="note"><span class="num">7</span><div><h3>Nothing on this screen pops</h3><p>Greeting rises first, the four cards stagger 30/70/110/150&nbsp;ms (cap 6, <code>MAX_STAGGER_MS</code> 270), the note lands last. All of it is <code>transform</code>+<code>opacity</code>, all of it interruptible, all of it instant under Reduce Motion.</p></div></div>
+
+      <div class="callout">
+        <h4>What this screen replaces</h4>
+        <p><b>Nothing new is added.</b> The greeting, the four cards, the <code>+</code>, the field and the send button all already exist. What changes is the wording of one card, the size of two touch targets, one new line of text about persistence, and the arrival order.</p>
+        <p>The prototype loop that plays these entrances is the same one a developer can read: <code>rise 300ms ease-out (0.33,1,0.68,1)</code>, stagger <code>30 + min(i,6)×40</code>.</p>
+      </div>
+      <div class="footer">Screen 1 of 5 · <code>docs/design/2026-09-20/</code> · palette and motion tokens read from the app, not invented.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
