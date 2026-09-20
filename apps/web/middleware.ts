@@ -7,6 +7,7 @@ import {
   isProtectedPath,
   missingSupabasePublicEnv,
 } from "@/lib/routing";
+import { canonicalHostRedirect } from "@/lib/host-redirect";
 
 // ─── CDN CACHING — verified against the live site, Aug 2026 ────────────────
 // Vercel does NOT cache HTML responses that pass through middleware when the
@@ -31,6 +32,24 @@ import {
 //     mutation costs them nothing.
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // CANONICAL HOST — closes a leak where the raw Vercel deployment host(s)
+  // served the entire product with no redirect, so unbranded/uncanonical
+  // URLs could leak into search results and shared links. 308 (not 302):
+  // it is a PERMANENT move and preserves the request method, unlike a 302/303
+  // which some clients/crawlers coerce to GET. The target list is an explicit
+  // allowlist, not a `*.vercel.app` wildcard, because Vercel PREVIEW
+  // deployments (sumaiya-web-git-<branch>-<team>.vercel.app) must keep serving
+  // on their own host for PR review — redirecting every vercel.app host would
+  // break that.
+  const hostRedirect = canonicalHostRedirect(
+    request.headers.get("host"),
+    pathname,
+    request.nextUrl.search,
+  );
+  if (hostRedirect) {
+    return NextResponse.redirect(hostRedirect, 308);
+  }
 
   // Read language preference from cookie early, used for all paths.
   // Swahili is the primary language — default to it unless the visitor has

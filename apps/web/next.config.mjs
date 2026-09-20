@@ -47,6 +47,13 @@ const nextConfig = {
     // soft-404 (200 + homepage shell) instead of reaching the ATS checker.
     return [
       { source: "/ats", destination: "/ats-checker", permanent: true },
+      // "Ajira" is the Swahili word for jobs, and Swahili is the default
+      // language — printed/QR material and users type /ajira expecting the
+      // jobs board, but no such route exists, so it 404s. Send it to the real
+      // route (/jobs, which renders the Swahili title "Ajira Zinazolingana na
+      // CV Yako") instead.
+      { source: "/ajira", destination: "/jobs", permanent: true },
+      { source: "/:locale(en|sw)/ajira", destination: "/jobs", permanent: true },
       // Pricing / checkout were removed (2026-09 — everything is free). Send
       // stale links home rather than 404.
       { source: "/pricing", destination: "/", permanent: false },
