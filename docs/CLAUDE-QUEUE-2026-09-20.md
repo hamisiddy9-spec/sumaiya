@@ -168,6 +168,148 @@ Build the guided capture path:
   and must not upload a raw multi-MB image (follow `lib/photo-upload.ts`: the 12 MB source
   cap, 600px square, JPEG q0.82, 400 KB ceiling already exist).
 
+**Research done, spec written: `docs/PHOTO-CAPTURE-SPEC-2026-09-20.md`** — read it before starting; it
+carries the citations (LinkedIn, US/UK passport rules, Bayt/GCC, the PSRS "must upload recent Passport
+Size Photo" condition), the exact thresholds, the cost table, and the cultural do-not list. The items
+below are ready to execute with no further research.
+
+#### 0.8.1 — Shared guide logic + thresholds (do this first, everything imports it)
+- **Build**: `packages/utils/src/photo-guides.ts` exporting `FaceBox`, `FrameStats`, `GuideHint`,
+  `evaluateGuides()` and the `PHOTO_GUIDE_TOLERANCES` constants; add `"./photo-guides"` to the
+  `exports` map in `packages/utils/package.json` and re-export from `packages/utils/src/index.ts`.
+  Pure, DOM-free, zero dependencies — same contract style as `packages/utils/src/cv-shape.ts`.
+- **Constants (copy verbatim from spec §2.3)**: `LUMA_MIN 80 / LUMA_MAX 185 / HARD_DARK 60 /
+  HARD_BRIGHT 210`; `BACKLIT_DELTA 55`; `SIDE_LIT_DELTA 40`; `FACE_H_MIN 0.35 / FACE_H_MAX 0.68`;
+  `FACE_W_MIN 0.25 / FACE_W_MAX 0.60`; `EDGE_MARGIN 0.04`; `CENTRE_X_TOL 0.08`; `EYE_LINE_Y 0.30–0.48`;
+  `ROLL_OK 5° / ROLL_WARN 10°`; `YAW_MAX 0.20`; `DEVICE_ROLL_OK 3°`; `BG_VARIANCE_MAX 45`.
+- **Hint priority** (one hint per tick, first match wins): `no_face` → too dark/bright → `backlit`
+  → `side_lit` → `too_far`/`too_close` → edge margin → `off_centre` → `not_frontal` → `tilted` →
+  `phone_tilted` → busy background → `ok`.
+- **Hard rule**: `face === null` returns severity `"tip"` and **never** a block, warning score, or
+  disabled shutter (NIST FRVT demographic-differential evidence; spec §2.3 bias rule). No skin-tone
+  heuristic anywhere.
+- **Tests**: `apps/web/lib/photo-guides.test.ts` (table-driven, one case per hint code) +
+  `apps/native/src/lib/photo-guides.test.ts` (thin import check, mirroring how `cv-shape` is tested
+  from both apps).
+- **Acceptance**: `cd apps/web && npx vitest run lib/photo-guides.test.ts` green;
+  `cd apps/native && npx jest src/lib/photo-guides.test.ts` green; `npx tsc --noEmit` clean in both.
+
+#### 0.8.2 — Web capture sheet (mobile web + webcam), on-device guides
+- **Build**: `apps/web/components/editor/photo-capture-dialog.tsx` — a modal with a visible
+  `<video muted playsInline autoPlay>`, the overlay from spec §2.1, one Swahili hint line, torch
+  toggle (via `track.applyConstraints({ advanced: [{ torch: true }] })` when supported, hidden
+  otherwise), shutter, "Piga tena", "Tumia picha hii", and a permanent "Chagua picha iliyopo"
+  fallback that opens the existing file input.
+- **Capture**: `canvas.drawImage(video, …)` → `toBlob("image/jpeg", 0.9)`. **Never** call
+  `ImageCapture` — caniuse has it unsupported on iOS Safari today; the canvas path works everywhere.
+- **Detection tiers**: (1) `'FaceDetector' in window` → native shape detection; (2) else lazy-load
+  MediaPipe Tasks Vision BlazeFace short-range (224 KB measured) **only when the sheet opens**;
+  (3) else degraded mode = oval + luma/variance maths only, which needs no model at all. Degraded
+  mode must be genuinely usable, not an error state.
+- **Measurement**: 64×64 sampling canvas every 250 ms, luma `0.2126R+0.7152G+0.0722B`, feeding
+  `evaluateGuides()`. Feature-detect `navigator.mediaDevices?.getUserMedia` and fall through to the
+  file input when absent (secure context is a hard requirement of the API).
+- **Acceptance**: `cd apps/web && npx vitest run lib/photo-capture-hints.test.ts` (hint-mapping
+  logic) green; manual matrix in spec §5 (dark room, backlit window, too far, tilted phone, iOS
+  Safari stream renders and captures) recorded with screenshots.
+
+#### 0.8.3 — Extend the existing pipeline, do not fork it
+- **Build**: in `apps/web/lib/photo-upload.ts` add `computeGuidedSquareCrop(srcW, srcH, faceBox|null,
+  target)` — identical output to `computeSquareCrop` when `faceBox` is `null` (so existing tests are
+  untouched) and face-anchored otherwise; and an optional `adjustments?: AdjustmentPlan` parameter on
+  `downscalePhotoFile()` applied to the **same canvas** between decode and encode.
+- **Invariants that must still hold**: 12 MB source cap, EXIF-aware decode, 600px square, q0.82 with
+  stepped fallback, ≤400 KB stored data URL, `isImageDataUrl()` still true for the returned value.
+- **Acceptance**: `npx vitest run lib/photo-upload.test.ts` green **unmodified**; new cases: face box
+  present → crop shifts toward the face; face box null → byte-identical output to today for the same
+  input fixture.
+
+#### 0.8.4 — On-device adjustments (web), all discardable, all explained
+- **Build**: `packages/utils/src/photo-adjust.ts` — pure `computeAdjustments(stats)` returning
+  `{ rotateDeg, cropRect, gamma, channelGains, reasons[] }`; apply it in the capture flow's canvas
+  step. Toggles in the sheet's post-capture view, each with its Swahili line from spec §3.5.
+- **Clamps**: straighten ≤±6°; exposure ≤±0.5 stop equivalent; WB channel gains ≤±12% and attenuated
+  toward 1.0 by the skin-pixel share so skin is never neutralised; background matte via the MediaPipe
+  selfie segmenter (244 KB measured) loaded **only** when the user taps "Badilisha mandhari ya nyuma".
+- **Banned (enforce in code review)**: any face retouch — smoothing, whitening, slimming, skin-tone
+  shift — and any pixel write inside the face box other than the clamped global transform.
+- **Hard rules**: original bytes retained for the session; `Rudisha kama ilivyokuwa` restores it;
+  every change individually discardable; the identity-document warning line always visible
+  (`Kwa picha ya paspoti, visa, au maombi ya Ajira Portal — tumia picha ya awali bila marekebisho.`).
+- **Acceptance**: unit tests for the clamps and the "no face-box pixel writes" invariant; a recorded
+  session showing the original restored after undo, and each toggle's Swahili explanation on screen.
+
+#### 0.8.5 — Native capture screen (Phase 1 now, Phase 2 gated on a compatibility check)
+- **Phase 1 (no new native dependency)**: new screen using the existing `expo-camera ^57.0.4`
+  (`CameraView`, `useCameraPermissions`, `enableTorch`, `takePictureAsync({ quality: 0.85 })` — the
+  `apps/native/src/screens/app/scan-screen.tsx:5,20,28-42,125` pattern) with `facing="front"`, the
+  in-app overlay from spec §2.1, torch button, and the instructional tips. Guides are instructional
+  only: `expo-camera`'s `CameraView` exposes no face boxes or pixel access in this SDK and
+  `expo-face-detector` is deprecated/removed (Expo FYI `face-detector-removed.md`).
+- **Phase 2 (do not start until the check passes)**: first verify `react-native-vision-camera` +
+  an ML Kit / BlazeFace frame processor against **RN 0.86.3 / Expo SDK 57** on a real device. If it
+  lines up, run detection in a frame processor on-device (offline, free, bundled 224 KB model) and
+  feed the **same** `evaluateGuides()` from `packages/utils`. If it does not line up, stop at Phase 1
+  on native and ship measurement on web only — do not force a broken native module.
+- **Acceptance**: `cd apps/native && npx tsc --noEmit && npx jest` clean; APK smoke test on a real
+  Android phone: capture in dark room → torch hint; too far → distance hint; overlay and hint line
+  legible on a small screen at 320 px width.
+
+#### 0.8.6 — Desktop web: check the file the user already has
+- **Build**: keep the existing file input as the primary desktop route
+  (`cv-editor-client.tsx:2070-2099`); add a secondary "Tumia kamera ya kompyuta" button that opens the
+  0.8.2 sheet. After `validatePhotoFile()` and after decode, measure the same `FrameStats` on a
+  downscaled copy of the picked image and show the guidance as a **report, never a gate** (e.g.
+  `Uso ni mdogo kwenye picha. Picha itakatwa kuzunguka uso wako.`).
+- **Acceptance**: picking a deliberately bad photo (tiny face) shows the report, still saves, and the
+  guided crop centres on the face; `npx vitest run lib/photo-upload.test.ts` still green.
+
+#### 0.8.7 — Optional, consented AI critique via `deepseek-flash` Vision
+- **Build**: a Next.js API route that posts the **already-processed 600px / ≤400 KB** JPEG to
+  `https://api.deepseek.com/chat/completions` with `model: "deepseek-flash"` and an OpenAI-compatible
+  `content` array containing a `{"type":"image_url","image_url":{"url":"data:image/jpeg;base64,…"}}`
+  part, `jsonMode: true` for a structured verdict. Route it through the existing
+  `apps/web/lib/api/ai-provider.ts` so provider fallback and timeouts are unchanged.
+- **What it is for and what it is not**: it produces the *critique and the Swahili explanation*; it
+  cannot edit an image (no image-output endpoint exists). Never let its prose override a measurement
+  the deterministic maths made — the model sees a ~384-token downscale, the maths sees the frame.
+- **Gating**: opt-in only, **after** the on-device path has finished, with the Swahili consent line
+  naming the recipient and the country (PDPA s.23(2) wants notice before collection;
+  `docs/ai-memory-disclosure.md` already flags the cross-border transfer). Refusal changes nothing —
+  no degradation, no nag.
+- **Cost guard**: ≈$0.0002–0.0003 per photo at published rates (384 image tokens + ~250 output
+  tokens). Cap it: one call per photo, cached, never on autosave, never in a loop.
+- **Acceptance**: a recorded run showing the consent line before the request, the request only after
+  consent, a structured response rendered as Swahili guidance, and a clean silent skip when
+  `DEEPSEEK_API_KEY` is empty (it is empty in Vercel — this must not 503 the editor).
+
+#### 0.8.8 — One stored photo format across both apps + the Swahili strings
+- **Reconcile the divergence**: native compresses to 400 px wide at q0.7
+  (`apps/native/src/lib/pick-photo.ts:44-47`) while web stores 600 px square at q0.82
+  (`photo-upload.ts:35-39`). Move native to **600 px / q0.82 / same 400 KB ceiling** so both apps
+  store the same thing and the `PhotoCircle`/`photoCircle` renderers get the same input.
+- **Swahili copy**: add every string from spec §3.5 and §2.3 (guide hints, toggle explanations,
+  consent line, identity-document warning) in both docs' agreed register; run the lint tripwires.
+- **Acceptance**: `npx vitest run lib/swahili-lint.test.ts` (web) and `cd apps/native && npx jest
+  src/lib/swahili-lint.test.ts` green; a native capture and a web capture produce the same
+  dimensions and quality; **the owner has approved the Swahili wording in writing** (none of it is
+  written by a native speaker — ship as a proposal, per `docs/SWAHILI-STANDARD-2026-09-20.md` §3).
+
+#### 0.8.9 — Privacy surface for photos (PDPA + Play data safety)
+- **Build**: extend the existing editor consent note (`cv-editor-client.tsx:2108-2115`) rather than
+  duplicating it; state that the photo is stored in the CV, that adjustment happens on the device by
+  default, and that the optional AI critique sends the image to DeepSeek outside Tanzania. Update the
+  Google Play Data safety declaration to include photos, and the PDPA record of processing.
+- **Acceptance**: the note is visible before any off-device send; the Play data-safety form lists
+  photo collection with its purpose; no off-device request occurs without consent in the recorded
+  run from 0.8.7.
+
+#### 0.8.10 — Verification with evidence (gate on this before calling it done)
+- Real cheap Android phone, real iOS Safari: run the matrix in spec §5 and attach screenshots
+  (dark-room torch hint, backlit hint, too-far hint, tilt hint, successful capture, undo restoring
+  the original). 3G-throttled load must be usable with **zero** model downloads until the user taps
+  the background button. Report failures as failures — a green test suite is not a working camera.
+
 ### 1. Swahili language programme — HIGHEST PRIORITY
 Two native-speaker catches already prove non-native audit fails at first glance:
 - **`Mgusiko`** — not a word. `Mguso mmoja, hakuna nywila.` is the intended line.
