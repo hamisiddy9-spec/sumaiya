@@ -312,7 +312,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         body: JSON.stringify({
           documentId: activeCvId,
           documentType: "cv",
-          title: `AI: ${toolName} (${new Date().toISOString().slice(0, 16).replace("T", " ")})`,
+          title: `Sumaiya: ${toolName} (${new Date().toISOString().slice(0, 16).replace("T", " ")})`,
           snapshot: { title: activeCvTitle ?? "", data: cv },
         }),
       });

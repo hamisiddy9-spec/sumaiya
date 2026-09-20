@@ -88,7 +88,7 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
             <ul className="space-y-2 mb-8 text-sm text-text-body">
               <li>✓ ATS-optimized — passes automated recruiter screening</li>
               <li>✓ Free to build &amp; export as PDF</li>
-              <li>✓ AI writing help for your summary &amp; experience</li>
+              <li>✓ Writing help for your summary &amp; experience</li>
               <li>✓ Matching cover letter &amp; business card in the same style</li>
             </ul>
 
