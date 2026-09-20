@@ -24,7 +24,7 @@ export function nextSnapTab(current: number, key: string, count: number): number
 export function snapResultsLiveMessage(sw: boolean, score: number): string {
   const pct = Number.isFinite(score) ? Math.round(score) : 0;
   return sw
-    ? `Matokeo yako yako tayari — ulinganifu wa ATS ${pct}%.`
+    ? `Matokeo yako yako tayari — ulinganifu na kazi ${pct}%.`
     : `Results ready — ATS match ${pct}%.`;
 }
 

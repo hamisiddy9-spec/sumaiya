@@ -98,7 +98,7 @@ export function computeNextAction(
           args: {},
           reason: {
             en: `ATS score is ${score}/100 — improving the summary is the fastest fix.`,
-            sw: `Alama ya ATS ni ${score}/100 — kuboresha muhtasari ndiyo njia ya haraka.`,
+            sw: `Alama ya CV yako ni ${score}/100 — kuboresha muhtasari ndiyo njia ya haraka.`,
           },
         };
       }

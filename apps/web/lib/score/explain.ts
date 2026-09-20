@@ -34,7 +34,7 @@ const COMPONENT_LABEL: Record<ScoreComponentKey, { en: string; sw: string }> = {
   experienceRelevance: { en: "Experience relevance", sw: "Uhusiano wa uzoefu" },
   achievementStrength: { en: "Achievement strength", sw: "Nguvu ya mafanikio" },
   educationQualification: { en: "Education & qualifications", sw: "Elimu na sifa" },
-  atsQuality: { en: "ATS document quality", sw: "Ubora wa hati kwa ATS" },
+  atsQuality: { en: "ATS document quality", sw: "Ubora wa hati kwa waajiri" },
 };
 
 const DISCLAIMER = {

@@ -15,7 +15,7 @@ export interface DocType {
 }
 
 export const DOC_TYPES: DocType[] = [
-  { id: "cv",            icon: "cv",     href: "/editor/cv/new",            en: "CV / Résumé",   sw: "CV",               blurbEn: "Recruiter-ready, ATS-friendly", blurbSw: "Tayari kwa waajiri, rafiki kwa ATS" },
+  { id: "cv",            icon: "cv",     href: "/editor/cv/new",            en: "CV / Résumé",   sw: "CV",               blurbEn: "Recruiter-ready, ATS-friendly", blurbSw: "Tayari kwa waajiri, inayopitishwa na mifumo yao" },
   { id: "cover-letter",  icon: "mail",   href: "/editor/cover-letter/new",  en: "Cover Letter",  sw: "Barua ya Maombi",  blurbEn: "Matched to the job",            blurbSw: "Inayolingana na kazi" },
   { id: "business-card", icon: "card",   href: "/editor/business-card/new", en: "Business Card", sw: "Kadi ya Biashara", blurbEn: "Print-ready contact card",      blurbSw: "Kadi ya mawasiliano" },
   { id: "letter",        icon: "letter", href: "/editor/letter/new",        en: "Formal Letter", sw: "Barua Rasmi",      blurbEn: "Official correspondence",       blurbSw: "Mawasiliano rasmi" },

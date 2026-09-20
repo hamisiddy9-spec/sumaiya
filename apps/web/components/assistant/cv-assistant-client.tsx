@@ -198,7 +198,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   const cockpit = !!activeCvId;
   const openingMessage = cockpit
     ? (convoSw
-        ? `Nimeipata CV yako${activeCvTitle ? ` "${activeCvTitle}"` : ""}${firstName ? `, ${firstName}` : ""}. Ningeweza kuikagua kwa ATS, au kuilinganisha na kazi unayolenga na kuiboresha. Gusa hapa chini — au niambie tu.`
+        ? `Nimeipata CV yako${activeCvTitle ? ` "${activeCvTitle}"` : ""}${firstName ? `, ${firstName}` : ""}. Ningeweza kuikagua, au kuilinganisha na kazi unayolenga na kuiboresha. Gusa hapa chini — au niambie tu.`
         : `I've got your CV${activeCvTitle ? ` "${activeCvTitle}"` : ""}${firstName ? `, ${firstName}` : ""}. I can run an ATS check, or match it to a job you're eyeing and tailor it. Tap below — or just tell me.`)
     : greeting;
 
@@ -1413,7 +1413,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // and drop the result into the thread as a card. No AI call, no latency.
   const runAtsCheck = async () => {
     if (!cv || analyzing || actionBusy) return;
-    setMessages((m) => [...m, { role: "user", content: sw ? "Kagua CV yangu kwa ATS" : "Run an ATS check on my CV" }]);
+    setMessages((m) => [...m, { role: "user", content: sw ? "Kagua CV yangu" : "Run an ATS check on my CV" }]);
     setAnalyzing(true);
     await new Promise((r) => setTimeout(r, 650)); // a beat — feels considered
     const checks = analyzeCv(cv, sw);
@@ -1421,7 +1421,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setMessages((m) => [...m, {
       role: "assistant",
       content: sw
-        ? `Hii hapa ATS ya CV yako${activeCvTitle ? ` "${activeCvTitle}"` : ""}. Gusa kitufe chochote kuiboresha.`
+        ? `Hii hapa alama ya CV yako${activeCvTitle ? ` "${activeCvTitle}"` : ""}. Gusa kitufe chochote kuiboresha.`
         : `Here's the ATS readiness of your CV${activeCvTitle ? ` "${activeCvTitle}"` : ""}. Open the editor to fix anything flagged.`,
       card: { kind: "ats", score, checks },
     }]);
@@ -2495,7 +2495,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   <Link href="/ats-checker" onClick={() => setShowConvos(false)}
                     className="flex items-center gap-2 px-2 py-2 rounded-lg text-[13px] text-espresso hover:bg-sand transition">
                     <Bolt className="w-3.5 h-3.5 text-ember" />
-                    {sw ? "Kagua ATS" : "ATS check"}
+                    {sw ? "Kagua CV" : "ATS check"}
                   </Link>
                 </li>
                 <li>
@@ -2727,7 +2727,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               <button onClick={runAtsCheck}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
                 <Bolt className="w-4 h-4 text-ember" />
-                {sw ? "Kagua ATS ya CV yangu" : "Run an ATS check"}
+                {sw ? "Kagua CV yangu" : "Run an ATS check"}
               </button>
               <button onClick={startJobs}
                 className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
@@ -3141,7 +3141,7 @@ function AtsResultCard({ score, checks, sw, onFix }: { score: number; checks: At
         }
         summary={
           <>
-            <span className="font-bold">{sw ? "Utayari wa ATS" : "ATS readiness"}: {label}</span>
+            <span className="font-bold">{sw ? "Utayari wa CV" : "ATS readiness"}: {label}</span>
             <span className="block text-xs text-text-muted font-normal">
               {problems > 0
                 ? sw ? `${problems} vya kurekebisha` : `${problems} to fix`

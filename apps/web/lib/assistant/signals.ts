@@ -232,10 +232,10 @@ export function computeSignals(context: UnifiedContext, now: Date = new Date()):
           type: "ats.check",
           tool: "ats.check",
           priority: 60,
-          title: { en: "Your CV may miss ATS filters", sw: "CV yako inaweza kukosa vigezo vya ATS" },
+          title: { en: "Your CV may miss ATS filters", sw: "CV yako inaweza kukosa vigezo vya waajiri" },
           detail: {
             en: `"${context.activeCv.title}" scores ${score}/100 on ATS readability — a quick check shows the exact fixes.`,
-            sw: `"${context.activeCv.title}" ina alama ${score}/100 kwenye ATS — ukaguzi wa haraka unaonyesha marekebisho sahihi.`,
+            sw: `"${context.activeCv.title}" ina alama ${score}/100 ya usomekaji na waajiri — ukaguzi wa haraka unaonyesha marekebisho sahihi.`,
           },
           trigger: `ATS score ${score}/100 < ${SIGNAL_THRESHOLDS.atsMinScore}`,
         });

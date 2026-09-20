@@ -24,7 +24,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     quote: {
       en: "The ATS checker told me exactly what was missing. Fixed it, re-downloaded, got the interview.",
-      sw: "Kikagua cha ATS kiliniambia hasa kilichokosekana. Nilirekebisha, nikapakua tena, nikapata mahojiano.",
+      sw: "Kikagua cha CV kiliniambia hasa kilichokosekana. Nilirekebisha, nikapakua tena, nikapata mahojiano.",
     },
     name: "Brian",
     detail: { en: "Logistics · Nairobi", sw: "Usafirishaji · Nairobi" },

@@ -10,10 +10,10 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   const sw = params.locale !== "en";
   return {
     title: sw
-      ? "Angalia Alama ya ATS ya CV Yako Bila Malipo"
+      ? "Angalia Alama ya CV Yako Bila Malipo"
       : "Free ATS Resume Checker — Score Your CV Instantly",
     description: sw
-      ? "Angalia alama ya ATS ya CV yako bila malipo. Pakia CV yako kama PDF na upate alama ya papo hapo pamoja na marekebisho maalum ya kupita Mifumo ya Kufuatilia Maombi (ATS) — imeundwa kwa watafuta-ajira kila mahali."
+      ? "Angalia alama ya CV yako bila malipo. Pakia CV yako kama PDF na upate alama ya papo hapo pamoja na marekebisho maalum ya kupita vichujio vya waajiri — imeundwa kwa watafuta-ajira kila mahali."
       : "Check your CV's ATS score free. Upload your resume as a PDF and get an instant score plus specific fixes to pass Applicant Tracking Systems — built for job seekers everywhere.",
     keywords: sw
       ? ["kuangalia CV ATS", "alama ya ATS", "CV inayopita ATS", "kagua CV", "ATS checker", "cv checker tanzania", "cv checker kenya", "resume checker free"]
@@ -24,9 +24,9 @@ export async function generateMetadata({ params }: { params: { locale: string } 
         ],
     alternates: alternatesFor("/ats-checker", params.locale),
     openGraph: {
-      title: sw ? "Angalia Alama ya ATS ya CV Yako | Sumaiya" : "Free ATS Resume Checker | Sumaiya",
+      title: sw ? "Angalia Alama ya CV Yako | Sumaiya" : "Free ATS Resume Checker | Sumaiya",
       description: sw
-        ? "Pakua CV yako na upate alama ya ATS papo hapo pamoja na marekebisho maalum. Bure, hakuna usajili."
+        ? "Pakua CV yako na upate alama papo hapo pamoja na marekebisho maalum. Bure, hakuna usajili."
         : "Upload your CV and get an instant ATS score with specific fixes. Free, no sign-up.",
       url: "/ats-checker",
       images: ["/og-image.png"],
@@ -62,11 +62,11 @@ export default async function AtsCheckerPage({ params }: { params: { locale: str
             <span className="text-xs font-semibold text-cream/70 tracking-wider uppercase">{sw ? "Bure · Hakuna usajili" : "Free · No sign-up"}</span>
           </div>
           <h1 className="font-display font-extrabold text-3xl md:text-5xl text-cream mb-4 tracking-tight leading-tight">
-            {sw ? "CV yako iko tayari kwa ATS?" : "Is your CV ATS-ready?"}
+            {sw ? "CV yako iko tayari kwa waajiri?" : "Is your CV ATS-ready?"}
           </h1>
           <p className="text-base md:text-lg text-cream/60 max-w-xl mx-auto leading-relaxed">
             {sw
-              ? "Maombi mengi huchujwa na programu kabla ya mtu kuyaona. Pakia CV yako upate alama ya ATS papo hapo pamoja na marekebisho kamili ya kufaulu — kwa sekunde chache."
+              ? "Maombi mengi huchujwa na programu kabla ya mtu kuyaona. Pakia CV yako upate alama papo hapo pamoja na marekebisho kamili ya kufaulu — kwa sekunde chache."
               : "Most applications are filtered by software before a human sees them. Upload your CV and get an instant ATS score with the exact fixes to pass — in seconds."}
           </p>
         </div>

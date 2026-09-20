@@ -214,7 +214,7 @@ export function computeCompositeScore(input: CompositeInput, jobProfile?: JobPro
       weight: WEIGHTS.atsQuality,
       score: Math.round(ats),
       detail: `ATS readiness ${Math.round(ats)}/100 (${atsChecks.filter((c) => c.pass).length}/${atsChecks.length} checks pass).`,
-      detailSw: `Utayari wa ATS ${Math.round(ats)}/100 (${atsChecks.filter((c) => c.pass).length}/${atsChecks.length} ukaguzi umepita).`,
+      detailSw: `Utayari wa CV yako ${Math.round(ats)}/100 (${atsChecks.filter((c) => c.pass).length}/${atsChecks.length} ukaguzi umepita).`,
     },
   ];
 

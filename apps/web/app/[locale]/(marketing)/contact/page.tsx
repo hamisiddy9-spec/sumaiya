@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: alternatesFor("/contact", params.locale),
     title: sw ? "Wasiliana Nasi" : "Contact",
     description: sw
-      ? "Pata msaada kuhusu mpango wako wa Sumaiya, upakuaji, au alama ya ATS. Tunajibu ndani ya saa 24."
+      ? "Pata msaada kuhusu mpango wako wa Sumaiya, upakuaji, au alama ya CV yako. Tunajibu ndani ya saa 24."
       : "Get help with your Sumaiya plan, downloads, or ATS score. We reply within 24 hours.",
   };
 }
@@ -42,7 +42,7 @@ const contactDetails = (sw: boolean) => [
 
 const faqLinks = (sw: boolean) => [
   { href: "/templates", label: sw ? "Naweza kubadilisha muundo wa CV?" : "Can I change my CV design?" },
-  { href: "/ats-checker", label: sw ? "CV yangu itapita mifumo ya ATS?" : "Will my CV pass ATS systems?" },
+  { href: "/ats-checker", label: sw ? "CV yangu itapita vichujio vya waajiri?" : "Will my CV pass ATS systems?" },
   { href: "/tools", label: sw ? "Mna zana za PDF bila malipo?" : "Do you have free PDF tools?" },
 ];
 
@@ -62,7 +62,7 @@ export default async function ContactPage({ params }: { params: { locale: string
           </h1>
           <p className="text-lg text-text-body max-w-2xl mx-auto">
             {sw
-              ? "Una maswali kuhusu mpango wako, upakuaji, au alama ya ATS? Tuandikie ujumbe na tutakujibu ndani ya saa 24."
+              ? "Una maswali kuhusu mpango wako, upakuaji, au alama ya CV yako? Tuandikie ujumbe na tutakujibu ndani ya saa 24."
               : "Questions about your plan, downloads, or ATS score? Drop us a message and we'll reply within 24 hours."}
           </p>
         </div>

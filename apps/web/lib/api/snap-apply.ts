@@ -231,13 +231,13 @@ export function snapNotAJobMessage(sw: boolean): string {
 
 export function snapNoProfileMessage(sw: boolean): string {
   return sw
-    ? "Hatujapata CV au wasifu wako bado — na hatutabuni matokeo. Jenga CV yako nami (dakika ~2), kisha urudie hapa kwa ATS score + CV lengwa + barua ya maombi."
+    ? "Hatujapata CV au wasifu wako bado — na hatutabuni matokeo. Jenga CV yako nami (dakika ~2), kisha urudie hapa kwa alama ya CV yako + CV lengwa + barua ya maombi."
     : "We couldn't find your CV or career profile yet — and we never invent results. Build your CV with Sumaiya (takes ~2 minutes), then come back for your ATS score + tailored CV + cover letter.";
 }
 
 export function snapAiUnavailableMessage(sw: boolean): string {
   return sw
-    ? "Huduma ya AI haipatikani kwa sasa — ATS score na mpangilio wa CV lengwa ziko hapa, lakini uandishi wa AI umekosekana. Jaribu tena baada ya dakika chache."
+    ? "Huduma ya AI haipatikani kwa sasa — alama ya CV yako na mpangilio wa CV lengwa ziko hapa, lakini uandishi wa AI umekosekana. Jaribu tena baada ya dakika chache."
     : "AI writing is temporarily unavailable — your ATS score and reordered CV are here, but the AI-drafted parts couldn't be generated. Please try again in a few minutes.";
 }
 

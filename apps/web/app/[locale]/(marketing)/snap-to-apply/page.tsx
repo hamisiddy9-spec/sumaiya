@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       ? "Lenga CV Yako kwa Kazi Yoyote kwa Sekunde 30 — Bure"
       : "Tailor Your CV to Any Job in 30 Seconds — Free",
     description: sw
-      ? "Bandika maelezo ya kazi au piga picha ya tangazo la kazi. Pata alama ya ulinganifu wa ATS papo hapo, kisha CV na barua ya maombi zilizolengwa zinazopita programu — bure, hakuna usajili."
+      ? "Bandika maelezo ya kazi au piga picha ya tangazo la kazi. Pata alama ya ulinganifu wa kazi papo hapo, kisha CV na barua ya maombi zilizolengwa zinazopita programu — bure, hakuna usajili."
       : "Paste a job description or snap a photo of a job poster. Get an instant ATS match score, then a tailored CV and cover letter that pass the robots — free, no sign-up.",
     keywords: sw
       ? ["lenga CV kwa kazi", "CV kwa maombi ya kazi", "alama ya ATS", "CV inayolingana na kazi", "barua ya maombi", "piga picha ya tangazo la kazi", "CV kwa sekunde 30", "snap to apply"]
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     openGraph: {
       title: sw ? "Lenga CV Yako kwa Sekunde 30 — Bure | Sumaiya" : "Tailor Your CV to Any Job in 30 Seconds — Free | Sumaiya",
       description: sw
-        ? "Bure, hakuna usajili: bandika au pigia picha kazi yoyote na upate CV na barua za maombi zilizolingana na ATS kwa sekunde 30."
+        ? "Bure, hakuna usajili: bandika au pigia picha kazi yoyote na upate CV na barua za maombi zilizolingana na kazi hiyo kwa sekunde 30."
         : "Free, no sign-up: paste or photograph any job and get an ATS-matched CV and cover letter in 30 seconds.",
       url: "/snap-to-apply",
       // Page-level openGraph replaces the marketing layout's, so the og:image
@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
       card: "summary_large_image",
       title: sw ? "Lenga CV Yako kwa Sekunde 30 — Bure | Sumaiya" : "Tailor Your CV to Any Job in 30 Seconds — Free | Sumaiya",
       description: sw
-        ? "Bandika au pigia picha kazi yoyote, upate alama ya ATS, kisha CV na barua zilizolengwa. Bure, hakuna usajili."
+        ? "Bandika au pigia picha kazi yoyote, upate alama ya ulinganifu, kisha CV na barua zilizolengwa. Bure, hakuna usajili."
         : "Paste or photograph any job, get an ATS match score, then a tailored CV and cover letter. Free, no sign-up.",
       images: [`${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`],
     },
@@ -72,7 +72,7 @@ const steps = (sw: boolean) => [
   {
     icon: "target" as const,
     step: "02",
-    title: sw ? "Pata alama yako ya ATS" : "Get your ATS match score",
+    title: sw ? "Pata alama ya ulinganifu wako" : "Get your ATS match score",
     body: sw
       ? "Ona papo hapo jinsi CV yako ya sasa inavyolingana na kile programu ya mwajiri inachotafuta — na kile kinachokosekana hasa."
       : "See instantly how your current CV lines up with what the recruiter's software is looking for — and exactly what's missing.",
@@ -109,7 +109,7 @@ export default async function SnapToApplyPage({ params }: { params: { locale: st
           </h1>
           <p className="text-base md:text-lg text-cream/60 max-w-xl mx-auto leading-relaxed mb-8">
             {sw
-              ? "Bandika maelezo ya kazi au piga picha ya tangazo. Snap-to-Apply inaikadiria CV yako dhidi ya maneno muhimu ya ATS ya kazi hiyo, kisha inaiandika upya pamoja na barua ya maombi — kabla hujatuma maombi."
+              ? "Bandika maelezo ya kazi au piga picha ya tangazo. Snap-to-Apply inaikadiria CV yako dhidi ya maneno muhimu ya kazi hiyo, kisha inaiandika upya pamoja na barua ya maombi — kabla hujatuma maombi."
               : "Paste a job description or snap a photo of a poster. Snap-to-Apply scores your CV against the role's ATS keywords, then rewrites your CV and cover letter to match — before you apply."}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

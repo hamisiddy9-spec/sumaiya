@@ -226,7 +226,7 @@ function UpgradeModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
         <p className="text-text-muted text-sm mb-6">{sw ? "Pata upakuaji wa PDF bila kikomo, miundo yote, na maboresho ya AI." : "Get unlimited PDF downloads, every look, and AI-powered enhancements."}</p>
         <ul className="text-left space-y-2 mb-6">
           {(sw
-            ? ["Upakuaji wa PDF bila kikomo", "Miundo yote ya kitaalamu", "Uboreshaji wa maudhui kwa AI", "Zana za kuboresha ATS"]
+            ? ["Upakuaji wa PDF bila kikomo", "Miundo yote ya kitaalamu", "Uboreshaji wa maudhui kwa AI", "Zana za kuridhisha waajiri"]
             : ["Unlimited PDF downloads", "Every professional look", "AI content enhancement", "ATS optimization tools"]
           ).map((f) => (
             <li key={f} className="flex items-center gap-2.5 text-sm text-text-body">
@@ -965,7 +965,7 @@ function formatTimeAgo(iso: string, lang: Lang): string {
 type Directive = "shorter" | "ats" | "measurable" | "leadership" | "sw" | "en";
 const REFINE_OPTIONS: { id: Exclude<Directive, "sw" | "en">; en: string; sw: string }[] = [
   { id: "shorter", en: "Shorter", sw: "Fupisha" },
-  { id: "ats", en: "More ATS", sw: "Kusomeka na mifumo (ATS)" },
+  { id: "ats", en: "More ATS", sw: "Rafiki Zaidi kwa Waajiri" },
   { id: "measurable", en: "More measurable", sw: "Ongeza vipimo" },
   { id: "leadership", en: "More leadership", sw: "Uongozi zaidi" },
 ];
@@ -2939,21 +2939,21 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     <Icon name="download" size={15} className="text-ember mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">PDF</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi ya ATS" : "Pixel-perfect design + invisible ATS text"}</span>
+                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span>
                     </span>
                   </button>
                   <button onClick={handleDownloadDocx} disabled={isDocx} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60">
                     <FileText size={15} className="text-pine mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">Word (.docx)</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Maandishi ya ATS · sio design ya template" : "ATS text version · not the template design"}</span>
+                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span>
                     </span>
                   </button>
                   <button onClick={handleDownloadText} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left">
                     <FileType2 size={15} className="text-text-body mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, salama kwa ATS" : "Leanest ATS-safe format"}</span>
+                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span>
                     </span>
                   </button>
                   <div className="h-px bg-border my-1.5" />
@@ -3112,15 +3112,15 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <div className="absolute right-0 bottom-full mb-2 z-50 bg-card border border-border rounded-xl shadow-card-hover py-1.5 min-w-[248px] text-left overflow-hidden" role="menu">
                     <button onClick={() => { setCenterMenu(false); handleDownload("preview"); }} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left" role="menuitem">
                       <Icon name="download" size={15} className="text-ember mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">PDF</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi ya ATS" : "Pixel-perfect design + invisible ATS text"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">PDF</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span></span>
                     </button>
                     <button onClick={() => { setCenterMenu(false); handleDownloadDocx(); }} disabled={isDocx} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60" role="menuitem">
                       <FileText size={15} className="text-pine mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">Word (.docx)</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Maandishi ya ATS · sio design ya template" : "ATS text version · not the template design"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">Word (.docx)</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span></span>
                     </button>
                     <button onClick={() => { setCenterMenu(false); handleDownloadText(); }} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left" role="menuitem">
                       <FileType2 size={15} className="text-text-body mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, salama kwa ATS" : "Leanest ATS-safe format"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span></span>
                     </button>
                     <div className="h-px bg-border my-1.5" />
                     <button onClick={() => { setCenterMenu(false); handleShare(); }} disabled={isSharing} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60" role="menuitem">
@@ -3304,7 +3304,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     <p className="text-xs font-semibold text-espresso">{uiLang === "sw" ? "Fanya CV yako ifanye kazi zaidi" : "Make your CV work harder"}</p>
                   </div>
                   <p className="text-[11px] text-text-body mb-3 leading-relaxed">
-                    {uiLang === "sw" ? "Kagua uzingatiaji wa ATS na uone jinsi CV yako inavyolingana na kazi maalum — bila akaunti." : "Check ATS compliance and see how well your CV fits a specific role — no account needed."}
+                    {uiLang === "sw" ? "Kagua jinsi CV yako inavyosomeka na mifumo ya kuajiri, na uone inavyolingana na kazi maalum — bila akaunti." : "Check ATS compliance and see how well your CV fits a specific role — no account needed."}
                   </p>
                   <button
                     onClick={() => { setSampleJdActive(true); setShowJobTarget(true); setShowAtsPanel(false); track("job_target_sample_jd_used"); }}
@@ -3442,7 +3442,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       <Icon name="bolt" size={16} className="text-text-muted flex-shrink-0" />
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-text-body">{uiLang === "sw" ? "Mipangilio Tayari" : "Mode Presets"}</p>
-                        <p className="text-[10px] text-text-muted">{uiLang === "sw" ? "ATS · Mtendaji · Ubunifu · Mwanafunzi" : "ATS · Executive · Creative · Student"}</p>
+                        <p className="text-[10px] text-text-muted">{uiLang === "sw" ? "Salama · Mtendaji · Ubunifu · Mwanafunzi" : "ATS · Executive · Creative · Student"}</p>
                       </div>
                     </div>
                     <Icon name="chevron-right" className={`text-text-muted transition-transform duration-[300ms] flex-shrink-0 ml-2 ${showPresets ? "rotate-90" : ""}`} size={14} />

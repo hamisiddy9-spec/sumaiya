@@ -103,9 +103,9 @@ export default async function AdminInsightsPage() {
         <Card title="Tailoring lift — ATS before vs after" note={<SampleNote n={tailorLift.n} />}>
           {tailorLift.n > 0 ? (
             <>
-              <Row label="Wastani wa mabadiliko ya ATS" value={num(tailorLift.avgDeltaAts)} />
+              <Row label="Wastani wa mabadiliko ya alama ya CV" value={num(tailorLift.avgDeltaAts)} />
               <Row label="Wastani wa kati (median)" value={num(tailorLift.medianDeltaAts)} />
-              <Row label="Asilimia walioinuka (ATS > 0)" value={tailorLift.liftRate === null ? "—" : `${tailorLift.liftRate}%`} />
+              <Row label="Asilimia walioinuka (alama > 0)" value={tailorLift.liftRate === null ? "—" : `${tailorLift.liftRate}%`} />
               <Row label="Wastani wa mabadiliko ya match" value={num(tailorLift.avgDeltaMatch)} />
             </>
           ) : (

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: alternatesFor("/about", params.locale),
     title: sw ? "Kuhusu Sisi" : "About",
     description: sw
-      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita ATS, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."
+      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita vichujio vya waajiri, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa AI, kwa Kiingereza au Kiswahili."
       : "Sumaiya helps job seekers build professional, ATS-ready CVs, cover letters, business cards and formal letters — in minutes, with an AI assistant, in English or Kiswahili.",
   };
 }
@@ -27,7 +27,7 @@ const values = (sw: boolean) => [
   {
     title: sw ? "Shinda roboti" : "Beat the robots",
     body: sw
-      ? "Maombi mengi huchujwa kwanza na programu ya ATS. Kila template imetengenezwa na tabaka halisi la maandishi na vichwa safi ili mashine — na binadamu — waweze kuisoma."
+      ? "Maombi mengi huchujwa kwanza na programu kabla ya mtu kuyaona. Kila template imetengenezwa na tabaka halisi la maandishi na vichwa safi ili mashine — na binadamu — waweze kuisoma."
       : "Most applications are screened by ATS software first. Every template is structured with a real text layer and clean headings so machines — and humans — can read it.",
   },
   {
@@ -48,7 +48,7 @@ const stats = (sw: boolean) => [
   { value: "120+", label: sw ? "Miundo iliyochaguliwa" : "Curated looks" },
   { value: "4", label: sw ? "Aina za hati" : "Document types" },
   { value: "2", label: sw ? "Lugha" : "Languages" },
-  { value: "PDF", label: sw ? "Uhamishaji salama kwa ATS" : "ATS-safe export" },
+  { value: "PDF", label: sw ? "Uhamishaji unaosomwa na waajiri" : "ATS-safe export" },
 ];
 
 export default async function AboutPage({ params }: { params: { locale: string } }) {

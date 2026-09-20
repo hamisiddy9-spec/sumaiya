@@ -212,12 +212,12 @@ export function AtsCheckerClient() {
                 {statusText(result.status)}
               </span>
               <h2 className="font-display font-extrabold text-2xl text-espresso mt-3">
-                {sw ? "Alama yako ya ATS" : "Your ATS score"}
+                {sw ? "Alama ya CV yako" : "Your ATS score"}
               </h2>
               <p className="text-sm text-text-body mt-1.5 leading-relaxed">
                 {result.status === "ready"
-                  ? (sw ? "CV yako inapita ukaguzi wa mifumo mingi ya ATS. Rekebisha vidokezo vichache hapo chini." : "Your CV clears most ATS checks. Tidy up the few items below and you're set.")
-                  : (sw ? "Kuna mambo yanayoweza kukufanya ukataliwe na ATS. Rekebisha yaliyo hapa chini." : "A few things could get you filtered out by an ATS. Fix the flagged items below.")}
+                  ? (sw ? "CV yako inapita vichujio vya waajiri wengi. Rekebisha vidokezo vichache hapo chini." : "Your CV clears most ATS checks. Tidy up the few items below and you're set.")
+                  : (sw ? "Kuna mambo yanayoweza kukufanya ukataliwe kabla ya mwajiri kuona CV yako. Rekebisha yaliyo hapa chini." : "A few things could get you filtered out by an ATS. Fix the flagged items below.")}
               </p>
               <button onClick={reset} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-ember-hover transition">
                 <RefreshCw className="w-3.5 h-3.5" /> {sw ? "Kagua CV nyingine" : "Check another CV"}
@@ -254,7 +254,7 @@ export function AtsCheckerClient() {
             </h3>
             <p className="text-cream/60 text-sm mb-5 max-w-md mx-auto leading-relaxed">
               {sw
-                ? "Jenga upya CV yako kwa muundo rafiki kwa ATS, au rekebisha hii uliyopakia."
+                ? "Jenga upya CV yako kwa muundo rafiki kwa waajiri, au rekebisha hii uliyopakia."
                 : "Rebuild your CV on an ATS-friendly template, or fix the one you just uploaded — free."}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -273,7 +273,7 @@ export function AtsCheckerClient() {
 
           <p className="text-[11px] text-text-muted/70 text-center mt-4 leading-relaxed">
             {sw
-              ? "Ukaguzi huu unatathmini maandishi ya CV yako. Kila mfumo wa ATS hutofautiana kidogo."
+              ? "Ukaguzi huu unatathmini maandishi ya CV yako. Kila mwajiri hutofautiana kidogo."
               : "This check analyzes your CV's text the way an ATS parses it. Every ATS differs slightly."}
           </p>
         </div>

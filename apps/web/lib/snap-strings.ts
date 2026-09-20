@@ -82,7 +82,7 @@ export const STRINGS = {
     badge: "Snap-to-Apply",
     title: "Bandika kazi, upate kila kitu",
     subtitle:
-      "Bandika maelezo yoyote ya kazi — pata ATS score, CV lengwa na barua ya maombi kwa mguso mmoja.",
+      "Bandika maelezo yoyote ya kazi — pata alama ya ulinganifu, CV lengwa na barua ya maombi kwa mguso mmoja.",
     textareaPlaceholder:
       "Bandika maelezo kamili ya kazi hapa… (cheo, majukumu, mahitaji)",
     pasteHint: "Bandika tangazo zima — kadiri lilivyo kamili, ndivyo ulinganifu unavyokuwa sahihi.",
@@ -92,7 +92,7 @@ export const STRINGS = {
     notJobHint: "Weka tangazo zima — pamoja na sehemu za mahitaji na majukumu.",
     noProfileTitle: "Tunahitaji CV yako kwanza",
     buildCv: "Jenga CV yangu nami",
-    scoreLabel: "Ulinganifu wa ATS",
+    scoreLabel: "Ulinganifu na Kazi",
     scoreBefore: "CV yako",
     scoreAfter: "Iliyolengwa",
     matched: "Maneno yaliyolingana",
@@ -121,7 +121,7 @@ export const STRINGS = {
     shareButton: "Shiriki matokeo yangu",
     shareCopied: "Kiungo kimenakiliwa!",
     shareLinkHint:
-      "Kadi yako ya kushiriki inaonyesha tu alama ya ATS na cheo cha kazi — hakuna CV, hakuna mawasiliano.",
+      "Kadi yako ya kushiriki inaonyesha tu alama ya ulinganifu na cheo cha kazi — hakuna CV, hakuna mawasiliano.",
     shareSheetTitle: "CV yangu lengwa — Sumaiya",
     genericError: "Kuna hitilafu. Tafadhali jaribu tena.",
     networkError: "Hitilafu ya mtandao. Jaribu tena.",

@@ -318,7 +318,7 @@ const PRODUCTS_SW: ProductItem[] = [
   {
     iconName: "cv",
     title: "Kuunda CV",
-    desc: "Miundo ya kitaalamu inayopita ATS. Hakiki ya moja kwa moja, mapendekezo ya AI, PDF kamili.",
+    desc: "Miundo ya kitaalamu inayopita vichujio vya waajiri. Hakiki ya moja kwa moja, mapendekezo ya AI, PDF kamili.",
     count: "Miundo 47+",
     href: "/editor/cv/try",
     bgColor: "bg-ember-tint",
@@ -479,10 +479,10 @@ export default function LandingPage() {
   const FAQS = lang === "sw"
     ? [
         { q: "Je, Sumaiya ni bure kweli?", a: "Ndiyo. Unaweza kuunda CV, barua ya maombi, kadi ya biashara au barua rasmi na kupakua PDF bila malipo — bila kadi ya benki." },
-        { q: "Je, CV zenu zinapita mifumo ya ATS?", a: "Ndiyo. Miundo yetu imeundwa kuwa rahisi kusomwa na mifumo ya waajiri (ATS) — safu moja, vichwa wazi, na PDF yenye maandishi halisi. Pia kuna kikagua-ATSbure cha kupima CV yako." },
+        { q: "Je, CV zenu zinapita vichujio vya waajiri?", a: "Ndiyo. Miundo yetu imeundwa kuwa rahisi kusomwa na mifumo ya waajiri — safu moja, vichwa wazi, na PDF yenye maandishi halisi. Pia kuna kikagua CV bure cha kupima CV yako." },
         { q: "Je, naweza kuitumia kwa Kiswahili?", a: "Ndiyo. Programu nzima inapatikana kwa Kiingereza na Kiswahili — badilisha wakati wowote kwa kitufe cha lugha." },
         { q: "Je, ninahitaji kufungua akaunti?", a: "Unaweza kuanza kuunda CV mara moja bila akaunti. Unahitaji tu kuingia unapotaka kuhifadhi kazi yako mtandaoni au kuipata kwenye kifaa kingine." },
-        { q: "Je, naweza kuitumia popote duniani?", a: "Ndiyo. Imejengwa kwa waombaji kazi popote — miundo inayopita ATS, ushauri wa msaidizi wa AI, na miundo inayofaa waajiri wa kimataifa." },
+        { q: "Je, naweza kuitumia popote duniani?", a: "Ndiyo. Imejengwa kwa waombaji kazi popote — miundo inayopita vichujio vya waajiri, ushauri wa msaidizi wa AI, na miundo inayofaa waajiri wa kimataifa." },
         { q: "Je, naweza kupata faili la Word (DOCX)?", a: "Ndiyo. Mbali na PDF safi, unaweza kupakua CV yako kama faili la Word linalohaririwa." },
       ]
     : [
@@ -522,7 +522,7 @@ export default function LandingPage() {
             {/* Sub-headline — what she does, plainly */}
             <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
               {lang === "sw"
-                ? "Msaidizi wako wa AI anayekuandikia CV, kuilenga kwa kila kazi, kukagua ATS, na kukuandaa kwa usaili — kwa Kiswahili au Kiingereza."
+                ? "Msaidizi wako wa AI anayekuandikia CV, kuilenga kwa kila kazi, kukagua CV yako, na kukuandaa kwa usaili — kwa Kiswahili au Kiingereza."
                 : "Your AI assistant — writes your CV, targets it to every job, checks it against ATS, and preps you for the interview. In English or Swahili."}
             </p>
 
@@ -555,7 +555,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-x-6 gap-y-2">
               <div className="flex items-center gap-1.5">
                 <Icon name="target" size={14} className="text-pine" />
-                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "Inapita mifumo ya waajiri (ATS)" : "Passes employer screening (ATS)"}</span>
+                <span className="text-xs text-text-body font-medium">{lang === "sw" ? "Inapita vichujio vya waajiri" : "Passes employer screening (ATS)"}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Icon name="globe-lang" size={14} className="text-ember" />

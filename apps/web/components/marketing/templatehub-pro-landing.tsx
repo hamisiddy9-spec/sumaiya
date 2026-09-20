@@ -237,7 +237,7 @@ export function TemplateHubProLanding() {
     ? [
         { n: "1", t: "Chagua muundo", b: "Chagua muundo unaokufaa. Kwa kazi yako, tunapendekeza wenyewe." },
         { n: "2", t: "Sumaiya anaandika", b: "Ongea naye kwa Kiswahili au Kiingereza. Anajaza sehemu zote, anarekebisha ujuzi, na anakuambia kilichokosekana." },
-        { n: "3", t: "Pakua PDF", b: "Pakua PDF tayari kwa ATS, tuma kwa barua pepe, au shiriki moja kwa moja kwenye WhatsApp." },
+        { n: "3", t: "Pakua PDF", b: "Pakua PDF inayopitishwa na mifumo ya kuajiri, tuma kwa barua pepe, au shiriki moja kwa moja kwenye WhatsApp." },
       ]
     : [
         { n: "1", t: "Pick a design", b: "Choose the design that fits. For your job, we suggest one." },
@@ -250,7 +250,7 @@ export function TemplateHubProLanding() {
   const features: { icon: IconName; t: string; b: string }[] = sw
     ? [
         { icon: "shapes", t: "Miundo 260+", b: "Kila muundo unafanya kazi kwenye simu. Hakuna kupanga kwa vidole." },
-        { icon: "check", t: "Kikagua cha ATS", b: "Inakuambia hasa kilichokosekana kabla ya kutuma maombi." },
+        { icon: "check", t: "Kikagua cha CV", b: "Inakuambia hasa kilichokosekana kabla ya kutuma maombi." },
         { icon: "mail", t: "Barua za maombi", b: "Barua inayolingana na kazi husika, kwa dakika." },
         { icon: "globe-lang", t: "Kiswahili na Kiingereza", b: "Kila kitu kinaonekana katika lugha uliyochagua." },
       ]
@@ -330,7 +330,7 @@ export function TemplateHubProLanding() {
 
           <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-[#4A3F36]">
             {sw
-              ? "Karibu Sumaiya Pro. Tumia Sumaiya hapa mtandaoni — chagua muundo, kisha Sumaiya anaandika kila sehemu na kukupatia PDF inayopita ATS. Uzoefu kamili wa Sumaiya unakuja kwenye app ya Android, na Play Store hivi karibuni."
+              ? "Karibu Sumaiya Pro. Tumia Sumaiya hapa mtandaoni — chagua muundo, kisha Sumaiya anaandika kila sehemu na kukupatia PDF inayopitishwa na mifumo ya kuajiri. Uzoefu kamili wa Sumaiya unakuja kwenye app ya Android, na Play Store hivi karibuni."
               : "Welcome to Sumaiya Pro. Use Sumaiya online, right here — pick a design, and she writes every section and hands you an ATS-ready PDF. The full Sumaiya experience is coming to the Android app, and to Play Store soon."}
           </p>
 

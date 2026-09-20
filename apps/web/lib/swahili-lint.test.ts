@@ -11,13 +11,16 @@
  * file carried (-a connective "kwa" misuse, plural agreement with a count of
  * one) are kept, now in the same guard table.
  *
- * The six audited classes, with the replacement that was applied by hand:
+ * The seven audited classes, with the replacement that was applied by hand:
  *   1. "MANENO YA MAPENZI" ("words of love")      → "MANENO YA KUPENDEZA"
  *   2. "barua ya kazi" (calque "job letter")      → "barua ya maombi" (cover letter)
  *   3. "tajriba" (calque "experience")            → "uzoefu" (u-class: "wako"/"huo")
  *   4. "Wathibitishaji" / "Marejeo" (references)  → "Wadhamini"
  *   5. "ailenge" / "iipitishe" (malformed verbs)  → "ilenge" / "ipitishe"
  *   6. a Preview label reading exactly "Hakiki"   → "Onyesho" ("hakiki" = verify)
+ *   7. "ATS" named directly in Swahili copy       → describe the outcome
+ *      ("mifumo ya kuajiri" / "vichujio vya waajiri" / "kikagua CV"), never
+ *      the mechanism. English copy may still say "ATS".
  *
  * Scope: every non-test .ts/.tsx file under apps/web/{lib,app,components}. Test
  * files are skipped deliberately — they quote user utterances and job-advert
@@ -204,6 +207,40 @@ const GUARDS: Guard[] = [
       '"Hakikisha tangazo lina mwanga wa kutosha"',
       '"Kila rasilimali imehakikiwa"',
     ],
+  },
+  {
+    id: "ats-jargon-in-swahili",
+    // Narrow on purpose: only fires when "ATS" is directly preceded by a
+    // Swahili particle/connective (or the word "kikagua"), which is the
+    // shape the mechanism-naming howler actually takes ("kwa ATS", "ya ATS",
+    // "kikagua ATS", …). It must not fire on English strings like "Check
+    // your ATS readiness" or "ATS-ready template" that happen to live in the
+    // same file.
+    pattern: /\b(?:wa|ya|kwa|za|la|cha|na|kwenye|kikagua)\s+ATS\b/i,
+    message: (m) =>
+      `"${m}" — names the ATS mechanism directly in Swahili copy; describe the outcome instead ("mifumo ya kuajiri", "vichujio vya waajiri", "kikagua CV") — the product rule is sell the outcome, never the mechanism, and English copy is allowed to keep "ATS"`,
+    bad: [
+      "ikague utayari wa ATS",
+      "akili ya ATS",
+      "kila muundo ni rafiki kwa ATS",
+      "kisha ipitishe kwenye kikagua ATS bila malipo",
+    ],
+    good: [
+      "Check your ATS readiness",
+      "ATS-ready template",
+      "Sumaiya checks your CV",
+      "ikague kama CV yako itavuka vichujio vya waajiri",
+      "kikagua CV bila malipo",
+    ],
+    // The two page-level `keywords:` arrays are search terms, not rendered
+    // copy: a Swahili speaker looking for this tool types "alama ya ATS", so
+    // the term has to stay in the page's metadata or the page stops matching
+    // the query it exists to serve. Line-scoped (file + content) like every
+    // other exclusion here, so the rest of both files is still guarded.
+    skip: (file, line) =>
+      (file === "app/[locale]/(marketing)/ats-checker/page.tsx" ||
+        file === "app/[locale]/(marketing)/snap-to-apply/page.tsx") &&
+      line.includes('"alama ya ATS"'),
   },
 ];
 

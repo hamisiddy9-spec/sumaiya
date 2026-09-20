@@ -159,14 +159,14 @@ export const translations = {
     hero: {
       badge: "Jukwaa lako la ajira lenye AI",
       title: "Kutoka CV yako hadi kazini — AI kila hatua",
-      subtitle: "Jenga wasifu wako wa kazi mara moja, kisha AI ilenge kwa kila kazi, ikague utayari wa ATS, iandike barua zako za maombi, na ikuandae kwa usaili.",
+      subtitle: "Jenga wasifu wako wa kazi mara moja, kisha AI ilenge kwa kila kazi, ikague kama CV yako itavuka vichujio vya waajiri, iandike barua zako za maombi, na ikuandae kwa usaili.",
       cta: "Anza bure",
       ctaSub: "Hakuna kadi ya mkopo inayohitajika",
       tryFree: "Jaribu bure →",
     },
     features: {
       title: "Kila kitu unachohitaji kupata ajira",
-      subtitle: "Wasifu mmoja wa kazi → CV, ulinganishaji wa kazi, akili ya ATS, barua za maombi na maandalizi ya usaili — vyote mahali pamoja.",
+      subtitle: "Wasifu mmoja wa kazi → CV, ulinganishaji wa kazi, uchambuzi wa CV yako, barua za maombi na maandalizi ya usaili — vyote mahali pamoja.",
     },
     pricing: {
       title: "Bei rahisi na ya wazi",
@@ -249,9 +249,9 @@ export const translations = {
     templates: {
       badge: "Muonekano",
       title: "Sumaiya anaipamba kwa ajili yako",
-      subtitle: "CV, barua ya maombi, kadi au barua rasmi — kila muundo ni rafiki kwa ATS. Sumaiya anachagua unaokufaa, nawe unaweza kuubadilisha wakati wowote.",
+      subtitle: "CV, barua ya maombi, kadi au barua rasmi — kila muundo unapitishwa na mifumo ya kuajiri. Sumaiya anachagua unaokufaa, nawe unaweza kuubadilisha wakati wowote.",
       ctaHeading: "Hujui ya kuchagua?",
-      ctaDescription: "Anza na Nakuru, kisha ipitishe kwenye kikagua ATS bila malipo na uone alama mwenyewe.",
+      ctaDescription: "Anza na Nakuru, kisha ipitishe kwenye kikagua CV bila malipo na uone alama mwenyewe.",
       ctaSwitch: "Badilisha muonekano wakati wowote kwenye kihariri kwa mguso mmoja — maudhui yako yanabaki.",
       ctaButton: "Anza kutengeneza bure",
     },

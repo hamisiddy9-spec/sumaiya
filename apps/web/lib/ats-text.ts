@@ -62,7 +62,7 @@ export function scoreResumeText(raw: string, sw = false): AtsTextResult {
       severity: ok ? "pass" : partial ? "warn" : "fail",
       tip: L(
         "Very little selectable text was found — your PDF may be a scan or image, which an ATS reads as a blank page. Export a text-based PDF.",
-        "Maandishi machache sana yamepatikana — huenda PDF yako ni picha/skani, ambayo ATS huisoma kama ukurasa tupu. Tengeneza PDF yenye maandishi."
+        "Maandishi machache sana yamepatikana — huenda PDF yako ni picha/skani, ambayo mifumo ya kuajiri huisoma kama ukurasa tupu. Tengeneza PDF yenye maandishi."
       ),
     });
   }
@@ -98,7 +98,7 @@ export function scoreResumeText(raw: string, sw = false): AtsTextResult {
     severity: sectionsFound >= 4 ? "pass" : sectionsFound >= 2 ? "warn" : "fail",
     tip: L(
       `Found ${sectionsFound}/4 standard sections. Use clear headings: Summary, Experience, Education, Skills — ATS files your details by them.`,
-      `Zimepatikana sehemu ${sectionsFound}/4. Tumia vichwa wazi: Muhtasari, Uzoefu, Elimu, Ujuzi — ATS hupanga taarifa kwa vichwa hivyo.`
+      `Zimepatikana sehemu ${sectionsFound}/4. Tumia vichwa wazi: Muhtasari, Uzoefu, Elimu, Ujuzi — mifumo ya kuajiri hupanga taarifa kwa vichwa hivyo.`
     ),
   });
 
@@ -145,7 +145,7 @@ export function scoreResumeText(raw: string, sw = false): AtsTextResult {
     earned: contactAtTop ? 8 : 0,
     max: 8,
     severity: contactAtTop ? "pass" : "warn",
-    tip: L("Put your name and contact details at the very top — some ATS only scan the header for them.", "Weka jina na mawasiliano juu kabisa — baadhi ya ATS husoma kichwa pekee."),
+    tip: L("Put your name and contact details at the very top — some ATS only scan the header for them.", "Weka jina na mawasiliano juu kabisa — baadhi ya mifumo ya kuajiri husoma kichwa pekee."),
   });
 
   // 9. Dates
@@ -155,7 +155,7 @@ export function scoreResumeText(raw: string, sw = false): AtsTextResult {
     earned: years.length >= 2 ? 8 : years.length === 1 ? 4 : 0,
     max: 8,
     severity: years.length >= 2 ? "pass" : "warn",
-    tip: L("Include start/end years for each role and qualification so an ATS can build your timeline.", "Weka miaka ya kuanza/kumaliza kwa kila kazi na sifa ili ATS itengeneze ratiba yako."),
+    tip: L("Include start/end years for each role and qualification so an ATS can build your timeline.", "Weka miaka ya kuanza/kumaliza kwa kila kazi na sifa ili ratiba yako ionekane vizuri."),
   });
 
   const earned = checks.reduce((s, c) => s + c.earned, 0);

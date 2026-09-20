@@ -32,7 +32,7 @@ const STRINGS = {
   },
   sw: {
     badge: "Imetengenezwa kwa Sumaiya",
-    kicker: "Ulinganifu wa ATS",
+    kicker: "Ulinganifu na Kazi",
     genericTitle: "CV yangu lengwa",
     sub: "Lenga CV yako kwa kazi yoyote kwa sekunde 30 — bure. Hakuna ukweli uliobuniwa, ni uzoefu wako halisi unaosisitizwa.",
     cta: "Lenga CV yangu — bure",
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: { params: { token: string } }
   }
   const title = payload.j ? `${payload.s}% ATS — ${payload.j}` : `${payload.s}% ATS match`;
   const description = sw
-    ? `Nimepata ${payload.s}% ya ulinganifu wa ATS${payload.j ? ` kwa ${payload.j}` : ""} — imetengenezwa bure kwa Sumaiya.`
+    ? `Nimepata ${payload.s}% ya ulinganifu na kazi hii${payload.j ? ` kwa ${payload.j}` : ""} — imetengenezwa bure kwa Sumaiya.`
     : `I hit ${payload.s}% ATS match${payload.j ? ` for ${payload.j}` : ""} — made free with Sumaiya.`;
   return {
     title,

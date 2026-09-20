@@ -93,9 +93,9 @@ export interface VariantSet {
  */
 export const REPEAT_VARIANTS: VariantSet = {
   sw: [
-    "Nimekuelewa 😊 Hivi karibuni tumezungumza jambo kama hili — tuchukue hatua inayofuata: naweza kukagulia CV yako kwenye ATS, kuilinganisha na kazi unayoitaka, au kutengeneza hati mpya. Ni ipi?",
-    "Sawa, nimesikia! Ili tusirudie — tuende mbele: chagua mojawapo — kagua ATS, linganisha na kazi, au tengeneza CV/barua mpya. Niko tayari kukusaidia.",
-    "Umekwisha niambia hivyo, asante! Hebu tuende hatua inayofuata — gusa hapa chini: ATS check, linganisha kazi, au tengeneza hati. Tutafanya nini kwanza?",
+    "Nimekuelewa 😊 Hivi karibuni tumezungumza jambo kama hili — tuchukue hatua inayofuata: naweza kukagua CV yako, kuilinganisha na kazi unayoitaka, au kutengeneza hati mpya. Ni ipi?",
+    "Sawa, nimesikia! Ili tusirudie — tuende mbele: chagua mojawapo — kagua CV, linganisha na kazi, au tengeneza CV/barua mpya. Niko tayari kukusaidia.",
+    "Umekwisha niambia hivyo, asante! Hebu tuende hatua inayofuata — gusa hapa chini: ukaguzi wa CV, linganisha kazi, au tengeneza hati. Tutafanya nini kwanza?",
   ],
   en: [
     "Got it 😊 We talked about something similar recently — let's move forward: I can run an ATS check on your CV, match it to a job, or build a new document. Which one?",

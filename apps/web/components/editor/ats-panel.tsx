@@ -70,7 +70,7 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
       {/* Score card — pine bg */}
       <div className="bg-pine rounded-card p-5 text-cream">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80">{sw ? "Alama ya ATS" : "ATS Score"}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80">{sw ? "Alama ya CV" : "ATS Score"}</span>
           <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cream/15 text-cream">
             {statusLabel}
           </span>

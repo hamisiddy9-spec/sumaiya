@@ -169,7 +169,7 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
           </h2>
           <p className="text-cream/75 text-sm md:text-base leading-relaxed mb-5 max-w-xl">
             {sw
-              ? "Template 260+ zinazopita mifumo ya ATS, kikagua alama papo hapo, na msaidizi wa AI anayekuandikia. Pakua PDF au Word."
+              ? "Template 260+ zinazopita vichujio vya waajiri, kikagua alama papo hapo, na msaidizi wa AI anayekuandikia. Pakua PDF au Word."
               : "260+ ATS-ready templates, an instant score checker, and an AI assistant that writes it with you. Download as PDF or Word."}
           </p>
           <Link
@@ -206,7 +206,7 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
             </h2>
             <p className="text-cream/60 text-sm leading-relaxed max-w-lg">
               {sw
-                ? "Tengeneza CV ya kitaalamu inayopita ATS bila malipo ukitumia muundo rafiki kwa waajiri na msaidizi wa AI."
+                ? "Tengeneza CV ya kitaalamu inayopita vichujio vya waajiri bila malipo ukitumia muundo rafiki kwa waajiri na msaidizi wa AI."
                 : "Build a professional, ATS-friendly CV free with recruiter-friendly templates and an AI assistant."}
             </p>
           </div>

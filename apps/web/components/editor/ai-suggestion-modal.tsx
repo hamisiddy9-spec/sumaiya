@@ -14,7 +14,7 @@ import { WhatChanged } from "@/components/editor/what-changed";
 export type RefineDirective = "shorter" | "ats" | "measurable" | "leadership" | "sw" | "en";
 const REFINE_OPTIONS: { id: Exclude<RefineDirective, "sw" | "en">; en: string; sw: string }[] = [
   { id: "shorter", en: "Shorter", sw: "Fupisha" },
-  { id: "ats", en: "More ATS", sw: "Zaidi ya ATS" },
+  { id: "ats", en: "More ATS", sw: "Rafiki Zaidi kwa Waajiri" },
   { id: "measurable", en: "More measurable", sw: "Ongeza vipimo" },
   { id: "leadership", en: "More leadership", sw: "Uongozi zaidi" },
 ];
