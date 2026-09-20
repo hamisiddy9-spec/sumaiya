@@ -23,6 +23,7 @@ import { TEMPLATE_COMPONENTS } from "@/components/templates/registry";
 import { NakuruTemplate } from "@/components/templates/nakuru";
 import { TEMPLATES, CURATED_CV_TEMPLATES, DEFAULT_SECTION_ORDER, isTemplateId, isPremiumTemplate, parseCVData, type TemplateId, type CVData } from "@/types";
 import { SECTION_TEMPLATES } from "@/lib/data/samples";
+import { photoNotPrintedNotice, templateShowsPhoto } from "@/lib/templates/photo-support";
 import { ENGINE_PRESETS } from "@/components/templates/engine/presets";
 import { AtsPanel } from "@/components/editor/ats-panel";
 import { WhatChanged } from "@/components/editor/what-changed";
@@ -2123,6 +2124,27 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             <span className="text-[10px] text-text-muted">{uiLang === "sw" ? `Hadi ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Huhifadhiwa kwa ukubwa mdogo` : `Up to ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Stored compact`}</span>
           </div>
         </div>
+        {/* Honesty, not silence: some templates have no portrait slot (see
+            lib/templates/photo-support.ts), so a photo the candidate uploaded
+            would simply not be in the PDF. Discovering that in the file an
+            employer receives is the failure this prevents. Deliberately shown
+            only when a photo is actually set, so it is a real statement about
+            this document and not a generic disclaimer. */}
+        {cvData.personal.photo && !templateShowsPhoto(templateId) && (
+          <div
+            role="note"
+            data-testid="photo-not-printed-notice"
+            className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2"
+          >
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-700 mt-0.5 flex-shrink-0" />
+            <p className="text-[11px] text-amber-900 leading-relaxed">
+              {photoNotPrintedNotice(
+                TEMPLATES.find((tpl) => tpl.id === templateId)?.name ?? String(templateId),
+                uiLang === "sw" ? "sw" : "en",
+              )}
+            </p>
+          </div>
+        )}
         {/* Consent, plainly stated in both languages: uploading a photo is the
             candidate's choice, it is never required, and neither choice is
             penalised. The note exists because a photo request on a CV builder
