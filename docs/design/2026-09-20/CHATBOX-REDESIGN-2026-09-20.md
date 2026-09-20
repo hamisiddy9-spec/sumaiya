@@ -758,6 +758,21 @@ sibling names different variants, the mapping column is what changes, not the ch
 | Mic / listening state (web) | **V3**, amber | inline | exists, inline |
 | The sheet's own loading / empty / error states | inline inside V1's body, never a second overlay | per §3.8 | exists inside the job sheet |
 
+### Reconciliation — the sibling's overlay spec landed after this section was written
+
+`docs/design/2026-09-20/08-overlays.html` now names the platform's overlay system
+directly: **“one scrim constant, one z-ladder, three radii, five variants”** —
+
+| Theirs | Mine | Verdict |
+| --- | --- | --- |
+| **1 · Bottom sheet — the default for choices** | V1 | **Match.** Attach sheet, job sheet and the read sheet are all this. |
+| **2a · Confirm dialog — destructive** | V2 | **Match.** `Futa mazungumzo` is 2a. |
+| **2b · Confirm dialog — not destructive** | V2 | **Match.** The “name the file before the OS chooser” confirmation is 2b. |
+| **3 · Toast — transient confirmation** | *(deliberately unused)* | **The chat uses no toast.** A transient confirmation for something the user must be able to re-read — a saved CV, a failed read, an unavailable assistant — is the wrong instrument; the chat's equivalents are the **inline receipt** (T9), the **system note** (T3) and the **status line on the document card**, all of which persist. Flagged, not hidden. |
+| **4 · Full-screen sheet — a task, not a choice** | V4 | **Match in intent.** Mine is a navigation push; theirs is a scrim-based full-screen sheet. Either satisfies “a task, not a choice”; the *housing* is the sibling's call, because it is their system. |
+| **5 · Share sheet — the one that differs by platform** | V5 | **Match.** |
+| — | **V3 · Inline notice** | **THE ONE REAL GAP.** The chat's three most important non-happy surfaces — the **unavailable notice**, the **error on a turn**, and the **system note** — are **not scrim overlays**: they live inside the transcript, in the reading order, at the exact turn they belong to. None of the five variants is a scrim-less in-content surface. If the platform system ships only scrim overlays, these have no home and will be re-invented per screen — which is the defect the overlay work exists to remove. **Recommended resolution:** name the in-content notice as a sixth variant (a *surface*, not an *overlay*) or state explicitly that in-content status is the host screen's business. **This is the design conflict worth the owner seeing.** |
+
 ### Overlay conflicts to see, not paper over
 
 1. **Two incompatible overlay housings in one app.** `attach-sheet.tsx:27-35` records
