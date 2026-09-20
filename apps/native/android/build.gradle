@@ -1,5 +1,47 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+/* ── Preflight: validate android/local.properties' sdk.dir before AGP uses it ──
+ *
+ * local.properties is hand-written, git-ignored and per-machine. Java's
+ * .properties parser eats unescaped backslashes: a very natural Windows line
+ *
+ *   sdk.dir=C:\Users\hamis\tools\android-sdk
+ *
+ * loads as `C:Usershamis<TAB>oolsandroid-sdk` — the \U and \h pass through and
+ * \t becomes a TAB. That is not a valid Windows path, and the only symptom is
+ *
+ *   A problem occurred configuring project ':react-native-gesture-handler'.
+ *   > java.io.IOException: The filename, directory name, or volume label syntax
+ *     is incorrect
+ *
+ * which blames whichever library project happened to be configured first
+ * (gesture-handler here) and costs an afternoon pointing at the wrong thing.
+ * The SDK path is also resolved lazily, which is why :app and :expo configure
+ * "successfully" and the error surfaces three projects later.
+ *
+ * Fail here instead, in one line, naming the file and the value it actually
+ * parsed to.
+ */
+def _sdkPropsFile = file("local.properties")
+if (_sdkPropsFile.exists()) {
+  def _sdkProps = new Properties()
+  _sdkPropsFile.withInputStream { _sdkProps.load(it) }
+  def _sdkDir = _sdkProps.getProperty("sdk.dir")
+  if (_sdkDir != null && !file(_sdkDir).isDirectory()) {
+    // Render a TAB as <TAB> so the mangled value is legible in the error.
+    def _shown = _sdkDir.collect { it == (char) 9 ? "<TAB>" : it }.join()
+    throw new GradleException(
+      "android/local.properties: sdk.dir does not resolve to a directory.\n" +
+      "  parsed value : ${_shown}\n" +
+      "  looked in    : ${file(_sdkDir).absolutePath}\n" +
+      "Backslashes are escape characters in a .properties file, so \\t in a\n" +
+      "Windows path becomes a TAB and the path is silently destroyed. Use\n" +
+      "forward slashes (or escape every backslash):\n" +
+      "  sdk.dir=C:/Users/<you>/tools/android-sdk"
+    )
+  }
+}
+
 buildscript {
   repositories {
     google()
