@@ -102,7 +102,7 @@ export function useSumaiyaChat() {
       // cache only pays out on an identical prefix, and this changes far less
       // often than the conversation does.
       let memoryBlock = "";
-      try { memoryBlock = renderMemoryBlock(await loadMemory()); } catch { /* ignore */ }
+      try { memoryBlock = renderMemoryBlock(await loadMemory(), t); } catch { /* ignore */ }
 
       const userMsgId = generateMessageId();
       const readable = attachments.filter((a) => a.kind === "image" || a.kind === "document");

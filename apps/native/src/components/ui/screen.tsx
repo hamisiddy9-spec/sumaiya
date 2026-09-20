@@ -50,7 +50,15 @@ export function Screen({
   const body = scroll ? (
     <ScrollView
       keyboardShouldPersistTaps="handled"
-      keyboardDismissMode="interactive"
+      // "on-drag", never "interactive": on Android RN ignores "interactive"
+      // (it is iOS-only), so the keyboard stayed up while the user scrolled and
+      // could cover the footer. Measured on the Pixel 8 Pro against 1.6.24 —
+      // the Snap screen's "Lenga ajira hii" sat at y 2566-2682 while the IME
+      // occupied y 1959-2992, so three taps at the button's own reported bounds
+      // went to the keyboard (the focused job field's counter went up instead).
+      // Dragging the content is the gesture a user makes to reach a control the
+      // keyboard is covering, so it has to put the keyboard away.
+      keyboardDismissMode="on-drag"
       showsVerticalScrollIndicator={false}
       refreshControl={
         onRefresh

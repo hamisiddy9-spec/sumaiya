@@ -7,7 +7,7 @@ import { useCvs } from "../hooks/use-cvs";
 import { useAuthContext } from "../contexts/auth-context";
 import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
-import { addEpisode, updateMemory } from "../lib/ai-memory";
+import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
 import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
@@ -100,22 +100,32 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
       // instead of rediscovering it from scratch every time.
       const firstFailure = analysis.checks.find((ch) => !ch.pass);
       if (firstFailure) {
-        const topic = `ats_${firstFailure.label
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .slice(0, 30)}`;
+        // The topic is a MACHINE key and must not depend on the language in
+        // play. It used to be built from `firstFailure.label`, and that label is
+        // localized (analyzeCv(data, sw)) — so the same failing check on a
+        // Swahili phone produced `ats_taarifa_kamili_za_mawasiliano` while the
+        // English phone produced `ats_complete_contact_info`, and consolidation
+        // could never accumulate evidence for either. `ch.id` is the stable
+        // identifier; `label` stays for the sentence, where it belongs.
+        const topic = `ats_${firstFailure.id.slice(0, 30)}`;
         updateMemory((m) =>
           // NOT internal. This string reaches the user by three routes, which is
-          // why the acronym must not be here:
-          //   1. memory-screen.tsx:182 renders `e.detail` verbatim under
-          //      "MATUKIO YA HIVI KARIBUNI" / "RECENT ACTIVITY SHE NOTED";
+          // why the acronym must not be here and why it must be written in the
+          // language the person is reading:
+          //   1. memory-screen.tsx renders it under "MATUKIO YA HIVI KARIBUNI" /
+          //      "RECENT ACTIVITY SHE NOTED", via episodeText();
           //   2. ai-memory.ts renderMemoryBlock() puts it in the chat prompt as
-          //      "Recently: - <detail>", so she can paraphrase it back in Swahili;
-          //   3. consolidate() promotes it to a Fact `value`, which is then
-          //      injected into EVERY later conversation as "Known: - <value>".
-          // Naming the mechanism here put it in front of the user through the
-          // memory layer instead of the UI layer, where no lint looks.
-          addEpisode(m, topic, `CV check scored ${analysis.score}/100, losing points on "${firstFailure.label}"`),
+          //      "Recently: - <detail>", so she can paraphrase it back to them;
+          //   3. consolidate() promotes it to a Fact `value` (with the event) that
+          //      is injected into EVERY later conversation as "Known: - <value>".
+          // It is recorded as an event, so the sentence is built in the reader's
+          // language instead of being frozen in whatever language wrote it.
+          addEpisodeEvent(
+            m,
+            topic,
+            { key: "cv_check_failed", params: { score: analysis.score, check: firstFailure.label } },
+            t,
+          ),
         ).catch(() => {});
       }
     } catch {

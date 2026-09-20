@@ -6,7 +6,9 @@ import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
 import {
   EMPTY_MEMORY,
+  episodeText,
   eraseMemory,
+  factText,
   forget,
   loadConsent,
   loadMemory,
@@ -150,7 +152,7 @@ export function MemoryScreen() {
               style={{ backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }}
             >
               <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: c.text, fontSize: 14.5, lineHeight: 20 }}>{f.value}</Text>
+                <Text style={{ color: c.text, fontSize: 14.5, lineHeight: 20 }}>{factText(f, t)}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 11.5 }}>
                   {f.confirmed
                     ? t("You told her this", "Ulimwambia hivi")
@@ -159,7 +161,7 @@ export function MemoryScreen() {
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t(`Forget: ${f.value}`, `Sahau: ${f.value}`)}
+                accessibilityLabel={t(`Forget: ${factText(f, t)}`, `Sahau: ${factText(f, t)}`)}
                 hitSlop={10}
                 onPress={() => onForget(f.key)}
                 style={{ padding: 6 }}
@@ -179,7 +181,11 @@ export function MemoryScreen() {
           </Text>
           {activity.map((e) => (
             <Text key={e.id} style={{ color: c.textBody, fontSize: 13.5, lineHeight: 19 }}>
-              • {e.detail || e.topic.replace(/_/g, " ")}
+              {/* In the READER's language, not the language it was written in:
+                  an episode is stored with the event that produced it, so a
+                  Swahili user reading "MATUKIO YA HIVI KARIBUNI" sees Swahili
+                  even for rows written before the toggle was flipped. */}
+              • {episodeText(e, t)}
             </Text>
           ))}
           {episodes.length > 5 ? (

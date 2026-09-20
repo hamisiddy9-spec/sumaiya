@@ -8,7 +8,7 @@ import { apiClient } from "../lib/api-client";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
-import { addEpisode, updateMemory } from "../lib/ai-memory";
+import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
@@ -333,9 +333,19 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       storedLocally = true;
       track(FUNNEL_EVENTS.cvCreated, { template });
       // Let her learn from real activity, not only from the ATS screen.
+      //
+      // Recorded as an EVENT, not as a sentence. The old call stored the English
+      // string "Rebuilt a CV using the ${template} template", which a Swahili
+      // user then read verbatim under "MATUKIO YA HIVI KARIBUNI" — and which
+      // consolidation promoted into a Fact `value` injected into every later
+      // conversation. The sentence is now built in the language being read
+      // (lib/ai-memory.ts EPISODE_TEXT), so the same line follows the language
+      // toggle, and the template is named the way the picker names it instead of
+      // by its internal id ("classic" -> "Asili"/"Classic").
+      const templateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
       // Rebuilding a CV repeatedly is itself a signal worth noticing.
       updateMemory((m) =>
-        addEpisode(m, "cv_rebuilt", `Rebuilt a CV using the ${template} template`),
+        addEpisodeEvent(m, "cv_rebuilt", { key: "cv_rebuilt", params: { template: templateName } }, t),
       ).catch(() => {});
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.local", cvId: cv.id });
@@ -403,9 +413,14 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // An export is the moment a CV leaves the app to be sent to someone, so
       // it is the strongest signal we ever get that the person is actively
       // applying. Three of these across different days becomes a fact she can
+      //
+      // Same event-not-sentence rule as the save path above: this used to store
+      // the English "Exported a CV using the ${template} template" that a
+      // Swahili user then read in the memory screen.
+      const exportedTemplateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
       // coach from — "actively applying" — without ever being asked.
       updateMemory((m) =>
-        addEpisode(m, "cv_exported", `Exported a CV using the ${template} template`),
+        addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: exportedTemplateName } }, t),
       ).catch(() => {});
       await shareCV(cv, uri);
     } catch {

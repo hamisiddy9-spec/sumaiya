@@ -14,16 +14,24 @@ import {
   EMPTY_MEMORY,
   CONSOLIDATION_THRESHOLD,
   addEpisode,
+  addEpisodeEvent,
   consolidate,
+  episodeText,
+  eventText,
+  factText,
   setFact,
   forget,
   recordPlaybook,
   renderMemoryBlock,
   type Memory,
+  type Translate,
 } from "./ai-memory";
 
 const DAY = 1000 * 60 * 60 * 24;
 const T0 = new Date("2026-09-01T09:00:00Z").getTime();
+/** The two readings of `useLang().t`: one for each language. */
+const en: Translate = (e) => e;
+const sw: Translate = (_e, s) => s;
 
 function withEpisodes(topic: string, n: number, spacingMs = DAY): Memory {
   let m = EMPTY_MEMORY;
@@ -161,5 +169,82 @@ describe("prompt block", () => {
     const m = recordPlaybook(EMPTY_MEMORY, "ats_low", ["lead with the summary", "mirror the posting's words"], true, T0);
     expect(renderMemoryBlock(m)).toContain("Approaches that have worked here:");
     expect(renderMemoryBlock(m)).toContain("lead with the summary");
+  });
+});
+
+/**
+ * The defect this guards, seen on the device 2026-09-20: the memory screen's
+ * "MATUKIO YA HIVI KARIBUNI" list printed raw English to a Swahili user
+ * ("Rebuilt a CV using the Aurora template"), because every detail string was
+ * authored in English at the call site — and consolidation then promoted those
+ * same English sentences into Fact values injected into every later
+ * conversation, so the coach read English about a person who had chosen
+ * Kiswahili. An episode is now stored as an EVENT plus the sentence it rendered
+ * to, so the sentence follows the reader's language instead of freezing it.
+ */
+describe("memory in the reader's language", () => {
+  const REBUILT = { key: "cv_rebuilt", params: { template: "Asili" } };
+
+  it("writes the sentence in the language in play, and re-renders it in the other", () => {
+    const m = addEpisodeEvent(EMPTY_MEMORY, "cv_rebuilt", REBUILT, sw, T0);
+    expect(m.episodes[0].detail).toBe("CV imeundwa upya kwa muundo wa Asili");
+    expect(episodeText(m.episodes[0], sw)).toBe("CV imeundwa upya kwa muundo wa Asili");
+    // The same row, read by someone using English — no second write needed.
+    expect(episodeText(m.episodes[0], en)).toBe("Rebuilt a CV using the Asili template");
+  });
+
+  it("keeps a promoted fact readable in the reader's language", () => {
+    let m: Memory = EMPTY_MEMORY;
+    for (let i = 0; i < CONSOLIDATION_THRESHOLD; i++) m = addEpisodeEvent(m, "cv_rebuilt", REBUILT, en, T0 + i * DAY);
+    const { memory, promoted } = consolidate(m, T0 + 10 * DAY);
+    expect(promoted[0].value).toBe("Rebuilt a CV using the Asili template");
+    expect(factText(memory.facts[0], en)).toBe("Rebuilt a CV using the Asili template");
+    expect(factText(memory.facts[0], sw)).toBe("CV imeundwa upya kwa muundo wa Asili");
+    expect(memory.facts[0].valueEvent?.key).toBe("cv_rebuilt");
+  });
+
+  it("renders the prompt block in the language the person is reading in", () => {
+    let m: Memory = EMPTY_MEMORY;
+    for (let i = 0; i < CONSOLIDATION_THRESHOLD; i++) m = addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: "Kisasa" } }, sw, T0 + i * DAY);
+    const { memory } = consolidate(m, T0 + 10 * DAY);
+    expect(renderMemoryBlock(memory, sw)).toContain("CV imepakuliwa kwa muundo wa Kisasa");
+    expect(renderMemoryBlock(memory, sw)).not.toContain("Exported a CV using");
+    expect(renderMemoryBlock(memory, en)).toContain("Exported a CV using the Kisasa template");
+    // No language passed (logs, tests, any caller without a context) stays English.
+    expect(renderMemoryBlock(memory)).toContain("Exported a CV using the Kisasa template");
+  });
+
+  it("never names the screening mechanism in Swahili copy, anywhere it can reach the user", () => {
+    const line = eventText({ key: "cv_check_failed", params: { score: 15, check: "Muhtasari (herufi 60+)" } }, sw);
+    expect(line).toBe('Ukaguzi wa CV ulipata alama 15/100; sehemu iliyopunguza: "Muhtasari (herufi 60+)"');
+    expect(line).not.toMatch(/\bATS\b/);
+    expect(eventText({ key: "cv_check_failed", params: { score: 15, check: "Summary (60+ chars)" } }, en)).toContain("CV check scored 15/100");
+  });
+
+  it("falls back to the stored sentence for an episode written before events existed", () => {
+    const m = addEpisode(EMPTY_MEMORY, "interview_practice", "asked how to answer 'tell me about yourself'", T0);
+    expect(m.episodes[0].event).toBeUndefined();
+    expect(episodeText(m.episodes[0], sw)).toBe("asked how to answer 'tell me about yourself'");
+    // An old episode with no sentence at all still has its topic, spaced.
+    const bare = addEpisode(EMPTY_MEMORY, "cv_editing", "", T0);
+    expect(episodeText(bare.episodes[0], sw)).toBe("cv editing");
+  });
+
+  it("degrades an unknown or malformed event to something honest instead of throwing", () => {
+    expect(eventText({ key: "not_registered" }, sw)).toBe("not registered");
+    // A store written by a newer build (or a hand-edited one) must not crash the
+    // memory screen: unreadable event -> the sentence it was written with.
+    const m = addEpisode(EMPTY_MEMORY, "cv_rebuilt", "Rebuilt a CV using the Asili template", T0);
+    const corrupted = { ...m.episodes[0], event: { key: 42 } as unknown as typeof m.episodes[0]["event"] };
+    expect(episodeText(corrupted, sw)).toBe("Rebuilt a CV using the Asili template");
+  });
+
+  it("shows a corrected fact exactly as the person stated it", () => {
+    let m: Memory = EMPTY_MEMORY;
+    for (let i = 0; i < CONSOLIDATION_THRESHOLD; i++) m = addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: "Asili" } }, en, T0 + i * DAY);
+    const { memory } = consolidate(m, T0 + 10 * DAY);
+    const corrected = setFact(memory, "cv_exported", "ninaomba kazi za uhasibu", true, T0 + 11 * DAY);
+    expect(factText(corrected.facts[0], sw)).toBe("ninaomba kazi za uhasibu");
+    expect(corrected.facts[0].valueEvent).toBeUndefined();
   });
 });

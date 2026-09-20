@@ -305,11 +305,6 @@ interface VoiceExemption {
 
 const FIRST_PERSON_EXEMPT: VoiceExemption[] = [
   {
-    file: "components/chat/chat-types.ts",
-    contains: "labelSw: 'Tengeneza CV yangu'",
-    why: "chat quick-action chip: the label is the user's own request, and tapping it sends that request as the user's message",
-  },
-  {
     file: "lib/courses.ts",
     contains: "Niandikie sehemu fupi",
     why: "practice prompt the learner sends to Sumaiya verbatim",
