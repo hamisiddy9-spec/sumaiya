@@ -25,7 +25,7 @@ describe("supabase credentials", () => {
   });
 
   it("resolves a real project URL", () => {
-    expect(projectRefFromUrl(SUPABASE_URL)).toBe("ayczgaddnufdxnhizpcr");
+    expect(projectRefFromUrl(SUPABASE_URL)).toBe("duywnmibgiqulqzunsmh");
   });
 
   it("the key is a well-formed three-part JWT with role anon", () => {
@@ -35,7 +35,7 @@ describe("supabase credentials", () => {
       Buffer.from(parts[1] + "=".repeat((4 - (parts[1].length % 4)) % 4), "base64").toString(),
     );
     expect(payload.role).toBe("anon");
-    expect(payload.ref).toBe("ayczgaddnufdxnhizpcr");
+    expect(payload.ref).toBe("duywnmibgiqulqzunsmh");
   });
 
   it("the key belongs to the project the URL points at", () => {
