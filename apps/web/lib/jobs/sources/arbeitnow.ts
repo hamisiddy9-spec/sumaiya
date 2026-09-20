@@ -3,7 +3,7 @@
  * https://www.arbeitnow.com/api/job-board-api
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, firstTag, employmentType } from "./shared";
+import { fetchJson, str, firstTag, employmentType, globalSourceCap } from "./shared";
 
 const ARBEITNOW_URL = "https://www.arbeitnow.com/api/job-board-api";
 
@@ -11,6 +11,7 @@ export const arbeitnowAdapter: JobSourceAdapter = {
   id: "arbeitnow",
   name: "Arbeitnow",
   enabled: () => true, // keyless
+  maxPerSource: globalSourceCap, // global board — see shared.ts
   async fetch(): Promise<RawJob[]> {
     const data = await fetchJson(ARBEITNOW_URL);
     const jobs: any[] = data?.data ?? [];

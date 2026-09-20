@@ -3,7 +3,7 @@
  * https://remoteok.com/api  (array; may LEAD with a meta/status object)
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, firstTag } from "./shared";
+import { fetchJson, str, firstTag, globalSourceCap } from "./shared";
 
 const REMOTEOK_URL = "https://remoteok.com/api";
 
@@ -11,6 +11,7 @@ export const remoteokAdapter: JobSourceAdapter = {
   id: "remoteok",
   name: "RemoteOK",
   enabled: () => true, // keyless
+  maxPerSource: globalSourceCap, // global remote board — see shared.ts
   async fetch(): Promise<RawJob[]> {
     const data = await fetchJson(REMOTEOK_URL);
     const jobs: any[] = Array.isArray(data) ? data : [];

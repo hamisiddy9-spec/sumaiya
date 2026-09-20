@@ -8,6 +8,31 @@ export const FETCH_TIMEOUT_MS = 15_000;
 export const JOBS_USER_AGENT =
   "Sumaiya-Jobs-Ingest/1.0 (+https://sumaiya.app)";
 
+/**
+ * Ceiling on how many postings ONE global remote board may contribute per run.
+ *
+ * Why this exists: the feed is source-counted, so raw volume wins. Measured on
+ * 20 Sep 2026 the four global remote boards supplied 748 of the feed's 806
+ * rows while the single Tanzania board supplied 10 — and adding African
+ * sources alone does not fix that, because a 338-posting Western ATS feed
+ * still outnumbers a 400-posting local board in the same proportion. Capping
+ * each global board keeps its newest N and lets the Africa-facing sources hold
+ * a real share of the feed.
+ *
+ * JOBS_GLOBAL_SOURCE_CAP overrides the default; 0 means unlimited.
+ */
+export const DEFAULT_GLOBAL_SOURCE_CAP = 80;
+
+/** The per-global-source cap in force for this run. */
+export function globalSourceCap(): number {
+  const raw = process.env.JOBS_GLOBAL_SOURCE_CAP;
+  if (raw !== undefined && raw.trim() !== "") {
+    const n = Number(raw);
+    if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+  }
+  return DEFAULT_GLOBAL_SOURCE_CAP;
+}
+
 /** GET a JSON endpoint with a hard timeout. Throws on non-2xx. */
 export async function fetchJson(url: string): Promise<any> {
   const controller = new AbortController();

@@ -35,6 +35,8 @@ import { usajobsAdapter } from "./usajobs";
 import { careerjetAdapter } from "./careerjet";
 import { talentAdapter } from "./talent";
 import { jobwebTanzaniaAdapter } from "./jobwebtanzania";
+import { reliefWebAdapter } from "./reliefweb";
+import { ajiraAdapter } from "./ajira";
 
 /**
  * The built-in source list. Add a new source here (one file per source).
@@ -43,8 +45,19 @@ import { jobwebTanzaniaAdapter } from "./jobwebtanzania";
  * so; key-gated sources (adzuna, jooble, usajobs, careerjet, talent) return
  * enabled() === false until their env vars are set — ingest skips them
  * silently and still succeeds.
+ *
+ * ORDER: the regional Africa-facing sources are listed FIRST. They are the
+ * point of the feed — the global remote boards are the wider net, not the
+ * product. Cross-source dedup picks the richest record, so order does not
+ * change which row wins; it changes which sources a reader of this file sees
+ * first, and that is deliberate.
  */
 export const JOB_SOURCE_REGISTRY: JobSourceAdapter[] = [
+  // ── Africa-facing (the reason this feed exists) ──────────────────────────
+  jobwebTanzaniaAdapter, // Tanzania-only commercial board (~400 fresh listings)
+  ajiraAdapter, // Tanzania government recruitment portal
+  reliefWebAdapter, // UN OCHA humanitarian roles, Tanzania + neighbours
+  // ── Global remote boards (capped per run — see shared.globalSourceCap) ───
   remotiveAdapter,
   jobicyAdapter,
   arbeitnowAdapter,
@@ -58,9 +71,6 @@ export const JOB_SOURCE_REGISTRY: JobSourceAdapter[] = [
   usajobsAdapter,
   careerjetAdapter,
   talentAdapter,
-  // Regional. Listed last only because it is a single-country board — it is the
-  // source that makes the feed usable for the users the product is built for.
-  jobwebTanzaniaAdapter,
 ];
 
 /**
@@ -89,8 +99,23 @@ export function normalizeRawJob(adapter: JobSourceAdapter, raw: RawJob): Normali
 }
 
 /**
+ * The per-source cap in force for one run. A function form is resolved here so
+ * the cap can come from the environment at RUN time instead of being frozen at
+ * module load (which would make it untestable). 0 = unlimited.
+ */
+export function capFor(adapter: JobSourceAdapter): number {
+  const raw =
+    typeof adapter.maxPerSource === "function" ? adapter.maxPerSource() : adapter.maxPerSource;
+  return typeof raw === "number" && Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : 0;
+}
+
+/**
  * Run a list of adapters with full isolation. Returns canonical jobs plus a
  * per-source report (which ran, which were skipped, which failed).
+ *
+ * Per-source cap: an adapter carrying `maxPerSource` contributes at most that
+ * many postings. The cap is applied BEFORE normalization and the dropped count
+ * is reported as `capped`, so a capped source is never silently truncated.
  */
 export async function runSources(
   adapters: JobSourceAdapter[]
@@ -119,7 +144,11 @@ export async function runSources(
     }
 
     try {
-      const raw = await adapter.fetch();
+      const fetched = await adapter.fetch();
+      const cap = capFor(adapter);
+      const raw = cap > 0 && fetched.length > cap ? fetched.slice(0, cap) : fetched;
+      const capped = fetched.length - raw.length;
+
       let okCount = 0;
       for (const r of raw) {
         try {
@@ -138,8 +167,11 @@ export async function runSources(
         ran: true,
         ok: true,
         count: okCount,
+        ...(capped > 0 ? { capped } : {}),
       });
-      console.log(`[jobs] source ${adapter.id} ran: ${okCount} jobs`);
+      console.log(
+        `[jobs] source ${adapter.id} ran: ${okCount} jobs${capped > 0 ? ` (${capped} above the ${cap}-per-run cap)` : ""}`
+      );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       reports.push({

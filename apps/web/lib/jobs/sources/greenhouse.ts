@@ -8,7 +8,7 @@
  * boards; set the env var to your own list.
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType } from "./shared";
+import { fetchJson, str, companyName, employmentType, globalSourceCap } from "./shared";
 import { cleanHtml } from "../text";
 
 const GREENHOUSE_BOARDS_ENV = "GREENHOUSE_BOARDS";
@@ -27,6 +27,7 @@ export const greenhouseAdapter: JobSourceAdapter = {
   id: "greenhouse",
   name: "Greenhouse",
   enabled: () => boards().length > 0, // keyless — always on unless list emptied
+  maxPerSource: globalSourceCap, // global ATS boards — see shared.ts
   async fetch(): Promise<RawJob[]> {
     const out: RawJob[] = [];
     for (const board of boards()) {

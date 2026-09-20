@@ -3,7 +3,7 @@
  * https://jobicy.com/api/v2/remote-jobs
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType } from "./shared";
+import { fetchJson, str, companyName, employmentType, globalSourceCap } from "./shared";
 
 const JOBICY_URL = "https://jobicy.com/api/v2/remote-jobs?count=100";
 
@@ -11,6 +11,7 @@ export const jobicyAdapter: JobSourceAdapter = {
   id: "jobicy",
   name: "Jobicy",
   enabled: () => true, // keyless
+  maxPerSource: globalSourceCap, // global remote board — see shared.ts
   async fetch(): Promise<RawJob[]> {
     const data = await fetchJson(JOBICY_URL);
     const jobs: any[] = data?.jobs ?? [];

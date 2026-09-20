@@ -8,7 +8,7 @@
  *   4. malformed raw job → dropped, source's other jobs survive
  */
 import { describe, expect, it } from "vitest";
-import { JOB_SOURCE_REGISTRY, normalizeRawJob, runSources } from "./registry";
+import { JOB_SOURCE_REGISTRY, capFor, normalizeRawJob, runSources } from "./registry";
 import type { JobSourceAdapter, RawJob } from "./types";
 import { greenhouseAdapter } from "./greenhouse";
 import { leverAdapter } from "./lever";
@@ -18,6 +18,12 @@ import { joobleAdapter } from "./jooble";
 import { usajobsAdapter } from "./usajobs";
 import { careerjetAdapter } from "./careerjet";
 import { talentAdapter } from "./talent";
+import { jobicyAdapter } from "./jobicy";
+import { remoteokAdapter } from "./remoteok";
+import { arbeitnowAdapter } from "./arbeitnow";
+import { jobwebTanzaniaAdapter } from "./jobwebtanzania";
+import { reliefWebAdapter } from "./reliefweb";
+import { ajiraAdapter } from "./ajira";
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -212,5 +218,78 @@ describe("normalizeRawJob — canonical shape through text.ts", () => {
   it("caps description at 4000 chars (cleanHtml max)", () => {
     const n = normalizeRawJob(adapterFixture, { ...GOOD_RAW, description: "x".repeat(9000) });
     expect(n.description.length).toBe(4000);
+  });
+});
+
+// ─── Per-source cap — the balance lever ───────────────────────────────────────
+//
+// WHY THIS IS TESTED: the feed is source-counted, so a source that returns
+// more rows wins more of the feed. Measured 20 Sep 2026 — the four global
+// remote boards held 748 of 806 rows while the single Tanzania board held 10.
+// Capping each global board is what lets the Africa-facing sources hold a real
+// share, so the cap must actually bite and must report what it dropped rather
+// than truncating silently.
+
+describe("per-source cap (maxPerSource)", () => {
+  const many = (n: number): RawJob[] =>
+    Array.from({ length: n }, (_, i) => ({
+      ...GOOD_RAW,
+      externalId: `id-${i}`,
+      title: `Role ${i}`,
+      applyUrl: `https://jobs.acme.com/${i}`,
+      sourceUrl: `https://jobs.acme.com/${i}`,
+    }));
+
+  it("capFor resolves a number, a function, and treats 0/absent as unlimited", () => {
+    expect(capFor(adapter())).toBe(0);
+    expect(capFor(adapter({ maxPerSource: 80 }))).toBe(80);
+    expect(capFor(adapter({ maxPerSource: () => 25 }))).toBe(25);
+    expect(capFor(adapter({ maxPerSource: 0 }))).toBe(0); // 0 = unlimited
+    expect(capFor(adapter({ maxPerSource: -5 }))).toBe(0);
+    expect(capFor(adapter({ maxPerSource: () => Number.NaN }))).toBe(0);
+  });
+
+  it("keeps the newest N and REPORTS the dropped count instead of truncating silently", async () => {
+    const { jobs: capped, reports } = await runSources([
+      adapter({ fetch: async () => many(10), maxPerSource: 4 }),
+    ]);
+    expect(capped.map((j) => j.externalId)).toEqual(["id-0", "id-1", "id-2", "id-3"]);
+    expect(reports[0]).toMatchObject({ source: "test", ran: true, ok: true, count: 4, capped: 6 });
+  });
+
+  it("leaves a source under the cap completely alone", async () => {
+    const { jobs: all, reports } = await runSources([
+      adapter({ fetch: async () => many(3), maxPerSource: 80 }),
+    ]);
+    expect(all).toHaveLength(3);
+    expect(reports[0].capped).toBeUndefined(); // nothing was dropped, so nothing is claimed
+  });
+
+  it("does not cap an adapter that declares no cap", async () => {
+    const { jobs: all } = await runSources([adapter({ fetch: async () => many(10) })]);
+    expect(all).toHaveLength(10);
+  });
+
+  it("the global remote boards really do carry a cap — the feed is not source-counted", () => {
+    // The four biggest Western feeds and the Western ATS board all declare one.
+    expect(capFor(jobicyAdapter)).toBeGreaterThan(0);
+    expect(capFor(remoteokAdapter)).toBeGreaterThan(0);
+    expect(capFor(arbeitnowAdapter)).toBeGreaterThan(0);
+    expect(capFor(greenhouseAdapter)).toBeGreaterThan(0);
+  });
+
+  it("the Africa-facing sources are NOT capped — they are the point of the feed", () => {
+    expect(capFor(jobwebTanzaniaAdapter)).toBe(0);
+    expect(capFor(reliefWebAdapter)).toBe(0);
+    expect(capFor(ajiraAdapter)).toBe(0);
+  });
+
+  it("all three Africa-facing sources are registered", () => {
+    const ids = JOB_SOURCE_REGISTRY.map((a) => a.id);
+    expect(ids).toContain("jobwebtanzania");
+    expect(ids).toContain("reliefweb");
+    expect(ids).toContain("ajira");
+    // …and they lead the registry, so the file reads in the product's priority.
+    expect(ids.slice(0, 3)).toEqual(["jobwebtanzania", "ajira", "reliefweb"]);
   });
 });

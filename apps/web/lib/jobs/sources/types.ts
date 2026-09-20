@@ -85,6 +85,17 @@ export interface JobSourceAdapter {
   enabled(): boolean;
   /** Fetch + map to RawJob[]. May throw — the registry isolates failures. */
   fetch(params?: FetchParams): Promise<RawJob[]>;
+  /**
+   * Optional ceiling on how many postings this source may contribute to ONE
+   * run. Set on the global remote boards so a 300-posting Western feed cannot
+   * swamp the Tanzania / East Africa sources this product is built for — the
+   * ingest is otherwise source-counted, and raw volume wins every time.
+   * Unset (or 0) means unlimited. The registry keeps the FIRST N postings the
+   * adapter returned, which for these boards is the newest N. A function form
+   * is allowed so the cap can be read from the environment at RUN time rather
+   * than frozen at module load.
+   */
+  maxPerSource?: number | (() => number);
 }
 
 /** Per-source outcome of a run — used for logging + the run report. */
@@ -95,10 +106,12 @@ export interface SourceRunReport {
   ran: boolean;
   /** True when the adapter fetched and normalized without throwing. */
   ok: boolean;
-  /** Number of canonical jobs this source produced. */
+  /** Number of canonical jobs this source produced AFTER any per-source cap. */
   count: number;
   /** True when the adapter was skipped because enabled() was false. */
   skipped?: boolean;
   /** Error message when the fetch failed. */
   error?: string;
+  /** How many postings were dropped by the adapter's own `maxPerSource`. */
+  capped?: number;
 }
