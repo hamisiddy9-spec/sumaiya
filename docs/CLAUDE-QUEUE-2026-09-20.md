@@ -134,6 +134,37 @@ was fake — versus the old route's `missing OAuth secret`.
 2. Deploy the web app (the live site still runs the old bundle).
 
 
+### 0.6.1 GOOGLE OAUTH — VERIFIED STATE (read off the console, not assumed)
+Verified 2026-09-20 by reading the OAuth client page in the Google Cloud console
+(project `sumaiya-508116`) on the device browser.
+
+**Web client** `811013224847-1g6ml0490hhfngrips635ropm8tka4ep.apps.googleusercontent.com`
+(name "Sumaiya", type Web application, created Sep 9 2026):
+- **Authorized JavaScript origins: `https://sumaiya.app`** — SET. This is exactly the value the
+  shipped GIS + `signInWithIdToken` fix needs, so **the last external blocker for web Google
+  sign-in is satisfied**; the fix only needs deploying.
+- Authorized redirect URIs, all three read verbatim: `https://sumaiya.app/auth/callback`,
+  `http://localhost:3000/auth/callback`,
+  `https://fskokfnunjlrvxspkftx.supabase.co/auth/v1/callback`
+- Second client: **Android**, `811013224847-esth…`
+
+**Three discrepancies — all owner actions, all cheap:**
+1. **`https://sumaiya.app/auth/callback` returns 404 on the live site** (verified: curl -> 404).
+   The route that exists is `https://sumaiya.app/api/auth/callback` (curl -> 307). The console
+   therefore points at a path the app does not serve. Harmless for the ID-token flow, which uses
+   no redirect URI at all, but wrong configuration.
+2. The third redirect URI points at `fskokfnunjlrvxspkftx` — the FIRST new project ref, **not the
+   live `duywnmibgiqulqzunsmh`**. Leftover from the rebuild, and the same class of stale-ref
+   mistake that broke the Vercel deploy.
+3. `http://localhost:3000` is configured as a **redirect URI but not as a JavaScript origin**, so
+   GIS cannot be exercised on a local dev server at all — it fails origin validation before
+   minting a token. Add it to **Authorized JavaScript origins** to make the flow testable
+   locally, and add `https://www.sumaiya.app` if the www host serves the app.
+
+**Not needed any more:** do NOT configure a Supabase-hosted Google client secret for the web
+path. The shipped fix removed that dependency (`lib/auth-client.ts`, enforced by
+`lib/signin-mechanism-parity.test.ts`).
+
 ### 0.7. MOBILE WEB vs DESKTOP — never designed, only stretched
 **User's words:** *"web page transition loading show illustrations of boxes when loading pages ... audit also find a way to make mobile web and desktop environments research them individually against the world and adjust to best as you can ... i feel the web versions mobile and desktop have not been given thought to"*
 
