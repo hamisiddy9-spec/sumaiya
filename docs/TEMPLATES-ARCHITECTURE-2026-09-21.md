@@ -3,6 +3,57 @@
 2026-09-21. Four parallel audits + external research. Every number carries a file:line or URL.
 Where a claim rests on a subagent's static reading rather than a run, that is said explicitly.
 
+> ## ⚠ RED-TEAM CORRECTIONS — read these first
+>
+> A dedicated adversarial pass tried to falsify this doc and **succeeded on four points**.
+> The corrected facts, with evidence:
+>
+> 1. **The phone offers 224 designs, not 218.** `ALL_TEMPLATES = 6 hand-written + 218 engine`
+>    (`apps/native/src/lib/cv-html.ts:67`), and the gallery header prints
+>    `ALL_TEMPLATES.length` (`template-gallery.tsx:313`). Only the *generated* 218 exist as
+>    files. **This also resolves the "ungoverned 224" flagged earlier in the session: 224 is
+>    exactly `ALL_TEMPLATES.length`, and it is consistent.** It was never an inconsistency.
+> 2. **The phone DOES have premium, and the two premium sets are DISJOINT.** `Executive` and
+>    `Compact` carry `tier: "premium"` (`cv-html.ts:40-41`), render into the "TemplateHub
+>    Premium" section (`template-gallery.tsx:139-150`) and are named in the paywall copy
+>    (`premium-sheet.tsx:34-41`). So "no premium exists on the phone" is **false as
+>    experienced** — the correct statement is that the web's 7 and the phone's 2 are different
+>    sets, each unreachable from the other. The asymmetry is **bidirectional**, and this doc's
+>    original table omitted the phone→web direction.
+> 3. **"Unify the renderer" is NOT cheap — it is the expensive option.** The web's A4 fit is a
+>    measurement-driven React loop (`engine/fit.tsx:1-45`), and web PDF **rasterizes the live
+>    element** (`cv-editor-client.tsx:1683 renderElementToPdfBlob(previewRef.current,
+>    { refuseIfClipped: true })`, `lib/pdf.ts:527`) with HTML page-break detection
+>    (`pdf.ts:168`). An HTML-string-first page breaks measurement, capture *and* clip
+>    detection — none of which the original recommendation costed. Meanwhile the phone is
+>    **already** HTML (`cv-html.ts:320`, `pdf-export.ts:66`): all the cost lands on web for
+>    zero phone gain.
+> 4. **The sequencing was backwards.** All 41 curated designs are **bespoke JSX with zero
+>    `./engine/*` imports** (129–393 lines each — `zanzibar` 393, `ubuntu` 376). No
+>    `spec + content → HTML` function can express them; unification would cover only the 6
+>    wrappers plus 218 unoffered ids. "Close the gap, then unify" means writing each design
+>    twice; **unify-first writes each once.**
+>
+> Two more corrections:
+>
+> - **Line counts were unfair.** The native engine is **2,613** non-test lines across 13 files,
+>   not 3,045 — the original figure counted native **test** files (443 lines) as implementation
+>   while excluding the web's own `fit-band.test.ts`. Corrected comparison: **web 1,760 vs
+>   native 2,613.**
+> - **The proposed artifact already exists and is unwired.** `lib/templates/native-provider.ts
+>   renderDocument` already emits a full HTML document — but with **hardcoded English**
+>   section headings (`:240-262`) — consumed by `dynamic-template-renderer.tsx:74` (iframe
+>   `srcDoc`), and `DynamicTemplateRenderer` has **zero importers**. Another written-but-unwired
+>   ghost, like `typography.ts`.
+>
+> **The defect this doc MISSED, and it is the sharpest one in the file:** `cv-html.ts:335`
+> silently falls back to `"classic"` for any template id the phone cannot render — deliberately
+> (`cv-list-screen.tsx:66-69` redispatches the export with the raw id). So **a CV designed on web
+> as `zanzibar` prints on the phone as Classic, with no warning.** Silent substitution, in the
+> artifact the user hands an employer. That is worse than a duplicated renderer and worse than a
+> clipped page.
+
+
 ## 1. The finding that matters most: the two surfaces offer DIFFERENT catalogues
 
 | | web | phone |
