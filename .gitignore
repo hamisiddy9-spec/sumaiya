@@ -33,3 +33,6 @@ apps/native/android/app/sumaiya-release.keystore
 # agent run artefacts (print-mode JSON + stderr from delegated runs)
 .*-run.json
 .*-run.err
+
+# free-improve-loop local state (queue, logs, flags) — not committed, changes hourly
+docs/panels/.loop/
