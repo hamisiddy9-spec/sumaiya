@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>html2canvas object-fit test</title>
+<style>
+  body { margin: 0; background: #fff; }
+  #stage { width: 400px; height: 200px; }
+  /* a NON-SQUARE frame holding a SQUARE image, exactly like kioo's 302x334 */
+  .frame { width: 120px; height: 132px; overflow: hidden; position: relative; }
+  .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="frame"><img id="pic" alt="test"></div>
+</div>
+<script>
+// Square source: a beige DISC on a white 600x600 canvas. If the rasteriser
+// honours object-fit:cover the disc must stay square in a non-square frame;
+// if it stretches the image to the box, the disc becomes a 120x132 ellipse.
+const c = document.createElement("canvas");
+c.width = 600; c.height = 600;
+const x = c.getContext("2d");
+x.fillStyle = "white"; x.fillRect(0, 0, 600, 600);
+x.fillStyle = "rgb(205,160,125)";
+x.beginPath(); x.arc(300, 300, 150, 0, Math.PI * 2); x.fill();
+document.getElementById("pic").src = c.toDataURL("image/png");
+
+window.__result = null;
+window.__run = async () => {
+  const frame = document.querySelector(".frame");
+  const el = document.getElementById("pic");
+  const box = el.getBoundingClientRect();
+  const src = c.toDataURL("image/png");
+  const h2c = await html2canvas(frame, { scale: 1, backgroundColor: "#ffffff", logging: false });
+  const ctx = h2c.getContext("2d");
+  const d = ctx.getImageData(0, 0, h2c.width, h2c.height).data;
+  let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1, n = 0;
+  for (let yy = 0; yy < h2c.height; yy++) for (let xx = 0; xx < h2c.width; xx++) {
+    const i = (yy * h2c.width + xx) * 4;
+    if (Math.abs(d[i] - 205) < 40 && Math.abs(d[i+1] - 160) < 40 && Math.abs(d[i+2] - 125) < 40) {
+      n++; if (xx < x0) x0 = xx; if (yy < y0) y0 = yy; if (xx > x1) x1 = xx; if (yy > y1) y1 = yy;
+    }
+  }
+  window.__result = {
+    frameBox: [Math.round(box.width), Math.round(box.height)],
+    canvasSize: [h2c.width, h2c.height],
+    discBox: [x1 - x0 + 1, y1 - y0 + 1],
+    discPx: n,
+    discAspect: ((x1 - x0 + 1) / (y1 - y0 + 1)),
+    sourceIs600x600SquareWithRoundDisc: true,
+    objectFit: getComputedStyle(el).objectFit,
+  };
+  return window.__result;
+};
+</script>
+<script src="./html2canvas.min.js"></script>
+</body>
+</html>

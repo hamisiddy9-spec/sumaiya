@@ -1,0 +1,310 @@
+[
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: the server responded with a status of 415 ()"
+ },
+ {
+  "type": "log",
+  "text": "Warning: Indexing all PDF objects"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: the server responded with a status of 500 ()"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: the server responded with a status of 500 ()"
+ },
+ {
+  "type": "log",
+  "text": "Warning: Indexing all PDF objects"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "log",
+  "text": "Warning: Indexing all PDF objects"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: the server responded with a status of 415 ()"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "requestfailed",
+  "text": "POST https://sumaiya.app/api/ai/assistant-turn :: net::ERR_FAILED"
+ },
+ {
+  "type": "error",
+  "text": "Failed to load resource: net::ERR_FAILED"
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/558ca1a6aa3cb55e-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/9d5a263311222317-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/e4af272ccee01ff0-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ },
+ {
+  "type": "warning",
+  "text": "The resource https://sumaiya.app/_next/static/media/313510e2713fb214-s.p.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally."
+ }
+]

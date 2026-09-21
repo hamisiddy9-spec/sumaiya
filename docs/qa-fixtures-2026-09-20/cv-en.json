@@ -1,0 +1,170 @@
+{
+ "personal": {
+  "fullName": "Amina Joseph Mwakasege",
+  "jobTitle": "Software Engineer",
+  "email": "amina.mwakasege@example.co.tz",
+  "phone": "+255 712 345 678",
+  "location": "Dar es Salaam, Tanzania",
+  "linkedin": "linkedin.com/in/aminamwakasege",
+  "website": ""
+ },
+ "summary": "Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes.",
+ "experience": [
+  {
+   "id": "e1",
+   "position": "Senior Software Engineer",
+   "company": "Nala Payments",
+   "location": "Dar es Salaam",
+   "startDate": "Mar 2022",
+   "endDate": "",
+   "current": true,
+   "description": "- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.\n- Raised availability from 99.2% to 99.95% over 18 months.\n- Mentored four engineers and ran the weekly reliability review."
+  },
+  {
+   "id": "e2",
+   "position": "Software Engineer",
+   "company": "Selcom",
+   "location": "Dar es Salaam",
+   "startDate": "Jul 2019",
+   "endDate": "Feb 2022",
+   "current": false,
+   "description": "- Shipped USSD and mobile-money integrations for 3 partner banks.\n- Reduced bill-payment API p95 from 2.4s to 380ms."
+  },
+  {
+   "id": "e3",
+   "position": "Junior Developer",
+   "company": "Tanzania Education Trust",
+   "location": "Morogoro",
+   "startDate": "Aug 2018",
+   "endDate": "Jun 2019",
+   "current": false,
+   "description": "- Built a school-fees tracking tool used by 42 schools."
+  }
+ ],
+ "education": [
+  {
+   "id": "d1",
+   "degree": "BSc",
+   "field": "Computer Science",
+   "institution": "University of Dar es Salaam",
+   "startDate": "2014",
+   "endDate": "2018",
+   "grade": "Upper Second"
+  },
+  {
+   "id": "d2",
+   "degree": "Certificate",
+   "field": "Project Management",
+   "institution": "Institute of Finance Management",
+   "startDate": "2020",
+   "endDate": "2020",
+   "grade": "Distinction"
+  }
+ ],
+ "skills": [
+  {
+   "id": "s1",
+   "name": "TypeScript"
+  },
+  {
+   "id": "s2",
+   "name": "Node.js"
+  },
+  {
+   "id": "s3",
+   "name": "PostgreSQL"
+  },
+  {
+   "id": "s4",
+   "name": "AWS"
+  },
+  {
+   "id": "s5",
+   "name": "Docker"
+  },
+  {
+   "id": "s6",
+   "name": "Terraform"
+  },
+  {
+   "id": "s7",
+   "name": "Kafka"
+  },
+  {
+   "id": "s8",
+   "name": "React"
+  },
+  {
+   "id": "s9",
+   "name": "Go"
+  }
+ ],
+ "projects": [
+  {
+   "id": "p1",
+   "name": "Boda Route Optimiser",
+   "role": "Lead Developer",
+   "date": "2021",
+   "description": "Open-source route planner for motorcycle couriers in Dar es Salaam.",
+   "url": ""
+  },
+  {
+   "id": "p2",
+   "name": "Fee Tracker",
+   "role": "Creator",
+   "date": "2019",
+   "description": "School-fees reconciliation tool for 42 schools.",
+   "url": ""
+  }
+ ],
+ "languages": [
+  {
+   "id": "l1",
+   "name": "Swahili",
+   "proficiency": "Native"
+  },
+  {
+   "id": "l2",
+   "name": "English",
+   "proficiency": "Fluent"
+  },
+  {
+   "id": "l3",
+   "name": "French",
+   "proficiency": "Basic"
+  }
+ ],
+ "certifications": [
+  {
+   "id": "c1",
+   "name": "AWS Solutions Architect Associate",
+   "issuer": "Amazon Web Services",
+   "date": "2023"
+  },
+  {
+   "id": "c2",
+   "name": "Certified Scrum Master",
+   "issuer": "Scrum Alliance",
+   "date": "2021"
+  }
+ ],
+ "referees": [
+  {
+   "id": "r1",
+   "name": "Dr. Neema Kimaro",
+   "title": "Head of Engineering",
+   "company": "Nala Payments",
+   "email": "neema.kimaro@example.co.tz",
+   "phone": "+255 754 111 222"
+  },
+  {
+   "id": "r2",
+   "name": "Mr. Baraka Mushi",
+   "title": "CTO",
+   "company": "Selcom",
+   "email": "baraka.mushi@example.co.tz",
+   "phone": "+255 786 333 444"
+  }
+ ],
+ "hobbies": "Long-distance running, chess, and Swahili literature."
+}

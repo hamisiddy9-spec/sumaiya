@@ -1,0 +1,310 @@
+{
+ "personal": {
+  "fullName": "Amina Joseph Mwakasege (over-long CV)",
+  "jobTitle": "Software Engineer",
+  "email": "amina.mwakasege@example.co.tz",
+  "phone": "+255 712 345 678",
+  "location": "Dar es Salaam, Tanzania",
+  "linkedin": "linkedin.com/in/aminamwakasege",
+  "website": ""
+ },
+ "summary": "Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes.",
+ "experience": [
+  {
+   "id": "e0",
+   "position": "Role 1 — Programme Delivery Lead",
+   "company": "Employer 1 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2010",
+   "endDate": "Dec 2011",
+   "current": false,
+   "description": "- Delivered initiative 1.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 1.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 1.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 1.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 1.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e1",
+   "position": "Role 2 — Programme Delivery Lead",
+   "company": "Employer 2 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2011",
+   "endDate": "Dec 2012",
+   "current": false,
+   "description": "- Delivered initiative 2.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 2.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 2.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 2.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 2.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e2",
+   "position": "Role 3 — Programme Delivery Lead",
+   "company": "Employer 3 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2012",
+   "endDate": "Dec 2013",
+   "current": false,
+   "description": "- Delivered initiative 3.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 3.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 3.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 3.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 3.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e3",
+   "position": "Role 4 — Programme Delivery Lead",
+   "company": "Employer 4 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2013",
+   "endDate": "Dec 2014",
+   "current": false,
+   "description": "- Delivered initiative 4.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 4.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 4.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 4.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 4.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e4",
+   "position": "Role 5 — Programme Delivery Lead",
+   "company": "Employer 5 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2014",
+   "endDate": "Dec 2015",
+   "current": false,
+   "description": "- Delivered initiative 5.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 5.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 5.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 5.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 5.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e5",
+   "position": "Role 6 — Programme Delivery Lead",
+   "company": "Employer 6 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2015",
+   "endDate": "Dec 2016",
+   "current": false,
+   "description": "- Delivered initiative 6.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 6.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 6.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 6.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 6.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e6",
+   "position": "Role 7 — Programme Delivery Lead",
+   "company": "Employer 7 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2016",
+   "endDate": "Dec 2017",
+   "current": false,
+   "description": "- Delivered initiative 7.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 7.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 7.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 7.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 7.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e7",
+   "position": "Role 8 — Programme Delivery Lead",
+   "company": "Employer 8 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2017",
+   "endDate": "Dec 2018",
+   "current": false,
+   "description": "- Delivered initiative 8.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 8.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 8.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 8.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 8.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  },
+  {
+   "id": "e8",
+   "position": "Role 9 — Programme Delivery Lead",
+   "company": "Employer 9 Ltd",
+   "location": "Dar es Salaam",
+   "startDate": "Jan 2018",
+   "endDate": "Dec 2019",
+   "current": false,
+   "description": "- Delivered initiative 9.1 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 9.2 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 9.3 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 9.4 which measurably improved settlement throughput and reduced manual reconciliation effort across the region.\n- Delivered initiative 9.5 which measurably improved settlement throughput and reduced manual reconciliation effort across the region."
+  }
+ ],
+ "education": [
+  {
+   "id": "d1",
+   "degree": "BSc",
+   "field": "Computer Science",
+   "institution": "University of Dar es Salaam",
+   "startDate": "2014",
+   "endDate": "2018",
+   "grade": "Upper Second"
+  },
+  {
+   "id": "d2",
+   "degree": "Certificate",
+   "field": "Project Management",
+   "institution": "Institute of Finance Management",
+   "startDate": "2020",
+   "endDate": "2020",
+   "grade": "Distinction"
+  }
+ ],
+ "skills": [
+  {
+   "id": "s1",
+   "name": "TypeScript"
+  },
+  {
+   "id": "s2",
+   "name": "Node.js"
+  },
+  {
+   "id": "s3",
+   "name": "PostgreSQL"
+  },
+  {
+   "id": "s4",
+   "name": "AWS"
+  },
+  {
+   "id": "s5",
+   "name": "Docker"
+  },
+  {
+   "id": "s6",
+   "name": "Terraform"
+  },
+  {
+   "id": "s7",
+   "name": "Kafka"
+  },
+  {
+   "id": "s8",
+   "name": "React"
+  },
+  {
+   "id": "s9",
+   "name": "Go"
+  },
+  {
+   "id": "sx0",
+   "name": "Skill Number 1"
+  },
+  {
+   "id": "sx1",
+   "name": "Skill Number 2"
+  },
+  {
+   "id": "sx2",
+   "name": "Skill Number 3"
+  },
+  {
+   "id": "sx3",
+   "name": "Skill Number 4"
+  },
+  {
+   "id": "sx4",
+   "name": "Skill Number 5"
+  },
+  {
+   "id": "sx5",
+   "name": "Skill Number 6"
+  },
+  {
+   "id": "sx6",
+   "name": "Skill Number 7"
+  },
+  {
+   "id": "sx7",
+   "name": "Skill Number 8"
+  },
+  {
+   "id": "sx8",
+   "name": "Skill Number 9"
+  },
+  {
+   "id": "sx9",
+   "name": "Skill Number 10"
+  },
+  {
+   "id": "sx10",
+   "name": "Skill Number 11"
+  },
+  {
+   "id": "sx11",
+   "name": "Skill Number 12"
+  }
+ ],
+ "projects": [
+  {
+   "id": "p1",
+   "name": "Boda Route Optimiser",
+   "role": "Lead Developer",
+   "date": "2021",
+   "description": "Open-source route planner for motorcycle couriers in Dar es Salaam.",
+   "url": ""
+  },
+  {
+   "id": "p2",
+   "name": "Fee Tracker",
+   "role": "Creator",
+   "date": "2019",
+   "description": "School-fees reconciliation tool for 42 schools.",
+   "url": ""
+  },
+  {
+   "id": "px0",
+   "name": "Project 1",
+   "role": "Lead",
+   "date": "2022",
+   "description": "Long description Long description Long description Long description Long description Long description ",
+   "url": ""
+  },
+  {
+   "id": "px1",
+   "name": "Project 2",
+   "role": "Lead",
+   "date": "2022",
+   "description": "Long description Long description Long description Long description Long description Long description ",
+   "url": ""
+  },
+  {
+   "id": "px2",
+   "name": "Project 3",
+   "role": "Lead",
+   "date": "2022",
+   "description": "Long description Long description Long description Long description Long description Long description ",
+   "url": ""
+  },
+  {
+   "id": "px3",
+   "name": "Project 4",
+   "role": "Lead",
+   "date": "2022",
+   "description": "Long description Long description Long description Long description Long description Long description ",
+   "url": ""
+  }
+ ],
+ "languages": [
+  {
+   "id": "l1",
+   "name": "Swahili",
+   "proficiency": "Native"
+  },
+  {
+   "id": "l2",
+   "name": "English",
+   "proficiency": "Fluent"
+  },
+  {
+   "id": "l3",
+   "name": "French",
+   "proficiency": "Basic"
+  }
+ ],
+ "certifications": [
+  {
+   "id": "c1",
+   "name": "AWS Solutions Architect Associate",
+   "issuer": "Amazon Web Services",
+   "date": "2023"
+  },
+  {
+   "id": "c2",
+   "name": "Certified Scrum Master",
+   "issuer": "Scrum Alliance",
+   "date": "2021"
+  }
+ ],
+ "referees": [
+  {
+   "id": "r1",
+   "name": "Dr. Neema Kimaro",
+   "title": "Head of Engineering",
+   "company": "Nala Payments",
+   "email": "neema.kimaro@example.co.tz",
+   "phone": "+255 754 111 222"
+  },
+  {
+   "id": "r2",
+   "name": "Mr. Baraka Mushi",
+   "title": "CTO",
+   "company": "Selcom",
+   "email": "baraka.mushi@example.co.tz",
+   "phone": "+255 786 333 444"
+  }
+ ],
+ "hobbies": "Long-distance running, chess, and Swahili literature."
+}

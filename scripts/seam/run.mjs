@@ -58,11 +58,11 @@ import {
   createTestUser, deleteTestUser, passwordGrant, mintSsrCookies,
   authSettings, requestEmailOtp, googleAuthorizeProbe, googleIdTokenProbe, storageKey,
 } from "./lib/auth.mjs";
-import { ensureAppServer, appEnv, REPO } from "./lib/app-server.mjs";
+import { ensureAppServer, appEnv, REPO, prepareRuntimeCopy, killServerTree, askOsForFreePort, appHealth } from "./lib/app-server.mjs";
 import { deployedBundleScan } from "./lib/deploy.mjs";
 import {
   guestBuildsCvAndDownloadsPdf, assertPdf, makePhotoBuffer, createOutDir,
-  SURFACE, waitForDownloadControl, probeGoogleMechanism,
+  SURFACE, waitForDownloadControl, probeGoogleMechanism, classifyPage,
 } from "./lib/browser.mjs";
 import { pdfFacts, containsAll } from "./lib/pdf.mjs";
 
@@ -81,16 +81,51 @@ const OPTS = {
   cleanup: flag("cleanup"),
   httpOnly: flag("http-only"),
   skipBrowser: flag("skip-browser"),
+  reuse: flag("reuse"),
 };
 const RUN_ID = randomUUID();
-const PORT = Number(new URL(OPTS.appUrl).port || 3000);
+/** The origin actually under test. Reassigned if the port is taken and the seam
+ *  server has to move (it must never reuse a build another process owns). */
+let appUrl = opt("app-url", LOCAL_APP);
+const PORT = Number(new URL(appUrl).port || 3000);
 const report = new Report();
 const outDir = createOutDir();
-const artifacts = { runId: RUN_ID, startedAt: new Date().toISOString(), appUrl: OPTS.appUrl, liveUrl: OPTS.liveUrl };
+const artifacts = { runId: RUN_ID, startedAt: new Date().toISOString(), appUrl: appUrl, liveUrl: OPTS.liveUrl };
 let browser = null;
 let server = null;
 let sql = null;
 let createdUser = null;
+
+/**
+ * ALWAYS take the dev server down — on success, on failure, on a thrown error and
+ * on Ctrl-C. An earlier version of this suite left a 2.6 GB `next dev` holding
+ * :3010, which poisoned the NEXT run's port. A test that leaks a process holding
+ * a port is a net negative for the machine it runs on.
+ */
+function killSeamServer() {
+  try {
+    if (server?.started && server.child) {
+      killServerTree(server.child);
+      server.cleaned = true;
+    }
+  } catch {
+    /* cleanup must never throw */
+  }
+}
+process.on("exit", killSeamServer);
+process.on("SIGINT", () => {
+  killSeamServer();
+  process.exit(130);
+});
+process.on("SIGTERM", () => {
+  killSeamServer();
+  process.exit(143);
+});
+process.on("uncaughtException", (err) => {
+  console.error(`SEAM: uncaught exception — ${err.message}`);
+  killSeamServer();
+  process.exit(1);
+});
 
 const banner = (t) => {
   report.say("════════════════════════════════════════════════════════════════════");
@@ -99,11 +134,9 @@ const banner = (t) => {
 };
 
 async function shutdown() {
+  killSeamServer();
   try { if (browser) await browser.close(); } catch { /* ignore */ }
   try { if (sql) await sql.end({ timeout: 5 }); } catch { /* ignore */ }
-  if (server?.started && server.child) {
-    try { server.child.kill(); } catch { /* ignore */ }
-  }
 }
 
 function writeArtifacts(extra = {}) {
@@ -127,7 +160,7 @@ async function fatal(reason, extra = {}) {
 // ═══════════════════════════════════════════════════════════════════════════
 async function main() {
   banner(`THE SEAM TEST — run ${RUN_ID.slice(0, 8)} · ${new Date().toISOString()}`);
-  report.say(`app under test : ${OPTS.appUrl}   (starting one if nothing answers)`);
+  report.say(`app under test : ${appUrl}   (starting one if nothing answers)`);
   report.say(`live probe     : ${OPTS.liveUrl}`);
   report.say(`surfaces       : this run exercises the WEB surface only.`);
   report.say(`                 the ANDROID app is NOT exercised (no device attached).`);
@@ -191,23 +224,74 @@ async function main() {
   report.step("APP UNDER TEST — reachable, and the DB it reports is the DB we assert against");
   if (OPTS.httpOnly || OPTS.skipBrowser) {
     report.blocked("browser journey skipped by flag (--http-only/--skip-browser) — the whole guest journey stays UNVERIFIED", { evidence: EVIDENCE.UI });
-    const h = await probe(`${OPTS.appUrl}/api/health`);
+    const h = await probe(`${appUrl}/api/health`);
     report.observed(`GET /api/health → ${describe(h)}`);
   } else {
+    // ── ISOLATION, because a shared build directory caused a FALSE FAILURE ──
+    // `next dev` writes chunk manifests into apps/web/.next, and siblings in this
+    // repo run `next build` against the same directory. On 2026-09-20 that
+    // produced ChunkLoadError → no hydration → "no draft written" and "no PDF
+    // produced" FAILs against a guest journey that works. The app now runs from
+    // its own copy so no other writer can touch its build output.
+    const runtime = prepareRuntimeCopy({ outDir, attempt: 1 });
+    artifacts.runtime = {
+      runtime: runtime.runtime,
+      webDir: runtime.webDir,
+      files: runtime.files,
+      bytes: runtime.bytes,
+      junctions: runtime.junctioned,
+    };
+    report.observed(
+      `isolated app runtime: ${runtime.files} source files (${(runtime.bytes / 1e6).toFixed(1)} MB) copied to ${runtime.webDir}`,
+    );
+    report.observed(`read-only junctions (never written by this run): ${JSON.stringify(runtime.junctioned)}`);
+
+    // ── WHICH PORT? Ask, don't assume ─────────────────────────────────────
+    // A fixed port is a shared dependency between every run on this machine: an
+    // orphaned dev server once held :3010 with 2.6 GB and the NEXT run failed with
+    // EADDRINUSE. So: probe first; reuse a healthy server if there is one; if
+    // nothing answers, let the OS pick.
+    const explicitTarget = argv.some((a) => a.startsWith("--app-url="));
+    const candidatePort = Number(new URL(appUrl).port || PORT);
+    const before = await appHealth(candidatePort);
+    if (before.up) {
+      report.observed(`health check before spawning: port ${candidatePort} is ALREADY ANSWERING (${JSON.stringify(before.body)}) — this run will reuse that server`);
+    } else if (!explicitTarget) {
+      const free = await askOsForFreePort();
+      appUrl = `http://localhost:${free}`;
+      report.observed(
+        `health check before spawning: nothing answering on ${candidatePort}, and no --app-url was given, so the OPERATING SYSTEM was asked for a free port → ${free}`,
+      );
+    } else {
+      report.observed(`health check before spawning: nothing answering on ${candidatePort} (an explicit --app-url was given, so that port is kept)`);
+    }
+
     server = await ensureAppServer({
-      port: PORT,
-      env: appEnv({ secrets, appUrl: OPTS.appUrl, resolveEnv: resolve }),
+      port: Number(new URL(appUrl).port || PORT),
+      env: appEnv({ secrets, appUrl, resolveEnv: resolve }),
       outDir,
+      webDir: runtime.webDir,
+      reuse: OPTS.reuse,
     });
     if (!server.ok) {
-      await fatal(`the app under test is not reachable: ${server.error}`, { serverStarted: server.started, port: PORT });
+      await fatal(`the app under test is not reachable: ${server.error}`, { serverStarted: server.started, port: server.port ?? candidatePort });
+    }
+    // The server may have moved to a bindable port rather than sit on one another
+    // process holds; every later step must target the port it actually bound.
+    if (Number(new URL(appUrl).port) !== server.port) {
+      appUrl = `http://localhost:${server.port}`;
+      report.observed(`port ${candidatePort} was occupied but not answering HTTP, so the seam server bound ${server.port} instead — ${appUrl}`);
     }
     report.pass(
-      `app is up on ${OPTS.appUrl} (${server.started ? "started by this run" : "an already-running server was reused"}) · /api/health → ${JSON.stringify(server.health)}`,
-      { evidence: EVIDENCE.SERVER, detail: server.logPath ? `dev log: ${server.logPath}` : undefined },
+      `app is up on ${appUrl} — ${server.reused ? `REUSED a server that was already healthy on port ${server.port}` : `STARTED a dev server on port ${server.port} from an isolated copy of apps/web`} · /api/health → ${JSON.stringify(server.health)}`,
+      {
+        evidence: EVIDENCE.SERVER,
+        receipt: true,
+        detail: `${server.started ? `spawned by this run (pid ${server.child?.pid})` : "not spawned by this run; it was already running"}${server.logPath ? ` · dev log: ${server.logPath}` : ""}`,
+      },
     );
-    const health = await probe(`${OPTS.appUrl}/api/health`);
-    report.pass(`GET /api/health → ${describe(health)}`, { evidence: EVIDENCE.SERVER });
+    const health = await probe(`${appUrl}/api/health`);
+    report.pass(`GET /api/health → ${describe(health)}`, { evidence: EVIDENCE.SERVER, receipt: true });
   }
 
   // ── STEP 3: the guest builds a CV and downloads a real PDF ───────────────
@@ -232,9 +316,49 @@ async function main() {
     report.observed(`fixture photo drawn in-browser: ${photoBuffer.length} bytes of real JPEG`);
 
     guest = await guestBuildsCvAndDownloadsPdf({
-      browser, appUrl: OPTS.appUrl, runId: RUN_ID, outDir, report,
+      browser, appUrl, runId: RUN_ID, outDir, report,
       label: "local-guest", photoBuffer,
     });
+
+    // ── ONE RETRY ON A FRESH RUNTIME, BECAUSE THE COPY CAN BE TAKEN MID-WRITE ──
+    // Sibling agents edit this repo while the run is going. If a source file was
+    // half-written at the instant the copy was taken, the compiled chunk is
+    // garbage, the page never hydrates, and every UI assertion below would be a
+    // statement about a broken COPY rather than the product. Re-take the copy and
+    // try once more before deciding anything.
+    if (browser && guest.harness && (guest.harness.valid === false || guest.harness.hydration?.hydrated === false)) {
+      report.observed(
+        `attempt 1 was harness-invalid (${guest.harness.breaking?.[0] ?? guest.harness.hydration?.evidence}) — re-taking the runtime copy and retrying once`,
+      );
+      try {
+        killServerTree(server?.child);
+      } catch {
+        /* best effort */
+      }
+      await new Promise((r) => setTimeout(r, 2500));
+      const runtime2 = prepareRuntimeCopy({ outDir, attempt: 2 });
+      const nextPort = (server?.port ?? PORT) + 1;
+      const s2 = await ensureAppServer({
+        port: nextPort,
+        env: appEnv({ secrets, appUrl: `http://localhost:${nextPort}`, resolveEnv: resolve }),
+        outDir,
+        webDir: runtime2.webDir,
+      });
+      artifacts.guestRetry = { ok: s2.ok, port: s2.port, runtime: runtime2.webDir, error: s2.error };
+      if (!s2.ok) {
+        report.invalid(`the retry could not start a server: ${s2.error}`, { evidence: EVIDENCE.SERVER });
+      } else {
+        server = s2;
+        appUrl = `http://localhost:${s2.port}`;
+        guest = await guestBuildsCvAndDownloadsPdf({
+          browser, appUrl, runId: RUN_ID, outDir, report,
+          label: "local-guest-retry", photoBuffer,
+        });
+        report.observed(
+          `attempt 2 on a fresh copy: harness valid=${guest.harness?.valid} · hydration=${guest.harness?.hydration?.evidence ?? "none"}`,
+        );
+      }
+    }
     artifacts.guest = {
       status: guest.status, finalUrl: guest.finalUrl, name: guest.name,
       draftName: guest.draftName, draftPhotoChars: guest.draftPhotoChars,
@@ -257,32 +381,61 @@ async function main() {
       });
     }
 
-    // The guest's ONLY store is this browser. That is a seam in its own right
-    // (see the next step), but first: did the editor persist it at all?
-    if (guest.draftName) {
-      report.pass(`guest draft present in browser storage: fullName="${guest.draftName}" · ${guest.draftRawBytes} bytes of JSON`, {
-        evidence: EVIDENCE.UI,
-        detail: "localStorage key sumaiya-guest-cv — client-only by design; the server half is asserted next",
-      });
-    } else if (guest.draftRawBytes) {
-      report.fail(`the guest draft exists in browser storage but carries no fullName (read back: "${guest.draftName ?? "(missing)"}")`, { evidence: EVIDENCE.UI });
+    // ── THE HARNESS-VALIDITY GATE ─────────────────────────────────────────
+    // If the page could not load its own JavaScript, or React never hydrated,
+    // then NOTHING below can be said about the product. Report it as a harness
+    // fault and refuse to emit product findings from this step.
+    const harnessOk = guest.harness?.valid === true && guest.harness?.hydration?.hydrated === true;
+    artifacts.guestHarness = {
+      valid: guest.harness?.valid,
+      breaking: guest.harness?.breaking,
+      hydration: guest.harness?.hydration,
+      reason: guest.harnessReason,
+    };
+    if (!harnessOk) {
+      report.invalid(
+        `the guest journey cannot be judged on this run: ${guest.harnessReason ?? "the page under test was not in a runnable state"}`,
+        {
+          evidence: EVIDENCE.UI,
+          detail:
+            `page errors: ${JSON.stringify(guest.pageErrors ?? [])} · hydration evidence: ${guest.harness?.hydration?.evidence ?? "none"}. ` +
+            "This is a fault in the test's own environment, so NO product assertion is made here. " +
+            "Cause seen in this repo: several agents share apps/web/.next, so a concurrent build rewrites a chunk mid-request.",
+        },
+      );
+      if (guest.pageErrors?.length) report.observed(`raw page errors: ${JSON.stringify(guest.pageErrors)}`);
     } else {
-      report.fail("after typing and waiting out the 2s autosave debounce, NO guest draft was written to browser storage — a guest's work would be lost on reload", {
-        evidence: EVIDENCE.UI,
-      });
-    }
-    if (guest.photoUploaded) {
-      report.pass(`guest photo reached the draft as a ${guest.draftPhotoChars}-char data URL (the editor's own validate→crop→re-encode pipeline ran)`, {
-        evidence: EVIDENCE.UI,
-        detail: "whether it survives sign-up is asserted against the database, below",
-      });
-      if (guest.draftPhotoChars < 1000) {
-        report.fail(`the guest photo in the draft is only ${guest.draftPhotoChars} chars — that is not a stored image`, { evidence: EVIDENCE.UI });
+      // The guest's ONLY store is this browser. That is a seam in its own right
+      // (see the next step), but first: did the editor persist it at all?
+      const draftExists = Boolean(guest.draftRawBytes || guest.draftName);
+      if (guest.draftName && draftExists) {
+        report.pass(`guest draft present in browser storage: fullName="${guest.draftName}" · ${guest.draftRawBytes} bytes of JSON`, {
+          evidence: EVIDENCE.UI,
+          detail: "localStorage key sumaiya-guest-cv — client-only by design; the server half is asserted next",
+        });
+      } else if (draftExists) {
+        report.fail(`the guest draft exists in browser storage but carries no fullName (read back: "${guest.draftName ?? "(missing)"}")`, { evidence: EVIDENCE.UI });
+      } else {
+        report.fail("the page hydrated and the name field took input, yet after the 2s autosave debounce NO guest draft was written to browser storage — a guest's work would be lost on reload", {
+          evidence: EVIDENCE.UI,
+          detail: "hydration was confirmed by the page's own state-driven behaviour, so this is a product observation, not a harness one",
+        });
       }
-    } else if (guest.photoUploaded === false) {
-      report.fail("no image file input was found in the guest editor — the photo path could not be exercised", { evidence: EVIDENCE.UI });
+      if (guest.photoUploaded && guest.draftPhotoChars > 0 && draftExists) {
+        report.pass(`guest photo reached the draft as a ${guest.draftPhotoChars}-char data URL (the editor's own validate→crop→re-encode pipeline ran)`, {
+          evidence: EVIDENCE.UI,
+          detail: "whether it survives sign-up is asserted against the database, below",
+        });
+        if (guest.draftPhotoChars < 1000) {
+          report.fail(`the guest photo in the draft is only ${guest.draftPhotoChars} chars — that is not a stored image`, { evidence: EVIDENCE.UI });
+        }
+      } else if (guest.photoUploaded && !draftExists) {
+        report.unverified("a photo was handed to the editor but no draft exists to read it back from, so the photo-in-draft step was not verified");
+      } else if (guest.photoUploaded === false) {
+        report.fail("no image file input was found in the guest editor — the photo path could not be exercised", { evidence: EVIDENCE.UI });
+      }
+      assertPdf(report, guest, { expectName: guest.name, stepLabel: "guest, no account" });
     }
-    assertPdf(report, guest, { expectName: guest.name, stepLabel: "guest, no account" });
 
     if (guest.consoleErrors?.length) {
       report.observed(`console/page errors during the guest journey: ${JSON.stringify(guest.consoleErrors)}`);
@@ -331,6 +484,7 @@ async function main() {
     if (anonCvRest.status === 401 || anonCvRest.rows === 0) {
       report.pass("the public key cannot read any CV rows (RLS in front of the table), so a guest's or a user's document is not reachable by key alone", {
         evidence: EVIDENCE.SERVER,
+        receipt: true,
       });
     } else {
       report.fail(`the public anon key READ ${anonCvRest.rows} CV row(s) over PostgREST — user documents are exposed by the key every browser ships`, {
@@ -342,7 +496,10 @@ async function main() {
         evidence: EVIDENCE.SERVER,
       });
     } else {
-      report.pass("the public key cannot read the job table's internal columns", { evidence: EVIDENCE.SERVER });
+      report.pass("the public anon key cannot read the job table's internal columns either — the public key opens nothing but the public feed", {
+        evidence: EVIDENCE.SERVER,
+        receipt: true,
+      });
     }
   } else {
     report.unverified("the orphan question could not be answered because the guest journey did not produce a name to search for");
@@ -381,8 +538,8 @@ async function main() {
         const me = await probe(`${supabaseUrl}/auth/v1/user`, { headers: { apikey: anonKey, ...bearer(grant.accessToken) } });
         report.pass(`GET /auth/v1/user with that token → HTTP ${me.status} (sub ${me.json?.id ?? "?"})`, { evidence: EVIDENCE.SERVER });
 
-        const noAuth = await probe(`${OPTS.appUrl}/api/cv`);
-        const withAuth = await probe(`${OPTS.appUrl}/api/cv`, { headers: bearer(grant.accessToken) });
+        const noAuth = await probe(`${appUrl}/api/cv`);
+        const withAuth = await probe(`${appUrl}/api/cv`, { headers: bearer(grant.accessToken) });
         report.observed(`GET /api/cv — anonymous: HTTP ${noAuth.status} · with bearer: HTTP ${withAuth.status} · ${(dataArray(withAuth) ?? []).length} row(s)`);
         if (noAuth.status === 401 && withAuth.status === 200) {
           report.pass("the API rejects anonymous reads and accepts the real token — the 401/200 seam behaves", { evidence: EVIDENCE.SERVER });
@@ -423,7 +580,7 @@ async function main() {
       await context.addCookies(
         // Playwright wants either `url` OR `domain`+`path` — not both. The cookie
         // is scoped to the app origin for this run.
-        minted.cookies.map((c) => ({ name: c.name, value: c.value, url: OPTS.appUrl })),
+        minted.cookies.map((c) => ({ name: c.name, value: c.value, url: appUrl })),
       );
       // Prove the SERVER reads them before blaming the page.
       const apiAsUser = await page.evaluate(async () => {
@@ -433,7 +590,7 @@ async function main() {
       report.observed(`in-page GET /api/cv with the injected cookies → HTTP ${apiAsUser.status} ${apiAsUser.body}`);
 
       const before = await cvRowsForUser(sql, session.userId);
-      const migUrl = `${OPTS.appUrl}/migrate-guest`;
+      const migUrl = `${appUrl}/migrate-guest`;
       await page.goto(migUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
       let landed = null;
       try {
@@ -446,14 +603,27 @@ async function main() {
       const cvId = /\/editor\/cv\/([A-Za-z0-9_-]+)/.exec(landed)?.[1] ?? null;
 
       if (!cvId) {
-        report.fail(`the migration page did not reach an editor for a real CV (ended on ${landed}) — the guest's work was not saved to the account`, {
-          evidence: EVIDENCE.SERVER,
-        });
+        // Which is it: the product failed to save, or the page failed to run?
+        const laterHarness = classifyPage(guest.pageErrorLog ?? guest.pageErrors ?? []);
+        if (!laterHarness.valid) {
+          report.invalid(
+            `the migration leg cannot be judged: an editor was not reached AND the page logged harness-breaking errors during it (${laterHarness.breaking[0] ?? "unknown"})`,
+            {
+              evidence: EVIDENCE.UI,
+              detail: "the page under test failed to load its own JS, so no product claim is made about the guest→account save",
+            },
+          );
+        } else {
+          report.fail(`the migration page did not reach an editor for a real CV (ended on ${landed}) — the guest's work was not saved to the account`, {
+            evidence: EVIDENCE.SERVER,
+            detail: "the page ran cleanly (no chunk/hydration errors), so this is a product observation",
+          });
+        }
       } else {
         // The client's own write bodies are evidence: a payload-shape bug is
         // invisible on screen and obvious on the wire.
         for (const r of guest.apiRequests.filter((x) => x.url?.includes("/api/cv") && x.method !== "GET")) {
-          report.observed(`request seen in the browser: ${r.method} ${r.url.replace(OPTS.appUrl, "")} · body[0..159]=${JSON.stringify(r.body)}`);
+          report.observed(`request seen in the browser: ${r.method} ${r.url.replace(appUrl, "")} · body[0..159]=${JSON.stringify(r.body)}`);
         }
         const before = await cvRowsForUser(sql, session.userId);
         const after = await cvRowsForUser(sql, session.userId);
@@ -547,7 +717,7 @@ async function main() {
         }
 
         // The list endpoint, as the server answers it.
-        const list = await probe(`${OPTS.appUrl}/api/cv`, { headers: bearer(session.accessToken) });
+        const list = await probe(`${appUrl}/api/cv`, { headers: bearer(session.accessToken) });
         const rows = dataArray(list) ?? [];
         artifacts.cvList = { status: list.status, count: rows.length, ids: rows.map((r) => r.id) };
         if (list.status === 200 && rows.some((r) => r.id === cvId)) {
@@ -898,10 +1068,24 @@ async function main() {
       });
       artifacts.liveGuest = {
         status: liveGuest.status,
+        harness: { valid: liveGuest.harness?.valid, breaking: liveGuest.harness?.breaking, hydration: liveGuest.harness?.hydration?.evidence },
         pdf: liveGuest.pdf && { bytes: liveGuest.pdf.bytes, pages: liveGuest.pdf.pages, textChars: liveGuest.pdf.textChars, file: liveGuest.pdf.file },
         pdfError: liveGuest.pdfError,
       };
-      assertPdf(report, liveGuest, { expectName: liveGuest.name, stepLabel: "DEPLOYED bundle" });
+      // ON THE DEPLOYED SURFACE a chunk that will not load is a DEPLOY fault, not
+      // a harness one: nobody in this repo can swap the bundle a visitor gets.
+      if (liveGuest.harness && liveGuest.harness.valid === false) {
+        report.fail(
+          `the DEPLOYED guest editor served JavaScript that will not run (${liveGuest.harness.breaking[0] ?? "unknown"}) — a visitor landing on ${OPTS.liveUrl}/editor/cv/try gets a page that never hydrates`,
+          { evidence: EVIDENCE.SERVER, detail: `raw: ${JSON.stringify(liveGuest.pageErrors ?? []).slice(0, 200)}` },
+        );
+      } else if (liveGuest.harness?.hydration?.hydrated === false) {
+        report.fail("the DEPLOYED guest editor never hydrated (no autosave write, no state-driven preview) — a visitor cannot complete the journey", {
+          evidence: EVIDENCE.SERVER,
+        });
+      } else {
+        assertPdf(report, liveGuest, { expectName: liveGuest.name, stepLabel: "DEPLOYED bundle" });
+      }
     }
   }
 
@@ -920,7 +1104,7 @@ async function main() {
   // "how many rows the feed returns" must be compared with min(live, 100), not
   // with the raw count, or the test would report a design limit as a bug.
   const expectedRows = dbJobs.live === null ? null : Math.min(dbJobs.live, 100);
-  const apiJobs = await probe(`${OPTS.appUrl}/api/jobs`);
+  const apiJobs = await probe(`${appUrl}/api/jobs`);
   const apiRows = dataArray(apiJobs) ?? [];
   artifacts.jobs.api = { status: apiJobs.status, rows: apiRows.length, expected: expectedRows, first: apiRows[0] ? { id: apiRows[0].id, title: apiRows[0].title } : null };
   report.observed(`GET /api/jobs (the DB-backed feed every client reads) → HTTP ${apiJobs.status} · ${apiRows.length} row(s)${apiRows[0] ? ` · first: ${JSON.stringify({ id: apiRows[0].id, title: apiRows[0].title })}` : ""}`);
@@ -944,7 +1128,7 @@ async function main() {
 
   // The legacy mock route: does anything actually point at it? (If it has no
   // callers it is dead code, not a divergence — say which, from the source.)
-  const mockFeed = await probe(`${OPTS.appUrl}/api/jobs/feed`, jsonPost({ page: 1, limit: 50 }));
+  const mockFeed = await probe(`${appUrl}/api/jobs/feed`, jsonPost({ page: 1, limit: 50 }));
   const mockRows = dataArray(mockFeed) ?? [];
   const callers = await countSourceCallers("/api/jobs/feed");
   artifacts.jobs.mockFeed = { status: mockFeed.status, count: mockRows.length, callers };
@@ -1004,8 +1188,8 @@ async function main() {
 
   // ── STEP 12: cleanup + surfaces ────────────────────────────────────────
   report.step("WHAT THIS RUN EXERCISED, AND WHAT IT DID NOT");
-  report.observed(`EXERCISED: web, desktop viewport (Chromium ${browser ? "headless" : "n/a"}), against ${OPTS.appUrl}${server?.started ? " (started by this run)" : ""}`);
-  report.observed(`EXERCISED: HTTP/API surface of ${OPTS.appUrl} + the deployed site ${OPTS.skipLive ? "(skipped)" : OPTS.liveUrl}`);
+  report.observed(`EXERCISED: web, desktop viewport (Chromium ${browser ? "headless" : "n/a"}), against ${appUrl}${server?.started ? " (started by this run)" : ""}`);
+  report.observed(`EXERCISED: HTTP/API surface of ${appUrl} + the deployed site ${OPTS.skipLive ? "(skipped)" : OPTS.liveUrl}`);
   report.observed("EXERCISED: Postgres directly — rows, columns, byte lengths");
   report.blocked("NOT EXERCISED: the ANDROID app. A separate codebase, its own API host and its own build; a green web run says nothing about the APK. Verifying it needs a device/emulator and a real install.", {
     evidence: EVIDENCE.UI,

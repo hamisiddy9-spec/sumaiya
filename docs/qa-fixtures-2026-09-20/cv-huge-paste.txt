@@ -1,0 +1,2880 @@
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.
+Amina Joseph Mwakasege
+Software Engineer
+amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege
+
+PROFESSIONAL SUMMARY
+Software engineer with 6 years building payment and logistics platforms across East Africa. Led a team of four that cut settlement reconciliation time from 9 hours to 40 minutes. Comfortable across TypeScript, Postgres and AWS; strong on reliability and cost control.
+
+EXPERIENCE
+Senior Software Engineer | Nala Payments | Dar es Salaam, Tanzania | Mar 2022 - Present
+- Rebuilt the merchant settlement ledger, cutting reconciliation time from 9h to 40min.
+- Owned the uptime budget; raised availability from 99.2% to 99.95% over 18 months.
+- Mentored four engineers and ran the weekly reliability review.
+
+Software Engineer | Selcom | Dar es Salaam, Tanzania | Jul 2019 - Feb 2022
+- Shipped USSD and mobile-money integrations for 3 partner banks.
+- Reduced the bill-payment API p95 from 2.4s to 380ms by adding a Redis read path.
+
+Junior Developer | Tanzania Education Trust | Morogoro, Tanzania | Aug 2018 - Jun 2019
+- Built a school-fees tracking tool used by 42 schools.
+
+EDUCATION
+BSc Computer Science | University of Dar es Salaam | 2014 - 2018 | Upper Second
+Certificate Project Management | Institute of Finance Management | 2020 | Distinction
+
+SKILLS
+TypeScript • Node.js • PostgreSQL • AWS • Docker • Terraform • Kafka • React • Go
+
+LANGUAGES
+Swahili (Native) • English (Fluent) • French (Basic)
+
+CERTIFICATIONS
+- AWS Solutions Architect Associate | Amazon Web Services | 2023
+- Certified Scrum Master | Scrum Alliance | 2021
+
+PROJECTS
+Boda Route Optimiser | Lead Developer | 2021
+- Open-source route planner for motorcycle couriers in Dar es Salaam.
+Fee Tracker | Creator | 2019
+- School-fees reconciliation tool for 42 schools.
+
+REFEREES
+Dr. Neema Kimaro | Head of Engineering, Nala Payments
+neema.kimaro@example.co.tz | +255 754 111 222
+Mr. Baraka Mushi | CTO, Selcom
+baraka.mushi@example.co.tz | +255 786 333 444
+
+INTERESTS
+Long-distance running, chess, and Swahili literature.

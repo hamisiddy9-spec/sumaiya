@@ -30,6 +30,60 @@ const req = createRequire(path.join(REPO, "package.json"));
 export const SURFACE = "web (desktop viewport, Chromium)";
 
 /**
+ * ── THE HARNESS-VALIDITY GATE ────────────────────────────────────────────────
+ * A page that could not load its own JavaScript cannot testify about the
+ * product. These signals mean "the thing under test never started running":
+ *
+ *   ChunkLoadError / "Loading chunk … failed"  — a chunk 404'd or was rewritten
+ *                                                mid-request by another writer
+ *   SyntaxError                                — a truncated/mangled chunk
+ *   "error occurred during hydration"          — React never took over the DOM
+ *   "Failed to fetch dynamically imported …"   — a dynamic import died
+ *
+ * When any of these is present, a missing draft or a missing download is a
+ * HARNESS fault, not a product one. Reporting it as a product failure is how a
+ * test sends someone to "fix" a feature that works.
+ */
+const HARNESS_BREAKING = /ChunkLoadError|Loading chunk|SyntaxError|error occurred during hydration|Failed to fetch dynamically imported module|net::ERR_|Failed to load resource: net/i;
+
+export function classifyPage(pageErrors) {
+  const breaking = pageErrors.filter((e) => HARNESS_BREAKING.test(e));
+  return { valid: breaking.length === 0, breaking: breaking.slice(0, 4) };
+}
+
+/**
+ * Hydration evidence: the observable side effect of React actually taking over.
+ * Both signals below are produced by the app's OWN effects — the localStorage
+ * autosave and the preview rendering the typed name — so neither can happen on
+ * a page that only painted server HTML.
+ */
+async function hydrationEvidence(page, name, timeoutMs = 25_000) {
+  const deadline = Date.now() + timeoutMs;
+  let previewSawName = false;
+  let draftWritten = false;
+  while (Date.now() < deadline) {
+    const state = await page
+      .evaluate(() => ({
+        draft: localStorage.getItem("sumaiya-guest-cv"),
+        text: document.body.innerText,
+      }))
+      .catch(() => null);
+    if (state) {
+      if (state.draft) draftWritten = true;
+      if (name && state.text?.includes(name)) previewSawName = true;
+      if (draftWritten || previewSawName) break;
+    }
+    await page.waitForTimeout(500);
+  }
+  return {
+    draftWritten,
+    previewSawName,
+    evidence: draftWritten ? "the editor's own autosave wrote its draft to localStorage" : previewSawName ? "the preview rendered the typed name (state → DOM)" : "none",
+    hydrated: draftWritten || previewSawName,
+  };
+}
+
+/**
  * A real JPEG, drawn in the same browser that will upload it. Hand-written byte
  * arrays and "fake" images are avoided on purpose: this one has to survive the
  * app's own decode → centre-crop → re-encode pipeline.
@@ -145,9 +199,15 @@ export async function guestBuildsCvAndDownloadsPdf({
   });
   const page = await context.newPage();
   const consoleErrors = [];
-  page.on("pageerror", (e) => consoleErrors.push(`pageerror: ${String(e).slice(0, 160)}`));
+  const pageErrors = [];
+  page.on("pageerror", (e) => pageErrors.push(`pageerror: ${String(e).slice(0, 200)}`));
   page.on("console", (m) => {
-    if (m.type() === "error") consoleErrors.push(`console: ${m.text().slice(0, 160)}`);
+    if (m.type() === "error") {
+      const text = m.text().slice(0, 200);
+      consoleErrors.push(`console: ${text}`);
+      // A failed chunk request surfaces here, not as a pageerror.
+      if (/Loading chunk|ChunkLoadError|hydration|ERR_/.test(text)) pageErrors.push(`console: ${text}`);
+    }
   });
   const requests = [];
   page.on("request", (r) => {
@@ -190,6 +250,30 @@ export async function guestBuildsCvAndDownloadsPdf({
   facts.filled = filled;
   report.observed(`typed into the editor: ${Object.entries(filled).map(([k, v]) => `${k}=${v ? JSON.stringify(v.value.slice(0, 40)) : "NOT FOUND"}`).join(" · ")}`);
 
+  // Hydration gate BEFORE any assertion about the page's behaviour.
+  const hydration = await hydrationEvidence(page, name, 25_000);
+  const harness = { ...classifyPage(pageErrors), hydration };
+  facts.pageErrors = pageErrors.slice(0, 8);
+  // Live reference: the caller re-classifies AFTER later navigations in this same
+  // page (the migration leg), where a chunk can fail mid-run.
+  facts.pageErrorLog = pageErrors;
+  facts.harness = harness;
+  report.observed(
+    `hydration evidence: ${hydration.evidence}${harness.breaking.length ? ` · HARNESS-BREAKING page errors: ${JSON.stringify(harness.breaking)}` : ""}`,
+  );
+
+  if (!harness.valid || !hydration.hydrated) {
+    // Stop here on purpose. Any assertion below would be a statement about a page
+    // that never ran, and the caller reports INVALID-HARNESS instead of a FAIL.
+    facts.harnessReason = !harness.valid
+      ? `the page failed to load its own JavaScript (${harness.breaking[0] ?? "unknown"})`
+      : "React never hydrated: no autosave write, no state-driven preview";
+    facts.context = context;
+    facts.page = page;
+    if (!captureDraft) await context.close();
+    return facts;
+  }
+
   // Photo — the real pipeline (validate → decode → crop → JPEG re-encode).
   let photoSet = null;
   if (photoBuffer) {
@@ -208,7 +292,6 @@ export async function guestBuildsCvAndDownloadsPdf({
   }
   facts.photoUploaded = photoSet;
   report.observed(`photo upload: ${photoSet === null ? "not attempted" : photoSet ? "source JPEG handed to the editor's file input" : "no image file input found"}`);
-
   // Let the 2s autosave debounce flush, then read the draft AS THE BROWSER HAS IT.
   await page.waitForTimeout(3500);
   if (captureDraft) {

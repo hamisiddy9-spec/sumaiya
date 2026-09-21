@@ -1,0 +1,17 @@
+{
+ "en": {
+  "status": 201,
+  "id": "wK6Sbmsbm8GNccU39whVb",
+  "raw": "{\"success\":true,\"data\":{\"id\":\"wK6Sbmsbm8GNccU39whVb\",\"userId\":\"87d62bf1-79ee-4afa-a02f-c282674813ee\",\"title\":\"QA English CV\",\"templateId\":\"nakuru\",\"templateHistory\":[\"nakuru\"],\"primaryColor\":\"#DA4A1C\",\"fontFamily\":\"Inter\",\"data\":{\"skills\":[{\"id\":\"s1\",\"name\":\"TypeScript\"},{\"id\":\"s2\",\"name\":\"Node.js\"}"
+ },
+ "sw": {
+  "status": 201,
+  "id": "MaZpDFakBnBqgPIxlnkLc",
+  "raw": "{\"success\":true,\"data\":{\"id\":\"MaZpDFakBnBqgPIxlnkLc\",\"userId\":\"87d62bf1-79ee-4afa-a02f-c282674813ee\",\"title\":\"QA Swahili CV\",\"templateId\":\"nakuru\",\"templateHistory\":[\"nakuru\"],\"primaryColor\":\"#DA4A1C\",\"fontFamily\":\"Inter\",\"data\":{\"skills\":[{\"id\":\"s1\",\"name\":\"Uhandisi wa Programu\"},{\"id\":\"s2\",\"name\":"
+ },
+ "long": {
+  "status": 201,
+  "id": "Phad8qa6CFpqyB7o6LfUN",
+  "raw": "{\"success\":true,\"data\":{\"id\":\"Phad8qa6CFpqyB7o6LfUN\",\"userId\":\"87d62bf1-79ee-4afa-a02f-c282674813ee\",\"title\":\"QA Long CV\",\"templateId\":\"nakuru\",\"templateHistory\":[\"nakuru\"],\"primaryColor\":\"#DA4A1C\",\"fontFamily\":\"Inter\",\"data\":{\"skills\":[{\"id\":\"s1\",\"name\":\"TypeScript\"},{\"id\":\"s2\",\"name\":\"Node.js\"},{\""
+ }
+}

@@ -1,0 +1,43 @@
+name: rls-guard
+
+# Deliberately NOT triggered by pull_request or push.
+#
+# scripts/assert-rls.mjs needs DATABASE_URL — the production connection string.
+# Running it on pull_request would put live database credentials in the path of
+# every PR build, including PRs from forks. So this runs on a schedule and on
+# manual dispatch only: the secret is never present in a pull-request context.
+#
+# What it guards, verified by mutation on 2026-09-20 (each hole was reopened and
+# the guard was watched failing, then closed again):
+#   - every public table has RLS enabled;
+#   - the anon key holds NO write privilege anywhere;
+#   - the anon key holds NO read on `cv`   (it could list every published CV and
+#     its photo, because PostgREST filters are client-supplied);
+#   - the anon key holds NO read on `job`  (it exposed source / source_url /
+#     external_id, which the jobs API route deliberately withholds);
+#   - the deny-by-default telemetry tables never grow a policy;
+#   - every text primary key can make its own id.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  assert-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install the pg driver the guard imports
+        run: npm install --no-save pg
+
+      - name: Assert the public schema is not reachable with the anon key
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_PATH: ${{ github.workspace }}/node_modules
+        run: node scripts/assert-rls.mjs

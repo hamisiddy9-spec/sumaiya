@@ -1,0 +1,16 @@
+{
+ "file": "cv-huge.pdf",
+ "bytes": 27001436,
+ "terminal": null,
+ "events": [
+  {
+   "at": 1121,
+   "chip": true,
+   "err": null
+  }
+ ],
+ "serverCalls": [
+  "https://sumaiya.app/api/tools/extract-text"
+ ],
+ "ms": 177287
+}
