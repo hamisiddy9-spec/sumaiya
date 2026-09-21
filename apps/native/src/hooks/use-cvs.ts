@@ -4,6 +4,7 @@ import type { CV, SyncQueueItem } from "@sumaiya/types";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { dedupe } from "../lib/cv-dedupe";
+import { ownerIdFor } from "../lib/local-owner";
 import { classifyCvError, type CvErrorKind } from "../lib/cv-fetch-error";
 import { useAuthContext } from "../contexts/auth-context";
 
@@ -35,12 +36,24 @@ export function queueItemIdsToDropOnDelete(queue: SyncQueueItem[], deletedCvId: 
 
 export function useCvs() {
   const { user } = useAuthContext();
-  // Scope the on-device cache to the actual signed-in account. This used to be
-  // the constant "me" — fine for a single-account phone, but on a shared
-  // device (or this QA phone, signed in/out across 3 test accounts) every
-  // account read and wrote the same cache rows, so one account's CVs could
-  // show up under another's session.
-  const LOCAL_USER = user?.id ?? "signed-out";
+  // Scope the on-device cache to the actual owner of the CVs: the signed-in
+  // account, or the guest bucket when there is no account (GUEST_OWNER_ID,
+  // lib/local-owner.ts). This used to be the constant "me" — fine for a
+  // single-account phone, but on a shared device (or this QA phone, signed
+  // in/out across 3 test accounts) every account read and wrote the same cache
+  // rows, so one account's CVs could show up under another's session.
+  //
+  // The owner id is NOT invented here: `ownerIdFor` is the same function the CV
+  // editor writes with, so a CV the user just saved is a CV this hook can find.
+  // Those two used to disagree ("me" vs the account id), which is why a CV
+  // saved offline could sit in the database and never appear in the list.
+  const LOCAL_USER = ownerIdFor(user);
+  // A guest has no server copy to fold in and no token to ask with — the list
+  // is the device, full stop. Skipping the call is what makes the CV list
+  // genuinely usable with no network and no account: no request is issued, so
+  // nothing can hang, 401 or report a connection error about work that is
+  // sitting safely on the phone.
+  const isGuest = !user;
   const [cvs, setCvs] = useState<CV[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +102,20 @@ export function useCvs() {
     loadInFlight.current = true;
     setLoading(true);
     await readLocal(); // show what's on the device right away
+    if (isGuest) {
+      // Nothing to fetch: a guest's CVs are the ones on this phone. Clearing
+      // any error state matters here — the guest path must never report a
+      // "couldn't reach the server" problem (or call the list empty) about a
+      // device-only list that is complete and correct.
+      loadInFlight.current = false;
+      if (mounted.current) {
+        setLoading(false);
+        setError(null);
+        setErrorKind(null);
+        setStorageBlocked(false);
+      }
+      return;
+    }
     try {
       const server = await apiClient.listCVs();
       // Best-effort persist — but a storage failure must NEVER hide rows the
@@ -141,7 +168,7 @@ export function useCvs() {
       loadInFlight.current = false;
       if (mounted.current) setLoading(false);
     }
-  }, [readLocal, LOCAL_USER]);
+  }, [readLocal, LOCAL_USER, isGuest]);
 
   const deleteCV = useCallback(async (id: string) => {
     await offlineStorage.deleteCVOffline(id).catch(() => {});
@@ -163,8 +190,15 @@ export function useCvs() {
     try {
       // A synced CV has a server id (m_…) — delete it directly. A local-only
       // row is keyed by its id as clientId.
-      if (id.startsWith("m_")) await apiClient.deleteCV(id);
-      else await apiClient.deleteCVByClientId(id);
+      //
+      // A GUEST has neither: their CV never left the phone, so there is nothing
+      // to delete on a server, and queueing an unauthenticated delete would
+      // fire against whatever account signs in next. Local delete is the whole
+      // operation.
+      if (!isGuest) {
+        if (id.startsWith("m_")) await apiClient.deleteCV(id);
+        else await apiClient.deleteCVByClientId(id);
+      }
     } catch {
       // Offline / transient — queue it so it isn't resurrected on next sync.
       await offlineStorage
@@ -192,24 +226,31 @@ export function useCvs() {
       } as CV;
       await offlineStorage.saveCVOffline(merged).catch(() => {});
       await readLocal();
-      try {
-        if (id.startsWith("m_")) await apiClient.updateCV(id, patch);
-        else await apiClient.createCV({ ...merged, clientId: id });
-      } catch {
-        await offlineStorage
-          .addToSyncQueue({
-            id: `update_cv-${id}-${Date.now()}`,
-            cvId: id,
-            operation: "update_cv",
-            data: merged,
-            timestamp: Date.now(),
-            retries: 0,
-          } as never)
-          .catch(() => {});
+      // Guest: saved on the device and that is the finished state of a save.
+      // No request, no queue item — an unauthenticated push would fail on every
+      // retry and fill the sync queue with work that never had an account to
+      // belong to. The claim on sign-in (lib/local-owner.ts) is what uploads
+      // these later.
+      if (!isGuest) {
+        try {
+          if (id.startsWith("m_")) await apiClient.updateCV(id, patch);
+          else await apiClient.createCV({ ...merged, clientId: id });
+        } catch {
+          await offlineStorage
+            .addToSyncQueue({
+              id: `update_cv-${id}-${Date.now()}`,
+              cvId: id,
+              operation: "update_cv",
+              data: merged,
+              timestamp: Date.now(),
+              retries: 0,
+            } as never)
+            .catch(() => {});
+        }
       }
       return merged;
     },
-    [cvs, readLocal, LOCAL_USER],
+    [cvs, readLocal, LOCAL_USER, isGuest],
   );
 
   useEffect(() => {

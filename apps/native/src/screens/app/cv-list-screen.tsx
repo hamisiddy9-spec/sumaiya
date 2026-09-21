@@ -4,6 +4,9 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
+import { openAuth } from "../../navigation/root-nav";
+import { GUEST_KEEP_CARD, guestText } from "../../lib/guest-invite";
+import { offerGuestAccountOnce } from "../../components/account-gate";
 import { cvErrorCopy } from "../../lib/cv-fetch-error";
 import {
   Button,
@@ -30,7 +33,12 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { cvs, loading, error, errorKind, storageBlocked, deleteCV, loadCVs } = useCvs();
-  const { signOut } = useAuthContext();
+  const { user, signOut } = useAuthContext();
+  // GUEST MODE: this list is the device's own CVs, and everything on this screen
+  // — build, edit, preview, download, delete — works with no account and no
+  // network. The account only ever appears here as an offer, after there is
+  // something worth keeping.
+  const isGuest = !user;
   // Same truth as Home: the reason decides the message AND the action.
   const cvError = cvErrorCopy(errorKind ?? "unknown");
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -68,6 +76,8 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         // No SAF here — the system share sheet is this platform's own way to
         // save a file, so it is still the honest action to take.
         await shareCV(cv, uri);
+        // The file has left the app: a deliverable, so the one offer stands.
+        void offerGuestAccountOnce({ isGuest });
         return;
       }
       dialog.alert(
@@ -81,6 +91,11 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           { text: t("Done", "Sawa"), style: "cancel" },
         ],
       );
+      // THE DOWNLOAD MOMENT — the guest has a real PDF in their hand. This is
+      // the one place the account is offered (dialog layer queues it behind the
+      // confirmation above, so it appears once that is dismissed), it says what
+      // the account EARNS, and it happens at most once ever.
+      void offerGuestAccountOnce({ isGuest });
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
@@ -156,20 +171,48 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
             title={t(cvError.title.en, cvError.title.sw)}
             body={t(cvError.body.en, cvError.body.sw)}
             actionLabel={t(cvError.action.en, cvError.action.sw)}
-            onAction={cvError.actionKind === "signin" ? () => void signOut() : onRefresh}
+            onAction={
+              cvError.actionKind === "signin"
+                ? // A refused session is only fixable by someone who has one. A
+                  // guest never did, so offer the account instead of a sign-out.
+                  isGuest
+                  ? () => openAuth()
+                  : () => void signOut()
+                : onRefresh
+            }
           />
         </View>
       ) : cvs.length === 0 ? (
         <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
-          <EmptyState
-            icon="file-text"
-            title={t("You have no CVs yet", "Huna CV bado")}
-            body={t("No CVs yet, draft or completed. Talk to me and I'll build one with you, or upload a CV you already have to start.", "Huna CV, rasimu wala iliyokamilika. Ongea nami nikutengenezee moja, au pakia CV uliyonayo ili kuanza.")}
-            actionLabel={t("Talk to me", "Ongea nami")}
-            onAction={() => navigation.navigate("SumaiyaTab")}
-            secondaryLabel={t("Upload a CV", "Pakia CV")}
-            onSecondary={() => navigation.navigate("ImportTab")}
-          />
+          {isGuest ? (
+            // A stranger's first screen. No account anywhere in it, and no
+            // claim that anything is missing: the builder is one tap away and
+            // the download works offline.
+            <EmptyState
+              icon="file-text"
+              title={t("Build your CV — no account needed", "Jenga CV yako — hakuna akaunti inayohitajika")}
+              body={t(
+                "Your CV is written and saved on this phone, and you can download it as a PDF. Nothing leaves your phone unless you choose.",
+                "CV yako inaandikwa na kuhifadhiwa kwenye simu hii, na unaweza kuipakua kama PDF. Hakuna kinachotoka kwenye simu yako bila wewe kuamua.",
+              )}
+              actionLabel={t("Build your CV", "Jenga CV yako")}
+              onAction={() =>
+                navigation.navigate("CvEditor", { nonce: String(Date.now()) })
+              }
+              secondaryLabel={t("Upload a CV", "Pakia CV")}
+              onSecondary={() => navigation.navigate("ImportTab")}
+            />
+          ) : (
+            <EmptyState
+              icon="file-text"
+              title={t("You have no CVs yet", "Huna CV bado")}
+              body={t("No CVs yet, draft or completed. Talk to me and I'll build one with you, or upload a CV you already have to start.", "Huna CV, rasimu wala iliyokamilika. Ongea nami nikutengenezee moja, au pakia CV uliyonayo ili kuanza.")}
+              actionLabel={t("Talk to me", "Ongea nami")}
+              onAction={() => navigation.navigate("SumaiyaTab")}
+              secondaryLabel={t("Upload a CV", "Pakia CV")}
+              onSecondary={() => navigation.navigate("ImportTab")}
+            />
+          )}
         </View>
       ) : (
         cvs
@@ -245,6 +288,40 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
             </Stagger>
           ))
       )}
+
+      {/* THE QUIET OFFER — a guest who already has a CV to lose gets one
+          standing row saying what an account is for. It is not a prompt: it
+          never interrupts, and the interruption (after a save or a download)
+          still happens at most once ever. It disappears the moment they sign
+          in, because there is nothing left to offer. */}
+      {isGuest && cvs.length > 0 ? (
+        <Card
+          onPress={() => openAuth()}
+          accessibilityLabel={t(GUEST_KEEP_CARD.cta.en, GUEST_KEEP_CARD.cta.sw)}
+          style={{ marginTop: 4, flexDirection: "row", alignItems: "center", gap: 12 }}
+        >
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              backgroundColor: c.accent + "14",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="user-plus" size={18} color={c.accent} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: c.text, fontSize: 13.5, lineHeight: 19 }}>
+              {guestText(GUEST_KEEP_CARD.body, lang)}
+            </Text>
+            <Text style={{ color: c.accent, fontSize: 13, fontWeight: "800", marginTop: 6 }}>
+              {guestText(GUEST_KEEP_CARD.cta, lang)}
+            </Text>
+          </View>
+        </Card>
+      ) : null}
     </Screen>
   );
 }

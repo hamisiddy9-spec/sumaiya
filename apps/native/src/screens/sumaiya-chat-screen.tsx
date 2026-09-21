@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
+import { useAuthContext } from "../contexts/auth-context";
+import { ownerIdFor } from "../lib/local-owner";
 import { useCvs } from "../hooks/use-cvs";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { useSumaiyaChat } from "../hooks/use-sumaiya-chat";
@@ -77,6 +79,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
     dismissError,
   } = useSumaiyaChat();
   const { cvs } = useCvs();
+  const { user } = useAuthContext();
   const { queueOperation } = useOfflineSync();
   const { lang, t } = useLang();
   const [input, setInput] = useState("");
@@ -324,7 +327,11 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
     const now = new Date();
     const cv = {
       id: `cv-${Date.now()}`,
-      userId: "me",
+      // The SAME owner id the CV list and the editor use (lib/local-owner.ts).
+      // This was the constant "me", which is why a CV built here was written to
+      // the device and then missing from "CV zako" until a server round-trip
+      // re-cached it — and missing from this screen's own CV picker too.
+      userId: ownerIdFor(user),
       templateId: template,
       title: cvData.personalInfo?.fullName || "CV",
       data: cvData,

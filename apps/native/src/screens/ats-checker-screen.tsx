@@ -5,6 +5,7 @@ import type { CV, CVData } from "@sumaiya/types";
 import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { useCvs } from "../hooks/use-cvs";
 import { useAuthContext } from "../contexts/auth-context";
+import { offerAccountForGate } from "../components/account-gate";
 import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
 import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
@@ -39,7 +40,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const { t, lang } = useLang();
   const sw = lang === "sw";
   const { cvs, loading, error, errorKind, loadCVs } = useCvs();
-  const { signOut } = useAuthContext();
+  const { user, signOut } = useAuthContext();
   // Same truth as Home: the reason decides the message AND the action.
   const cvError = cvErrorCopy(errorKind ?? "unknown");
   const { premium } = useEntitlements();
@@ -74,6 +75,15 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   }, [picked, jd]);
 
   const runVerdict = async () => {
+    // GUEST: the written review is generated on the server, for an account, so
+    // it cannot be run without one — and the old order here would have shown
+    // the PREMIUM paywall to a guest, which is both a dead end and the wrong
+    // ask. The score, the checks and the line findings above are all computed
+    // on the device (lib/ats.ts) and stay exactly as they are.
+    if (!user) {
+      offerAccountForGate("atsVerdict");
+      return;
+    }
     if (!premium) { setShowPremium(true); return; }
     if (!picked || !analysis || verdictBusy) return;
     setVerdictBusy(true);

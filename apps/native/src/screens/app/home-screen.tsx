@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import type { JobRecommendation, MobileSignal } from "@sumaiya/api-client";
 import { signalAction, signalText } from "../../lib/signal-actions";
 import { apiClient } from "../../lib/api-client";
 import { useCvs } from "../../hooks/use-cvs";
 import { useAuthContext } from "../../contexts/auth-context";
+import { openAuth } from "../../navigation/root-nav";
 import { useLang } from "../../lib/i18n";
 import { GUIDES } from "../../lib/guides";
 import { relativeDate } from "../../lib/relative-date";
@@ -46,6 +46,12 @@ const SIDE = 20;
 export function HomeScreen({ navigation }: HomeScreenProps) {
   const c = useThemeColors();
   const { user, signOut } = useAuthContext();
+  // GUEST MODE: no account, no server calls. This screen is the guest's
+  // dashboard — the CV count and the CVs below are read from the device (see
+  // hooks/use-cvs), and every request that needs a signed-in token is skipped
+  // rather than fired and refused. Nothing here waits on the network for a
+  // guest, which is the whole promise for a phone with no data.
+  const isGuest = !user;
   const { t, lang } = useLang();
   const { cvs, loading, error, errorKind, loadCVs } = useCvs();
   // What to say when the list failed — decided by WHY it failed (a refused
@@ -105,20 +111,22 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   // Top job matches for the profile — best-effort, silent on failure.
   const [jobRecs, setJobRecs] = useState<JobRecommendation[]>([]);
   useEffect(() => {
+    if (isGuest) return;
     let alive = true;
     apiClient.getJobRecommendations(3).then((r) => { if (alive) setJobRecs(r); }).catch(() => {});
     return () => { alive = false; };
-  }, []);
+  }, [isGuest]);
 
   // Proactive nudges from Sumaiya (deterministic signal engine, server-side).
   // Refreshed every time the tab regains focus so it reflects the latest state.
   const [signals, setSignals] = useState<MobileSignal[]>([]);
   useFocusEffect(
     React.useCallback(() => {
+      if (isGuest) return;
       let alive = true;
       apiClient.getSignals().then((s) => { if (alive) setSignals(s); }).catch(() => {});
       return () => { alive = false; };
-    }, []),
+    }, [isGuest]),
   );
   const topSignal = signals[0] ?? null;
 
@@ -270,6 +278,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
+  // A GUEST gets the three tiles that actually work for them. Job matches,
+  // applications and cover letters are all written on the server against an
+  // account, so showing them here would be four doors into an invitation —
+  // the wall this whole change removes. What stays: the assistant (the
+  // product's own face, invited honestly when tapped), the CV check, which
+  // scores on the device from the shared rules (lib/ats.ts), and TemplateHub.
+  const guestQuickActions = quickActions.filter((a) =>
+    a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid",
+  );
+  const shownQuickActions = isGuest ? guestQuickActions : quickActions;
+
   // NEW vs RETURNING for the greeting. `nextMoves === undefined` means the
   // profile has not loaded yet — treated as "new" on purpose: saying "Karibu"
   // a beat early is harmless, telling a first-timer "welcome back" is not.
@@ -282,7 +301,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
       {/* Rotating hint — one proactive suggestion at a time. The shuffle control
           cycles to the next; tapping the card acts on the current one. */}
       {hint ? (
-        <Animated.View entering={FadeInDown.duration(320).delay(40)}>
+        <Reveal delayMs={40}>
           <Card
             onPress={hint.onPress}
             accessibilityLabel={hint.title}
@@ -339,11 +358,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               </View>
             </View>
           </Card>
-        </Animated.View>
+        </Reveal>
       ) : null}
 
       {/* Primary row — two equal tiles: the count, and the make-a-CV CTA. */}
-      <Animated.View entering={FadeInDown.duration(320).delay(60)} style={{ flexDirection: "row", gap: GUTTER }}>
+      <Reveal delayMs={60} style={{ flexDirection: "row", gap: GUTTER }}>
         <Card
           onPress={() => navigation.navigate("CVsTab")}
           accessibilityLabel={t("View my CVs", "Ona CV zako")}
@@ -375,13 +394,13 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             </Text>
           </View>
         </Card>
-      </Animated.View>
+      </Reveal>
 
       {/* Quick actions — a 2-column grid that fills the row exactly. */}
-      <Animated.View entering={FadeInDown.duration(320).delay(120)}>
+      <Reveal delayMs={120}>
         <SectionHeader title={t("Quick actions", "Shughuli za haraka")} />
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: GUTTER }}>
-          {quickActions.map((a, i) => (
+          {shownQuickActions.map((a, i) => (
             <Stagger key={a.label} index={i} step={45}>
               <Card onPress={a.onPress} style={{ width: COL_W, alignItems: "flex-start", gap: 10 }}>
                 <View
@@ -405,11 +424,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             </Stagger>
           ))}
         </View>
-      </Animated.View>
+      </Reveal>
 
       {/* Jobs matched to the profile */}
       {jobRecs.length > 0 ? (
-        <Animated.View entering={FadeInDown.duration(320).delay(170)}>
+        <Reveal delayMs={170}>
           <SectionHeader
             title={t("New openings", "Nafasi mpya za kazi")}
             actionLabel={t("See all", "Ona zote")}
@@ -439,11 +458,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               );
             })}
           </View>
-        </Animated.View>
+        </Reveal>
       ) : null}
 
       {/* Recent CVs */}
-      <Animated.View entering={FadeInDown.duration(320).delay(180)}>
+      <Reveal delayMs={180}>
         <SectionHeader
           title={t("Recent CVs", "CV za hivi karibuni")}
           actionLabel={cvs.length > 3 ? t("View all", "Ona zote") : undefined}
@@ -492,7 +511,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
               </Text>
             </View>
             <Pressable
-              onPress={cvError?.actionKind === "signin" ? () => void signOut() : onRefresh}
+              onPress={
+                cvError?.actionKind === "signin"
+                  ? // A refused session: for someone with an account that means
+                    // sign in again. For a guest there is no session to fix —
+                    // they never had one — so the honest action is the
+                    // invitation, not a sign-out.
+                    isGuest
+                    ? () => openAuth()
+                    : () => void signOut()
+                  : onRefresh
+              }
               accessibilityRole="button"
               accessibilityLabel={
                 cvError ? t(cvError.action.en, cvError.action.sw) : t("Try again", "Jaribu tena")
@@ -560,7 +589,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             ))}
           </View>
         )}
-      </Animated.View>
+      </Reveal>
 
       {/* The full gallery: searchable, filterable, virtualised. */}
       <TemplateGallery

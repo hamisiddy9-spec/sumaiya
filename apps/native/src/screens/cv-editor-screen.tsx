@@ -5,6 +5,9 @@ import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { useIsFocused } from "@react-navigation/native";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
+import { useAuthContext } from "../contexts/auth-context";
+import { ownerIdFor } from "../lib/local-owner";
+import { offerGuestAccountOnce } from "../components/account-gate";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
@@ -77,7 +80,17 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { templateId, cvId: initialCvId, initialData } = route.params || {};
-  const { status, queueOperation } = useOfflineSync();
+  const { user } = useAuthContext();
+  // GUEST MODE: an account is not required to build or export a CV here. Every
+  // write below is to the device; the network is only involved for someone who
+  // has an account to sync to. The owner id is what makes the CV the user just
+  // saved visible to the CV list (which reads the same id) — and what makes a
+  // guest's CV claimable when they do sign in (lib/local-owner.ts).
+  const owner = ownerIdFor(user);
+  const isGuest = !user;
+  // Never run the upload loop without an account: a queued op would retry
+  // unauthenticated forever and count against the "N to sync" pill.
+  const { status, queueOperation } = useOfflineSync({ enabled: !isGuest });
   const insets = useSafeAreaInsets();
   const [showPreview, setShowPreview] = useState(false);
   const [accent, setAccent] = useState("#DA4A1C");
@@ -316,7 +329,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     setSaving(true);
     const cv: CV = {
       id: cvIdRef.current,
-      userId: "me",
+      userId: owner,
       templateId: template,
       title: data.personalInfo.fullName || "My CV",
       data: data as CVData,
@@ -355,9 +368,19 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     try {
       // Write to the local cache first so the list/home reflect it immediately
       // and it survives being offline, then queue the push to the server.
-      await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
+      //
+      // A GUEST stops at the cache: there is no account to push to. `storedLocally`
+      // above already decided whether the CV is real, so this is only about the
+      // upload — and skipping it is what keeps "save" working with the phone in
+      // aeroplane mode and no account at all. The claim on sign-in uploads it
+      // (lib/local-owner.ts).
+      if (!isGuest) await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
       haptics.success();
       setDirty(false);
+      // THE DELIVERABLE MOMENT. The CV exists and is safe on the phone; this is
+      // the first point at which an account is worth offering, and the offer
+      // (once ever) says what it earns rather than asking for a sign-in.
+      if (storedLocally) void offerGuestAccountOnce({ isGuest });
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.queue", cvId: cv.id });
       if (storedLocally) {
@@ -401,7 +424,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     try {
       const cv: CV = {
         id: cvIdRef.current,
-        userId: "me",
+        userId: owner,
         templateId: template,
         title: data.personalInfo?.fullName || "My CV",
         data: data as CVData,
@@ -437,6 +460,10 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       if (saved.status === "unsupported") {
         // No SAF (iOS, or an unusual ROM): the share sheet IS the system save path.
         await shareCV(cv, uri);
+        // The document has left the app — a deliverable either way, so the one
+        // offer still belongs here (queued after this screen, never on top of
+        // the share sheet).
+        void offerGuestAccountOnce({ isGuest });
         return;
       }
       dialog.alert(
@@ -450,6 +477,11 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           { text: t("Done", "Sawa"), style: "cancel" },
         ],
       );
+      // THE DOWNLOAD MOMENT. Pushed after the confirmation above, so the dialog
+      // layer shows it once that one is dismissed — a guest who has just taken
+      // the file away is the person an account is worth offering to. Once ever
+      // (lib/guest-invite.ts), and never for someone who already has an account.
+      void offerGuestAccountOnce({ isGuest });
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
@@ -564,7 +596,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
             <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("Back to editing", "Rudi kuhariri")}</Text>
           </Pressable>
           <CvPreviewCard
-            cv={{ id: cvIdRef.current, userId: "me", templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
+            cv={{ id: cvIdRef.current, userId: owner, templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
             initialTemplate={template}
             initialColor={accent}
             onTemplateChange={(id) => { setTemplate(id); setDirty(true); }}

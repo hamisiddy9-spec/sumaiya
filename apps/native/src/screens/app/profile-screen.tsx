@@ -5,6 +5,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
+import { openAuth } from "../../navigation/root-nav";
 import { isPushAvailable, registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
@@ -35,6 +36,12 @@ function initials(name?: string | null, email?: string | null): string {
 export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const c = useThemeColors();
   const { user, signOut } = useAuthContext();
+  // GUEST MODE: Profile is open to a guest, because language, dark mode,
+  // privacy and support have nothing to do with an account. What changes is
+  // the ACCOUNT group — there is no session to sign out of and no account to
+  // delete, so it offers to create one instead of offering controls that
+  // cannot do anything.
+  const isGuest = !user;
   const { premium } = useEntitlements();
   const [showPremium, setShowPremium] = useState(false);
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -161,11 +168,31 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
     // now deliberately keep retrying forever, since it never made it to the
     // server) would be silently discarded, contradicting the dialog's own
     // promise. Check first and say so plainly if that's actually the case.
+    //
+    // FOR A GUEST the promise needs the opposite wording entirely: there is no
+    // cloud copy of anything, so "your cloud copies are safe" would be the
+    // most expensive sentence in the app — it would invite someone to delete
+    // the only copy of their CV.
     let pending = 0;
     try {
       pending = (await offlineStorage.getSyncQueue()).length;
     } catch {
       /* if this fails, fall through with the normal (0-pending) dialog */
+    }
+
+    if (isGuest) {
+      dialog.alert(
+        t("Delete the CVs on this phone?", "Ufute CV zilizo kwenye simu hii?"),
+        t(
+          "These CVs have no account behind them, so this device holds the only copy. Deleting them here deletes them for good. Download the PDFs first if you want to keep them.",
+          "CV hizi hazina akaunti nyuma yake, hivyo kifaa hiki kina nakala pekee. Kufuta hapa kunafuta kabisa. Pakua PDF kwanza ikiwa unataka kuzihifadhi.",
+        ),
+        [
+          { text: t("Cancel", "Ghairi"), style: "cancel" },
+          { text: t("Delete them", "Zifute"), style: "destructive", onPress: () => void doClearCache() },
+        ],
+      );
+      return;
     }
 
     if (pending > 0) {
@@ -306,6 +333,21 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
                   borderColor: c.border,
                 }}
               />
+            ) : isGuest ? (
+              // No account, so no initial to show: the circle is the way to the
+              // photo, and today it says so.
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.accent + "14",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="user-plus" size={22} color={c.accent} />
+              </View>
             ) : (
               <View
                 style={{
@@ -325,10 +367,14 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-              {user?.name || user?.email?.split("@")[0] || t("Your account", "Akaunti yako")}
+              {user?.name || user?.email?.split("@")[0] || t("No account yet", "Bado huna akaunti")}
             </Text>
-            <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={1}>
-              {user?.email}
+            <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
+              {user?.email ||
+                t(
+                  "Your CVs are saved on this phone. A free account keeps them for you.",
+                  "CV zako zimehifadhiwa kwenye simu hii. Akaunti ya bure inazihifadhi kwa ajili yako.",
+                )}
             </Text>
           </View>
         </View>
@@ -405,16 +451,21 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             icon="bell"
             label={t("Push notifications", "Arifa za simu")}
             sublabel={
-              pushReady
-                ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
-                : t(
-                    "Not available yet — this version can't send alerts to your phone.",
-                    "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
+              isGuest
+                ? t(
+                    "Job matches and sync updates come with a free account.",
+                    "Ajira zinazokufaa na taarifa za usawazishaji huja na akaunti ya bure.",
                   )
+                : pushReady
+                  ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
+                  : t(
+                      "Not available yet — this version can't send alerts to your phone.",
+                      "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
+                    )
             }
-            value={pushReady ? undefined : t("Not yet", "Bado")}
-            toggle={pushReady ? { value: notifications, onValueChange: setNotif } : undefined}
-            disabled={!pushReady}
+            value={pushReady && !isGuest ? undefined : t("Not yet", "Bado")}
+            toggle={pushReady && !isGuest ? { value: notifications, onValueChange: setNotif } : undefined}
+            disabled={!pushReady || isGuest}
           />
         </View>
 
@@ -455,8 +506,25 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         {/* Account */}
         <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
         <View style={groupBox}>
+          {/* A guest has no session to end and no account to delete, so the
+              group offers the one account action that is real for them, first,
+              and says what it earns. */}
+          {isGuest ? (
+            <ListRow
+              first
+              icon="user-plus"
+              iconColor={c.accent}
+              label={t("Create a free account", "Fungua akaunti bure")}
+              sublabel={t(
+                "Keep these CVs safe and open them on another phone",
+                "Hifadhi CV zako salama na uzifungue kwenye simu nyingine",
+              )}
+              onPress={() => openAuth()}
+              chevron
+            />
+          ) : null}
           <ListRow
-            first
+            first={!isGuest}
             icon="trash-2"
             iconColor={c.warning}
             label={t("Clear offline data", "Futa data iliyohifadhiwa")}
@@ -478,14 +546,16 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               between signing out and handing the phone over signed in, so it
               also moved above the fold and the shadow button at the bottom was
               removed rather than duplicated. */}
-          <ListRow
-            icon="log-out"
-            label={t("Sign out", "Toka")}
-            sublabel={t("You can sign back in any time", "Unaweza kuingia tena wakati wowote")}
-            disabled={busy === "signout"}
-            onPress={confirmSignOut}
-            chevron
-          />
+          {!isGuest ? (
+            <ListRow
+              icon="log-out"
+              label={t("Sign out", "Toka")}
+              sublabel={t("You can sign back in any time", "Unaweza kuingia tena wakati wowote")}
+              disabled={busy === "signout"}
+              onPress={confirmSignOut}
+              chevron
+            />
+          ) : null}
           <ListRow last icon="alert-circle" label={t("Version", "Toleo")} value={version} />
         </View>
 
@@ -530,18 +600,25 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         </View>
 
         {/* Danger */}
-        <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
-        <View style={groupBox}>
-          <ListRow
-            first
-            last
-            icon="trash-2"
-            label={t("Delete account", "Futa akaunti")}
-            destructive
-            disabled={busy === "delete"}
-            onPress={confirmDelete}
-          />
-        </View>
+        {/* A guest has no account to delete — and apiClient.deleteAccount()
+            without a session is a request that can only fail, so the row is
+            hidden rather than offered as a dead end. */}
+        {!isGuest ? (
+          <>
+            <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
+            <View style={groupBox}>
+              <ListRow
+                first
+                last
+                icon="trash-2"
+                label={t("Delete account", "Futa akaunti")}
+                destructive
+                disabled={busy === "delete"}
+                onPress={confirmDelete}
+              />
+            </View>
+          </>
+        ) : null}
 
         {/* The shadow "Toka" button that used to sit here is gone: sign-out is
             a row in Account now, above the fold, with the same confirm dialog. */}
