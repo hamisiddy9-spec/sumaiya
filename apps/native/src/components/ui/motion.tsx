@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Easing, useReducedMotion } from "react-native-reanimated";
-import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
 import {
   MOTION,
   MAX_STAGGER_MS,
@@ -46,13 +46,15 @@ export const EASE = {
 export const useMotionReduced = useReducedMotion;
 
 /**
- * Staggered entrance for a list of children — each item fades/slides up a beat
- * after the last. Wrap mapped rows: children.map((row, i) => <Stagger index={i}>…)
+ * Staggered entrance for a list of children — each item fades/rises a beat after
+ * the last. Wrap mapped rows: children.map((row, i) => <Stagger index={i}>…)
  *
- * Uses a *timed* curve rather than a spring: the rows should settle, not bounce,
- * and a closed-form timing curve is cheaper on a low-end GPU than a spring
- * integrator running per row. The delay is capped at `MAX_STAGGER_MS`, so a long
- * list is fully delivered within one beat.
+ * Drives the rise with a shared value (via `Reveal`), not an `entering` layout
+ * animation. A layout-animation intercept on a wrapper has already broken
+ * interaction — and crashed Fabric mounting (`addViewAt … index N, count N-1`) —
+ * once in this app (see `Reveal` and `empty-state.tsx`). Shared values have no
+ * mounting-layer involvement, so rows added to or removed from a list (e.g. the
+ * home screen's recent CVs) cannot skew Fabric's child indices.
  */
 export function Stagger({
   index,
@@ -70,14 +72,9 @@ export function Stagger({
   const reduce = useMotionReduced();
   const delay = staggerDelayMs(index, { reduceMotion: reduce, step, base });
   return (
-    <Animated.View
-      entering={FadeInDown.duration(enterDurationMs(reduce))
-        .easing(EASE.out)
-        .delay(delay)
-        .withInitialValues({ transform: [{ translateY: distance }], opacity: 0 })}
-    >
+    <Reveal delayMs={delay} distance={distance}>
       {children}
-    </Animated.View>
+    </Reveal>
   );
 }
 
