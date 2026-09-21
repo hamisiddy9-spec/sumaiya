@@ -48,6 +48,15 @@ export function PdfToolsScreen() {
       const next = res.assets
         .filter((a) => a.base64)
         .map((a) => ({ uri: a.uri, base64: a.base64! }));
+      // expo-image-picker's `base64` field is nullable by contract even when
+      // `base64: true` is requested — seen in practice with multi-select on
+      // Android. If every asset came back without it, the picker didn't fail,
+      // it just gave us nothing usable: say so instead of a silent no-op.
+      if (next.length === 0) {
+        haptics.error();
+        dialog.alert(t("Couldn't add that photo", "Imeshindwa kuongeza picha hiyo"), t("Try again.", "Jaribu tena."));
+        return;
+      }
       setPics((p) => [...p, ...next].slice(0, 30));
     } catch {
       haptics.error();

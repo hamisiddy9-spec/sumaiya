@@ -32,20 +32,21 @@ export async function consumePendingOnboardingPhoto(): Promise<string | null> {
  * both pickAndCompressPhoto() and the first-run wizard's Google-avatar
  * prefill, so every source produces the exact same shape.
  *
- * Returns null if the manipulator failed (including a network failure
- * fetching a remote URI).
+ * Throws if the manipulator fails (including a network failure fetching a
+ * remote URI) — callers that already show an error on failure (the CV
+ * editor's photo control, the first-run wizard's photo step) rely on this to
+ * tell a real failure apart from a user cancelling the picker, which returns
+ * null instead. Callers that treat a missing photo as a non-issue (the
+ * Google-avatar prefill) must catch this themselves.
  */
-export async function compressPhotoUri(uri: string): Promise<string | null> {
-  try {
-    const out = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 400 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true },
-    );
-    return out.base64 ? `data:image/jpeg;base64,${out.base64}` : null;
-  } catch {
-    return null;
-  }
+export async function compressPhotoUri(uri: string): Promise<string> {
+  const out = await ImageManipulator.manipulateAsync(
+    uri,
+    [{ resize: { width: 400 } }],
+    { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true },
+  );
+  if (!out.base64) throw new Error("Image manipulator returned no base64 data");
+  return `data:image/jpeg;base64,${out.base64}`;
 }
 
 /**
@@ -54,7 +55,8 @@ export async function compressPhotoUri(uri: string): Promise<string | null> {
  * first-run wizard's optional photo step, so both produce the exact same
  * shape — no separate "onboarding photo" format to reconcile later.
  *
- * Returns null if the user cancelled or the picker/manipulator failed.
+ * Returns null only if the user cancelled the picker. Throws if the
+ * manipulator fails, so callers' existing try/catch can tell the two apart.
  */
 export async function pickAndCompressPhoto(): Promise<string | null> {
   const res = await ImagePicker.launchImageLibraryAsync({

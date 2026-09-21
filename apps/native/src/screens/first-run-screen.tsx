@@ -134,9 +134,11 @@ export function FirstRunScreen({ onDone }: Props) {
   useEffect(() => {
     if (!user?.photoUrl || photo) return;
     let cancelled = false;
-    compressPhotoUri(user.photoUrl).then((p) => {
-      if (!cancelled && p) setPhoto(p);
-    });
+    compressPhotoUri(user.photoUrl)
+      .then((p) => {
+        if (!cancelled) setPhoto(p);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };

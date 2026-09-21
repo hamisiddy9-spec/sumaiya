@@ -83,6 +83,21 @@ export function templateMeta(id: string): CvTemplateMeta | undefined {
   return ALL_TEMPLATES.find((tpl) => tpl.id === id);
 }
 
+/**
+ * True if cvToHtml() can actually draw this id — an engine renderer exists,
+ * or it's one of the six hand-written legacy templates. Mirrors the exact
+ * fallback check inside cvToHtml(). A known id (isKnownTemplate) can still
+ * fail this: the "bespoke" ids listed in BESPOKE_IDS are real, pickable
+ * templates with no renderer yet, and cvToHtml silently substitutes
+ * "classic" for them. Pickers/previews use this to warn before that swap.
+ */
+export function isRenderable(id: string | undefined | null): boolean {
+  if (!id) return false;
+  const engineTemplate = TEMPLATE_REGISTRY[id];
+  if (engineTemplate && hasRenderer(engineTemplate)) return true;
+  return CV_TEMPLATES.some((tpl) => tpl.id === id);
+}
+
 export interface CvHtmlOptions {
   accent?: string;
   lang?: "en" | "sw";
