@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.22",
+  version: "1.6.26",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -52,20 +52,18 @@ export const APP_RELEASE: AppReleaseManifest = {
   // every in-app update link 404'd at the DNS layer.
   url: "https://sumaiya.app/downloads/sumaiya.apk",
   notes: {
-    // 1.6.12 and 1.6.13 were built but never announced, so this is the first
-    // bump since 1.6.11 that users will actually see. It is a normal update —
-    // same signing key throughout, no "remove the old app first" dance.
+    // What is true of THIS build that was not true of the one it replaces. These
+    // notes render inside the update modal, so they say what changed for the
+    // person reading them, not what changed in the repo.
     //
-    // What it says is the one thing true of every version before it: sign-in
-    // could not work. 1.6.11 and 1.6.12 shipped without the Supabase anon key
-    // in the bundle, so the email code was refused with "Invalid API key" and
-    // nobody could get in. Users who gave up should be told the cause was ours
-    // and that a retry is worth it now.
+    // 1.6.26's one line: a stranger can now finish. Before it, the account gate
+    // stood immediately after onboarding, so the whole product sat behind a
+    // sign-up for someone who had not yet seen it work.
     //
-    // Deliberately does not promise that the code will arrive: the mailer is
-    // configured on the Supabase side, so this build can accept the request
-    // while delivery is still being fixed. No "you're all set".
-    en: "Crash reporting is on — when something breaks in the app we now capture it and fix it fast. Your CVs and personal details are never sent, only the error.",
-    sw: "Ufuatiliaji wa hitilafu umeanza — app inapokwama sasa tunapata taarifa na kurekebisha haraka. CV zako na taarifa binafsi hazitumwi, hitilafu pekee.",
+    // Deliberately does not promise Premium arrives instantly: it is earned when
+    // a friend signs up and builds their first CV, which takes as long as the
+    // friend takes. No "you're all set".
+    en: "You can now build and download a CV before signing in — and the file is yours. The welcome, language and first steps are one smooth motion now, taps land where you aim, and Back closes what is open. Share it with someone job-hunting: inviting friends earns you Premium.",
+    sw: "Sasa unaweza kutengeneza na kupakua CV kabla ya kuingia — na faili ni lako. Kukaribishwa, kuchagua lugha na hatua za mwanzo ni mwendo mmoja sasa, miguso inafika unapolenga, na 'Back' inafunga kilichofunguliwa. Ishare na anayetafuta kazi: kualika marafiki kunakupatia Premium.",
   },
 };
