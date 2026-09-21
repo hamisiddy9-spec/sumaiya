@@ -1,0 +1,24 @@
+You are a senior brand and conversion designer. Look at the image above. It is the
+og:image (social share card, 1200x630) of a Tanzania-first mobile product called Sumaiya.
+This is the exact card a stranger sees when someone forwards the link into a WhatsApp
+group in Tanzania — arguably the single most important impression the product makes,
+because WhatsApp is where its audience shares things.
+
+Answer all of these, concisely but specifically:
+
+1. Transcribe every word in the image exactly.
+2. Who is this card FOR, and for whom is it clearly not? Judge from the pixels only.
+3. It contains no English at all, but the product also serves an English locale. What
+   breaks for an English reader?
+4. Judge the CALL TO ACTION. Does this card give a stranger any reason to tap, and any
+   idea what they will get for free? Name specifically what is missing.
+5. There is no device mockup, no example CV, no price, no country, no phone number, no
+   proof of any kind. Is that restraint or a wasted impression? Argue it.
+6. Rewrite what should appear on this card so that a 24-year-old in Mwanza who has never
+   paid for anything online would tap it. Give the Swahili line first, then the English.
+   The logo/wordmark is fixed and cannot change.
+7. The card says "kwa AI" (with AI) — a mechanism word. Judge whether that word earns its
+   place on this specific surface.
+
+Mark anything you are inferring as JUDGEMENT. Write in markdown. Be concise — under 900
+words — and finish every answer; do not stop mid-sentence.
