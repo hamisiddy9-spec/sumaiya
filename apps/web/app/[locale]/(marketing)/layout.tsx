@@ -3,6 +3,7 @@ import { LangProvider } from "@/lib/i18n/context";
 import type { Lang } from "@/lib/i18n/translations";
 import { MarketingAuthProvider } from "@/components/ui/marketing-auth-context";
 import { alternatesFor } from "@/lib/seo";
+import { CANONICAL_ORIGIN } from "@/lib/seo";
 
 // Language-aware — this layout wraps the homepage and all marketing pages, so its
 // title/description is what Google indexes for them. Swahili by default (the
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   // Absolute og/twitter image URL. Relative URLs in openGraph are resolved
   // against metadataBase, but we spell it out so the <meta> tags are complete
   // regardless of where the page is rendered (crawlers, link unfurlers, etc.).
-  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`;
+  const ogImage = `${CANONICAL_ORIGIN}/og-image.png`;
 
   return {
     title,
