@@ -1,7 +1,18 @@
 import { Resend } from "resend";
+import { CANONICAL_ORIGIN } from "@/lib/seo";
 
 const FROM = process.env.EMAIL_FROM ?? "Sumaiya <noreply@templatehub.pro>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app";
+
+/**
+ * Absolute, always — see CANONICAL_ORIGIN for the whole story.
+ *
+ * `NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"` resolves to "" when the variable is set to
+ * an empty string, and `??` does not fall back on "". That turned every link in these
+ * emails into a relative `/dashboard`, `/settings`, `/contact` — and a relative link in an
+ * HTML email is dead in every mail client, because there is no origin to resolve against.
+ */
+const APP_URL = CANONICAL_ORIGIN;
+
 
 /** Escape user-supplied text before embedding it in an HTML email. */
 function esc(s: string): string {
