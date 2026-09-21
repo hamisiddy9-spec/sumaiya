@@ -225,7 +225,7 @@ export function BusinessCardEditorClient({ initialDoc, accessToken, isPremium: i
       try { await fetch(`/api/documents/business-card/${initialDoc.id}/download`, { method: "POST" }); } catch {}
     } catch (err) {
       if (!(err instanceof DOMException && err.name === "AbortError")) {
-        setDownloadError(lang === "sw" ? "Imeshindwa kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
+        setDownloadError(lang === "sw" ? "Sikuweza kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
         setTimeout(() => setDownloadError(""), 5000);
       }
     } finally {
@@ -248,7 +248,7 @@ export function BusinessCardEditorClient({ initialDoc, accessToken, isPremium: i
       setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 3000);
     } catch (err) {
-      setDownloadError(err instanceof Error ? err.message : (lang === "sw" ? "Kupakua PDF kumeshindwa. Jaribu tena." : "PDF export failed. Try again."));
+      setDownloadError(err instanceof Error ? err.message : (lang === "sw" ? "Sikuweza kupakua PDF. Jaribu tena." : "PDF export failed. Try again."));
       setTimeout(() => setDownloadError(""), 5000);
     } finally {
       setIsDownloading(false);

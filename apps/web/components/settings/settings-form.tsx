@@ -97,7 +97,7 @@ const STRINGS = {
     analyticsOptOutDesc: "Saidia kuboresha bidhaa kwa takwimu za matumizi zisizojulikana (hazishirikiwi, hakuna taarifa za kibinafsi).",
     saveChanges: "Hifadhi Mabadiliko",
     updateSuccess: "Wasifu umesasishwa.",
-    updateError: "Imeshindwa kusasisha wasifu.",
+    updateError: "Sikuweza kusasisha wasifu.",
     somethingWentWrong: "Kuna hitilafu. Tafadhali jaribu tena.",
     dangerZone: "Eneo Hatari",
     dangerZoneDesc: "Ukifuta akaunti yako, hakuna njia ya kurudi. CV zako zote na barua za maombi zitafutwa kabisa.",
@@ -106,7 +106,7 @@ const STRINGS = {
     deleteConfirmDesc: "Kitendo hiki hakiwezi kutenduliwa. Data yako yote itafutwa kabisa.",
     yesDelete: "Ndiyo, futa akaunti yangu",
     cancel: "Ghairi",
-    deleteError: "Imeshindwa kufuta akaunti. Tafadhali wasiliana na msaada.",
+    deleteError: "Sikuweza kufuta akaunti. Tafadhali wasiliana na msaada.",
     freePlan: "Mpango wa Bure",
     freePlanDesc: "Unda na hariri bila kikomo. Kupakua kunahitaji mpango.",
     seePlans: "Tazama mipango",
@@ -521,7 +521,7 @@ export function SettingsForm({
         {profileLoadError && (
           <div className="flex items-center gap-2 text-xs text-red-600 mb-1">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{lang === "sw" ? "Imeshindwa kupakia wasifu wako." : "Couldn't load your saved profile."}</span>
+            <span>{lang === "sw" ? "Sikuweza kupakia wasifu wako." : "Couldn't load your saved profile."}</span>
             <button onClick={loadProfile} className="font-semibold underline hover:no-underline">
               {label(lang, "retry")}
             </button>

@@ -26,9 +26,9 @@ export function ConfirmationsSettingsCard({ lang }: Props) {
       const res = await fetch("/api/profile/confirmations");
       const j = (await res.json().catch(() => ({}))) as { success?: boolean; data?: PendingConfirmation[] };
       if (j.success) setItems(j.data ?? []);
-      else setError(sw ? "Imeshindwa kupakia." : "Couldn't load.");
+      else setError(sw ? "Sikuweza kupakia." : "Couldn't load.");
     } catch {
-      setError(sw ? "Imeshindwa kupakia." : "Couldn't load.");
+      setError(sw ? "Sikuweza kupakia." : "Couldn't load.");
     }
   }, [sw]);
 

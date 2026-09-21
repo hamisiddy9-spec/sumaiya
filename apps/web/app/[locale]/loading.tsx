@@ -7,5 +7,5 @@ import { RouteProgress } from "@/components/ui/route-progress";
 // request header here would risk forcing the static subtree dynamic.
 export default function LocaleLoading() {
   const lang = useLang();
-  return <RouteProgress label={lang === "sw" ? "Inapakia…" : "Loading…"} />;
+  return <RouteProgress label={lang === "sw" ? "Ninapakia…" : "Loading…"} />;
 }

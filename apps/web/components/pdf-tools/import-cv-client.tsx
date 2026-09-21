@@ -80,10 +80,10 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
     dropHint: sw ? `PDF yoyote — yenye maandishi au ya picha/skani · hadi ${MAX_FILE_MB} MB` : `Any PDF — text or image/scan · up to ${MAX_FILE_MB} MB`,
     change: sw ? "Badilisha faili" : "Change file",
     ready: sw ? "Tayari kuingizwa" : "Ready to import",
-    reading: sw ? "Inasoma faili…" : "Reading your file…",
-    ocr: sw ? "Inasoma picha (OCR)" : "Reading the image (OCR)",
+    reading: sw ? "Ninasoma faili…" : "Reading your file…",
+    ocr: sw ? "Ninasoma picha (OCR)" : "Reading the image (OCR)",
     understanding: sw ? "Ninaichambua CV yako…" : "Working out what is in your CV…",
-    opening: sw ? "Inafungua kihariri…" : "Opening the editor…",
+    opening: sw ? "Ninafungua kihariri…" : "Opening the editor…",
     // Per-failure messages — never collapse everything into one generic error,
     // so the user knows what to actually do next.
     notPdf: sw ? "Tafadhali pakia faili ya PDF." : "Please upload a PDF file.",
@@ -99,7 +99,7 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
       : "If the CV is in your account, tap \"⋯\" on its dashboard card, then Duplicate — it's instant. Otherwise, upload it below.",
     madeHereCta: sw ? "Nenda nyumbani" : "Go to dashboard",
     readFail: sw
-      ? "Tumeshindwa kusoma maandishi ya PDF hii. Hakikisha si iliyoskaniwa."
+      ? "Sikuweza kusoma maandishi ya PDF hii. Hakikisha si iliyoskaniwa."
       : "We couldn't read this PDF's text. Make sure it isn't a scan.",
     aiOff: sw
       ? "Siwezi kufanya hivi kwa sasa. Jaribu tena baadaye."
@@ -111,7 +111,7 @@ export function ImportCvClient({ initialTemplateId }: { initialTemplateId?: stri
       ? "Imechukua muda mrefu mno. Jaribu tena — mara nyingi hufaulu mara ya pili."
       : "This is taking too long. Please try again — it usually works on a second attempt.",
     saveFail: sw
-      ? "Tumeshindwa kuhifadhi CV. Jaribu tena."
+      ? "Sikuweza kuhifadhi CV. Jaribu tena."
       : "We couldn't save your CV. Please try again.",
     failed: sw ? "Imeshindikana. Jaribu tena." : "Something went wrong. Please try again.",
     go: sw ? "Igeuze kuwa CV unayoweza kuhariri" : "Convert to an editable CV",

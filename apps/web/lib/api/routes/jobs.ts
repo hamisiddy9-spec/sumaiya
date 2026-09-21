@@ -12,6 +12,7 @@ import { getRecommendations } from "@/lib/jobs/recommend";
 import { enrichJob } from "@/lib/jobs/enrich";
 import { parseCareerProfile } from "@/types";
 import { buildTargetedCv } from "@/lib/targeted-cv";
+import { requestLang } from "@/lib/api/lang";
 import { isPickRequest, normalizePickQuery, parsePickLimit } from "@sumaiya/api-client";
 
 const jobSchema = z.object({
@@ -147,6 +148,10 @@ export const jobRoutes = new Hono()
     jobTitle: z.string().min(1).max(200),
     company: z.string().max(200).optional(),
     jobDescription: z.string().max(20000).optional(),
+    // The caller's UI language — the "why it moved" bullets are user-facing
+    // prose, not keywords, so the server must be told which language to write
+    // them in (lib/match-explanation.ts). Defaults to English for older clients.
+    lang: z.enum(["en", "sw"]).optional(),
   })), async (c) => {
     const user = await getAuthUser(c);
     if (!user) return c.json({ error: "Unauthorized" }, 401);
@@ -165,7 +170,7 @@ export const jobRoutes = new Hono()
 
     const profile = parseCareerProfile(row.careerProfile);
     const jd = [b.jobTitle, b.company, b.jobDescription ?? ""].filter(Boolean).join("\n");
-    const result = buildTargetedCv(profile, jd);
+    const result = buildTargetedCv(profile, jd, requestLang(c, b.lang));
 
     // Outcome instrumentation (PR-1): the real score the user just saw.
     try {

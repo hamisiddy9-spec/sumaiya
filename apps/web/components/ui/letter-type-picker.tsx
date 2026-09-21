@@ -73,6 +73,14 @@ export function LetterTypePicker({ className }: Props) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={triggerClass}
+        // This control opens a MENU of letter types, not a document. It is
+        // labelled like the other document types' "New …" buttons, which open a
+        // creation sheet directly — so without the two ARIA states below neither
+        // a screen reader nor an automated check could tell that the first click
+        // had done anything (D7 read exactly that as a dead button). The
+        // chevron-down is the visual half of the same signal.
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <Plus className="w-4 h-4" />
         {lang === "sw" ? "Barua Rasmi Mpya" : "New Formal Letter"}

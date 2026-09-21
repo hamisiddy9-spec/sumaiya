@@ -44,7 +44,7 @@ export function ResetPasswordForm({ lang }: { lang: string }) {
     password: sw ? "Nywila mpya" : "New password",
     confirm: sw ? "Thibitisha nywila" : "Confirm password",
     submit: sw ? "Hifadhi nywila" : "Save password",
-    saving: sw ? "Inahifadhi…" : "Saving…",
+    saving: sw ? "Ninahifadhi…" : "Saving…",
     mismatch: sw ? "Nywila hazifanani" : "Passwords don't match",
     tooShort: sw ? "Nywila iwe na herufi 8 au zaidi" : "Password must be at least 8 characters",
     expiredTitle: sw ? "Kiungo hakitumiki tena" : "This link has expired",

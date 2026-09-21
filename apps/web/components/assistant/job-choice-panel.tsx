@@ -120,7 +120,7 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
       }
       onPickOurJob(jd, [row.title, row.company].filter(Boolean).join(" · "));
     } catch {
-      setNotice(sw ? "Imeshindwa kupakia tangazo. Jaribu tena." : "Couldn't load the advert. Try again.");
+      setNotice(sw ? "Sikuweza kupakia tangazo. Jaribu tena." : "Couldn't load the advert. Try again.");
     } finally {
       setBusyId(null);
     }
@@ -206,11 +206,11 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
 
           <div aria-live="polite" className="mt-2 max-h-56 overflow-y-auto">
             {phase === "loading" && (
-              <p className="px-1 py-2 text-[12px] text-text-muted">{sw ? "Inatafuta…" : "Searching…"}</p>
+              <p className="px-1 py-2 text-[12px] text-text-muted">{sw ? "Ninatafuta…" : "Searching…"}</p>
             )}
             {phase === "error" && (
               <p className="px-1 py-2 text-[12px] text-text-body">
-                {sw ? "Imeshindwa kupakia kazi. Angalia mtandao wako kisha ujaribu tena." : "Couldn't load the jobs. Check your connection and try again."}{" "}
+                {sw ? "Sikuweza kupakia kazi. Angalia mtandao wako kisha ujaribu tena." : "Couldn't load the jobs. Check your connection and try again."}{" "}
                 <button type="button" onClick={() => void load(q)} className="font-semibold text-ember hover:text-ember-hover">
                   {sw ? "Jaribu tena" : "Try again"}
                 </button>

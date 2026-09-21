@@ -31,6 +31,7 @@ import { AtsExplain } from "@/components/editor/ats-explain";
 import { AuthenticWritingPanel } from "@/components/editor/authentic-writing-panel";
 import { JobTargetPanel } from "@/components/editor/job-target-panel";
 import { matchCvToJd } from "@/lib/job-match";
+import { shouldRecordVersion } from "@/lib/versions/snapshot-policy";
 import { SharedProfilePanel } from "@/components/editor/shared-profile-panel";
 import { ConfirmationsCard, type PendingConfirmation } from "@/components/assistant/confirmations-card";
 import { CrossSellBanner } from "@/components/editor/cross-sell-banner";
@@ -1238,7 +1239,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
     addReferee, updateReferee, removeReferee, reorderReferees,
     setHobbies, setTemplate, setPrimaryColor, setFontFamily,
     setTitle, saveCv, exportPdf, title, setAccessToken,
-    toggleSectionVisibility, setSectionOrder, setDensity, saveError,
+    toggleSectionVisibility, setSectionOrder, setDensity, saveError, saveErrorKind,
   } = useEditorStore();
 
   // "Start from an example" — offered only while the CV is still essentially
@@ -1357,15 +1358,20 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   }, [initialDoc.id, guestMode, saveCv]);
 
   // Flash "Saved ✓" briefly whenever a save round-trip completes successfully,
-  // and latch the persistent "saved" resting state.
+  // and latch the persistent "saved" resting state. A completed save is also the
+  // moment to ask whether this change deserves a restorable version.
   useEffect(() => {
     if (prevSavingRef.current && !isSaving && !saveError) {
       setSavedFlash(true);
       setEverSaved(true);
+      maybeRecordVersion();
       const t = setTimeout(() => setSavedFlash(false), 2000);
       return () => clearTimeout(t);
     }
     prevSavingRef.current = isSaving;
+    // maybeRecordVersion reads the live store state; it is intentionally not a
+    // dependency (it would change identity every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSaving, saveError]);
 
   // An existing signed-in document is already persisted when it loads.
@@ -1537,9 +1543,36 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
   // People ruin CVs (over-editing, a regretted AI rewrite). A version is a
   // snapshot of the full document payload; restoring loads it back and is itself
   // snapshotted first, so a restore is never destructive.
+  //
+  // A version is also recorded AUTOMATICALLY on a meaningful change (see
+  // lib/versions/snapshot-policy.ts): the panel promised a history that ordinary
+  // editing never produced — one row after dozens of PATCHes, still carrying the
+  // pre-rename title (D5). The policy keeps a burst of typing from burning the
+  // 20-version budget: it only records when the payload differs from the payload
+  // the last version was taken from, and at most once per 10 minutes.
+  const versionBaselineRef = useRef<{ sig: string; at: number }>({ sig: "", at: 0 });
   const snapshotPayload = () => {
     const s = useEditorStore.getState();
     return { title: s.title, templateId: s.templateId, primaryColor: s.primaryColor, fontFamily: s.fontFamily, data: s.cv };
+  };
+  const maybeRecordVersion = () => {
+    if (guestMode) return;
+    const sig = JSON.stringify(snapshotPayload());
+    const { sig: baseline, at } = versionBaselineRef.current;
+    const record = shouldRecordVersion({
+      payloadSignature: sig,
+      baselineSignature: baseline,
+      lastRecordedAt: at,
+      now: Date.now(),
+    });
+    if (!record) {
+      // The first save of a session only fixes the baseline: opening a CV must
+      // not manufacture a version of a document nobody touched.
+      if (!baseline) versionBaselineRef.current = { sig, at };
+      return;
+    }
+    versionBaselineRef.current = { sig, at: Date.now() };
+    void saveVersion({ silent: true });
   };
   const loadVersions = async () => {
     if (guestMode) return;
@@ -2765,7 +2798,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 {savingVersion ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 {uiLang === "sw" ? "Hifadhi toleo la sasa" : "Save current version"}
               </button>
-              <p className="text-[11px] text-text-muted mt-1.5 text-center">{uiLang === "sw" ? "Kila unapopakua CV, toleo huhifadhiwa kiotomatiki." : "Every download is saved automatically too."}</p>
+              <p className="text-[11px] text-text-muted mt-1.5 text-center">{uiLang === "sw" ? "Toleo huhifadhiwa kiotomatiki kila unapopakua CV na baada ya mabadiliko makubwa." : "A version is saved automatically on every download and after meaningful changes."}</p>
             </div>
             <div className="p-3 flex-1 min-h-0 overflow-y-auto">
               {versionsLoading ? (
@@ -2925,7 +2958,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               title={uiLang === "sw" ? "Sikuweza kuhifadhi — gusa kujaribu tena" : "Save failed — tap to retry"}
             >
               <AlertTriangle className="w-3 h-3 text-gold" />
-              <span className="hidden sm:inline">{uiLang === "sw" ? "Jaribu tena" : "Retry save"}</span>
+              <span className="hidden sm:inline">{uiLang === "sw" ? "Hijahifadhiwa bado — gusa kujaribu tena" : "Not saved yet — tap to retry"}</span>
             </button>
           ) : everSaved ? (
             <span className={`flex items-center gap-1.5 text-[10px] font-semibold flex-shrink-0 transition-colors ${savedFlash ? "text-green-400" : "text-cream/60"}`}
@@ -3075,6 +3108,44 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           )}
         </div>
       </div>
+
+      {/* NOT SAVED — the honest version of a bare "Jaribu tena".
+          Offline, the save fails and the toolbar offered only "Jaribu tena"
+          ("Try again"), which says nothing about whether the work is safe
+          (D10). The edit is held in memory and re-saved automatically (the store
+          retries with backoff and again on the browser's `online` event), but
+          until a save lands it is NOT saved — so this says exactly that, and it
+          only appears for a FAILED SAVE: a failed PDF export sets the same
+          `saveError`, and claiming the document was unsaved then would be a new
+          lie (hence saveErrorKind). */}
+      {saveError && saveErrorKind !== "export" && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="bg-gold-tint border-b border-gold/30 px-3 md:px-4 py-2 flex flex-wrap items-center gap-x-2 gap-y-1 flex-shrink-0 z-10"
+        >
+          <AlertTriangle className="w-3.5 h-3.5 text-gold-text flex-shrink-0" />
+          <span className="text-xs md:text-sm text-gold-text">
+            {uiLang === "sw" ? (
+              <>
+                <strong>Hijahifadhiwa bado</strong> — mabadiliko yako yapo kwenye kivinjari hiki tu;
+                tutahifadhi tena mtandao ukirudi.
+              </>
+            ) : (
+              <>
+                <strong>Not saved yet</strong> — your changes are only in this browser;
+                we&apos;ll save again once you&apos;re back online.
+              </>
+            )}
+          </span>
+          <button
+            onClick={() => { guestMode ? triggerAutoSave() : saveCv(initialDoc.id); }}
+            className="ml-auto flex-shrink-0 text-xs md:text-sm font-semibold text-gold-text hover:underline"
+          >
+            {uiLang === "sw" ? "Jaribu tena" : "Try again"}
+          </button>
+        </div>
+      )}
 
       {guestMode && (
         <div className="bg-gold-tint border-b border-gold/30 px-3 md:px-4 py-2 flex items-center justify-between flex-shrink-0 z-10">

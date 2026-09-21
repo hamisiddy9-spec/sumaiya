@@ -290,15 +290,28 @@
 .snap-rise-3 { animation-delay: 0.15s; }
 .snap-rise-4 { animation-delay: 0.2s; }
 
-/* RF5 — generic reveal (same language as snap-rise) for non-/snap surfaces:
-   result cards, quick-create tiles, stat rows. `.rise-N` matches the shared
-   motion utility's stagger (riseClass). Reduced-motion collapses these to
-   instant via the app-wide safety net below. */
-.rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.rise-1 { animation-delay: 0.05s; }
-.rise-2 { animation-delay: 0.1s; }
+/* RF5 — generic reveal for non-/snap surfaces: result cards, quick-create
+   tiles, stat rows. `.rise-N` matches the shared motion utility's stagger
+   (riseClass) and the tokens in apps/web/lib/motion.ts + the native app's
+   components/ui/motion.tsx. Delays: base 30ms, step 40ms, capped at 6 items
+   (max 270ms) — a long grid is fully delivered inside one beat rather than
+   trickling in after the page is already usable.
+   Reduced-motion collapses these to instant via the app-wide safety net below. */
+.rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.03s; }
+.rise-1 { animation-delay: 0.07s; }
+.rise-2 { animation-delay: 0.11s; }
 .rise-3 { animation-delay: 0.15s; }
-.rise-4 { animation-delay: 0.2s; }
+.rise-4 { animation-delay: 0.19s; }
+.rise-5 { animation-delay: 0.23s; }
+.rise-6 { animation-delay: 0.27s; }
+
+/* Loading → content hand-off. The placeholder fades away where it stands while
+   the real content rises into the space, so a load never ends by swapping one
+   thing out and another in on the same frame (a "boom": the slot goes blank,
+   then content pops into the hole). */
+.swap-in { animation: snap-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.swap-out { animation: swap-out 0.14s cubic-bezier(0.32, 0, 0.67, 0) both; }
+@keyframes swap-out { from { opacity: 1; } to { opacity: 0; } }
 
 /* Snap tab panel — the photo capture UI fades in on Paste ⇄ Photo switch. */
 .snap-panel { animation: snap-rise 0.18s ease-out both; }

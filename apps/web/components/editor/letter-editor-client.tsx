@@ -351,7 +351,7 @@ export function LetterEditorClient({
       if (result.success && result.data?.enhanced) {
         setAiPreview({ original: base, suggested: result.data.enhanced });
       } else {
-        setEnhanceError(result.error || (sw ? "Imeshindwa sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
+        setEnhanceError(result.error || (sw ? "Sikuweza sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
       }
     } catch {
       setEnhanceError(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -401,7 +401,7 @@ export function LetterEditorClient({
       try { await fetch(`/api/documents/letter/${initialDoc.id}/download`, { method: "POST" }); } catch {}
     } catch (err) {
       if (!(err instanceof DOMException && err.name === "AbortError")) {
-        setDownloadError(sw ? "Imeshindwa kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
+        setDownloadError(sw ? "Sikuweza kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
         setTimeout(() => setDownloadError(""), 5000);
       }
     } finally {
@@ -423,7 +423,7 @@ export function LetterEditorClient({
       setDownloadDone(true);
       setTimeout(() => setDownloadDone(false), 3000);
     } catch (err) {
-      setDownloadError(err instanceof Error ? err.message : (sw ? "Kupakua PDF kumeshindwa. Jaribu tena." : "PDF export failed. Try again."));
+      setDownloadError(err instanceof Error ? err.message : (sw ? "Sikuweza kupakua PDF. Jaribu tena." : "PDF export failed. Try again."));
       setTimeout(() => setDownloadError(""), 5000);
     } finally {
       setIsDownloading(false);
@@ -626,7 +626,7 @@ export function LetterEditorClient({
                   disabled={isEnhancing || !letterData.body.trim()}
                   className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium"
                 >
-                  <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
+                  <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Ninaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                 </button>
               </div>
               {enhanceError && <p className="text-[11px] text-red-600 mb-1.5">{enhanceError}</p>}

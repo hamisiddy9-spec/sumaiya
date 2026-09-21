@@ -240,7 +240,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
           regenerate: () => handleEnhance(opts),
         });
       } else {
-        setGenerateError(data.error || (sw ? "Imeshindwa sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
+        setGenerateError(data.error || (sw ? "Sikuweza sasa. Jaribu tena." : "Couldn't enhance right now. Please try again."));
       }
     } catch {
       setGenerateError(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -271,7 +271,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { content?: string }; error?: string };
       if (!res.ok || !json.success || !json.data?.content) {
-        setGenerateError(json.error || (sw ? "Imeshindwa kuboresha sasa. Jaribu tena." : "Couldn't tailor right now. Please try again."));
+        setGenerateError(json.error || (sw ? "Sikuweza kuboresha sasa. Jaribu tena." : "Couldn't tailor right now. Please try again."));
       } else {
         setAiPreview({
           subtitle: sw ? "Nimeiboresha barua hii iilenge kazi hii." : "I tailored your letter to this job.",
@@ -305,7 +305,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { content?: string }; error?: string };
       if (!res.ok || !json.success || !json.data?.content) {
-        setGenerateError(json.error || (sw ? "Imeshindwa kutengeneza rasimu sasa. Jaribu tena." : "Couldn't generate a draft right now. Please try again."));
+        setGenerateError(json.error || (sw ? "Sikuweza kutengeneza rasimu sasa. Jaribu tena." : "Couldn't generate a draft right now. Please try again."));
       } else {
         setAiPreview({
           subtitle: sw ? "Nimetengeneza rasimu mpya kutokana na maelezo yako." : "I wrote a fresh draft from your details.",
@@ -360,7 +360,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       logDownload();
     } catch (err) {
       if (!(err instanceof DOMException && err.name === "AbortError")) {
-        setDownloadError(sw ? "Imeshindwa kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
+        setDownloadError(sw ? "Sikuweza kushiriki. Tumia Pakua badala yake." : "Couldn't share. Try Download instead.");
         setTimeout(() => setDownloadError(""), 5000);
       }
     } finally {
@@ -379,7 +379,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
       setTimeout(() => setDownloadSuccess(false), 3000);
       logDownload();
     } catch (err) {
-      setDownloadError(err instanceof Error ? err.message : (sw ? "Kupakua PDF kumeshindwa. Jaribu tena." : "PDF export failed. Try again."));
+      setDownloadError(err instanceof Error ? err.message : (sw ? "Sikuweza kupakua PDF. Jaribu tena." : "PDF export failed. Try again."));
       setTimeout(() => setDownloadError(""), 5000);
     } finally {
       setIsDownloading(false);
@@ -525,11 +525,11 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
                 <div className="flex items-center gap-3">
                   <button onClick={() => void handleGenerate()} disabled={isGenerating}
                     className="flex items-center gap-1 text-xs text-ember-hover hover:text-ember disabled:opacity-50 transition font-medium">
-                    <Sparkles className="w-3 h-3" /> {isGenerating ? (sw ? "Inatengeneza…" : "Generating…") : (sw ? "Niandikie" : "Write it for me")}
+                    <Sparkles className="w-3 h-3" /> {isGenerating ? (sw ? "Ninatengeneza…" : "Generating…") : (sw ? "Niandikie" : "Write it for me")}
                   </button>
                   <button onClick={() => void handleEnhance()} disabled={isEnhancing || !content.trim()}
                     className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium">
-                    <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Inaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
+                    <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Ninaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                   </button>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
               <button onClick={() => void handleTailorToJob()} disabled={isTailoring || !content.trim() || !jd.trim()}
                 className="mt-2 w-full flex items-center justify-center gap-2 bg-ember text-cream text-sm font-semibold py-2.5 rounded-lg disabled:opacity-50 transition hover:bg-ember-hover">
                 <Target className="w-4 h-4" />
-                {isTailoring ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Boresha kulenga kazi hii" : "Tailor to this job")}
+                {isTailoring ? (sw ? "Ninaboresha…" : "Tailoring…") : (sw ? "Boresha kulenga kazi hii" : "Tailor to this job")}
               </button>
               {!content.trim() && (
                 <p className="text-[11px] text-text-muted mt-1">{sw ? "Andika au tengeneza barua kwanza, kisha uiboreshe kulenga kazi." : "Write or generate the letter first, then tailor it to a job."}</p>

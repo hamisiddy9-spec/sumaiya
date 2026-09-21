@@ -236,12 +236,12 @@ export function TemplateHubProLanding() {
   const steps = sw
     ? [
         { n: "1", t: "Chagua muundo", b: "Chagua muundo unaokufaa. Kwa kazi yako, tunapendekeza wenyewe." },
-        { n: "2", t: "Sumaiya anaandika", b: "Ongea naye kwa Kiswahili au Kiingereza. Anajaza sehemu zote, anarekebisha ujuzi, na anakuambia kilichokosekana." },
+        { n: "2", t: "Mimi ninaandika", b: "Ongea nami kwa Kiswahili au Kiingereza. Ninajaza sehemu zote, ninarekebisha ujuzi, na ninakuambia kilichokosekana." },
         { n: "3", t: "Pakua PDF", b: "Pakua PDF inayopitishwa na mifumo ya kuajiri, tuma kwa barua pepe, au shiriki moja kwa moja kwenye WhatsApp." },
       ]
     : [
         { n: "1", t: "Pick a design", b: "Choose the design that fits. For your job, we suggest one." },
-        { n: "2", t: "Sumaiya writes", b: "Talk to her in Swahili or English. She fills every section, sharpens your skills, and tells you what's missing." },
+        { n: "2", t: "I write it", b: "Talk to me in Swahili or English. I fill every section, sharpen your skills, and tell you what's missing." },
         { n: "3", t: "Download the PDF", b: "Export an ATS-ready PDF, email it, or share it straight to WhatsApp." },
       ];
 

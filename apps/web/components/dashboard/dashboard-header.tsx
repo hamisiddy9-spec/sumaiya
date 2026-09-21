@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLang } from "@/lib/i18n/context";
+import { accessCopy } from "@/lib/access-copy";
 import { signOut } from "@/lib/auth-client";
 import { Logo } from "@/components/ui/logo";
 import { Icon } from "@/components/ui/icon";
@@ -14,6 +15,14 @@ interface Props {
   settingsLabel: string;
   userEmail?: string;
   userAvatarUrl?: string;
+  /**
+   * The account's real Premium state, resolved SERVER-side from the same
+   * `profile.premiumUntil` that /api/entitlements answers from. Undefined means
+   * "not known" and is treated as no-Premium: the copy then offers the free
+   * truth, which understates rather than lies (a Premium user may briefly read
+   * the free sentence, never the other way round).
+   */
+  premium?: boolean;
 }
 
 interface NavItem {
@@ -28,6 +37,7 @@ export function DashboardHeader({
   settingsLabel,
   userEmail,
   userAvatarUrl,
+  premium = false,
 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
@@ -51,6 +61,11 @@ export function DashboardHeader({
   const qs = searchParams.toString();
   const search = qs ? `?${qs}` : "";
   const sw = lang === "sw";
+
+  // The access card's copy — the account's real entitlements, in this language
+  // (lib/access-copy.ts; asserted never to claim "everything is unlocked" when
+  // Premium is not active).
+  const access = accessCopy(premium, sw);
 
   // Nav labels respect language (the sidebar previously ignored its own props
   // and hard-coded English). `dashboardLabel` / `settingsLabel` come from the
@@ -139,18 +154,32 @@ export function DashboardHeader({
           {/* Spacer to push usage card to bottom */}
           <div className="flex-1 min-h-4" />
 
-          {/* Access card — everything is unlocked (payments intentionally off),
-              so no fake "free plan" usage bar / upgrade nudge. */}
+          {/* Access card — HONEST, per account. It used to read "Umefunguliwa
+              Kila Kitu / Kila kitu kipo tayari kutumika" ("everything is
+              unlocked") for every account, while /api/entitlements answered
+              premium:false and template.premium:false: the Premium designs were
+              locked, so the sentence was false (D2). The copy now comes from
+              lib/access-copy.ts, keyed off the server-resolved Premium flag, and
+              keeps the upsell — it just tells the truth about what is free and
+              what the one locked thing is. */}
           <div className="mx-2 mb-5 bg-espresso-2 rounded-card p-4">
             <div className="flex items-center gap-2 mb-1">
               <Icon name="check" size={14} className="text-gold" />
               <p className="text-xs font-semibold text-cream tracking-wide">
-                {sw ? "Umefunguliwa Kila Kitu" : "Full access"}
+                {access.title}
               </p>
             </div>
             <p className="text-[11px] text-cream/50 leading-relaxed">
-              {sw ? "Kila kitu kipo tayari kutumika." : "All features unlocked."}
+              {access.body}
             </p>
+            {access.cta && (
+              <Link
+                href={access.cta.href}
+                className="mt-2 inline-block text-[11px] font-semibold text-gold hover:underline"
+              >
+                {access.cta.label} →
+              </Link>
+            )}
           </div>
         </nav>
       </aside>

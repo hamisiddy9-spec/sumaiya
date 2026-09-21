@@ -9,6 +9,9 @@ import { careerProfileSchema, parseCareerProfile } from "@/types";
 import { pickMostCompleteCv, parseCvLoose, stampProfileAllFacts } from "@/lib/career-profile/mapper";
 import { ensureProfileRow, seedProfileFromCv } from "@/lib/career-profile/sync";
 import { listPendingConfirmations, resolveConfirmations } from "@/lib/career-profile/confirmations";
+// jsonb writes are pinned to text with an explicit cast — see lib/db/jsonb.ts
+// for why a bare object would be stored as a JSON *string*.
+import { jsonbParam } from "@/lib/db/jsonb";
 
 const profileUpdateSchema = z.object({
   fullName: z.string().max(200).optional(),
@@ -69,7 +72,7 @@ export const profileRoutes = new Hono()
     const payload = { ...body } as Record<string, unknown>;
     if (body.careerProfile) {
       const source: string = body.careerProfileSource ?? "user-edited";
-      payload.careerProfile = stampProfileAllFacts(body.careerProfile, { source, confidence: 1 });
+      payload.careerProfile = jsonbParam(stampProfileAllFacts(body.careerProfile, { source, confidence: 1 }));
       delete payload.careerProfileSource;
     }
 
@@ -117,6 +120,9 @@ export const profileRoutes = new Hono()
     if (Object.keys(merged).length === 0) {
       return c.json({ success: true, data: existing ?? null, filled: [] });
     }
+    // jsonb: the same pin every other career_profile write uses — a bare
+    // object here would be stored as a JSON *string*. See lib/db/jsonb.ts.
+    if (merged.careerProfile !== undefined) merged.careerProfile = jsonbParam(merged.careerProfile);
 
     const [upserted] = await db
       .insert(userProfile)
@@ -147,7 +153,7 @@ export const profileRoutes = new Hono()
     const payload = { ...body } as Record<string, unknown>;
     if (body.careerProfile) {
       const source: string = body.careerProfileSource ?? "user-edited";
-      payload.careerProfile = stampProfileAllFacts(body.careerProfile, { source, confidence: 1 });
+      payload.careerProfile = jsonbParam(stampProfileAllFacts(body.careerProfile, { source, confidence: 1 }));
       delete payload.careerProfileSource;
     }
 
@@ -276,7 +282,7 @@ export const profileRoutes = new Hono()
 
     await db
       .update(userProfile)
-      .set({ careerProfile: resolved, updatedAt: new Date() })
+      .set({ careerProfile: jsonbParam(resolved) as never, updatedAt: new Date() })
       .where(eq(userProfile.id, userId));
 
     const updated = listPendingConfirmations(resolved);

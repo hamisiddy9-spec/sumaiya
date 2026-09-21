@@ -83,7 +83,7 @@ export function CrossSellBanner({ cvId, cvTitle, cvData, accessToken, atsScore, 
             className="mt-2.5"
           >
             {creating ? (
-              <>{sw ? "Inatengeneza..." : "Creating..."}</>
+              <>{sw ? "Ninatengeneza..." : "Creating..."}</>
             ) : (
               <><Icon name="spark" size={12} /> {sw ? "Tengeneza Barua ya Maombi" : "Create Cover Letter"}</>
             )}

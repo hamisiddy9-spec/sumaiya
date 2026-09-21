@@ -40,14 +40,19 @@ export const PROMPTS = {
     builtIn: "lib/api/routes/ai.ts POST /cover-letter",
   },
   "assistant.system": {
-    version: "v2.1",
+    version: "v2.2",
     purpose: "The conversational Sumaiya system prompt (web assistant-turn route).",
     builtIn: "lib/api/routes/ai.ts POST /assistant-turn",
   },
   "assistant.mobile": {
-    version: "v1.2",
+    version: "v1.3",
     purpose: "The mobile chat system prompt (mid-conversation, no greeting, <120 words).",
     builtIn: "lib/api/routes/mobile.ts POST /chat",
+  },
+  "assistant.whatsapp": {
+    version: "v1.1",
+    purpose: "The WhatsApp conversational system prompt (plain text, <90 words, EN/SW).",
+    builtIn: "lib/api/routes/whatsapp.ts POST /api/whatsapp/turn",
   },
   "skillGap.plan": {
     version: "v1.0",

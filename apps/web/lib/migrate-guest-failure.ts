@@ -50,7 +50,7 @@ export function migrationFailure(
     return {
       retryable: true,
       message: sw
-        ? "Imeshindwa kuhifadhi CV yako. Tafadhali jaribu tena."
+        ? "Sikuweza kuhifadhi CV yako. Tafadhali jaribu tena."
         : "Failed to save your CV. Please try again.",
     };
   }
@@ -61,7 +61,7 @@ export function migrationFailure(
   return {
     retryable: false,
     message: sw
-      ? "Imeshindwa kuhifadhi CV yako. Jaribu tena baadaye — rasimu yako ipo salama kwenye kivinjari hiki."
+      ? "Sikuweza kuhifadhi CV yako. Jaribu tena baadaye — rasimu yako ipo salama kwenye kivinjari hiki."
       : "Failed to save your CV. Try again later — your draft is safe in this browser.",
   };
 }

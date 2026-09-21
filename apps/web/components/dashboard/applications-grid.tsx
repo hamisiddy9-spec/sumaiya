@@ -92,7 +92,7 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
         setApplications(cur => [json.data, ...cur]);
         setEditing(json.data);
       } else {
-        setErrorMsg(sw ? "Imeshindwa kuongeza ombi. Jaribu tena." : "Couldn't add the application. Please try again.");
+        setErrorMsg(sw ? "Sikuweza kuongeza ombi. Jaribu tena." : "Couldn't add the application. Please try again.");
       }
     } catch {
       setErrorMsg(sw ? "Hitilafu ya mtandao." : "Network error.");
@@ -117,7 +117,7 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
       // doesn't look like a random glitch.
       if (!res.ok || !json.success) {
         setApplications(prev);
-        setErrorMsg(sw ? "Imeshindwa kubadilisha hali. Jaribu tena." : "Couldn't update the status. Please try again.");
+        setErrorMsg(sw ? "Sikuweza kubadilisha hali. Jaribu tena." : "Couldn't update the status. Please try again.");
       }
     } catch {
       setApplications(prev);
@@ -140,7 +140,7 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
         setApplications(cur => cur.map(a => (a.id === editing.id ? { ...a, ...json.data } : a)));
         setEditing(null);
       } else {
-        setErrorMsg(sw ? "Imeshindwa kuhifadhi. Jaribu tena." : "Couldn't save. Please try again.");
+        setErrorMsg(sw ? "Sikuweza kuhifadhi. Jaribu tena." : "Couldn't save. Please try again.");
       }
     } catch {
       // keep the modal open so the user can retry
@@ -156,10 +156,10 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
     setEditing(null);
     try {
       const res = await fetch(`/api/applications/${id}`, { method: "DELETE" });
-      if (!res.ok) { setApplications(prev); setErrorMsg(sw ? "Imeshindwa kufuta. Jaribu tena." : "Couldn't delete. Please try again."); }
+      if (!res.ok) { setApplications(prev); setErrorMsg(sw ? "Sikuweza kufuta. Jaribu tena." : "Couldn't delete. Please try again."); }
     } catch {
       setApplications(prev);
-      setErrorMsg(sw ? "Imeshindwa kufuta. Jaribu tena." : "Couldn't delete. Please try again.");
+      setErrorMsg(sw ? "Sikuweza kufuta. Jaribu tena." : "Couldn't delete. Please try again.");
     }
   }
 
@@ -182,9 +182,9 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
         className="space-y-4"
         role="status"
         aria-live="polite"
-        aria-label={sw ? "Inapakia maombi…" : "Loading your applications…"}
+        aria-label={sw ? "Ninapakia maombi…" : "Loading your applications…"}
       >
-        <span className="sr-only">{sw ? "Inapakia maombi…" : "Loading your applications…"}</span>
+        <span className="sr-only">{sw ? "Ninapakia maombi…" : "Loading your applications…"}</span>
         {/* Filter pills skeleton */}
         <div className="flex flex-wrap items-center gap-1.5" aria-hidden="true">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -221,7 +221,7 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
       <div className="border-2 border-dashed border-border rounded-card-lg p-12 text-center bg-card">
         <Icon name="briefcase" size={40} className="text-text-muted mx-auto mb-3" />
         <h3 className="text-base font-semibold text-espresso mb-1">
-          {sw ? "Imeshindwa kupakia maombi" : "Couldn't load your applications"}
+          {sw ? "Sikuweza kupakia maombi" : "Couldn't load your applications"}
         </h3>
         <p className="text-sm text-text-body mb-5">
           {sw ? "Angalia mtandao wako kisha jaribu tena." : "Check your connection and try again."}
@@ -523,7 +523,7 @@ function EditApplicationModal({ app, sw, saving, onSave, onDelete, onClose }: {
             disabled={saving}
             className="flex-1 bg-ember text-cream text-sm font-semibold py-2.5 rounded-input-lg shadow-ember-hard active:shadow-ember-active active:translate-y-[2px] hover:bg-ember-hover disabled:opacity-60 transition"
           >
-            {saving ? (sw ? "Inahifadhi…" : "Saving…") : (sw ? "Hifadhi" : "Save")}
+            {saving ? (sw ? "Ninahifadhi…" : "Saving…") : (sw ? "Hifadhi" : "Save")}
           </button>
           {confirmDel ? (
             <button onClick={() => onDelete(app.id)} disabled={saving} className="px-3 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-input-lg disabled:opacity-60 transition">

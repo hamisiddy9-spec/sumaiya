@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   return {
     title: sw ? "Ajira Zinazolingana na CV Yako" : "Jobs — Matched to Your CV",
     description: sw
-      ? "Nafasi za kazi zinazopatikana kiotomatiki kutoka vyanzo vya kuaminika, zikilinganishwa na CV yako. Angalia ulinganisho wako, omba, na fuatilia — vyote mahali pamoja."
-      : "Automatically discovered openings from trusted job sources, scored against your CV. See your match, apply, and track — all in one place.",
+      ? "Nafasi za kazi zinazopatikana kiotomatiki kutoka vyanzo vya kuaminika, zikilinganishwa na CV yako. Angalia ulinganisho wako, kisha fungua tangazo kwenye tovuti ya mwajiri — maombi unayoyafuatilia yanabaki hapa Sumaiya."
+      : "Automatically discovered openings from trusted job sources, scored against your CV. See your match, then open the advert on the employer's site — the applications you track stay here in Sumaiya.",
     alternates: alternatesFor("/jobs", params.locale),
   };
 }

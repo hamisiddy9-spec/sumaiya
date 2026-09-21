@@ -3,6 +3,8 @@ import { Icon } from "@/components/ui/icon";
 import type { Lang } from "@/lib/i18n/translations";
 import { getRecommendations } from "@/lib/jobs/recommend";
 import { SnapTailorButton } from "@/components/jobs/snap-tailor-button";
+import { ExternalLink } from "@/components/ui/external-link";
+import { advertLinkLabel } from "@/lib/external-link";
 
 interface Props {
   userId: string;
@@ -82,15 +84,14 @@ export async function RecommendedJobsSection({ userId, lang, limit = 3 }: Props)
                 company={r.job.company}
                 description={r.job.description}
               />
-              <a
+              <ExternalLink
                 href={r.job.applyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                sw={sw}
                 className="inline-flex items-center gap-1 text-[13px] font-semibold text-ember-hover hover:text-ember/80"
               >
-                {sw ? "Omba" : "Apply"}
+                {advertLinkLabel(sw)}
                 <Icon name="chevron-right" size={13} />
-              </a>
+              </ExternalLink>
               <span className="ml-auto text-[11px] text-text-muted">{r.job.sourceName}</span>
             </div>
           </div>

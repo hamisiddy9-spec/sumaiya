@@ -6,9 +6,9 @@
 // `sw` boolean (true = Swahili) used across client components.
 
 export const UI = {
-  loading: { sw: "Inapakia…", en: "Loading…" },
+  loading: { sw: "Ninapakia…", en: "Loading…" },
   skipToContent: { sw: "Ruka hadi maudhui", en: "Skip to content" },
-  openingEditor: { sw: "Inafungua kihariri…", en: "Opening editor…" },
+  openingEditor: { sw: "Ninafungua kihariri…", en: "Opening editor…" },
   retry: { sw: "Jaribu tena", en: "Retry" },
   close: { sw: "Funga", en: "Close" },
 } as const;

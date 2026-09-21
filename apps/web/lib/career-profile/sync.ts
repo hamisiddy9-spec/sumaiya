@@ -11,6 +11,7 @@ import { db, profile, userProfile } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { parseCareerProfile } from "@/types";
 import { mergeProfileFromCv, parseCvLoose, type Provenance } from "./mapper";
+import { jsonbParam } from "@/lib/db/jsonb";
 
 // user_profile.id is a FK to profile.id, and a profile row is only created
 // lazily on the first Settings save. Ensure the parent row exists first.
@@ -43,12 +44,15 @@ export async function seedProfileFromCv(
     if (!filled.length) return { filled };
 
     await ensureProfileRow(userId);
+    // jsonb: pinned to JSON text + an explicit cast (lib/db/jsonb.ts) — handed a
+    // bare object, drizzle/postgres-js store a JSON *string* and every SQL jsonb
+    // operator over the career profile reads NULL.
     await db
       .insert(userProfile)
-      .values({ id: userId, careerProfile: merged, updatedAt: new Date() } as never)
+      .values({ id: userId, careerProfile: jsonbParam(merged) as never, updatedAt: new Date() } as never)
       .onConflictDoUpdate({
         target: userProfile.id,
-        set: { careerProfile: merged, updatedAt: new Date() } as never,
+        set: { careerProfile: jsonbParam(merged) as never, updatedAt: new Date() } as never,
       });
     return { filled };
   } catch (e) {

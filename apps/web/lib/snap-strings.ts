@@ -108,7 +108,7 @@ export const STRINGS = {
     copyLetter: "Nakili barua",
     copied: "Imenakiliwa!",
     save: "Hifadhi kwenye akaunti yako",
-    saving: "Inahifadhi…",
+    saving: "Ninahifadhi…",
     saved: "Imehifadhiwa! Fungua kwenye mhariri →",
     // M1 — the save also opens a tracker entry; this link lands in the workspace.
     openApplication: "Fuatilia kwenye Maombi →",
@@ -150,7 +150,7 @@ export const STRINGS = {
     // D3 — one-tap PDF export from the result.
     downloadCvPdf: "Pakua CV (PDF)",
     downloadLetterPdf: "Pakua barua (PDF)",
-    preparingPdf: "Inaandaa PDF…",
-    pdfError: "Imeshindwa kuunda PDF. Tafadhali jaribu tena.",
+    preparingPdf: "Ninaandaa PDF…",
+    pdfError: "Sikuweza kuunda PDF. Tafadhali jaribu tena.",
   },
 } as const;

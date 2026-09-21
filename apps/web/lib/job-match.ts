@@ -56,6 +56,14 @@ export const STOP_WORDS = new Set([
   "mzuri", "kubwa", "kutafuta", "kujiunga", "kusaidia", "kutumia", "kuhakikisha",
   "kutoa", "kuendesha", "kufafanua", "kuongoza", "kusimamia", "kujenga",
   "kuunda", "kuelewa", "kuhitajika", "mtahiniwa", "kuomba", "sio", "siyo",
+  // Advert filler that reached the user as chips: "HAYAPO KWENYE WASIFU WAKO"
+  // listed "least" and "grow" as if they were missing skills
+  // (docs/QA-WEB-JOURNEYS-2026-09-20.md D11). Quantifiers, bare generic verbs
+  // and adverb padding — never something an applicant would put on a CV.
+  // Real skills stay: "sales", "customer", "budgeting", "region", "growth".
+  "least", "grow", "grows", "growing", "grew", "prepare", "prepares", "preparing",
+  "prepared", "include", "includes", "included", "various", "prior", "ideally",
+  "typically", "relevant", "similar", "other", "others", "additional",
 ]);
 
 // HTML / entity / URL leakage that must never count as a skill or keyword.
@@ -85,8 +93,23 @@ export function extractTerms(text: string): string[] {
       .replace(/<[/!a-zA-Z][^>]*>/g, " ")
       .replace(/<[a-z][^>]*$/gi, " ")
       .replace(/&[a-z]+;?|&#\d+;?|&#x[0-9a-f]+;?/gi, " ")
-      .replace(/[^a-z0-9\s\+\#\.\/]/g, " ")
+      // `+`, `#`, `.` and `/` are kept INSIDE a term (c++, c#, node.js, ci/cd)
+      // but never at its edges: a sentence's punctuation used to survive as part
+      // of the keyword, so the "hayapo kwenye wasifu wako" chips listed
+      // "salaam." and "independently." — a user cannot tell a real keyword from
+      // a spelling mistake (docs/QA-WEB-JOURNEYS-2026-09-20.md D11).
+      .replace(/[^a-z0-9\s\+#./]/g, " ")
       .split(/\s+/)
+      .map((w) => {
+        // Sentence punctuation is never part of a keyword: "salaam." →
+        // "salaam", "independently." → "independently", "node.js." → "node.js".
+        let t = w.replace(/^[./]+/, "").replace(/[./]+$/, "");
+        // A trailing "+"/"#" belongs to a LANGUAGE (c++, c#, g#), so it only
+        // gets stripped when what remains still reads as a term on its own
+        // ("react+" → "react", but "c++" stays "c++").
+        t = t.replace(/[+#]+$/, (m) => (t.length - m.length >= 3 ? "" : m));
+        return t;
+      })
       .filter((w) => w.length >= 3 && !STOP_WORDS.has(w) && !MARKUP_TERMS.has(w)),
   )];
 }

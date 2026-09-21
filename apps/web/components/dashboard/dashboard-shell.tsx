@@ -9,6 +9,8 @@ export interface DashboardNav {
   settingsLabel: string;
   userEmail?: string;
   userAvatarUrl?: string;
+  /** Server-resolved Premium state — see lib/access-copy.ts. */
+  premium?: boolean;
 }
 
 /**

@@ -86,7 +86,7 @@ export function EditorProfileMenu({
   // ── Upload Document ─────────────────────────────────────────────────
   const handleUpload = async (file: File) => {
     setBusy("upload");
-    setUploadDetail(sw ? "Inasoma faili…" : "Reading file…");
+    setUploadDetail(sw ? "Ninasoma faili…" : "Reading file…");
     try {
       // Step 1 — extract text in the browser
       let text: string;
@@ -101,7 +101,7 @@ export function EditorProfileMenu({
         text = result.text;
       } else {
         // Plain text, Word, or other — read as text directly
-        setUploadDetail(sw ? "Inasoma faili…" : "Reading file…");
+        setUploadDetail(sw ? "Ninasoma faili…" : "Reading file…");
         text = await file.text();
       }
 

@@ -18,7 +18,11 @@
 import type { CareerProfile, CVData } from "@/types";
 import { profileToCvData } from "@/lib/career-profile/mapper";
 import { matchCvToJd } from "@/lib/job-match";
+import { matchExplanation } from "@/lib/match-explanation";
 import { analyzeJob, rankSkillsForJob, rankExperienceForJob, type JobAnalysis } from "@/lib/job-analysis";
+
+/** The two product languages; mirrors SnapLang in lib/api/snap-apply.ts. */
+export type SnapLang = "en" | "sw";
 
 export interface TargetedCvResult {
   /** The derived, reordered CV (before AI rewording). */
@@ -33,7 +37,7 @@ export interface TargetedCvResult {
   toConfirm: string[];
 }
 
-export function buildTargetedCv(profile: CareerProfile, jd: string): TargetedCvResult {
+export function buildTargetedCv(profile: CareerProfile, jd: string, lang: SnapLang = "en"): TargetedCvResult {
   const analysis = analyzeJob(jd, profile.personal.jobTitle);
 
   // Base CV from the profile (verified facts only).
@@ -49,23 +53,16 @@ export function buildTargetedCv(profile: CareerProfile, jd: string): TargetedCvR
   const before = matchCvToJd(base, jd);
   const after = matchCvToJd(reordered, jd);
 
-  // Explain the delta with concrete coverage facts.
-  const explanation: string[] = [];
-  const newlyMatched = after.matched.filter((t) => !before.matched.includes(t));
-  if (newlyMatched.length) {
-    explanation.push(`Reordering surfaced ${newlyMatched.length} keyword${newlyMatched.length === 1 ? "" : "s"} already in your profile: ${newlyMatched.slice(0, 6).join(", ")}${newlyMatched.length > 6 ? "…" : ""}.`);
-  }
-  const stillMissing = after.missing.slice(0, 6);
-  if (stillMissing.length) {
-    explanation.push(`Still missing from your profile: ${stillMissing.join(", ")}.`);
-  }
-  if (after.score > before.score) {
-    explanation.push(`Your best skills and experience for this role moved to the top, so ATS keyword scanning sees them first.`);
-  } else if (after.score === before.score) {
-    explanation.push(`Your profile already covers this job well — the reorder keeps the same match while putting the most relevant content first for a human recruiter.`);
-  } else {
-    explanation.push(`This job asks for skills outside your profile — the score reflects the real gap.`);
-  }
+  // Explain the delta with concrete coverage facts, in the caller's language
+  // (lib/match-explanation.ts) — the same builder /snap uses, so the two screens
+  // can never drift into different wording or different languages.
+  const explanation = matchExplanation({
+    lang,
+    newlyMatched: after.matched.filter((t) => !before.matched.includes(t)),
+    stillMissing: after.missing.slice(0, 6),
+    beforeScore: before.score,
+    afterScore: after.score,
+  });
 
   return {
     cv: reordered,

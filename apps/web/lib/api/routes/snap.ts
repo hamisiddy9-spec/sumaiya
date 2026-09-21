@@ -127,7 +127,7 @@ export const snapRoutes = new Hono().post("/snap", zValidator("json", snapSchema
   const cleanJd = sanitizePromptText(jobDescription, 8000);
 
   // ── ATS match: deterministic, always available (even when AI is down) ─────
-  let match = snapMatch(cvData, cleanJd);
+  let match = snapMatch(cvData, cleanJd, sw ? "sw" : "en");
 
   // ── AI: tailored CV + cover letter in parallel (one snap = one quota unit) ─
   let tailoredCv: { summary: string; experience: Array<{ id: string; description: string }> } | null = null;
