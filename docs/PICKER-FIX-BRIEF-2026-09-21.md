@@ -78,3 +78,25 @@ that item. Minimal change, no refactors, no new dependencies. **Never push, buil
 or touch a database.** Commit named paths only — never `git add -A`. Run `npx tsc --noEmit` and
 `npx jest` in `apps/native` (jest, **not** vitest). Flag Swahili for the owner rather than
 rewriting it. Report: verified / changed / refused / exact test output / sha.
+
+
+## ADDED — item 5: the substitution must be an ANGALIZO (owner's ruling)
+
+The owner said of exactly this behaviour: **"inastahili umakini iwe angalizo"** — it deserves
+attention; it should be a caution. He made that call while looking at the product, so treat it as
+decided, not proposed.
+
+You already confirmed the path and proposed the smallest honest fix: a one-line banner in
+`CvPreviewCard`, which already carries that pattern for empty CVs. **Implement it.**
+
+- Trigger: the id being rendered is NOT renderable on this device (the `cv-html.ts:335` fallback
+  to `"classic"` has fired).
+- Say which design is unavailable and which one is shown instead — in the same bilingual
+  `t("…", "…")` pattern the surrounding code uses. Do NOT compose new Swahili on your own
+  authority; if the wording is not already available elsewhere in the repo, flag it for the
+  owner instead of inventing it.
+- **A caution, not a block.** The user must still be able to export and share. This is about
+  removing silence, not adding a wall.
+- Cover the full-screen preview too, not just the card, since both render the substitute.
+- Add a test that a non-renderable id produces the caution, and that a renderable id produces
+  none.
