@@ -1,54 +1,70 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
-  Easing,
   cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
-  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { useThemeColors } from "../components/ui/theme";
-import { useMotionReduced } from "../components/ui/motion";
-import { SumaiyaMark } from "../components/sumaiya-mark";
+import { EASE, MOTION, staggerDelayMs, useMotionReduced } from "../components/ui/motion";
+import { MarkWell } from "../components/mark-well";
+import type { SumaiyaMarkState } from "../components/sumaiya-mark";
 import { useLang } from "../lib/i18n";
 
+/**
+ * Beat 1 of the welcoming path — the mark, in the well, with its name.
+ *
+ * This screen used to be its own effect: the mark at 52 in a solid 96 square on
+ * `Easing.back(1.6)` (the app's only overshoot) with a two-cycle pulse layered
+ * on the container *while* the mark breathed inside it, then the language stage
+ * rendered the same mark at 72 in a tinted 128 square, then the slides at 78 in
+ * a 148 square. Four sizes, three containers, three curve families, one cold
+ * start — which is what made the flow read as several effects in a queue.
+ *
+ * Now it is the first beat of ONE effect. The mark is `MarkWell`: the same
+ * container, the same mark, the same scale the language stage and the slides
+ * use. Nothing here scales: the well and the word arrive by opacity and a
+ * `MOTION.rise`, on the shared decelerate curve, and the mark's own single
+ * breath does the breathing (it is the only scale animation in the frame, so it
+ * reads as one object breathing rather than two stacked effects).
+ *
+ * Cost on a Redmi/Android-Go class phone: two timed shared values, both
+ * cancelled on unmount, and a frame callback that stops when the mark settles
+ * to `idle`. There is no looping animation left on this screen — the previous
+ * container pulse looped twice against a mark that was already breathing.
+ */
 export function SplashScreen() {
   const c = useThemeColors();
   const { t } = useLang();
   const reduce = useMotionReduced();
-  const logo = useSharedValue(0);
+  const well = useSharedValue(0);
   const word = useSharedValue(0);
-  const pulse = useSharedValue(1);
+  // The mark spins up as she "arrives" and settles into her resting drift — the
+  // same thinking → idle beat the language stage opens with, so the hand-off to
+  // it is the mark already mid-beat rather than a new one starting.
+  const [markState, setMarkState] = useState<SumaiyaMarkState>("thinking");
+
+  useEffect(() => {
+    const id = setTimeout(() => setMarkState("idle"), 1200);
+    return () => clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     // Reduce Motion: land everything at its resting state immediately. The
     // splash still shows the mark, the word and the tagline — nothing about the
-    // screen depends on having watched it move.
+    // screen depends on having watched it move — and `SumaiyaMark` reads the
+    // same setting itself, so the well is simply the resting frame.
     if (reduce) {
-      logo.value = 1;
+      well.value = 1;
       word.value = 1;
-      pulse.value = 1;
       return;
     }
-    logo.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.back(1.6)) });
-    word.value = withDelay(240, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
-    // A bounded breath, not an infinite one. The splash is a hand-off, not a
-    // loop: an animation that never ends keeps queueing UI-thread work for as
-    // long as the screen is mounted, and this screen is the one being torn down
-    // during the root cross-fade.
-    pulse.value = withDelay(
-      900,
-      withRepeat(
-        withSequence(
-          withTiming(1.05, { duration: 900, easing: Easing.inOut(Easing.quad) }),
-          withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
-        ),
-        2,
-        true,
-      ),
+    well.value = withTiming(1, { duration: MOTION.dur.slow, easing: EASE.out });
+    word.value = withDelay(
+      staggerDelayMs(1),
+      withTiming(1, { duration: MOTION.dur.slow, easing: EASE.out }),
     );
     // Cancel on unmount. Reanimated does not stop a running animation when the
     // component that started it goes away, so the pulse kept ticking against
@@ -57,41 +73,26 @@ export function SplashScreen() {
     // `RetryableMountingLayerException` during the splash → first-screen
     // transition. Measured before this fix: 291 of them in one cold start.
     return () => {
-      cancelAnimation(logo);
+      cancelAnimation(well);
       cancelAnimation(word);
-      cancelAnimation(pulse);
     };
-  }, [reduce, logo, word, pulse]);
+  }, [reduce, well, word]);
 
-  const logoStyle = useAnimatedStyle(() => ({
-    opacity: logo.value,
-    transform: [{ scale: logo.value * pulse.value }],
+  // One origin for everything entering the path: opacity plus a `rise`, never a
+  // scale — the mark's size is the one thing the path holds constant.
+  const wellStyle = useAnimatedStyle(() => ({
+    opacity: well.value,
+    transform: [{ translateY: (1 - well.value) * MOTION.rise }],
   }));
   const wordStyle = useAnimatedStyle(() => ({
     opacity: word.value,
-    transform: [{ translateY: (1 - word.value) * 10 }],
+    transform: [{ translateY: (1 - word.value) * MOTION.rise }],
   }));
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, alignItems: "center", justifyContent: "center", gap: 22 }}>
-      <Animated.View
-        style={[
-          logoStyle,
-          {
-            width: 96,
-            height: 96,
-            borderRadius: 26,
-            backgroundColor: c.accent,
-            alignItems: "center",
-            justifyContent: "center",
-            shadowColor: c.accent,
-            shadowOpacity: 0.35,
-            shadowRadius: 24,
-            shadowOffset: { width: 0, height: 10 },
-          },
-        ]}
-      >
-        <SumaiyaMark size={52} state="thinking" color="#FAF5EE" />
+      <Animated.View style={wellStyle}>
+        <MarkWell state={markState} />
       </Animated.View>
 
       <Animated.View style={[wordStyle, { alignItems: "center", gap: 6 }]}>

@@ -52,7 +52,9 @@ way that lags the finger.
 **4. No gratuitous motion.**
 If an animation does not communicate hierarchy, origin, or state, it is deleted
 rather than tuned. Two specific consequences in this codebase:
-- the splash mark's breath is **bounded** (two cycles), not an infinite loop;
+- the splash mark's breath is **bounded** — it is the mark's own `thinking`
+  breath, and it stops when the mark settles to `idle` (`splash-screen.tsx`),
+  so nothing on the launch screen loops for the life of the screen;
 - `SumaiyaMark` is `static` on inactive tabs — a per-frame callback on five
   invisible marks is motion nobody can see and the battery still pays for.
 
@@ -106,10 +108,15 @@ shorter than the matching entry. `dur.instant` is the only duration below 90ms.
 | `ease.inOut` | `Easing.inOut(Easing.cubic)` | `cubic-bezier(0.65, 0, 0.35, 1)` | a value that changes in place (chevron 0° → 180°) |
 | `ease.emphasized` | `Easing.bezier(0.16, 1, 0.3, 1)` | `cubic-bezier(0.16, 1, 0.3, 1)` | the longer settle on the last 10% — hero/brand moments only |
 
-**No overshoot on functional UI.** A list row that bounces has told the user
-something false about where it will land. The one sanctioned overshoot in the
-app is the splash mark's `Easing.back(1.6)`, and it is decoration on a screen
-with nothing to do.
+**No overshoot, anywhere.** A list row that bounces has told the user something
+false about where it will land, and a container that overshoots its own size has
+done the same to the brand mark. The splash mark's `Easing.back(1.6)` was the
+app's one sanctioned exception; it was removed when the welcoming path was made
+one continuous effect, because an overshoot is a *size change*, and the whole
+point of that path is that the mark is the one object whose size and container
+never change — the launch, the language stage and the slides all put the same
+mark in the same well at the same scale, arriving by opacity and a `rise`.
+`mark-well-tokens.test.ts` fails if a second size or container comes back.
 
 ### 3.3 Springs
 

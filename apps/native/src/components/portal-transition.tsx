@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { StyleSheet, useWindowDimensions, View } from "react-native";
 import Animated, {
-  Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
@@ -11,6 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { SumaiyaMark } from "./sumaiya-mark";
 import { useThemeColors } from "./ui/theme";
+import { EASE } from "./ui/motion";
+import { MARK_WELL, wellBackground } from "./ui/mark-well-tokens";
 import { haptics } from "./ui/haptics";
 
 /**
@@ -38,6 +39,14 @@ import { haptics } from "./ui/haptics";
  * the handoff then cut off mid-flight), a mark scaling on its own curve to
  * 3.4× while the field grew on another (two centres of expansion for the eye),
  * and a destination screen re-animating its logo on top of all of it.
+ *
+ * The mark here is the SAME object the slides left on screen — `MARK_WELL`'s
+ * container and size, so the hand-off adds no size jump and no container
+ * change — riding the flood on the same `EASE` family the rest of the path
+ * uses. It has to change ink (`accentText`, not `accent`): by the time it is
+ * visible the field behind it *is* the accent, so accent-coloured blades would
+ * paint cream-on-cream. That is the one difference between this frame and the
+ * rest of the path, and it is a contrast requirement, not a style choice.
  */
 // The single clock. COVER_AT is the moment the field is opaque everywhere —
 // everything else in this file is expressed relative to it.
@@ -52,10 +61,15 @@ const MARK_IN_MS = 160;
 // must be gone *before* the navigator's reveal starts, or it ghosts on top of
 // the incoming screen's own brand mark.
 const MARK_OUT_MS = 140;
-// The mark's bloom ceiling, and the scale it starts from. Both the field and
-// the mark are set in motion at IGNITE_MS with the same easing and duration,
-// so they read as one object: the size ratio between them never changes.
-const MARK_FROM = 1.18;
+// The mark's bloom ceiling, and the scale it starts from. The field and the
+// mark are set in motion at IGNITE_MS with the same easing and duration, so
+// they read as one object: the size ratio between them never changes.
+//
+// It starts at 1.0 — the size the slide's mark was already at — because the
+// previous 1.18 existed to fake the old 64 → 78 jump by starting the mark at
+// 64 * 1.18 ≈ 75.5. With one shared well there is no jump to fake: the mark
+// continues from where the slide left it.
+const MARK_FROM = 1;
 const MARK_TO = 1.55;
 
 export function PortalTransition({
@@ -109,20 +123,20 @@ export function PortalTransition({
     const release = setTimeout(() => haptics.medium(), IGNITE_MS);
 
     markOpacity.value = withSequence(
-      withDelay(MARK_IN_AT, withTiming(1, { duration: MARK_IN_MS, easing: Easing.out(Easing.quad) })),
+      withDelay(MARK_IN_AT, withTiming(1, { duration: MARK_IN_MS, easing: EASE.out })),
       // hold through the rest of the flood, then leave — see MARK_OUT_MS
-      withDelay(COVER_AT - (MARK_IN_AT + MARK_IN_MS), withTiming(0, { duration: MARK_OUT_MS, easing: Easing.in(Easing.quad) })),
+      withDelay(COVER_AT - (MARK_IN_AT + MARK_IN_MS), withTiming(0, { duration: MARK_OUT_MS, easing: EASE.in })),
     );
 
     // Same easing, same duration, same start as the field — one object.
     markScale.value = withDelay(
       IGNITE_MS,
-      withTiming(MARK_TO, { duration: BLOOM_MS, easing: Easing.in(Easing.cubic) }),
+      withTiming(MARK_TO, { duration: BLOOM_MS, easing: EASE.in }),
     );
 
     disc.value = withDelay(
       IGNITE_MS,
-      withTiming(1, { duration: BLOOM_MS, easing: Easing.in(Easing.cubic) }, (finished) => {
+      withTiming(1, { duration: BLOOM_MS, easing: EASE.in }, (finished) => {
         "worklet";
         if (!finished) return;
         runOnJS(haptics.success)();
@@ -158,22 +172,25 @@ export function PortalTransition({
           discStyle,
         ]}
       />
-      {/* the mark, riding the leading edge of the flood */}
+      {/* the mark, riding the leading edge of the flood — same well geometry
+          and same mark size as the slide it left, so nothing resizes here */}
       <Animated.View
         style={[
           {
             position: "absolute",
-            left: ox - 40,
-            top: oy - 40,
-            width: 80,
-            height: 80,
+            left: ox - MARK_WELL.size / 2,
+            top: oy - MARK_WELL.size / 2,
+            width: MARK_WELL.size,
+            height: MARK_WELL.size,
+            borderRadius: MARK_WELL.radius,
+            backgroundColor: wellBackground(c.accent),
             alignItems: "center",
             justifyContent: "center",
           },
           markStyle,
         ]}
       >
-        <SumaiyaMark size={64} state="thinking" color="#FAF5EE" />
+        <SumaiyaMark size={MARK_WELL.mark} state="thinking" color={c.accentText} />
       </Animated.View>
     </View>
   );
