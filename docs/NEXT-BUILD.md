@@ -105,3 +105,25 @@ grammar, which is exactly why panel grammar rulings are relayed as candidates, n
 Separately flagged, and genuinely contested: line 145 `hali yake` (singular possessive) sits beside
 `Maombi uliyotuma` and the plural verb `ziko`. A panel proposes `hali zake`. `hali` is a class 9/10
 noun, so `yake` is also defensible — **a native speaker decides.**
+
+
+### The A4 fit defect — one engine, not nine templates
+
+Full write-up in `docs/TEMPLATE-FIT-FINDINGS-2026-09-21.md`. In short: the page is A4 on both
+surfaces and correct (794x1123px = 210.1x297.1mm, `engine/fit.tsx` and the native
+`cv-engine/fit.ts` agree). What is wrong is what happens at the A4 edge — `clampFitScale`
+refuses to shrink below **0.92**, the page carries `overflow: hidden`, so content needing more
+than 8% of shrink is **clipped and silently lost**. `mono-cv` loses 137px (~5 lines).
+
+The warning that exists is marked `data-pdf-exclude`, so the exported PDF says nothing: **the
+person who downloads the file is the only one who never sees it.**
+
+A free-model panel (2/2, independently) ruled that silent clipping at export is a
+**correctness bug, not a design limit**, and converged on the order: **A** (confirm at export —
+non-negotiable) → **B** (second A4 page, the honest fix for `mono-cv`) → **D** (make the
+existing spacing tiers work harder) → **C** (shrink below 0.92) last resort only, floor >= 0.88.
+
+Also retracted here: the earlier reading that "42 of 47 templates overflow" from
+`usedFraction`. That metric includes non-text boxes, so its floor is 1.000 by construction and
+29 templates sharing exactly 1.12 is an artefact. The true counts are **7 spilling vertically**
+and **3 overflowing horizontally**.
