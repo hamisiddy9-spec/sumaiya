@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { TEMPLATES } from "@/types";
 import { BLOG_POSTS } from "@/lib/blog";
 import { PDF_TOOLS } from "@/lib/pdf-tools";
+import { CANONICAL_ORIGIN } from "@/lib/seo";
 
 // Generated from the real data so it never drifts: every template landing page
 // and every blog post is listed, not a hand-maintained subset.
@@ -14,7 +15,9 @@ import { PDF_TOOLS } from "@/lib/pdf-tools";
 const LAST_CONTENT_PASS = new Date("2026-08-19");
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app";
+  // Absolute, always. The empty-string trap that shipped a relative sitemap is documented
+  // on CANONICAL_ORIGIN — a `<loc>` that is not absolute makes the whole file inert.
+  const baseUrl = CANONICAL_ORIGIN;
 
   // Single entry type for all lists so `lastModified` is a known optional
   // property (MetadataRoute.Sitemap[number]) everywhere below.

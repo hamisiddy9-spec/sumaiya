@@ -23,7 +23,26 @@
  * one the sitemap publishes.
  */
 
-export const CANONICAL_ORIGIN = process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app";
+/**
+ * The canonical origin, resolved defensively.
+ *
+ * `process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"` is NOT safe here, and the
+ * failure was live in production: the variable is set to an EMPTY STRING in Vercel, and
+ * `??` only falls back on null/undefined — an empty string is neither. So the origin came
+ * out as `""`.
+ *
+ * Metadata survived that by luck: Next resolves a relative `canonical`/`og:image` against
+ * `metadataBase`, which does use `||`. But `sitemap.xml` and `robots.txt` are raw text
+ * emitted with no such resolution, so the live sitemap shipped `<loc>/templates</loc>` for
+ * all 296 entries and robots.txt advertised `Sitemap: /sitemap.xml`. A relative sitemap is
+ * invalid: crawlers ignore the whole file, and the entries are worth nothing.
+ *
+ * A whitespace-only value is equally unusable, so trim before deciding.
+ */
+export const CANONICAL_ORIGIN = (() => {
+  const raw = (process.env.NEXT_PUBLIC_APP_URL || "").trim().replace(/\/+$/, "");
+  return raw || "https://sumaiya.app";
+})();
 
 export const LOCALES = ["sw", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
