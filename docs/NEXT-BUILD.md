@@ -41,11 +41,17 @@ has **not** been run (`GET /rest/v1/app_report` → 404). The endpoint will 500-
    → **0 and 0**. Cheapest fix: a **no-AI letter generated on the device** — the advert already
    states the position, addressee and reference — leaving AI polish as the premium upsell. See
    `docs/MVP-2026-09-21.md`.
-2. **The templates legibility pass.** `components/templates/engine/typography.ts` is written,
-   correct, and **imported by nothing**. 707 literals across 47 templates sit below its floor, and
-   `rift` compresses 7 of its 8 sizes into a 9.5–12.5px band. A per-template design pass — raising a
-   floor on an already-full page can re-overflow the three templates that already overflow.
-   **Decision needed: wire it in, or delete the orphan.**
+2. **The templates legibility pass** — a free-model panel ruled on 2026-09-21 (see
+   `docs/panels/`). `components/templates/engine/typography.ts` is written, correct, and **imported
+   by nothing**; 707 literals across 47 templates sit below its floor and `rift` compresses 7 of its
+   8 sizes into a 9.5–12.5px band.
+   **Ruling: neither "all 47" nor "delete" — raise only what is below ~9px, and fix the three
+   overflowers FIRST.** Both roles independently flagged the same constraint: *"raising type on pages
+   at usedFraction 1.254 will worsen overflow"* (meridian, grid, mono-cv). So the order is
+   (a) fix horizontal overflow on those three, (b) apply the floor as a raise-only clamp to the
+   sub-9px literals — starting with the 16 templates measured at 7.5px — (c) re-measure usedFraction
+   before/after and gallery-check at 0.48 scale on a cheap screen. `rift`'s density problem is
+   separate and needs its own pass. This is a panel's opinion, not a measured finding.
 3. **A screen to enter a friend's code.** `POST /api/referral/claim {code}` exists; nothing calls it.
    So a Bluetooth or WhatsApp *file* hand-off — how apps actually spread here — credits nobody, which
    is exactly what the sharing model depends on.

@@ -1,0 +1,56 @@
+// The small-print floor — the ONE legibility rule for CV typography.
+//
+// 8pt is the usual minimum for printed copy, and the sheet is authored at 96dpi
+// (794px = A4's 8.27in), so 8pt is 8 × 96/72 = 10.667px. Call it 10.7.
+//
+// Why it needs to exist at all: 41 of the 47 offered templates are hand-written
+// and set their own inline pixel sizes, and 707 of those literals are below this
+// floor — dates at 7.5px (5.6pt), the contact line and language/skill levels at
+// 8px, section labels at 8.5px. Measured across the offered set, the smallest
+// rendered text was 7.5px in 16 of 47 templates (median 9.0). 7.5px prints as a
+// grey smudge and, at the gallery's 0.48 preview scale, paints at 3.6px, which
+// is not text — on a document whose entire job is to be read by a stranger.
+//
+// The floor is applied in two places, on purpose:
+//   • engine/tokens.ts clamps every size the token scale can produce, so an
+//     engine template is AUTHORED at a legible size (density can no longer drag
+//     a token to 7.65px);
+//   • engine/fit.tsx raises anything still below the floor inside the sheet it
+//     measures, which is what reaches the 41 hand-written templates — they never
+//     call makeTokens(), so no token change can touch them.
+
+/** 8pt at 96dpi. Nothing on a CV may render smaller than this. */
+export const SMALL_PRINT_FLOOR_PX = 10.7;
+
+/**
+ * The floor, as a pure decision: the size to force, or `null` to leave it alone.
+ * Only ever raises — a size already at or above the floor is untouched, which is
+ * what makes the DOM pass idempotent.
+ */
+export function clampFontPx(px: number, floor: number = SMALL_PRINT_FLOOR_PX): number | null {
+  if (!Number.isFinite(px) || px <= 0) return null;
+  return px < floor ? floor : null;
+}
+
+/** px → pt at 96dpi, for reporting sizes the way a print shop reads them. */
+export function pxToPt(px: number): number {
+  return Math.round((px * 72) / 96 * 10) / 10;
+}
+
+
+---
+
+QUESTION: This legibility floor is written, correct, and imported by NOTHING (0 call sites). Facts: 707 inline pixel literals across 47 hand-written templates sit BELOW the floor; the worst templates put dates at 7.5px and contact lines at 8px; at the gallery's 0.48 preview scale 7.5px paints at 3.6px. Three templates (meridian, grid, mono-cv) ALREADY overflow horizontally with usedFraction 1.254. Design judgement found that template 'rift' compresses 7 of its 8 type sizes into a 9.5-12.5px band, so its lower half reads as one grey texture. Options: (A) wire the floor into all 47 templates, (B) wire it only where text is below 9px, (C) delete the unused file. Which, and what is the risk of raising a floor on pages that already overflow?
+
+YOUR ROLE: a product designer who judges legibility and hierarchy on cheap Android screens
+
+Answer in EXACTLY this shape, nothing before VERDICT:
+
+VERDICT: <one sentence, your ruling>
+WHY: <at most 3 short bullets>
+ACTION: <at most 3 imperative next steps, one per line, each starting with ACTION: >
+RISK: <the one thing that would make your ruling wrong>
+DOUBT: <what you could not judge from the material given>
+
+No preamble, no restating the question, no apologies. If the material is insufficient, say so
+in DOUBT and still give a VERDICT.
