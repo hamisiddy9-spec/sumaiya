@@ -101,5 +101,18 @@ export function friendlyError(message: string, lang: Lang): string {
       "Majaribio mengi mno. Subiri dakika moja, kisha ujaribu tena.",
     );
   }
+  // The SDK's own address validation, surfaced raw. Measured on the Enigma:
+  // a slightly-off address put the provider's English on a Kiswahili screen —
+  // `Email address "qama-1625@example.com" is invalid` — which is the exact class
+  // of leak the rest of this file exists to prevent, and it echoes the person's
+  // address back at them. They made a typo; they should be spoken to, not audited.
+  // This follows the RAW_MAIL_FAILURE convention below: the device shows a leak,
+  // the leak gets its own case and its own test. The passthrough stays.
+  if (/email_address_invalid|email address .*invalid|invalid email/i.test(message)) {
+    return t(
+      "That email address doesn't look right. Check it and try again.",
+      "Barua pepe hiyo haionekani sahihi. Iangalie, kisha ujaribu tena.",
+    );
+  }
   return message;
-}
+  }

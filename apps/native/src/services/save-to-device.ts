@@ -54,7 +54,17 @@ export async function saveToPhone(
 
   let directoryUri: string;
   try {
-    const permission = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+    // OPEN SOMEWHERE USABLE. Called with no argument, SAF opens at the volume
+    // ROOT, which Android 11+ forbids as a destination: the user is met with
+    // "Can't use this folder / To protect your privacy, choose another folder",
+    // a GREYED-OUT "USE THIS FOLDER" button, and no hint about what to do.
+    // Measured on the Enigma (Android 15, 720x1560): the obvious choice is a dead
+    // end, and Download is refused too — only Documents enables the button.
+    // Anchoring at Documents means the first screen the user sees is one they can
+    // actually save into.
+    const permission = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(
+      "content://com.android.externalstorage.documents/document/primary%3ADocuments",
+    );
     if (!permission.granted || !permission.directoryUri) return { status: "cancelled" };
     directoryUri = permission.directoryUri;
   } catch {

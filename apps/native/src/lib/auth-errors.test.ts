@@ -62,6 +62,24 @@ describe("friendlyError", () => {
   });
 
   /**
+   * The failure the device actually showed on 2026-09-21, verbatim, on the Enigma
+   * (Android 15, 720x1560 @ density 272): a mistyped address put the provider's
+   * English — and the address itself — on a Kiswahili screen. Same convention as
+   * RAW_MAIL_FAILURE below: a leak seen on a device gets its own case and its own
+   * test, rather than replacing the deliberate passthrough this file keeps for
+   * errors nobody has met yet.
+   */
+  const RAW_BAD_ADDRESS = 'Email address "qama-1625@example.com" is invalid';
+
+  it("never returns the provider's own address rejection", () => {
+    expect(friendlyError(RAW_BAD_ADDRESS, "en")).toMatch(/doesn't look right/i);
+    expect(friendlyError(RAW_BAD_ADDRESS, "sw")).toMatch(/haionekani sahihi/);
+    // and it must not echo the person's address back at them — the raw string did
+    expect(friendlyError(RAW_BAD_ADDRESS, "en")).not.toContain("@");
+    expect(friendlyError(RAW_BAD_ADDRESS, "sw")).not.toContain("@");
+  });
+
+  /**
    * The failure the device actually showed on 2026-09-13, verbatim, while the
    * auth project had no mailer configured. It reached a Swahili screen as raw
    * English SDK text because no branch matched it.
