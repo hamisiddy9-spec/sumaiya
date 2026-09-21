@@ -1,0 +1,90 @@
+[
+ {
+  "kind": "img-cover",
+  "frame": [
+   272,
+   300
+  ],
+  "frameAspect": 0.907,
+  "screen": {
+   "px": 30672,
+   "w": 198,
+   "h": 198,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 111328,
+   "w": 358,
+   "h": 396,
+   "aspect": 0.904
+  },
+  "rasterVsScreenPct": -9.6,
+  "faithful": false
+ },
+ {
+  "kind": "bg-cover",
+  "frame": [
+   272,
+   300
+  ],
+  "frameAspect": 0.907,
+  "screen": {
+   "px": 30672,
+   "w": 198,
+   "h": 198,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 122304,
+   "w": 396,
+   "h": 396,
+   "aspect": 1
+  },
+  "rasterVsScreenPct": 0,
+  "faithful": true
+ },
+ {
+  "kind": "cvphoto-square",
+  "frame": [
+   96,
+   96
+  ],
+  "frameAspect": 1,
+  "screen": {
+   "px": 3096,
+   "w": 62,
+   "h": 62,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 12556,
+   "w": 126,
+   "h": 126,
+   "aspect": 1
+  },
+  "rasterVsScreenPct": 0,
+  "faithful": true
+ },
+ {
+  "kind": "cvphoto-wide",
+  "frame": [
+   96,
+   96
+  ],
+  "frameAspect": 1,
+  "screen": {
+   "px": 3128,
+   "w": 64,
+   "h": 64,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 4180,
+   "w": 42,
+   "h": 126,
+   "aspect": 0.333
+  },
+  "rasterVsScreenPct": -66.7,
+  "faithful": false
+ }
+]
