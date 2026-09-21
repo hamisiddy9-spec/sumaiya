@@ -11,6 +11,7 @@ import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
 import { haptics, enterDurationMs, MOTION, TextField, useMotionReduced, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
+import { TemplateThumb } from "./template-thumb";
 import { track } from "../../lib/analytics";
 
 /**
@@ -204,7 +205,7 @@ export function TemplateGallery({
               opacity: locked ? 0.55 : 1,
             }}
           >
-            <RealTemplateThumb id={item.id} accent={c.accent} lang={lang} width={cell - 12} />
+            <TemplateThumb id={item.id} accent={c.accent} width={cell - 12} />
           </View>
           <Text
             numberOfLines={1}
@@ -348,10 +349,9 @@ export function TemplateGallery({
           </FlatListRow>
         </View>
 
-        {/* Collections grid. Every cell is a real WebView rendering a full A4
-            page (see real-template-thumb.tsx). The old defaults mounted 12 ROWS =
-            36 WebViews before the gallery was usable — which is most of what
-            "not smooth" was. Mount two rows, then grow the window as the user
+        {/* Collections grid. Each cell is the pure-RN schematic thumbnail (see
+            template-thumb.tsx) — a real WebView per cell stuttered scrolling on
+            low-end Android. Mount two rows, then grow the window as the user
             scrolls instead of all at once. */}
         <SectionList
           sections={sections}

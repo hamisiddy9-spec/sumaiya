@@ -185,11 +185,12 @@ const languagesBlock = ({ L, languages }: Parts) =>
     : "";
 
 const BASE_CSS = `
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
   body { margin: 0; background: #fff; color: #2b2b2b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .name { margin: 0; }
   .section { margin-bottom: 16px; }
-  .entry { margin-bottom: 10px; }
+  .entry { margin-bottom: 10px; break-inside: avoid; }
   .entry-title { font-weight: 700; color: #211A15; }
   .entry-sub { color: #666; }
   .entry-date { color: #999; }

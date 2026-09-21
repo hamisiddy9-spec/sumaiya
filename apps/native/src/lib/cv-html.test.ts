@@ -40,3 +40,12 @@ describe("cvToHtml — photo rendering", () => {
     expect(html).toContain('src="https://example.com/p.jpg"');
   });
 });
+
+describe("cvToHtml — print pagination", () => {
+  it.each(CV_TEMPLATES.map((t) => t.id))("declares an A4 page and protects entries from splitting for the %s template", (id: CvTemplateId) => {
+    const html = cvToHtml(cv(), { template: id });
+    expect(html).toContain("@page");
+    expect(html).toMatch(/size:\s*A4/);
+    expect(html).toMatch(/\.entry\s*\{[^}]*break-inside:\s*avoid/);
+  });
+});

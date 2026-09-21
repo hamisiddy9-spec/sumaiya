@@ -145,6 +145,7 @@ export function renderTemplateHtml(
 
   return `<!DOCTYPE html><html lang="${lang}"><head><meta charset="UTF-8">${fit ? fit.viewport : `<meta name="viewport" content="width=${PAGE_W}">`}
 <style>
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html, body { margin: 0; padding: 0; background: #fff; }
   body { color: ${tokens.color.text}; }

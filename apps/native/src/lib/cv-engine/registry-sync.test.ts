@@ -135,6 +135,12 @@ describe("every engine template renders a usable document", () => {
     // It has content beyond the boilerplate
     expect(html.length).toBeGreaterThan(1200);
 
+    // Printable: an A4 page with no margin surprise, and a job entry never
+    // splits across a page boundary (see the pdf-export print-pagination audit).
+    expect(html).toContain("@page");
+    expect(html).toMatch(/size:\s*A4/);
+    expect(html).toContain("break-inside:avoid");
+
     // No unresolved generator sentinel leaked into the output
     expect(html).not.toContain("@accent");
 
