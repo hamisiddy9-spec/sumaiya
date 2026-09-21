@@ -130,7 +130,7 @@ const ATS_IN_SWAHILI = /\b(?:\w*kagua\s+ATS|(?:wa|ya|kwa|za|la|cha|na|kwenye)\s+
 // Muundo na nafasi tu.", ~30 template blurbs) and for a seat ("Nafasi 50
 // zimechukuliwa", early-access places), so a broad guard would fail the build
 // on correct copy — the opposite of useful.
-const BARE_NAFASI_FOR_A_JOB = /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa)"/;
+const BARE_NAFASI_FOR_A_JOB = /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa|Nafasi za kazi kwako)"/;
 
 // "Fonti" is a calque of "Font" — Swahili does not form a noun by adding -i. The
 // word is "Herufi" (letters / type). English keeps "Font" so the mapping is
@@ -201,7 +201,14 @@ const CALQUE_GUARDS: CalqueGuard[] = [
   },
   {
     pattern: BARE_NAFASI_FOR_A_JOB,
-    message: (m, file, line) => `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi" in ${file}:${line}`,
+    // Owner's instruction, verbatim: "toa kwako nafasi za kazi is enough". A
+    // trailing "kwako" on this label is wrong twice over — it is a possessive
+    // tacked onto the label, and it promises a personalisation the feed does not
+    // do (job_recommendation has 0 rows for every user).
+    message: (m, file, line) =>
+      m.includes("kwako") && m.includes("za kazi")
+        ? `"${m}" — the label is "Nafasi za kazi"; drop the "kwako" (owner: "toa kwako nafasi za kazi is enough") in ${file}:${line}`
+        : `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi" in ${file}:${line}`,
   },
   {
     pattern: FONTI_CALQUE,

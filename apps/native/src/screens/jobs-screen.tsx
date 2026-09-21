@@ -148,7 +148,10 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
-      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings for you", "Nafasi za kazi kwako")}</ScreenTitle>
+      {/* Owner's instruction, verbatim: "toa kwako nafasi za kazi is enough" —
+          the "kwako" is gone. It also stops the label promising a personalisation
+          the feed does not do (job_recommendation has 0 rows for every user). */}
+      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings", "Nafasi za kazi")}</ScreenTitle>
 
       {loading ? (
         <SkeletonList count={3} gap={10} />

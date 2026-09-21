@@ -315,10 +315,16 @@ const GUARDS: Guard[] = [
     // /\bNafasi\b/: "nafasi" is the correct word for whitespace ("Bila rangi.
     // Muundo na nafasi tu.", ~30 template blurbs) and for a seat ("Nafasi 50
     // zimechukuliwa"), so a broad guard would fail the build on correct copy.
-    pattern: /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa)"/,
+    pattern: /"(Nafasi kwako|Nafasi zote|Nafasi mpya|Nafasi mpya zinazokufaa|Hakuna nafasi kwa sasa|Nafasi za kazi kwako)"/,
+    // Owner's instruction, verbatim: "toa kwako nafasi za kazi is enough". A
+    // trailing "kwako" on this label is wrong twice over — it is a possessive
+    // tacked onto the label, and it promises a personalisation the feed does not
+    // do (job_recommendation has 0 rows for every user).
     message: (m) =>
-      `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi"`,
-    bad: ['sw ? "Nafasi mpya" : "New roles"', '"Nafasi zote"', '"Nafasi kwako"'],
+      m.includes("kwako") && m.includes("za kazi")
+        ? `"${m}" — the label is "Nafasi za kazi"; drop the "kwako" (owner: "toa kwako nafasi za kazi is enough")`
+        : `"${m}" — a bare "nafasi" does not say whether it means a job or a space; where the job sense is meant write "Nafasi za kazi …" / "nafasi ya kazi"`,
+    bad: ['sw ? "Nafasi mpya" : "New roles"', '"Nafasi zote"', '"Nafasi kwako"', '"Nafasi za kazi kwako"'],
     good: [
       '"Nafasi za kazi"',
       '"Nafasi mpya za kazi"',
