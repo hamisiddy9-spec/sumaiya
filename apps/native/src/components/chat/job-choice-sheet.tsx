@@ -272,7 +272,7 @@ export function JobChoiceSheet({
               {phase === "loading" ? (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 12, paddingHorizontal: 4 }}>
                   <ActivityIndicator color={c.accent} />
-                  <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Searching…", "Inatafuta…")}</Text>
+                  <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Searching…", "Ninatafuta…")}</Text>
                 </View>
               ) : null}
 

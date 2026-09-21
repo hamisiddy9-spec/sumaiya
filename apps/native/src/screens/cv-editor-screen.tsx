@@ -9,8 +9,8 @@ import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
-import { fileNameFromUri, saveToPhone } from "../services/save-to-device";
 import { shareCV } from "../services/share";
+import { fileNameFromUri, saveToPhone } from "../services/save-to-device";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
 import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
@@ -334,6 +334,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       storedLocally = true;
       track(FUNNEL_EVENTS.cvCreated, { template });
       // Let her learn from real activity, not only from the ATS screen.
+      // Rebuilding a CV repeatedly is itself a signal worth noticing.
       //
       // Recorded as an EVENT, not as a sentence. The old call stored the English
       // string "Rebuilt a CV using the ${template} template", which a Swahili
@@ -344,7 +345,6 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // toggle, and the template is named the way the picker names it instead of
       // by its internal id ("classic" -> "Asili"/"Classic").
       const templateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
-      // Rebuilding a CV repeatedly is itself a signal worth noticing.
       updateMemory((m) =>
         addEpisodeEvent(m, "cv_rebuilt", { key: "cv_rebuilt", params: { template: templateName } }, t),
       ).catch(() => {});
@@ -414,12 +414,12 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // An export is the moment a CV leaves the app to be sent to someone, so
       // it is the strongest signal we ever get that the person is actively
       // applying. Three of these across different days becomes a fact she can
+      // coach from — "actively applying" — without ever being asked.
       //
       // Same event-not-sentence rule as the save path above: this used to store
       // the English "Exported a CV using the ${template} template" that a
       // Swahili user then read in the memory screen.
       const exportedTemplateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
-      // coach from — "actively applying" — without ever being asked.
       updateMemory((m) =>
         addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: exportedTemplateName } }, t),
       ).catch(() => {});
@@ -479,7 +479,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       <Screen>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
           <ActivityIndicator color={c.accent} />
-          <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Opening your CV…", "Inafungua CV yako…")}</Text>
+          <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Opening your CV…", "Ninafungua CV yako…")}</Text>
         </View>
       </Screen>
     );

@@ -4,7 +4,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useApplications } from "../hooks/use-applications";
 import { STATUS_META, type AppStatus } from "../lib/applications-store";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, Screen, ScreenTitle, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, EmptyState, Screen, ScreenTitle, SkeletonList, Stagger, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import type { ThemeColors } from "../components/ui/theme";
 import type { ApplicationsScreenProps } from "../navigation/types";
@@ -56,11 +56,7 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
       </ScreenTitle>
 
       {loading && applications.length === 0 ? (
-        <>
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </>
+        <SkeletonList count={3} />
       ) : applications.length === 0 ? (
         <EmptyState
           icon="briefcase"

@@ -25,7 +25,7 @@ interface Props {
 }
 
 const STEPS_EN = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];
-const STEPS_SW = ["Inasoma maandishi…", "Inatafuta uzoefu wako…", "Inapanga CV yako…"];
+const STEPS_SW = ["Ninasoma maandishi…", "Ninatafuta uzoefu wako…", "Ninapanga CV yako…"];
 
 export function ScanProcessingScreen({ route }: Props) {
   const c = useThemeColors();

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, {
   Easing,
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -10,19 +11,34 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useThemeColors } from "../components/ui/theme";
+import { useMotionReduced } from "../components/ui/motion";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useLang } from "../lib/i18n";
 
 export function SplashScreen() {
   const c = useThemeColors();
   const { t } = useLang();
+  const reduce = useMotionReduced();
   const logo = useSharedValue(0);
   const word = useSharedValue(0);
   const pulse = useSharedValue(1);
 
   useEffect(() => {
+    // Reduce Motion: land everything at its resting state immediately. The
+    // splash still shows the mark, the word and the tagline — nothing about the
+    // screen depends on having watched it move.
+    if (reduce) {
+      logo.value = 1;
+      word.value = 1;
+      pulse.value = 1;
+      return;
+    }
     logo.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.back(1.6)) });
-    word.value = withDelay(240, withTiming(1, { duration: 420 }));
+    word.value = withDelay(240, withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) }));
+    // A bounded breath, not an infinite one. The splash is a hand-off, not a
+    // loop: an animation that never ends keeps queueing UI-thread work for as
+    // long as the screen is mounted, and this screen is the one being torn down
+    // during the root cross-fade.
     pulse.value = withDelay(
       900,
       withRepeat(
@@ -30,10 +46,22 @@ export function SplashScreen() {
           withTiming(1.05, { duration: 900, easing: Easing.inOut(Easing.quad) }),
           withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
         ),
-        -1,
+        2,
+        true,
       ),
     );
-  }, []);
+    // Cancel on unmount. Reanimated does not stop a running animation when the
+    // component that started it goes away, so the pulse kept ticking against
+    // views that no longer existed; each tick is only flushed during a UI event
+    // dispatch, which is why they surfaced as a flood of
+    // `RetryableMountingLayerException` during the splash → first-screen
+    // transition. Measured before this fix: 291 of them in one cold start.
+    return () => {
+      cancelAnimation(logo);
+      cancelAnimation(word);
+      cancelAnimation(pulse);
+    };
+  }, [reduce, logo, word, pulse]);
 
   const logoStyle = useAnimatedStyle(() => ({
     opacity: logo.value,
