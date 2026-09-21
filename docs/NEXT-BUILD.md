@@ -32,9 +32,15 @@ has **not** been run (`GET /rest/v1/app_report` → 404). The endpoint will 500-
 
 ## QUEUED — not started
 
-1. **The application letter (barua ya maombi ya kazi).** Every Tanzanian advert mandates a *signed*
-   letter alongside the CV; both direct competitors already ship one; our `cover_letter` table holds
-   **zero rows**, ever. This is the MVP gap — see `docs/MVP-2026-09-21.md`.
+1. **Un-wall the advert → letter flow.** *(Corrected — this is not "build the letter". The letter
+   is built, one tap from home (`JobApply {want:"letter"}`), and the server can write it. The real
+   defect is that `applications.ts` and `cover-letter.ts` are entirely `getUserId → 401`, and the
+   home screen hides those tiles from guests on purpose.)* So a guest can finish a **CV** but not an
+   **application** — which cuts against the standing rule that a guest finishes before being asked
+   for an account. Evidence: CV editor open to guests → **7 rows**; letter/application account-walled
+   → **0 and 0**. Cheapest fix: a **no-AI letter generated on the device** — the advert already
+   states the position, addressee and reference — leaving AI polish as the premium upsell. See
+   `docs/MVP-2026-09-21.md`.
 2. **The templates legibility pass.** `components/templates/engine/typography.ts` is written,
    correct, and **imported by nothing**. 707 literals across 47 templates sit below its floor, and
    `rift` compresses 7 of its 8 sizes into a 9.5–12.5px band. A per-template design pass — raising a
