@@ -22,6 +22,7 @@ WHAT IT WILL NOT DO: print a secret; write outside --out; treat a verdict as a f
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -100,7 +101,7 @@ in DOUBT and still give a VERDICT."""
 
 FREE_RULES = """Answer freely and directly, in your own structure and your own voice. Say what
 you actually think, including anything the question did not ask about. Be specific and concrete.
-Skip preamble and restating. At most 450 words."""
+Do not narrate your reasoning, describe your process, or restate the task - answer only. End with a final line beginning "BOTTOM LINE:" stating your ruling in one sentence. At most 400 words."""
 
 
 def read_payload(p: str) -> str:
@@ -169,13 +170,19 @@ def ask_with_rotation(model: str, prompt: str, key: str, tried: set):
     return model, None, err
 
 
-def verdict_line(text: str, label: str) -> str:
-    """One line per answer: the verdict, or the first thing that stands in for one."""
-    for line in text.splitlines():
-        s = line.strip()
-        if s.upper().startswith("VERDICT:"):
-            return f"{label}  {s[8:].strip()}"
-    return f"{label}  {' '.join(text.split())[:130]}"
+NARRATION = re.compile(r"^(the user|i need|i will|i am|i should|i must|let me|first,|sure|okay|alright|as an? |my task|here is my|i have reviewed|looking at|i ll|i m)", re.I)
+
+
+def verdict_line(text: str, label: str, width: int = 300) -> str:
+    """The ruling, wherever the model put it. Models that narrate their reasoning into
+    content (nemotron does) otherwise reduce a real answer to its first preamble line."""
+    lines = [l.strip() for l in text.splitlines() if l.strip()]
+    for l in lines:
+        if l.upper().startswith("VERDICT:") or l.upper().startswith("BOTTOM LINE:"):
+            return f"{label}  {l.split(chr(58), 1)[1].strip()[:width]}"
+    body = [l for l in lines if not NARRATION.match(l)]
+    joined = " ".join(" ".join(body).split()) if body else " ".join(text.split())
+    return f"{label}  {joined[:width]}"
 
 
 def actions(text: str, limit: int = 3):
@@ -200,12 +207,10 @@ def run_one(target: str, payload: str, args, key: str, outdir: Path):
     base = (f"{payload}\n\n---\n\nSCOPE: {args.scope}\nQUESTION: {args.ask}\n\n"
             f"{spec['frame']}\n\nYOUR ROLE: ")
 
-    tried = set()
-
     def work(job):
         n, role, model = job
         prompt = base + role + "\n\n" + rules
-        m, text, err = ask_with_rotation(model, prompt, key, tried)
+        m, text, err = ask_with_rotation(model, prompt, key, set())  # per-job: a shared set lets one job starve the other of rotations
         return n, role, m, text, err, prompt
 
     # ── two at a time, by default ──
@@ -269,6 +274,9 @@ def main():
             else:
                 line = verdict_line(text, f"[{n} {model.split('/')[-1][:26]}]")
             print("    " + line)
+            if text and args.style == "free":
+                # free style often holds the ruling at the END, so show the tail too
+                print("      tail:", " ".join(text.split())[-280:])
             digest.append(f"- {target}  {line}")
             if text and args.style == "digest":
                 for a in actions(text):

@@ -1,0 +1,6 @@
+# free-panel 20260921-164031
+scope=copy style=free
+QUESTION: This is the copy a first-time user with NO ACCOUNT meets when a feature needs one, plus the invite/reward copy for sharing. Owner rules: (1) a guest must FINISH and DOWNLOAD a CV before being asked for an account; (2) premium gates unlock by SHARING (kwa kualika marafiki), not by paying. Where does this copy break those rules, and where is the Swahili wrong, cold or a calque? Quote exact strings.
+
+- C:\Users\hamis\AppData\Local/Temp/panel-a  [1 nemotron-3-ultra-550b-a55b]  Owner rules: 1. Guest must FINISH and DOWNLOAD a CV before being asked for an account 2. Premium gates unlock by SHARING (kwa kualika marafiki), not by paying GUEST_DELIVERABLE_INVITE: - title: "Hifadhi CV yako" - "Save your CV" - this is good, imperative - body: "CV yako iko kwenye simu hii pekee. 
+- C:\Users\hamis\AppData\Local/Temp/panel-a  [2 nemotron-3-ultra-550b-a55b]  1. A guest must FINISH and DOWNLOAD a CV before being asked for an account. 2. Premium gates unlock by SHARING (kwa kualika marafiki), not by paying. I also need to check Swahili quality: wrong, cold, calque, ambiguous, reads wrong for a non-native speaker. I'll go through the strings in both files.
