@@ -80,9 +80,13 @@ test_endpoint "DELETE" "/cv/mock-cv-id" "" \
 
 echo "💼 JOBS ENDPOINTS"
 echo "---"
-test_endpoint "POST" "/jobs/feed" \
-  '{"page":1,"limit":10}' \
-  "Get jobs feed (POST /api/jobs/feed)"
+# The mock POST /jobs/feed route (app/api/jobs/feed/route.ts) was DELETED on
+# 2026-09-21: it served 8 hardcoded, invented listings (including a Nairobi one)
+# on the public domain with nothing marking them as samples. The real feed is the
+# hono route in lib/api/routes/jobs.ts (GET /api/jobs, database rows).
+test_endpoint "GET" "/jobs" \
+  "" \
+  "Get jobs feed (GET /api/jobs)"
 
 test_endpoint "POST" "/jobs/job-1/apply" \
   '{"cvId":"cv-123"}' \

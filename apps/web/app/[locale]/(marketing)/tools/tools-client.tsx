@@ -263,7 +263,7 @@ function ToolSection({ tool, visible }: { tool: ToolConfig; visible: boolean }) 
       if (tool.extractText) {
         const json = await res.json();
         if (json.success) set((p) => ({ ...p, loading: false, extractedText: json.text ?? "" }));
-        else set((p) => ({ ...p, loading: false, error: json.error ?? (sw ? "Imeshindwa kutoa maandishi." : "Failed to extract text.") }));
+        else set((p) => ({ ...p, loading: false, error: json.error ?? (sw ? "Sikuweza kutoa maandishi." : "Failed to extract text.") }));
       } else {
         const blob = await res.blob();
         const disp = res.headers.get("Content-Disposition") ?? "";
@@ -619,7 +619,7 @@ export default function ToolsClient() {
           </h2>
           <p className="text-text-body mb-8 max-w-md mx-auto">
             {lang === "sw"
-              ? "Miundo ya kitaalamu inayopita vichujio vya waajiri, pamoja na msaidizi wa kazi."
+              ? "Miundo ya kitaalamu inayopita vigezo vya waajiri, pamoja na msaidizi wa kazi."
               : "Professional ATS-optimized templates with a writing assistant."}
           </p>
           <a href="/templates"
