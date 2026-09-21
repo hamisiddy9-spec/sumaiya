@@ -32,6 +32,20 @@ LOG="$LOOP/run.log"
 
 log() { printf '%s  %s\n' "$(date '+%H:%M:%S')" "$*" >> "$LOG"; }
 
+# ── 0. branch guard: self-anchoring, so a silent branch switch can never be followed ────
+BRANCH_FILE="$LOOP/branch"
+BRANCH="$(git branch --show-current)"
+if [ -f "$BRANCH_FILE" ]; then
+  WANT="$(cat "$BRANCH_FILE" 2>/dev/null)"
+  if [ "$BRANCH" != "$WANT" ]; then
+    log "SKIP: branch is '$BRANCH' but this loop was pinned to '$WANT' — refusing to follow a switch"
+    exit 0
+  fi
+else
+  printf '%s' "$BRANCH" > "$BRANCH_FILE"
+  log "pinned to branch '$BRANCH' (delete $BRANCH_FILE to re-pin)"
+fi
+
 # ── 1. guard: never run over someone else's in-flight work ──────────────────────────────
 DIRTY_TRACKED="$(git status --porcelain | grep -v '^??' | wc -l)"
 if [ "$DIRTY_TRACKED" -gt 0 ]; then
