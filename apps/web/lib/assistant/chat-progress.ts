@@ -13,6 +13,8 @@
 //   · exactly one step is `current`, everything before it is `done`;
 //   · a failed step ends the run rather than pretending to continue.
 
+import type { TurnEnding } from "./deliverable";
+
 export type ChatStepId = "received" | "read" | "think" | "answer";
 export type ChatStepState = "done" | "current" | "pending" | "failed";
 
@@ -33,6 +35,16 @@ export interface TurnProgress {
   /** Optional so a caller that has not reached this stage can say only what it knows. */
   answering?: boolean;
   outcome?: "ok" | "stopped" | "failed";
+  /**
+   * How the reply READS — set by the caller from the reply text via
+   * `classifyTurnEnding()`. Undefined means "not reported": the rail then makes
+   * no claim about an answer (it says "Nimejibu").
+   *
+   * The rail used to print "Here's your answer" for every turn that returned a
+   * reply — including a turn whose reply was a question (device defect, native
+   * 1.6.25, 2026-09-21). The native twin carries the same field; keep them in step.
+   */
+  ending?: TurnEnding;
 }
 
 const LABELS: Record<ChatStepId, { en: string; sw: string }> = {
@@ -40,6 +52,13 @@ const LABELS: Record<ChatStepId, { en: string; sw: string }> = {
   read: { en: "I'm reading your file", sw: "Ninasoma faili yako" },
   think: { en: "I'm thinking about your request", sw: "Ninalifikiri ombi lako" },
   answer: { en: "I'll write your answer", sw: "Nitakuandikia jibu lako" },
+};
+
+/** What the rail says once the turn is over — one honest line per ending. */
+const ENDED_LABELS: Record<TurnEnding, { en: string; sw: string }> = {
+  answer: { en: "Here's your answer", sw: "Hii hapa jibu lako" },
+  question: { en: "I've asked you something", sw: "Nimekuuliza kitu" },
+  other: { en: "I've replied", sw: "Nimejibu" },
 };
 
 /** The file line's sub-text: the real outcome, never a placeholder. */
@@ -85,7 +104,7 @@ export function buildTurnSteps(p: TurnProgress, charCount: (n: number) => string
   if (p.answering || done) {
     steps.push({
       id: "answer",
-      label: done ? { en: "Here's your answer", sw: "Hii hapa jibu lako" } : LABELS.answer,
+      label: done ? ENDED_LABELS[p.ending ?? "other"] : LABELS.answer,
       state: done ? "done" : p.awaiting ? "pending" : "current",
     });
   }

@@ -34,6 +34,27 @@ export interface ChatStep {
   state: ChatStepState;
 }
 
+/**
+ * How a finished turn actually reads, derived from the reply itself.
+ *
+ * This exists because the rail used to print `✓ Hii hapa jibu lako` ("here is
+ * your answer") for EVERY turn that returned a reply — including a turn whose
+ * reply was a question. Measured on a real device (1.6.25, 2026-09-21): the user
+ * asked for a CV summary, got "…ukaguzi wa CV, linganisha kazi, au tengeneza
+ * hati. Tutafanya nini kwanza?", and the rail claimed an answer had arrived.
+ * A claim the user can check must be true.
+ */
+export type TurnEnding = "answer" | "question" | "other";
+
+/** What the rail says once the turn is over — one honest line per ending. */
+const ENDED_LABELS: Record<TurnEnding, { en: string; sw: string }> = {
+  answer: { en: "Here's your answer", sw: "Hii hapa jibu lako" },
+  // She asked something and delivered nothing — say exactly that.
+  question: { en: "I've asked you something", sw: "Nimekuuliza kitu" },
+  // A plain acknowledgement: no answer, no question. Never dressed up as one.
+  other: { en: "I've replied", sw: "Nimejibu" },
+};
+
 /** What the client actually knows, from real events. Nothing here is inferred. */
 export interface TurnProgress {
   /** The user's turn is in the transcript. */
@@ -50,6 +71,12 @@ export interface TurnProgress {
   answering?: boolean;
   /** How the turn ended, when it has. */
   outcome?: "ok" | "stopped" | "failed";
+  /**
+   * How the reply READS — set by the caller from the reply text via
+   * `turnEndingOf()`. Undefined means "not reported": the rail then makes no
+   * claim about an answer (it says `Nimejibu`).
+   */
+  ending?: TurnEnding;
 }
 
 const LABELS: Record<ChatStepId, { en: string; sw: string }> = {
@@ -59,6 +86,50 @@ const LABELS: Record<ChatStepId, { en: string; sw: string }> = {
   // Named while it is still pending — "a named future step is a plan, not a silence".
   answer: { en: "I'll write your answer", sw: "Nitakuandikia jibu lako" },
 };
+
+/**
+ * How does a reply READ — an answer, a question, or neither?
+ *
+ * Same shape as the web twin (apps/web/lib/assistant/deliverable.ts
+ * `classifyTurnEnding`): a reply "answers" only when it carries a printed block
+ * of work (a bullet list or a quoted/indented paragraph) or ≥ 20 words of prose
+ * that are neither a question to the user nor an offer/acknowledgement. The
+ * thresholds are deliberately conservative in the SAFE direction: a false
+ * "question" costs a less flattering rail line, while a false "answer" is the
+ * lie this function exists to stop.
+ *
+ * No lookbehind/lookahead assertions — Hermes' regex engine is not the browser's, so
+ * fragments are split with an explicit scan.
+ */
+const OFFER_RE =
+  /\b(naweza|unaweza|tunaweza|nitaweza|chagua|gusa|bofya|ni ipi|ipi|which one|what should we do|would you like|want me to|do you want me to|i can|shall i|options?|au (?:kutengeneza|kuandika|kukagua))\b/i;
+const QUESTION_START_RE =
+  /^(je|niambie|nipe|taja|ni ipi|ipi|unataka|unaweza|unahitaji|ungependa|what|which|how|when|where|who|why|do you|would you|can you|are you|could you|tell me|name|give me)\b/i;
+const BLOCK_RE = /(^|\n)\s*(?:[-•*]|\d+\.)\s+\S|["“][^"”\n]{20,}["”]/m;
+
+export function turnEndingOf(reply: string): TurnEnding {
+  const text = (reply || "").trim();
+  if (!text) return "other";
+  if (BLOCK_RE.test(text)) return "answer";
+
+  const parts = text
+    .split("\n")
+    .flatMap((line) => line.match(/[^.!?…;:]+[.!?…]*/g) ?? [])
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  let contentWords = 0;
+  let asks = false;
+  for (const part of parts) {
+    if (/[?]$/.test(part) || QUESTION_START_RE.test(part) || OFFER_RE.test(part)) {
+      asks = true;
+      continue;
+    }
+    contentWords += part.split(/\s+/).filter(Boolean).length;
+  }
+  if (contentWords >= 20) return "answer";
+  return asks ? "question" : "other";
+}
 
 /**
  * `herufi 2,340` — grouped, because it is a real count the user can check.
@@ -142,10 +213,12 @@ export function buildTurnSteps(p: TurnProgress): ChatStep[] {
 
   // The last row is only worth naming once the model is answering, or when the
   // turn is over — naming it while she is still reading is a menu, not a plan.
+  // Once the turn IS over the row's wording must match what came back: the rail
+  // claims an answer only when the reply carries one (see turnEndingOf).
   if (p.answering || done) {
     steps.push({
       id: "answer",
-      label: done ? { en: "Here's your answer", sw: "Hii hapa jibu lako" } : LABELS.answer,
+      label: done ? ENDED_LABELS[p.ending ?? "other"] : LABELS.answer,
       state: done ? "done" : p.awaiting ? "pending" : "current",
     });
   }

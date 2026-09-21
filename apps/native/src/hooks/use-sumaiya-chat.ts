@@ -23,7 +23,7 @@ import { reportError } from '../lib/reporting';
 import { useLang, greetingFor } from '../lib/i18n';
 import { splitReplyIntoBubbles } from '../lib/reply-bubbles';
 import { sleep } from '@sumaiya/utils';
-import { buildTurnSteps, type ChatStep, type TurnProgress } from '../components/chat/chat-progress';
+import { buildTurnSteps, turnEndingOf, type ChatStep, type TurnProgress } from '../components/chat/chat-progress';
 import { isModelUnavailableStatus, safeUnavailableText, type UnavailableVariant } from '../components/chat/chat-unavailable';
 
 // A long reply arrives in one round-trip (no streaming — see reply-bubbles.ts
@@ -307,6 +307,10 @@ export function useSumaiyaChat() {
           awaiting: false,
           answering: true,
           outcome: 'ok',
+          // What the rail may claim is decided by the reply itself: a reply that
+          // only asks a question is not "here's your answer" (device defect,
+          // 1.6.25 — the rail said ✓ Hii hapa jibu lako for a menu of questions).
+          ending: turnEndingOf(replyText),
         }));
       } catch (err) {
         // Stopping is not a failure: the words stay, the partial work stays, and
@@ -519,6 +523,8 @@ export function useSumaiyaChat() {
         awaiting: false,
         answering: true,
         outcome: "ok",
+        // A built CV IS an answer — the reply carries a document.
+        ending: "answer",
       }));
     } catch (err) {
       const status = isTransportError(err) ? err.status : undefined;

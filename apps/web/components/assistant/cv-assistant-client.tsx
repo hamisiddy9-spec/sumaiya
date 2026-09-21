@@ -19,6 +19,7 @@ import { UnavailableCard, TurnErrorCard } from "./unavailable-card";
 import { DocumentCard, DocumentStateLine, cvProvenanceSentence } from "./document-card";
 import { CHAT_MOTION } from "@/lib/assistant/chat-motion";
 import { buildTurnSteps, type ChatStep, type TurnProgress } from "@/lib/assistant/chat-progress";
+import { classifyTurnEnding } from "@/lib/assistant/deliverable";
 import { charCountLabel } from "@/lib/assistant/chat-motion";
 import { isModelUnavailableStatus, safeUnavailableText, type UnavailableVariant } from "@/lib/assistant/chat-unavailable";
 import { ChevronLeft, Send, Loader2, Sparkles, RotateCcw, FileText, Mail, CreditCard, ScrollText, Paperclip, Bolt, CheckCircle2, AlertTriangle, XCircle, Target, Check, Volume2, VolumeX, Mic, MicOff, Briefcase, History, Trash2, Plus, SlidersHorizontal, Search, LayoutTemplate, Settings } from "lucide-react";
@@ -975,7 +976,16 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
       }
 
       setTurnState((t) => (t ? { ...t, status: "sent" } : t));
-      setTurnProgress((p) => ({ ...(p ?? { received: true, awaiting: false, answering: true }), awaiting: false, answering: true, outcome: "ok" }));
+      setTurnProgress((p) => ({
+        ...(p ?? { received: true, awaiting: false, answering: true }),
+        awaiting: false,
+        answering: true,
+        outcome: "ok",
+        // The rail may only claim "here is your answer" when the reply carries
+        // one — a reply that asks a question says so instead (see
+        // lib/assistant/deliverable.ts, and the native twin's same defect).
+        ending: classifyTurnEnding(data.reply),
+      }));
     } catch (err) {
       // A cancelled turn is NOT a failure: the user chose to stop, their words
       // stay, and no error card is raised for something they decided.

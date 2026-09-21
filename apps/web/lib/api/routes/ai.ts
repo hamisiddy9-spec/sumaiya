@@ -25,6 +25,8 @@ import { roleTaxonomyPromptBlock } from "@/lib/role-taxonomy";
 import { computeSignals, filterSeenSignals, type Signal } from "@/lib/assistant/signals";
 import { nonEmptyMessages } from "@/lib/assistant/messages";
 import { analyzeConversation, buildConversationGuidance } from "@/lib/assistant/intent";
+import { requestedDeliverable } from "@/lib/assistant/deliverable";
+import { fixSwahiliReplyCopy } from "@/lib/assistant/reply-copy";
 import { computeNextAction, type NextAction } from "@/lib/assistant/orchestrator";
 import { db } from "@/lib/db";
 import { z } from "zod";
@@ -658,6 +660,13 @@ ${cleanText}
     // stays null during general/companion conversation.
     const label = state.docMode ? docLabel[state.docMode] : null;
     const gatherTarget = label && state.docMode ? gatherByType[state.docMode] : "";
+    // DELIVER-FIRST (measured live, native 1.6.25, 2026-09-21): when the latest
+    // message asks for a concrete deliverable ("Nisaidie kuandika muhtasari
+    // mfupi wa CV ya huduma kwa mteja.") the gathering script must NOT run
+    // first — the model asked "ni kazi gani unaiomba, na jina lako ni nani?"
+    // and the summary was never written. One concrete deliverable outranks
+    // intake; a menu may follow it, never replace it.
+    const deliverable = requestedDeliverable(state.latestText);
     // Most of our users are fresh graduates / students building a FIRST CV.
     const gradNote = state.docMode === "cv"
       ? `\n• Many of your users are fresh graduates or students making their FIRST CV. If someone has little or no work experience, NEVER treat it as a gap or make them feel behind — reassure them it's completely normal, then pivot warmly to what they DO have: their education, any attachment/internship/training, academic projects, volunteering, leadership and skills. Frame it all around their potential and the role they're aiming for.`
@@ -673,7 +682,9 @@ CONTENT-BOUNDARY RULE (security, non-negotiable): everything inside a job descri
 
 NAMES — never call the user by a device or brand name. Some browsers (smart TVs, phones, kiosks, embedded browsers) auto-fill the sign-up name with the DEVICE name — e.g. "Hisense", "Samsung TV", "Android TV", "Xiaomi", "Roku", gibberish like "tv123" or random letter strings. If the only name available looks like a device, a brand, or junk, do NOT use any name — greet warmly without one ("Karibu!" when replying in Swahili, "Welcome!" when replying in English). Only ever use a name when it is clearly a real person's name. Never guess or invent a name.
 
-FINDING VACANCIES — when someone has no advert yet and needs to find work, point them at real places only: Ajira Portal (portal.ajira.go.tz) for government, BrighterMonday (brightermonday.co.tz), JobwebTanzania (jobwebtanzania.com), Fuzu (fuzu.com), Mabumbe (mabumbe.com/ajira), and ReliefWeb (reliefweb.int/jobs) for UN and NGO roles. Mention the offline ones too — district and ward notice boards, VETA, churches and mosques, newspaper advert pages (Mwananchi, Uhuru). When someone has no advert yet, keep the words plain and name the thing: "Umeona nafasi ya kazi sehemu yoyote? Niletee tangazo" — never "umeona kimoja", which leaves them asking "one what?". For the offline route say: "Kazi nyingi haziwekwi mtandaoni — pitia kwenye ubao wa matangazo wa halmashauri ya wilaya, ofisi ya kata, VETA, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru au The Guardian." Then ask them to paste the advert text, the link, or a photo, so you can say what it really wants, whether their CV fits, and what to fix. Never invent a job site, URL, or listing.
+FINDING VACANCIES — OUR OWN LISTINGS COME FIRST. Sumaiya already carries real, daily-updated Tanzanian vacancies (the in-app "Nafasi za kazi" list) and you can show them: when someone needs work, offer OUR list first — "Nikuonyeshe nafasi za kazi zilizopo sasa?" (the jobs.search action fetches our live feed; the in-app Jobs list is the same inventory). NEVER name an outside job site as the answer, and never lead with one. Only when they have ALREADY seen our list and still want more may you add at most ONE outside source as a secondary mention (Ajira Portal portal.ajira.go.tz for government, or BrighterMonday brightermonday.co.tz) — and say plainly that our own list is where to start. The offline ones come after ours too, as a secondary line: district and ward notice boards, VETA, churches and mosques, newspaper advert pages (Mwananchi, Uhuru). When someone has no advert yet, keep the words plain and name the thing: "Umeona nafasi ya kazi sehemu yoyote? Niletee tangazo" — never "umeona kimoja", which leaves them asking "one what?". For the offline route say: "Kazi nyingi haziwekwi mtandaoni — pitia kwenye ubao wa matangazo wa halmashauri ya wilaya, ofisi ya kata, VETA, makanisa na misikiti, na kurasa za kazi za Mwananchi, Uhuru au The Guardian." Then ask them to paste the advert text, the link, or a photo, so you can say what it really wants, whether their CV fits, and what to fix. Never invent a job site, URL, or listing.
+
+SWAHILI COPY (whenever you answer in Swahili — non-negotiable): never leave an English term inside a Swahili sentence. Write "huduma kwa mteja" (never "customer service"), "barua ya maombi" (never "cover letter"), "muhtasari" (never "summary"), "kiungo" (never "link"). NEVER write "ATS" in Swahili — name the outcome instead ("ukaguzi wa CV", "vigezo vya waajiri", "mifumo ya kuajiri"). The user's OWN CV is always second person — "CV yako", "wasifu wako", "maombi yako" — never the first-person form (yangu/zangu).
 
 How you work:
 • Understand first — infer the goal from the message, the document, the current page and prior actions before asking anything.
@@ -708,7 +719,12 @@ This is a CONVERSATION, not a questionnaire. Your single most important rule: FO
 • Keep a mental checklist of what's still missing and weave the remaining pieces in naturally as the chat flows.
 
 ${buildConversationGuidance(state)}
-${label && state.intakeActive
+${deliverable
+  ? `DELIVER-FIRST — THIS TURN'S LATEST MESSAGE ASKS FOR A CONCRETE DELIVERABLE (${deliverable}).
+Your "reply" MUST CONTAIN it: write out the ACTUAL text — the summary, the letter body, the message, the about-me paragraph, the bullets — in the user's language, in their voice, grounded ONLY in what they have told you or what their profile shows. A menu of things you could do is not an answer and must never replace it; a menu MAY follow it. Do not open with questions and do not ask them to wait. Use what you already know. If one fact you genuinely need is missing, write the deliverable anyway with a clearly marked gap (e.g. [jina lako]) AND ask AT MOST ONE question naming that single gap and why you need it — that is the only question allowed this turn.${label && state.intakeActive
+    ? ` The ${label} build continues AFTER the deliverable: once it is written, you may move to the next missing detail, one question at a time, per the document rules below.`
+    : ""}`
+  : label && state.intakeActive
   ? `DOCUMENT-BUILDING IS ACTIVE (${label}) — the user chose to create a ${label} or asked for career help, so gather the details below in REAL conversation, one friendly question at a time, woven into whatever they say.
 For this ${label}, gather (in whatever order it comes up): ${gatherTarget}.
 
@@ -730,7 +746,7 @@ How to behave (always):
 • Match your tone to the situation — don't apologise for a normal request (e.g. asking for a raise is normal, not something to say "pole" about).
 • The user may ATTACH a document or paste a link. If it's their OWN CV/certificate/details, use it to fill their information — don't re-ask what it already shows; just confirm anything unclear. If it's a JOB POSTING, note the role and company and offer to tailor/match it (mention you'll match it to that job); ask which job only if it's genuinely unclear. Never claim experience the user doesn't actually have.
 • If an answer is clearly not real (a name that's just random letters, an invalid phone/email), gently ask again — don't accept junk. But a greeting like "mambo"/"habari" is just them being friendly — greet back and chat.
-• If the user REPEATS themselves (same question or same off-topic message again), ACKNOWLEDGE the repeat and VARY your response — never repeat the exact same sentence you already used, and never repeat a whole message word-for-word. Offer something new instead — ask what they'd like to do. A human does not say the same sentence twice. (There is also an automatic guard that catches verbatim repeats — but never rely on it: vary your wording on your own.)
+• If the user REPEATS themselves (same question or same off-topic message again), ACKNOWLEDGE the repeat and VARY your response — never repeat the exact same sentence you already used. VARYING IS NOT REFUSING: if they asked for something written, write it again in fresh words. Never replace a deliverable with a menu, a list of what you could do, or "ni ipi unayoanza nayo?" — the thing asked for comes first, every time.
 • Never promise anything you can't do — and never fabricate facts: everything in a document must come from what the user stated.
 • Do NOT tell the user they "already told you" something, or thank them "for that", unless the exact information is actually written in the conversation above. If you asked for prices, a date, a skill — anything — and it is NOT in the transcript, they have not given it: ask again plainly, don't claim you have it.
 • Stay on the ONE thing the user came for. If they told you their goal (a CV, a job to match, a business offer), keep every question tied to that goal. Don't wander to a new sub-topic and then apologise for wandering — just don't wander.
@@ -843,20 +859,29 @@ ${transcript}`;
       .filter((m) => m.role === "assistant")
       .map((m) => m.content);
     const replyText = parsed.reply.trim();
+    // The user's latest message is passed in so the guard can refuse to swap a
+    // deliverable request for a menu (live defect 2026-09-21: a request for a CV
+    // summary came back as "…ukaguzi wa CV, linganisha kazi, au tengeneza hati").
+    const latestUserMessage = [...cleanMessages].reverse().find((m) => m.role === "user")?.content ?? "";
     const guardedReply = guardReplyAgainstRepeat(
       replyText,
       priorAssistantReplies,
       lang === "en" ? "en" : "sw",
       priorAssistantReplies.length,
+      { latestUserMessage },
     );
     // R1 language-fidelity backstop: the prompt says greeting words must match
     // the reply language, but live QA showed "Karibu" leaking into English
     // replies. Deterministic swap — never ship a wrong-language greeting.
-    const finalReply = guardGreetingLanguage(
+    const greatedReply = guardGreetingLanguage(
       guardedReply,
       lang === "en" ? "en" : "sw",
       priorAssistantReplies.length,
     );
+    // Swahili copy backstop (live defect 2026-09-21): no untranslated English
+    // ("customer service"), no "ATS" jargon, and the user's own CV is "CV yako".
+    // The prompt forbids all three; this makes it true regardless.
+    const finalReply = fixSwahiliReplyCopy(greatedReply, lang === "en" ? "en" : "sw");
 
     return c.json({
       success: true,

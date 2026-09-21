@@ -302,4 +302,44 @@ describe("buildConversationGuidance", () => {
     const g = buildConversationGuidance(s);
     expect(g).toContain("Do NOT ask");
   });
+
+  // ── REGRESSION: the deflection (native 1.6.25, 2026-09-21) ────────────────
+  // The user asked for a CV summary and the assistant gathered instead — the
+  // deterministic router put the turn into document intake because the message
+  // contains "CV". A concrete deliverable now outranks intake, for every type.
+  it("tells the model to DELIVER when the user asks for a summary, not to gather", () => {
+    const s = analyzeConversation(
+      [turn("user", "Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja.")],
+      null,
+    );
+    const g = buildConversationGuidance(s);
+    expect(g).toContain("DELIVER-FIRST");
+    expect(g).toContain("muhtasari wa CV");
+    expect(g).toContain("is NOT an answer and must never replace it");
+    // The one-question allowance must be bounded, and must still require the work.
+    expect(g).toContain("AT MOST ONE question");
+    expect(g).toMatch(/still write the best version/i);
+  });
+
+  it("holds for every deliverable type, not only the one that was caught", () => {
+    const cases: Array<[string, string]> = [
+      ["Niandikie barua ya maombi ya kazi ya udereva", "barua ya maombi"],
+      ["Nisaidie kuandika ujumbe mfupi kwa mwajiri", "ujumbe"],
+      ["Nijenge kuhusu mimi kwa muhtasari", "muhtasari wa CV"],
+      ["Help me write my skills section for the CV", "skills"],
+      ["Niongeze uzoefu wangu kwenye CV", "uzoefu"],
+    ];
+    for (const [ask, expectLabel] of cases) {
+      const g = buildConversationGuidance(analyzeConversation([turn("user", ask)], null));
+      expect(g, ask).toContain("DELIVER-FIRST");
+      expect(g, ask).toContain(expectLabel);
+    }
+  });
+
+  it("does NOT fire on smalltalk, so ordinary chat is not forced into writing", () => {
+    for (const msg of ["Mambo", "Nimeona kazi sokoni", "Vipi matokeo ya mpira?", "asante"]) {
+      const g = buildConversationGuidance(analyzeConversation([turn("user", msg)], null));
+      expect(g, msg).not.toContain("DELIVER-FIRST");
+    }
+  });
 });
