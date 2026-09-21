@@ -430,7 +430,7 @@ export function FirstRunScreen({ onDone }: Props) {
       case "look":
         return (
           <View style={{ gap: 14 }}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 18, paddingVertical: 6, paddingHorizontal: 2 }}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 18, paddingVertical: 6, paddingHorizontal: 2 }}>
               {lookTemplates.map((tpl) => {
                 const locked = tpl.tier === "premium" && !premium;
                 const active = !locked && template === tpl.id;

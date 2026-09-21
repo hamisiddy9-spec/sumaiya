@@ -126,7 +126,7 @@ export function AttachSheet({
           {t("Add to the chat", "Ongeza kwenye mazungumzo")}
         </Text>
 
-        <ScrollView bounces={false}>
+        <ScrollView bounces={false} keyboardShouldPersistTaps="handled">
           {ROWS.map((r, i) => (
             <View key={r.kind}>
               <Pressable
