@@ -79,3 +79,29 @@ Build when either is true:
 
 When a build does happen, it carries everything in HELD and anything finished in QUEUED — one build,
 one update prompt, not four.
+
+
+### Copy: the guest gate says its button six ways
+
+`lib/guest-invite.ts` holds 8 gate bodies. Every one ends by inviting the user to `Fungua akaunti
+bure` (open a free account) — and they finish that clause **six different ways**:
+
+| line | closing clause | form |
+|---|---|---|
+| 125 | `...bure tuzungumze` | bare subjunctive |
+| 135 | `...bure nami nianze kukulinganisha` | `nami` + subjunctive |
+| 145 | `...bure ili kuyafuatilia` | explicit `ili` |
+| 155 | `...bure ili kutuma moja` | explicit `ili` |
+| 165 | `...bure upate chako` | bare subjunctive |
+| 175 | `...bure` (no verb) | bare |
+| 185 | `...bure ili kuusoma` | explicit `ili` |
+
+Bare subjunctive for purpose is **correct, idiomatic Swahili** (`Njoo tule`) — so this is not a
+grammar error. It is an **inconsistency across strings the same user reads minutes apart**, and one
+of these should be chosen as the house form and applied everywhere. **Awaiting the owner's ruling;
+not changed unilaterally.** A free-model panel flagged this as a "comma splice" by applying English
+grammar, which is exactly why panel grammar rulings are relayed as candidates, never applied.
+
+Separately flagged, and genuinely contested: line 145 `hali yake` (singular possessive) sits beside
+`Maombi uliyotuma` and the plural verb `ziko`. A panel proposes `hali zake`. `hali` is a class 9/10
+noun, so `yake` is also defensible — **a native speaker decides.**
