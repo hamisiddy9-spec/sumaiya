@@ -127,8 +127,8 @@ android {
         applicationId 'pro.sumaiya.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10625
-        versionName "1.6.25"
+        versionCode 10626
+        versionName "1.6.26"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
