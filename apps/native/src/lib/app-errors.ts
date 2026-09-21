@@ -166,4 +166,34 @@ export function friendlyApiError(
   }
 
   return pick(GENERIC);
+
+/**
+ * The failure copy for the CV IMPORT path (`/api/mobile/ocr`).
+ *
+ * WHY IT IS NOT `friendlyApiError`: the import's dominant real failure is a
+ * 502/503/504 from the OCR route, and the shared mapper answers those with the
+ * transient "I'm busy right now. Try again in a moment." — which names nothing
+ * about the photo the person just handed over and offers a retry that has
+ * already been tried on the same input.
+ *
+ * Measured on the Pixel 8 Pro (2026-09-21, 03:04-03:12 EAT, build 1.6.24): the
+ * Pakia import failed TWICE more — ~62 s and ~70 s wall-clock — on a clean 90 kB
+ * PNG of a CV, both ending on that busy line, exactly as the 2026-09-20 sweep
+ * measured it twice at ~75 s. The client's own budget is 90 s and the server's
+ * OCR budget is 60 s (see `OCR_TIMEOUT_MS` in @sumaiya/api-client), so this
+ * class means "reading that image did not finish" — the fault is ours, and the
+ * honest advice is about the picture and the other way in, not about waiting.
+ *
+ * Everything else — session expired, offline, 429, 413 — still comes from
+ * `friendlyApiError`, so this only overrides the one class where the shared
+ * sentence lies about the cause.
+ */
+export function friendlyImportError(err: unknown, lang: Lang): string {
+  if (isTransportError(err) && (err.kind === "timeout" || err.status === 502 || err.status === 503 || err.status === 504)) {
+    return lang === "sw"
+      ? "Sikuweza kumaliza kusoma picha hiyo — tatizo ni upande wangu, si mtandao wako. Jaribu picha ndogo au iliyo wazi zaidi, au anza CV na uiandike mwenyewe."
+      : "I couldn't finish reading that photo — that is on my side, not your connection. Try a smaller or sharper picture, or start a CV and type it in.";
+  }
+  return friendlyApiError(err, lang);
+}
 }

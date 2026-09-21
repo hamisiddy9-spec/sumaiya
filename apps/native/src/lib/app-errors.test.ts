@@ -1,4 +1,4 @@
-import { friendlyApiError, isTransportError } from "./app-errors";
+import { friendlyApiError, friendlyImportError, isTransportError } from "./app-errors";
 import { SUPPORT_EMAIL } from "./app-hosts";
 
 /**
@@ -128,5 +128,54 @@ describe("friendlyApiError honours a caller's fallback for non-transport throws"
     const fallback = { en: "custom", sw: "custom-sw" };
     expect(friendlyApiError(REAL_500_ERROR, "en", fallback)).not.toBe("custom");
     expect(friendlyApiError(REAL_500_ERROR, "en", fallback)).toContain(SUPPORT_EMAIL);
+  });
+});
+
+/**
+ * The import path's own copy. The device measured the 502/503/504 class as the
+ * ONLY failure the CV import produces (four runs: ~75 s and ~75 s on 2026-09-20,
+ * ~62 s and ~70 s on 2026-09-21), and the shared mapper answered it with the
+ * transient "I'm busy right now. Try again in a moment." — which says nothing
+ * about the photo and invites a retry that had already failed twice on the same
+ * input. These tests pin the difference, and pin that everything else still
+ * comes from the shared mapper.
+ */
+describe("friendlyImportError names the condition the import actually hits", () => {
+  const BUSY = "I'm busy right now. Try again in a moment.";
+  const BUSY_SW = "Nina shughuli nyingi sasa hivi. Jaribu tena baada ya muda mfupi.";
+
+  it("does NOT use the transient busy line for a 502/503/504", () => {
+    for (const status of [502, 503, 504]) {
+      const en = friendlyImportError({ status, message: `${status} Bad Gateway` }, "en");
+      expect(en).not.toBe(BUSY);
+      expect(en).toContain("couldn't finish reading that photo");
+      const sw = friendlyImportError({ status, message: `${status} Bad Gateway` }, "sw");
+      expect(sw).not.toBe(BUSY_SW);
+      expect(sw).toMatch(/^Sikuweza/);
+    }
+  });
+
+  it("says the same thing for a timeout the client hit first", () => {
+    expect(friendlyImportError(REAL_TIMEOUT_ERROR, "en")).toContain("couldn't finish reading that photo");
+    expect(friendlyImportError(REAL_TIMEOUT_ERROR, "sw")).toMatch(/^Sikuweza/);
+  });
+
+  it("takes the blame rather than blaming the reader's network", () => {
+    expect(friendlyImportError({ status: 504, message: "504 Gateway Timeout" }, "en")).toContain("on my side");
+    expect(friendlyImportError({ status: 504, message: "504 Gateway Timeout" }, "sw")).toContain("upande wangu");
+    for (const lang of LANGS) {
+      const copy = friendlyImportError(REAL_TIMEOUT_ERROR, lang);
+      expect(copy).not.toMatch(/\bImeshindwa\b/);
+      // The client's generic timeout text is English and must never surface.
+      expect(copy).not.toContain("Request timed out");
+    }
+  });
+
+  it("keeps the honest cases on the shared mapper", () => {
+    // A 401 is a session problem the import cannot fix by re-photographing.
+    expect(friendlyImportError({ status: 401 }, "sw")).toContain("Kipindi chako kimeisha");
+    expect(friendlyImportError({ status: 413 }, "en")).toContain("too large");
+    // A non-transport throw still gets the generic, never its own message.
+    expect(friendlyImportError(new Error("boom"), "en")).toContain(SUPPORT_EMAIL);
   });
 });
