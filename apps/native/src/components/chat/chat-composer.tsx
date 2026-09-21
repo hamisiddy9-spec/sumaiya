@@ -185,9 +185,9 @@ export function ChatComposer({
       }}
     >
       {attachments.length > 0 && (
-        {/* keyboardShouldPersistTaps: the chips are tappable WHILE the person is
-            typing, and without this the first tap only dismisses the keyboard — the
-            chip appears dead and they tap it again. */}
+        // keyboardShouldPersistTaps: the chips are tappable WHILE the person is
+        // typing, and without this the first tap only dismisses the keyboard — the
+        // chip appears dead and they tap it again.
         <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 8, paddingRight: 12 }}>
           {attachments.map((a, i) => (
             // Move 12 — a chip enters at 300 with a 40 ms stagger and leaves at

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, BackHandler, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { apiClient } from "../../lib/api-client";
 import { jobChoiceModel, jobToJd, isUsableJd, type JobPickRow } from "@sumaiya/api-client";
@@ -106,6 +106,19 @@ export function JobChoiceSheet({
   const model = jobChoiceModel();
 
   const [path, setPath] = useState<"ours" | "own" | null>(null);
+
+  // The Android hardware back button. This sheet is NOT a <Modal> (see the note at the
+  // top of the file), so nothing dismissed it on back: the press fell through to the
+  // navigator and changed screen with the sheet still standing. The two sheets that ARE
+  // Modals pass `onRequestClose` and close correctly — this is that same behaviour.
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true; // handled — do not also navigate
+    });
+    return () => sub.remove();
+  }, [visible, onClose]);
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<JobPickRow[] | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");

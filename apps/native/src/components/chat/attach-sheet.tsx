@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Icon } from "../icon";
@@ -65,6 +65,20 @@ export function AttachSheet({
   // stays mounted for the length of its own exit.
   const [shown, setShown] = useState(visible);
   const progress = useSharedValue(0);
+
+  // The Android hardware back button. This sheet is NOT a <Modal> (see the note at the
+  // top), so nothing dismissed it on back: the press fell through to the navigator and
+  // changed screen with the sheet still standing. The two sheets that ARE Modals pass
+  // `onRequestClose` and close correctly — this is that same behaviour.
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true; // handled — do not also navigate
+    });
+    return () => sub.remove();
+  }, [visible, onClose]);
+
   useEffect(() => {
     if (visible) {
       setShown(true);
