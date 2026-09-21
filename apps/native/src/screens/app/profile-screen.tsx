@@ -17,6 +17,7 @@ import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { Icon } from "../../components/icon";
+import { reportSheet } from "../../components/report-sheet";
 import type { ProfileScreenProps } from "../../navigation/types";
 import {
   ListGroupLabel,
@@ -589,12 +590,20 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             chevron
           />
           <ListRow
-            last
             icon="mail"
             iconColor={c.accent}
             label={t("Contact support", "Wasiliana nasi")}
             sublabel={SUPPORT_EMAIL}
             onPress={() => navigation.navigate("Support")}
+            chevron
+          />
+          <ListRow
+            last
+            icon="flag"
+            iconColor={c.accent}
+            label={t("Report a problem", "Ripoti tatizo")}
+            sublabel={t("Send a screenshot and what happened", "Tuma picha ya skrini na kilichotokea")}
+            onPress={() => reportSheet.open("problem")}
             chevron
           />
         </View>

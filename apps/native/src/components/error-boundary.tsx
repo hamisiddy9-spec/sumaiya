@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { SumaiyaMark } from "./sumaiya-mark";
 import { reportError } from "../lib/reporting";
 import { getLastKnownLang } from "../lib/i18n";
+import { reportSheet } from "./report-sheet";
 
 /**
  * Catches a render/lifecycle crash anywhere below it and shows a calm recovery
@@ -86,6 +87,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
           style={{ marginTop: 6, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 14, backgroundColor: "#DA4A1C" }}
         >
           <Text style={{ color: "#FAF5EE", fontSize: 15, fontWeight: "800" }}>{sw ? "Jaribu tena" : "Try again"}</Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => reportSheet.open("crash")}
+          style={{ paddingVertical: 10, paddingHorizontal: 16 }}
+        >
+          <Text style={{ color: "#6B5F54", fontSize: 14, fontWeight: "700" }}>
+            {sw ? "Ripoti tatizo" : "Report a problem"}
+          </Text>
         </Pressable>
       </View>
     );

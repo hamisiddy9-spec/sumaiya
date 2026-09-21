@@ -1,6 +1,6 @@
 import "../../global.css";
-import React, { useEffect, useState } from "react";
-import { AppState, LogBox } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { AppState, LogBox, View } from "react-native";
 import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -12,6 +12,9 @@ import { getSecureItem, offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { reportError, setReporter } from "../lib/reporting";
 import { flushTelemetry, shortMessage, startTelemetry, track } from "../lib/telemetry";
+import { setAnalyticsSink } from "../lib/analytics";
+import { pushLogEntry } from "../lib/log-buffer";
+import { setScreenshotRoot } from "../lib/screenshot";
 import { AuthProvider } from "../contexts/auth-context";
 import { LangProvider } from "../lib/i18n";
 import { LanguageSync } from "../lib/language-sync";
@@ -20,6 +23,7 @@ import { UpdatePrompt } from "../components/update-prompt";
 import { DialogHost, ToastHost } from "../components/ui";
 import { ConnectivityGate } from "../components/connectivity-gate";
 import { ErrorBoundary } from "../components/error-boundary";
+import { ReportSheetHost } from "../components/report-sheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +42,10 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   // Bump to force a full re-mount after an ErrorBoundary reset.
   const [bootKey, setBootKey] = useState(0);
+  // The view a problem report screenshots. Registered once, read from a plain
+  // module (lib/screenshot.ts) so the report sheet can capture it even when
+  // it's mounted outside every provider — see report-sheet.tsx's file header.
+  const rootViewRef = useRef<View>(null);
 
   useEffect(() => {
     async function prepare() {
@@ -80,10 +88,28 @@ export default function RootLayout() {
         // chat errors, boundary catches, a failed SQLite open) now also lands in
         // telemetry as a breadcrumb — one seam, every existing call site.
         setReporter((error, context) => {
-          track("app.error", {
-            scope: typeof context?.scope === "string" ? context.scope : "unknown",
-            message: shortMessage(error),
-          });
+          const scope = typeof context?.scope === "string" ? context.scope : "unknown";
+          const message = shortMessage(error);
+          pushLogEntry("error", scope, message);
+          track("app.error", { scope, message });
+        });
+
+        // The activation funnel (signed_up, onboarded, cv_created, ...) is
+        // real event NAMES declared in lib/analytics.ts, but that module's
+        // `track()` only ever did `console.info` — `setAnalyticsSink()` existed
+        // to plug in a real sink and nothing ever called it, so none of those
+        // seven events had reached the server. Route them into the same
+        // batched pipe as everything else in app_event.
+        //
+        // `setAnalyticsSink` replaces a single module-level function reference,
+        // not a subscriber list, so calling it more than once is harmless —
+        // the last call always wins and nothing double-fires. That makes it
+        // idempotent by construction, unlike `startTelemetry()` (which opens a
+        // queue + timer and DOES need the `started`-flag guard above to avoid
+        // starting twice); a `started`-style guard here would just be dead code.
+        setAnalyticsSink((name, props) => {
+          pushLogEntry("event", name, props && Object.keys(props).length ? shortMessage(JSON.stringify(props)) : undefined);
+          track(name, props ?? {});
         });
       } catch (e) {
         console.warn("Font loading error:", e);
@@ -106,6 +132,11 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
 
+  useEffect(() => {
+    setScreenshotRoot(rootViewRef);
+    return () => setScreenshotRoot(null);
+  }, []);
+
   // Hold the React tree behind the native splash until the SQLite cache is open
   // and the theme choice is applied — so no screen queries an uninitialised DB
   // and there's no light/dark flash on launch.
@@ -113,21 +144,27 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ErrorBoundary key={bootKey} onReset={() => setBootKey((k) => k + 1)}>
-          <AuthProvider apiClient={apiClient}>
-            <LangProvider>
-              <LanguageSync />
-              <RootNavigator />
-              <ConnectivityGate />
-              <UpdatePrompt />
-              <DialogHost />
-              <ToastHost />
-              <StatusBar />
-            </LangProvider>
-          </AuthProvider>
-        </ErrorBoundary>
-      </SafeAreaProvider>
+      <View ref={rootViewRef} collapsable={false} style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <ErrorBoundary key={bootKey} onReset={() => setBootKey((k) => k + 1)}>
+            <AuthProvider apiClient={apiClient}>
+              <LangProvider>
+                <LanguageSync />
+                <RootNavigator />
+                <ConnectivityGate />
+                <UpdatePrompt />
+                <DialogHost />
+                <ToastHost />
+                <StatusBar />
+              </LangProvider>
+            </AuthProvider>
+          </ErrorBoundary>
+          {/* A sibling of ErrorBoundary, not a child: the crash screen's own
+              "Report a problem" button (error-boundary.tsx) must still have a
+              host to open even after everything below ErrorBoundary unmounts. */}
+          <ReportSheetHost />
+        </SafeAreaProvider>
+      </View>
     </GestureHandlerRootView>
   );
 }

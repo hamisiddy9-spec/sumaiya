@@ -6,6 +6,7 @@ import {
 // ─── App Enums ────────────────────────────────────────────────────────────────
 
 export const documentStatusEnum = pgEnum("document_status", ["draft", "complete"]);
+export const appReportKindEnum = pgEnum("app_report_kind", ["crash", "problem", "idea"]);
 export const subscriptionStatusEnum = pgEnum("subscription_status", [
   "active", "trialing", "cancelled", "expired", "past_due",
 ]);
@@ -673,6 +674,46 @@ export const appEvent = pgTable("app_event", {
 
 export type AppEvent = typeof appEvent.$inferSelect;
 export type NewAppEvent = typeof appEvent.$inferInsert;
+
+// ─── App Reports (user-initiated problem reports) ─────────────────────────────
+// A user tapped "Report a problem" (the error boundary, or Profile/Settings) and
+// explicitly confirmed a consent sheet listing exactly what would be sent. Same
+// anonymity shape as app_event: keyed by installId, userHash only when signed
+// in and only ever a salted hash — never a raw user id. `screenshot` is a
+// downscaled (width 720, quality 0.6) JPEG the CLIENT captured and resized
+// before sending; `logs` is the last 40 entries of the same ring buffer that
+// feeds this table's telemetry sibling.
+//
+// Why a table and not Supabase Storage: at this volume a bucket plus policies
+// is more moving parts and more to go wrong, and the storage service key would
+// become a write path for anonymous uploads. Postgres TOASTs the blob fine.
+// If report volume or screenshot size ever makes this column heavy, that's the
+// point to move `screenshot` out to object storage and keep this row as the
+// pointer + metadata.
+export const appReport = pgTable("app_report", {
+  id: text("id").primaryKey(),
+  /** Same anonymous per-install id as app_event. */
+  installId: text("install_id").notNull(),
+  /** Salted user hash when signed in, else null. Never a raw user id. */
+  userHash: text("user_hash"),
+  kind: appReportKindEnum("kind").notNull(),
+  /** The user's own optional written note. */
+  note: text("note"),
+  /** Base64 JPEG, already downscaled client-side. Null when declined/failed. */
+  screenshot: text("screenshot"),
+  /** Last 40 log-buffer entries: [{ at, kind, name, detail }, ...]. */
+  logs: jsonb("logs").notNull().default([]),
+  appVersion: text("app_version"),
+  platform: text("platform"),
+  device: text("device"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (t) => ({
+  createdIdx: index("app_report_created_idx").on(t.createdAt),
+  installIdx: index("app_report_install_idx").on(t.installId, t.createdAt),
+}));
+
+export type AppReport = typeof appReport.$inferSelect;
+export type NewAppReport = typeof appReport.$inferInsert;
 
 // ─── Campaign Events (printed-poster attribution, server-side) ────────────────
 // The QR on a printed poster lands on /ats-checker?src=poster. attribution.ts

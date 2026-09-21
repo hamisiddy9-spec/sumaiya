@@ -666,6 +666,35 @@ export class ApiClient {
     });
   }
 
+  /**
+   * Send a user-initiated problem report. Unlike `postTelemetry`, this one
+   * DOES surface failure to the caller — a report the user explicitly asked
+   * to send needs a real "I couldn't send it" outcome, not a silently
+   * requeued event. Auth is optional (a guest can report); never throws —
+   * the report sheet shows its own message either way.
+   */
+  async postAppReport(payload: {
+    installId: string;
+    kind: "crash" | "problem" | "idea";
+    note?: string;
+    screenshot?: string | null;
+    logs: { at: number; kind: string; name: string; detail?: string }[];
+    appVersion: string;
+    platform?: string;
+    device?: string | null;
+  }): Promise<{ ok: boolean }> {
+    try {
+      await this.request<void>(
+        "/api/app/report",
+        { method: "POST", body: JSON.stringify(payload) },
+        UPLOAD_TIMEOUT_MS, // carries a base64 screenshot — the default 30s is too tight
+      );
+      return { ok: true };
+    } catch {
+      return { ok: false };
+    }
+  }
+
   // ── Export ledger (Hono /api/mobile/export, Bearer) ──────────────────────
 
   /**

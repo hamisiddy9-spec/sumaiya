@@ -23,6 +23,7 @@ import { jobRoutes } from "@/lib/api/routes/jobs";
 import { mobileOcrRoutes } from "@/lib/api/routes/mobile-ocr";
 import { mobileRoutes } from "@/lib/api/routes/mobile";
 import { appTelemetryRoutes } from "@/lib/api/routes/app-telemetry";
+import { appReportRoutes } from "@/lib/api/routes/app-report";
 import { campaignEventRoutes } from "@/lib/api/routes/campaign-events";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 import { reportError } from "@/lib/observability/report-error";
@@ -94,6 +95,10 @@ app.route("/mobile", mobileRoutes);
 // Anonymous native telemetry — signed-out installs included, so it can't live
 // behind the user-keyed outcome-event path. Never rejects the client.
 app.route("/app", appTelemetryRoutes);
+// User-initiated problem reports (screenshot + logs, consent-first). Its own
+// hard per-IP rate limit lives inside app-report.ts, on top of the general
+// limiter above — a screenshot-accepting anonymous endpoint is a target.
+app.route("/app", appReportRoutes);
 // Printed-poster campaign funnel — client-reported, anonymous, unsigned-in
 // scans included (they are the scans that matter). See lib/campaign/ingest.ts.
 app.route("/campaign", campaignEventRoutes);
