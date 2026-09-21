@@ -9,6 +9,7 @@ import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
+import { fileNameFromUri, saveToPhone } from "../services/save-to-device";
 import { shareCV } from "../services/share";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
@@ -422,7 +423,33 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       updateMemory((m) =>
         addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: exportedTemplateName } }, t),
       ).catch(() => {});
-      await shareCV(cv, uri);
+      // The Swahili label on this button is "Pakua PDF" — so it has to SAVE the
+      // file, not hand the bytes to the Android share sheet. The 1.6.24 device
+      // sweep measured exactly that lie on the CV card ("Sharing 1 file", with
+      // /sdcard/Download byte-identical before and after), and the same call sat
+      // behind this footer button. Same flow as the CV list's Pakua: the user
+      // picks the folder (Downloads is one tap away — see
+      // services/save-to-device.ts for why SAF is the only honest door), and
+      // sharing stays one tap away inside the confirmation.
+      const saved = await saveToPhone(uri, fileNameFromUri(uri));
+      // A dismissed folder picker is a cancelled action, not a failure.
+      if (saved.status === "cancelled") return;
+      if (saved.status === "unsupported") {
+        // No SAF (iOS, or an unusual ROM): the share sheet IS the system save path.
+        await shareCV(cv, uri);
+        return;
+      }
+      dialog.alert(
+        t("Saved to your phone", "Imehifadhiwa kwenye simu yako"),
+        t(
+          `${saved.fileName} is in the folder you chose. Open Files to attach it in WhatsApp.`,
+          `${saved.fileName} iko kwenye folda uliyochagua. Fungua Files ili kuipachika WhatsApp.`,
+        ),
+        [
+          { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+          { text: t("Done", "Sawa"), style: "cancel" },
+        ],
+      );
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
