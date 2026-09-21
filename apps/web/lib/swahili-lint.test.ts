@@ -11,7 +11,12 @@
  * file carried (-a connective "kwa" misuse, plural agreement with a count of
  * one) are kept, now in the same guard table.
  *
- * The seven audited classes, with the replacement that was applied by hand:
+ *   9. "vichujio vya waajiri" where it means the employer's SCREENING CRITERIA
+ *      (owner's decision, native-speaker confirmed) → "vigezo vya waajiri".
+ *      "vichujio" is right for the app's own UI filters, and only there
+ *      ("Ondoa vichujio" = "Clear filters").
+ *
+ * The nine audited classes, with the replacement that was applied by hand:
  *   1. "MANENO YA MAPENZI" ("words of love")      → "MANENO YA KUPENDEZA"
  *   2. "barua ya kazi" (calque "job letter")      → "barua ya maombi" (cover letter)
  *   3. "tajriba" (calque "experience")            → "uzoefu" (u-class: "wako"/"huo")
@@ -21,6 +26,20 @@
  *   7. "ATS" named directly in Swahili copy       → describe the outcome
  *      ("mifumo ya kuajiri" / "vigezo vya waajiri" / "kikagua CV"), never
  *      the mechanism. English copy may still say "ATS".
+ *   8. the `i-`/`ina-` MACHINE REGISTER ("Inapiga CV yako", "Inatafuta
+ *      uzoefu wako", "Inapanga CV yako", "Inafungua CV yako…",
+ *      "Imeshindwa kupiga hiyo")                → Sumaiya's own voice
+ *      ("Ninasoma CV yako", "Ninatafuta uzoefu wako", "Ninaandaa CV yako…",
+ *      "Ninafungua CV yako…", "Sikuweza…"). A waiting line and a failure line
+ *      are sentences SHE says, so they take the ni-/si- first-person prefixes;
+ *      `i-`/`ina-` is the prefix you use when a MACHINE narrates. They slipped
+ *      through because the English slots are idiomatic gerunds ("Reading the
+ *      text…"), which read fine in English and wrong in Swahili. This is the
+ *      largest copy defect class in the product (~20 native instances in
+ *      docs/UX-DEFECT-HUNT-2026-09-20.md F49, ~160 web instances fixed on
+ *      2026-09-21), and until this guard existed nothing stopped it returning.
+ *      Mirrored in apps/native/src/lib/swahili-lint.test.ts by the sibling
+ *      agent who owns the APK's copy.
  *
  * Scope: every non-test .ts/.tsx file under apps/web/{lib,app,components}. Test
  * files are skipped deliberately — they quote user utterances and job-advert
@@ -306,6 +325,137 @@ const GUARDS: Guard[] = [
       '"Nafasi zote za kazi"',
       '"Bila rangi. Muundo na nafasi tu."',
       '"Nafasi 50 zimechukuliwa"',
+    ],
+  },
+  {
+    id: "machine-register-failure",
+    // A FAILURE line is a sentence SHE says, so it takes the si- first-person
+    // prefix: "Sikuweza kuhifadhi" (I couldn't save it). "Imeshindwa…" is the
+    // machine register — the impersonal "it failed", with no one speaking —
+    // and "tumeshindwa"/"kumeshindwa" push the voice to a third party ("we",
+    // or the action itself). All three shipped on the product's most-used
+    // paths: the CV scan, saving a CV, and every AI write.
+    pattern: /\b(?:Imeshindwa|Tumeshindwa|imeshindwa|tumeshindwa|kumeshindwa)\b/,
+    message: (m) =>
+      `"${m}" — the i-/ina- MACHINE REGISTER on a failure line; Sumaiya says it herself: "Sikuweza kuhifadhi. Jaribu tena." (and for a whole failed export, "Sikuweza kupakua PDF")`,
+    bad: [
+      "Imeshindwa kupiga hiyo",
+      "Imeshindwa kuhifadhi CV yako. Jaribu tena.",
+      "Samahani, imeshindwa kupata jibu. Jaribu tena.",
+      "Tumeshindwa kusoma maandishi ya PDF hii.",
+      "Kupakua PDF kumeshindwa. Jaribu tena.",
+      "Kuhifadhi kumeshindwa — gusa kujaribu tena",
+    ],
+    good: [
+      "Sikuweza kupiga hiyo",
+      "Sikuweza kuhifadhi CV yako. Jaribu tena.",
+      "Samahani, sikuweza kupata jibu. Jaribu tena.",
+      "Sikuweza kusoma maandishi ya PDF hii.",
+      "Sikuweza kupakua PDF. Jaribu tena.",
+      "Sikuweza kuhifadhi — gusa kujaribu tena",
+      // Not the register: the subject is a THING inside the document, not her.
+      "Kitu ndani ya hati hii kimeshindwa kupakia.",
+    ],
+  },
+  {
+    id: "machine-register-progress",
+    // A WAITING line is also her speech: "Ninasoma CV yako…" (I'm reading your
+    // CV), "Ninaandaa PDF…", "Ninafungua kihariri…". The shipped copy said
+    // "Inasoma CV yako…" — a machine narrating the user's own job — because the
+    // English slot ("Reading your CV…") is a gerund with no subject at all.
+    //
+    // Deliberately a CLOSED SET of the verbs the product uses for work done ON
+    // THE USER'S BEHALF, mirroring the bare-nafasi guard's approach: a bare
+    // /\bIna[a-z]+/ would fire on correct Swahili — "Inahitaji kazi" (the score
+    // band), "Inaonyesha 12 kati ya 40" (the list reporting a count),
+    // "Inaongeza nambari mpya" (the tool describing itself), "Inahitaji
+    // marekebisho" — and a build that fails on correct copy gets the guard
+    // deleted. Verbs NOT in the set are the ones whose subject is a thing, not
+    // her (see the `skip` on the pdf-tools.ts FAQ line, and the tool pages).
+    pattern: new RegExp(
+      "\\b(?:Ina|ina)(?:" +
+        [
+          "piga", "tafuta", "panga", "fungua", "kagua", "soma", "andaa", "anzisha",
+          "andika", "pakia", "tengeneza", "chambua", "linganisha", "pitia", "hesabu",
+          "badilisha", "futa", "tuma", "boresha", "tafsiri", "lenga", "unda", "pima",
+          "chagua", "kamilisha", "hifadhi", "pakua", "safisha", "zalisha", "jibu",
+        ].join("|") +
+        ")\\b",
+    ),
+    message: (m) =>
+      `"${m}" — the i-/ina- MACHINE REGISTER on a waiting/progress line; Sumaiya says it herself in the first person: "Ninasoma CV yako…", "Ninaandaa PDF…", "Ninafungua kihariri…" (Ina- is what a machine uses to narrate)`,
+    bad: [
+      "Inasoma maandishi…",
+      "Inatafuta uzoefu wako…",
+      "Inapanga CV yako…",
+      "Inapiga CV yako",
+      "Inafungua CV yako…",
+      "Inafungua kihariri…",
+      'sw ? "Inapakia…" : "Loading…"',
+      'sw ? "Inahifadhi…" : "Saving…"',
+      'sw ? "Inakagua CV yako…" : "Checking your CV…"',
+      'sw ? "Inaanzisha…" : "Starting…"',
+      'sw ? "Inatafuta…" : "Searching…"',
+    ],
+    good: [
+      "Ninasoma maandishi…",
+      "Ninatafuta uzoefu wako…",
+      "Ninaandaa CV yako…",
+      "Ninasoma CV yako",
+      "Ninafungua CV yako…",
+      "Ninafungua kihariri…",
+      'sw ? "Ninapakia…" : "Loading…"',
+      'sw ? "Ninahifadhi…" : "Saving…"',
+      'sw ? "Ninakagua CV yako…" : "Checking your CV…"',
+      'sw ? "Ninaanzisha…" : "Starting…"',
+      'sw ? "Ninatafuta…" : "Searching…"',
+      // Correct Swahili with a subject that is a THING or a band label, never
+      // her — the closed set above is what keeps this guard honest.
+      '"Inahitaji kazi"',
+      "Inasomwa na mashine",
+      "Kadi yako ya kushiriki inaonyesha tu alama ya ulinganifu",
+      "Inaongeza nambari mpya",
+      "Chrome kwenye Android inafanya kazi vizuri.",
+    ],
+    // NON-COPY, excluded deliberately: the extract-text tool's own FAQ answer
+    // says what the TOOL does with a PDF's text layer ("Inasoma safu ya
+    // maandishi ya PDF" — it reads the text layer). The subject is the tool on
+    // a public marketing FAQ, not Sumaiya narrating the user's own job, and the
+    // line sits in the same file as the neighbouring tool descriptions that were
+    // deliberately left in the same voice. Line-scoped (file + content) like
+    // every other exclusion here, so the rest of that file is still guarded.
+    skip: (file, line) =>
+      file === "lib/pdf-tools.ts" && line.includes("Inasoma safu ya maandishi") ||
+      // The user's OWN turn's delivery word (§3.2 T1 of the approved chatbox
+      // redesign): `Inatuma…` / `Imetumwa` / `Haijatumwa`. Its subject is the
+      // MESSAGE, not Sumaiya narrating work she is doing on the user's behalf —
+      // which is the only thing this guard exists to catch — and the approved
+      // mockup names these three exact words. Line-scoped (file + content) like
+      // every other exclusion here, so the rest of that file is still guarded.
+      file === "components/assistant/cv-assistant-client.tsx" && line.includes("Inatuma…"),
+  },
+  {
+    id: "vichujio-vya-waajiri",
+    // The owner's own decision, confirmed by a native speaker: a Tanzanian
+    // reads "vichujio vya waajiri" as FILTERS/SIEVES belonging to employers, not
+    // as the screening CRITERIA a CV must pass, so the marketing copy that meant
+    // criteria says "vigezo vya waajiri". Deliberately narrow — it fires only on
+    // the exact phrase, because "vichujio" is the RIGHT word for the UI's own
+    // filters ("Ondoa vichujio" = "Clear filters", components/jobs/jobs-feed.tsx
+    // and components/template-gallery-client.tsx) and those stay untouched.
+    pattern: /\bvichujio vya waajiri\b/i,
+    message: (m) =>
+      `"${m}" — "vichujio" means FILTERS/SIEVES, not the screening criteria a CV has to pass; the approved wording is "vigezo vya waajiri" (keep "vichujio" only where it means the app's own filters: "Ondoa vichujio")`,
+    bad: [
+      "CV za kitaalamu zinazopita vichujio vya waajiri",
+      "marekebisho maalum ya kupita vichujio vya waajiri",
+      "inayopita vichujio vya waajiri bila malipo",
+    ],
+    good: [
+      "zinazopita vigezo vya waajiri",
+      "CV yako inapita vigezo vya waajiri wengi",
+      "Ondoa vichujio",
+      'sw ? "Jaribu neno lingine au ondoa vichujio." : "Try a different term."',
     ],
   },
 ];
