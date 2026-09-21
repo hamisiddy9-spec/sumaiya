@@ -9,7 +9,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Icon } from "../icon";
-import { haptics, useThemeColors } from "../ui";
+import { haptics, useMotionReduced, useThemeColors } from "../ui";
+import { CHAT_MOTION, chatEnterMs, chatExitMs } from "./chat-motion";
 import { useLang } from "../../lib/i18n";
 import { extractFailureMessage } from "../../lib/attachment-extract";
 import type { Attachment } from "./chat-types";
@@ -36,19 +37,24 @@ export function AttachmentPreviewSheet({
   const { width, height } = useWindowDimensions();
   const { t, lang } = useLang();
   const progress = useSharedValue(0);
+  const reduce = useMotionReduced();
   const [mounted, setMounted] = React.useState(!!attachment);
 
   useEffect(() => {
     if (attachment) {
       setMounted(true);
-      progress.value = withTiming(1, { duration: 220, easing: Easing.out(Easing.cubic) });
+      // §3.6b: this sheet's entrance was right and its EXIT was off-token (160
+      // is not a duration in the system). It is the V1 bottom sheet, so both ends
+      // come from the chat motion table: 220 `ease.out` in, 140 `ease.in` out —
+      // and `dur.instant` under Reduce Motion.
+      progress.value = withTiming(1, { duration: chatEnterMs(reduce, CHAT_MOTION.sheet.panel), easing: Easing.out(Easing.cubic) });
     } else if (mounted) {
-      progress.value = withTiming(0, { duration: 160, easing: Easing.in(Easing.cubic) }, (done) => {
+      progress.value = withTiming(0, { duration: chatExitMs(reduce, CHAT_MOTION.sheet.exit), easing: Easing.in(Easing.cubic) }, (done) => {
         if (done) runOnJS(setMounted)(false);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attachment]);
+  }, [attachment, reduce]);
 
   const backdropStyle = useAnimatedStyle(() => ({ opacity: progress.value }));
   const sheetStyle = useAnimatedStyle(() => ({
