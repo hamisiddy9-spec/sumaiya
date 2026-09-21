@@ -39,7 +39,7 @@ const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
     ],
     sw: [
       "Miundo 7 bora — sidebars za rangi, pete za picha, mistari ya muda",
-      "Inapatikana kwa kuwalika marafiki — siku 7 kila mmoja akijenga CV",
+      "Inapatikana kwa kualika marafiki — siku 7 kila mmoja akijenga CV",
       "Kila kitu kingine kinabaki bure",
     ],
   },
@@ -179,13 +179,13 @@ export function PremiumSheet({
           <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 }}>
             {t(
               "Paying isn't open yet — but you don't have to wait. Premium is earned by inviting friends: 7 days each time one of them builds their first CV.",
-              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kuwalika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
+              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kualika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
             )}
           </Text>
 
           {earn && (
             <Button
-              label={t("Earn Premium — invite friends", "Pata Premium — walika marafiki")}
+              label={t("Earn Premium by inviting friends", "Pata Premium kwa kualika marafiki")}
               onPress={() => {
                 haptics.light();
                 onClose();
