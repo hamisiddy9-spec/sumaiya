@@ -2,7 +2,21 @@
  * Chat message types and interfaces for Sumaiya AI assistant
  */
 
-export type MessageType = 'text' | 'skill-gap' | 'recommendation' | 'action' | 'learning' | 'cv-ready';
+/**
+ * The message taxonomy of §3.2, as a union.
+ *
+ * `'recommendation'` and `'action'` were **retired** (audit M1): nothing ever
+ * rendered them, so they were dead union members that made the type look like it
+ * had capabilities it did not have. The kinds that arrived with the redesign:
+ *
+ *   'text'        a turn — the user's (T1) or Sumaiya's (T2)
+ *   'system'      T3, the centred note that carries what the app knows
+ *   'progress'    T4/T9, the step rail while she works, the receipt after
+ *   'unavailable' T8, the honest "I can't think right now" state
+ *   'cv-ready'    T5, a produced document
+ *   'skill-gap' / 'learning' — kept, and wrapped in the document-card shell
+ */
+export type MessageType = 'text' | 'skill-gap' | 'learning' | 'cv-ready' | 'system' | 'progress' | 'unavailable';
 export type ActionType = 'open-cv' | 'learn' | 'practice' | 'chat' | 'edit-cv' | 'view-resources';
 export type MessageAuthor = 'user' | 'sumaiya';
 
@@ -59,6 +73,14 @@ export interface ChatMessageData {
 
   // A CV Sumaiya built from the conversation (type: 'cv-ready')
   cv?: import("@sumaiya/types").CVData;
+  /**
+   * The template the produced CV was actually BUILT with — the card used to
+   * hard-code `'classic'` (M5), so the CV shown was not necessarily the CV saved.
+   */
+  cvTemplateId?: import("../../lib/cv-html").CvTemplateId;
+
+  /** T8: which unavailable variant this is, when the model is missing. */
+  unavailable?: 'known' | 'mid-turn' | 'partial';
 }
 
 export type AttachmentKind = 'image' | 'document' | 'link' | 'cv';
@@ -112,6 +134,18 @@ export interface ChatMessage {
   timestamp: Date;
   sending?: boolean; // While message is being sent
   error?: string; // If message failed to send
+  /**
+   * T1: the user's own turn's delivery word — one word, under the bubble:
+   * `Inatuma…` · `Imetumwa` · `Haijatumwa`. The bubble and its words are never
+   * removed on failure; it gains an outline instead.
+   */
+  delivery?: 'sending' | 'sent' | 'failed';
+  /**
+   * True when the turn's text came from one of the offered openers rather than
+   * the user's own typing (audit F5): the bubble says so, because putting words
+   * in someone's mouth unmarked is the one thing this vocabulary must not do.
+   */
+  offeredOpener?: boolean;
   attachments?: Attachment[]; // Files/links the user added to this turn
 }
 
@@ -129,7 +163,11 @@ export interface SumaiyaResponse {
 
 // Quick actions available from greeting
 export const INITIAL_QUICK_ACTIONS: QuickAction[] = [
-  { id: 'cv-builder', label: 'Build my CV', labelSw: 'Tengeneza CV yangu', icon: 'file-text', action: 'open-cv' },
+  // §3.6 voice table / mockup 01 #2: this is CHROME the product renders, not
+  // something the user said — so it names the outcome in the second person.
+  // `Ongea nami` beside it stays first person on purpose: that one IS her
+  // speaking, which the Swahili voice rule permits.
+  { id: 'cv-builder', label: 'Build my CV', labelSw: 'Tengeneza CV yako', icon: 'file-text', action: 'open-cv' },
   { id: 'job-letter', label: 'Cover letter', labelSw: 'Barua ya maombi', icon: 'mail', action: 'edit-cv', data: { template: 'letter' } },
   { id: 'learn-skills', label: 'Learn a skill', labelSw: 'Jifunze ujuzi', icon: 'briefcase', action: 'learn' },
   { id: 'free-chat', label: 'Just talk', labelSw: 'Ongea nami', icon: 'message-circle', action: 'chat' },

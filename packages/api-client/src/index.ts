@@ -125,8 +125,8 @@ export class ApiError extends Error {
    * our credentials even after a refresh. Callers must NOT report that as a
    * connection problem.
    */
-  kind?: "timeout" | "network" | "unauthorized";
-  constructor(status: number, message: string, kind?: "timeout" | "network" | "unauthorized") {
+  kind?: "timeout" | "network" | "unauthorized" | "aborted";
+  constructor(status: number, message: string, kind?: "timeout" | "network" | "unauthorized" | "aborted") {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -227,6 +227,24 @@ export class ApiClient {
       attempt++;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
+      // An EXTERNAL abort (the chat's Stop control) must really stop the
+      // request: on a metered connection a "stop" that keeps the bytes flowing
+      // is worse than no stop at all — the user paid for a reply they cancelled.
+      // Composed with our own timeout controller rather than replacing it.
+      const external = options.signal;
+      let externalAborted = false;
+      if (external) {
+        if (external.aborted) controller.abort();
+        else
+          external.addEventListener(
+            "abort",
+            () => {
+              externalAborted = true;
+              controller.abort();
+            },
+            { once: true },
+          );
+      }
       try {
         response = await fetch(url, { ...options, headers, signal: controller.signal });
         clearTimeout(timeoutId);
@@ -238,6 +256,11 @@ export class ApiClient {
           continue;
         }
         if (err instanceof Error && err.name === "AbortError") {
+          // The user's own cancel is not a timeout, and must not be reported as
+          // one — it is the one case where nothing went wrong at all.
+          if (externalAborted) {
+            throw new ApiError(0, "Request stopped.", "aborted");
+          }
           throw new ApiError(0, "Request timed out. Check your connection.", "timeout");
         }
         // The real cause (DNS failure, TLS handshake, connection reset…) was
@@ -499,12 +522,37 @@ export class ApiClient {
   async sendChatMessage(
     messages: { role: "user" | "assistant"; content: string }[],
     conversationId?: string,
-    lang?: "en" | "sw"
+    lang?: "en" | "sw",
+    /**
+     * Optional external abort — the chat's Stop control. Passed through to the
+     * transport so stopping a turn really stops it: the request is cancelled and
+     * the bytes stop, which is the whole point on a metered connection.
+     */
+    signal?: AbortSignal
   ): Promise<{ message: string; conversationId: string | null }> {
     return this.request("/api/mobile/chat", {
       method: "POST",
       body: JSON.stringify({ messages, conversationId, lang }),
+      ...(signal ? { signal } : {}),
     });
+  }
+
+  /**
+   * The provider's own answer about itself — `GET /api/ai/status` →
+   * `{configured, provider}`.
+   *
+   * The chat asks THIS before the user invests a message, rather than guessing
+   * from a connectivity flag: "never a connectivity heuristic" (§3.6 of the
+   * chatbox redesign). Returns `null` when the probe itself could not be made —
+   * which is deliberately NOT the same as "the provider is off": an unplugged
+   * phone must not be told the intelligence is unavailable when nobody asked it.
+   */
+  async getAiStatus(): Promise<{ configured: boolean; provider: string | null } | null> {
+    try {
+      return await this.request<{ configured: boolean; provider: string | null }>("/api/ai/status");
+    } catch {
+      return null;
+    }
   }
 
   /** Turn a chat transcript (what the user told Sumaiya + their profile) into a

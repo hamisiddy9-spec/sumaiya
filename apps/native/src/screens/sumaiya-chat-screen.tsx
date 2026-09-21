@@ -1,16 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, {
-  Easing,
-  FadeInUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
 import { useCvs } from "../hooks/use-cvs";
@@ -22,42 +13,69 @@ import { AttachSheet } from "../components/chat/attach-sheet";
 import { JobChoiceSheet } from "../components/chat/job-choice-sheet";
 import { QuickActionsGrid } from "../components/chat/quick-actions-grid";
 import { ChatComposer } from "../components/chat/chat-composer";
+import { ProgressRail, ProgressReceipt } from "../components/chat/progress-rail";
+import { SystemNote } from "../components/chat/system-note";
+import { TurnErrorCard } from "../components/chat/turn-error-card";
+import { UnavailableCard } from "../components/chat/unavailable-card";
+import { SuggestionChips } from "../components/chat/suggestion-chips";
 import { INITIAL_QUICK_ACTIONS } from "../components/chat/chat-types";
+import { CHAT_MOTION, chatEnterMs, chatExitMs } from "../components/chat/chat-motion";
 import type { CVData } from "@sumaiya/types";
-import type { ActionType, Attachment } from "../components/chat/chat-types";
+import type { ActionType, Attachment, ChatMessage } from "../components/chat/chat-types";
 import type { AttachKind } from "../components/chat/attach-sheet";
+import type { CvTemplateId } from "../lib/cv-html";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useSpeech } from "../lib/speech";
 import { useLang, greetingFor } from "../lib/i18n";
 import { resolveAttachment, linkAttachment } from "../lib/attachments";
-import { dialog, haptics, useThemeColors, PromptModal } from "../components/ui";
+import { dialog, haptics, useMotionReduced, useThemeColors, PromptModal } from "../components/ui";
 import type { SumaiyaChatScreenProps } from "../navigation/types";
 
-function TypingDot({ i }: { i: number }) {
-  const c = useThemeColors();
-  const v = useSharedValue(0.4);
-  useEffect(() => {
-    v.value = withDelay(
-      i * 140,
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: 350, easing: Easing.inOut(Easing.quad) }),
-          withTiming(0.4, { duration: 350, easing: Easing.inOut(Easing.quad) }),
-        ),
-        -1,
-      ),
-    );
-  }, []);
-  const style = useAnimatedStyle(() => ({ opacity: v.value, transform: [{ scale: 0.8 + v.value * 0.2 }] }));
-  return <Animated.View style={[style, { width: 7, height: 7, borderRadius: 4, backgroundColor: c.textMuted }]} />;
-}
-
+/**
+ * The chat screen — §3 of CHATBOX-REDESIGN-2026-09-20.md.
+ *
+ * What changed here, and why each one is not cosmetic:
+ *
+ *   · The **three-dot bubble is gone**. On the device tonight a user who got no
+ *     reply sent `Hi` four times, because three pulsing dots look identical
+ *     whether the request is healthy or dead — and re-sending on a metered
+ *     connection costs them money. A progress rail built from real events
+ *     replaced it, with a stop control from the first second.
+ *   · The **composer is never blocked**. It used to be `editable={!loading}`
+ *     with a dead send button; now the field is always live (a message sent
+ *     while she works is queued, not refused) and the send slot becomes stop.
+ *   · The **chips dock above the composer** in one scrollable row, capped at
+ *     three, instead of repeating verbatim inside the transcript.
+ *   · Every failure is a **state with a control**, never a dead end and never an
+ *     English sentence in a Swahili conversation.
+ */
 export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { messages, loading, error, sendMessage, clearChat, fetchLearningResources, buildCvFromChat, buildingCv, retryAttachment } =
-    useSumaiyaChat();
+  const {
+    messages,
+    loading,
+    error,
+    delivery,
+    turnSteps,
+    turnStartedAt,
+    turnError,
+    modelStatus,
+    queued,
+    turnActive,
+    turnOutcome,
+    sendMessage,
+    clearChat,
+    fetchLearningResources,
+    buildCvFromChat,
+    buildingCv,
+    retryAttachment,
+    stopTurn,
+    retryLastTurn,
+    dismissTurnError,
+    dismissError,
+  } = useSumaiyaChat();
   const { cvs } = useCvs();
   const { queueOperation } = useOfflineSync();
   const { lang, t } = useLang();
@@ -69,11 +87,12 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   // "Lenga kwenye kazi" must not assume which job — it opens the choice (our
   // listings, searchable, or the user's own) at zero request cost.
   const [jobChoiceOpen, setJobChoiceOpen] = useState(false);
+  /** Move 21: the pill appears only when the reader is NOT at the bottom. */
+  const [pinned, setPinned] = useState(true);
   const scrollRef = useRef<ScrollView>(null);
   const inputRef = useRef<TextInput>(null);
+  const reduce = useMotionReduced();
 
-  // The tapped attachment, resolved live from the transcript so the preview
-  // sheet always reflects the CURRENT read state (a retry mutates the message).
   const previewLive = preview
     ? messages.flatMap((m) => m.attachments ?? []).find((a) => a.id === preview.id) ?? preview
     : null;
@@ -119,13 +138,20 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
     return "";
   })();
 
-  useEffect(() => {
-    if (messages.length) setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 80);
-  }, [messages, loading]);
+  /**
+   * S1: the old code guessed with `setTimeout(…, 80)` on every messages/loading
+   * change — it fired on the first render of a restored 40-turn transcript and
+   * it fought a user who was reading upwards. Now the transcript scrolls itself
+   * only when the reader is already at the bottom, and it does so on a real
+   * layout event (`onContentSizeChange`).
+   */
+  const scrollToEnd = (animated = true) => {
+    scrollRef.current?.scrollToEnd({ animated: reduce ? false : animated });
+  };
 
   const send = async () => {
     const text = input.trim();
-    if ((!text && attachments.length === 0) || loading) return;
+    if (!text && attachments.length === 0) return;
     haptics.light();
     const atts = attachments;
     setInput("");
@@ -134,6 +160,10 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
   };
 
   const onAttach = async (kind: AttachKind) => {
+    if (kind === "jobTarget") {
+      setJobChoiceOpen(true);
+      return;
+    }
     if (kind === "link") {
       setLinkPrompt(true);
       return;
@@ -215,9 +245,9 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       case "open-cv":
       case "edit-cv": {
         if (data?.section === "jobs") {
-          // The "Lenga kwenye kazi" chip. Never assume the job: offer our live
-          // listings (searchable) or the user's own advert, then hand the chosen
-          // one to the existing snap screen.
+          // The "Lenga kwenye kazi" chip and the + menu's fifth row. Never
+          // assume the job: offer our live listings (searchable) or the user's
+          // own advert, then hand the chosen one to the existing snap screen.
           setJobChoiceOpen(true);
           break;
         }
@@ -259,14 +289,38 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         break;
       case "chat":
         speech.stop();
-        clearChat();
+        askClear();
         break;
     }
   };
 
+  /**
+   * `Futa mazungumzo` behind a confirmation (§3.7 / R7). It was a destructive
+   * action on up to 40 turns of work behind a 17 px icon with no confirmation at
+   * all; the dialog is V2 (spring.gentle card, backdrop 220, out 140).
+   */
+  const askClear = () => {
+    if (messages.length <= 2) {
+      // Only two turns of nothing to lose — clearing instantly is not a risk.
+      clearChat();
+      return;
+    }
+    dialog.alert(
+      t("Clear this conversation?", "Futa mazungumzo haya?"),
+      t(
+        `The ${messages.length} messages on this phone will be deleted. Nothing you built in it (a CV, a letter) is deleted with it.`,
+        `Ujumbe ${messages.length} ulio kwenye simu hii utafutwa. Hutaifuta kitu ulichokitengeneza (CV, barua) kwa kufuta mazungumzo.`,
+      ),
+      [
+        { text: t("Keep it", "Acha"), style: "cancel" as const },
+        { text: t("Delete", "Futa"), style: "destructive" as const, onPress: () => { speech.stop(); clearChat(); } },
+      ],
+    );
+  };
+
   // Persist a CV Sumaiya built in the chat — straight to the local store + a
   // best-effort server push. No trip through the editor needed.
-  const saveCvFromChat = async (cvData: CVData, template: string) => {
+  const saveCvFromChat = async (cvData: CVData, template: string): Promise<string> => {
     const now = new Date();
     const cv = {
       id: `cv-${Date.now()}`,
@@ -290,13 +344,83 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
       // queue the editor uses so it's retried like every other unsynced edit.
       await queueOperation("create_cv", cv.id, cv).catch(() => {});
     }
+    // The id is returned so the card can hand it to the editor: the whole point
+    // of the handoff (§3.4 step 2) is that saving from the editor updates THIS
+    // document instead of forking a second CV.
+    return cv.id;
   };
+
+  /**
+   * §3.4 · The handoff. Identity travels with it: the CV's real template, plus
+   * `sourceCvId` so a save from the editor can update THIS document instead of
+   * forking a second CV (M5). And the editor announces the context it came from
+   * — as a system note in the chat, not a banner in the editor.
+   */
+  const openCvFromCard = (cv: CVData, templateId?: CvTemplateId, cvId?: string) => {
+    addSystemNote(
+      t(
+        "You've opened the CV I built here. When you come back, I'll carry on with it.",
+        "Umefungua CV yako iliyotengenezwa hapa. Ukirudi, nitaendelea nayo."
+      ),
+    );
+    navigation.navigate("CVsTab", {
+      screen: "CvEditor",
+      // `sourceCvId` is passed only when the document has really been saved —
+      // a placeholder id would make the editor believe it is editing a saved CV.
+      params: { initialData: cv, templateId: templateId ?? null, ...(cvId ? { sourceCvId: cvId } : {}) },
+    });
+  };
+
+  /** T3 · a system note in the transcript (centred, no avatar, never a toast). */
+  const addSystemNote = (text: string) => {
+    const note: ChatMessage = {
+      id: `note-${Date.now()}`,
+      type: "system",
+      author: "sumaiya",
+      content: text,
+      data: {},
+      timestamp: new Date(),
+    };
+    setSystemNotes((prev) => [...prev.slice(-2), note]);
+  };
+  const [systemNotes, setSystemNotes] = React.useState<ChatMessage[]>([]);
 
   // Offer to build once the user has actually told Sumaiya something, and only
   // until a CV has been produced in this thread.
   const substantiveUserTurns = messages.filter((m) => m.author === "user" && m.content.trim().length > 12).length;
   const alreadyBuilt = messages.some((m) => m.type === "cv-ready");
-  const showBuildBar = !empty && substantiveUserTurns >= 2 && !alreadyBuilt;
+
+  // T6 · the docked chip row: the newest reply's suggestions, capped at three.
+  const chips = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const s = messages[i].data?.suggestions;
+      if (s?.length) return s;
+    }
+    return [];
+  })();
+
+  // Move 21 — the scroll-to-bottom pill, entering at 300 with a 12 px rise.
+  const pillV = useSharedValue(0);
+  useEffect(() => {
+    pillV.value = withTiming(pinned ? 0 : 1, {
+      duration: pinned ? chatExitMs(reduce, CHAT_MOTION.scrollPill.exit) : chatEnterMs(reduce, CHAT_MOTION.scrollPill.enter),
+      easing: pinned ? Easing.in(Easing.cubic) : Easing.out(Easing.cubic),
+    });
+  }, [pinned, reduce, pillV]);
+  const pillStyle = useAnimatedStyle(() => ({
+    opacity: pillV.value,
+    transform: [{ translateY: (1 - pillV.value) * CHAT_MOTION.scrollPill.distance }],
+  }));
+
+  // The composer's one always-true sentence (§3.1's draft line).
+  const draftNote = queued
+    ? t(
+        "Kept — I'll send it as soon as I finish this one.",
+        "Nimeihifadhi — nitaituma mara nitakapomaliza hii.",
+      )
+    : modelStatus === "unavailable"
+      ? t("Your words are kept even while I can't think.", "Maneno yako yanahifadhiwa hata nikiwa siwezi kufikiri sasa hivi.")
+      : undefined;
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
@@ -353,7 +477,7 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         {!empty ? (
           <Pressable
             hitSlop={10}
-            onPress={() => { haptics.selection(); speech.stop(); clearChat(); }}
+            onPress={() => { haptics.selection(); askClear(); }}
             accessibilityRole="button"
             accessibilityLabel={t("Clear conversation", "Futa mazungumzo")}
           >
@@ -373,9 +497,20 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
           contentContainerStyle={{ padding: 16, flexGrow: 1 }}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => {
+            if (pinned) scrollToEnd();
+          }}
+          onScroll={(e) => {
+            const { contentOffset, layoutMeasurement, contentSize } = e.nativeEvent;
+            setPinned(contentOffset.y + layoutMeasurement.height >= contentSize.height - 24);
+          }}
+          scrollEventThrottle={16}
         >
           {empty ? (
-            <Animated.View entering={FadeInUp.duration(320)} style={{ flex: 1, paddingTop: 12 }}>
+            <View style={{ flex: 1, paddingTop: 12 }}>
+              {/* §3.2 T3 — one quiet line answering a real question: the
+                  transcript has always been kept (40 turns on disk) and the UI
+                  was silent about it. */}
               <View
                 style={{
                   backgroundColor: c.bgElevated,
@@ -390,71 +525,126 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
                 <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", marginBottom: 4 }}>
                   {t("Hi, I'm Sumaiya 👋", "Habari, mimi ni Sumaiya 👋")}
                 </Text>
-                <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 21 }}>
-                  {greetingFor(lang)}
-                </Text>
+                <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 21 }}>{greetingFor(lang)}</Text>
               </View>
               <QuickActionsGrid actions={INITIAL_QUICK_ACTIONS} onSelect={(a) => onInitialAction(a.id)} loading={loading} />
-            </Animated.View>
+              <SystemNote text={t("This conversation stays on this phone.", "Mazungumzo yanabaki kwenye simu hii.")} />
+            </View>
           ) : (
-            messages.map((m) => (
-              <Animated.View key={m.id} entering={FadeInUp.duration(260)}>
+            messages.map((m, i) => {
+              if (m.type === "system") return <SystemNote key={m.id} text={m.content} />;
+              const prev = messages[i - 1];
+              // One attribution row per run of her bubbles (T2).
+              const showAttribution = m.author === "sumaiya" && (!prev || prev.author !== "sumaiya");
+              return (
                 <ChatMessageComponent
+                  key={m.id}
                   message={m}
+                  index={i}
+                  showAttribution={showAttribution}
+                  delivery={m.author === "user" ? delivery[m.id] : undefined}
                   onActionPress={onAction}
                   loading={loading}
                   onPreviewAttachment={setPreview}
-                  onOpenCvEditor={(cv) =>
-                    navigation.navigate("CVsTab", { screen: "CvEditor", params: { initialData: cv } })
-                  }
+                  onOpenCvEditor={openCvFromCard}
                   onSaveCv={saveCvFromChat}
+                  onRetry={m.author === "user" && delivery[m.id] === "failed" ? () => void retryLastTurn() : undefined}
+                  retryBusy={turnActive}
+                  onWriteYourself={m.author === "user" ? dismissTurnError : undefined}
                 />
-              </Animated.View>
-            ))
+              );
+            })
           )}
 
-          {loading ? (
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 5,
-                alignSelf: "flex-start",
-                backgroundColor: c.bgElevated,
-                borderWidth: 1,
-                borderColor: c.border,
-                borderRadius: 16,
-                borderBottomLeftRadius: 4,
-                paddingHorizontal: 14,
-                paddingVertical: 12,
-                marginTop: 6,
-              }}
-            >
-              <TypingDot i={0} />
-              <TypingDot i={1} />
-              <TypingDot i={2} />
-            </View>
+          {/* Notes raised during this session (the editor hand-off, mostly). */}
+          {systemNotes.map((n) => (
+            <SystemNote key={n.id} text={n.content} />
+          ))}
+
+          {/* T4 · the rail, replacing the bare three-dot bubble entirely. */}
+          {turnActive ? (
+            <ProgressRail steps={turnSteps} startedAt={turnStartedAt} onStop={stopTurn} />
+          ) : null}
+
+          {/* T9 · what the rail leaves behind. */}
+          {!turnActive && turnOutcome !== "failed" && turnSteps.length > 0 && turnSteps.some((s) => s.state === "done") ? (
+            <ProgressReceipt steps={turnSteps} />
+          ) : null}
+
+          {queued ? (
+            <SystemNote
+              text={t("Kept — I'll send it as soon as I finish this one.", "Nimeihifadhi — nitaituma mara nitakapomaliza hii.")}
+            />
+          ) : null}
+
+          {/* T8 · the honest unavailable state, from the probe (known) or the
+              turn's own outcome (mid-turn). It never begs, never lies, never
+              deadlines and never shows English. */}
+          {turnError ? (
+            turnError.modelMissing ? (
+              <UnavailableCard
+                variant="mid-turn"
+                onOpenAts={() => {
+                  const cv = cvs[0];
+                  navigation.navigate("HomeTab", { screen: "AtsChecker", params: cv ? { cvId: cv.id } : {} });
+                }}
+                onOpenEditor={() => onAction("open-cv")}
+                onReadPhoto={() => {
+                  setAttachOpen(true);
+                }}
+                onRetry={() => void retryLastTurn()}
+                retryBusy={turnActive}
+                onWriteYourself={dismissTurnError}
+              />
+            ) : (
+              <TurnErrorCard
+                title={t("I couldn't answer this one.", "Sikuweza kujibu ombi hili.")}
+                why={turnError.text}
+                retryLabel={t("Try this request again", "Jaribu ombi hili tena")}
+                onRetry={() => void retryLastTurn()}
+                busy={turnActive}
+                onSecondary={dismissTurnError}
+              />
+            )
           ) : null}
 
           {error ? (
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 8,
-                backgroundColor: c.error + "18",
-                borderColor: c.error + "40",
-                borderWidth: 1,
-                borderRadius: 12,
-                padding: 11,
-                marginTop: 10,
-              }}
-            >
-              <Icon name="alert-circle" size={16} color={c.error} />
-              <Text style={{ flex: 1, color: c.error, fontSize: 13 }}>{error}</Text>
-            </View>
+            <TurnErrorCard
+              title={t("That didn't go through.", "Hilo halikupita.")}
+              why={error}
+              onSecondary={dismissError}
+            />
           ) : null}
         </ScrollView>
 
-        {showBuildBar ? (
+        {/* Move 21 — the pill that never animates the scroll offset itself. */}
+        <Animated.View pointerEvents={pinned ? "none" : "auto"} style={[pillStyle, { alignSelf: "center", marginBottom: 6 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("Go to the newest message", "Nenda kwenye ujumbe wa mwisho")}
+            onPress={() => {
+              setPinned(true);
+              scrollToEnd();
+            }}
+            style={{
+              minHeight: 36,
+              paddingHorizontal: 14,
+              borderRadius: 999,
+              backgroundColor: c.text,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 6,
+            }}
+          >
+            <Icon name="chevron-down" size={14} color={c.accentText} />
+            <Text style={{ color: c.accentText, fontSize: 12, fontWeight: "700" }}>
+              {t("Newest", "Ya mwisho")}
+            </Text>
+          </Pressable>
+        </Animated.View>
+
+        {!empty && substantiveUserTurns >= 2 && !alreadyBuilt ? (
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ disabled: buildingCv }}
@@ -472,27 +662,32 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
               marginBottom: 8,
               paddingVertical: 12,
               borderRadius: 14,
-              backgroundColor: c.accent,
+              backgroundColor: c.accentFill,
               opacity: buildingCv ? 0.7 : 1,
             }}
           >
             <SumaiyaMark size={16} color={c.accentText} state={buildingCv ? "thinking" : "static"} />
             <Text style={{ color: c.accentText, fontSize: 14, fontWeight: "800" }}>
-              {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build my CV from this chat", "Tengeneza CV yako kutoka mazungumzo haya")}
+              {buildingCv ? t("Building your CV…", "Inatengeneza CV yako…") : t("Build your CV from this chat", "Tengeneza CV yako kutoka mazungumzo haya")}
             </Text>
           </Pressable>
         ) : null}
+
+        {/* T6 · the chips, docked above the composer in one scrollable row. */}
+        {!empty ? <SuggestionChips suggestions={chips} onSuggestionPress={onAction} /> : null}
 
         <ChatComposer
           value={input}
           onChangeText={setInput}
           onSend={send}
+          onStop={stopTurn}
           loading={loading}
           attachments={attachments}
           onAttach={onAttach}
           onOpenAttach={() => setAttachOpen(true)}
           onRemoveAttachment={(id) => setAttachments((prev) => prev.filter((a) => a.id !== id))}
           inputRef={inputRef}
+          draftNote={draftNote}
         />
       </KeyboardAvoidingView>
 

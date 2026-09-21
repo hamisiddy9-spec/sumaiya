@@ -67,7 +67,24 @@ export type ScanStackParamList = {
   ScanMain: undefined;
   PdfTools: undefined;
   ScanProcessing: { photoUri: string };
-  CvEditor: { templateId?: string | null; initialData?: unknown; nonce?: string } | undefined;
+  CvEditor:
+    | {
+        templateId?: string | null;
+        initialData?: unknown;
+        nonce?: string;
+        /**
+         * §3.4 step 2 · Identity travels with the handoff.
+         *
+         * When the chat's document card opens the editor, it passes the id the
+         * thread knows the document by, so a save from the editor can update THIS
+         * document instead of forking a second CV (audit M5: the chat passed
+         * `initialData` only, so the editor received a copy with no identity and
+         * saving produced two CVs). Additive on purpose: the editor may ignore
+         * it until it is wired to read it, and nothing else changes.
+         */
+        sourceCvId?: string;
+      }
+    | undefined;
 };
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;

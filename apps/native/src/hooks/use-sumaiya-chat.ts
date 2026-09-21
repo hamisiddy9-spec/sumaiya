@@ -2,11 +2,11 @@
  * Hook for managing Sumaiya AI chat state and logic
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '../contexts/auth-context';
 import { apiClient } from '../lib/api-client';
-import { friendlyApiError } from '../lib/app-errors';
+import { friendlyApiError, isTransportError } from '../lib/app-errors';
 import type {
   ChatMessage,
   SuggestionChip,
@@ -23,6 +23,8 @@ import { reportError } from '../lib/reporting';
 import { useLang, greetingFor } from '../lib/i18n';
 import { splitReplyIntoBubbles } from '../lib/reply-bubbles';
 import { sleep } from '@sumaiya/utils';
+import { buildTurnSteps, type ChatStep, type TurnProgress } from '../components/chat/chat-progress';
+import { isModelUnavailableStatus, safeUnavailableText, type UnavailableVariant } from '../components/chat/chat-unavailable';
 
 // A long reply arrives in one round-trip (no streaming — see reply-bubbles.ts
 // for why), so staging it into separate bubbles is the only place a "typing"
@@ -36,14 +38,45 @@ const BUBBLE_DELAY_MS = 550;
 
 const CHAT_KEY = 'sumaiya_chat_v1';
 
+/** What the user's own turn says about its delivery — one word, under the bubble. */
+export type DeliveryState = 'sending' | 'sent' | 'failed';
+
+/** Why the reply is not coming, when it is not coming. */
+export interface TurnError {
+  /** Her sentence, in the user's language. Never a raw server body. */
+  text: string;
+  /** True when the model itself is the missing piece. */
+  modelMissing: boolean;
+  variant: UnavailableVariant;
+}
+
 export function useSumaiyaChat() {
   const { user } = useAuthContext();
   const { lang, t } = useLang();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Delivery word per user message id (§3.2 T1): Inatuma… / Imetumwa / Haijatumwa. */
+  const [delivery, setDelivery] = useState<Record<string, DeliveryState>>({});
+  /** The live rail, from real events only — never a timer. */
+  const [progress, setProgress] = useState<TurnProgress | null>(null);
+  const [turnStartedAt, setTurnStartedAt] = useState<number>(() => Date.now());
+  /** A turn that failed: the error card hangs off the turn it belongs to. */
+  const [turnError, setTurnError] = useState<TurnError | null>(null);
+  /**
+   * The provider's own answer about itself, asked once on entry (§3.6
+   * "Detect": a probe, never a connectivity heuristic). `unknown` until it
+   * answers — an unknown provider never renders as "unavailable".
+   */
+  const [modelStatus, setModelStatus] = useState<"unknown" | "ready" | "unavailable">("unknown");
+  /** Kept while a turn is in flight; sent the moment that turn ends. */
+  const [queued, setQueued] = useState<{ text: string; attachments: Attachment[] } | null>(null);
   const messageIdRef = useRef(0);
   const hydrated = useRef(false);
+  const inFlight = useRef(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const stoppedRef = useRef(false);
+  const lastTurnRef = useRef<{ text: string; attachments: Attachment[] } | null>(null);
 
   // Restore the last conversation so a backgrounded/killed app doesn't lose it
   // (it holds the answers "Build my CV from this chat" depends on).
@@ -65,6 +98,23 @@ export function useSumaiyaChat() {
     })();
   }, []);
 
+  // Ask the thing that knows, once, before the user invests a message. A failed
+  // probe is NOT "the provider is off" — it leaves the status unknown and the
+  // chat behaves normally (an unplugged phone must not be told the intelligence
+  // is unavailable when nobody asked it).
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!user) return;
+      const status = await apiClient.getAiStatus();
+      if (!alive || !status) return;
+      setModelStatus(status.configured ? "ready" : "unavailable");
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [user]);
+
   // Persist (debounced), last 40 turns.
   useEffect(() => {
     if (!hydrated.current) return;
@@ -79,14 +129,28 @@ export function useSumaiyaChat() {
     return `msg-${Date.now()}-${++messageIdRef.current}`;
   }, []);
 
-  // Send message to Sumaiya backend
-  const sendMessage = useCallback(
-    async (userMessage: string, opts?: { attachments?: Attachment[]; context?: Record<string, any> }) => {
+  /**
+   * One turn, end to end — the single path every send, retry and queue-flush
+   * takes. The user's words enter the transcript here and are never removed from
+   * it; every line of the rail is emitted from a real event on this path.
+   */
+  const runTurn = useCallback(
+    async (userMessage: string, opts?: { attachments?: Attachment[]; isRetry?: boolean }) => {
       let attachments = opts?.attachments ?? [];
       if ((!userMessage.trim() && attachments.length === 0) || !user) return;
 
+      lastTurnRef.current = { text: userMessage, attachments };
+      stoppedRef.current = false;
+      setTurnError(null);
       setError(null);
+      setTurnStartedAt(Date.now());
       setLoading(true);
+      inFlight.current = true;
+      // The Stop control aborts THIS controller — the transport is handed it, so
+      // stopping really stops the request instead of paying for a reply the user
+      // cancelled.
+      const controller = new AbortController();
+      abortRef.current = controller;
 
       // On the first turn, hand Sumaiya the user's saved Career Profile so she
       // doesn't ask them to re-type their history. (Server-side assembleUserContext
@@ -104,7 +168,11 @@ export function useSumaiyaChat() {
       let memoryBlock = "";
       try { memoryBlock = renderMemoryBlock(await loadMemory(), t); } catch { /* ignore */ }
 
-      const userMsgId = generateMessageId();
+      // A retry re-uses the SAME turn: the words are already in the transcript
+      // and are never removed, so the rail restarts on the message that is
+      // already there instead of appending it a second time.
+      const existingUserId = [...messages].reverse().find((m) => m.author === "user")?.id;
+      const userMsgId = opts?.isRetry && existingUserId ? existingUserId : generateMessageId();
       const readable = attachments.filter((a) => a.kind === "image" || a.kind === "document");
       const userMsg: ChatMessage = {
         id: userMsgId,
@@ -117,7 +185,16 @@ export function useSumaiyaChat() {
           ? attachments.map((a) => ({ ...a, extracting: readable.some((r) => r.id === a.id) }))
           : undefined,
       };
-      setMessages(prev => [...prev, userMsg]);
+      if (!opts?.isRetry) setMessages(prev => [...prev, userMsg]);
+      setDelivery((d) => ({ ...d, [userMsgId]: 'sending' }));
+      setProgress({
+        received: true,
+        files: readable.length
+          ? attachments.filter((a) => readable.some((r) => r.id === a.id)).map((a) => ({ name: a.name }))
+          : undefined,
+        awaiting: false,
+        answering: false,
+      });
 
       // Read each file's text BEFORE talking to Sumaiya, so she works from what
       // the document says — not from its name (which is how she used to "quote"
@@ -131,10 +208,28 @@ export function useSumaiyaChat() {
         setMessages(prev =>
           prev.map(m => (m.id === userMsgId ? { ...m, attachments } : m)),
         );
+        // The rail's file line reports the REAL outcome of the read: the count of
+        // characters she got (`herufi 2,340`), or the app's own cause-specific
+        // sentence when it failed.
+        setProgress((p) => ({
+          ...(p ?? { received: true, awaiting: false, answering: false }),
+          files: attachments
+            .filter((a) => readable.some((r) => r.id === a.id))
+            .map((a) => ({
+              name: a.name,
+              chars: a.extractedText ? a.extractedText.length : undefined,
+              error: a.extractedText ? undefined : a.extractError,
+            })),
+        }));
       }
 
       const note = attachmentsContext(attachments);
       const outgoing = [profileBlock, userMessage.trim(), note].filter(Boolean).join("\n\n");
+
+      setProgress((p) => ({
+        ...(p ?? { received: true, files: undefined, awaiting: false, answering: false }),
+        awaiting: true,
+      }));
 
       try {
         // Real AI reply via the Bearer-authenticated Hono endpoint. Multi-turn:
@@ -150,7 +245,15 @@ export function useSumaiyaChat() {
             })),
           { role: "user" as const, content: outgoing },
         ];
-        const { message: replyText } = await apiClient.sendChatMessage(history, undefined, lang);
+        const { message: replyText } = await apiClient.sendChatMessage(history, undefined, lang, controller.signal);
+
+        // A reply arrived: the provider is up, whatever the entry probe said.
+        setModelStatus("ready");
+        setProgress((p) => ({
+          ...(p ?? { received: true, files: undefined, awaiting: true, answering: false }),
+          awaiting: false,
+          answering: true,
+        }));
 
         const sumaiyaResponse: SumaiyaResponse = {
           id: generateMessageId(),
@@ -167,6 +270,8 @@ export function useSumaiyaChat() {
         const bubbles = splitReplyIntoBubbles(replyText);
         for (let i = 0; i < bubbles.length; i++) {
           if (i > 0) await sleep(BUBBLE_DELAY_MS);
+          // Stopping keeps the partial work: bubbles already delivered stay.
+          if (stoppedRef.current) break;
           const bubbleMsg: ChatMessage = {
             id: generateMessageId(),
             type: sumaiyaResponse.type,
@@ -195,21 +300,111 @@ export function useSumaiyaChat() {
             ];
           });
         }
+
+        setDelivery((d) => ({ ...d, [userMsgId]: 'sent' }));
+        setProgress((p) => ({
+          ...(p ?? { received: true, files: undefined, awaiting: false, answering: true }),
+          awaiting: false,
+          answering: true,
+          outcome: 'ok',
+        }));
       } catch (err) {
+        // Stopping is not a failure: the words stay, the partial work stays, and
+        // no error card is raised for something the user chose.
+        if (stoppedRef.current || (isTransportError(err) && err.kind === "aborted")) {
+          setDelivery((d) => ({ ...d, [userMsgId]: 'sent' }));
+          setProgress((p) => ({
+            ...(p ?? { received: true, awaiting: false, answering: false }),
+            awaiting: false,
+            outcome: 'stopped',
+          }));
+          return;
+        }
+
+        const status = isTransportError(err) ? err.status : undefined;
+        const modelMissing = isModelUnavailableStatus(status);
         // Everything goes through the shared mapper, which reads `status` and
         // `kind` — never `message`. On this path `message` is English
         // ("Network error. Check your connection.") or a raw HTTP status line
-        // ("500 Internal Server Error"), and both were reaching a Swahili
-        // screen; the English ones also blamed the user's connection for
-        // faults that were ours.
-        setError(friendlyApiError(err, lang));
+        // ("500 Internal Server Error") or, on the web's 503, the literal body
+        // "AI is not configured." — and all three were reaching a Swahili screen.
+        // `safeUnavailableText` is the last gate: a raw English body can no
+        // longer become a bubble in a Swahili conversation.
+        const localized = friendlyApiError(err, lang);
+        setTurnError({
+          // A model that is missing gets HER sentence about herself, not a
+          // transport sentence about a network.
+          text: modelMissing ? safeUnavailableText("", lang, "mid-turn") : safeUnavailableText(localized, lang, "mid-turn"),
+          modelMissing,
+          variant: "mid-turn",
+        });
+        setDelivery((d) => ({ ...d, [userMsgId]: 'failed' }));
+        setProgress((p) => ({
+          ...(p ?? { received: true, awaiting: false, answering: false }),
+          awaiting: false,
+          outcome: 'failed',
+        }));
+        if (modelMissing) setModelStatus("unavailable");
         reportError(err, { scope: 'sumaiyaChat.send' });
       } finally {
+        inFlight.current = false;
+        abortRef.current = null;
         setLoading(false);
       }
     },
     [user, generateMessageId, messages, lang, t]
   );
+
+  /**
+   * The composer is never blocked (§3.1 / R2). A message sent while a turn is
+   * running is KEPT and sent the moment that turn ends — the alternative is a
+   * locked field, which was the single biggest violation of the motion
+   * standard's own "motion is never a gate" rule in the product.
+   */
+  const sendMessage = useCallback(
+    async (userMessage: string, opts?: { attachments?: Attachment[]; context?: Record<string, any> }) => {
+      if (inFlight.current) {
+        setQueued({ text: userMessage, attachments: opts?.attachments ?? [] });
+        return;
+      }
+      await runTurn(userMessage, { attachments: opts?.attachments });
+    },
+    [runTurn]
+  );
+
+  /** Send the queued turn, if any — fired automatically when a turn finishes. */
+  const flushQueue = useCallback(async () => {
+    if (inFlight.current || !queued) return;
+    const next = queued;
+    setQueued(null);
+    await runTurn(next.text, { attachments: next.attachments });
+  }, [queued, runTurn]);
+
+  useEffect(() => {
+    if (!loading && queued) void flushQueue();
+  }, [loading, queued, flushQueue]);
+
+  /**
+   * Stop the turn: the request is aborted for real, the rail closes with the
+   * partial work intact, and the user's words stay exactly where they are.
+   * Stopping is never allowed to cost them what they wrote.
+   */
+  const stopTurn = useCallback(() => {
+    stoppedRef.current = true;
+    abortRef.current?.abort();
+    setQueued(null);
+  }, []);
+
+  /**
+   * Retry the turn that failed — the SAME words. This is the rule the whole
+   * unavailable state is built on: a retry must never cost the user a retype
+   * (and therefore another upload) to re-send something the model already got.
+   */
+  const retryLastTurn = useCallback(async () => {
+    const last = lastTurnRef.current;
+    if (!last || inFlight.current) return;
+    await runTurn(last.text, { attachments: last.attachments, isRetry: true });
+  }, [runTurn]);
 
   // Generate contextual suggestions based on user message and response
   // The "one decision per screen, big buttons" idea, applied to the chat:
@@ -245,7 +440,10 @@ export function useSumaiyaChat() {
     }
     if (has('cv', 'resume', 'wasifu', 'summary', 'muhtasari', 'experience', 'uzoefu')) {
       add('open-cv', 'Open my CV', 'Fungua CV yako', '📄', 'open-cv');
-      add('ats', 'Check ATS', 'Kagua CV', '🛡️', 'edit-cv', { section: 'ats' });
+      // `Kagua CV yako` — the outcome, not the mechanism: §3.6c defect 3 caught
+      // `Kagua ATS` naming the mechanism in Swahili (swahili-lint-ignore: cited counter-example), which the Swahili standard
+      // forbids, and §3.5 J4 caught the same action under two names.
+      add('ats', 'Check your CV', 'Kagua CV yako', '🛡️', 'edit-cv', { section: 'ats' });
     }
     if (has('job', 'kazi', 'apply', 'omba', 'advert', 'tangazo', 'tailor', 'lenga')) {
       add('tailor', 'Tailor to a job', 'Lenga kwenye kazi', '🎯', 'open-cv', { section: 'jobs' });
@@ -273,6 +471,10 @@ export function useSumaiyaChat() {
   const clearChat = useCallback(() => {
     setMessages([]);
     setError(null);
+    setTurnError(null);
+    setDelivery({});
+    setProgress(null);
+    setQueued(null);
     AsyncStorage.removeItem(CHAT_KEY).catch(() => {});
   }, []);
 
@@ -284,6 +486,8 @@ export function useSumaiyaChat() {
     if (!user || buildingCv) return;
     setBuildingCv(true);
     setError(null);
+    setTurnStartedAt(Date.now());
+    setProgress({ received: true, awaiting: true, answering: false });
     try {
       let profileBlock = "";
       try { profileBlock = profilePromptBlock(await loadProfile()); } catch { /* ignore */ }
@@ -294,9 +498,11 @@ export function useSumaiyaChat() {
       const transcript = [profileBlock, said].filter(Boolean).join("\n\n");
       if (transcript.trim().length < 20) {
         setError(t("Tell Sumaiya a bit about yourself first.", "Mwambie Sumaiya kidogo kukuhusu kwanza."));
+        setProgress(null);
         return;
       }
       const { cv } = await apiClient.buildCv(transcript, lang);
+      setModelStatus("ready");
       setMessages((prev) => [
         ...prev,
         {
@@ -308,13 +514,30 @@ export function useSumaiyaChat() {
           timestamp: new Date(),
         },
       ]);
+      setProgress((p) => ({
+        ...(p ?? { received: true, awaiting: true, answering: false }),
+        awaiting: false,
+        answering: true,
+        outcome: "ok",
+      }));
     } catch (err) {
-      setError(
-        friendlyApiError(err, lang, {
-          en: "I couldn't build the CV just now. Try again.",
-          sw: "Sikuweza kutengeneza CV sasa. Jaribu tena.",
-        }),
-      );
+      const status = isTransportError(err) ? err.status : undefined;
+      const modelMissing = isModelUnavailableStatus(status);
+      const localized = friendlyApiError(err, lang, {
+        en: "I couldn't build the CV just now. Try again.",
+        sw: "Sikuweza kutengeneza CV sasa. Jaribu tena.",
+      });
+      setTurnError({
+        text: modelMissing ? safeUnavailableText("", lang, "mid-turn") : safeUnavailableText(localized, lang, "mid-turn"),
+        modelMissing,
+        variant: "mid-turn",
+      });
+      if (modelMissing) setModelStatus("unavailable");
+      setProgress((p) => ({
+        ...(p ?? { received: true, awaiting: false, answering: false }),
+        awaiting: false,
+        outcome: "failed",
+      }));
       reportError(err, { scope: "sumaiyaChat.buildCv" });
     } finally {
       setBuildingCv(false);
@@ -404,11 +627,29 @@ export function useSumaiyaChat() {
     [messages, t, sendMessage],
   );
 
+  /** The rail's rows for the current (or last) turn, from the real events. */
+  const turnSteps: ChatStep[] = useMemo(() => (progress ? buildTurnSteps(progress) : []), [progress]);
+
   return {
     // State
     messages,
     loading,
     error,
+    delivery,
+    turnSteps,
+    turnStartedAt,
+    turnError,
+    modelStatus,
+    queued,
+    /** True while a turn is in flight — the rail is on screen with it. */
+    turnActive: loading && progress?.outcome === undefined,
+    /**
+     * How the last turn ended. A `failed` turn leaves NO receipt behind: a
+     * collapsed "I did these steps ✓" line under a failure reads as success, and
+     * the error card is the story (T7). A `stopped` turn does leave one — the
+     * partial work is real and she says so.
+     */
+    turnOutcome: progress?.outcome,
 
     // Actions
     sendMessage,
@@ -418,6 +659,13 @@ export function useSumaiyaChat() {
     buildCvFromChat,
     buildingCv,
     retryAttachment,
+    stopTurn,
+    retryLastTurn,
+    flushQueue,
+    /** The user chose to write it themselves — clear the failure, keep the words. */
+    dismissTurnError: () => setTurnError(null),
+    /** A local (non-transport) message the user has read, e.g. "tell me a bit first". */
+    dismissError: () => setError(null),
 
     // Utils
     generateMessageId

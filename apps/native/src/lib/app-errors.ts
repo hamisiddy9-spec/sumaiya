@@ -48,7 +48,12 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 /** The shape `@sumaiya/api-client`'s ApiError guarantees. */
 export interface TransportError {
   status: number;
-  kind?: "timeout" | "network";
+  /**
+   * `"aborted"` is new with the chat's Stop control: the user cancelled, so the
+   * request is gone and nothing went wrong. It must never be reported as a
+   * timeout or as a network problem — the user's own decision is not a fault.
+   */
+  kind?: "timeout" | "network" | "aborted";
 }
 
 /**
@@ -101,6 +106,12 @@ export function friendlyApiError(
     // did not come back in time. Saying "check your connection" would be a
     // guess and often a lie, and it invites a retry that may duplicate work
     // the server is still doing.
+    if (kind === "aborted") {
+      return pick({
+        en: "Stopped. What you wrote is still here.",
+        sw: "Nilisimamisha. Ulichoandika bado kipo.",
+      });
+    }
     if (kind === "timeout") {
       return pick({
         en: "This is taking longer than usual. It may still be finishing — check again in a moment.",
@@ -166,6 +177,7 @@ export function friendlyApiError(
   }
 
   return pick(GENERIC);
+}
 
 /**
  * The failure copy for the CV IMPORT path (`/api/mobile/ocr`).
@@ -195,5 +207,4 @@ export function friendlyImportError(err: unknown, lang: Lang): string {
       : "I couldn't finish reading that photo — that is on my side, not your connection. Try a smaller or sharper picture, or start a CV and type it in.";
   }
   return friendlyApiError(err, lang);
-}
 }

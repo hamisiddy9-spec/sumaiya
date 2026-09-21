@@ -14,6 +14,13 @@ import { useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } fr
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
+import { ProgressRail, ProgressReceipt } from "./progress-rail";
+import { UnavailableCard, TurnErrorCard } from "./unavailable-card";
+import { DocumentCard, DocumentStateLine, cvProvenanceSentence } from "./document-card";
+import { CHAT_MOTION } from "@/lib/assistant/chat-motion";
+import { buildTurnSteps, type ChatStep, type TurnProgress } from "@/lib/assistant/chat-progress";
+import { charCountLabel } from "@/lib/assistant/chat-motion";
+import { isModelUnavailableStatus, safeUnavailableText, type UnavailableVariant } from "@/lib/assistant/chat-unavailable";
 import { ChevronLeft, Send, Loader2, Sparkles, RotateCcw, FileText, Mail, CreditCard, ScrollText, Paperclip, Bolt, CheckCircle2, AlertTriangle, XCircle, Target, Check, Volume2, VolumeX, Mic, MicOff, Briefcase, History, Trash2, Plus, SlidersHorizontal, Search, LayoutTemplate, Settings } from "lucide-react";
 import { nanoid } from "nanoid";
 import { computeComposerHeight, COMPOSER_MAX_HEIGHT_PX } from "@/lib/assistant/composer-height";
@@ -375,6 +382,21 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // A brief "thinking" beat before instant deterministic cards — so the
   // assistant feels like it's working, not spitting out a form.
   const [analyzing, setAnalyzing] = useState(false);
+  /** §3.3 — the rail's real events for this turn. No timer anywhere in it. */
+  const [turnProgress, setTurnProgress] = useState<TurnProgress | null>(null);
+  const [turnStartedAt, setTurnStartedAt] = useState<number>(() => Date.now());
+  /** T1 — the delivery word for the newest user turn, and which turn it is. */
+  const [turnState, setTurnState] = useState<{ index: number; status: "sending" | "sent" | "failed" } | null>(null);
+  /** T8 — the probe's answer. `unknown` renders nothing at all. */
+  const [modelStatus, setModelStatus] = useState<"unknown" | "ready" | "unavailable">("unknown");
+  const [unavailable, setUnavailable] = useState<UnavailableVariant | null>(null);
+  /** A message sent while a turn is in flight is KEPT, not dropped (§3.1/R2). */
+  const queuedTurnRef = useRef<{ history: Msg[]; dt: DocType | null } | null>(null);
+  const [queuedNotice, setQueuedNotice] = useState(false);
+  /** The Stop control aborts the real request, so stopping really stops it. */
+  const turnAbortRef = useRef<AbortController | null>(null);
+  /** T3 — the system note the editor handoff leaves behind. */
+  const [handoffNote, setHandoffNote] = useState<string | null>(null);
   // The "what do you want today?" chooser retires once the user picks a card
   // or chooses to just type (the "I have a question" card).
   const [chooserDismissed, setChooserDismissed] = useState(false);
@@ -384,6 +406,26 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   // ── Universal voice ─────────────────────────────────────────────────────────
   // TTS read-back reuses the shared lib/tts service (the same one the Career
   // Interview uses) — no parallel speech system. Voice INPUT uses the Web
+  // §3.6 · Detection is a PROBE, not a guess: GET /api/ai/status returns
+  // {configured, provider} and is asked on entry — never a connectivity
+  // heuristic. A failed probe leaves the status unknown, which renders nothing:
+  // an offline browser must not be told the intelligence is unavailable when
+  // nobody asked it.
+  useEffect(() => {
+    let alive = true;
+    void (async () => {
+      try {
+        const res = await fetch("/api/ai/status");
+        const j = (await res.json().catch(() => ({}))) as { configured?: boolean };
+        if (!alive || typeof j.configured !== "boolean") return;
+        setModelStatus(j.configured ? "ready" : "unavailable");
+        // The "known" variant: she says it BEFORE the user invests a message.
+        if (!j.configured) setUnavailable("known");
+      } catch { /* unknown is a fine answer */ }
+    })();
+    return () => { alive = false; };
+  }, []);
+
   // Speech API only where the browser actually supports it (typing fallback
   // everywhere; iOS Safari hides the mic — it has no SpeechRecognition even
   // prefixed, so we never claim it works there).
@@ -683,6 +725,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
   }, [input]);
 
   const userTurns = messages.filter((m) => m.role === "user").length;
+  /** §3.3 — the rail's rows for this turn, from the real events only. */
+  const turnSteps: ChatStep[] = useMemo(() => (turnProgress ? buildTurnSteps(turnProgress, charCountLabel) : []), [turnProgress]);
   const showChips = !docType && !sending && !uploading && userTurns === 0;
 
   const send = useCallback(async (history: Msg[], dt: DocType | null) => {
@@ -690,6 +734,13 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     sendingRef.current = true;
     setSending(true);
     setError("");
+    // The rail starts from the moment the request goes out, and every line it
+    // shows afterwards comes from a real event below.
+    setTurnProgress({ received: true, awaiting: true, answering: false });
+    setTurnStartedAt(Date.now());
+    setUnavailable(null);
+    const controller = new AbortController();
+    turnAbortRef.current = controller;
     // P0 FIX 3: remember the last REAL job description the user pasted /
     // attached in this thread, so jobs.match / cv.tailor can reuse it instead
     // of running a match on a conversational sentence.
@@ -706,6 +757,9 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     try {
       const res = await fetch("/api/ai/assistant-turn", {
         method: "POST",
+        // Abortable: the Stop control on the rail cancels the real request, so a
+        // stopped turn stops costing the user bytes on a metered connection.
+        signal: controller.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           // Card-only messages (confirmations/signals/jobs) carry empty
@@ -733,7 +787,17 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         }),
       });
       const json = (await res.json().catch(() => ({}))) as { success?: boolean; data?: { reply: string; done: boolean; action?: { tool: string; args: Record<string, unknown> } | null; confirmations?: PendingConfirmation[]; signals?: Signal[]; suggestedNext?: { tool: string; args: Record<string, unknown>; href?: string; reason: { en: string; sw: string } } | null; leaveDocMode?: boolean }; error?: string };
-      if (!res.ok || !json.success || !json.data?.reply) throw new Error(s(json.error) || "failed");
+      if (!res.ok || !json.success || !json.data?.reply) {
+        // Carry the STATUS out of here, because the status is the field the
+        // transport actually guarantees and it is what decides which failure
+        // this is. The body travels only so the catch can recognise it — it is
+        // never rendered: `AI is not configured.` used to become her own bubble
+        // in a Swahili conversation, and that is the defect this fixes.
+        const failure = new Error("turn failed") as Error & { status?: number; body?: string };
+        failure.status = res.status;
+        failure.body = s(json.error);
+        throw failure;
+      }
       const data = json.data;
       // If the assistant chose a read-tool action, run it and attach its result
       // card to this reply. Write tools (tailor, etc.) are handled via their own
@@ -771,6 +835,10 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
         }
       }
       setMessages((m) => [...m, { role: "assistant", content: data.reply, ...(card ? { card } : {}) }]);
+      // The reply is in hand: the provider is up (whatever the entry probe said)
+      // and the rail moves to its last, honest step.
+      setModelStatus("ready");
+      setTurnProgress((p) => ({ ...(p ?? { received: true, awaiting: true, answering: false }), awaiting: false, answering: true }));
       if (data.done) setDone(true);
       // Companion-first: the user refused/abandoned the selected document twice
       // — drop the docType so the UI returns to general chat (chips reappear)
@@ -905,15 +973,50 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
           markExecuted({ tool: "jobs.search", args: act.args ?? {} });
         } catch { /* non-fatal — the reply already shows */ }
       }
+
+      setTurnState((t) => (t ? { ...t, status: "sent" } : t));
+      setTurnProgress((p) => ({ ...(p ?? { received: true, awaiting: false, answering: true }), awaiting: false, answering: true, outcome: "ok" }));
     } catch (err) {
-      // Surface the server's real error (quota 429, AI unconfigured 503, …) so
-      // the user sees WHY the turn failed instead of a generic retry loop.
-      // Never leak a raw object ("[object Object]") — errorMsg coerces.
-      setError(errorMsg(err, convoSw, convoSw ? "Samahani, sikuweza kupata jibu. Jaribu tena." : "Sorry, I couldn't get a reply. Please try again."));
+      // A cancelled turn is NOT a failure: the user chose to stop, their words
+      // stay, and no error card is raised for something they decided.
+      if (controller.signal.aborted) {
+        setTurnState((t) => (t ? { ...t, status: "sent" } : t));
+        setTurnProgress((p) => ({ ...(p ?? { received: true, awaiting: false, answering: false }), awaiting: false, outcome: "stopped" }));
+      } else {
+        const status = (err as { status?: number } | null)?.status;
+        const body = (err as { body?: string } | null)?.body;
+        const modelMissing = isModelUnavailableStatus(status);
+        if (modelMissing) {
+          // T8: a provider that is off, a key that was rotated, a quota or a
+          // dead gateway are ONE state with one sentence — the user never sees
+          // a status code and never has to know which it was.
+          setModelStatus("unavailable");
+          setUnavailable("mid-turn");
+        } else {
+          setError(
+            safeUnavailableText(
+              body ?? errorMsg(err, convoSw, convoSw ? "Sikuweza kupata jibu." : "I couldn't get a reply."),
+              convoSw,
+              "mid-turn",
+            ),
+          );
+        }
+        setTurnState((t) => (t ? { ...t, status: "failed" } : t));
+        setTurnProgress((p) => ({ ...(p ?? { received: true, awaiting: false, answering: false }), awaiting: false, outcome: "failed" }));
+      }
     } finally {
+      turnAbortRef.current = null;
       setSending(false);
       sendingRef.current = false;
       setTimeout(() => inputRef.current?.focus(), 0);
+      // The queued turn goes out the moment this one ends: the composer is never
+      // a locked box, and nothing the user typed is dropped.
+      const queued = queuedTurnRef.current;
+      if (queued) {
+        queuedTurnRef.current = null;
+        setQueuedNotice(false);
+        setTimeout(() => { void send(queued.history, queued.dt); }, 0);
+      }
     }
   }, [sw, profile, cv]);
 
@@ -932,12 +1035,26 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     const history = [...messages, userMsg];
     setMessages(history);
     setDocType(dt);
+    setTurnState({ index: history.length - 1, status: "sending" });
     void send(history, dt);
   };
 
   const submit = () => {
     const value = input.trim();
-    if (!value || sendingRef.current || sending || building || uploading) return;
+    if (!value) return;
+    if (sendingRef.current || sending || building || uploading) {
+      // The composer is never blocked (§3.1 / R2). Rather than dropping what
+      // they typed — or deadening the field, as the live client did — the turn
+      // is KEPT and sent the moment the current one ends.
+      const queuedMsg: Msg = { role: "user", content: value };
+      const queuedHistory = [...messages, queuedMsg];
+      setMessages(queuedHistory);
+      setInput("");
+      if (inputRef.current) inputRef.current.style.height = "auto";
+      queuedTurnRef.current = { history: queuedHistory, dt: docType };
+      setQueuedNotice(true);
+      return;
+    }
     // Stop any active dictation — the message is being sent as-is (P5).
     recRef.current?.stop();
     setListening(false);
@@ -996,6 +1113,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
     setMessages(history);
     setInput("");
     if (inputRef.current) inputRef.current.style.height = "auto";
+    // T1's delivery word, attached to THIS turn.
+    setTurnState({ index: history.length - 1, status: "sending" });
     void send(history, dt);
   };
 
@@ -2712,6 +2831,25 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   </div>
                 </div>
               )}
+              {/* T1 · the delivery word: one word, right-aligned, under the
+                  bubble. The cheapest possible receipt, and the difference
+                  between "did that go?" and knowing. The bubble and its words
+                  are never removed on failure — it gains an outline instead. */}
+              {m.role === "user" && turnState && turnState.index === i ? (
+                <div className="flex justify-end pr-1">
+                  <span
+                    className={`text-[10.5px] font-bold ${
+                      turnState.status === "failed" ? "text-ember-hover" : "text-text-muted"
+                    }`}
+                  >
+                    {turnState.status === "sending"
+                      ? (sw ? "Inatuma…" : "Sending…")
+                      : turnState.status === "failed"
+                        ? (sw ? "Haijatumwa" : "Not sent")
+                        : (sw ? "Imetumwa" : "Sent")}
+                  </span>
+                </div>
+              ) : null}
               {m.role === "assistant" && m.content && tts.supported && (
                 <div className="flex justify-start pl-1">
                   <button
@@ -2851,42 +2989,71 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
 
           {/* A guest's freshly-built CV — see it, recolour it, download it,
               right here. "Open the editor" carries the chosen look across. */}
+          {/* T5 · The document card, not a rich bubble: a tinted band no bubble
+              has, the object's name, what she used and what she could not find,
+              the action stack, and the truth in the footer. The handoff carries
+              the template with it, and the editor is announced in the chat
+              rather than by a banner in the editor (§3.4 step 3). */}
           {guestCvReady && (
-            <CvReadyCard
-              cv={guestCvReady}
+            <DocumentCard
               sw={sw}
-              onOpenEditor={(look, color) => {
-                stashGuestCv(guestCvReady, look, color, sw);
-                router.push("/editor/cv/try");
-              }}
-            />
+              stateLabel={sw ? "tayari" : "ready"}
+              footer={<DocumentStateLine saved={false} sw={sw} />}
+            >
+              <div className="border border-t-0 border-border bg-card px-3.5 pt-3 space-y-1.5">
+                <p className="text-[14.5px] font-bold text-espresso">
+                  {guestCvReady.personal?.fullName ? `CV — ${guestCvReady.personal.fullName}` : (sw ? "CV yako" : "Your CV")}
+                </p>
+                <p className="text-[12px] leading-[17px] text-text-body">{cvProvenanceSentence(guestCvReady, sw)}</p>
+              </div>
+              <div className="border border-t-0 border-border bg-card px-3 pt-1 pb-3">
+                <CvReadyCard
+                  cv={guestCvReady}
+                  sw={sw}
+                  onOpenEditor={(look, color) => {
+                    stashGuestCv(guestCvReady, look, color, sw);
+                    setHandoffNote(
+                      sw
+                        ? "Umefungua CV yako iliyotengenezwa hapa. Ukirudi, nitaendelea nayo."
+                        : "You've opened the CV I built here. When you come back, I'll carry on with it.",
+                    );
+                    router.push("/editor/cv/try");
+                  }}
+                />
+              </div>
+            </DocumentCard>
           )}
 
-          {/* Cockpit chips — shown when an active CV is loaded (/assistant?cv=<id>).
-              These run instant, deterministic checks as inline cards. */}
-          {showCockpit && (
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button onClick={startMatch}
-                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
-                <Target className="w-4 h-4 text-ember" />
-                {sw ? "Linganisha na kazi" : "Match to a job"}
-              </button>
-              <button onClick={runAtsCheck}
-                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
-                <Bolt className="w-4 h-4 text-ember" />
-                {sw ? "Kagua CV yako" : "Run an ATS check"}
-              </button>
-              <button onClick={startJobs}
-                className="inline-flex items-center gap-2 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-sm font-medium rounded-full pl-3 pr-4 py-2 transition shadow-sm">
-                <Briefcase className="w-4 h-4 text-ember" />
-                {sw ? "Kazi zinazofanana na mimi" : "Jobs matching me"}
-              </button>
-            </div>
-          )}
+          {/* T6 · The cockpit chips are DOCKED above the composer from here on
+              (see the docked row in the composer block). The pixel review's
+              finding was that chips inside the transcript read as the user's own
+              bubbles and repeated verbatim under two different replies, and the
+              running app showed exactly that. */}
 
           {/* Fresh thread → "what do you want today?" as four big cards
               (one decision, big targets), then a slim row of extras. Retires
               once the user picks or chooses to type. */}
+          {/* T3 · The system note — centred, no avatar, the ONLY element in the
+              transcript allowed to be centred. The thread has always been kept
+              (localStorage) and the UI was silent about it; this says so once. */}
+          {userTurns === 0 ? (
+            <p className="mx-auto max-w-[88%] text-center rounded-full bg-sand-2 px-3 py-1.5 text-xs text-text-muted">
+              {sw ? "Mazungumzo yanabaki kwenye kifaa hiki." : "This conversation stays on this device."}
+            </p>
+          ) : null}
+
+          {queuedNotice ? (
+            <p className="mx-auto max-w-[88%] text-center rounded-full bg-sand-2 px-3 py-1.5 text-xs text-text-muted">
+              {sw ? "Nimeihifadhi — nitaituma mara nitakapomaliza hii." : "Kept — I'll send it as soon as I finish this one."}
+            </p>
+          ) : null}
+
+          {handoffNote ? (
+            <p className="mx-auto max-w-[88%] text-center rounded-full bg-sand-2 px-3 py-1.5 text-xs text-text-muted">
+              {handoffNote}
+            </p>
+          ) : null}
+
           {showChips && !chooserDismissed && (
             <StartChooser sw={sw} onPick={handleStartChoice} />
           )}
@@ -2919,29 +3086,25 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
             </div>
           )}
 
-          {(sending || analyzing) && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5" aria-label={sw ? "Anaandika" : "Typing"}>
-                {analyzing && <span className="text-[11px] text-text-muted mr-1">{sw ? "Ninachambua" : "Analyzing"}</span>}
-                <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-2 h-2 rounded-full bg-text-muted/60 animate-bounce" />
-              </div>
-            </div>
-          )}
+          {/* T4 · ONE rail for one state. This replaces THREE things: the bare
+              three-dot bubble (which looks identical whether the request is
+              healthy or dead, so a user cannot tell a wait from a stall and has
+              no tool but to send it again), and the two indicators the client
+              stacked for the same flags (audit T4). */}
+          {turnProgress && (sending || analyzing) ? (
+            <ProgressRail
+              steps={turnSteps}
+              startedAt={turnStartedAt}
+              sw={convoSw}
+              onStop={() => turnAbortRef.current?.abort()}
+            />
+          ) : null}
 
-          {sending && (
-            <div className="flex justify-start" role="status" aria-live="polite">
-              <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-text-body flex items-center gap-2">
-                <span className="flex gap-1" aria-hidden>
-                  <span className="w-1.5 h-1.5 rounded-full bg-ember animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-ember animate-bounce" style={{ animationDelay: "120ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-ember animate-bounce" style={{ animationDelay: "240ms" }} />
-                </span>
-                {sw ? "Kuchambua ombi lako…" : "Analyzing your request…"}
-              </div>
-            </div>
-          )}
+          {/* T9 · the receipt: what the rail leaves behind, collapsible and never
+              re-animating. */}
+          {!sending && !building && turnProgress?.outcome !== "failed" && turnSteps.some((s2) => s2.state === "done") ? (
+            <ProgressReceipt steps={turnSteps} sw={convoSw} />
+          ) : null}
           {building && (
             <div className="flex justify-start">
               <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-2.5 text-sm text-text-body flex items-center gap-2">
@@ -2951,22 +3114,37 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
             </div>
           )}
 
-          {error && (
-            <div className="flex justify-start">
-              <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 max-w-[85%]">
-                <p className="text-sm text-red-700">{error}</p>
-                <div className="flex gap-3 mt-2">
-                  <button onClick={done ? build : retry} disabled={sending || building}
-                    className="text-xs font-semibold text-ember-hover hover:underline disabled:opacity-50">
-                    {sw ? "Jaribu tena" : "Try again"}
-                  </button>
-                  <Link href={guest ? "/" : "/dashboard"} className="text-xs font-semibold text-text-muted hover:text-espresso">
-                    {guest ? (sw ? "Nenda mwanzo" : "Go home") : (sw ? "Nenda nyumbani" : "Go to dashboard")}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* T8 · The honest unavailable state. A STATE, not an error page: gold
+              (degraded, not broken), first person, the wrong cause ruled out, at
+              least one control that works right now, and never a word of raw
+              English — the 503 body `AI is not configured.` used to become her
+              own bubble in a Swahili conversation (QA-WEB-JOURNEYS §D3). */}
+          {unavailable ? (
+            <UnavailableCard
+              variant={unavailable}
+              sw={convoSw}
+              onOpenAts={activeCvId ? () => runAtsCheck() : undefined}
+              onOpenEditor={() => router.push(activeCvId ? `/editor/cv/${activeCvId}` : "/editor/cv/try")}
+              onReadPhoto={() => fileRef.current?.click()}
+              onRetry={retry}
+              retryBusy={sending}
+              onWriteYourself={() => setUnavailable(null)}
+            />
+          ) : null}
+
+          {/* T7 · an error that belongs to a turn, with a retry that resends THE
+              SAME turn (`retry` re-sends the existing transcript) — so retrying
+              never costs the user a retype, or another upload. */}
+          {error && !unavailable ? (
+            <TurnErrorCard
+              title={sw ? "Sikuweza kujibu ombi hili." : "I couldn't answer this one."}
+              why={error}
+              retryLabel={sw ? "Jaribu ombi hili tena" : "Try this request again"}
+              onRetry={retry}
+              busy={sending}
+              onSecondary={() => setError("")}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -3135,7 +3313,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                       <button onClick={startMatch}
                         className="inline-flex items-center gap-1.5 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-xs font-medium rounded-full pl-2.5 pr-3 py-1.5 transition">
                         <Target className="w-3.5 h-3.5 text-ember" />
-                        {sw ? "Lenga CV kwa kazi" : "Tailor to a job"}
+                        {sw ? "Lenga kwenye kazi" : "Target a job"}
                       </button>
                       <button onClick={() => pickDoc("cv")}
                         className="inline-flex items-center gap-1.5 bg-card border border-border-input hover:border-ember hover:bg-ember-tint/40 text-espresso text-xs font-medium rounded-full pl-2.5 pr-3 py-1.5 transition">
@@ -3179,6 +3357,32 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   onClose={() => setShowJobChoice(false)}
                 />
               )}
+              {/* T6 · the docked chip row: one scrollable row, neutral tinted,
+                  a `›` prefix, capped at three, and every label naming an
+                  OUTCOME (`Lenga kwenye kazi`, `Kagua CV yako`) or being her
+                  speaking — never a third-party feature label. */}
+              {showCockpit ? (
+                <div className="mb-2 flex gap-2 overflow-x-auto scrollbar-hide -mx-3 px-3">
+                  {[
+                    { key: "match", label: sw ? "Lenga kwenye kazi" : "Target a job", onPress: startMatch },
+                    { key: "ats", label: sw ? "Kagua CV yako" : "Check your CV", onPress: runAtsCheck },
+                    { key: "jobs", label: sw ? "Kazi zinazofanana na mimi" : "Jobs matching me", onPress: startJobs },
+                  ]
+                    .slice(0, 3)
+                    .map((chip) => (
+                      <button
+                        key={chip.key}
+                        type="button"
+                        onClick={chip.onPress}
+                        className="shrink-0 inline-flex items-center gap-1.5 min-h-[44px] rounded-input border border-border bg-sand-2 px-3 text-xs font-bold text-espresso-2 hover:border-ember transition"
+                      >
+                        <span className="text-ember-shadow text-sm font-bold">›</span>
+                        {chip.label}
+                      </button>
+                    ))}
+                </div>
+              ) : null}
+
               {/* WS-6 — thinking effort selector: Haraka / Wastani / Kina.
                   WS-12 — collapsed to a single sliders icon so the composer stays
                   clean; the three options live in a compact popover above it.
@@ -3249,18 +3453,58 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                   value={input}
                   onChange={(e) => { setInput(e.target.value); if (micError) setMicError(null); autoGrow(e.target); }}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-                  placeholder={sending ? (convoSw ? "Subiri kidogo…" : "One moment…") : awaitingJd ? (convoSw ? "Bandika maelezo ya kazi hapa…" : "Paste the job description here…") : (showChips ? (convoSw ? "Andika, au bandika kiungo cha kazi…" : "Type, or paste a job link…") : (convoSw ? "Andika, au bandika kiungo…" : "Type, or paste a link…"))}
+                  // §3.1: the field is NEVER disabled. She may be working; the
+                  // user may still be typing — and on a metered connection the
+                  // next thought must not be lost to a locked box.
+                  placeholder={sending ? (convoSw ? "Andika wakati akifanya kazi…" : "Type while I work…") : awaitingJd ? (convoSw ? "Bandika maelezo ya kazi hapa…" : "Paste the job description here…") : (showChips ? (convoSw ? "Andika, au bandika kiungo cha kazi…" : "Type, or paste a job link…") : (convoSw ? "Andika, au bandika kiungo…" : "Type, or paste a link…"))}
                   rows={1}
-                  disabled={sending || building}
                   autoFocus
                   className="flex-1 resize-none px-4 py-2.5 text-base sm:text-sm leading-relaxed bg-sand-2 border border-border-input rounded-2xl focus:outline-none focus:shadow-focus-ember focus:border-ember placeholder:text-text-muted/60 max-h-[25vh] overflow-y-auto scrollbar-hide disabled:opacity-60"
                 />
-                <button onClick={submit} disabled={!input.trim() || sending || building}
-                  aria-label={sw ? "Tuma" : "Send"}
-                  className="w-10 h-10 rounded-full bg-ember hover:bg-ember-hover text-cream flex items-center justify-center disabled:opacity-40 transition shrink-0">
-                  {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                </button>
+                {/* Move 11 · the send slot's three states, in one 44 px slot:
+                    EMPTY is a deliberate outline (not a faded filled button that
+                    looks nearly-available with no reason given), READY fills, and
+                    WORKING becomes STOP — but only while the draft is empty, so a
+                    user who has typed the next thought can always tap send (and
+                    have it queued rather than dropped). */}
+                {sending && !input.trim() ? (
+                  <button
+                    type="button"
+                    onClick={() => turnAbortRef.current?.abort()}
+                    aria-label={convoSw ? "Acha" : "Stop"}
+                    className="w-11 h-11 rounded-full bg-espresso hover:bg-black/80 text-cream flex items-center justify-center shrink-0 transition"
+                    style={{ transitionDuration: `${CHAT_MOTION.sendSlot.fill}ms` }}
+                  >
+                    <span className="block w-3.5 h-3.5 rounded-[4px] bg-cream" aria-hidden />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={submit}
+                    disabled={!input.trim()}
+                    aria-label={convoSw ? "Tuma" : "Send"}
+                    className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition ${
+                      input.trim()
+                        ? "bg-ember-shadow hover:bg-ember-hover text-cream"
+                        : "border-[1.5px] border-border-input text-text-muted bg-transparent"
+                    }`}
+                    style={{ transitionDuration: `${CHAT_MOTION.sendSlot.fill}ms` }}
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                )}
               </div>
+              {/* The draft line (§3.1): below the row, 11.5 px, and only when it
+                  has something true to say. */}
+              {queuedNotice ? (
+                <p className="mt-2 text-[11.5px] text-text-muted">
+                  {convoSw ? "Maneno yako yanahifadhiwa — nitayatuma mara nitakapomaliza hii." : "Your words are kept — I'll send them as soon as I finish this one."}
+                </p>
+              ) : modelStatus === "unavailable" ? (
+                <p className="mt-2 text-[11.5px] text-text-muted">
+                  {convoSw ? "Maneno yako yanahifadhiwa hata nisiweze kufikiri sasa hivi." : "Your words are kept even while I can't think right now."}
+                </p>
+              ) : null}
             </>
           )}
         </div>
