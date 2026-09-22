@@ -31,7 +31,9 @@ export function closingLabel(
   // A date already gone is described the way the rest of the app describes
   // past dates ("Jana", "Siku 2 zilizopita") — the caller decides to mark it
   // closed; this only says when.
-  if (dayDiff <= 0) return relativeDate(date, lang);
+  // Thread the caller's clock through — `relativeDate` takes it too, otherwise the
+  // injected `now` is dropped for today/past and the label follows the wall clock.
+  if (dayDiff <= 0) return relativeDate(date, lang, now);
 
   if (lang === "sw") {
     if (dayDiff === 1) return "Kesho";
