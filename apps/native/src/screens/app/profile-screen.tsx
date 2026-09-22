@@ -368,13 +368,13 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-              {user?.name || user?.email?.split("@")[0] || t("No account yet", "Bado huna akaunti")}
+              {user?.name || user?.email?.split("@")[0] || t("Not signed in", "Hujaingia")}
             </Text>
             <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
               {user?.email ||
                 t(
-                  "Your CVs are saved on this phone. A free account keeps them for you.",
-                  "CV zako zimehifadhiwa kwenye simu hii. Akaunti ya bure inazihifadhi kwa ajili yako.",
+                  "Your CVs are on this phone. Sign in to open them anywhere.",
+                  "CV zako ziko kwenye simu hii. Ingia ili kuzifungua mahali popote.",
                 )}
             </Text>
           </View>
@@ -515,10 +515,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               first
               icon="user-plus"
               iconColor={c.accent}
-              label={t("Create a free account", "Fungua akaunti bure")}
+              label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
               sublabel={t(
-                "Keep these CVs safe and open them on another phone",
-                "Hifadhi CV zako salama na uzifungue kwenye simu nyingine",
+                "If you already have one, your CVs are waiting for you.",
+                "Kama unayo, CV zako zinakusubiri.",
               )}
               onPress={() => openAuth()}
               chevron
