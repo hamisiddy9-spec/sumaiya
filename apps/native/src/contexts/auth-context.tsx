@@ -17,6 +17,7 @@ import type { Session, User } from "@supabase/supabase-js";
 import type { ApiClient } from "@sumaiya/api-client";
 import type { AuthUser } from "@sumaiya/types";
 import { supabase } from "../lib/supabase";
+import { isConfirmDeepLink } from "../lib/auth-deep-link";
 import { apiClient as sharedApiClient } from "../lib/api-client";
 import { installAuthRecovery } from "../lib/auth-recovery";
 import { reportError } from "../lib/reporting";
@@ -100,7 +101,7 @@ export function AuthProvider({ children, apiClient = sharedApiClient }: AuthProv
     initialized.current = true;
 
     const handleUrl = async (url: string | null) => {
-      if (!url || !url.includes("auth/confirm")) return;
+      if (!isConfirmDeepLink(url)) return;
       setLoading(true);
       try {
         const parsed = Linking.parse(url);

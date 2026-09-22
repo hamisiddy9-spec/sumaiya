@@ -142,10 +142,10 @@ const contactLine = ({ p }: Parts) => [p.email, p.phone, p.location].filter(Bool
 // picker — validate the value actually looks like an image src before it goes
 // into an HTML attribute, rather than trusting it's always our own base64
 // output.
-const PHOTO_SRC_RE = /^(data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+|https:\/\/\S+)$/;
+const PHOTO_SRC_RE = /^(data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+|https:\/\/[^"'\s<>]+)$/;
 function photoTag({ p }: Parts, className = "photo"): string {
   if (!p.profilePhoto || !PHOTO_SRC_RE.test(p.profilePhoto)) return "";
-  return `<img class="${className}" src="${p.profilePhoto}" alt="" />`;
+  return `<img class="${className}" src="${esc(p.profilePhoto)}" alt="" />`;
 }
 
 const summaryBlock = ({ L, d }: Parts) =>

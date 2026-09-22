@@ -36,9 +36,26 @@ describe("cvToHtml — photo rendering", () => {
     expect(html).not.toContain("onerror");
   });
 
+  it("rejects an https URL that tries to break out of the src attribute with a quote (XSS)", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: 'https://x/a"onerror="alert(1)' } }));
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("onerror");
+  });
+
+  it("rejects an https URL that tries to break out of the tag with an angle bracket (XSS)", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: "https://x/a><script>" } }));
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("<script>");
+  });
+
   it("accepts an https URL as well as a base64 data URI", () => {
     const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: "https://example.com/p.jpg" } }));
     expect(html).toContain('src="https://example.com/p.jpg"');
+  });
+
+  it("still renders a legitimate base64 data URI photo", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: PHOTO } }));
+    expect(html).toContain(`src="${PHOTO}"`);
   });
 });
 

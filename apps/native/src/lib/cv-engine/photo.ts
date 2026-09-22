@@ -9,7 +9,7 @@
 
 import { esc } from "./html";
 
-const PHOTO_SRC_RE = /^(data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+|https:\/\/\S+)$/;
+const PHOTO_SRC_RE = /^(data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+|https:\/\/[^"'\s<>]+)$/;
 
 export function initialsOf(name: string): string {
   const parts = String(name ?? "")
