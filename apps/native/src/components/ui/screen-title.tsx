@@ -1,12 +1,21 @@
 import React from "react";
 import { Text, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
 import { useThemeColors } from "./theme";
+import { Reveal } from "./motion";
 
 /**
  * One screen title, everywhere. Every screen was rolling its own <Text> with
  * a different fontSize (24/26/30), letterSpacing (-0.4/-0.5/-0.6) and margin —
  * which read as "not aligned" screen to screen. This is the single source.
+ *
+ * Fades in via `Reveal` (a shared value), not Reanimated's `entering` — this
+ * component sits as the first child on every screen, so an `entering` layout
+ * animation here registers with Fabric's mounting layer right where later
+ * siblings (a hint card, a loaded list) get inserted or removed. That
+ * combination is what crashed Fabric mounting before (`addViewAt … index N,
+ * count N-1`; see `Reveal` in `./motion`), so this stays on the same
+ * shared-value pattern as everything else in `./motion`. `distance={0}`
+ * keeps the original fade-only look — no rise.
  */
 export function ScreenTitle({
   children,
@@ -19,8 +28,8 @@ export function ScreenTitle({
 }) {
   const c = useThemeColors();
   return (
-    <Animated.View
-      entering={FadeIn.duration(260)}
+    <Reveal
+      distance={0}
       style={{
         flexDirection: "row",
         alignItems: "flex-end",
@@ -44,6 +53,6 @@ export function ScreenTitle({
         </Text>
       </View>
       {trailing ? <View style={{ flexShrink: 0 }}>{trailing}</View> : null}
-    </Animated.View>
+    </Reveal>
   );
 }
