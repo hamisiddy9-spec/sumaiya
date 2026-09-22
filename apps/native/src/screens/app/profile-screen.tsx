@@ -383,7 +383,32 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
       <Animated.View entering={FadeInDown.duration(300).delay(70)}>
         {/* Career profile — the facts Sumaiya reads */}
-        <ListGroupLabel>{t("Your details", "Taarifa zako")}</ListGroupLabel>
+        {/* The only route back into an existing account, at the TOP of the
+            screen. It used to sit in the Account group five sections down - under
+            Appearance, Notifications, Share and Premium - which is not where anyone
+            looks for a login, and a returning user has no other way in. */}
+        {isGuest ? (
+          <>
+            <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
+            <View style={groupBox}>
+              <ListRow
+                first
+                last
+                icon="user-plus"
+                iconColor={c.accent}
+                label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
+                sublabel={t(
+                  "If you already have one, your CVs are waiting for you.",
+                  "Kama unayo, CV zako zinakusubiri.",
+                )}
+                onPress={() => openAuth()}
+                chevron
+              />
+            </View>
+          </>
+        ) : null}
+
+
         <View style={groupBox}>
           <ListRow
             first
@@ -510,20 +535,6 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           {/* A guest has no session to end and no account to delete, so the
               group offers the one account action that is real for them, first,
               and says what it earns. */}
-          {isGuest ? (
-            <ListRow
-              first
-              icon="user-plus"
-              iconColor={c.accent}
-              label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
-              sublabel={t(
-                "If you already have one, your CVs are waiting for you.",
-                "Kama unayo, CV zako zinakusubiri.",
-              )}
-              onPress={() => openAuth()}
-              chevron
-            />
-          ) : null}
           <ListRow
             first={!isGuest}
             icon="trash-2"

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { openAuth } from "../navigation/root-nav";
 import Animated, {
   cancelAnimation,
   FadeIn,
@@ -309,7 +310,7 @@ export function OnboardingScreen({ onComplete }: Props) {
   // true centre visibly jumped away from where the art actually was — read as
   // the transition "appearing out of nowhere" rather than growing out of it.
   const [portalOrigin, setPortalOrigin] = useState<{ x: number; y: number } | null>(null);
-  const finish = (via: "skip" | "start" = "skip") => {
+  const finish = (via: "skip" | "start" | "signin" = "skip") => {
     // The slide someone was on when they left IS the answer to "do the four
     // slides cost us people before they even sign up?" — and it is the cheapest
     // point in the whole funnel to lose someone, because they have no account
@@ -430,6 +431,31 @@ export function OnboardingScreen({ onComplete }: Props) {
                 }}
               />
             </Reveal>
+
+              {/* A returning user who has just cleared their data should not have
+                  to accept the slides and then hunt for a login. Finishing first
+                  keeps the guest path intact; the modal then presents over the app.
+                  openAuth() is a no-op until the container is ready, so it retries
+                  once rather than failing silently. */}
+              {isLast ? (
+                <Pressable
+                  onPress={() => {
+                    haptics.selection();
+                    finish("signin");
+                    setTimeout(() => {
+                      if (!openAuth()) setTimeout(() => openAuth(), 600);
+                    }, 400);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("I already have an account", "Nina akaunti tayari")}
+                  style={{ alignSelf: "center", marginTop: 14, paddingVertical: 8, paddingHorizontal: 12 }}
+                >
+                  <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+                    {t("I already have an account — sign in", "Nina akaunti tayari — ingia")}
+                  </Text>
+                </Pressable>
+              ) : null}
+
           </View>
         </Animated.View>
       )}

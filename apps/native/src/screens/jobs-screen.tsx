@@ -194,7 +194,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
           ) : (
             <Pressable
               accessibilityRole="button"
-              onPress={() => { haptics.selection(); navigation.navigate("ProfileTab", { screen: "CareerProfile" }); }}
+              onPress={() => { haptics.selection(); void onRefresh(); }}
               style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}
             >
               <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
@@ -202,7 +202,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
-                  {t("Add your first job to get matched", "Ongeza kazi yako ya kwanza upate ulinganifu")}
+                  {t("Nothing matched — tap to search again", "Hakuna kilicholingana — gusa kutafuta tena")}
                 </Text>
                 <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
                   {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi za kazi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}

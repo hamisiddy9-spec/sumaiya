@@ -298,6 +298,40 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 24 }} refreshing={refreshing} onRefresh={onRefresh}>
       <ScreenTitle eyebrow={`${greeting(lang, isReturningUser)},`}>{name}</ScreenTitle>
 
+        {/* The way back in, on the FIRST screen. After a data clear the app opens
+            straight onto this guest dashboard with no sign-in step, so a returning
+            user had only two routes: tap something that is gated and use the gate's
+            CTA, or scroll the Profile five groups down. openAuth() presents the auth
+            modal over the app, and nothing here is walled off for a real guest. */}
+        {isGuest ? (
+          <Pressable
+            onPress={() => {
+              haptics.selection();
+              openAuth();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t("Sign in", "Ingia")}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              alignSelf: "flex-start",
+              gap: 8,
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 12,
+              backgroundColor: c.accent + "14",
+              borderWidth: 1,
+              borderColor: c.accent + "2e",
+            }}
+          >
+            <Icon name="arrow-right" size={15} color={c.accent} />
+            <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+              {t("Sign in", "Ingia")}
+            </Text>
+          </Pressable>
+        ) : null}
+
+
       {/* Rotating hint — one proactive suggestion at a time. The shuffle control
           cycles to the next; tapping the card acts on the current one. */}
       {hint ? (
