@@ -15,10 +15,10 @@ import { liveStatusFilter } from "@/lib/jobs/lifecycle";
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
   return {
-    title: sw ? "Ajira Zinazolingana na CV Yako" : "Jobs — Matched to Your CV",
+    title: sw ? "Ajira — vinjari nafasi, kisha uone ulinganifu wako" : "Jobs — browse openings, then see your match",
     description: sw
-      ? "Nafasi za kazi zinazopatikana kiotomatiki kutoka vyanzo vya kuaminika, zikilinganishwa na CV yako. Angalia ulinganisho wako, kisha fungua tangazo kwenye tovuti ya mwajiri — maombi unayoyafuatilia yanabaki hapa Sumaiya."
-      : "Automatically discovered openings from trusted job sources, scored against your CV. See your match, then open the advert on the employer's site — the applications you track stay here in Sumaiya.",
+      ? "Nafasi nilizokusanya kutoka vyanzo vinavyoaminika. Vinjari bure, na ukishakuwa na CV hapa, uone unavyolingana na kila moja."
+      : "Openings I've gathered from trusted sources. Browse them free, and once you have a CV here, see how you match each one.",
     alternates: alternatesFor("/jobs", params.locale),
   };
 }

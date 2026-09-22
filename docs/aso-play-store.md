@@ -11,26 +11,26 @@ Sumaiya: CV & Career AI
 
 **Short description** (80 max)
 ```
-Build an ATS-ready CV, find Tanzanian jobs, and get AI career advice.
+Build a CV with me, browse jobs, and get advice — free, in Swahili or English.
 ```
 
 **Full description** (4000 max)
 ```
 Sumaiya is your career workspace — not just a CV maker.
 
-Build a CV that actually gets read, find jobs near you, check how you score against real ATS systems, and get plain career advice in Swahili or English.
+Build a CV that actually gets read, find jobs near you, see how clearly your CV reads before you send it, and get plain career advice in Swahili or English.
 
 WHY SUMAIYA
-• Made for Tanzania and East Africa — local jobs first, not roles you can't reach
+• Built for job seekers in Tanzania
 • Works in Swahili and English
 • AI advice grounded in your real profile — never invented experience
 
 WHAT YOU CAN DO
-• Create a CV that passes ATS — 200+ professional designs, free and premium
+• Create a CV with me — 224 designs to choose from
 • Scan or import an existing CV and improve it
-• Check your ATS score and see exactly what to fix
-• Find jobs that match your profile — Tanzanian roles first, then nearby nations
-• Track every application in one place and get nudged to follow up
+• See how readable your CV is, and what to fix
+• Browse openings I've gathered — Tanzanian roles among them, plus remote work you can do from here
+• Keep a list of what you applied for, and I'll remind you to follow up
 • Write cover letters that match each job
 • Learn the skills your target role needs
 • Export a clean, ATS-ready PDF and share it in one tap

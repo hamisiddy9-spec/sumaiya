@@ -8,8 +8,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   return {
     title: sw ? "Pata Kazi — Umetuma Maombi na Hukuitwa?" : "Get Hired — Applied and Never Called Back?",
     description: sw
-      ? "Hukuitwa baada ya kutuma maombi? Si wewe — ni CV yako. Sumaiya inakujengea CV inayopita wakaguzi. Bure."
-      : "Not getting called back? It's not you — it's your CV. Sumaiya builds a CV that passes screeners. Free.",
+      ? "Hukuitwa baada ya kutuma maombi? Si wewe — ni CV yako. Ninaijenga ili mtu anayechuja aisome kwa mpigo mmoja. Bure."
+      : "Not getting called back? It's not you — it's your CV. I build a CV a tired screener can read in one pass. Free.",
     alternates: alternatesFor("/pata-kazi", params.locale),
     openGraph: {
       title: sw ? "Pata Kazi | Sumaiya" : "Get Hired | Sumaiya",
@@ -25,13 +25,13 @@ export async function generateMetadata({ params }: { params: { locale: string } 
 const STEPS = {
   sw: [
     { title: "Jenga CV yako", desc: "Bure, kwa dakika chache — kwenye simu yako" },
-    { title: "Rekebishwa kuendana na kazi unayoomba", desc: "Ili ipite wakaguzi na kumfikia boss" },
-    { title: "Pata usaili", desc: "Anza kuitwa na kufanya kazi" },
+    { title: "Inalengwa kwa kazi unayoomba", desc: "Maneno yanafuata tangazo hilo, ili anayesoma aone kwa nini unafaa." },
+    { title: "Tuma na ufuatilie", desc: "Ni yako kupakia na kuituma — nami nitakukumbusha kufuatilia." },
   ],
   en: [
     { title: "Build your CV", desc: "Free, in minutes — right on your phone" },
-    { title: "Tailored to the job you apply for", desc: "So it passes screeners and reaches the boss" },
-    { title: "Get the interview", desc: "Start getting called and working" },
+    { title: "Aimed at the job you apply for", desc: "The wording follows that advert, so a person reading it sees why you fit." },
+    { title: "Send it, and keep track", desc: "Yours to download, yours to send — and I'll remind you to follow up." },
   ],
 } as const;
 
@@ -69,12 +69,12 @@ export default function PataKaziPage({ params }: { params: { locale: string } })
         <p className="mb-6 text-center text-base leading-relaxed text-espresso/75">
           {sw ? (
             <>Si wewe — <strong className="font-semibold text-espresso">ni CV yako.</strong>{" "}
-              Wakaguzi huchuja <strong className="font-semibold text-espresso">8 kati ya 10</strong>{" "}
-              CV zinazotumwa, hata kabla boss hajaona profile yako.</>
+              Ninaijenga yako ili mtu anayechuja kwa haraka aisome kwa mpigo mmoja, na ili boss aone mambo
+              sahihi kwanza.</>
           ) : (
             <>It&apos;s not you — <strong className="font-semibold text-espresso">it&apos;s your CV.</strong>{" "}
-              Screeners filter <strong className="font-semibold text-espresso">8 in 10</strong>{" "}
-              CVs sent, before the boss ever sees your profile.</>
+              I build yours so a tired screener can read it in one pass, and so the boss sees the right
+              things first.</>
           )}
         </p>
 

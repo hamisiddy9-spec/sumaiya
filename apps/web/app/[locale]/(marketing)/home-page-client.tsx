@@ -492,8 +492,8 @@ export default function LandingPage() {
               <SumaiyaMark size={26} state="idle" className="text-ember shrink-0 mt-1" />
               <span>
                 {lang === "sw"
-                  ? "Bandika tangazo la kazi. Mimi ni Sumaiya — nitakuandikia CV inayolingana nalo, kwa Kiswahili, kwenye simu yako, bila malipo, bila akaunti."
-                  : "Paste the job advert. I'm Sumaiya — I'll write the CV that matches it, in Swahili, on your phone, free, with no account."}
+                  ? "Bandika tangazo la kazi. Mimi ni Sumaiya — nitakusaidia kuandika CV inayolingana nalo, kwa Kiswahili, kwenye simu yako. Bure kuanza; ukinitaka niandike mimi, ingia tu."
+                  : "Paste the job advert. I'm Sumaiya — I'll help you write the CV that matches it, in Swahili, on your phone. Free to start, and sign in when you want me to do the writing."}
               </span>
             </p>
 
@@ -529,8 +529,8 @@ export default function LandingPage() {
             <p className="flex items-center gap-2 text-sm font-semibold text-pine mb-9">
               <Icon name="check" size={16} className="text-pine shrink-0" />
               {lang === "sw"
-                ? "Hakuna akaunti. Hakuna kadi ya benki. Hakuna malipo."
-                : "No account. No card. Nothing to pay."}
+                ? "Hakuna kadi. Hakuna malipo. Faili lako ni lako, ukiingia au usiingie."
+                : "No card. Nothing to pay. Your file is yours whether or not you sign in."}
             </p>
 
             {/* Three claims a reader can check in the next minute. The old row led
