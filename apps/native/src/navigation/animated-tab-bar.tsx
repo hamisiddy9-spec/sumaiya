@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { publishTabBarHeight } from "./tab-bar-metrics";
+import { publishTabBarHeight, publishTabBarLive } from "./tab-bar-metrics";
 import Animated, {
   useAnimatedStyle,
   useDerivedValue,
@@ -98,6 +98,16 @@ export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarP
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
+
+  // Tell floating UI whether a bar is on screen at all. Onboarding and the other
+  // carousel screens render OUTSIDE this navigator, so with the height-only signal
+  // the update pill still reserved a bar's height and floated over the language
+  // choices — swallowing taps for the last one. A layout effect, so the answer is
+  // published before the first paint.
+  React.useLayoutEffect(() => {
+    publishTabBarLive(true);
+    return () => publishTabBarLive(false);
+  }, []);
 
   // The navigator's static `title` options are English-only, so in Swahili mode
   // the app's primary navigation rendered untranslated. Translate here instead.
