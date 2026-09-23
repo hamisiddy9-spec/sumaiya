@@ -3,13 +3,18 @@
 # run outlives the terminal tool's ceiling, and restarting it collides a second gradlew on
 # the same build/ directory.
 #
-# 1.6.28 carries the native work since 1.6.27 (which was built but never published):
+# 1.6.28 carries the native work since 1.6.27 (which was built but never published), and
+# because it was never published it keeps the same version — no number is spent on it:
 #   - 7c70bb0  the Fabric mount crash (ScreenTitle's entering animation)
 #   - 1357cba  documents render on the hardware layer again; PDFs are A4, not US Letter
 #   - eb231b2  the template gallery caches real renders instead of a 5-shape doodle,
 #              and the preview sample is a full-length CV
 #   - 7ed2d53  maombi: a birth path from the feed, an honest account wall, and the
 #              application_created event that had never once fired
+#   - ab85299  maombi's manual form fires its events, the feed opens to guests (tailoring
+#              stays gated), and a guest-401 in the feed's recommendation call is fixed
+#   - 5109fb0  a legibility floor for small print (the engine printed meta text at 5.7pt),
+#              and an export that says something when the folder picker is dismissed
 #
 # Preconditions (checked by the caller, not here):
 #   - apps/native is COMMITTED and frozen (no other agent editing it)
