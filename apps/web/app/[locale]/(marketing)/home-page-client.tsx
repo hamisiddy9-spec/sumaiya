@@ -632,7 +632,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS — three plain steps ── */}
-      <section className="px-4 sm:px-6 lg:px-8 py-20 lg:py-24 max-w-7xl mx-auto border-t border-border">
+      <section id="how-it-works" className="scroll-mt-24 px-4 sm:px-6 lg:px-8 py-20 lg:py-24 max-w-7xl mx-auto border-t border-border">
         <div className="reveal mb-12 text-center max-w-2xl mx-auto">
           <p className="text-xs font-mono uppercase tracking-wider text-ember-hover mb-4">
             {lang === "sw" ? "JINSI INAVYOFANYA KAZI" : "HOW IT WORKS"}
