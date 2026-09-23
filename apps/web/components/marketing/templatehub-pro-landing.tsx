@@ -237,7 +237,7 @@ export function TemplateHubProLanding() {
     ? [
         { n: "1", t: "Chagua muundo", b: "Chagua muundo unaokufaa. Kwa kazi yako, tunapendekeza wenyewe." },
         { n: "2", t: "Mimi ninaandika", b: "Ongea nami kwa Kiswahili au Kiingereza. Ninajaza sehemu zote, ninarekebisha ujuzi, na ninakuambia kilichokosekana." },
-        { n: "3", t: "Pakua PDF", b: "Pakua PDF inayopitishwa na mifumo ya kuajiri, tuma kwa barua pepe, au shiriki moja kwa moja kwenye WhatsApp." },
+        { n: "3", t: "Pakua PDF", b: "Pakua PDF inayosomeka kwa mifumo ya kuajiri, tuma kwa barua pepe, au shiriki moja kwa moja kwenye WhatsApp." },
       ]
     : [
         { n: "1", t: "Pick a design", b: "Choose the design that fits. For your job, we suggest one." },
@@ -249,13 +249,13 @@ export function TemplateHubProLanding() {
   // a compile error instead of an icon that silently renders nothing.
   const features: { icon: IconName; t: string; b: string }[] = sw
     ? [
-        { icon: "shapes", t: "Miundo 260+", b: "Kila muundo unafanya kazi kwenye simu. Hakuna kupanga kwa vidole." },
+        { icon: "shapes", t: "Miundo ya kitaalamu", b: "Kila muundo unafanya kazi kwenye simu. Hakuna kupanga kwa vidole." },
         { icon: "check", t: "Kikagua cha CV", b: "Inakuambia hasa kilichokosekana kabla ya kutuma maombi." },
         { icon: "mail", t: "Barua za maombi", b: "Barua inayolingana na kazi husika, kwa dakika." },
         { icon: "globe-lang", t: "Kiswahili na Kiingereza", b: "Kila kitu kinaonekana katika lugha uliyochagua." },
       ]
     : [
-        { icon: "shapes", t: "260+ designs", b: "Every design works on a phone. No fiddling with columns." },
+        { icon: "shapes", t: "Professional designs", b: "Every design works on a phone. No fiddling with columns." },
         { icon: "check", t: "ATS checker", b: "Tells you exactly what's missing before you apply." },
         { icon: "mail", t: "Cover letters", b: "A letter matched to the specific job, in minutes." },
         { icon: "globe-lang", t: "Swahili & English", b: "Everything renders in the language you chose." },
@@ -330,7 +330,7 @@ export function TemplateHubProLanding() {
 
           <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-[#4A3F36]">
             {sw
-              ? "Karibu Sumaiya Pro. Tumia Sumaiya hapa mtandaoni — chagua muundo, kisha Sumaiya anaandika kila sehemu na kukupatia PDF inayopitishwa na mifumo ya kuajiri. Uzoefu kamili wa Sumaiya unakuja kwenye app ya Android, na Play Store hivi karibuni."
+              ? "Karibu Sumaiya Pro. Tumia Sumaiya hapa mtandaoni — chagua muundo, kisha Sumaiya anaandika kila sehemu na kukupatia PDF inayosomeka kwa mifumo ya kuajiri. Uzoefu kamili wa Sumaiya unakuja kwenye app ya Android, na Play Store hivi karibuni."
               : "Welcome to Sumaiya Pro. Use Sumaiya online, right here — pick a design, and she writes every section and hands you an ATS-ready PDF. The full Sumaiya experience is coming to the Android app, and to Play Store soon."}
           </p>
 

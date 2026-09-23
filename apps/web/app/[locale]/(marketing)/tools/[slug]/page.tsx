@@ -169,8 +169,8 @@ export default async function ToolDetailPage({ params }: { params: { slug: strin
           </h2>
           <p className="text-cream/75 text-sm md:text-base leading-relaxed mb-5 max-w-xl">
             {sw
-              ? "Template 260+ zinazopita vigezo vya waajiri, kikagua alama papo hapo, na msaidizi anayekuandikia. Pakua PDF au Word."
-              : "260+ ATS-ready templates, an instant score checker, and a writing assistant that works on it with you. Download as PDF or Word."}
+              ? "Miundo inayosomeka kwa urahisi, kikagua alama papo hapo, na msaidizi anayekuandikia. Pakua PDF au Word."
+              : "Professionally designed templates, an instant score checker, and a writing assistant that works on it with you. Download as PDF or Word."}
           </p>
           <Link
             href="/editor/cv/try"
