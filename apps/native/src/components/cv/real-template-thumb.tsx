@@ -60,7 +60,6 @@ export function RealTemplateThumb({
         pointerEvents="none"
         onLoadEnd={() => setReady(true)}
         style={{ width, height: h, backgroundColor: "#fff", opacity: ready ? 1 : 0 }}
-        androidLayerType="software"
       />
     </View>
   );

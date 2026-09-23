@@ -11,7 +11,7 @@ import { Button, Screen, ScreenTitle, SectionHeader, dialog, haptics, useThemeCo
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { letterIsEmpty, letterToHtml } from "../lib/letter-html";
-import { letterFileName, renamePdf } from "../services/pdf-export";
+import { A4_H_PT, A4_W_PT, letterFileName, renamePdf } from "../services/pdf-export";
 import { reportExport } from "../services/export-ledger";
 import { useLang } from "../lib/i18n";
 import type { JobApplyScreenProps } from "../navigation/types";
@@ -119,6 +119,8 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     try {
       const { uri } = await Print.printToFileAsync({
         html: letterToHtml({ jobTitle: result.jobTitle, company: result.company, content }),
+        width: A4_W_PT,
+        height: A4_H_PT,
       });
       // Without this the file keeps expo-print's UUID name and lands in WhatsApp
       // as "54abcd12-d5ef-47ae-8fb4-cae2774c3185.pdf".

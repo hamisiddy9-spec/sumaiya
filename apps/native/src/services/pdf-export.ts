@@ -12,6 +12,15 @@ import * as FileSystem from "expo-file-system/legacy";
 import type { CV } from "@sumaiya/types";
 import { cvToHtml, type CvHtmlOptions } from "../lib/cv-html";
 
+/**
+ * A4 at 72dpi, in points — expo-print's Android renderer builds its page size
+ * from PrintAttributes and otherwise defaults to US Letter (612x792pt), which
+ * is 67 CSS px shorter than the 794x1123 every document is authored at. Every
+ * printToFileAsync call in the app must pass these.
+ */
+export const A4_W_PT = 595;
+export const A4_H_PT = 842;
+
 /** Keeps a suggested filename safe on every platform and short enough to read. */
 function safeFileName(base: string, fallback: string): string {
   const clean = base
@@ -63,6 +72,6 @@ export async function renamePdf(uri: string, fileName: string): Promise<string> 
 }
 
 export async function exportCVAsPDF(cv: CV, opts: CvHtmlOptions = {}): Promise<string> {
-  const { uri } = await Print.printToFileAsync({ html: cvToHtml(cv, opts), base64: false });
+  const { uri } = await Print.printToFileAsync({ html: cvToHtml(cv, opts), base64: false, width: A4_W_PT, height: A4_H_PT });
   return renamePdf(uri, cvFileName(cv));
 }

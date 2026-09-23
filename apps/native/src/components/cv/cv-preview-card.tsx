@@ -285,7 +285,6 @@ export function CvPreviewCard({
           pointerEvents="none"
           onLoadEnd={() => setThumbReady(true)}
           style={{ width: thumbW, height: thumbH, backgroundColor: "#fff", opacity: thumbReady ? 1 : 0 }}
-          androidLayerType="software"
         />
         {!thumbReady ? (
           <View style={{ position: "absolute", inset: 0, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
@@ -406,7 +405,7 @@ export function CvPreviewCard({
             </View>
           ) : null}
           <Animated.View entering={FadeIn} style={{ flex: 1, backgroundColor: "#fff" }}>
-            <WebView originWhitelist={["*"]} source={{ html: htmlFull }} style={{ flex: 1, backgroundColor: "#fff" }} androidLayerType="software" />
+            <WebView originWhitelist={["*"]} source={{ html: htmlFull }} style={{ flex: 1, backgroundColor: "#fff" }} />
           </Animated.View>
           <View style={{ padding: 16, paddingBottom: insets.bottom + 16 }}>
             <Button

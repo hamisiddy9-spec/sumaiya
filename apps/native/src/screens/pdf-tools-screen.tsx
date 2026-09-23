@@ -6,6 +6,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useLang } from "../lib/i18n";
 import { requestCameraAccess, showCameraRefusal } from "../lib/permissions";
+import { A4_H_PT, A4_W_PT } from "../services/pdf-export";
 import { Button, Screen, ScreenTitle, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
@@ -88,7 +89,7 @@ export function PdfToolsScreen() {
         )
         .join("");
       const html = `<html><head><meta name="viewport" content="width=device-width"/><style>*{margin:0;padding:0}</style></head><body>${pages}</body></html>`;
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri } = await Print.printToFileAsync({ html, width: A4_W_PT, height: A4_H_PT });
       haptics.success();
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: t("Save or share PDF", "Hifadhi au shiriki PDF") });
