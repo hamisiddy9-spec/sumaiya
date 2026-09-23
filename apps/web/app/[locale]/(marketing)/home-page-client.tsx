@@ -682,7 +682,7 @@ export default function LandingPage() {
         <div className="mt-10 text-center">
           <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'how_it_works' })}>
             <Button variant="primary" size="lg">
-              {lang === "sw" ? "Anza sasa — Bure" : "Start now — free"} <Icon name="chevron-right" size={16} />
+              {lang === "sw" ? "Andika CV yako — bure" : "Write your CV — free"} <Icon name="chevron-right" size={16} />
             </Button>
           </Link>
         </div>
@@ -943,7 +943,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'bottom_cta' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Anza CV yako" : "Start my CV"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Andika CV yako — bure" : "Write your CV — free"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
             </div>
