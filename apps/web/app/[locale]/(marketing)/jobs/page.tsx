@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   return {
     title: sw ? "Ajira — vinjari nafasi, kisha uone ulinganifu wako" : "Jobs — browse openings, then see your match",
     description: sw
-      ? "Nafasi nilizokusanya kutoka vyanzo vinavyoaminika. Vinjari bure, na ukishakuwa na CV hapa, uone unavyolingana na kila moja."
-      : "Openings I've gathered from trusted sources. Browse them free, and once you have a CV here, see how you match each one.",
+      ? "Nafasi nilizokusanya kutoka vyanzo vinavyoaminika. Vinjari bure, na ukishakuwa na CV hapa, uone unavyolingana na kila moja, kisha fungua tangazo kwenye tovuti ya mwajiri."
+      : "Openings I've gathered from trusted sources. Browse them free, and once you have a CV here, see how you match each one, then open the advert on the employer's site.",
     alternates: alternatesFor("/jobs", params.locale),
   };
 }
