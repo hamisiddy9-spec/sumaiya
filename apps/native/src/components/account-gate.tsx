@@ -65,7 +65,7 @@ export function GuestAccountScreen({ gate, title }: { gate: GuestGateId; title?:
 /**
  * Make one screen account-only, without touching the screen itself.
  *
- *   <HomeStack.Screen name="Jobs" component={withAccountGate(JobsScreen, "jobs")} />
+ *   <HomeStack.Screen name="JobApply" component={withAccountGate(JobApplyScreen, "jobs")} />
  *
  * Build the wrapped component ONCE at module scope: calling this inline in JSX
  * would hand the navigator a brand-new component type on every render, which

@@ -132,12 +132,12 @@ export const GUEST_GATE_COPY: Record<GuestGateId, { title: GuestCopy; body: Gues
   },
   jobs: {
     title: {
-      en: "Job matches need an account",
-      sw: "Kulinganisha na kazi kunahitaji akaunti",
+      en: "Tailoring your CV needs an account",
+      sw: "Kulenga CV yako kunahitaji akaunti",
     },
     body: {
-      en: "I search openings and match them to your profile on my servers. Create a free account and I'll start matching — the CVs on this phone come with you.",
-      sw: "Natafuta kazi na kuzilinganisha na wasifu wako kwenye seva zangu. Fungua akaunti bure nami nianze kukulinganisha — CV zako zilizo kwenye simu hii zitakuja nawe.",
+      en: "Browsing and saving jobs is free — this is the AI step, which runs on my servers against your account. Create a free account and I'll tailor your CV to this job — the CVs on this phone come with you.",
+      sw: "Kuvinjari na kuhifadhi kazi ni bure — hii ni hatua ya AI, inayofanyika kwenye seva zangu kwa akaunti yako. Fungua akaunti bure nami nikulengee CV yako kwa ajira hii — CV zako zilizo kwenye simu hii zitakuja nawe.",
     },
   },
   applications: {

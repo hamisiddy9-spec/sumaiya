@@ -65,8 +65,6 @@ describe("2. the right surfaces are gated, and only those", () => {
   const GATED: { route: string; gate: GuestGateId }[] = [
     { route: "SumaiyaTab", gate: "chat" },
     { route: "ImportTab", gate: "import" },
-    { route: "Jobs", gate: "jobs" },
-    { route: "JobDetail", gate: "jobs" },
     { route: "JobApply", gate: "jobs" },
     { route: "LearningHub", gate: "courses" },
     { route: "Invite", gate: "invite" },
@@ -106,7 +104,9 @@ describe("2. the right surfaces are gated, and only those", () => {
     // Home, My CVs, the builder, the CV check, the profile screens: a guest
     // builds, edits, previews and DOWNLOADS here with no account. Applications
     // join this list too — the store is device-only (lib/applications-store.ts),
-    // so gating it was never honest (docs/FIX-BRIEF-MAOMBI-01.md).
+    // so gating it was never honest (docs/FIX-BRIEF-MAOMBI-01.md). Jobs and
+    // JobDetail join it as well — the feed is public data and browsing it
+    // needs no session (docs/FIX-BRIEF-MAOMBI-02.md).
     const OPEN: { route: string; component: string }[] = [
       { route: "HomeMain", component: "HomeScreen" },
       { route: "CvListMain", component: "CvListScreen" },
@@ -116,10 +116,22 @@ describe("2. the right surfaces are gated, and only those", () => {
       { route: "CareerProfile", component: "CareerProfileScreen" },
       { route: "Applications", component: "ApplicationsScreen" },
       { route: "ApplicationDetail", component: "ApplicationDetailScreen" },
+      { route: "Jobs", component: "JobsScreen" },
+      { route: "JobDetail", component: "JobDetailScreen" },
     ];
     for (const { route, component } of OPEN) {
       expect(tabs).toMatch(new RegExp(`name="${route}"\\s+component=\\{${component}\\}`));
     }
+  });
+
+  it("JobApply stays gated even though its siblings opened up — it calls the authenticated /api/mobile/apply", () => {
+    // Pinned in both directions: Jobs/JobDetail must NOT appear in the wrapped
+    // set, and JobApply must still route through a withAccountGate() alias.
+    expect(wraps.some((w) => w.screen === "JobsScreen")).toBe(false);
+    expect(wraps.some((w) => w.screen === "JobDetailScreen")).toBe(false);
+    const jobApplyWrap = wraps.find((w) => w.screen === "JobApplyScreen");
+    expect(jobApplyWrap).toBeDefined();
+    expect(tabs).toMatch(new RegExp(`name="JobApply"\\s+component=\\{${jobApplyWrap!.alias}\\}`));
   });
 });
 

@@ -133,7 +133,14 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
 
   const load = useCallback(async () => {
     try {
-      const [r, j] = await Promise.all([apiClient.getJobRecommendations(8), apiClient.getJobs()]);
+      // getJobRecommendations is /api/jobs/recommendations, which 401s with no
+      // session — a guest hitting it inside this Promise.all would fail the
+      // WHOLE load (including the public /api/jobs feed) and show "Couldn't
+      // load jobs" to someone who never asked for a match, just a feed.
+      const [r, j] = await Promise.all([
+        isGuest ? Promise.resolve<JobRecommendation[]>([]) : apiClient.getJobRecommendations(8),
+        apiClient.getJobs(),
+      ]);
       // A listing past its own applicationDeadline was still being
       // recommended, and the CTA walked the user straight to a dead advert
       // (confirmed on device: HTTP 410 "Applications closed").
@@ -150,7 +157,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isGuest]);
 
   useFocusEffect(useCallback(() => { void load(); }, [load]));
 

@@ -70,13 +70,17 @@ const ProfileStack = createNativeStackNavigator<ProfileStackParamList, undefined
  * honest invitation in components/account-gate.tsx instead of a broken or
  * empty screen.
  *
+ * Jobs and JobDetail are ungated too: the feed (GET /api/jobs) is public data
+ * and the fit score shown there is either the device-local matchJd() (ats.ts)
+ * or simply absent for a guest — see docs/FIX-BRIEF-MAOMBI-02.md. JobApply
+ * stays gated: it calls the authenticated /api/mobile/apply endpoint, which
+ * genuinely needs a session.
+ *
  * Wrapped at MODULE SCOPE, not inline in JSX: a component type created during
  * render makes React Navigation remount the screen.
  */
 const GatedChatTab = withAccountGate(SumaiyaChatScreen, "chat");
 const GatedImportTab = withAccountGate(ScanStack, "import");
-const GatedJobs = withAccountGate(JobsScreen, "jobs");
-const GatedJobDetail = withAccountGate(JobDetailScreen, "jobs");
 const GatedJobApply = withAccountGate(JobApplyScreen, "jobs");
 // Applications are device-only (lib/applications-store.ts) — there is no
 // account to gate them on. Ungated deliberately: see docs/FIX-BRIEF-MAOMBI-01.md.
@@ -98,8 +102,8 @@ function HomeStackScreen() {
         options={{ presentation: "modal" }}
       />
       <HomeStack.Screen name="Guide" component={GuideScreen} />
-      <HomeStack.Screen name="Jobs" component={GatedJobs} />
-      <HomeStack.Screen name="JobDetail" component={GatedJobDetail} />
+      <HomeStack.Screen name="Jobs" component={JobsScreen} />
+      <HomeStack.Screen name="JobDetail" component={JobDetailScreen} />
       <HomeStack.Screen name="Invite" component={GatedInvite} />
     </HomeStack.Navigator>
   );
