@@ -1,5 +1,5 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
+import { Image, Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
@@ -7,11 +7,19 @@ import { useEntitlements } from "../../lib/entitlements";
 import { loadProfile } from "../../lib/profile-store";
 import { fieldLabel, suggestTemplates } from "../../lib/template-suggestions";
 import { useLang } from "../../lib/i18n";
+import {
+  getCachedThumbUri,
+  requestThumbRender,
+  subscribeThumbReady,
+  thumbCellHeight,
+  warmThumbCacheFromDisk,
+} from "../../lib/template-thumb-cache";
 import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
 import { haptics, enterDurationMs, MOTION, TextField, useMotionReduced, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
 import { TemplateThumb } from "./template-thumb";
+import { TemplateThumbRenderer } from "./template-thumb-renderer";
 import { track } from "../../lib/analytics";
 
 /**
@@ -103,6 +111,18 @@ export function TemplateGallery({
     if (visible) track("template_viewed");
   }, [visible]);
 
+  // Real thumbnails render lazily, one at a time, off-screen (see
+  // template-thumb-cache.ts / template-thumb-renderer.tsx). `thumbTick` forces
+  // a re-render of the currently mounted cells each time one finishes, so a
+  // cell swaps from the schematic placeholder to the real design as soon as
+  // it's ready, without waiting for the next scroll.
+  const [thumbTick, setThumbTick] = useState(0);
+  useEffect(() => {
+    if (!visible) return;
+    void warmThumbCacheFromDisk().then(() => setThumbTick((n) => n + 1));
+    return subscribeThumbReady(() => setThumbTick((n) => n + 1));
+  }, [visible]);
+
   const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
 
   const sections = useMemo<Section[]>(() => {
@@ -188,6 +208,14 @@ export function TemplateGallery({
     (item: CvTemplateMeta, idx: number) => {
       const locked = item.tier === "premium" && !premium;
       const active = item.id === selected;
+      const thumbW = cell - 12;
+      const thumbH = thumbCellHeight(thumbW);
+      const cachedUri = getCachedThumbUri({ id: item.id, lang, width: thumbW, height: thumbH });
+      // The real design once it's cached; the schematic placeholder — never a
+      // WebView here — while the background renderer works through the queue.
+      // Idempotent: the cache module drops a request that's already cached or
+      // already queued, so calling this on every render is cheap.
+      if (!cachedUri) requestThumbRender({ id: item.id, lang, width: thumbW, height: thumbH, accent: c.accent });
       return (
         <Pressable
           key={item.id}
@@ -205,7 +233,15 @@ export function TemplateGallery({
               opacity: locked ? 0.55 : 1,
             }}
           >
-            <TemplateThumb id={item.id} accent={c.accent} width={cell - 12} />
+            {cachedUri ? (
+              <Image
+                source={{ uri: cachedUri }}
+                style={{ width: thumbW, height: thumbH, borderRadius: 4, backgroundColor: "#fff" }}
+                resizeMode="cover"
+              />
+            ) : (
+              <TemplateThumb id={item.id} accent={c.accent} width={thumbW} />
+            )}
           </View>
           <Text
             numberOfLines={1}
@@ -224,7 +260,9 @@ export function TemplateGallery({
         </Pressable>
       );
     },
-    [cell, selected, premium, lang, pick, c, t],
+    // thumbTick isn't read in the body — it's a pure re-render signal so a
+    // cell swaps in its cached image as soon as the background render finishes.
+    [cell, selected, premium, lang, pick, c, t, thumbTick],
   );
 
   const renderRow = useCallback(
@@ -349,10 +387,13 @@ export function TemplateGallery({
           </FlatListRow>
         </View>
 
-        {/* Collections grid. Each cell is the pure-RN schematic thumbnail (see
-            template-thumb.tsx) — a real WebView per cell stuttered scrolling on
-            low-end Android. Mount two rows, then grow the window as the user
-            scrolls instead of all at once. */}
+        {/* Collections grid. Each cell shows a cached real render once one
+            exists (see template-thumb-cache.ts), and the pure-RN schematic
+            thumbnail (template-thumb.tsx) until then — a real WebView per
+            VISIBLE cell stuttered scrolling on low-end Android, which is why
+            rendering happens off-screen, one template at a time, in
+            <TemplateThumbRenderer/> below. Mount two rows, then grow the
+            window as the user scrolls instead of all at once. */}
         <SectionList
           sections={sections}
           keyExtractor={(item, idx) => (item[0]?.id ?? "row") + idx}
@@ -374,6 +415,10 @@ export function TemplateGallery({
             </View>
           }
         />
+
+        {/* Off-screen, one-at-a-time real-render cache warmer for the grid
+            above — see the SectionList comment and template-thumb-cache.ts. */}
+        <TemplateThumbRenderer />
       </View>
 
       {/* Full-screen preview — tap a thumbnail to see the design large, then
