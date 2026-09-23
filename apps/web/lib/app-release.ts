@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.26",
+  version: "1.6.28",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -56,14 +56,16 @@ export const APP_RELEASE: AppReleaseManifest = {
     // notes render inside the update modal, so they say what changed for the
     // person reading them, not what changed in the repo.
     //
-    // 1.6.26's one line: a stranger can now finish. Before it, the account gate
-    // stood immediately after onboarding, so the whole product sat behind a
-    // sign-up for someone who had not yet seen it work.
+    // 1.6.28's line: the document stops being the weak part. Exports were US Letter
+    // while every design is authored A4 (so a one-page CV printed as two), pages were
+    // software-rasterised, small print printed at 5.7pt, and the gallery showed an
+    // identical grey sketch for 224 different designs. Maombi also works without an
+    // account now, and is finally measured.
     //
     // Deliberately does not promise Premium arrives instantly: it is earned when
     // a friend signs up and builds their first CV, which takes as long as the
     // friend takes. No "you're all set".
-    en: "You can now build and download a CV before signing in — and the file is yours. The welcome, language and first steps are one smooth motion now, taps land where you aim, and Back closes what is open. Share it with someone job-hunting: inviting friends earns you Premium.",
-    sw: "Sasa unaweza kutengeneza na kupakua CV kabla ya kuingia — na faili ni lako. Kukaribishwa, kuchagua lugha na hatua za mwanzo ni mwendo mmoja sasa, miguso inafika unapolenga, na 'Back' inafunga kilichofunguliwa. Ishare na anayetafuta kazi: kualika marafiki kunakupatia Premium.",
+    en: "Your CV now comes out A4 — the size employers here expect — and pages render sharp, with the small print readable. The gallery shows each design's real look, and you can save a job without signing in, keep the CV and letter you tailored for it, and track it from saved to offer.",
+    sw: "CV yako sasa inatoka kama A4 — ukubwa ambao waajiri wanatarajia — na kurasa zinaonekana vizuri, maandishi madogo yanasomeka. Orodha ya miundo inaonyesha kila muundo jinsi unavyoonekana kweli, na unaweza kuhifadhi kazi bila kuingia, ukaweka CV na barua ulizoandaa kwa kazi hiyo, na kufuatilia kutoka imehifadhiwa hadi ofa.",
   },
 };
