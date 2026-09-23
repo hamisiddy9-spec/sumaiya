@@ -203,10 +203,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     out.push({
       key: "templatehub",
       eyebrow: "TemplateHub",
-      title: t("224 designs for every document", "Miundo 224 kwa kila nyaraka"),
+      title: t("A design that fits your document", "Muundo unaofaa nyaraka yako"),
       detail: t(
-        "Real previews and premium collections, matched to your field.",
-        "Miundo halisi na makusanyo ya premium, yanayolingana na uwanja wako.",
+        "See each design's real preview, and pick the one that suits your work.",
+        "Ona kila muundo jinsi unavyoonekana kweli, na uchague unaofaa kazi yako.",
       ),
       cta: t("Explore", "Gundua"),
       icon: "layout-grid",
