@@ -473,8 +473,8 @@ ${cleanBackground}
     // Uploaded/pasted CV text (OCR or a .txt saved as HTML) can carry markup.
     const cleanText = sanitizePromptText(text);
     const prompt = `Extract the résumé/CV text below into STRICT JSON matching exactly this shape (no extra keys, no commentary, no markdown):
-{"personal":{"fullName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","website":""},"summary":"","experience":[{"company":"","position":"","location":"","startDate":"","endDate":"","current":false,"description":""}],"education":[{"institution":"","degree":"","field":"","startDate":"","endDate":""}],"skills":[""],"projects":[{"name":"","role":"","date":"","description":""}],"languages":[{"name":"","proficiency":""}],"certifications":[{"name":"","issuer":"","date":""}],"hobbies":""}
-Rules: use "" for anything not present (and [] for empty lists); dates as "YYYY-MM" when possible; put achievement bullets in "description" separated by newlines; "skills" are short strings; set "current":true only for an ongoing role. "linkedin"/"website" are URLs or handles if present. For each language, "proficiency" MUST be exactly one of: Native, Fluent, Advanced, Intermediate, Basic (pick the closest; use "" if truly unstated). "certifications" are professional certificates/licenses with issuer and date when given. "hobbies" is a short comma-separated list of interests if present.
+{"personal":{"fullName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","website":""},"summary":"","experience":[{"company":"","position":"","location":"","startDate":"","endDate":"","current":false,"description":""}],"education":[{"institution":"","degree":"","field":"","startDate":"","endDate":""}],"skills":[{"name":"","level":""}],"projects":[{"name":"","role":"","date":"","description":""}],"languages":[{"name":"","proficiency":""}],"certifications":[{"name":"","issuer":"","date":""}],"hobbies":""}
+Rules: use "" for anything not present (and [] for empty lists); dates as "YYYY-MM" when possible; put achievement bullets in "description" separated by newlines; "skills" are objects of {"name","level"} and ARE NOT PLAIN STRINGS — the CV store drops any skill that is not an object with a name; set "current":true only for an ongoing role. "linkedin"/"website" are URLs or handles if present. For each language, "proficiency" MUST be exactly one of: Native, Fluent, Advanced, Intermediate, Basic (pick the closest; use "" if truly unstated). "certifications" are professional certificates/licenses with issuer and date when given. "hobbies" is a short comma-separated list of interests if present.
 The text may come from OCR of a scanned/image PDF and contain scanning errors — dropped letters, split or merged words, stray symbols. Silently repair obvious OCR artifacts and reconstruct clearly-implied words so the result reads as clean, professional prose. BUT never fabricate facts: do not invent employers, job titles, dates, metrics or numbers that the text does not support — if a number or name is unrecoverable, omit it rather than guess. Do not let a person's name or contact details leak into a job description. Return ONLY the JSON object.
 
 CV TEXT:
@@ -1376,13 +1376,13 @@ function cvWriterPrompt(text: string, lang?: "en" | "sw"): string {
     ? `Write the ENTIRE CV in ${lang === "sw" ? "Swahili" : "English"} (the user's UI language). Never flip Swahili→English on your own — if the UI is Swahili, write the CV in Swahili. Any field labels are for structure only — ignore them when deciding the language.`
     : `Write the ENTIRE CV in the SAME language as the candidate's answers (Swahili, English, French, etc.). Any field labels are for structure only — ignore them when deciding the language.`;
   return `You are an expert CV writer for the global job market. A job-seeker has answered a few questions in rough, everyday language — in whatever language they're comfortable with. Turn their answers into a COMPLETE, polished, professional CV as STRICT JSON matching exactly this shape (no extra keys, no commentary, no markdown):
-{"personal":{"fullName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","website":""},"summary":"","experience":[{"company":"","position":"","location":"","startDate":"","endDate":"","current":false,"description":""}],"education":[{"institution":"","degree":"","field":"","startDate":"","endDate":""}],"skills":[""],"projects":[{"name":"","role":"","date":"","description":""}],"languages":[{"name":"","proficiency":""}],"certifications":[{"name":"","issuer":"","date":""}],"hobbies":""}
+{"personal":{"fullName":"","jobTitle":"","email":"","phone":"","location":"","linkedin":"","website":""},"summary":"","experience":[{"company":"","position":"","location":"","startDate":"","endDate":"","current":false,"description":""}],"education":[{"institution":"","degree":"","field":"","startDate":"","endDate":""}],"skills":[{"name":"","level":""}],"projects":[{"name":"","role":"","date":"","description":""}],"languages":[{"name":"","proficiency":""}],"certifications":[{"name":"","issuer":"","date":""}],"hobbies":""}
 
 Do not merely copy their words — WRITE the CV professionally:
 - summary: write a compelling 3–4 sentence professional summary that fits their stated profession and describes the ACTUAL work of that profession. Confident, specific, human — NO clichés (results-driven, passionate, team player, dynamic). If they gave little, keep it short and credible for that exact profession rather than padding.
 - MANY candidates are fresh GRADUATES or students with little or no formal work history. If so, write a confident ENTRY-LEVEL summary that leads with their education, field of study, key skills and career goal — selling their potential and readiness to grow. Do NOT apologise for or draw attention to a lack of experience, and invent nothing.
 - experience[].description: turn each rough note into 2–4 strong, specific bullet points, each line starting "- ". Lead with what they did and the result. KEEP every real fact and number they gave; NEVER invent employers, dates, numbers, metrics or achievements. An industrial/field attachment, internship, training or a substantial academic/personal project IS valid experience — capture it as an entry (position e.g. "Intern", "Industrial Attachment", "Project"), truthfully. If there is genuinely no experience of any kind, leave experience as [] rather than fabricating a job.
-- skills: clean short strings, deduplicated, strongest first. Do not invent skills they didn't mention.
+- skills: one object per skill — {"name":"","level":""} — NEVER a bare string, because the CV store discards any skill that is not an object with a name. "level" MUST be exactly one of beginner, intermediate, advanced, expert (use "intermediate" when unstated). Deduplicated, strongest first. Do not invent skills they didn't mention.
 - projects: any academic, personal, volunteer or client projects the candidate mentions — for each, a short name, their role (if given), and a 1–2 line description of what they did and its result. Especially valuable for graduates with little job history. Use [] if none; never invent a project.
 - ${langLine}
 - Match their REAL profession — never reframe a clinical, technical, trade, farming or care role as sales/marketing/customer-service unless selling is genuinely their field.
@@ -1439,7 +1439,24 @@ export function validateBuiltDocShape(parsed: unknown, docType: "cv" | "cover-le
       summary: clean(o.summary),
       experience: arr(o.experience),
       education: arr(o.education),
-      skills: Array.isArray(o.skills) ? o.skills.filter(isStr) : [],
+      // Skills MUST stay objects. The storage boundary's row identity for a skill is
+      // `name` (types/index.ts → CV_ROW_IDENTITY) and it drops anything that is not a
+      // plain object — while this line used to keep ONLY strings and both prompts above
+      // asked the model for `"skills":[""]`. So every skill the model returned was
+      // discarded twice over and the CV lost its whole Skills section. Measured on the
+      // live endpoint: 7 skills generated, 0 stored, and our own ATS engine then scored
+      // the CV 58/100 with Job Relevance 25 because it failed its own "8+ skills listed"
+      // check. A bare string is coerced rather than dropped, so an older client or a
+      // pasted payload still works.
+      skills: arr(o.skills)
+        .map((s) => (isStr(s) ? { name: s } : s))
+        .filter(
+          (s) =>
+            !!s &&
+            typeof s === "object" &&
+            isStr((s as Record<string, unknown>).name) &&
+            String((s as Record<string, unknown>).name).trim() !== "",
+        ),
       projects: arr(o.projects),
       languages: arr(o.languages),
       certifications: arr(o.certifications),

@@ -34,7 +34,53 @@ describe("validateBuiltDocShape — build-doc output shape gate", () => {
     expect(personal.fullName).toBe("Juma");
     expect(personal.jobTitle).toBe(""); // 42 coerced to ""
     expect(cv.hobbies).toBe(""); // 123 coerced to ""
-    expect(cv.skills).toEqual(["React", "TS"]); // non-strings dropped
+    // Skills are OBJECTS. This assertion used to read ["React","TS"] with the comment
+    // "non-strings dropped" — which froze in the very shape that lost every skill on the
+    // web path, because the storage boundary requires a row with `name` (CV_ROW_IDENTITY
+    // in types/index.ts) and discards bare strings. A string is now coerced to { name },
+    // and a number (never a skill in any client) is still dropped.
+    expect(cv.skills).toEqual([{ name: "React" }, { name: "TS" }]);
+  });
+
+  it("keeps skill OBJECTS intact — the shape the prompts ask for and the store keeps", () => {
+    // The seam that failed: both CV prompts in ai.ts asked the model for `"skills":[""]`
+    // while the normaliser kept only strings and the write boundary kept only objects, so
+    // skills were discarded twice over. Measured on the live endpoint: 7 skills returned
+    // by the model, 0 stored in cv.data. This asserts the requested shape survives.
+    const out = validateBuiltDocShape({
+      personal: { fullName: "Amina" },
+      summary: "Sales assistant",
+      experience: [],
+      education: [],
+      projects: [],
+      languages: [],
+      certifications: [],
+      skills: [
+        { name: "Customer service", level: "advanced" },
+        { name: "Microsoft Excel", level: "intermediate" },
+        "Point of Sale (POS)",
+      ],
+    }, "cv");
+    expect(out).not.toBeNull();
+    const skills = (out as Record<string, unknown>).skills as Array<Record<string, unknown>>;
+    expect(skills).toHaveLength(3);
+    expect(skills[0]).toEqual({ name: "Customer service", level: "advanced" });
+    expect(skills[2]).toEqual({ name: "Point of Sale (POS)" });
+    expect(skills.every((s) => typeof s.name === "string" && s.name.trim() !== "")).toBe(true);
+  });
+
+  it("drops a skills row with no readable name — the boundary's own rule", () => {
+    const out = validateBuiltDocShape({
+      personal: { fullName: "A" },
+      summary: "x",
+      experience: [],
+      education: [],
+      projects: [],
+      languages: [],
+      certifications: [],
+      skills: [{ name: "   " }, { level: "advanced" }, 7, null],
+    }, "cv");
+    expect((out as Record<string, unknown>).skills).toEqual([]);
   });
 
   it("rejects a cover letter with non-string/empty content", () => {
