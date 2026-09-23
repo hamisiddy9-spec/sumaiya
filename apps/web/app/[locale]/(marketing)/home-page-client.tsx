@@ -484,16 +484,22 @@ export default function LandingPage() {
                 `hero-reveal` above), so it must not gain markup that JS has to
                 resolve before the LCP element can render. */}
             <h1 className="font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
-              {lang === "sw" ? "CV inayokufikisha kwa mwajiri." : "The CV that reaches the employer."}
+              {lang === "sw" ? "CV inayolingana na kazi unayoomba." : "A CV that matches the job you are applying for."}
             </h1>
 
-            {/* Sub-headline — who does it, and how, in one sentence. */}
+            {/* Sub-headline — the instruction, in the order the visitor performs it:
+                open, type, download. It deliberately names the MANUAL path ("open the
+                editor"), because that is where the one button goes and it needs no
+                endpoint. It no longer promises AI writing: the assistant's AI is dark in
+                production (`/api/ai/status` → {"configured":false,"provider":null}) and
+                401s a guest, so promising it here would promise the one thing the page
+                cannot hand over. */}
             <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8 flex gap-3">
               <SumaiyaMark size={26} state="idle" className="text-ember shrink-0 mt-1" />
               <span>
                 {lang === "sw"
-                  ? "Bandika tangazo la kazi. Mimi ni Sumaiya — nitakusaidia kuandika CV inayolingana nalo, kwa Kiswahili, kwenye simu yako. Bure kuanza; ukinitaka niandike mimi, ingia tu."
-                  : "Paste the job advert. I'm Sumaiya — I'll help you write the CV that matches it, in Swahili, on your phone. Free to start, and sign in when you want me to do the writing."}
+                  ? "Mimi ni Sumaiya. Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
+                  : "I'm Sumaiya. Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
               </span>
             </p>
 
@@ -506,20 +512,28 @@ export default function LandingPage() {
                 live) and returns 401 to a guest, so the largest button on the page
                 led to a surface that could not answer. Sumaiya the assistant is
                 still here, named, as the secondary. */}
+            {/* ONE action. The label is the site-wide label ("Write your CV — free" /
+                "Andika CV yako — bure") so the same button is never renamed mid-page.
+                It is "CV yako" and not the first-person possessive deliberately: the house
+                voice names the user's own object in the second person (233 uses, first in
+                lib/api/routes/ai.ts:687), which lib/swahili-lint.test.ts enforces.
+                The old secondary was "or talk to me" → /assistant, which by the comment
+                above cannot answer a guest; a second CTA that dead-ends is worse than no
+                second CTA. The replacement is an in-page jump, so it adds no surface. */}
             <div className="flex flex-wrap items-center gap-4 mb-3">
               <Link href="/editor/cv/try" onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_build' })}>
                 <Button variant="primary" size="lg">
-                  {lang === "sw" ? "Anza CV yako — Bure" : "Start your CV — free"} <Icon name="chevron-right" size={16} />
+                  {lang === "sw" ? "Andika CV yako — bure" : "Write your CV — free"} <Icon name="chevron-right" size={16} />
                 </Button>
               </Link>
-              <Link
-                href="/assistant"
-                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_ai' })}
+              <a
+                href="#how-it-works"
+                onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_steps' })}
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
-                {lang === "sw" ? "au ongea nami" : "or talk to me"}
+                {lang === "sw" ? "Ona hatua tatu" : "See the three steps"}
                 <Icon name="chevron-right" size={14} />
-              </Link>
+              </a>
             </div>
 
             {/* Free reassurance — the stranger-read pass, having criticised almost
