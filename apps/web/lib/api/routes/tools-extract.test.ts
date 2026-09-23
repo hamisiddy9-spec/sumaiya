@@ -121,9 +121,14 @@ describe("extract-text — the happy paths are unchanged", () => {
     expect(res.text).toContain("INTERESTS");
   });
 
+  // Generous timeout: this path does `await import("mammoth")` and then parses a zip.
+  // Observed twice failing inside a full parallel run while a gradle release build and
+  // two agent runs were saturating the machine, and passing in isolation (1.2s) and in
+  // full runs on an idle box. The assertion is about extraction, not speed, so a slow
+  // machine should not turn this into a false red.
   it("still extracts a real DOCX", async () => {
     const res = await postFixture("cv.docx");
     expect(res.status).toBe(200);
     expect(res.text).toContain("Amina Joseph Mwakasege");
-  });
+  }, 20_000);
 });
