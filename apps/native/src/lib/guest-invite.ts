@@ -19,10 +19,15 @@
  * aeroplane mode (see lib/local-owner.ts for the same rule on the CV itself).
  *
  * The per-surface gate copy (`GUEST_GATE_COPY`) is the OTHER half of guest mode:
- * the surfaces that genuinely need an account (chat, jobs, applications, file
- * import, invite, courses, the written review). Each one is an honest
- * invitation with a way out — never a dead end, and never a nag: they appear
- * only when the guest actually walks into that surface.
+ * the surfaces that genuinely need an account (chat, jobs, file import, invite,
+ * courses, the written review). Each one is an honest invitation with a way
+ * out — never a dead end, and never a nag: they appear only when the guest
+ * actually walks into that surface.
+ *
+ * `applications` keeps a copy entry too, even though nothing gates on it
+ * anymore — Applications are device-only (lib/applications-store.ts) and open
+ * to a guest like the CV path is. It is here for the later, honest invitation
+ * ("keep this on your account so it syncs") once syncing exists — not a wall.
  */
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
 
@@ -137,12 +142,12 @@ export const GUEST_GATE_COPY: Record<GuestGateId, { title: GuestCopy; body: Gues
   },
   applications: {
     title: {
-      en: "Applications live in your account",
-      sw: "Maombi yako yanaishi kwenye akaunti yako",
+      en: "Keep your applications everywhere",
+      sw: "Fuatilia maombi yako popote",
     },
     body: {
-      en: "The applications you send, their status and the letters you write all live in your account. Create a free account to follow them up — the CVs on this phone come with you.",
-      sw: "Maombi uliyotuma, hali yake na barua unazoandika ziko kwenye akaunti yako. Fungua akaunti bure ili kuyafuatilia — CV zako zilizo kwenye simu hii zitakuja nawe.",
+      en: "The jobs you save, the CVs you tailor and the letters you write stay on this phone. Create a free account and I'll keep them, follow them up, and remember them for you — even on another phone.",
+      sw: "Kazi unazohifadhi, CV unazozilenga na barua unazoandika zinabaki kwenye simu hii. Fungua akaunti bure nami nitazihifadhi, kuzifuatilia, na kuzikumbuka kwa ajili yako — hata kwenye simu nyingine.",
     },
   },
   import: {

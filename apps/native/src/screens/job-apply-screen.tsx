@@ -14,6 +14,10 @@ import { letterIsEmpty, letterToHtml } from "../lib/letter-html";
 import { A4_H_PT, A4_W_PT, letterFileName, renamePdf } from "../services/pdf-export";
 import { reportExport } from "../services/export-ledger";
 import { useLang } from "../lib/i18n";
+import { createApplication } from "../lib/applications-store";
+import { FUNNEL_EVENTS } from "../lib/analytics";
+import { track } from "../lib/telemetry";
+import { useAuthContext } from "../contexts/auth-context";
 import type { JobApplyScreenProps } from "../navigation/types";
 
 type Want = "cv" | "letter" | "both";
@@ -28,13 +32,24 @@ const WANT_OPTS: { id: Want; en: string; sw: string; icon: string }[] = [
 export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
+  const { user } = useAuthContext();
+  const isGuest = !user;
   const { cvs, updateCV } = useCvs();
-  const [jd, setJd] = useState<string>(route?.params?.jd ?? "");
+  // The whole listing, when this came from JobDetail's "Start an application"
+  // — carries company/location/applyUrl an Application needs, which a bare jd
+  // string never could.
+  const job = route?.params?.job;
+  const [jd, setJd] = useState<string>(
+    route?.params?.jd ?? (job ? `${job.title}\n${job.company}\n\n${job.description}` : ""),
+  );
   const [want, setWant] = useState<Want>(route?.params?.want ?? "both");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [applied, setApplied] = useState(false);
+  const [kept, setKept] = useState(false);
+  const [keeping, setKeeping] = useState(false);
+  const [keptId, setKeptId] = useState<string | null>(null);
 
   const targetCv = useMemo(
     () => [...cvs].sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))[0] ?? null,
@@ -89,6 +104,46 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
     navigation.navigate("CVsTab", { screen: "CvEditor", params: { cvId: targetCv.id, templateId: targetCv.templateId } });
   }
 
+  // This is the strongest moment in the app — a retuned CV and a grounded
+  // letter, both in hand — and until now it only offered "Tailor to another
+  // job", throwing the work away with no record of which advert it was for.
+  async function keepAsApplication() {
+    if (kept || keeping) return;
+    const role = (job?.title ?? result?.jobTitle ?? "").trim();
+    const company = (job?.company ?? result?.company ?? "").trim();
+    if (!role && !company) return;
+    setKeeping(true);
+    haptics.light();
+    try {
+      const app = await createApplication({
+        role: role || company,
+        company: company || role,
+        location: job?.location || undefined,
+        jobDescription: jd.trim() || undefined,
+        jobUrl: job?.applyUrl || undefined,
+        cvId: targetCv?.id,
+        coverLetter: result?.letter && !letterIsEmpty(result.letter.content) ? result.letter.content : undefined,
+        status: "saved",
+      });
+      const props = {
+        via: job ? "advert" : "tailor",
+        has_jd: jd.trim().length > 0,
+        has_cv: Boolean(result?.cv),
+        guest: isGuest,
+      };
+      track("application.created", props);
+      track(FUNNEL_EVENTS.applicationCreated, props);
+      haptics.success();
+      setKeptId(app.id);
+      setKept(true);
+    } catch {
+      haptics.error();
+      dialog.alert(t("Couldn't save", "Imeshindwa kuhifadhi"), t("Try again.", "Jaribu tena."));
+    } finally {
+      setKeeping(false);
+    }
+  }
+
   async function shareLetter() {
     if (!result?.letter) return;
     haptics.light();
@@ -140,6 +195,7 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
 
   // ── Result view ──────────────────────────────────────────────────────────
   if (result) {
+    const canKeep = Boolean((job?.title ?? result.jobTitle ?? "").trim() || (job?.company ?? result.company ?? "").trim());
     return (
       <Screen scroll>
         <Animated.View entering={FadeIn.duration(240)} style={{ marginTop: 8, marginBottom: 18 }}>
@@ -214,6 +270,24 @@ export function JobApplyScreen({ navigation, route }: JobApplyScreenProps) {
               </View>
             </Animated.View>
           )
+        ) : null}
+
+        {/* The strongest moment in the app used to discard its own work: no
+            record of which advert this CV/letter pair was for. Keeping it
+            writes one Application row, local to the phone. */}
+        {canKeep ? (
+          <Button
+            label={
+              keeping
+                ? t("Saving…", "Inahifadhi…")
+                : kept
+                  ? t("Saved as an application", "Imewekwa kama ombi")
+                  : t("Keep this as an application", "Kuweka hii kama ombi")
+            }
+            variant="secondary"
+            loading={keeping}
+            onPress={kept ? () => keptId && navigation.navigate("ApplicationDetail", { id: keptId }) : keepAsApplication}
+          />
         ) : null}
 
         <Pressable

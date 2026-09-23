@@ -40,22 +40,33 @@ export function JobDetailScreen({ navigation, route }: JobDetailScreenProps) {
     });
   };
 
+  // Unlike tailor() above, this carries the whole listing — not a sliced jd
+  // string — so JobApply's "Keep this as an application" has the company,
+  // location and apply link an Application needs, not just the description.
+  const startApplication = () => {
+    haptics.selection();
+    navigation.navigate("JobApply", { job });
+  };
+
   const meta = [job.employmentType, job.category, job.sourceName].filter(Boolean) as string[];
 
   return (
     <Screen
       scroll
       footer={
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1 }}>
-            <Button label={t("Tailor my CV", "Lenga CV yako")} onPress={tailor} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Button
-              label={t("Open the advert", "Fungua tangazo")}
-              variant="secondary"
-              onPress={() => job.applyUrl && confirmAndOpenUrl(job.applyUrl, t)}
-            />
+        <View style={{ gap: 8 }}>
+          <Button label={t("Start an application", "Kuanza ombi")} onPress={startApplication} />
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flex: 1 }}>
+              <Button label={t("Tailor my CV", "Lenga CV yako")} variant="secondary" onPress={tailor} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                label={t("Open the advert", "Fungua tangazo")}
+                variant="secondary"
+                onPress={() => job.applyUrl && confirmAndOpenUrl(job.applyUrl, t)}
+              />
+            </View>
           </View>
         </View>
       }

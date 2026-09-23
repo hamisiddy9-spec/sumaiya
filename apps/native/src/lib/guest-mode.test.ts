@@ -68,8 +68,6 @@ describe("2. the right surfaces are gated, and only those", () => {
     { route: "Jobs", gate: "jobs" },
     { route: "JobDetail", gate: "jobs" },
     { route: "JobApply", gate: "jobs" },
-    { route: "Applications", gate: "applications" },
-    { route: "ApplicationDetail", gate: "applications" },
     { route: "LearningHub", gate: "courses" },
     { route: "Invite", gate: "invite" },
   ];
@@ -106,7 +104,9 @@ describe("2. the right surfaces are gated, and only those", () => {
 
   it("leaves the CV path open, because that is the promise", () => {
     // Home, My CVs, the builder, the CV check, the profile screens: a guest
-    // builds, edits, previews and DOWNLOADS here with no account.
+    // builds, edits, previews and DOWNLOADS here with no account. Applications
+    // join this list too — the store is device-only (lib/applications-store.ts),
+    // so gating it was never honest (docs/FIX-BRIEF-MAOMBI-01.md).
     const OPEN: { route: string; component: string }[] = [
       { route: "HomeMain", component: "HomeScreen" },
       { route: "CvListMain", component: "CvListScreen" },
@@ -114,6 +114,8 @@ describe("2. the right surfaces are gated, and only those", () => {
       { route: "AtsChecker", component: "AtsCheckerScreen" },
       { route: "ProfileMain", component: "ProfileScreen" },
       { route: "CareerProfile", component: "CareerProfileScreen" },
+      { route: "Applications", component: "ApplicationsScreen" },
+      { route: "ApplicationDetail", component: "ApplicationDetailScreen" },
     ];
     for (const { route, component } of OPEN) {
       expect(tabs).toMatch(new RegExp(`name="${route}"\\s+component=\\{${component}\\}`));

@@ -5,11 +5,15 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import type { JobListing, JobRecommendation } from "@sumaiya/api-client";
 import { apiClient } from "../lib/api-client";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, Card, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, toast, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { confirmAndOpenUrl } from "../lib/external-link";
 import { isExpiredListing } from "../lib/job-listing";
 import { closingLabel } from "../lib/deadline";
+import { createApplication } from "../lib/applications-store";
+import { FUNNEL_EVENTS } from "../lib/analytics";
+import { track } from "../lib/telemetry";
+import { useAuthContext } from "../contexts/auth-context";
 import type { JobsScreenProps } from "../navigation/types";
 
 function MatchBadge({ score }: { score: number }) {
@@ -30,6 +34,7 @@ function JobCard({
   onTailor,
   onApply,
   onOpen,
+  onSave,
 }: {
   job: JobListing;
   score?: number;
@@ -37,10 +42,20 @@ function JobCard({
   onTailor: () => void;
   onApply: () => void;
   onOpen: () => void;
+  onSave: () => Promise<boolean>;
 }) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const closing = closingLabel(job.applicationDeadline, lang);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    if (saved || saving) return;
+    setSaving(true);
+    const ok = await onSave();
+    setSaving(false);
+    if (ok) setSaved(true);
+  };
   return (
     /* The card body is a real control now, not a View that looked like one.
        Measured on the device against 1.6.24: the only clickable nodes on this
@@ -83,6 +98,18 @@ function JobCard({
           <Button label={t("Open the advert", "Fungua tangazo")} size="sm" variant="secondary" onPress={onApply} />
         </View>
       </View>
+      {/* Local, no account, no network — createApplication writes straight to
+          the phone (lib/applications-store.ts). This is the birth path the
+          feed never had: today the only way to start an Application is the
+          small "+" on the Applications list. */}
+      <Button
+        label={saved ? t("Saved", "Imehifadhiwa") : t("Save this job", "Hifadhi kazi hii")}
+        size="sm"
+        variant="ghost"
+        loading={saving}
+        disabled={saved}
+        onPress={save}
+      />
       <View style={{ flexDirection: "row", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
         <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>
           {t("See the full advert", "Ona tangazo kamili")}
@@ -96,6 +123,8 @@ function JobCard({
 export function JobsScreen({ navigation }: JobsScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
+  const { user } = useAuthContext();
+  const isGuest = !user;
   const [recs, setRecs] = useState<JobRecommendation[]>([]);
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,6 +174,30 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   const open = (job: JobListing, score?: number, reason?: string) => {
     navigation.navigate("JobDetail", { job, score, reason });
   };
+  // The birth path the feed never had: a saved job becomes an Application on
+  // the phone, no tailoring and no account required.
+  const save = async (job: JobListing): Promise<boolean> => {
+    haptics.selection();
+    try {
+      await createApplication({
+        company: job.company,
+        role: job.title,
+        location: job.location || undefined,
+        jobDescription: job.description || undefined,
+        jobUrl: job.applyUrl || undefined,
+        status: "saved",
+      });
+      const props = { via: "feed", has_jd: Boolean(job.description), has_cv: false, guest: isGuest };
+      track("application.created", props);
+      track(FUNNEL_EVENTS.applicationCreated, props);
+      toast.show(t("Saved to your applications", "Imehifadhiwa kwenye maombi yako"));
+      return true;
+    } catch {
+      haptics.error();
+      toast.show(t("Couldn't save", "Imeshindwa kuhifadhi"));
+      return false;
+    }
+  };
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
@@ -186,6 +239,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
                       onTailor={() => tailor(r.job)}
                       onApply={() => apply(r.job)}
                       onOpen={() => open(r.job, r.score, r.reason)}
+                      onSave={() => save(r.job)}
                     />
                   </Stagger>
                 ))}
@@ -221,7 +275,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               <View style={{ gap: 12 }}>
                 {rest.slice(0, 40).map((j, i) => (
                   <Stagger key={j.id} index={i}>
-                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} onOpen={() => open(j)} />
+                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} onOpen={() => open(j)} onSave={() => save(j)} />
                   </Stagger>
                 ))}
               </View>

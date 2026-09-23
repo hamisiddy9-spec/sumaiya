@@ -14,7 +14,10 @@ export type HomeStackParamList = {
    *  passed whole: it is already in memory from the feed, and re-fetching it
    *  by id would make a tap on a card wait on the network. */
   JobDetail: { job: JobListing; score?: number; reason?: string };
-  JobApply: { jd?: string; want?: "cv" | "letter" | "both" } | undefined;
+  /** `job`, when present, is the whole listing (from JobDetail's "Start an
+   *  application"), not a sliced jd string — it carries the company/location/
+   *  applyUrl an Application needs, and JobApply derives the full jd from it. */
+  JobApply: { jd?: string; want?: "cv" | "letter" | "both"; job?: JobListing } | undefined;
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
   AtsChecker: { cvId?: string } | undefined;

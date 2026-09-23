@@ -63,10 +63,12 @@ const ProfileStack = createNativeStackNavigator<ProfileStackParamList, undefined
  *
  * A guest builds and downloads CVs with no account at all: Home, My CVs, the
  * editor, the template gallery, the PDF export, Profile (language, dark mode,
- * privacy, support), Career Profile and the CV check all work offline and stay
- * open. Everything wrapped below genuinely needs an account — it reads or
- * writes on the server on the user's behalf — so it shows the honest invitation
- * in components/account-gate.tsx instead of a broken or empty screen.
+ * privacy, support), Career Profile, the CV check and Applications (device-only,
+ * lib/applications-store.ts — nothing here has ever needed a server) all work
+ * offline and stay open. Everything wrapped below genuinely needs an account —
+ * it reads or writes on the server on the user's behalf — so it shows the
+ * honest invitation in components/account-gate.tsx instead of a broken or
+ * empty screen.
  *
  * Wrapped at MODULE SCOPE, not inline in JSX: a component type created during
  * render makes React Navigation remount the screen.
@@ -76,8 +78,8 @@ const GatedImportTab = withAccountGate(ScanStack, "import");
 const GatedJobs = withAccountGate(JobsScreen, "jobs");
 const GatedJobDetail = withAccountGate(JobDetailScreen, "jobs");
 const GatedJobApply = withAccountGate(JobApplyScreen, "jobs");
-const GatedApplications = withAccountGate(ApplicationsScreen, "applications");
-const GatedApplicationDetail = withAccountGate(ApplicationDetailScreen, "applications");
+// Applications are device-only (lib/applications-store.ts) — there is no
+// account to gate them on. Ungated deliberately: see docs/FIX-BRIEF-MAOMBI-01.md.
 const GatedLearningHub = withAccountGate(LearningHubScreen, "courses");
 const GatedInvite = withAccountGate(InviteScreen, "invite");
 
@@ -87,8 +89,8 @@ function HomeStackScreen() {
     <HomeStack.Navigator id={undefined} screenOptions={stackScreenOptions(c)}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="JobApply" component={GatedJobApply} />
-      <HomeStack.Screen name="Applications" component={GatedApplications} />
-      <HomeStack.Screen name="ApplicationDetail" component={GatedApplicationDetail} />
+      <HomeStack.Screen name="Applications" component={ApplicationsScreen} />
+      <HomeStack.Screen name="ApplicationDetail" component={ApplicationDetailScreen} />
       <HomeStack.Screen name="AtsChecker" component={AtsCheckerScreen} />
       <HomeStack.Screen
         name="LearningHub"

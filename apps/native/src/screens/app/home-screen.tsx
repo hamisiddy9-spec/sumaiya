@@ -278,14 +278,16 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
-  // A GUEST gets the three tiles that actually work for them. Job matches,
-  // applications and cover letters are all written on the server against an
-  // account, so showing them here would be four doors into an invitation —
-  // the wall this whole change removes. What stays: the assistant (the
+  // A GUEST gets the tiles that actually work for them. Job matches and the
+  // cover-letter generator both tailor on the server against an account, so
+  // those stay hidden here. Applications are device-only
+  // (lib/applications-store.ts) — the same promise as the CV path — so a
+  // guest tracks them like everyone else. What stays: the assistant (the
   // product's own face, invited honestly when tapped), the CV check, which
-  // scores on the device from the shared rules (lib/ats.ts), and TemplateHub.
+  // scores on the device from the shared rules (lib/ats.ts), Applications,
+  // and TemplateHub.
   const guestQuickActions = quickActions.filter((a) =>
-    a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid",
+    a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid" || a.icon === "briefcase",
   );
   const shownQuickActions = isGuest ? guestQuickActions : quickActions;
 

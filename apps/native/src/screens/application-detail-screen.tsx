@@ -13,6 +13,9 @@ import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
+import { FUNNEL_EVENTS } from "../lib/analytics";
+import { track } from "../lib/telemetry";
+import { useAuthContext } from "../contexts/auth-context";
 import type { ApplicationDetailScreenProps } from "../navigation/types";
 
 export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
