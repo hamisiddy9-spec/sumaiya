@@ -2,6 +2,7 @@ import type { CV, CVData } from "@sumaiya/types";
 import { TEMPLATE_REGISTRY } from "./templates/registry";
 import { hasRenderer, renderTemplateHtml } from "./cv-engine/render";
 import { fitSheet } from "./cv-engine/fit";
+import { SMALL_PRINT_FLOOR_PX } from "./cv-engine/tokens";
 import type { NativeTemplate } from "./templates/types";
 
 /**
@@ -229,6 +230,7 @@ function withPhoto(nameHeadlineHtml: string, photoHtml: string, align: "start" |
 }
 
 function templateCss(id: CvTemplateId, accent: string): string {
+  const floor = SMALL_PRINT_FLOOR_PX;
   switch (id) {
     case "modern":
       return `${BASE_CSS}
@@ -241,17 +243,17 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .body { padding: 24px 44px; }
         .section-title { font-size: 12px; font-weight: 800; color: ${accent}; letter-spacing: 0.7px; text-transform: uppercase; margin-bottom: 8px; }
         .entry-title { font-size: 13px; }
-        .skill { background: ${accent}1f; color: ${accent}; padding: 3px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 700; }`;
+        .skill { background: ${accent}1f; color: ${accent}; padding: 3px 9px; border-radius: 12px; font-size: ${floor}px; font-weight: 700; }`;
     case "minimal":
       return `${BASE_CSS}
         body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 12px; line-height: 1.6; padding: 48px 52px; color: #333; }
         .name { font-size: 27px; font-weight: 700; letter-spacing: -0.3px; }
         .headline { color: #555; font-size: 13px; margin: 2px 0 4px; }
-        .contact { font-size: 10.5px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 20px; }
+        .contact { font-size: ${floor}px; color: #888; border-bottom: 1px solid #ddd; padding-bottom: 16px; margin-bottom: 20px; }
         .photo { width: 64px; height: 64px; }
         .section-title { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: #999; margin-bottom: 9px; }
         .entry-title { font-size: 12.5px; }
-        .skill { border: 1px solid #ccc; color: #555; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; }`;
+        .skill { border: 1px solid #ccc; color: #555; padding: 2px 8px; border-radius: 4px; font-size: ${floor}px; }`;
     case "sidebar":
       return `${BASE_CSS}
         body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 12px; line-height: 1.5; }
@@ -260,8 +262,8 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .aside .photo { width: 88px; height: 88px; margin: 0 auto 16px; border: 3px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .aside .name { font-size: 22px; font-weight: 800; color: #211A15; letter-spacing: -0.4px; }
         .aside .headline { color: ${accent}; font-weight: 700; font-size: 12px; margin: 3px 0 14px; }
-        .aside .contact { font-size: 10.5px; color: #555; line-height: 1.9; }
-        .aside .section-title { font-size: 10.5px; font-weight: 800; color: ${accent}; letter-spacing: 0.8px; text-transform: uppercase; margin: 18px 0 7px; }
+        .aside .contact { font-size: ${floor}px; color: #555; line-height: 1.9; }
+        .aside .section-title { font-size: ${floor}px; font-weight: 800; color: ${accent}; letter-spacing: 0.8px; text-transform: uppercase; margin: 18px 0 7px; }
         .main { flex: 1; padding: 34px 32px; }
         .main .section-title { font-size: 12px; font-weight: 800; color: #211A15; letter-spacing: 0.6px; text-transform: uppercase; border-bottom: 2px solid ${accent}; padding-bottom: 4px; margin-bottom: 10px; }
         .skills { flex-direction: column; gap: 4px; }
@@ -280,16 +282,16 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .skills { gap: 4px 14px; }`;
     case "compact":
       return `${BASE_CSS}
-        body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 10.5px; line-height: 1.4; padding: 32px 40px; }
+        body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: ${floor}px; line-height: 1.4; padding: 32px 40px; }
         .name { font-size: 22px; font-weight: 800; color: #211A15; letter-spacing: -0.4px; }
         .headline { color: ${accent}; font-weight: 700; font-size: 11px; }
-        .contact { font-size: 9.5px; color: #666; border-bottom: 2px solid ${accent}; padding-bottom: 8px; margin-bottom: 12px; }
+        .contact { font-size: ${floor}px; color: #666; border-bottom: 2px solid ${accent}; padding-bottom: 8px; margin-bottom: 12px; }
         .photo { width: 44px; height: 44px; }
         .section { margin-bottom: 10px; }
-        .section-title { font-size: 10px; font-weight: 800; color: ${accent}; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 5px; }
+        .section-title { font-size: ${floor}px; font-weight: 800; color: ${accent}; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 5px; }
         .entry { margin-bottom: 6px; }
         .entry-title { font-size: 11px; }
-        .skill { background: ${accent}1a; color: ${accent}; padding: 2px 7px; border-radius: 9px; font-size: 9px; font-weight: 700; }`;
+        .skill { background: ${accent}1a; color: ${accent}; padding: 2px 7px; border-radius: 9px; font-size: ${floor}px; font-weight: 700; }`;
     case "classic":
     default:
       return `${BASE_CSS}
@@ -300,7 +302,7 @@ function templateCss(id: CvTemplateId, accent: string): string {
         .photo { width: 72px; height: 72px; border: 3px solid ${accent}33; }
         .section-title { font-size: 12.5px; font-weight: 800; color: ${accent}; letter-spacing: 0.6px; text-transform: uppercase; border-bottom: 1px solid #e6e6e6; padding-bottom: 5px; margin-bottom: 10px; }
         .entry-title { font-size: 13px; }
-        .skill { background: ${accent}1f; color: ${accent}; padding: 3px 9px; border-radius: 12px; font-size: 10.5px; font-weight: 700; }`;
+        .skill { background: ${accent}1f; color: ${accent}; padding: 3px 9px; border-radius: 12px; font-size: ${floor}px; font-weight: 700; }`;
   }
 }
 

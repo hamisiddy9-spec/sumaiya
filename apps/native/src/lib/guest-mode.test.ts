@@ -193,17 +193,23 @@ describe("4. the account is offered once, from the deliverable", () => {
 
   it("the offer fires after a save or a download, never before one", () => {
     const list = code("screens/app/cv-list-screen.tsx");
-    const cancelled = list.indexOf('saved.status === "cancelled"');
+    const gate = list.indexOf("shouldOfferShare(saved)");
     const saveAlert = list.indexOf('t("Saved to your phone"');
     const calls = [...list.matchAll(/offerGuestAccountOnce\(/g)].map((m) => m.index ?? -1);
-    expect(cancelled).toBeGreaterThan(-1);
+    expect(gate).toBeGreaterThan(-1);
     expect(saveAlert).toBeGreaterThan(-1);
     // Two branches count as a download (the SAF save, and the share-sheet
     // fallback) — and neither may fire before the outcome is known, so a
     // dismissed folder picker is never followed by an account pitch.
     expect(calls.length).toBe(2);
-    expect(Math.min(...calls)).toBeGreaterThan(cancelled);
+    expect(Math.min(...calls)).toBeGreaterThan(gate);
     expect(Math.max(...calls)).toBeGreaterThan(saveAlert);
+    // A dismissed folder picker ("cancelled") must say so and offer the share
+    // sheet, but must never itself reach the account pitch.
+    const notSavedStart = list.indexOf('t("Not saved"');
+    const notSavedBranchEnd = list.indexOf("return;", notSavedStart);
+    expect(notSavedStart).toBeGreaterThan(-1);
+    expect(list.slice(notSavedStart, notSavedBranchEnd)).not.toContain("offerGuestAccountOnce(");
 
     const editor = code("screens/cv-editor-screen.tsx");
     // After the local write is confirmed (storedLocally), and after the export

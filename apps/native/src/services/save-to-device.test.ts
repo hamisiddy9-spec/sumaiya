@@ -16,7 +16,7 @@ jest.mock("expo-file-system/legacy", () => ({
 // Platform.OS is much easier to steer than to fake the whole RN module.
 jest.mock("react-native", () => ({ Platform: { OS: "android" } }));
 
-import { fileNameFromUri, saveToPhone } from "./save-to-device";
+import { fileNameFromUri, saveToPhone, shouldOfferShare } from "./save-to-device";
 import { Platform } from "react-native";
 
 describe("fileNameFromUri", () => {
@@ -93,5 +93,46 @@ describe("saveToPhone — 'Pakua' writes a file the user can find", () => {
     (Platform as { OS: string }).OS = "android";
     mockRequestDir.mockRejectedValue(new Error("no SAF"));
     expect(await saveToPhone("file:///cache/CV.pdf", "CV.pdf")).toEqual({ status: "unsupported" });
+  });
+
+  it("falls through to the next anchor when the first one throws before the picker opens", async () => {
+    // An OEM content-provider that rejects the Documents anchor outright must
+    // not be treated the same as "no SAF at all" — Download (or the bare
+    // picker) may still work.
+    mockRequestDir
+      .mockRejectedValueOnce(new Error("Documents anchor unsupported on this ROM"))
+      .mockResolvedValueOnce({
+        granted: true,
+        directoryUri: "content://com.android.externalstorage.documents/tree/download",
+      });
+    const out = await saveToPhone("file:///cache/CV.pdf", "CV.pdf");
+    expect(out).toEqual({ status: "saved", fileName: "CV.pdf" });
+    expect(mockRequestDir).toHaveBeenCalledTimes(2);
+    expect(mockCreateFile).toHaveBeenCalledWith(
+      "content://com.android.externalstorage.documents/tree/download",
+      "CV.pdf",
+      "application/pdf",
+    );
+  });
+
+  it("is only unsupported once every anchor candidate has thrown", async () => {
+    mockRequestDir.mockRejectedValue(new Error("no SAF anywhere"));
+    expect(await saveToPhone("file:///cache/CV.pdf", "CV.pdf")).toEqual({ status: "unsupported" });
+    // Documents, Download, and the bare picker were all tried before giving up.
+    expect(mockRequestDir).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("shouldOfferShare — the one place that decides the silent-failure question", () => {
+  it("is false only when the file actually landed somewhere", () => {
+    expect(shouldOfferShare({ status: "saved", fileName: "CV.pdf" })).toBe(false);
+  });
+
+  it("is true for a dismissed folder picker, so 'cancelled' is never left silent", () => {
+    expect(shouldOfferShare({ status: "cancelled" })).toBe(true);
+  });
+
+  it("is true where SAF is unsupported, so sharing is still offered", () => {
+    expect(shouldOfferShare({ status: "unsupported" })).toBe(true);
   });
 });

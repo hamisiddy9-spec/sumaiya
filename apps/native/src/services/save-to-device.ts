@@ -28,6 +28,50 @@ export type SaveOutcome =
   /** No SAF on this platform — the caller's share sheet is the system's save path. */
   | { status: "unsupported" };
 
+/**
+ * The one place that decides whether a caller must fall back to sharing the
+ * file directly. Only "saved" means a file actually landed somewhere the user
+ * can find it — every other outcome used to let the caller return in silence
+ * (measured on 1.6.28: dismissing the folder picker ended with no file, no
+ * message and no share sheet). Pulled out as pure logic, tested here, so a
+ * screen cannot re-introduce a silent branch by switching on `status` itself.
+ */
+export function shouldOfferShare(
+  outcome: SaveOutcome,
+): outcome is Extract<SaveOutcome, { status: "cancelled" | "unsupported" }> {
+  return outcome.status !== "saved";
+}
+
+/**
+ * Anchor folders to try, in order. Measured behaviour differs by OS/OEM:
+ * Android 15 (Enigma, Hisense, 720x1560) and Android 17 (Pixel 8 Pro) both
+ * open the picker cleanly anchored at Documents; Android 11+ refuses the
+ * volume root outright as a destination (greyed-out "USE THIS FOLDER"). If a
+ * given anchor URI itself makes the picker throw before it even opens (an
+ * unusual OEM content-provider), fall through to the next candidate instead
+ * of calling the whole platform unsupported.
+ */
+const ANCHOR_CANDIDATES: (string | undefined)[] = [
+  "content://com.android.externalstorage.documents/document/primary%3ADocuments",
+  "content://com.android.externalstorage.documents/document/primary%3ADownload",
+  undefined,
+];
+
+async function requestSaveDirectory(): Promise<FileSystem.FileSystemRequestDirectoryPermissionsResult | null> {
+  for (const anchor of ANCHOR_CANDIDATES) {
+    try {
+      return anchor
+        ? await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(anchor)
+        : await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+    } catch {
+      // This anchor made the picker throw before it opened — try the next one.
+      continue;
+    }
+  }
+  // Every candidate threw: no usable SAF on this device.
+  return null;
+}
+
 /** The readable name a printed PDF already carries (expo-print names it a UUID). */
 export function fileNameFromUri(uri: string): string {
   const last = (uri.split("/").pop() ?? "").split("?")[0] ?? "";
@@ -52,25 +96,21 @@ export async function saveToPhone(
   // system save path, so the caller falls back to sharing there.
   if (Platform.OS !== "android") return { status: "unsupported" };
 
-  let directoryUri: string;
-  try {
-    // OPEN SOMEWHERE USABLE. Called with no argument, SAF opens at the volume
-    // ROOT, which Android 11+ forbids as a destination: the user is met with
-    // "Can't use this folder / To protect your privacy, choose another folder",
-    // a GREYED-OUT "USE THIS FOLDER" button, and no hint about what to do.
-    // Measured on the Enigma (Android 15, 720x1560): the obvious choice is a dead
-    // end, and Download is refused too — only Documents enables the button.
-    // Anchoring at Documents means the first screen the user sees is one they can
-    // actually save into.
-    const permission = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync(
-      "content://com.android.externalstorage.documents/document/primary%3ADocuments",
-    );
-    if (!permission.granted || !permission.directoryUri) return { status: "cancelled" };
-    directoryUri = permission.directoryUri;
-  } catch {
-    // No SAF (an unusual ROM, a locked-down device) — sharing still works.
-    return { status: "unsupported" };
-  }
+  // OPEN SOMEWHERE USABLE. Called with no argument, SAF opens at the volume
+  // ROOT, which Android 11+ forbids as a destination: the user is met with
+  // "Can't use this folder / To protect your privacy, choose another folder",
+  // a GREYED-OUT "USE THIS FOLDER" button, and no hint about what to do.
+  // Measured on the Enigma (Android 15, 720x1560): the obvious choice is a
+  // dead end, and Download is refused too — only Documents enables the
+  // button. Measured again on a Pixel 8 Pro (Android 17): Documents opened
+  // cleanly and the export completed, writing to /sdcard/Documents. Anchoring
+  // at Documents means the first screen most users see is one they can
+  // actually save into; requestSaveDirectory() still tries further candidates
+  // if that anchor itself throws on some OEM build.
+  const permission = await requestSaveDirectory();
+  if (!permission) return { status: "unsupported" };
+  if (!permission.granted) return { status: "cancelled" };
+  const directoryUri = permission.directoryUri;
 
   // Read first, then create: a read failure (a print that never landed) should
   // fail before we have made an empty file in the user's folder.

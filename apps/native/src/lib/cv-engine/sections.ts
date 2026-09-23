@@ -12,7 +12,7 @@
  * apps/native/src/lib/cv-engine/sections.test.ts guards the section keys.
  */
 
-import type { DesignTokens } from "./tokens";
+import { SMALL_PRINT_FLOOR_PX, type DesignTokens } from "./tokens";
 import type { EngineView, VExperience, VPersonal } from "./view";
 import type { ExperienceVariant, Lang, SectionStyle, SkillDisplay } from "./types";
 import { dateRange, el, esc, fmtDate, join, tx } from "./html";
@@ -161,7 +161,7 @@ export function sectionLabel(
           justifyContent: "center",
           flexShrink: 0,
         },
-        `<span style="font-size:8px;font-weight:800;color:${tokens.color.onAccent};font-family:${tokens.fontFamily}">§</span>`,
+        `<span style="font-size:${SMALL_PRINT_FLOOR_PX}px;font-weight:800;color:${tokens.color.onAccent};font-family:${tokens.fontFamily}">§</span>`,
       ) + tx(label, { ...base, color: tokens.color.text }),
     );
   }

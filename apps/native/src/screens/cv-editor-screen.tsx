@@ -13,7 +13,7 @@ import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
 import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
 import { shareCV } from "../services/share";
-import { fileNameFromUri, saveToPhone } from "../services/save-to-device";
+import { fileNameFromUri, saveToPhone, shouldOfferShare } from "../services/save-to-device";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
 import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
@@ -455,15 +455,35 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // services/save-to-device.ts for why SAF is the only honest door), and
       // sharing stays one tap away inside the confirmation.
       const saved = await saveToPhone(uri, fileNameFromUri(uri));
-      // A dismissed folder picker is a cancelled action, not a failure.
-      if (saved.status === "cancelled") return;
-      if (saved.status === "unsupported") {
-        // No SAF (iOS, or an unusual ROM): the share sheet IS the system save path.
-        await shareCV(cv, uri);
-        // The document has left the app — a deliverable either way, so the one
-        // offer still belongs here (queued after this screen, never on top of
-        // the share sheet).
-        void offerGuestAccountOnce({ isGuest });
+      // Anything short of a real save must still say something — a dismissed
+      // folder picker used to return here in total silence: no file, no
+      // message, no share sheet (measured on 1.6.28). shouldOfferShare() is
+      // the single tested place that decides "not saved", so the two
+      // "download" screens can't drift apart on it.
+      if (shouldOfferShare(saved)) {
+        if (saved.status === "unsupported") {
+          // No SAF (iOS, or an unusual ROM): the share sheet IS the system save path.
+          await shareCV(cv, uri);
+          // The document has left the app — a deliverable either way, so the one
+          // offer still belongs here (queued after this screen, never on top of
+          // the share sheet).
+          void offerGuestAccountOnce({ isGuest });
+          return;
+        }
+        // "cancelled": the user dismissed the folder picker. Nothing failed,
+        // but nothing was written either — say so and offer the share sheet
+        // as the alternative save path, instead of returning in silence.
+        dialog.alert(
+          t("Not saved", "Haikuhifadhiwa"),
+          t(
+            "You didn't choose a folder, so nothing was saved. You can still share it directly.",
+            "Hukuchagua folda, kwa hivyo hakuna kilichohifadhiwa. Bado unaweza kuisambaza moja kwa moja.",
+          ),
+          [
+            { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+            { text: t("Done", "Sawa"), style: "cancel" },
+          ],
+        );
         return;
       }
       dialog.alert(

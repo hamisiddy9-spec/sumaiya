@@ -24,7 +24,7 @@ import { useLang } from "../../lib/i18n";
 import { relativeDate } from "../../lib/relative-date";
 import { dialog } from "../../components/ui";
 import { exportCVAsPDF } from "../../services/pdf-export";
-import { fileNameFromUri, saveToPhone } from "../../services/save-to-device";
+import { fileNameFromUri, saveToPhone, shouldOfferShare } from "../../services/save-to-device";
 import type { CvTemplateId } from "../../lib/cv-html";
 import { shareCV } from "../../services/share";
 import type { CvListScreenProps } from "../../navigation/types";
@@ -68,18 +68,38 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
       // stored id from an older template set.
       const uri = await exportCVAsPDF(cv, { lang, template: cv.templateId as CvTemplateId });
       const saved = await saveToPhone(uri, fileNameFromUri(uri));
-      // The folder picker was dismissed: the user chose not to save, which is
-      // not a failure and needs no dialog.
-      if (saved.status === "cancelled") return;
-      haptics.success();
-      if (saved.status === "unsupported") {
-        // No SAF here — the system share sheet is this platform's own way to
-        // save a file, so it is still the honest action to take.
-        await shareCV(cv, uri);
-        // The file has left the app: a deliverable, so the one offer stands.
-        void offerGuestAccountOnce({ isGuest });
+      // Anything short of a real save must still say something — a dismissed
+      // folder picker used to return here in total silence: no file, no
+      // message, no share sheet (measured on 1.6.28). shouldOfferShare() is
+      // the single tested place that decides "not saved", so this screen and
+      // the editor's own download button can't drift apart on it.
+      if (shouldOfferShare(saved)) {
+        if (saved.status === "unsupported") {
+          haptics.success();
+          // No SAF here — the system share sheet is this platform's own way to
+          // save a file, so it is still the honest action to take.
+          await shareCV(cv, uri);
+          // The file has left the app: a deliverable, so the one offer stands.
+          void offerGuestAccountOnce({ isGuest });
+          return;
+        }
+        // "cancelled": the user dismissed the folder picker. Nothing failed,
+        // but nothing was written either — say so and offer the share sheet
+        // as the alternative save path, instead of returning in silence.
+        dialog.alert(
+          t("Not saved", "Haikuhifadhiwa"),
+          t(
+            "You didn't choose a folder, so nothing was saved. You can still share it directly.",
+            "Hukuchagua folda, kwa hivyo hakuna kilichohifadhiwa. Bado unaweza kuisambaza moja kwa moja.",
+          ),
+          [
+            { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+            { text: t("Done", "Sawa"), style: "cancel" },
+          ],
+        );
         return;
       }
+      haptics.success();
       dialog.alert(
         t("Saved to your phone", "Imehifadhiwa kwenye simu yako"),
         t(
