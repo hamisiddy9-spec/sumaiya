@@ -31,17 +31,23 @@ import { track } from "../../lib/analytics";
  *   2. TemplateHub Premium   — the paid collection (gated by entitlement).
  *   3. Curated Core          — simple, dependable, always-free designs.
  *
- * Search collapses this into a single flat "Results" section. A family filter
- * (Sidebar / Minimal / …) applies inside every section. The grid is virtualised
- * via SectionList and stays three-across by chunking each section into rows.
+ * Search collapses this into a single flat "Results" section. A style filter
+ * (Simple / Formal / Creative / Colourful) applies inside every section. The
+ * grid is virtualised via SectionList and stays three-across by chunking each
+ * section into rows.
  */
 
-const FAMILIES: { key: string; en: string; sw: string }[] = [
-  { key: "sidebar", en: "Sidebar", sw: "Pembeni" },
-  { key: "minimal", en: "Minimal", sw: "Sahili" },
-  { key: "header", en: "Header", sw: "Kichwa" },
-  { key: "creative", en: "Creative", sw: "Ubunifu" },
-  { key: "classic", en: "Classic", sw: "Rasmi" },
+// User-facing style chips. These describe what a person can SEE in the design
+// (plain / formal / bold / coloured) — never the render engine's internal
+// layout name (`tpl.style`, unchanged below: sidebar | header | minimal |
+// creative | classic). "Colourful" is the one chip that spans two engine
+// layouts, since both read as "a coloured band" to someone looking at the
+// design rather than its markup.
+const STYLE_CHIPS: { key: string; en: string; sw: string; styles: string[] }[] = [
+  { key: "simple", en: "Simple", sw: "Rahisi", styles: ["minimal"] },
+  { key: "formal", en: "Formal", sw: "Rasmi", styles: ["classic"] },
+  { key: "creative", en: "Creative", sw: "Ubunifu", styles: ["creative"] },
+  { key: "colourful", en: "Colourful", sw: "Ya rangi", styles: ["sidebar", "header"] },
 ];
 
 const GAP = 12;
@@ -125,6 +131,8 @@ export function TemplateGallery({
 
   const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
 
+  const activeChip = useMemo(() => STYLE_CHIPS.find((f) => f.key === family) ?? null, [family]);
+
   const sections = useMemo<Section[]>(() => {
     const q = deferredQuery.trim().toLowerCase();
     const matches = (tpl: CvTemplateMeta) =>
@@ -132,7 +140,7 @@ export function TemplateGallery({
         tpl.id.includes(q) ||
         tpl.name.en.toLowerCase().includes(q) ||
         tpl.name.sw.toLowerCase().includes(q)) &&
-      (!family || tpl.style === family);
+      (!activeChip || (tpl.style ? activeChip.styles.includes(tpl.style) : false));
 
     // Search: one flat results section, no collection framing.
     if (q) {
@@ -142,10 +150,12 @@ export function TemplateGallery({
 
     const out: Section[] = [];
 
-    // 1. AI recommendation. Surfaces even while a family filter is active, but
+    // 1. AI recommendation. Surfaces even while a style filter is active, but
     //    never fights search (handled above).
     if (suggestion) {
-      const recs = suggestion.templates.filter((tpl) => !family || tpl.style === family);
+      const recs = suggestion.templates.filter(
+        (tpl) => !activeChip || (tpl.style ? activeChip.styles.includes(tpl.style) : false),
+      );
       if (recs.length) {
         out.push({
           key: "recs",
@@ -182,7 +192,7 @@ export function TemplateGallery({
     }
 
     return out;
-  }, [deferredQuery, family, suggestion, lang, t]);
+  }, [deferredQuery, activeChip, suggestion, lang, t]);
 
   const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
@@ -319,15 +329,6 @@ export function TemplateGallery({
     </Pressable>
   );
 
-  const total = useMemo(() => {
-    if (deferredQuery.trim()) {
-      // Searching: count the single flat results section.
-      return sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0);
-    }
-    // Browsing: unique designs — the recommended section overlaps its own tier.
-    return ALL_TEMPLATES.length;
-  }, [sections, deferredQuery]);
-
   return (
     <Modal visible={visible} animationType={reduce ? "none" : "slide"} onRequestClose={onClose} statusBarTranslucent>
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
@@ -344,12 +345,7 @@ export function TemplateGallery({
         >
           <View>
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>
-              {t("TemplateHub", "TemplateHub")}
-            </Text>
-            <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-              {deferredQuery.trim()
-                ? t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)
-                : t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
+              {t("Choose your CV design", "Chagua muundo wa CV yako")}
             </Text>
           </View>
           <Pressable
@@ -376,10 +372,10 @@ export function TemplateGallery({
           />
         </View>
 
-        {/* Family filter */}
+        {/* Style filter */}
         <View style={{ paddingHorizontal: PAD, marginTop: 10 }}>
           <FlatListRow>
-            {FAMILIES.map((f) =>
+            {STYLE_CHIPS.map((f) =>
               chip(f.key, lang === "sw" ? f.sw : f.en, family === f.key, () =>
                 setFamily(family === f.key ? null : f.key),
               ),
@@ -434,8 +430,10 @@ export function TemplateGallery({
                 {lang === "sw" ? previewFor.name.sw : previewFor.name.en}
               </Text>
               <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                {FAMILIES.find((f) => f.key === previewFor.style)?.[lang === "sw" ? "sw" : "en"] ?? ""} ·{" "}
-                {previewFor.tier === "premium" ? t("Premium", "Premium") : t("Free", "Bure")}
+                {STYLE_CHIPS.find((f) => previewFor.style && f.styles.includes(previewFor.style))?.[
+                  lang === "sw" ? "sw" : "en"
+                ] ?? ""}{" "}
+                · {previewFor.tier === "premium" ? t("Premium", "Premium") : t("Free", "Bure")}
               </Text>
             </View>
             <Pressable onPress={() => setPreviewFor(null)} hitSlop={12} accessibilityRole="button" accessibilityLabel={t("Close", "Funga")}>
