@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
-import { TemplateHubProLanding } from "@/components/marketing/templatehub-pro-landing";
+import { SumaiyaProLanding } from "@/components/marketing/sumaiya-pro-landing";
 import { alternatesFor } from "@/lib/seo";
 
 /**
- * TemplateHub Pro — the page sumaiya.app serves at its root.
+ * Sumaiya Pro — the page sumaiya.app serves at its root.
  *
  * Kept as a server component so the page is a static prerender like every other
  * marketing route (see the CDN caching notes in middleware.ts): the copy, the
@@ -25,13 +25,13 @@ export async function generateMetadata({
   return {
     alternates: alternatesFor("/pro", params.locale),
     title: sw
-      ? "TemplateHub Pro — miundo ya CV ya kitaalamu"
-      : "TemplateHub Pro — professional CV designs",
+      ? "Sumaiya Pro — miundo ya CV ya kitaalamu"
+      : "Sumaiya Pro — professional CV designs",
     description: sw
       ? "Chagua kutoka miundo ya CV ya kitaalamu, kisha Sumaiya anakusaidia kuandika kila sehemu na kukupatia PDF inayosomeka kwa mifumo ya kuajiri. Pakua bure kwa Android, kwa Kiswahili au Kiingereza."
       : "Pick from professionally designed CVs, then Sumaiya writes every section and hands you an ATS-ready PDF. Free on Android, in Swahili or English.",
     openGraph: {
-      title: sw ? "TemplateHub Pro" : "TemplateHub Pro",
+      title: sw ? "Sumaiya Pro" : "Sumaiya Pro",
       description: sw
         ? "Chagua muundo, Sumaiya anakusaidia kuandika, nawe unapakua PDF yako."
         : "Professional CV designs. Pick a design, Sumaiya writes it, download the PDF.",
@@ -40,11 +40,11 @@ export async function generateMetadata({
   };
 }
 
-export default function TemplateHubProPage() {
+export default function SumaiyaProPage() {
   return (
     <>
       <MarketingNav />
-      <TemplateHubProLanding />
+      <SumaiyaProLanding />
       <Footer />
     </>
   );

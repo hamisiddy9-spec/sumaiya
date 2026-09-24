@@ -112,8 +112,8 @@ export function CvPreviewCard({
     onTemplateChange?.(id);
     // Say what just happened, and to WHAT. A design tap used to close the
     // gallery and change the page with no acknowledgement at all — the owner:
-    // "after choosing templatehub template user should get some feedback that
-    // template applied to your profiile or cv".
+    // "after choosing a design the user should get some feedback that the
+    // design applied to your profiile or cv".
     toast.show(t("This design has been applied to this CV.", "Mtindo huu umewekwa kwenye CV hii."));
   };
 

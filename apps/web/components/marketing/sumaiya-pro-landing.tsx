@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * TemplateHub Pro — the front door at sumaiya.app.
+ * Sumaiya Pro — the front door at sumaiya.app.
  *
- * This is the page a visitor sees when they land on the TemplateHub domain. Its
+ * This is the page a visitor sees when they land on sumaiya.app's root. Its
  * whole job is to sell the app, so it leads with the thing people came for
  * (the designs), shows them rendered for real and not as swatches, then asks for
  * the one action that matters: install on Android.
@@ -199,7 +199,7 @@ function DesignCard({ id, scale, label }: { id: TemplateId; scale: number; label
   );
 }
 
-export function TemplateHubProLanding() {
+export function SumaiyaProLanding() {
   const lang = useLang();
   const sw = lang === "sw";
   const [showAll, setShowAll] = useState(false);
@@ -309,7 +309,7 @@ export function TemplateHubProLanding() {
           className="max-w-3xl"
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-[#DA4A1C]/30 bg-[#DA4A1C]/8 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] text-[#DA4A1C]">
-            TemplateHub Pro
+            Sumaiya Pro
           </span>
 
           <h1 className="mt-5 text-[38px] font-extrabold leading-[1.08] tracking-tight text-[#211A15] sm:text-[54px]">
