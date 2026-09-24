@@ -274,8 +274,8 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     // "letter" instead of the generic default, so tapping this feels like a
     // purpose-built cover-letter feature, not a detour through job matching.
     { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: c.warning, onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
-    // TemplateHub is a first-class surface — the gallery opens straight from here.
-    { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
+    // The design gallery is a first-class surface — it opens straight from here.
+    { icon: "layout-grid", label: t("Designs", "Miundo"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
   ];
 
   // A GUEST gets the tiles that actually work for them. Job matches and the
@@ -285,7 +285,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   // guest tracks them like everyone else. What stays: the assistant (the
   // product's own face, invited honestly when tapped), the CV check, which
   // scores on the device from the shared rules (lib/ats.ts), Applications,
-  // and TemplateHub.
+  // and the design gallery.
   const guestQuickActions = quickActions.filter((a) =>
     a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid" || a.icon === "briefcase",
   );
