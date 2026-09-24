@@ -759,7 +759,14 @@ web form silently accepts 6 digits and fails verification, or blocks the 8th key
 **Acceptance test:** a real code from a real email is accepted on the web **and** in the app; the
 test that asserts length identity fails if you change one side only.
 
-### 11. JOB FEED: EMPTY IN PRODUCTION, AND NOBODY CAN TELL WHY · P0
+### 11. JOB FEED: EMPTY IN PRODUCTION, AND NOBODY CAN TELL WHY · ~~P0~~ VERIFIED FIXED (2026-09-24)
+
+> **Verified fixed 2026-09-24** by live probe, before anyone spent a session on it:
+> `GET https://sumaiya.app/api/jobs?limit=3` returns `{"success":true,"data":[…]}` with real
+> listings (HV Electrician · Barrick · Tanzania), and the database holds **1,874** jobs with the
+> freshest ingested the same morning. `/api/feed`, `/api/mobile/jobs` and `/api/jobs/feed` are
+> 404 — `/api/jobs` is the live path. Left here as history rather than deleted, so the next
+> reader can see the symptom was real and the fix was never recorded.
 
 ```
 $ curl -s https://sumaiya.app/api/jobs      → {"success":true,"data":[]}
