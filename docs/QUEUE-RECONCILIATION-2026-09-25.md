@@ -87,3 +87,23 @@ appended to becomes a list of things people are afraid to re-check.
 Cheapest structural fix, and what this file is: after acting on an item, write the measurement
 that closed it into the queue itself. "Fixed in commit X, verified by running Y and seeing Z"
 takes one minute and saves a session.
+
+### §8 — measured attempt, and what blocked it
+
+I tried to close §8 with a real measurement rather than a structural argument: export a CV on the
+Pixel and extract the text from the file.
+
+**Blocked: the device is PIN-locked.** `adb` reports `pro.sumaiya.app/.MainActivity` as the focused
+window, but the UI hierarchy is the keyguard (`com.android.systemui:id/keyguard_message_area_container`),
+so nothing can be tapped. I do not guess or attempt device credentials, so the measurement stops
+here and this entry stays open.
+
+Two things are nonetheless established for the next attempt:
+
+- The CV export runs through `expo-print` on real HTML text (`apps/native/src/lib/cv-html.ts`
+  states it is written to work in expo-print and react-native-webview). Printing HTML text yields
+  real text; the only way that becomes image-only is a rasterising step, which `printToFileAsync`
+  does not perform. That is a sound expectation, and still not a measurement.
+- The measurement itself is two commands once the device is unlocked: export a CV, then run the
+  file through `/api/tools/extract-text` (unpdf) — if it returns the CV's text, §8 is closed; if it
+  returns `scanned_pdf`, §8 is real and the export path needs the fix.
