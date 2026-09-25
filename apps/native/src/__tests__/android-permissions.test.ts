@@ -42,9 +42,9 @@ describe("android permissions — RECORD_AUDIO removed", () => {
     const plugins = appJson.expo.plugins as unknown[];
     const cameraPlugin = plugins.find(
       (p) => Array.isArray(p) && p[0] === "expo-camera",
-    ) as [string, { recordAudioAndroid: boolean }] | undefined;
+    ) as [string, { recordAudioAndroid: boolean; barcodeScannerEnabled?: boolean }] | undefined;
     expect(cameraPlugin).toBeTruthy();
-    expect(cameraPlugin![1]).toEqual({ recordAudioAndroid: false });
+    expect(cameraPlugin![1]).toEqual({ recordAudioAndroid: false, barcodeScannerEnabled: false });
   });
 
   it("the committed AndroidManifest.xml has no RECORD_AUDIO line", () => {

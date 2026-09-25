@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import { Image, Linking, Platform, Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
@@ -16,6 +16,7 @@ import { loadProfile } from "../../lib/profile-store";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
+import { shareApk } from "../../lib/apk-share";
 import { Icon } from "../../components/icon";
 import { reportSheet } from "../../components/report-sheet";
 import type { ProfileScreenProps } from "../../navigation/types";
@@ -49,7 +50,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { lang, setLang, t } = useLang();
 
   const [notifications, setNotifications] = useState(false);
-  const [busy, setBusy] = useState<"signout" | "delete" | "cache" | null>(null);
+  const [busy, setBusy] = useState<"signout" | "delete" | "cache" | "apkshare" | null>(null);
 
   /**
    * The headshot the app asked for, on the screen where the user looks for it.
@@ -230,6 +231,24 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
     } catch {
       haptics.error();
       dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const sendApk = async () => {
+    if (busy === "apkshare") return;
+    haptics.light();
+    setBusy("apkshare");
+    try {
+      const result = await shareApk();
+      if (!result.ok) {
+        haptics.error();
+        dialog.alert(
+          t("Couldn't share the app", "Imeshindwa kutuma programu"),
+          t("Try again in a moment.", "Jaribu tena baada ya kidogo."),
+        );
+      }
     } finally {
       setBusy(null);
     }
@@ -500,7 +519,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         <View style={groupBox}>
           <ListRow
             first
-            last
+            last={Platform.OS !== "android"}
             icon="gift"
             iconColor={c.accent}
             label={t("Invite a friend", "Mwalike rafiki")}
@@ -508,6 +527,25 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={() => navigation.navigate("HomeTab", { screen: "Invite" })}
             chevron
           />
+          {/* Reaches the person NEXT to you, not just the one with data — copies
+              the installed APK and hands it to WhatsApp/Xender/Bluetooth/etc
+              directly, no download link, no data cost. Android only: there is
+              no equivalent "share my own binary" concept on iOS. */}
+          {Platform.OS === "android" ? (
+            <ListRow
+              last
+              icon="share-2"
+              iconColor={c.accent}
+              label={t("Nitumie Sumaiya", "Nitumie Sumaiya")}
+              sublabel={t(
+                "Send the app itself — no download, no data needed",
+                "Tuma programu yenyewe — hakuna kupakua, hakuna data inayohitajika",
+              )}
+              disabled={busy === "apkshare"}
+              onPress={() => void sendApk()}
+              chevron
+            />
+          ) : null}
         </View>
 
         {/* Premium */}

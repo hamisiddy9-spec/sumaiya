@@ -143,6 +143,13 @@ export interface AnalyticsEventMap {
   referral_sent: { channel: "whatsapp" | "link" | "copy" };
   referral_converted: Record<string, never>;
   referral_premium_granted: { days: number; premiumUntil: string };
+  // "Nitumie Sumaiya" — sharing the installed APK itself (not a download
+  // link), so it can move phone-to-phone with zero data cost. `code` is the
+  // sharer's per-install code, embedded in the shared filename
+  // (sumaiya-<code>.apk) so attribution survives a pure offline transfer.
+  // Native-only (apps/native/src/lib/apk-share.ts) — there is no APK to
+  // share from the web app.
+  apk_shared: { code: string };
   pwa_installed: void;
   web_push_subscribed: void;
 }
@@ -187,6 +194,7 @@ export const EVENTS = Object.freeze(
       "referral_sent",
       "referral_converted",
       "referral_premium_granted",
+      "apk_shared",
       "pwa_installed",
       "web_push_subscribed",
     ] as const satisfies readonly AnalyticsEventName[]

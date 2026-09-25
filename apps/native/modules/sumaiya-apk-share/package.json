@@ -1,0 +1,9 @@
+{
+  "name": "sumaiya-apk-share",
+  "version": "1.0.0",
+  "description": "Local Expo module: exposes this app's own installed APK path (Android only) so it can be shared phone-to-phone without a download link.",
+  "main": "index.ts",
+  "types": "index.ts",
+  "license": "UNLICENSED",
+  "private": true
+}
