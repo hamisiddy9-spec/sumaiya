@@ -24,6 +24,7 @@ import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { getDefaultTemplate } from "../lib/prefs";
 import { CvPreviewCard } from "../components/cv/cv-preview-card";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { loadDraft, saveDraft, clearDraft } from "../lib/cv-draft";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
@@ -112,6 +113,31 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const [dirty, setDirty] = useState(false);
 
   /**
+   * The autosave draft key for whatever is currently open. An existing CV
+   * (opened with `initialCvId`) is always keyed by its real id — a draft for
+   * it can never be confused with the saved document because it lives in a
+   * separate store (lib/cv-draft.ts), only in a different key namespace.
+   *
+   * A brand-new CV has no id yet worth keying by: `cvIdRef.current` is
+   * regenerated every time "New CV" is tapped, so a draft saved under it
+   * would be unreachable after the app is killed and relaunched. It stays on
+   * the fixed "new" slot (draftId === null) until the first successful Save,
+   * at which point `savedThisSessionRef` flips and further autosaves for the
+   * rest of this session move to the now-real id.
+   */
+  const savedThisSessionRef = useRef(false);
+  const currentDraftId = useCallback(
+    (): string | null => initialCvId ?? (savedThisSessionRef.current ? cvIdRef.current : null),
+    [initialCvId],
+  );
+  const [draftSafe, setDraftSafe] = useState(true);
+  // Set right after loading a persisted draft into `data`: that content is,
+  // by definition, already safely on disk, so the autosave effect below
+  // should not flash "Haijahifadhiwa" for the 600ms it takes to write back
+  // the exact bytes it just read.
+  const justRestoredRef = useRef(false);
+
+  /**
    * Unsaved-work guard for EVERY way out of this screen.
    *
    * This used to live only on the in-app "Back" link, so the Android system
@@ -142,13 +168,18 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
             style: "destructive",
             onPress: () => {
               leavingRef.current = true;
+              // The user explicitly asked to throw this away — unlike every
+              // other exit, a leftover draft here would silently resurrect
+              // content they just chose to discard the next time this
+              // document is opened.
+              void clearDraft(currentDraftId());
               leave();
             },
           },
         ],
       );
     },
-    [t],
+    [t, currentDraftId],
   );
 
   useEffect(() => {
@@ -211,6 +242,20 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           if (!cancelled && cv?.data) {
             setData(emptyData(cv.data as Partial<CVData>));
           }
+          // A draft newer than the last save (the app was killed, or the
+          // person backed out, before Save ran) wins in the editor's own
+          // buffer — the saved document on disk is untouched until Save runs.
+          const draft = await loadDraft(initialCvId);
+          if (!cancelled && draft) {
+            setData(emptyData(draft.data));
+            if (draft.template && CV_TEMPLATES.some((x) => x.id === draft.template)) {
+              setTemplate(draft.template as CvTemplateId);
+            }
+            if (draft.accent) setAccent(draft.accent);
+            justRestoredRef.current = true;
+            setDirty(true);
+            setDraftSafe(true);
+          }
         } catch {
           if (!cancelled) {
             dialog.alert(t("Couldn't open that CV", "Imeshindwa kufungua CV hiyo"), t("Check your connection and try again.", "Angalia mtandao kisha ujaribu tena."));
@@ -243,9 +288,12 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   ].join(":");
 
   useEffect(() => {
+    let cancelled = false;
     cvIdRef.current = initialCvId || uid();
     leavingRef.current = false;
+    savedThisSessionRef.current = false;
     setDirty(false);
+    setDraftSafe(true);
     setShowPreview(false);
     setSaving(false);
     setExporting(false);
@@ -256,9 +304,53 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     } else {
       setData(emptyData(initialData));
       setLoadingCv(false);
+      if (!initialData) {
+        // A brand-new, never-saved CV: restore whatever was being typed
+        // before the app was killed or the person backed out without
+        // choosing Discard.
+        void loadDraft(null).then((draft) => {
+          if (cancelled || !draft) return;
+          setData(emptyData(draft.data));
+          if (draft.template && CV_TEMPLATES.some((x) => x.id === draft.template)) {
+            setTemplate(draft.template as CvTemplateId);
+          }
+          if (draft.accent) setAccent(draft.accent);
+          justRestoredRef.current = true;
+          setDirty(true);
+          setDraftSafe(true);
+        });
+      }
     }
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openKey]);
+
+  /**
+   * Autosave. Every change that flips `dirty` (typing, a template pick, an
+   * accent change) is written to the draft store after a short pause —
+   * debounced so a fast typist doesn't hit disk on every keystroke.
+   * `draftSafe` only becomes true once THIS content actually landed, which is
+   * what lets the header pill below tell the truth instead of just echoing
+   * whether a manual Save ran.
+   */
+  useEffect(() => {
+    if (loadingCv || !dirty) return;
+    if (justRestoredRef.current) {
+      justRestoredRef.current = false;
+      return;
+    }
+    setDraftSafe(false);
+    const id = currentDraftId();
+    const timer = setTimeout(() => {
+      void saveDraft(id, { data, template, accent }).then((ok) => {
+        if (ok) setDraftSafe(true);
+      });
+    }, 600);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, template, accent, dirty, loadingCv]);
 
   const [skillInput, setSkillInput] = useState("");
 
@@ -316,9 +408,20 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
 
   const syncPill = useMemo(() => {
     if (status?.pendingCount) return { label: t(`${status.pendingCount} to sync`, `${status.pendingCount} kusawazisha`), color: c.warning, icon: "refresh-cw" };
+    // Truthful about what's actually safe, not about whether a manual Save
+    // ran: once the debounced autosave has landed, this is no longer "not
+    // saved" — a copy of exactly this content is already on the device.
+    if (dirty && draftSafe) return { label: t("Draft saved", "Rasimu imehifadhiwa"), color: c.textMuted, icon: "save" };
     if (dirty) return { label: t("Unsaved", "Haijahifadhiwa"), color: c.textMuted, icon: "edit" };
     return { label: t("Saved", "Imehifadhiwa"), color: c.success, icon: "check" };
-  }, [status?.pendingCount, dirty, c]);
+  }, [status?.pendingCount, dirty, draftSafe, c]);
+
+  /** Called from every path where `save()` actually lands the real document. */
+  function draftSettledBySave() {
+    void clearDraft(currentDraftId());
+    savedThisSessionRef.current = true;
+    setDraftSafe(true);
+  }
 
   async function save() {
     if (!data.personalInfo?.fullName?.trim()) {
@@ -376,6 +479,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // (lib/local-owner.ts).
       if (!isGuest) await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
       haptics.success();
+      draftSettledBySave();
       setDirty(false);
       // THE DELIVERABLE MOMENT. The CV exists and is safe on the phone; this is
       // the first point at which an account is worth offering, and the offer
@@ -387,6 +491,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
         // The CV is on the device and will be pushed by the next sync pass —
         // not worth interrupting the user for.
         haptics.success();
+        draftSettledBySave();
         setDirty(false);
       } else {
         // Last resort: the local cache itself is unavailable (SQLite failed to
@@ -397,6 +502,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
           if (initialCvId) await apiClient.updateCV(initialCvId, { ...cv });
           else await apiClient.createCV({ ...cv, clientId: cvIdRef.current });
           haptics.success();
+          draftSettledBySave();
           setDirty(false);
         } catch (apiError) {
           reportError(apiError, { scope: "cvEditor.save.server", cvId: cv.id });
