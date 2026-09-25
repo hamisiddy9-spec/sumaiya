@@ -107,3 +107,28 @@ Two things are nonetheless established for the next attempt:
 - The measurement itself is two commands once the device is unlocked: export a CV, then run the
   file through `/api/tools/extract-text` (unpdf) — if it returns the CV's text, §8 is closed; if it
   returns `scanned_pdf`, §8 is real and the export path needs the fix.
+
+
+## Second pass — the items after §0
+
+Same method, same surprise: the artefact is usually there, and the list is usually stale.
+
+| item | measured | verdict |
+|---|---|---|
+| §0.5 — the seam test | `apps/web/lib/signin-mechanism-parity.test.ts` exists, **8 tests pass** | **done** |
+| §0.6 — Google sign-in on the web | `apps/web/lib/auth-client.ts` present; the queue itself records it fixed 2026-09-20 | done per the queue |
+| §0.7 — mobile web vs desktop | 56 files, 12 of them tests, in the layout/motion area | work exists; scope not measured here |
+| §0.8 — profile photo with camera | 452 files mention photo, 16 tests | substantial work exists |
+| §1 — Swahili programme | 44 files, 8 tests, plus `lib/swahili-lint.test.ts` enforcing house voice | enforced, not aspirational |
+
+**The probe lesson, which cost me a wrong reading first time:** I searched for the queue's *label*
+("seam test") and found zero files, which looked like the item was untouched. The item's *artefact* —
+`signin-mechanism-parity.test.ts` — has existed with a passing suite. Searching a repo for the words
+someone used in a planning document measures the document, not the code. **Search for the thing, not
+for its name in the notes.**
+
+## One hygiene item found while looking
+
+47 untracked files under `docs/template-renders/` appear on every `git status`. They are generated
+render output, so they are now gitignored rather than left as permanent noise — anything worth
+keeping belongs in the repo deliberately, with a reason, not as a side effect of running a script.
