@@ -3,8 +3,9 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '../contexts/auth-context';
+import { ownerIdFor } from '../lib/local-owner';
+import { readChatFor, writeChatFor, clearChatFor } from '../lib/chat-scope';
 import { apiClient } from '../lib/api-client';
 import { friendlyApiError, isTransportError } from '../lib/app-errors';
 import type {
@@ -36,8 +37,6 @@ const BUBBLE_DELAY_MS = 550;
 // so it knows it has already introduced itself (otherwise the user's first
 // real reply — e.g. "Kiswahili" — makes it start over).
 
-const CHAT_KEY = 'sumaiya_chat_v1';
-
 /** What the user's own turn says about its delivery — one word, under the bubble. */
 export type DeliveryState = 'sending' | 'sent' | 'failed';
 
@@ -51,8 +50,12 @@ export interface TurnError {
 }
 
 export function useSumaiyaChat() {
-  const { user } = useAuthContext();
+  const { user, loading: authLoading } = useAuthContext();
   const { lang, t } = useLang();
+  // The transcript belongs to the person, not the handset. This is the same
+  // owner id the CV store uses (the account id, or GUEST_OWNER_ID when signed
+  // out), and it is what scopes the chat key — see lib/chat-scope.ts.
+  const ownerId = ownerIdFor(user);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,24 +82,35 @@ export function useSumaiyaChat() {
   const lastTurnRef = useRef<{ text: string; attachments: Attachment[] } | null>(null);
 
   // Restore the last conversation so a backgrounded/killed app doesn't lose it
-  // (it holds the answers "Build my CV from this chat" depends on).
+  // (it holds the answers "Build my CV from this chat" depends on). The
+  // transcript is the OWNER's (see lib/chat-scope.ts): when the owner changes,
+  // the previous owner's messages leave the screen before the new owner's are
+  // read, so they can neither flash up nor be re-saved under the other.
   useEffect(() => {
+    // No owner known yet (the session is still restoring) — never guess one.
+    // hydrated stays false, so a write can't land under the wrong key.
+    hydrated.current = false;
+    if (authLoading) return;
+    let alive = true;
+    setMessages([]);
     (async () => {
       try {
-        const raw = await AsyncStorage.getItem(CHAT_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as ChatMessage[];
-          if (Array.isArray(parsed) && parsed.length) {
-            setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })));
-          }
+        const raw = await readChatFor(ownerId);
+        if (!alive || !raw) return;
+        const parsed = JSON.parse(raw) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed.length) {
+          setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })));
         }
       } catch {
         /* fresh start is fine */
       } finally {
-        hydrated.current = true;
+        if (alive) hydrated.current = true;
       }
     })();
-  }, []);
+    return () => {
+      alive = false;
+    };
+  }, [ownerId, authLoading]);
 
   // Ask the thing that knows, once, before the user invests a message. A failed
   // probe is NOT "the provider is off" — it leaves the status unknown and the
@@ -115,14 +129,15 @@ export function useSumaiyaChat() {
     };
   }, [user]);
 
-  // Persist (debounced), last 40 turns.
+  // Persist (debounced), last 40 turns — into the OWNER's scope, never the
+  // device's.
   useEffect(() => {
     if (!hydrated.current) return;
     const id = setTimeout(() => {
-      AsyncStorage.setItem(CHAT_KEY, JSON.stringify(messages.slice(-40))).catch(() => {});
+      void writeChatFor(ownerId, messages);
     }, 400);
     return () => clearTimeout(id);
-  }, [messages]);
+  }, [messages, ownerId]);
 
   // Generate unique message ID
   const generateMessageId = useCallback((): string => {
@@ -479,8 +494,8 @@ export function useSumaiyaChat() {
     setDelivery({});
     setProgress(null);
     setQueued(null);
-    AsyncStorage.removeItem(CHAT_KEY).catch(() => {});
-  }, []);
+    void clearChatFor(ownerId);
+  }, [ownerId]);
 
   // Build a structured CV from everything the user told Sumaiya in this chat
   // (+ their saved profile). Appends a 'cv-ready' message the screen renders as
