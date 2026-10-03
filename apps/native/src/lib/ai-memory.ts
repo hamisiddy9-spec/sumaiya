@@ -25,8 +25,15 @@
  * identical prefix — see docs/sumaiya-ai-cost-sweet-spot.md. Reordering this
  * silently multiplies the bill.
  */
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { clearScoped, readScoped, writeScoped } from "./owner-scope";
 
+/**
+ * The pre-scope device key memory used to live under with NO owner in it — the
+ * same defect the chat transcript had (see lib/chat-scope.ts). Every read/write
+ * below goes through lib/owner-scope.ts, which names the owner in the key and
+ * claims this unscoped value (and a guest's) exactly once, for the owner present
+ * when it is first read.
+ */
 const KEY = "sumaiya.memory.v1";
 
 /** How many episodes of the same topic before it is allowed to become a fact. */
@@ -403,29 +410,27 @@ export function renderMemoryBlock(memory: Memory, t: Translate = englishOnly): s
 const CONSENT_KEY = "sumaiya.memory.consent.v1";
 export type Consent = "unasked" | "granted" | "declined";
 
-export async function loadConsent(): Promise<Consent> {
-  try {
-    const raw = await AsyncStorage.getItem(CONSENT_KEY);
-    return raw === "granted" || raw === "declined" ? raw : "unasked";
-  } catch {
-    return "unasked";
-  }
+/**
+ * Consent is scoped to the OWNER, like the memory it governs — one person's
+ * "granted" must never become another person's. A pre-scope or guest consent is
+ * claimed once, alongside the memory it belongs to, so an upgrading user is not
+ * re-asked while a different person on the handset still is.
+ */
+export async function loadConsent(ownerId: string): Promise<Consent> {
+  const raw = await readScoped(CONSENT_KEY, ownerId);
+  return raw === "granted" || raw === "declined" ? raw : "unasked";
 }
 
-export async function setConsent(value: Consent): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CONSENT_KEY, value);
-  } catch {
-    /* silent */
-  }
+export function setConsent(ownerId: string, value: Consent): Promise<void> {
+  return writeScoped(CONSENT_KEY, ownerId, value);
 }
 
 /* ------------------------------------------------------------ persistence --- */
 
 /** Never throws: a broken store must not take the assistant down. */
-export async function loadMemory(): Promise<Memory> {
+export async function loadMemory(ownerId: string): Promise<Memory> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await readScoped(KEY, ownerId);
     if (!raw) return EMPTY_MEMORY;
     const parsed = JSON.parse(raw) as Partial<Memory>;
     return {
@@ -439,12 +444,8 @@ export async function loadMemory(): Promise<Memory> {
   }
 }
 
-export async function saveMemory(memory: Memory): Promise<void> {
-  try {
-    await AsyncStorage.setItem(KEY, JSON.stringify(memory));
-  } catch {
-    /* silent — memory is an enhancement, never a dependency */
-  }
+export function saveMemory(ownerId: string, memory: Memory): Promise<void> {
+  return writeScoped(KEY, ownerId, JSON.stringify(memory));
 }
 
 /**
@@ -456,23 +457,20 @@ export async function saveMemory(memory: Memory): Promise<void> {
  * memory, so a refusal never breaks a screen that reads it.
  */
 export async function updateMemory(
+  ownerId: string,
   change: (memory: Memory) => Memory,
 ): Promise<{ memory: Memory; promoted: Fact[]; blocked: boolean }> {
-  const before = await loadMemory();
-  if ((await loadConsent()) !== "granted") {
+  const before = await loadMemory(ownerId);
+  if ((await loadConsent(ownerId)) !== "granted") {
     return { memory: before, promoted: [], blocked: true };
   }
   const changed = change(before);
   const { memory, promoted } = consolidate(changed);
-  if (promoted.length > 0 || memory !== before) await saveMemory(memory);
+  if (promoted.length > 0 || memory !== before) await saveMemory(ownerId, memory);
   return { memory, promoted, blocked: false };
 }
 
-/** Wipe everything she has learned. PDPA s.38 — erasure, and it is total. */
-export async function eraseMemory(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(KEY);
-  } catch {
-    /* silent */
-  }
+/** Wipe everything she has learned about ONE owner. PDPA s.38 — erasure, and it is total. */
+export function eraseMemory(ownerId: string): Promise<void> {
+  return clearScoped(KEY, ownerId);
 }

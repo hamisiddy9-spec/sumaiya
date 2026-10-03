@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
+import { useAuthContext } from "../../contexts/auth-context";
+import { ownerIdFor } from "../../lib/local-owner";
 import {
   EMPTY_MEMORY,
   episodeText,
@@ -34,22 +36,39 @@ export function MemoryScreen() {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
+  // What she knows belongs to the PERSON, not the handset (lib/ai-memory.ts):
+  // the memory is read, written and erased under this owner's key, so a second
+  // person on a shared phone is never shown the first person's conclusions.
+  const { user, loading: authLoading } = useAuthContext();
+  const ownerId = ownerIdFor(user);
   const [memory, setMemory] = useState<Memory | null>(null);
   const [consent, setConsentState] = useState<Consent>("unasked");
   const [showAllActivity, setShowAllActivity] = useState(false);
 
   useEffect(() => {
+    // Never read (or claim — lib/owner-scope.ts) while the session is still
+    // restoring: the owner is not known yet, so ownerId would be the guest
+    // bucket and a read would steal the signed-in user's memory into it.
+    if (authLoading) return;
+    let alive = true;
     (async () => {
-      const [m, k] = await Promise.all([loadMemory(), loadConsent()]);
+      const [m, k] = await Promise.all([loadMemory(ownerId), loadConsent(ownerId)]);
+      if (!alive) return;
       setMemory(m);
       setConsentState(k);
     })();
-  }, []);
+    return () => {
+      alive = false;
+    };
+  }, [ownerId, authLoading]);
 
-  const refresh = useCallback(async (next: Memory) => {
-    setMemory(next);
-    await saveMemory(next);
-  }, []);
+  const refresh = useCallback(
+    async (next: Memory) => {
+      setMemory(next);
+      await saveMemory(ownerId, next);
+    },
+    [ownerId],
+  );
 
   const onForget = useCallback(
     (key: string) => {
@@ -75,8 +94,8 @@ export function MemoryScreen() {
           style: "destructive",
           onPress: () => {
             void (async () => {
-              await eraseMemory();
-              await setConsent("declined");
+              await eraseMemory(ownerId);
+              await setConsent(ownerId, "declined");
               setConsentState("declined");
               setMemory(EMPTY_MEMORY);
               haptics.success();
@@ -85,15 +104,15 @@ export function MemoryScreen() {
         },
       ],
     );
-  }, [t]);
+  }, [t, ownerId]);
 
   const onAllow = useCallback(() => {
     haptics.light();
     void (async () => {
-      await setConsent("granted");
+      await setConsent(ownerId, "granted");
       setConsentState("granted");
     })();
-  }, []);
+  }, [ownerId]);
 
   const facts = memory?.facts ?? [];
   const episodes = memory?.episodes ?? [];
