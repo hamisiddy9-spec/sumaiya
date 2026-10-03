@@ -183,7 +183,7 @@ function CyclingCell({
         <p className="font-display font-bold text-sm text-cream mb-3 tracking-tight">{cur.name}</p>
         <Link
           href={"/editor/cv/try?template=" + cur.id}
-          className="w-full text-center text-sm font-semibold text-cream bg-ember shadow-ember-hard rounded-[10px] px-4 py-2 hover:bg-ember-hover active:shadow-ember-active active:translate-y-[2px] transition-all duration-150"
+          className="w-full text-center text-sm font-semibold text-cream bg-ember shadow-ember-hard rounded-[10px] px-4 py-3 hover:bg-ember-hover active:shadow-ember-active active:translate-y-[2px] transition-all duration-150"
         >
           {lang === "sw" ? "Tumia muundo huu" : "Use this look"}
         </Link>
@@ -975,12 +975,18 @@ export default function LandingPage() {
         </p>
         <div className="reveal space-y-3">
           {FAQS.map((f, i) => (
-            <details key={i} className="group bg-card border border-border rounded-card px-5 py-4 [&_summary::-webkit-details-marker]:hidden">
-              <summary className="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-espresso text-sm sm:text-base">
+            <details key={i} className="group bg-card border border-border rounded-card px-5 [&_summary::-webkit-details-marker]:hidden">
+              {/* The padding lives on the summary, not the details, so the whole
+                  52px band is the clickable target (WCAG 2.5.8 AA needs 24px
+                  minimum; Apple HIG wants 44). Visually identical to the old
+                  `details px-5 py-4` + bare summary — same 16px gap above the
+                  question and below the answer — but the target is now 52px
+                  instead of the 20px text line. */}
+              <summary className="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-espresso text-sm sm:text-base py-4">
                 {f.q}
                 <Icon name="chevron-down" size={18} className="text-text-muted shrink-0 transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="text-text-body text-sm leading-relaxed mt-3">{f.a}</p>
+              <p className="text-text-body text-sm leading-relaxed mt-3 pb-4">{f.a}</p>
             </details>
           ))}
         </div>
