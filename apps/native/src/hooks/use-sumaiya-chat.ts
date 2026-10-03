@@ -181,7 +181,13 @@ export function useSumaiyaChat() {
       // cache only pays out on an identical prefix, and this changes far less
       // often than the conversation does.
       let memoryBlock = "";
-      try { memoryBlock = renderMemoryBlock(await loadMemory(), t); } catch { /* ignore */ }
+      // What she already knows is the OWNER's, not the handset's (lib/ai-memory.ts).
+      // Never read it while the session is still restoring: ownerId would be the
+      // guest bucket then, and a read CLAIMS a still-unscoped memory for whoever
+      // is present (lib/owner-scope.ts) — robbing the signed-in user of theirs.
+      if (!authLoading) {
+        try { memoryBlock = renderMemoryBlock(await loadMemory(ownerId), t); } catch { /* ignore */ }
+      }
 
       // A retry re-uses the SAME turn: the words are already in the transcript
       // and are never removed, so the rail restarts on the message that is
@@ -371,7 +377,7 @@ export function useSumaiyaChat() {
         setLoading(false);
       }
     },
-    [user, generateMessageId, messages, lang, t]
+    [user, authLoading, ownerId, generateMessageId, messages, lang, t]
   );
 
   /**
