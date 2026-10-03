@@ -5,6 +5,7 @@ import type { CV, CVData } from "@sumaiya/types";
 import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { useCvs } from "../hooks/use-cvs";
 import { useAuthContext } from "../contexts/auth-context";
+import { ownerIdFor } from "../lib/local-owner";
 import { offerAccountForGate } from "../components/account-gate";
 import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
@@ -41,6 +42,10 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const sw = lang === "sw";
   const { cvs, loading, error, errorKind, loadCVs } = useCvs();
   const { user, signOut } = useAuthContext();
+  // Her memory is the OWNER's, not the handset's (lib/ai-memory.ts) — the same
+  // owner id the CV store uses, so what she learns from this check follows the
+  // person who did it and is never shown to the next person on the device.
+  const ownerId = ownerIdFor(user);
   // Same truth as Home: the reason decides the message AND the action.
   const cvError = cvErrorCopy(errorKind ?? "unknown");
   const { premium } = useEntitlements();
@@ -118,7 +123,7 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
         // could never accumulate evidence for either. `ch.id` is the stable
         // identifier; `label` stays for the sentence, where it belongs.
         const topic = `ats_${firstFailure.id.slice(0, 30)}`;
-        updateMemory((m) =>
+        updateMemory(ownerId, (m) =>
           // NOT internal. This string reaches the user by three routes, which is
           // why the acronym must not be here and why it must be written in the
           // language the person is reading:

@@ -7,6 +7,7 @@
 // this mock the suite dies at import with "[@RNC/AsyncStorage]: NativeModule:
 // AsyncStorage is null". Mocked file-locally rather than in shared setup so this
 // test is self-sufficient wherever it runs.
+jest.mock("@sumaiya/utils", () => ({ offlineStorage: {} }));
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );

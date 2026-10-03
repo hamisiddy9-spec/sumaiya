@@ -358,7 +358,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // toggle, and the template is named the way the picker names it instead of
       // by its internal id ("classic" -> "Asili"/"Classic").
       const templateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
-      updateMemory((m) =>
+      updateMemory(owner, (m) =>
         addEpisodeEvent(m, "cv_rebuilt", { key: "cv_rebuilt", params: { template: templateName } }, t),
       ).catch(() => {});
     } catch (error) {
@@ -443,7 +443,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // the English "Exported a CV using the ${template} template" that a
       // Swahili user then read in the memory screen.
       const exportedTemplateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
-      updateMemory((m) =>
+      updateMemory(owner, (m) =>
         addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: exportedTemplateName } }, t),
       ).catch(() => {});
       // The Swahili label on this button is "Pakua PDF" — so it has to SAVE the
