@@ -566,7 +566,7 @@ export default function LandingPage() {
                 Deliberately a bare string: this h1 is painted pre-hydration (see
                 `hero-reveal` above), so it must not gain markup that JS has to
                 resolve before the LCP element can render. */}
-            <h1 className="hero-reveal-2 font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
+            <h1 className="hero-reveal-2 font-display font-extrabold text-5xl md:text-6xl xl:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
               {lang === "sw" ? "CV inayolingana na kazi unayoomba." : "A CV that matches the job you are applying for."}
             </h1>
 
@@ -576,11 +576,16 @@ export default function LandingPage() {
                 endpoint. It no longer promises AI writing: the assistant's AI is dark in
                 production (`/api/ai/status` → {"configured":false,"provider":null}) and
                 401s a guest, so promising it here would promise the one thing the page
-                cannot hand over. */}
+                cannot hand over.
+
+                It no longer opens with "Mimi ni Sumaiya." — the welcome lockup directly
+                above now introduces her, in the spec's own words, and two identical
+                self-introductions three lines apart is the near-duplicate stacking the
+                siblings' home deliberately avoids. The instruction is unchanged. */}
             <p className="hero-reveal-3 text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
               {lang === "sw"
-                ? "Mimi ni Sumaiya. Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
-                : "I'm Sumaiya. Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
+                ? "Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
+                : "Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
             </p>
 
             {/* Primary action = the guest CV editor: the one thing a stranger can
