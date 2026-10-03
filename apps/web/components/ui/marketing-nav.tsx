@@ -220,7 +220,7 @@ export function MarketingNav() {
                 key={id}
                 href={pdfToolHref(id)}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 text-cream/70 hover:text-cream hover:bg-espresso-2 px-2.5 py-3 rounded-lg transition-colors"
+                className="flex items-center gap-2 text-cream/70 hover:text-cream hover:bg-espresso-2 px-2.5 py-3.5 rounded-lg transition-colors"
               >
                 <ToolIcon className="h-4 w-4 shrink-0 text-gold" strokeWidth={1.75} />
                 <span className="text-[12px] font-medium leading-tight">{translations[lang].tools[nameKey]}</span>
@@ -244,7 +244,7 @@ export function MarketingNav() {
                 <Link
                   href="/sign-in"
                   onClick={() => setMobileOpen(false)}
-                  className="text-sm font-medium text-cream/70 hover:text-cream px-3 py-2 rounded-lg transition-colors"
+                  className="text-sm font-medium text-cream/70 hover:text-cream px-3 py-3 rounded-lg transition-colors"
                 >
                   {tr.nav.signIn}
                 </Link>

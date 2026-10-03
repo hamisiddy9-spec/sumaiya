@@ -931,7 +931,7 @@ export default function LandingPage() {
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
             {lang === "sw" ? "Miundo 47 — chagua mmoja, uanze" : "47 looks — pick one and start"}
           </h2>
-          <p className="text-lg text-text-body">
+          <p className="text-lg text-text-body max-w-2xl">
             {lang === "sw"
               ? "Mfano unaoona hapa ni wa Neema, msimamizi wa ofisi Dar es Salaam. Maudhui yako hayabadiliki ukibadilisha muundo."
               : "The example you see here is Neema, an office administrator in Dar es Salaam. Your content does not change when you switch designs."}
@@ -1050,7 +1050,7 @@ export default function LandingPage() {
         <h2 className="reveal font-display font-extrabold tracking-tight text-espresso text-2xl sm:text-3xl text-center mb-3">
           {lang === "sw" ? "Maswali yanayoulizwa mara kwa mara" : "Frequently asked questions"}
         </h2>
-        <p className="reveal text-text-muted text-center text-sm mb-10">
+        <p className="reveal text-text-muted text-center text-sm mb-10 max-w-xl mx-auto">
           {lang === "sw" ? "Kila unachohitaji kujua kabla ya kuanza." : "Everything you need to know before you start."}
         </p>
         <div className="reveal space-y-3">
