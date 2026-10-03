@@ -145,19 +145,33 @@
     transform: translateY(0);
   }
   .reveal.delay-1 { transition-delay: 0.07s; }
-  .reveal.delay-2 { transition-delay: 0.14s; }
-  .reveal.delay-3 { transition-delay: 0.21s; }
-  .reveal.delay-4 { transition-delay: 0.28s; }
+  .reveal.delay-2 { transition-delay: 0.11s; }
+  .reveal.delay-3 { transition-delay: 0.15s; }
+  .reveal.delay-4 { transition-delay: 0.19s; }
 
   /* Hero copy reveal — the h1 is the LCP element, so it must NOT be hidden
      pre-hydration (opacity:0 would gate LCP behind JS + IntersectionObserver
      + a 1.6s fallback, pushing LCP past 4s on mid-range phones). Instead of
      the JS-gated .reveal, animate a pure transform rise: the text is fully
      painted on first frame, LCP counts immediately, and the entrance motion
-     is preserved. */
+     is preserved.
+
+     The hero is a STAGE, not one block: `.hero-reveal` is the base beat and
+     `.hero-reveal-1..6` stagger the lockup, eyebrow, headline, sub-head, the
+     actions, the proof line and the art — the same choreography the siblings'
+     welcoming path uses (a `Reveal` staggered by the shared motion tokens).
+     Delays are the house stagger step (MOTION.stagger.step = 40ms), not a
+     second rhythm invented here. Every step is transform-only, so the LCP
+     headline is never hidden and never waits on JavaScript. */
   .hero-reveal {
     animation: hero-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+  .hero-reveal-1 { animation-delay: 0.05s; }
+  .hero-reveal-2 { animation-delay: 0.09s; }
+  .hero-reveal-3 { animation-delay: 0.13s; }
+  .hero-reveal-4 { animation-delay: 0.17s; }
+  .hero-reveal-5 { animation-delay: 0.21s; }
+  .hero-reveal-6 { animation-delay: 0.25s; }
   @keyframes hero-rise {
     from { transform: translateY(12px); }
     to { transform: translateY(0); }
@@ -220,7 +234,13 @@
       transform: none;
       transition: none;
     }
-    .hero-reveal {
+    .hero-reveal,
+    .hero-reveal-1,
+    .hero-reveal-2,
+    .hero-reveal-3,
+    .hero-reveal-4,
+    .hero-reveal-5,
+    .hero-reveal-6 {
       animation: none;
     }
 
