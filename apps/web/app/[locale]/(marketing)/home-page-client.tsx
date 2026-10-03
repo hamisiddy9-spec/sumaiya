@@ -345,6 +345,28 @@ export default function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cardScale, setCardScale] = useState(210 / 794);
   const firstCardRef = useRef<HTMLDivElement>(null);
+
+  // Hero art scale. The floating CV stack is a fixed ~506px object (two 240px
+  // panels + gap, plus the rotateY overhang). In the 1024–1200px band the hero
+  // column is NARROWER than that, so the stack bled past the right edge and put
+  // a horizontal scrollbar on the page at 1024x768 (measured: 14px of overflow,
+  // nine elements out of bounds). The stack is already one transform, so scaling
+  // it to its own column keeps it inside the viewport at every width and in both
+  // orientations without touching the layout or the entrance beat.
+  const [heroStackScale, setHeroStackScale] = useState(1);
+  const heroArtRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = heroArtRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) setHeroStackScale(Math.min(1, w / 512));
+    };
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const nextPanelRef = useRef(0);
   const nextTemplateRef = useRef(0);
   const lang = useLang();
@@ -569,7 +591,7 @@ export default function LandingPage() {
               <a
                 href="#how-it-works"
                 onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_steps' })}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
+                className="inline-flex items-center gap-1.5 py-3 -my-3 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
                 {lang === "sw" ? "Ona hatua tatu" : "See the three steps"}
                 <Icon name="chevron-right" size={14} />
@@ -628,11 +650,11 @@ export default function LandingPage() {
           </div>
 
           {/* Right — floating CV card stack with perspective */}
-          <div className="hero-reveal-3 hidden lg:flex relative justify-center items-center min-h-[600px]"
+          <div ref={heroArtRef} className="hero-reveal-3 hidden lg:flex relative justify-center items-center min-h-[600px]"
             style={{ perspective: "1000px" }}
           >
             <div className="flex gap-4 items-start"
-              style={{ transform: "perspective(1000px) rotateY(-8deg) rotateX(2deg)" }}
+              style={{ transform: `perspective(1000px) rotateY(-8deg) rotateX(2deg) scale(${heroStackScale})`, transformOrigin: "center" }}
             >
               <div className="flex flex-col gap-4 mt-8">
                 <HeroCVPanel
@@ -786,7 +808,7 @@ export default function LandingPage() {
           </div>
 
           {/* The honest limit, said plainly rather than implied. */}
-          <p className="mt-10 text-sm text-text-muted max-w-2xl">
+          <p className="mt-10 text-sm text-text-muted max-w-lg">
             {lang === "sw"
               ? "Ukurasa wenyewe unahitaji mtandao mara moja ili ufunguke. Baada ya hapo, kuandika na kupakua hakuhitaji bando lingine."
               : "The page itself needs a connection once, to open. After that, typing and downloading do not need another bundle."}
@@ -992,7 +1014,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24 max-w-3xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24 max-w-2xl mx-auto">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -1020,7 +1042,7 @@ export default function LandingPage() {
                 {f.q}
                 <Icon name="chevron-down" size={18} className="text-text-muted shrink-0 transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="text-text-body text-sm leading-relaxed mt-3">{f.a}</p>
+              <p className="text-text-body text-sm leading-relaxed mt-3 max-w-prose">{f.a}</p>
             </details>
           ))}
         </div>

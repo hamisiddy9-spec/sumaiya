@@ -27,7 +27,7 @@ export function LangToggle() {
   return (
     <button
       onClick={toggle}
-      className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg border border-cream/20 hover:border-cream/40 hover:bg-espresso-2 transition focus-visible:outline-none focus-visible:shadow-focus-ember"
+      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2.5 min-h-11 rounded-lg border border-cream/20 hover:border-cream/40 hover:bg-espresso-2 transition focus-visible:outline-none focus-visible:shadow-focus-ember"
       title={lang === "en" ? "Switch to Swahili" : "Switch to English"}
       aria-label={lang === "en" ? "Switch to Swahili" : "Switch to English"}
     >
