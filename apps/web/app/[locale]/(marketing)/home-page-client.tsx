@@ -10,7 +10,7 @@ import { useLang } from "@/lib/i18n/context";
 import { translations } from "@/lib/i18n/translations";
 import posthog from "@/lib/analytics";
 import { Logo } from "@/components/ui/logo";
-import { SumaiyaMark } from "@/components/ui/sumaiya-mark";
+import { SumaiyaMark, type SumaiyaMarkState } from "@/components/ui/sumaiya-mark";
 import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { MarketingNav } from "@/components/ui/marketing-nav";
@@ -380,6 +380,18 @@ export default function LandingPage() {
   const [panelIdxs, setPanelIdxs] = useState([0, 1, 2, 3]);
   const [dimPanel, setDimPanel] = useState<number | null>(null);
 
+  // The welcome greeting. The house mark arrives in `thinking` — a full sweep —
+  // and settles to its idle drift, which is exactly what the siblings' welcoming
+  // path does (Faraja's onboarding: useState("thinking") → "idle" after 1600ms).
+  // This is the hero's own entrance, NOT an artificial loader: nothing on the
+  // page waits on it, and the copy paints on the first frame. Reduced Motion is
+  // honoured in globals.css — every mark animation is switched off there.
+  const [heroMarkState, setHeroMarkState] = useState<SumaiyaMarkState>("thinking");
+  useEffect(() => {
+    const id = setTimeout(() => setHeroMarkState("idle"), 1600);
+    return () => clearTimeout(id);
+  }, []);
+
   function toggleLang() {
     const next = lang === "en" ? "sw" : "en";
     document.cookie = `lang=${next};path=/;max-age=31536000`;
@@ -486,7 +498,7 @@ export default function LandingPage() {
               <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] bg-ember-tint ring-1 ring-ember/10 shadow-card lg:h-20 lg:w-20 lg:rounded-[25px]">
                 {/* size prop sets the intrinsic attrs; the responsive h/w classes
                     scale one instance, so there is only ever one animated mark. */}
-                <SumaiyaMark size={45} state="idle" className="h-9 w-9 text-ember lg:h-[45px] lg:w-[45px]" title="Sumaiya" />
+                <SumaiyaMark size={45} state={heroMarkState} className="h-9 w-9 text-ember lg:h-[45px] lg:w-[45px]" title="Sumaiya" />
               </span>
               <span className="flex flex-col leading-none">
                 <span className="font-display text-2xl font-extrabold tracking-tight text-espresso lg:text-[28px]">
