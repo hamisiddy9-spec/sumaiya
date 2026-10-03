@@ -101,7 +101,7 @@ export function MemoryScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40, gap: 18 }}
+      contentContainerStyle={{ padding: 20, paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, paddingBottom: insets.bottom + 40, gap: 18 }}
       style={{ backgroundColor: c.bg }}
     >
       {/* What this is — the same plain-language framing as the policy, because a

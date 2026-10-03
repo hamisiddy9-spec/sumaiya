@@ -169,7 +169,8 @@ export function ChatComposer({
   return (
     <View
       style={{
-        paddingHorizontal: 12,
+        paddingLeft: 12 + insets.left,
+        paddingRight: 12 + insets.right,
         paddingTop: attachments.length ? 8 : 10,
         // Do NOT add insets.bottom here. This composer lives inside a tab
         // screen, and the tab bar (AnimatedTabBar) is the bottom-most element

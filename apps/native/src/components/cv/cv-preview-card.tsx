@@ -386,7 +386,7 @@ export function CvPreviewCard({
 
       {/* L3 — full screen */}
       <Modal visible={full} animationType="slide" onRequestClose={() => setFull(false)}>
-        <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+        <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10 }}>
             <Pressable onPress={() => setFull(false)} hitSlop={10} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
               <Icon name="arrow-left" size={20} color={c.text} />

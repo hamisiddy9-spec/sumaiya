@@ -67,7 +67,13 @@ export function Screen({
       }
       contentContainerStyle={[
         {
-          paddingHorizontal: px,
+          // Left/right safe-area insets, applied exactly like the vertical ones
+          // below: 0 in portrait, non-zero in landscape on a device with a
+          // camera cutout or rounded corners, so the cutout never sits over the
+          // content edge. Padding (not margin) means a screen's background still
+          // bleeds to the physical edge while its content clears the notch.
+          paddingLeft: px + insets.left,
+          paddingRight: px + insets.right,
           paddingTop: edges.top ? insets.top + 12 : 12,
           paddingBottom: (edges.bottom ? insets.bottom : 0) + (footer ? 12 : 28),
           flexGrow: 1,
@@ -81,7 +87,8 @@ export function Screen({
     <View
       style={{
         flex: 1,
-        paddingHorizontal: px,
+        paddingLeft: px + insets.left,
+        paddingRight: px + insets.right,
         paddingTop: edges.top ? insets.top + 12 : 12,
         paddingBottom: footer ? 12 : edges.bottom ? insets.bottom : 0,
       }}
@@ -93,7 +100,8 @@ export function Screen({
   const footerNode = footer ? (
     <View
       style={{
-        paddingHorizontal: px,
+        paddingLeft: px + insets.left,
+        paddingRight: px + insets.right,
         paddingTop: 10,
         // A floor, not just the raw inset: some Android devices report a
         // near-zero bottom inset even with gesture nav, which put the
