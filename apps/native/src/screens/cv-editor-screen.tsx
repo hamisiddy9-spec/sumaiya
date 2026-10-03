@@ -606,7 +606,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </ScreenTitle>
 
       <Modal visible={showPreview} animationType="slide" onRequestClose={() => setShowPreview(false)}>
-        <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingTop: insets.top + 8, paddingBottom: 40 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right, paddingTop: insets.top + 8, paddingBottom: 40 }}>
           <Pressable
             onPress={() => setShowPreview(false)}
             hitSlop={10}

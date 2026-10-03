@@ -133,7 +133,11 @@ export function AnimatedTabBar({ state, descriptors, navigation }: BottomTabBarP
         borderTopColor: c.border,
         paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
         paddingTop: 6,
-        paddingHorizontal: 6,
+        // Left/right insets the same way as the bottom one above: the bar's
+        // background still spans the physical width, but the row of tabs clears
+        // a landscape camera cutout instead of sitting under it.
+        paddingLeft: 6 + insets.left,
+        paddingRight: 6 + insets.right,
       }}
     >
       {state.routes.map((route, index) => {

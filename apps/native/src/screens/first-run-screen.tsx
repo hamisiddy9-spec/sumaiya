@@ -527,7 +527,7 @@ export function FirstRunScreen({ onDone }: Props) {
       <View style={{ height: insets.top + 10 }} />
 
       {/* progress + skip */}
-      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 20, gap: 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "center", paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, gap: 12 }}>
         <View style={{ flex: 1 }}>
           <ProgressBar value={pct} />
         </View>
@@ -547,7 +547,7 @@ export function FirstRunScreen({ onDone }: Props) {
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardAvoidingBehavior()} keyboardVerticalOffset={insets.top + 44}>
         <ScrollView
-          contentContainerStyle={{ padding: 24, paddingTop: 28, flexGrow: 1 }}
+          contentContainerStyle={{ padding: 24, paddingLeft: 24 + insets.left, paddingRight: 24 + insets.right, paddingTop: 28, flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
@@ -571,7 +571,8 @@ export function FirstRunScreen({ onDone }: Props) {
         <Animated.View
           entering={FadeIn}
           style={{
-            paddingHorizontal: 20,
+            paddingLeft: 20 + insets.left,
+            paddingRight: 20 + insets.right,
             paddingTop: 12,
             paddingBottom: insets.bottom + 14,
             borderTopWidth: 1,
