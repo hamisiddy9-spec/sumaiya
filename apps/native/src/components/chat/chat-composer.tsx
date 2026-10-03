@@ -4,6 +4,7 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withTimi
 import { Icon } from "../icon";
 import { haptics, useMotionReduced, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { type AttachKind } from "./attach-sheet";
 import type { Attachment } from "./chat-types";
 import { CHAT_MOTION, chatEnterMs, chatExitMs, chatStaggerDelayMs } from "./chat-motion";
@@ -138,6 +139,7 @@ export function ChatComposer({
   draftNote,
 }: Props) {
   const c = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { t } = useLang();
   const reduce = useMotionReduced();
 
