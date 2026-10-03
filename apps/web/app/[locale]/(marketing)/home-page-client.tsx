@@ -19,6 +19,7 @@ import { Footer } from "@/components/ui/footer";
 import { ScanToApp } from "@/components/marketing/scan-to-app";
 import { PDF_TOOL_LINKS, pdfToolHref } from "@/lib/pdf-tools-list";
 import { getSampleCV } from "@/lib/sample-cv";
+import { WELCOME_GREETING, WELCOME_BODY, WELCOME_WORD, WELCOME_BODY_TEXT, MARK_WELL, wellTint } from "@/lib/welcome-spec";
 import { INTER_STACK } from "@/lib/fonts";
 
 // ─── Sample CV data ───────────────────────────────────────────────────────────
@@ -504,33 +505,50 @@ export default function LandingPage() {
               paints on the first frame and the entrance reads as one cascade
               rather than a single block sliding in. */}
           <div className="max-w-xl">
-            {/* ── Welcome lockup — the siblings' mark-well welcome, in Sumaiya's
-                brand. ──
-                Nuru and Faraja open their web landing with the house MARK set in
-                a soft well, under a bilingual "Karibu"; the brand is the hero and
-                the greeting is shown in both languages, Swahili first. Sumaiya's
-                landing buried its mark as a 26px glyph *inside* a paragraph, so
-                the page had no brand signature on first paint. This is the same
-                welcome, in ember on the house cream: the animated mark in an
-                ember-tint well, the wordmark, and the bilingual greeting. */}
-            <div className="hero-reveal mb-7 flex items-center gap-4">
-              {/* The house well: the siblings' MARK_WELL geometry — radius/size
-                  0.31 and mark/size 0.5625 (native mark-well-tokens.ts) — so the
-                  mark is the SAME object here as on the welcome path, in ember. */}
-              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] bg-ember-tint ring-1 ring-ember/10 shadow-card lg:h-20 lg:w-20 lg:rounded-[25px]">
-                {/* size prop sets the intrinsic attrs; the responsive h/w classes
-                    scale one instance, so there is only ever one animated mark. */}
-                <SumaiyaMark size={45} state={heroMarkState} className="h-9 w-9 text-ember lg:h-[45px] lg:w-[45px]" title="Sumaiya" />
+            {/* ── Welcome lockup — the welcoming path's first stage, copied from
+                the spec (apps/native/src/screens/onboarding-screen.tsx,
+                `WelcomeStage`) and rendered in Sumaiya's brand. ──
+                The house mark greets first, then the app's own word. ONE greeting
+                element — "Karibu", not a bilingual word-pair, and no separator dot
+                (the spec rejects the dot explicitly: "one word, the app's own
+                greeting, with the bilingual line under it doing the explaining").
+                The bilingual line follows, Swahili first, exactly as the native
+                screen writes it. Every number comes from lib/welcome-spec.ts
+                (29/800/-0.6 greeting; 15/22/290 body; the house MARK_WELL), never
+                from hand-picked Tailwind steps. */}
+            <div className="hero-reveal mb-8">
+              <span
+                className="flex items-center justify-center"
+                style={{
+                  width: MARK_WELL.size,
+                  height: MARK_WELL.size,
+                  borderRadius: MARK_WELL.radius,
+                  backgroundColor: wellTint("#DA4A1C"),
+                }}
+              >
+                <SumaiyaMark size={MARK_WELL.mark} state={heroMarkState} className="text-ember" title="Sumaiya" />
               </span>
-              <span className="flex flex-col leading-none">
-                <span className="font-display text-2xl font-extrabold tracking-tight text-espresso lg:text-[28px]">
-                  Sumaiya
-                </span>
-                <span className="mt-1.5 text-[13px] font-medium text-text-muted">
-                  {lang === "sw" ? "Karibu" : "Welcome"}
-                  <span className="text-text-muted/60"> · {lang === "sw" ? "Welcome" : "Karibu"}</span>
-                </span>
-              </span>
+              <p
+                className="mt-5 text-espresso"
+                style={{
+                  fontSize: WELCOME_GREETING.fontSize,
+                  fontWeight: WELCOME_GREETING.fontWeight,
+                  letterSpacing: WELCOME_GREETING.letterSpacing,
+                }}
+              >
+                {WELCOME_WORD}
+              </p>
+              <p
+                className="mt-2 text-text-body"
+                style={{
+                  fontSize: WELCOME_BODY.fontSize,
+                  lineHeight: `${WELCOME_BODY.lineHeight}px`,
+                  maxWidth: WELCOME_BODY.maxWidth,
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {WELCOME_BODY_TEXT}
+              </p>
             </div>
 
             {/* Eyebrow pill */}

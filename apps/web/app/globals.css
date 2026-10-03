@@ -160,18 +160,24 @@
      `.hero-reveal-1..6` stagger the lockup, eyebrow, headline, sub-head, the
      actions, the proof line and the art — the same choreography the siblings'
      welcoming path uses (a `Reveal` staggered by the shared motion tokens).
-     Delays are the house stagger step (MOTION.stagger.step = 40ms), not a
-     second rhythm invented here. Every step is transform-only, so the LCP
-     headline is never hidden and never waits on JavaScript. */
+     Every number is a canonical token, so the landing does not run a second
+     motion rhythm: duration = `MOTION.dur.slow` (300ms, "an element entering"),
+     easing = `MOTION.ease.out` (cubic-bezier(0.33,1,0.68,1) — the native
+     `Easing.out(Easing.cubic)` the welcome stage enters on), travel =
+     `MOTION.rise` (12px), and the delays are the house stagger
+     (base 30ms, step 40ms) — identical to the `.rise-1..6` helpers above.
+     Every step is transform-only, so the LCP headline is never hidden and never
+     waits on JavaScript. */
   .hero-reveal {
-    animation: hero-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: hero-rise 300ms cubic-bezier(0.33, 1, 0.68, 1) both;
+    animation-delay: 0.03s;
   }
-  .hero-reveal-1 { animation-delay: 0.05s; }
-  .hero-reveal-2 { animation-delay: 0.09s; }
-  .hero-reveal-3 { animation-delay: 0.13s; }
-  .hero-reveal-4 { animation-delay: 0.17s; }
-  .hero-reveal-5 { animation-delay: 0.21s; }
-  .hero-reveal-6 { animation-delay: 0.25s; }
+  .hero-reveal-1 { animation-delay: 0.07s; }
+  .hero-reveal-2 { animation-delay: 0.11s; }
+  .hero-reveal-3 { animation-delay: 0.15s; }
+  .hero-reveal-4 { animation-delay: 0.19s; }
+  .hero-reveal-5 { animation-delay: 0.23s; }
+  .hero-reveal-6 { animation-delay: 0.27s; }
   @keyframes hero-rise {
     from { transform: translateY(12px); }
     to { transform: translateY(0); }
