@@ -26,7 +26,8 @@
     "seam:http-only": "node scripts/seam/run.mjs --http-only",
     "seam:skip-evals": "node scripts/seam/run.mjs --skip-evals",
     "whatsapp": "npm -C apps/whatsapp start",
-    "whatsapp:test": "npm -C apps/whatsapp test"
+    "whatsapp:test": "npm -C apps/whatsapp test",
+    "assert:rls": "node scripts/assert-rls.mjs"
   },
   "devDependencies": {
     "pg": "^8.23.0",

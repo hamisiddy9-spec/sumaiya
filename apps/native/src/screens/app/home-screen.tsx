@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, useWindowDimensions, View } from "react-native";
+import { Platform, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import type { CV } from "@sumaiya/types";
 import type { JobRecommendation, MobileSignal } from "@sumaiya/api-client";
@@ -20,6 +20,7 @@ import {
   Reveal,
   SkeletonList,
   Stagger,
+  dialog,
   haptics,
   toast,
   useThemeColors,
@@ -29,6 +30,7 @@ import { TemplateGallery } from "../../components/cv/template-gallery";
 import { type CvTemplateId } from "../../lib/cv-html";
 import { getDefaultTemplate, setDefaultTemplate } from "../../lib/prefs";
 import { loadProfile } from "../../lib/profile-store";
+import { shareApk } from "../../lib/apk-share";
 import { recommendNextMoves, type NextMoves } from "../../lib/recommendations";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
 import type { HomeScreenProps } from "../../navigation/types";
@@ -201,8 +203,8 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     }
 
     out.push({
-      key: "templatehub",
-      eyebrow: "TemplateHub",
+      key: "design-gallery",
+      eyebrow: t("Designs", "Miundo"),
       title: t("A design that fits your document", "Muundo unaofaa nyaraka yako"),
       detail: t(
         "See each design's real preview, and pick the one that suits your work.",
@@ -263,6 +265,18 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     : false;
   const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
 
+  const shareTheApk = async () => {
+    haptics.light();
+    const result = await shareApk();
+    if (!result.ok) {
+      haptics.error();
+      dialog.alert(
+        t("Couldn't share the app", "Imeshindwa kutuma programu"),
+        t("Try again in a moment.", "Jaribu tena baada ya kidogo."),
+      );
+    }
+  };
+
   const quickActions = [
     { icon: "sumaiya", label: t("Sumaiya", "Sumaiya"), tint: c.accent, onPress: () => navigation.navigate("SumaiyaTab") },
     { icon: "target", label: t("Find jobs", "Tafuta kazi"), tint: "#12433D", onPress: () => navigation.navigate("Jobs") },
@@ -274,8 +288,17 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     // "letter" instead of the generic default, so tapping this feels like a
     // purpose-built cover-letter feature, not a detour through job matching.
     { icon: "mail", label: t("Cover letter", "Barua ya maombi"), tint: c.warning, onPress: () => navigation.navigate("JobApply", { want: "letter" }) },
-    // TemplateHub is a first-class surface — the gallery opens straight from here.
-    { icon: "layout-grid", label: t("TemplateHub", "TemplateHub"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
+    // The design gallery is a first-class surface — it opens straight from here.
+    { icon: "layout-grid", label: t("Designs", "Miundo"), tint: c.accent, onPress: () => { haptics.selection(); setGalleryOpen(true); } },
+    // "Nitumie Sumaiya" — share the installed APK itself, not a link, so it
+    // reaches the person next to you at zero data cost. Android only (there
+    // is no APK to share on iOS), and visible on the FIRST screen rather than
+    // buried three taps deep in Profile — this app is unreachable, not
+    // broken, and every tap between "want to share" and "shared" is a user
+    // who gives up first.
+    ...(Platform.OS === "android"
+      ? [{ icon: "share-2", label: t("Nitumie Sumaiya", "Nitumie Sumaiya"), tint: c.accent, onPress: () => void shareTheApk() }]
+      : []),
   ];
 
   // A GUEST gets the tiles that actually work for them. Job matches and the
@@ -285,9 +308,11 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   // guest tracks them like everyone else. What stays: the assistant (the
   // product's own face, invited honestly when tapped), the CV check, which
   // scores on the device from the shared rules (lib/ats.ts), Applications,
-  // and TemplateHub.
+  // the design gallery, and sharing the app itself — none of these need an
+  // account, and a guest is exactly who has no other way to move the app to
+  // someone else's phone.
   const guestQuickActions = quickActions.filter((a) =>
-    a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid" || a.icon === "briefcase",
+    a.icon === "sumaiya" || a.icon === "shield-check" || a.icon === "layout-grid" || a.icon === "briefcase" || a.icon === "share-2",
   );
   const shownQuickActions = isGuest ? guestQuickActions : quickActions;
 

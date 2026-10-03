@@ -36,3 +36,7 @@ apps/native/android/app/sumaiya-release.keystore
 
 # free-improve-loop local state (queue, logs, flags) — not committed, changes hourly
 docs/panels/.loop/
+
+# Generated render output. Regenerable; keeping it out of the tree stops it appearing
+# in every git status and in every commit that stages too broadly.
+docs/template-renders/

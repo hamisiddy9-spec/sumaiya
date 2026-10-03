@@ -24,6 +24,16 @@ import {
 const root = path.join(__dirname, "..", "..");
 const read = (p: string) => fs.readFileSync(path.join(root, p), "utf8");
 
+// The sibling web app's root — one level above `root` is the repo root, and
+// apps/web sits next to apps/native there. twa-manifest.json and vercel.json
+// are web-workspace files, but the class of bug this suite exists to catch
+// (a shipped config pointing at the wrong product's origin — see the
+// templatehub.pro AI outage this suite was extended for) is a whole-repo
+// rule, not a per-workspace one, so it is checked from here too.
+const webRoot = path.join(root, "..", "web");
+const readWeb = (p: string) => fs.readFileSync(path.join(webRoot, p), "utf8");
+const OTHER_DOMAIN = "templatehub.pro";
+
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of fs.readdirSync(path.join(root, dir), { withFileTypes: true })) {
     const rel = `${dir}/${entry.name}`;
@@ -132,6 +142,44 @@ describe("app-hosts — one source of truth", () => {
       // fail in CI. .env.example is the tracked artefact, and it is what a new
       // machine copies from.
       expect(read(".env.example")).toContain(`EXPO_PUBLIC_API_URL=${CANONICAL_ORIGIN}`);
+    });
+
+    it("apps/web/twa-manifest.json's host-shaped values are all the canonical apex", () => {
+      // This is the exact bug: v1.6.24's Android web-wrapper claimed
+      // www.templatehub.pro here, so the wrapped app loaded the OTHER
+      // product's site, not Sumaiya's own deployment.
+      const manifest = JSON.parse(readWeb("twa-manifest.json"));
+      expect(manifest.host).toBe(CANONICAL_HOST);
+      expect(manifest.iconUrl).toBe(`${CANONICAL_ORIGIN}/icon.svg`);
+      expect(manifest.maskableIconUrl).toBe(`${CANONICAL_ORIGIN}/icon-maskable-512.png`);
+      expect(manifest.webManifestUrl).toBe(`${CANONICAL_ORIGIN}/manifest.json`);
+      expect(manifest.fullScopeUrl).toBe(`${CANONICAL_ORIGIN}/`);
+      expect(JSON.stringify(manifest)).not.toContain(OTHER_DOMAIN);
+    });
+
+    it("apps/web/vercel.json names the other domain only as an inbound host match, never a destination", () => {
+      // vercel.json's `has: [{ type: "host", value: "templatehub.pro" }]`
+      // rewrites are the one legitimate appearance of the other domain here:
+      // they let visitors who still land on the retired domain get served
+      // Sumaiya's own /pro page. That is an INCOMING match, not Sumaiya's
+      // runtime reaching OUT to the other product, so it is allowed. A
+      // `destination` naming the other domain would be the opposite —
+      // Sumaiya proxying traffic away to it — and that must never appear.
+      const vercel = JSON.parse(readWeb("vercel.json"));
+      const rewrites = (vercel.rewrites ?? []) as Array<{
+        destination?: string;
+        has?: Array<{ type: string; value: string }>;
+      }>;
+      for (const rewrite of rewrites) {
+        expect(rewrite.destination ?? "").not.toContain(OTHER_DOMAIN);
+      }
+      const hostMatches = rewrites
+        .flatMap((r) => r.has ?? [])
+        .filter((h) => h.type === "host")
+        .map((h) => h.value);
+      for (const value of hostMatches) {
+        expect(value === OTHER_DOMAIN || value === `www.${OTHER_DOMAIN}`).toBe(true);
+      }
     });
 
     it("a local .env, when present, points at the canonical origin", () => {

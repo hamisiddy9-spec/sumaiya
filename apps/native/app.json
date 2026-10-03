@@ -60,7 +60,7 @@
       "./plugins/with-release-signing",
       "expo-font",
       "expo-sharing",
-      ["expo-camera", { "recordAudioAndroid": false }],
+      ["expo-camera", { "recordAudioAndroid": false, "barcodeScannerEnabled": false }],
       "expo-image-picker",
       "expo-document-picker",
       "@react-native-google-signin/google-signin",

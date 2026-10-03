@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -35,6 +36,7 @@ import { Button, ProgressBar, TextField, dialog, haptics, toast, useThemeColors 
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
+import { shareApk } from "../lib/apk-share";
 
 export const FIRST_RUN_KEY = "sumaiya_first_run_done";
 
@@ -285,6 +287,32 @@ export function FirstRunScreen({ onDone }: Props) {
             <View style={{ width: 116, height: 116, borderRadius: 36, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
               <SumaiyaMark size={62} state="idle" color={c.accent} />
             </View>
+            {/* "Nitumie Sumaiya" — visible on the FIRST screen anyone new sees,
+                not buried in Profile. Whoever handed this phone its own copy
+                of the app got it the same way: phone-to-phone, no data. */}
+            {Platform.OS === "android" ? (
+              <Pressable
+                onPress={() => {
+                  haptics.selection();
+                  void shareApk().then((result) => {
+                    if (!result.ok) {
+                      haptics.error();
+                      dialog.alert(
+                        t("Couldn't share the app", "Imeshindwa kutuma programu"),
+                        t("Try again in a moment.", "Jaribu tena baada ya kidogo."),
+                      );
+                    }
+                  });
+                }}
+                accessibilityRole="button"
+                style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 6, paddingHorizontal: 4 }}
+              >
+                <Icon name="share-2" size={14} color={c.accent} />
+                <Text style={{ color: c.accent, fontSize: 13, fontWeight: "700" }}>
+                  {t("Nitumie Sumaiya", "Nitumie Sumaiya")}
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         );
       case "name":

@@ -495,6 +495,9 @@ describe("i18n — every t(en, sw) call site in src/", () => {
       "TemplateHub",
       "TemplateHub Premium",
       "Premium",
+      // The named "share this app's APK" action — a feature name, not a
+      // sentence to translate (see apps/native/src/lib/apk-share.ts).
+      "Nitumie Sumaiya",
     ]);
     const offenders = callSites
       .filter((c) => {

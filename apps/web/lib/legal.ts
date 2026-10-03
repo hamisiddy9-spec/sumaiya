@@ -2,6 +2,14 @@
 // (Terms, Privacy, Cookies). Update this one place when the company is
 // incorporated: set `registrationStatus` to the reg number and drop the
 // "in registration" qualifier.
+//
+// `supportEmail` below is the ONE documented exception to "no first-party
+// runtime config points at another product's origin": it deliberately stays
+// on templatehub.pro because that domain runs on Google Workspace and
+// sumaiya.app has no MX records, so mail to @sumaiya.app bounces. URLs moved
+// to sumaiya.app; mailboxes did not, because there is nowhere for them to
+// move to. Do not "fix" this without first setting up mail on sumaiya.app —
+// see apps/native/src/lib/app-hosts.ts for the same note on the app side.
 
 export const COMPANY = {
   /** Product this policy set governs. */

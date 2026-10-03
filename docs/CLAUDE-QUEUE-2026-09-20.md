@@ -652,7 +652,28 @@ by the committed probe `scripts/live-state-probe.cjs`. Priorities: **P0** before
 
 ---
 
-### 7. SECURITY — the whole database is readable **and writable** with the public key · P0
+### 7. SECURITY — ~~the whole database is readable and writable with the public key~~ · VERIFIED FIXED 2026-09-25
+
+> **Verified fixed 2026-09-25, by live probe rather than by reading code.** Read-only catalogue
+> queries against production: **RLS is ON for all 33 public tables**, and `{authenticated}`
+> owner-scoped policies (`<table>_owner_select|insert|update|delete`) exist on every user-data
+> table. Then the decisive test — the **public anon key against the live REST API**:
+>
+> ```
+> READ  cv / profile / user_profile / application / app_event / job / referral_code  → 401 (42501)
+> WRITE cv  insert / patch / delete                                                  → 401 (42501)
+> a probe insert then checked as service_role → nothing persisted
+> ```
+>
+> The anon key is refused at the **GRANT** layer for both reads and writes. The vulnerability
+> described here is closed.
+>
+> **What is still true, and is the only part worth watching:** the default ACL for the `public`
+> schema gives `anon` `arwdDxtm` on tables created by `postgres`, so **a future table is born open
+> with RLS off**. `scripts/assert-rls.mjs` (163 lines) exists precisely to catch that, and
+> `.github/workflows/rls-guard.yml` wires it up — but **CI cannot run at all** while GitHub reports
+> failed account payments. Until billing is restored the guard is a script, not a guard.
+> `npm run assert:rls` runs it by hand in the meantime.
 
 **Measured, not inferred:**
 ```
@@ -759,7 +780,14 @@ web form silently accepts 6 digits and fails verification, or blocks the 8th key
 **Acceptance test:** a real code from a real email is accepted on the web **and** in the app; the
 test that asserts length identity fails if you change one side only.
 
-### 11. JOB FEED: EMPTY IN PRODUCTION, AND NOBODY CAN TELL WHY · P0
+### 11. JOB FEED: EMPTY IN PRODUCTION, AND NOBODY CAN TELL WHY · ~~P0~~ VERIFIED FIXED (2026-09-24)
+
+> **Verified fixed 2026-09-24** by live probe, before anyone spent a session on it:
+> `GET https://sumaiya.app/api/jobs?limit=3` returns `{"success":true,"data":[…]}` with real
+> listings (HV Electrician · Barrick · Tanzania), and the database holds **1,874** jobs with the
+> freshest ingested the same morning. `/api/feed`, `/api/mobile/jobs` and `/api/jobs/feed` are
+> 404 — `/api/jobs` is the live path. Left here as history rather than deleted, so the next
+> reader can see the symptom was real and the fix was never recorded.
 
 ```
 $ curl -s https://sumaiya.app/api/jobs      → {"success":true,"data":[]}

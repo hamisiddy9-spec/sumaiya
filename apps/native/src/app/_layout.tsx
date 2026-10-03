@@ -13,6 +13,7 @@ import { apiClient } from "../lib/api-client";
 import { reportError, setReporter } from "../lib/reporting";
 import { flushTelemetry, shortMessage, startTelemetry, track } from "../lib/telemetry";
 import { setAnalyticsSink } from "../lib/analytics";
+import { cleanupSharedApkCopies } from "../lib/apk-share";
 import { pushLogEntry } from "../lib/log-buffer";
 import { setScreenshotRoot } from "../lib/screenshot";
 import { AuthProvider } from "../contexts/auth-context";
@@ -83,6 +84,12 @@ export default function RootLayout() {
         void startTelemetry().then((started) => {
           if (started) track("app.open", { cold: true });
         });
+
+        // A share copy from a previous run that was never cleaned up (app
+        // killed mid-share) — sweep it now rather than leaving it in cache
+        // indefinitely. Best-effort: no keepFilename, so this only runs when
+        // nothing here could be actively mid-share.
+        void cleanupSharedApkCopies();
 
         // Everything that already goes through reportError (sync failures,
         // chat errors, boundary catches, a failed SQLite open) now also lands in
