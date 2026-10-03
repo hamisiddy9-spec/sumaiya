@@ -468,6 +468,32 @@ export default function LandingPage() {
           {/* Left copy — hero-reveal (transform-only) so the LCP h1 paints
               immediately instead of waiting for JS hydration */}
           <div className="hero-reveal max-w-xl">
+            {/* ── Welcome lockup — the siblings' mark-well welcome, in Sumaiya's
+                brand. ──
+                Nuru and Faraja open their web landing with the house MARK set in
+                a soft well, under a bilingual "Karibu"; the brand is the hero and
+                the greeting is shown in both languages, Swahili first. Sumaiya's
+                landing buried its mark as a 26px glyph *inside* a paragraph, so
+                the page had no brand signature on first paint. This is the same
+                welcome, in ember on the house cream: the animated mark in an
+                ember-tint well, the wordmark, and the bilingual greeting. */}
+            <div className="mb-7 flex items-center gap-4">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[18px] bg-ember-tint ring-1 ring-ember/10 shadow-card lg:h-20 lg:w-20 lg:rounded-[22px]">
+                {/* size prop sets the intrinsic attrs; the responsive h/w classes
+                    scale one instance, so there is only ever one animated mark. */}
+                <SumaiyaMark size={38} state="idle" className="h-8 w-8 text-ember lg:h-10 lg:w-10" title="Sumaiya" />
+              </span>
+              <span className="flex flex-col leading-none">
+                <span className="font-display text-2xl font-extrabold tracking-tight text-espresso lg:text-[28px]">
+                  Sumaiya
+                </span>
+                <span className="mt-1.5 text-[13px] font-medium text-text-muted">
+                  {lang === "sw" ? "Karibu" : "Welcome"}
+                  <span className="text-text-muted/60"> · {lang === "sw" ? "Welcome" : "Karibu"}</span>
+                </span>
+              </span>
+            </div>
+
             {/* Eyebrow pill */}
             <div className="inline-flex items-center gap-1.5 bg-ember-tint text-ember-hover font-mono text-[10px] font-semibold uppercase tracking-[2px] px-3 py-1 rounded-pill mb-6">
               <Icon name="bolt" size={12} className="text-ember" />
@@ -494,13 +520,10 @@ export default function LandingPage() {
                 production (`/api/ai/status` → {"configured":false,"provider":null}) and
                 401s a guest, so promising it here would promise the one thing the page
                 cannot hand over. */}
-            <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8 flex gap-3">
-              <SumaiyaMark size={26} state="idle" className="text-ember shrink-0 mt-1" />
-              <span>
-                {lang === "sw"
-                  ? "Mimi ni Sumaiya. Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
-                  : "I'm Sumaiya. Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
-              </span>
+            <p className="text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
+              {lang === "sw"
+                ? "Mimi ni Sumaiya. Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
+                : "I'm Sumaiya. Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
             </p>
 
             {/* Primary action = the guest CV editor: the one thing a stranger can
