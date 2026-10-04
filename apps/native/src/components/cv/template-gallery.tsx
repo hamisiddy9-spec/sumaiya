@@ -331,7 +331,7 @@ export function TemplateGallery({
 
   return (
     <Modal visible={visible} animationType={reduce ? "none" : "slide"} onRequestClose={onClose} statusBarTranslucent>
-      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
         {/* Header */}
         <Animated.View
           entering={FadeIn}
@@ -422,7 +422,7 @@ export function TemplateGallery({
       {previewFor ? (
         <Animated.View
           entering={FadeIn.duration(MOTION.dur.base)}
-          style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top }}
+          style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: PAD, paddingVertical: 12 }}>
             <View style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>

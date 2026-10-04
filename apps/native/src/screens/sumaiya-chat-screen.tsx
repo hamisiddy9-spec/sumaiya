@@ -436,7 +436,8 @@ export function SumaiyaChatScreen({ navigation, route }: SumaiyaChatScreenProps)
         style={{
           paddingTop: insets.top + 8,
           paddingBottom: 12,
-          paddingHorizontal: 16,
+          paddingLeft: 16 + insets.left,
+          paddingRight: 16 + insets.right,
           flexDirection: "row",
           alignItems: "center",
           gap: 12,

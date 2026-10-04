@@ -51,6 +51,8 @@ export function ConnectivityGate() {
         right: 0,
         paddingTop: insets.top + 4,
         paddingBottom: 6,
+        paddingLeft: insets.left,
+        paddingRight: insets.right,
         alignItems: "center",
         backgroundColor: "#211A15",
       }}

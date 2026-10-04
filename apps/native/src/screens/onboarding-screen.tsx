@@ -376,7 +376,7 @@ export function OnboardingScreen({ onComplete }: Props) {
             accessibilityRole="button"
             onPress={() => finish("skip")}
             hitSlop={10}
-            style={{ alignSelf: "flex-end", paddingHorizontal: 20, paddingVertical: 8 }}
+            style={{ alignSelf: "flex-end", paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, paddingVertical: 8 }}
           >
             <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>{t("Skip", "Ruka")}</Text>
           </Pressable>
@@ -410,7 +410,7 @@ export function OnboardingScreen({ onComplete }: Props) {
             ))}
           </Animated.ScrollView>
 
-          <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 20, gap: 22 }}>
+          <View style={{ paddingLeft: 24 + insets.left, paddingRight: 24 + insets.right, paddingBottom: insets.bottom + 20, gap: 22 }}>
             <View style={{ flexDirection: "row", justifyContent: "center", gap: 7 }}>
               {SLIDES.map((_, i) => (
                 <Dot key={i} active={i === activeDotIndex(page, SLIDES.length)} />
