@@ -5,7 +5,7 @@ Complete implementation status of the TemplateProvider architecture and CV Build
 > **Partly stale — the notes inline below say what changed.** The TemplateHub provider path
 > (*Phase 5*) was deleted in `aee08ae` (`docs/DECISIONS.md` D1); every remaining TemplateHub /
 > `templatehub-provider.ts` item in this file is historical, not shipped. The template counts
-> here (267 / 273 / 261) are also wrong: the tree has 268 `.tsx` files in
+> here (267 / 273 / 261) are also wrong: the tree has 269 `.tsx` files in
 > `components/templates/`, **266** of them template sources → **266** registry entries →
 > **260** still `family: "pending"`. Measured figures live in `apps/web/CLAUDE.md`.
 
@@ -29,7 +29,7 @@ Complete implementation status of the TemplateProvider architecture and CV Build
 ### Phase 2: Template Families & Registry
 - [x] **registry.ts** (auto-generated)
   - 266 templates with complete metadata
-  - Generated from 268 .tsx files in components/templates/ (266 sources + 2 helpers)
+  - Generated from 269 .tsx files in components/templates/ (266 sources + 2 helpers)
   - Includes family, tier, editable fields
 
 - [x] **families.ts**

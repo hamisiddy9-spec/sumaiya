@@ -57,7 +57,7 @@ deleted (`docs/DECISIONS.md` D1).
 
 **registry.ts** (auto-generated)
 - `TEMPLATE_REGISTRY` - 266 registry entries with metadata
-- Generated from 268 .tsx files (266 template sources + 2 helpers) in components/templates/
+- Generated from 269 .tsx files (266 template sources + 2 helpers) in components/templates/
 - Includes family, tier, editable fields, versions
 
 **families.ts**

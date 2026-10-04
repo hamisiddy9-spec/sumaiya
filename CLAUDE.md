@@ -36,11 +36,11 @@ packages/       8 private packages: analytics, api-client, core, design-tokens,
 ## Templates — the real numbers
 
 `apps/web/components/templates/` holds the web template sources. Measured (also re-checked
-2026-09-19 at `aee08ae`):
+2026-09-19 at `aee08ae`, re-measured 2026-10-04):
 
 | What | Count | How |
 |---|---|---|
-| `.tsx` template files in `components/templates/` | **268** | `ls -1 components/templates/*.tsx \| wc -l` |
+| `.tsx` template files in `components/templates/` | **269** | `ls -1 components/templates/*.tsx \| wc -l` |
 | Entries in `lib/templates/registry.ts` | **266** | the generator skips `template-canvas.tsx` and `template-utils.tsx` |
 | Distinct registry ids | 266 | every id unique |
 | Distinct display names | **265** | `"Herald"` appears twice |
@@ -53,7 +53,7 @@ packages/       8 private packages: analytics, api-client, core, design-tokens,
 | Mobile template index | 267 entries, 267 distinct ids | `node scripts/gen-mobile-templates.mjs` → `apps/native/src/data/templates.json` |
 
 So the three numbers that circulate in this repo are all measuring different things:
-**268** = `.tsx` files (266 of them template sources), **266** = registry entries, **273**
+**269** = `.tsx` files (266 of them template sources), **266** = registry entries, **273**
 = does not exist anywhere in the tree. 47 templates are actually offered; the rest are the
 legacy/recolor tail that still renders but is not surfaced (`getCvTemplateTier()` in
 `lib/templates/tiers.ts`).
@@ -108,7 +108,7 @@ dynamically generated from the template engine"*, imported only by
 
 ## Database
 
-Schema lives in `apps/web/lib/db/schema.ts` (Drizzle, 29 `pgTable` definitions) with SQL
+Schema lives in `apps/web/lib/db/schema.ts` (Drizzle, 30 `pgTable` definitions) with SQL
 under `apps/web/drizzle/migrations/`.
 
 **There is no `documents` table.** `cv`, `cover_letter` and `letter` still exist as
@@ -194,7 +194,7 @@ export`); the process is written up in `docs/aso-play-store.md` and
 | Claim | Reality |
 |---|---|
 | `mobile/` directory, `apps/mobile` | neither exists; the app is `apps/native` |
-| 273 templates (also: "266 or 273?" open question) | 267 `.tsx`, 266 registry entries, 47 offered |
+| 273 templates (also: "266 or 273?" open question) | 269 `.tsx`, 266 registry entries, 47 offered |
 | "8 families (267 total)" with a mapping per template | 8 stub family records; 260/266 templates are `family: "pending"`; 5 referenced ids don't exist |
 | `documents` table consolidating cv/letter/reference | no such table; `cv`, `cover_letter`, `letter` are separate |
 | `content_snapshot` field for versioning | the column is `snapshot` on `document_version` |
