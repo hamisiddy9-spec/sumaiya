@@ -33,14 +33,14 @@ apps/web/
 ├─ components/
 │  ├─ editor/               cv-editor-client, template-picker, dynamic-template-renderer,
 │  │                        template-selection-modal, ats-panel, share-cv-modal, …
-│  ├─ templates/            268 .tsx files, 266 of them template sources (the real gallery)
+│  ├─ templates/            269 .tsx files, 266 of them template sources (the real gallery)
 │  ├─ ui/                   primitives (badge.tsx, …)
 │  └─ admin/, marketing/    admin screens, landing pages
 ├─ lib/
 │  ├─ templates/            see next section — the provider layer
 │  ├─ cv-builder/           template-integration.ts, template-adapter.ts,
 │  │                        use-template-provider.ts, use-cv-export.ts
-│  ├─ db/schema.ts          Drizzle schema (29 tables)
+│  ├─ db/schema.ts          Drizzle schema (30 tables)
 │  ├─ i18n/                 translations.ts + parity tests
 │  ├─ snap-*.ts             the Snap-to-Apply surface
 │  └─ client-cv-extract.ts  browser-side OCR path (lazy tesseract.js)
@@ -72,7 +72,7 @@ colocated `.test.ts`).
 | `index.ts` | `selectProvider()` + the `templateProvider` singleton used by the UI |
 | `migrations.ts`, `database-schema.sql` | SQL kept alongside the provider layer — **the `documents` table they describe is not the live schema** |
 
-**Counts, measured 2026-09-19:** 268 `.tsx` files in `components/templates/` → **266**
+**Counts, measured 2026-09-19:** 269 `.tsx` files in `components/templates/` → **266**
 template sources (`template-canvas.tsx` and `template-utils.tsx` are helpers, not registry
 entries) → **266** registry entries → **265** distinct names (`"Herald"` is duplicated, as
 `herald` and `herald-cv`) → **47** offered (**7** premium). All 266 registry entries are
@@ -99,7 +99,7 @@ contains no `templatehub` / `TEMPLATE_HUB` string.
 
 ## Database
 
-`lib/db/schema.ts` (Drizzle) defines **29 tables**. The CV-family tables are still
+`lib/db/schema.ts` (Drizzle) defines **30 tables**. The CV-family tables are still
 separate: `cv`, `cover_letter`, `letter`, plus `document_version` for history, whose
 payload column is **`snapshot` (jsonb)**.
 
@@ -145,7 +145,7 @@ change that passes locally but breaks `web:build` will still fail the PR.
 | Active branch `chore/release-manifest-1.6.15` | active branch is **`main`**; that branch exists (local + origin) but is stale |
 | Branching from `claude/sumaiya-continuation-ife7xj`, merging `hermes/native-scan`, `hermes/native-offline`, `hermes/native-template-picker`, `hermes/native-settings-eas` | **none of those branches exist.** The real `hermes/*` branches are `hermes/ai-spine`, `hermes/crash-funnel-wip`, `hermes/native-a11y`, `hermes/native-e2e`, `hermes/native-empty-states-analytics`, `hermes/native-faq-privacy`, `hermes/web-template-dedup` |
 | `apps/mobile/` with `src/screens`, `src/components`, `src/services`, `src/state`, `src/hooks`, `eas.json`, `NATIVE_APP_SPEC.md` | the app is **`apps/native`**; it has `src/screens`, `src/components`, `src/services`, `src/hooks`, **`src/contexts`** (not `src/state`), and `eas.json` — but **no `NATIVE_APP_SPEC.md`** anywhere in the repo |
-| 273 templates (and "267 templates" in the sibling file) | 268 `.tsx` files, 266 of them template sources → 266 registry entries → 47 offered; 273 is not a real figure |
+| 273 templates (and "267 templates" in the sibling file) | 269 `.tsx` files, 266 of them template sources → 266 registry entries → 47 offered; 273 is not a real figure |
 | `documents` table "replaces fragmented cv/letter/reference tables" | no `documents` table exists; `cv`, `cover_letter`, `letter` are all still present |
 | "Content snapshot" field for versioning | `document_version.snapshot` (jsonb) |
 | `.github/workflows/verify.yml`, `apk-build.yml`, `mobile-apk-build.yml` | only `ci.yml`, `nightly-evals.yml`, `health-cron.yml` exist |
@@ -169,7 +169,7 @@ and `apps/native/eas.json` exist at the stated paths.
 
 ## Plans (NOT current facts)
 
-1. **Native app work** — the phone app is a real, built app (`apps/native`, version 1.6.23,
+1. **Native app work** — the phone app is a real, built app (`apps/native`, version 1.6.29,
    versionCode 10623) with 218 template implementations, not a 4-week greenfield spec.
    Anything still planned (camera/OCR round-trips, offline sync hardening, store
    submission) should be written as a plan in `docs/`, not asserted here.

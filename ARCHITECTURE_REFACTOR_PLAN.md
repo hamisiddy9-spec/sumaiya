@@ -1,7 +1,7 @@
 # Sumaiya × TemplateHub — Architecture Refactoring Plan
 
 **Strategic Direction:** Separate Sumaiya (Career Intelligence) from TemplateHub (Template Infrastructure)  
-**Current State:** Monolithic (273 CV templates as React components)  
+**Current State:** Monolithic (269 CV templates as React components)  
 **Target State:** Clean separation with TemplateProvider abstraction
 
 ---
@@ -9,7 +9,7 @@
 ## AUDIT FINDINGS
 
 ### Current Implementation
-- **Templates:** 273 CV templates as React .tsx files (~16K lines total)
+- **Templates:** 269 CV templates as React .tsx files (~16K lines total)
 - **Structure:** Name-based discovery (no metadata, no families, no versioning)
 - **Schema:** None (each template is a presentational component)
 - **Database:** Monolithic Sumaiya DB (no TemplateHub separation)
@@ -44,7 +44,7 @@
 - Skill gap detection
 
 **TEMPLATEHUB INFRASTRUCTURE** — Move/refactor
-- All 273 CV templates
+- All 269 CV templates
 - Cover letter templates (if any exist)
 - Business card templates (if any)
 - Reference sheet templates
@@ -151,7 +151,7 @@ const family = await provider.getTemplateFamily('executive-professional');
 ```
 templates/
 ├── provider.ts (interface)
-├── native-provider.ts (implementation for 273 local templates)
+├── native-provider.ts (implementation for 269 local templates)
 ├── schema.ts (TemplateMetadata, TemplateFamily types)
 ├── registry.ts (metadata for all 273 templates)
 └── __tests__/
@@ -231,7 +231,7 @@ export const TEMPLATE_FAMILIES: TemplateFamily[] = [
 ```
 
 ### Implication for Current Templates
-- 273 CV templates → 80-100 families (some CVs get matching cover letters, some don't)
+- 269 CV templates → 80-100 families (some CVs get matching cover letters, some don't)
 - Create stub cover letters for major CV families
 - Mark non-family templates as "legacy" or deprecate them
 
