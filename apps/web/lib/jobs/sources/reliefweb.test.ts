@@ -44,9 +44,35 @@ const TZ_ITEM = `
       </description>
     </item>`;
 
+/**
+ * The same item, with a closing date that is ALWAYS in the future.
+ *
+ * `TZ_ITEM` above faithfully records a real posting whose closing date was 5 Oct 2026. The adapter
+ * then drops a posting whose closing date has passed — deliberately, "archive, not supply" — so from
+ * 6 Oct 2026 every test that ran that fixture through `fetch()` began failing with an empty array,
+ * and `main` went red **on a date**, with no code change behind it.
+ *
+ * Pinning a later literal would only re-arm the same bomb for the next month. The date is derived
+ * from now instead, so the fixture cannot expire.
+ *
+ * `TZ_ITEM` keeps its literal on purpose: the pure-function tests above assert on that exact text,
+ * and no staleness gate applies to them.
+ *
+ * Declared BEFORE `FEED` on purpose — `FEED` is a module-load-time template literal, so a `const`
+ * below it would be in its temporal dead zone and the whole file would fail to import.
+ */
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+const CLOSING_AT = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days out, inside the feed's lead time
+const CLOSING = `${CLOSING_AT.getUTCDate()} ${MONTHS[CLOSING_AT.getUTCMonth()]} ${CLOSING_AT.getUTCFullYear()}`;
+/** The deadline the adapter must report for that fixture: the closing date, at UTC midnight. */
+const CLOSING_ISO = `${CLOSING_AT.getUTCFullYear()}-${String(CLOSING_AT.getUTCMonth() + 1).padStart(2, "0")}-${String(
+  CLOSING_AT.getUTCDate(),
+).padStart(2, "0")}T00:00:00.000Z`;
+const FUTURE_ITEM = TZ_ITEM.replace("Closing date: 5 Oct 2026", `Closing date: ${CLOSING}`);
+
 const FEED = `<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel>
   <title>ReliefWeb - United Republic of Tanzania (Tanzania) Jobs</title>
-  ${TZ_ITEM}
+  ${FUTURE_ITEM}
 </channel></rss>`;
 
 const withFetch = async <T>(xml: string, fn: () => Promise<T>): Promise<T> => {
@@ -114,7 +140,9 @@ describe("mapReliefWebItem", () => {
     expect(job.location).toBe("Ethiopia, Kenya, United Republic of Tanzania, Zimbabwe");
     expect(job.externalId).toBe("4230470");
     expect(job.applyUrl).toBe("https://reliefweb.int/job/4230470/network-development-associate-africa");
-    expect(job.applicationDeadline?.toISOString()).toBe("2026-10-05T00:00:00.000Z");
+    // The deadline is the fixture's own closing date — taken from CLOSING above rather than a
+    // literal, so this assertion cannot expire the way "2026-10-05" did.
+    expect(job.applicationDeadline?.toISOString()).toBe(CLOSING_ISO);
     expect(job.postedAt?.toISOString()).toBe("2026-09-18T12:26:56.000Z");
   });
 
@@ -150,7 +178,11 @@ describe("mapReliefWebItem", () => {
   });
 
   it("drops a posting whose closing date has already passed", async () => {
-    const closed = FEED.replace("Closing date: 5 Oct 2026", "Closing date: 1 Jan 2020");
+    // Substitute the fixture's OWN closing date (CLOSING) — replacing a hardcoded literal here
+    // silently stopped matching once the fixture became dynamic, and the test then asserted
+    // against an unmodified, still-live posting.
+    const closed = FEED.replace(`Closing date: ${CLOSING}`, "Closing date: 1 Jan 2020");
+    expect(closed).not.toBe(FEED); // the substitution must actually have happened
     const jobs = await withFetch(closed, () => reliefWebAdapter.fetch());
     expect(jobs).toEqual([]);
   });
