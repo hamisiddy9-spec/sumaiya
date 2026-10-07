@@ -12,7 +12,7 @@
  * apps/native/src/lib/cv-engine/sections.test.ts guards the section keys.
  */
 
-import type { DesignTokens } from "./tokens";
+import { SMALL_PRINT_FLOOR_PX, type DesignTokens } from "./tokens";
 import type { EngineView, VExperience, VPersonal } from "./view";
 import type { ExperienceVariant, Lang, SectionStyle, SkillDisplay } from "./types";
 import { dateRange, el, esc, fmtDate, join, tx } from "./html";
@@ -161,7 +161,7 @@ export function sectionLabel(
           justifyContent: "center",
           flexShrink: 0,
         },
-        `<span style="font-size:8px;font-weight:800;color:${tokens.color.onAccent};font-family:${tokens.fontFamily}">§</span>`,
+        `<span style="font-size:${SMALL_PRINT_FLOOR_PX}px;font-weight:800;color:${tokens.color.onAccent};font-family:${tokens.fontFamily}">§</span>`,
       ) + tx(label, { ...base, color: tokens.color.text }),
     );
   }
@@ -267,6 +267,7 @@ export function experienceSection(
             backgroundColor: tokens.color.faint,
             borderRadius: 5,
             borderLeft: `3px solid ${tokens.color.accent}`,
+            breakInside: "avoid",
           },
           el(
             "div",
@@ -297,7 +298,7 @@ export function experienceSection(
       .map((e) =>
         el(
           "div",
-          {},
+          { breakInside: "avoid" },
           el(
             "div",
             { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 6 },
@@ -372,7 +373,7 @@ export function experienceSection(
               ? `<p style="font-size:${tokens.font.body}px;color:${tokens.color.muted};margin:4px 0 0;line-height:${tokens.space.line};font-family:${tokens.fontFamily}">${esc(e.description)}</p>`
               : ""),
         );
-        return el("div", { display: "flex", gap: 0 }, dateCol + track + content);
+        return el("div", { display: "flex", gap: 0, breakInside: "avoid" }, dateCol + track + content);
       })
       .join("");
     return el(
@@ -397,6 +398,7 @@ export function experienceSection(
             padding: "7px 10px",
             backgroundColor: idx % 2 === 0 ? "#fff" : tokens.color.faint,
             gap: 8,
+            breakInside: "avoid",
           },
           `<div><span style="font-size:${tokens.font.roleTitle}px;font-weight:700;color:${tokens.color.text};font-family:${tokens.fontFamily}">${esc(e.position)}</span>` +
             `<span style="font-size:${tokens.font.orgName}px;color:${tokens.color.sub};font-family:${tokens.fontFamily}">${
@@ -465,7 +467,7 @@ export function experienceSection(
             ? `<p style="font-size:${tokens.font.body}px;color:${tokens.color.muted};margin:4px 0 0;line-height:${tokens.space.line};font-family:${tokens.fontFamily};${CLAMP_4}">${esc(e.description)}</p>`
             : ""),
       );
-      return el("div", { display: "flex", gap: showTimeline ? 10 : 0 }, gutter + content);
+      return el("div", { display: "flex", gap: showTimeline ? 10 : 0, breakInside: "avoid" }, gutter + content);
     })
     .join("");
 
@@ -491,7 +493,7 @@ export function educationSection(
     .map((e) =>
       el(
         "div",
-        { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 },
+        { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6, breakInside: "avoid" },
         `<div style="flex:1;min-width:0"><div style="font-size:${tokens.font.roleTitle}px;font-weight:700;color:${tokens.color.text};font-family:${tokens.fontFamily}">${esc(
           e.degree,
         )}${e.field ? esc(` ${lang === "sw" ? "katika" : "in"} ${e.field}`) : ""}</div>` +
@@ -721,7 +723,7 @@ export function certificationsSection(
     .map((c) =>
       el(
         "div",
-        {},
+        { breakInside: "avoid" },
         `<div style="font-size:${tokens.font.body}px;font-weight:600;color:${tokens.color.text};font-family:${tokens.fontFamily}">${esc(c.name)}</div>` +
           `<div style="font-size:${tokens.font.meta}px;color:${tokens.color.muted};font-family:${tokens.fontFamily}">${esc(c.issuer)}${
             c.date ? esc(` · ${fmtDate(c.date, lang)}`) : ""
@@ -771,7 +773,7 @@ export function projectsSection(
         : "";
       return el(
         "div",
-        {},
+        { breakInside: "avoid" },
         el(
           "div",
           { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 },
@@ -812,6 +814,7 @@ export function refereesSection(
           backgroundColor: tokens.color.faint,
           borderRadius: 4,
           borderLeft: `2px solid ${tokens.color.accent}50`,
+          breakInside: "avoid",
         },
         `<div style="font-size:${tokens.font.body}px;font-weight:600;color:${tokens.color.text};font-family:${tokens.fontFamily}">${esc(r.name)}</div>` +
           `<div style="font-size:${tokens.font.meta}px;color:${tokens.color.sub};font-family:${tokens.fontFamily}">${esc(r.title)}${

@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     alternates: alternatesFor("/about", params.locale),
     title: sw ? "Kuhusu Sisi" : "About",
     description: sw
-      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazopita vichujio vya waajiri, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa kazi, kwa Kiingereza au Kiswahili."
+      ? "Sumaiya huwasaidia watafuta-ajira kujenga CV za kitaalamu zinazosomeka kwa mifumo ya kuajiri, barua za maombi, kadi za biashara na barua rasmi — kwa dakika, kwa msaidizi wa kazi, kwa Kiingereza au Kiswahili."
       : "Sumaiya helps job seekers build professional, ATS-ready CVs, cover letters, business cards and formal letters — in minutes, with a career assistant, in English or Kiswahili.",
   };
 }

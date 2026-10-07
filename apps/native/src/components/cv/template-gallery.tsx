@@ -1,5 +1,5 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
+import { Image, Modal, Pressable, ScrollView, SectionList, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { ALL_TEMPLATES, type CvTemplateId, type CvTemplateMeta } from "../../lib/cv-html";
@@ -7,10 +7,19 @@ import { useEntitlements } from "../../lib/entitlements";
 import { loadProfile } from "../../lib/profile-store";
 import { fieldLabel, suggestTemplates } from "../../lib/template-suggestions";
 import { useLang } from "../../lib/i18n";
+import {
+  getCachedThumbUri,
+  requestThumbRender,
+  subscribeThumbReady,
+  thumbCellHeight,
+  warmThumbCacheFromDisk,
+} from "../../lib/template-thumb-cache";
 import { Icon } from "../icon";
 import { PremiumSheet } from "../premium-sheet";
 import { haptics, enterDurationMs, MOTION, TextField, useMotionReduced, useThemeColors } from "../ui";
 import { RealTemplateThumb } from "./real-template-thumb";
+import { TemplateThumb } from "./template-thumb";
+import { TemplateThumbRenderer } from "./template-thumb-renderer";
 import { track } from "../../lib/analytics";
 
 /**
@@ -22,17 +31,23 @@ import { track } from "../../lib/analytics";
  *   2. TemplateHub Premium   — the paid collection (gated by entitlement).
  *   3. Curated Core          — simple, dependable, always-free designs.
  *
- * Search collapses this into a single flat "Results" section. A family filter
- * (Sidebar / Minimal / …) applies inside every section. The grid is virtualised
- * via SectionList and stays three-across by chunking each section into rows.
+ * Search collapses this into a single flat "Results" section. A style filter
+ * (Simple / Formal / Creative / Colourful) applies inside every section. The
+ * grid is virtualised via SectionList and stays three-across by chunking each
+ * section into rows.
  */
 
-const FAMILIES: { key: string; en: string; sw: string }[] = [
-  { key: "sidebar", en: "Sidebar", sw: "Pembeni" },
-  { key: "minimal", en: "Minimal", sw: "Sahili" },
-  { key: "header", en: "Header", sw: "Kichwa" },
-  { key: "creative", en: "Creative", sw: "Ubunifu" },
-  { key: "classic", en: "Classic", sw: "Rasmi" },
+// User-facing style chips. These describe what a person can SEE in the design
+// (plain / formal / bold / coloured) — never the render engine's internal
+// layout name (`tpl.style`, unchanged below: sidebar | header | minimal |
+// creative | classic). "Colourful" is the one chip that spans two engine
+// layouts, since both read as "a coloured band" to someone looking at the
+// design rather than its markup.
+const STYLE_CHIPS: { key: string; en: string; sw: string; styles: string[] }[] = [
+  { key: "simple", en: "Simple", sw: "Rahisi", styles: ["minimal"] },
+  { key: "formal", en: "Formal", sw: "Rasmi", styles: ["classic"] },
+  { key: "creative", en: "Creative", sw: "Ubunifu", styles: ["creative"] },
+  { key: "colourful", en: "Colourful", sw: "Ya rangi", styles: ["sidebar", "header"] },
 ];
 
 const GAP = 12;
@@ -102,7 +117,21 @@ export function TemplateGallery({
     if (visible) track("template_viewed");
   }, [visible]);
 
+  // Real thumbnails render lazily, one at a time, off-screen (see
+  // template-thumb-cache.ts / template-thumb-renderer.tsx). `thumbTick` forces
+  // a re-render of the currently mounted cells each time one finishes, so a
+  // cell swaps from the schematic placeholder to the real design as soon as
+  // it's ready, without waiting for the next scroll.
+  const [thumbTick, setThumbTick] = useState(0);
+  useEffect(() => {
+    if (!visible) return;
+    void warmThumbCacheFromDisk().then(() => setThumbTick((n) => n + 1));
+    return subscribeThumbReady(() => setThumbTick((n) => n + 1));
+  }, [visible]);
+
   const suggestion = useMemo(() => suggestTemplates(profileText, 6), [profileText]);
+
+  const activeChip = useMemo(() => STYLE_CHIPS.find((f) => f.key === family) ?? null, [family]);
 
   const sections = useMemo<Section[]>(() => {
     const q = deferredQuery.trim().toLowerCase();
@@ -111,7 +140,7 @@ export function TemplateGallery({
         tpl.id.includes(q) ||
         tpl.name.en.toLowerCase().includes(q) ||
         tpl.name.sw.toLowerCase().includes(q)) &&
-      (!family || tpl.style === family);
+      (!activeChip || (tpl.style ? activeChip.styles.includes(tpl.style) : false));
 
     // Search: one flat results section, no collection framing.
     if (q) {
@@ -121,10 +150,12 @@ export function TemplateGallery({
 
     const out: Section[] = [];
 
-    // 1. AI recommendation. Surfaces even while a family filter is active, but
+    // 1. AI recommendation. Surfaces even while a style filter is active, but
     //    never fights search (handled above).
     if (suggestion) {
-      const recs = suggestion.templates.filter((tpl) => !family || tpl.style === family);
+      const recs = suggestion.templates.filter(
+        (tpl) => !activeChip || (tpl.style ? activeChip.styles.includes(tpl.style) : false),
+      );
       if (recs.length) {
         out.push({
           key: "recs",
@@ -161,7 +192,7 @@ export function TemplateGallery({
     }
 
     return out;
-  }, [deferredQuery, family, suggestion, lang, t]);
+  }, [deferredQuery, activeChip, suggestion, lang, t]);
 
   const cell = Math.floor((width - PAD * 2 - GAP * (COLUMNS - 1)) / COLUMNS);
 
@@ -187,6 +218,14 @@ export function TemplateGallery({
     (item: CvTemplateMeta, idx: number) => {
       const locked = item.tier === "premium" && !premium;
       const active = item.id === selected;
+      const thumbW = cell - 12;
+      const thumbH = thumbCellHeight(thumbW);
+      const cachedUri = getCachedThumbUri({ id: item.id, lang, width: thumbW, height: thumbH });
+      // The real design once it's cached; the schematic placeholder — never a
+      // WebView here — while the background renderer works through the queue.
+      // Idempotent: the cache module drops a request that's already cached or
+      // already queued, so calling this on every render is cheap.
+      if (!cachedUri) requestThumbRender({ id: item.id, lang, width: thumbW, height: thumbH, accent: c.accent });
       return (
         <Pressable
           key={item.id}
@@ -204,7 +243,15 @@ export function TemplateGallery({
               opacity: locked ? 0.55 : 1,
             }}
           >
-            <RealTemplateThumb id={item.id} accent={c.accent} lang={lang} width={cell - 12} />
+            {cachedUri ? (
+              <Image
+                source={{ uri: cachedUri }}
+                style={{ width: thumbW, height: thumbH, borderRadius: 4, backgroundColor: "#fff" }}
+                resizeMode="cover"
+              />
+            ) : (
+              <TemplateThumb id={item.id} accent={c.accent} width={thumbW} />
+            )}
           </View>
           <Text
             numberOfLines={1}
@@ -223,7 +270,9 @@ export function TemplateGallery({
         </Pressable>
       );
     },
-    [cell, selected, premium, lang, pick, c, t],
+    // thumbTick isn't read in the body — it's a pure re-render signal so a
+    // cell swaps in its cached image as soon as the background render finishes.
+    [cell, selected, premium, lang, pick, c, t, thumbTick],
   );
 
   const renderRow = useCallback(
@@ -280,18 +329,9 @@ export function TemplateGallery({
     </Pressable>
   );
 
-  const total = useMemo(() => {
-    if (deferredQuery.trim()) {
-      // Searching: count the single flat results section.
-      return sections.reduce((n, s) => n + s.data.reduce((m, r) => m + r.length, 0), 0);
-    }
-    // Browsing: unique designs — the recommended section overlaps its own tier.
-    return ALL_TEMPLATES.length;
-  }, [sections, deferredQuery]);
-
   return (
     <Modal visible={visible} animationType={reduce ? "none" : "slide"} onRequestClose={onClose} statusBarTranslucent>
-      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
         {/* Header */}
         <Animated.View
           entering={FadeIn}
@@ -305,12 +345,7 @@ export function TemplateGallery({
         >
           <View>
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>
-              {t("TemplateHub", "TemplateHub")}
-            </Text>
-            <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-              {deferredQuery.trim()
-                ? t(`${total} of ${ALL_TEMPLATES.length} designs`, `${total} kati ya ${ALL_TEMPLATES.length} miundo`)
-                : t(`${ALL_TEMPLATES.length} designs`, `Miundo ${ALL_TEMPLATES.length}`)}
+              {t("Choose your CV design", "Chagua muundo wa CV yako")}
             </Text>
           </View>
           <Pressable
@@ -337,10 +372,10 @@ export function TemplateGallery({
           />
         </View>
 
-        {/* Family filter */}
+        {/* Style filter */}
         <View style={{ paddingHorizontal: PAD, marginTop: 10 }}>
           <FlatListRow>
-            {FAMILIES.map((f) =>
+            {STYLE_CHIPS.map((f) =>
               chip(f.key, lang === "sw" ? f.sw : f.en, family === f.key, () =>
                 setFamily(family === f.key ? null : f.key),
               ),
@@ -348,11 +383,13 @@ export function TemplateGallery({
           </FlatListRow>
         </View>
 
-        {/* Collections grid. Every cell is a real WebView rendering a full A4
-            page (see real-template-thumb.tsx). The old defaults mounted 12 ROWS =
-            36 WebViews before the gallery was usable — which is most of what
-            "not smooth" was. Mount two rows, then grow the window as the user
-            scrolls instead of all at once. */}
+        {/* Collections grid. Each cell shows a cached real render once one
+            exists (see template-thumb-cache.ts), and the pure-RN schematic
+            thumbnail (template-thumb.tsx) until then — a real WebView per
+            VISIBLE cell stuttered scrolling on low-end Android, which is why
+            rendering happens off-screen, one template at a time, in
+            <TemplateThumbRenderer/> below. Mount two rows, then grow the
+            window as the user scrolls instead of all at once. */}
         <SectionList
           sections={sections}
           keyExtractor={(item, idx) => (item[0]?.id ?? "row") + idx}
@@ -374,6 +411,10 @@ export function TemplateGallery({
             </View>
           }
         />
+
+        {/* Off-screen, one-at-a-time real-render cache warmer for the grid
+            above — see the SectionList comment and template-thumb-cache.ts. */}
+        <TemplateThumbRenderer />
       </View>
 
       {/* Full-screen preview — tap a thumbnail to see the design large, then
@@ -381,7 +422,7 @@ export function TemplateGallery({
       {previewFor ? (
         <Animated.View
           entering={FadeIn.duration(MOTION.dur.base)}
-          style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top }}
+          style={{ position: "absolute", inset: 0, backgroundColor: c.bg, zIndex: 20, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: PAD, paddingVertical: 12 }}>
             <View style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
@@ -389,8 +430,10 @@ export function TemplateGallery({
                 {lang === "sw" ? previewFor.name.sw : previewFor.name.en}
               </Text>
               <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                {FAMILIES.find((f) => f.key === previewFor.style)?.[lang === "sw" ? "sw" : "en"] ?? ""} ·{" "}
-                {previewFor.tier === "premium" ? t("Premium", "Premium") : t("Free", "Bure")}
+                {STYLE_CHIPS.find((f) => previewFor.style && f.styles.includes(previewFor.style))?.[
+                  lang === "sw" ? "sw" : "en"
+                ] ?? ""}{" "}
+                · {previewFor.tier === "premium" ? t("Premium", "Premium") : t("Free", "Bure")}
               </Text>
             </View>
             <Pressable onPress={() => setPreviewFor(null)} hitSlop={12} accessibilityRole="button" accessibilityLabel={t("Close", "Funga")}>

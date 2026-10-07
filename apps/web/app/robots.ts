@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { CANONICAL_ORIGIN } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -10,6 +11,8 @@ export default function robots(): MetadataRoute.Robots {
       allow: ["/", "/editor/cv/try", "/editor/cover-letter/try", "/editor/business-card/try", "/editor/letter/try"],
       disallow: ["/api/", "/dashboard/", "/editor/", "/settings/", "/sign-in", "/verify"],
     },
-    sitemap: `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/sitemap.xml`,
+    // MUST be absolute — the spec requires it and an empty NEXT_PUBLIC_APP_URL had been
+    // shipping `Sitemap: /sitemap.xml` (see CANONICAL_ORIGIN for the whole story).
+    sitemap: `${CANONICAL_ORIGIN}/sitemap.xml`,
   };
 }

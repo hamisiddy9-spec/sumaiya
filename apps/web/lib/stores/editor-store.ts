@@ -3,7 +3,7 @@ import { immer } from "zustand/middleware/immer";
 import { nanoid } from "nanoid";
 import { createEmptyCVData, parseCVData, isTemplateId, type CVData, type TemplateId, type PersonalInfo, type ExperienceEntry, type EducationEntry, type SkillEntry, type LanguageEntry, type CertificationEntry, type RefereeEntry, type ProjectEntry } from "@/types";
 import type { CV } from "@/lib/db/schema";
-import { exportElementToPdf, buildCvText } from "@/lib/pdf";
+import { exportElementToPdf, buildCvText, ExportOverflowError, exportOverflowMessage } from "@/lib/pdf";
 import type { Lang } from "@/lib/i18n/translations";
 
 // Bounded auto-retry for a failed autosave. A transient network blip used to
@@ -22,6 +22,16 @@ interface EditorState {
   fontFamily: string;
   isSaving: boolean;
   saveError: string | null;
+  /**
+   * WHAT the last error was. `saveError` is set by two different failures — a
+   * failed document save (saveCv) and a failed PDF/export (exportPdf) — and the
+   * editor now tells the user different truths about them: a failed save means
+   * "your work is NOT saved yet", while a failed export means the document is
+   * fine and the FILE could not be produced. Rendering the unsaved banner for an
+   * export failure would be a new lie, so the caller must be able to tell them
+   * apart. null = no error.
+   */
+  saveErrorKind: "save" | "export" | null;
   lastSaved?: Date;
   activeSection: string;
   accessToken: string;
@@ -90,6 +100,7 @@ export const useEditorStore = create<EditorState>()(
     fontFamily: "Inter",
     isSaving: false,
     saveError: null,
+    saveErrorKind: null,
     activeSection: "personal",
     accessToken: "",
 
@@ -238,7 +249,7 @@ export const useEditorStore = create<EditorState>()(
       // A new save supersedes any pending auto-retry from a prior failure.
       if (saveRetryTimer) { clearTimeout(saveRetryTimer); saveRetryTimer = undefined; }
       const { cv: cvData, title, templateId, primaryColor, fontFamily, accessToken } = get();
-      set((s) => { s.isSaving = true; s.saveError = null; });
+      set((s) => { s.isSaving = true; s.saveError = null; s.saveErrorKind = null; });
       try {
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (accessToken) headers["Authorization"] = `Bearer ${accessToken}`;
@@ -255,7 +266,10 @@ export const useEditorStore = create<EditorState>()(
         saveAttempts = 0;
         set((s) => { s.lastSaved = new Date(); });
       } catch (err) {
-        set((s) => { s.saveError = err instanceof Error ? err.message : "Failed to save"; });
+        set((s) => {
+          s.saveError = err instanceof Error ? err.message : "Failed to save";
+          s.saveErrorKind = "save";
+        });
         // Auto-retry a live (non-unload) save a few times with backoff before
         // falling back to the passive tap-to-retry affordance. Unload flushes
         // (keepalive) aren't retried — the component is already tearing down.
@@ -263,6 +277,13 @@ export const useEditorStore = create<EditorState>()(
           const delay = SAVE_RETRY_BACKOFF_MS[saveAttempts];
           saveAttempts += 1;
           saveRetryTimer = setTimeout(() => { saveRetryTimer = undefined; get().saveCv(id); }, delay);
+        }
+        // Backoff runs out in ~17s; a device that is simply OFFLINE can stay
+        // offline for minutes. The editor tells the user "we'll save again once
+        // you're back online", so that promise has to be kept: re-save on the
+        // browser's own `online` event. `once` keeps this from accumulating.
+        if (!opts?.keepalive && typeof window !== "undefined" && window.navigator?.onLine === false) {
+          window.addEventListener("online", () => { get().saveCv(id); }, { once: true });
         }
       } finally {
         set((s) => { s.isSaving = false; });
@@ -283,10 +304,23 @@ export const useEditorStore = create<EditorState>()(
           filename: `${safeName}.pdf`,
           // Embed an invisible, ATS-readable text layer from the structured CV.
           textLayer: buildCvText(cv, lang),
+          // NEVER deliver a page-box-clipped CV: the A4 sheet hides its own
+          // overflow, so an over-long CV used to export ONE page cut off
+          // mid-sentence while the invisible text layer still carried all 7,347
+          // characters — the applicant's own ATS score describing a document
+          // that was never delivered (measured 2026-09-20, QA-IO-MATRIX D9).
+          // With this flag the export refuses, visibly, instead.
+          refuseIfClipped: true,
         });
       } catch (err) {
-        set((s) => { s.saveError = err instanceof Error ? err.message : "PDF export failed"; });
-        return;
+        const message = err instanceof ExportOverflowError
+          ? exportOverflowMessage(lang === "sw", err.overflow)
+          : err instanceof Error ? err.message : "PDF export failed";
+        set((s) => { s.saveError = message; s.saveErrorKind = "export"; });
+        // Rethrow so the caller cannot report success (the editor shows its
+        // export-failed overlay with this same message). Silently returning
+        // here is how a refusal would turn into a second silent failure.
+        throw err;
       }
       // Fire-and-forget download log
       const cvId = typeof window !== "undefined"

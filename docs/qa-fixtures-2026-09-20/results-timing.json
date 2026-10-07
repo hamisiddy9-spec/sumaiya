@@ -1,0 +1,78 @@
+[
+ {
+  "case": "minimal (1 page, 54 KB)",
+  "patchMs": 1728,
+  "gotoDomContentLoadedMs": 1021,
+  "editorReadyMs": 220,
+  "ready": true,
+  "harnessSettleMs": 1805,
+  "fontsReady": {
+   "ms": 0,
+   "status": "loaded"
+  },
+  "preview": {
+   "scrollH": 1123,
+   "cssH": 1123
+  },
+  "harnessClickToDetectMs": 856,
+  "exportInsidePageMs": 851,
+  "blobBytes": 54016
+ },
+ {
+  "case": "photo-nakuru (1 page)",
+  "patchMs": 2339,
+  "gotoDomContentLoadedMs": 950,
+  "editorReadyMs": 333,
+  "ready": true,
+  "harnessSettleMs": 1813,
+  "fontsReady": {
+   "ms": 0,
+   "status": "loaded"
+  },
+  "preview": {
+   "scrollH": 1123,
+   "cssH": 1123
+  },
+  "harnessClickToDetectMs": 1070,
+  "exportInsidePageMs": 1054,
+  "blobBytes": 332258
+ },
+ {
+  "case": "typical full CV (nakuru)",
+  "patchMs": 1664,
+  "gotoDomContentLoadedMs": 1256,
+  "editorReadyMs": 225,
+  "ready": true,
+  "harnessSettleMs": 1806,
+  "fontsReady": {
+   "ms": 0,
+   "status": "loaded"
+  },
+  "preview": {
+   "scrollH": 1123,
+   "cssH": 1123
+  },
+  "harnessClickToDetectMs": 1160,
+  "exportInsidePageMs": 1151,
+  "blobBytes": 331990
+ },
+ {
+  "case": "over-long CV (3+ pages)",
+  "patchMs": 1696,
+  "gotoDomContentLoadedMs": 886,
+  "editorReadyMs": 221,
+  "ready": true,
+  "harnessSettleMs": 1814,
+  "fontsReady": {
+   "ms": 0,
+   "status": "loaded"
+  },
+  "preview": {
+   "scrollH": 1123,
+   "cssH": 1123
+  },
+  "harnessClickToDetectMs": 862,
+  "exportInsidePageMs": 855,
+  "blobBytes": 594587
+ }
+]

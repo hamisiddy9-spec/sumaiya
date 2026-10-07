@@ -3,16 +3,34 @@
  *
  * Phase 3 Implementation (Navigation Integration):
  * This is the entry point for all navigation. It handles:
- * 1. Auth state switching (unauthenticated → authenticated)
+ * 1. Auth state switching (guest → signed in)
  * 2. Onboarding flow (first-time users only)
  * 3. Main app tabs (Home, CVs, Scan, Profile, Settings)
  * 4. Deep linking (email signin, push notifications, web links)
  *
  * Navigation Flow:
  * - Splash → Check auth state + onboarding status
- * - If !user → AuthStack (SignIn/SignUp)
- * - If user && !onboarded → OnboardingScreen (4-page carousel)
- * - If user && onboarded → AppTabs (main app)
+ * - If !hasSeenOnboarding → Onboarding (4-page carousel)
+ * - Else → AppTabs, WITH OR WITHOUT AN ACCOUNT
+ * - If signed in && !firstRunDone → FirstRun (the profile wizard)
+ * - Sign-in is a MODAL over the app (openAuth(), navigation/root-nav.ts),
+ *   presented when the guest chooses it — never a wall in front of the app.
+ *
+ * GUEST MODE (2026-09-21). This file used to read `!user ? AuthStack : App`,
+ * which meant a stranger who installed the APK met an account wall before they
+ * could build anything — and with email sign-in rate-limited at the provider,
+ * that wall was the whole product. The promise is the owner's, standing: a
+ * guest finishes and downloads a CV BEFORE being asked for an account. So the
+ * app tabs render for everyone; the account-only surfaces gate themselves (see
+ * components/account-gate.tsx) with an honest invitation; and the one prompt a
+ * guest does see arrives after their work exists (components/account-gate.tsx →
+ * offerGuestAccountOnce), once ever.
+ *
+ * WHAT THE GUEST'S WORK DOES ON SIGN-IN: the CVs on this device are owned by
+ * GUEST_OWNER_ID (lib/local-owner.ts). The effect below claims them for the
+ * account the moment a session lands — the row keeps its id, so it is one
+ * write, and it is then uploaded (or queued, if the network drops) — so the CV
+ * built before signing in is on the account after it, and nothing is discarded.
  *
  * Deep Linking:
  * - Custom scheme: sumaiya://
@@ -21,11 +39,11 @@
  */
 
 import React, { useEffect, useState, useMemo } from "react";
-import { NavigationContainer, LinkingOptions, createNavigationContainerRef } from "@react-navigation/native";
+import { NavigationContainer, LinkingOptions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as Linking from "expo-linking";
 import * as Notifications from "expo-notifications";
-import { getSecureItem, setSecureItem } from "@sumaiya/utils";
+import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
 import { usePushRegistration } from "../lib/push";
 import type { RootStackParamList } from "./types";
@@ -38,6 +56,7 @@ import { ThemeScope, useThemeColors } from "../components/ui";
 import { useNavTheme, rootScreenOptions } from "./nav-config";
 import { resolveNotificationTarget } from "../lib/notification-route";
 import { DEEP_LINK_PREFIXES } from "../lib/app-hosts";
+import { navRef } from "./root-nav";
 
 const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 
@@ -45,7 +64,6 @@ const Stack = createNativeStackNavigator<RootStackParamList, undefined>();
 const ONBOARDING_KEY = "sumaiya_onboarding_seen";
 
 const prefix = Linking.createURL("/");
-const navRef = createNavigationContainerRef<RootStackParamList>();
 
 // Deep linking configuration
 // Supports:
@@ -144,6 +162,38 @@ export function RootNavigator() {
     })();
   }, [user]);
 
+  // CLAIM THE GUEST'S WORK. Someone who built a CV without an account and has
+  // just signed in must find that CV on their account — not learn it is gone,
+  // and not be asked to build it twice. Every local row owned by
+  // GUEST_OWNER_ID is re-owned to this account id (one write: the row keeps its
+  // id) and then uploaded, or queued for the sync engine if the upload fails.
+  // A row that cannot be re-owned is left exactly as it was — a failed claim
+  // never deletes anything.
+  //
+  // Deliberately before the profile pull below: that effect decides whether
+  // this is a brand-new account by looking for existing CVs, and a guest
+  // arriving with a CV is not new — they should not be met by the first-run
+  // wizard seconds after signing in.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const { claimGuestWork } = await import("../lib/local-owner");
+        const result = await claimGuestWork(user.id);
+        if (!cancelled && result.claimed > 0) {
+          console.log(`[guest] claimed ${result.claimed} local CV(s) for the account`);
+        }
+      } catch (err) {
+        // Never fatal: the CVs are still on the device under the guest owner.
+        console.error("Failed to claim guest work:", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   // Pull the Career Profile from the server Spine once signed in — a returning
   // user on a new device / after a reinstall keeps their profile, and any
   // offline local edit gets pushed up. If the server already has a real
@@ -158,14 +208,20 @@ export function RootNavigator() {
     void (async () => {
       const { syncProfileFromServer, profileIsEmpty } = await import("../lib/profile-store");
       const { apiClient } = await import("../lib/api-client");
+      const { countOwnedCvs } = await import("../lib/local-owner");
 
       const hasExistingData = async () => {
         try {
-          const [profile, cvs] = await Promise.all([
+          const [localCount, profile, cvs] = await Promise.all([
+            // A CV on THIS device, owned by THIS account id — the shape a
+            // claimed guest CV has the moment the claim lands. Local, instant,
+            // and true even with no network, which is the case that used to
+            // fall through to the wizard.
+            countOwnedCvs(user.id),
             syncProfileFromServer(),
             apiClient.listCVs().catch(() => []),
           ]);
-          return !profileIsEmpty(profile) || cvs.length > 0;
+          return localCount > 0 || !profileIsEmpty(profile) || cvs.length > 0;
         } catch {
           return false;
         }
@@ -211,6 +267,17 @@ export function RootNavigator() {
     return () => sub.remove();
   }, []);
 
+  // After a successful sign-in the sign-in screen leaves the tree (nothing is
+  // registered above it with a session in hand) and the navigator drops back to
+  // the app underneath. This is the belt to that brace: if the route somehow
+  // survives the swap, close it, so nobody is left staring at a sign-in form
+  // while holding a session.
+  useEffect(() => {
+    if (!user || !navRef.isReady()) return;
+    const state = navRef.getRootState();
+    if (state.routes[state.index]?.name === "Auth") navRef.goBack();
+  }, [user]);
+
   if (loading || checkingOnboarding) {
     return (
       <ThemeScope mode="light">
@@ -231,9 +298,17 @@ export function RootNavigator() {
       }
     >
       <Stack.Navigator id={undefined} screenOptions={rootScreenOptions(c)}>
-        {/* Onboarding comes BEFORE auth: a fresh install must never open on a
-            bare sign-in screen (reads as a bug, especially in dark mode). New
-            users meet Sumaiya first, then hit auth only when they act. */}
+        {/* Onboarding still comes first: a fresh install must never open on a
+            bare sign-in screen (reads as a bug, especially in dark mode).
+
+            BUT THE APP IS NO LONGER BEHIND AN ACCOUNT. After onboarding, a
+            guest lands in AppTabs and can build, preview and download a CV
+            without ever signing in — the surfaces that genuinely need an
+            account gate themselves (components/account-gate.tsx) instead of the
+            whole product doing it from here. FirstRun is the profile wizard,
+            and it stays tied to an account because it is the account's profile
+            it collects; a guest with a CV skips it entirely (see the first-run
+            effect above, which counts the CVs already on this device). */}
         {!hasSeenOnboarding ? (
           <Stack.Screen name="Onboarding" options={{ animationTypeForReplace: "pop" }}>
             {(props) => (
@@ -242,17 +317,7 @@ export function RootNavigator() {
               </ThemeScope>
             )}
           </Stack.Screen>
-        ) : !user ? (
-          <Stack.Screen name="Auth">
-            {() => (
-              <ThemeScope mode="light">
-                <AuthStack />
-              </ThemeScope>
-            )}
-          </Stack.Screen>
-        ) : !firstRunDone ? (
-          // First real run after sign-in: a guided profile setup so Sumaiya
-          // starts knowing the user (skippable — they can fill it in Profile).
+        ) : user && !firstRunDone ? (
           <Stack.Screen name="FirstRun">
             {() => (
               <ThemeScope mode="light">
@@ -263,6 +328,25 @@ export function RootNavigator() {
         ) : (
           <Stack.Screen name="App" component={AppTabs} />
         )}
+
+        {/* Sign-in is presented OVER the app, when the guest asks for it (the
+            invitation after a download, a gated surface, the Profile row).
+            Registered only while there is no session: the moment a session
+            lands this screen leaves the tree and the navigator returns to the
+            app underneath — the CV the person just built is waiting for them,
+            claimed onto the account by the effect above. */}
+        {!user ? (
+          <Stack.Screen
+            name="Auth"
+            options={{ presentation: "modal", animation: "slide_from_bottom" }}
+          >
+            {() => (
+              <ThemeScope mode="light">
+                <AuthStack />
+              </ThemeScope>
+            )}
+          </Stack.Screen>
+        ) : null}
       </Stack.Navigator>
     </NavigationContainer>
   );

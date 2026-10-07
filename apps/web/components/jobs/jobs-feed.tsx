@@ -11,6 +11,8 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { TargetedCvDrawer } from "@/components/jobs/targeted-cv-drawer";
 import { SnapTailorButton } from "@/components/jobs/snap-tailor-button";
+import { ExternalLink } from "@/components/ui/external-link";
+import { advertLinkLabel } from "@/lib/external-link";
 import { matchTone } from "@/lib/match-ui";
 import { cleanHtml } from "@/lib/jobs/text";
 import type { Lang } from "@/lib/i18n/translations";
@@ -137,7 +139,7 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
       }
       setError(
         json.error ||
-          (sw ? "Imeshindwa kuanza kufuatilia. Jaribu tena." : "Couldn't start tracking. Please try again.")
+          (sw ? "Sikuweza kuanza kufuatilia. Jaribu tena." : "Couldn't start tracking. Please try again.")
       );
     } catch {
       setError(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -434,7 +436,7 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
                       {signedIn && <TargetedCvDrawer lang={lang} job={j} />}
                       <Button onClick={() => trackJob(j)} disabled={busy} size="sm">
                         {busy ? (
-                          sw ? "Inaanzisha…" : "Starting…"
+                          sw ? "Ninaanzisha…" : "Starting…"
                         ) : (
                           <>
                             <Icon name="plus" size={14} />
@@ -443,15 +445,14 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
                         )}
                       </Button>
                       {j.applyUrl && (
-                        <a
+                        <ExternalLink
                           href={j.applyUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          sw={sw}
                           className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors px-2 py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember/60 focus-visible:ring-offset-1 focus-visible:ring-offset-cream"
                         >
-                          {sw ? "Omba" : "Apply"}
+                          {advertLinkLabel(sw)}
                           <Icon name="share" size={14} />
-                        </a>
+                        </ExternalLink>
                       )}
                     </div>
                   </div>

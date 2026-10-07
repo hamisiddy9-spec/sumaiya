@@ -35,7 +35,7 @@ export default function EditorError({
       </h1>
       <p className="text-lg text-text-body max-w-md mb-10">
         {sw
-          ? "Kitu ndani ya hati hii kimeshindwa kupakia. Hati zako nyingine ziko salama — jaribu tena, au rudi nyumbani."
+          ? "Sikuweza kupakia kitu ndani ya hati hii. Hati zako nyingine ziko salama — jaribu tena, au rudi nyumbani."
           : "Something in this document failed to load. Your other documents are safe — try again, or head back to your dashboard."}
       </p>
 

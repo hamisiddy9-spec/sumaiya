@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="sw"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sumaiya &mdash; pendekezo la muonekano 2026 — Sumaiya 2026 redesign</title>
+<style>/* ============================================================================
+   SUMAIYA 2026 DESIGN SYSTEM — reference implementation
+   Colours are READ FROM THE APP (apps/web/tailwind.config.ts +
+   apps/native/src/components/ui/theme.ts). None are invented. None change.
+   This file is inlined into every mockup so each HTML file is standalone.
+   ========================================================================== */
+
+:root{
+  /* ── FIXED PALETTE (Warm Confidence) ─────────────────────────────────── */
+  --ember:#DA4A1C;      --ember-shadow:#A8330F;  --ember-hover:#C13E14;
+  /* ember as TEXT is 3.89:1 on cream and 4.22:1 on white — below WCAG AA
+   * 4.5:1 for 14px. #A8330F is 6.16:1 / 6.68:1. Ember stays a FILL and an
+   * ICON colour; small ember TEXT uses ember-shadow. Same palette, no change. */
+  --ember-text:#A8330F;
+  --ember-tint:#FBE9E1; --ember-fill:#B83A12;    /* accentFill (light) */
+  --pine:#12433D;       --pine-tint:#E4EDEA;
+  --gold:#F2A93B;       --gold-tint:#FBF3E2;     --gold-text:#96630F;
+  --espresso:#211A15;   --espresso-2:#2C231C;    --espresso-line:#3A2E25;
+  --cream:#FAF5EE;      --sand:#EFE7DA;          --sand-2:#F4EEE4;
+  --card:#FFFFFF;       --border:#E9E0D4;        --border-input:#9C8D7B;
+  --text-body:#6B5F54;  --text-muted:#756A5E;
+  --error:#C13E14;      --success:#12766A;       --warning:#96630F;
+
+  /* ── SPACING (base 4px; ONLY these) ──────────────────────────────────── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s8:32px;
+
+  /* ── RADII ───────────────────────────────────────────────────────────── */
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px;
+
+  /* ── ELEVATION (content plane is flat; shadow is for the floating layer) */
+  --shadow-press:0 2px 8px rgba(33,26,21,.05);
+  --shadow-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --shadow-ember:0 3px 0 #A8330F;
+
+  /* ── TYPE ────────────────────────────────────────────────────────────── */
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Hanken Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  /* ── MOTION (mirrors apps/native/src/components/ui/motion.tsx) ───────── */
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-field:340ms;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  --ease-in:cubic-bezier(.32,0,.67,0);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--sand);color:var(--espresso);
+  font-family:var(--font-body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── THE PROPOSAL LAYOUT (this chrome is the deliverable's wrapper, not the
+      product UI) ──────────────────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+.masthead{margin-bottom:40px}
+.masthead .kicker{
+  font-size:11px;font-weight:700;letter-spacing:.56px;text-transform:uppercase;
+  color:var(--ember-text);margin:0 0 8px
+}
+.masthead h1{
+  font-family:var(--font-display);font-size:38px;line-height:1.1;font-weight:800;
+  letter-spacing:-.5px;margin:0 0 12px
+}
+.masthead p{max-width:64ch;color:var(--text-body);margin:0 0 8px}
+.meta{font-size:12.5px;color:var(--text-muted)}
+.meta code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 6px;border-radius:6px;color:var(--espresso)}
+
+.sec{margin:64px 0 0}
+.sec>h2{
+  font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.3px;
+  margin:0 0 6px;padding-bottom:12px;border-bottom:2px solid var(--border)
+}
+.sec>h2 .n{color:var(--ember);font-family:var(--font-mono);font-size:14px;margin-right:10px}
+.sec>p.lede{color:var(--text-body);max-width:72ch;margin:14px 0 24px}
+
+/* ── DEVICE FRAME — the phone is the product, so the phone comes first ─── */
+.stage{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.phone{
+  width:390px;flex:0 0 390px;background:var(--espresso);
+  border-radius:44px;padding:10px;box-shadow:0 30px 70px -30px rgba(33,26,21,.35)
+}
+.phone__screen{
+  position:relative;background:var(--cream);border-radius:36px;overflow:hidden;
+  height:844px;display:flex;flex-direction:column
+}
+.phone__notch{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:96px;height:22px;border-radius:999px;background:var(--espresso);z-index:40
+}
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 22px 0;font-size:12px;font-weight:700;color:var(--espresso);flex:0 0 auto
+}
+.statusbar .right{display:flex;gap:5px;align-items:center}
+.bar{width:3px;height:9px;background:var(--espresso);border-radius:1px;opacity:.85}
+.bar.lg{height:12px}
+
+/* ── APP SHELL ───────────────────────────────────────────────────────── */
+.app{flex:1;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:12px 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.tabbar{
+  flex:0 0 auto;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 10px 22px;background:var(--card);border-top:1px solid var(--border)
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--text-muted);font-size:10.5px;font-weight:700;min-height:44px;justify-content:center}
+.tab.on{color:var(--ember-text)}
+.tab .glyph{width:22px;height:22px;display:grid;place-items:center}
+
+/* ── TYPE ROLES (design system §2) ───────────────────────────────────── */
+.r-display{font-family:var(--font-display);font-size:30px;line-height:36px;font-weight:800;letter-spacing:-.5px}
+.r-screen{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-.5px}
+.r-section{font-size:18px;line-height:24px;font-weight:800;letter-spacing:0}
+.r-cardtitle{font-size:15.5px;line-height:21px;font-weight:700}
+.r-body{font-size:14.5px;line-height:21px;font-weight:600}
+.r-bodysmall{font-size:13.5px;line-height:19px;font-weight:600}
+.r-caption{font-size:12.5px;line-height:18px;font-weight:400}
+.r-micro{font-size:11.5px;line-height:14px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.r-stat{font-size:26px;line-height:1;font-weight:800;letter-spacing:0}
+.muted{color:var(--text-muted)}.body{color:var(--text-body)}
+.eyebrow{color:var(--text-muted);font-size:13px;font-weight:600}
+
+/* ── SURFACES (design system §3–§4) ──────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card)}
+.card--20{border-radius:var(--r-card-lg)}
+.pad{padding:16px}
+.pad-row{padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px}
+.row-tight{display:flex;align-items:center;gap:8px}
+.stack{display:flex;flex-direction:column}
+.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+.sec-head:first-child{margin-top:4px}
+.sec-head .act{color:var(--ember-text);font-size:12.5px;font-weight:800}
+.dashed{border-style:dashed}
+
+/* icon wells — concentric: inner = outer − padding (design system §3.1) */
+.well{display:grid;place-items:center;flex:0 0 auto;background:var(--ember-tint);color:var(--ember)}
+.well--38{width:38px;height:38px;border-radius:11px}
+.well--44{width:44px;height:44px;border-radius:12px}
+.well--30{width:30px;height:30px;border-radius:9px}
+.well--72{width:72px;height:72px;border-radius:22px}
+.well--pine{background:var(--pine-tint);color:var(--pine)}
+.well--gold{background:var(--gold-tint);color:var(--gold-text)}
+.well--success{background:#E3F1EE;color:var(--success)}
+.well--warn{background:#FBF3E2;color:var(--warning)}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:0 18px;border-radius:var(--r-input-lg);border:1px solid transparent;
+  font-family:var(--font-body);font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-out),background var(--dur-base) var(--ease-out)
+}
+.btn--primary{background:var(--ember-fill);color:var(--cream)}
+.btn--secondary{background:var(--card);color:var(--espresso);border-color:var(--border-input)}
+.btn--ghost{background:transparent;color:var(--ember-text);min-height:44px}
+.btn--sm{min-height:44px;font-size:13.5px;padding:0 14px}
+.btn--block{width:100%}
+.btn:active{transform:scale(.975)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-pill);
+  padding:3px 9px;font-size:11.5px;font-weight:800;line-height:1.4
+}
+.badge--success{background:#E3F1EE;color:var(--success)}
+.badge--warn{background:var(--gold-tint);color:var(--warning)}
+.badge--muted{background:var(--sand-2);color:var(--text-muted)}
+.badge--ember{background:var(--ember-tint);color:var(--ember-text)}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;
+  border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);
+  font-size:13.5px;font-weight:600;color:var(--espresso)
+}
+
+/* tab-rail section nav (CV editor) */
+.rail{display:flex;gap:8px;overflow:auto;padding:10px 20px;background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto}
+.rail::-webkit-scrollbar{height:0}
+.rail .chip{min-height:36px;font-size:12.5px;padding:0 12px;white-space:nowrap}
+.rail .chip.on{background:var(--ember-tint);border-color:var(--ember);color:var(--ember-text);font-weight:700}
+
+/* skeleton — shimmer is bounded (2 cycles) per the motion standard */
+.sk{background:linear-gradient(90deg,#EFE7DA 25%,#E9E0D4 50%,#EFE7DA 75%);
+  background-size:200% 100%;border-radius:8px;animation:shimmer 1.5s ease-in-out 2}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-line.w40{width:40%}.sk-line.w60{width:60%}.sk-line.w80{width:80%}
+
+/* ── ENTRANCE: "nothing appears, everything arrives" ──────────────────── */
+.arrive{animation:arrive var(--dur-slow) var(--ease-out) both}
+.arrive-1{animation-delay:30ms}.arrive-2{animation-delay:70ms}
+.arrive-3{animation-delay:110ms}.arrive-4{animation-delay:150ms}
+.arrive-5{animation-delay:190ms}.arrive-6{animation-delay:230ms}
+@keyframes arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.handoff{animation:handoff var(--dur-fast) var(--ease-in) both}
+@keyframes handoff{to{opacity:0;transform:translateY(-4px)}}
+.pressable{transition:transform var(--dur-micro) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.pressable:active{transform:scale(.985);box-shadow:var(--shadow-press)}
+
+/* ── ANNOTATIONS (proposal chrome) ───────────────────────────────────── */
+.notes{flex:1 1 420px;min-width:320px;max-width:640px}
+.note{
+  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--ember);
+  border-radius:var(--r-card);padding:16px;margin-bottom:12px
+}
+.note h4{margin:0 0 6px;font-size:14.5px;font-weight:800;font-family:var(--font-display)}
+.note .tag{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--ember-text);background:var(--ember-tint);border-radius:6px;padding:2px 7px;margin-bottom:8px
+}
+.note p{margin:0;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.note ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--text-body)}
+.note li{margin:4px 0}
+.note li b{color:var(--espresso)}
+.note--before{border-left-color:var(--border-input)}
+.note--before .tag{color:var(--text-muted);background:var(--sand-2)}
+.note--ban{border-left-color:var(--error)}
+.note--ban .tag{color:var(--error);background:#FBE9E1}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+.rule h4{margin:0 0 8px;font-size:13.5px;font-weight:800;font-family:var(--font-display)}
+.rule code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 5px;border-radius:5px;color:var(--ember-shadow)}
+.rule .kv{font-size:12.5px;color:var(--text-body);display:flex;justify-content:space-between;
+  padding:4px 0;border-bottom:1px dashed var(--border)}
+.rule .kv:last-child{border-bottom:0}
+.rule .kv b{color:var(--espresso);font-family:var(--font-mono);font-size:11.5px}
+
+.toast{
+  position:absolute;left:20px;right:20px;bottom:88px;z-index:30;
+  background:var(--espresso);color:var(--cream);border-radius:var(--r-input-lg);
+  padding:12px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-float);
+  display:flex;gap:10px;align-items:center
+}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(33,26,21,.45);z-index:20}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:25;background:var(--card);
+  border-radius:20px 20px 0 0;padding:20px;box-shadow:var(--shadow-float)
+}
+.sheet__grip{width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 14px}
+.sticky-foot{
+  flex:0 0 auto;background:var(--cream);border-top:1px solid var(--border);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px))
+}
+.savepill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--sand-2);
+  border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:700;color:var(--text-muted)
+}
+.savepill--saved{background:#E3F1EE;color:var(--success)}
+.savepill--dirty{background:var(--gold-tint);color:var(--gold-text)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="masthead">
+    <p class="kicker">Sumaiya &middot; Redesign proposal &middot; 2026-09-20 &middot; docs/design/2026-09-20/</p>
+    <h1>Sumaiya &mdash; pendekezo la muonekano 2026</h1>
+    <p>A screen and motion redesign proposal for the Android app and the web app: the spec, the design system, and mockups you can open. Colours and logo untouched.</p>
+    <p class="meta">Colours and the logo are <code>FIXED</code> — read from
+      <code>apps/web/tailwind.config.ts</code> and
+      <code>apps/native/src/components/ui/theme.ts</code>. Motion obeys
+      <code>docs/MOTION-STANDARD-2026-09-20.md</code>. No source file is modified by this proposal.</p>
+  </div>
+  <div class="sec"><h2><span class="n">&rsaquo;</span>What this is</h2><p class="lede">A screen and motion redesign <b>proposal</b> for both platforms &mdash; a spec plus mockups you can open and look at. It improves what exists; it adds no feature that does not replace one. The palette and the logo are untouched.</p><div class="rule-grid"><div class="rule"><h4>Fixed by the owner</h4><div class="kv"><span>colours</span><b>not changed</b></div><div class="kv"><span>logo / SumaiyaMark</span><b>not changed</b></div><div class="kv"><span>product name</span><b>Sumaiya</b></div><div class="kv"><span>product AI</span><b>DeepSeek (live, verified)</b></div><div class="kv"><span>language</span><b>Swahili-first</b></div></div><div class="rule"><h4>What was measured, not assumed</h4><div class="kv"><span>screens inventoried</span><b>99 (51 + 21 + 27)</b></div><div class="kv"><span>contrast pairs computed</span><b>16</b></div><div class="kv"><span>found below AA 4.5:1</span><b>4 (all text)</b></div><div class="kv"><span>design pages</span><b>10</b></div><div class="kv"><span>phone frames rendered</span><b>8</b></div><div class="kv"><span>real-device captures</span><b>6 + a cold-start recording</b></div><div class="kv"><span>frames judged by vision</span><b>14</b></div></div><div class="rule"><h4>How to read a mockup</h4><p class="spec" style="margin:0">Every page is a standalone HTML file &mdash; open it in a browser, no build step. The phone frames are real 390px layouts, and the animations run, so you see the entrances rather than a still. The notes beside each frame carry the <code>file:line</code> of the code that exists today.</p></div></div></div><div class="sec"><h2><span class="n">&rsaquo;</span>The mockups</h2><a href="00-design-system.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">00</div><div class="grow"><div class="r-section" style="font-size:16px">Mfumo wa kubuni <span class="muted" style="font-weight:600;font-size:13px">&middot; The design system</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Nine type roles, the 4px spacing scale, concentric radii, the elevation split between the content plane and the floating layer, three icon sizes, and the motion additions + ban list. Includes the measured contrast finding that drives the ember-as-text rule.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="01-home.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">01</div><div class="grow"><div class="r-section" style="font-size:16px">Nyumbani (home) <span class="muted" style="font-weight:600;font-size:13px">&middot; Home / dashibodi</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Before and after side by side. The advert leaves the first slot, saved-state becomes visible, quick actions halve in height, and the loading boundary stops popping. <b>Approved by the owner as the reference for the system&rsquo;s direction.</b></div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="02-cv-editor.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">02</div><div class="grow"><div class="r-section" style="font-size:16px">Kihariri cha CV <span class="muted" style="font-weight:600;font-size:13px">&middot; The document editor</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Section rail to jump between form sections, an autosave state the user can see, and the PDF export moved into the thumb zone.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="03-jobs-feed.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">03</div><div class="grow"><div class="r-section" style="font-size:16px">Ajira <span class="muted" style="font-weight:600;font-size:13px">&middot; The jobs feed</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">One entry point for the eye, a score badge that stops meaning two things, and a corrected note: the live device proves this feed is populated, and that a new account sees the <i>unmatched</i> list by default.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="04-profile.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">04</div><div class="grow"><div class="r-section" style="font-size:16px">Wasifu <span class="muted" style="font-weight:600;font-size:13px">&middot; Profile</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Who is signed in, one scored prompt that explains why matching is weak, and destructive actions ordered by how recoverable they are. The device confirmed the DANGER ZONE split.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="05-empty-loading-error.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">05</div><div class="grow"><div class="r-section" style="font-size:16px">Hali tupu / kupakia / hitilafu <span class="muted" style="font-weight:600;font-size:13px">&middot; Empty, loading and error</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">One composite, three faces. The skeleton keeps the geometry of what replaces it; the error tells the user what is still available before asking them to retry.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="06-chat.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">06</div><div class="grow"><div class="r-section" style="font-size:16px">Sanduku la mazungumzo <span class="muted" style="font-weight:600;font-size:13px">&middot; The chat box</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Four starter chips cut to two, the artefact rendered in the thread that produced it, and the composer held still because typing must stay instant. The assistant itself is live (DeepSeek), so nothing here assumes a broken one.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="07-web-nav.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">07</div><div class="grow"><div class="r-section" style="font-size:16px">Upau wa urambazaji wa wavuti <span class="muted" style="font-weight:600;font-size:13px">&middot; Web navigation</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">The nav that was never designed: four primaries + the assistant + Zaidi on desktop, the signed-out bar, the narrow-desktop band, and a mobile-web bar that mirrors the APK&rsquo;s five slots instead of fighting them.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="08-overlays.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">08</div><div class="grow"><div class="r-section" style="font-size:16px">Lugha moja ya madirisha <span class="muted" style="font-weight:600;font-size:13px">&middot; One overlay language</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Five variants &mdash; bottom sheet, confirm dialog, toast, full-screen sheet, share sheet &mdash; plus the audit that shows three native sheet radii, six web scrims and seven z-indices where the theme already defines one.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a><a href="09-welcome.html" style="text-decoration:none;color:inherit;display:block"><div class="card pad pressable" style="display:flex;gap:16px;align-items:flex-start;margin-bottom:12px"><div style="font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--ember-text);flex:0 0 34px">09</div><div class="grow"><div class="r-section" style="font-size:16px">Njia ya kukaribisha <span class="muted" style="font-weight:600;font-size:13px">&middot; The welcoming sequence</span></div><div class="r-caption body" style="margin-top:6px;line-height:1.55">Launch to first arrival as ONE sequence: the audit of what each welcoming screen does differently (four origins, thirteen durations, five easing families), the six divergences named, and the hand-off that fixes &ldquo;different elements stacked together&rdquo;.</div></div><div style="color:var(--text-muted);flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div></div></a></div><div class="sec"><h2><span class="n">&rsaquo;</span>Honesty notes</h2><div class="note note--before"><span class="tag">WHAT THESE ARE NOT</span><h4>Mockups, not a shipped change</h4><p>No source file was modified. Every proposal here is a description tied to a current <code>file:line</code>; the mockups are HTML that demonstrates the target, and the phone frames may show slightly different text lengths than a real 360dp budget phone would give.</p></div><div class="note note--before"><span class="tag">CORRECTED ON THE LIVE DEVICE</span><h4>the job feed is NOT empty &mdash; this document was wrong about that</h4><p>An earlier draft said the job feed was empty in production. A capture of the running APK contradicts it: real postings from CCBRT, CRDB Bank, Ramada and others, each with <b>Lenga CV yangu</b> and <b>Fungua tangazo</b>. <b>What the capture also showed is more useful</b> &mdash; not one card carried a match score, because a new account has no career profile, so the unmatched list is the default. See <code>_device/device-07-jobs-live.png</code>. Two further corrections came from the device: the real tab label is <b>CV zangu</b> (not CV) and the real quick action is <b>Ukaguzi wa ATS</b> (not Ukaguzi wa CV). Both are fixed in the mockups.</p></div><div class="note note--ban"><span class="tag">WHAT I COULD NOT VERIFY</span><h4>Onboarding animation on the device, and a live chat turn</h4><p>The onboarding slides and first-run steps could only be re-recorded by clearing app data on the owner&rsquo;s live phone, which I did not do &mdash; so the welcome audit is from source for those two screens and from pixels only for the cold start. I also did not send a message to the assistant, so the chat mockup is a design proposal rather than a live before/after. No claim in this proposal is a device measurement unless it says so.</p></div></div>
+  
+</div>
+</body></html>

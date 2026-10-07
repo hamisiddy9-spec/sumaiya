@@ -16,6 +16,8 @@
 // `legacy` build for the widest mobile-browser support, and point its worker at
 // a bundler-emitted asset on our own origin (no CDN, so no CSP surprises).
 
+import { MAX_LOCAL_PARSE_BYTES, MAX_LOCAL_PARSE_MB } from "./upload-limits";
+
 export type ExtractProgress =
   | { stage: "loading" }
   | { stage: "reading-text" }
@@ -39,8 +41,12 @@ export class ExtractionError extends Error {
 }
 
 const MIN_TEXT_CHARS = 40;
-const MAX_FILE_MB = 25;
-const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
+// The local (browser) reader cap. Nothing is uploaded on this path, so it is
+// about what the tab can survive, NOT about the network — the server fallback
+// uses MAX_PDF_UPLOAD_BYTES (4 MB) instead, because a larger body never gets a
+// response at all (see lib/upload-limits.ts).
+const MAX_FILE_MB = MAX_LOCAL_PARSE_MB;
+const MAX_FILE_BYTES = MAX_LOCAL_PARSE_BYTES;
 // OCR is slow (~5–15s/page); cap the work so a huge scan can't hang the tab.
 const MAX_OCR_PAGES = 6;
 // A CV / cover letter is a few pages. NEVER iterate an entire large document —

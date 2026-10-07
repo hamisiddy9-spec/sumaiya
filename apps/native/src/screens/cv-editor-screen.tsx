@@ -5,11 +5,15 @@ import Animated, { FadeIn, LinearTransition } from "react-native-reanimated";
 import { useIsFocused } from "@react-navigation/native";
 import { offlineStorage } from "@sumaiya/utils";
 import { apiClient } from "../lib/api-client";
+import { useAuthContext } from "../contexts/auth-context";
+import { ownerIdFor } from "../lib/local-owner";
+import { offerGuestAccountOnce } from "../components/account-gate";
 import { useOfflineSync } from "../hooks/use-offline-sync";
 import { exportCVAsPDF } from "../services/pdf-export";
 import { track, FUNNEL_EVENTS } from "../lib/analytics";
-import { addEpisode, updateMemory } from "../lib/ai-memory";
+import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
 import { shareCV } from "../services/share";
+import { fileNameFromUri, saveToPhone, shouldOfferShare } from "../services/save-to-device";
 import type { CV, CVData, Education, Experience, PersonalInfo, Skill } from "@sumaiya/types";
 import type { CvEditorScreenProps } from "../navigation/types";
 import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
@@ -76,7 +80,17 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { templateId, cvId: initialCvId, initialData } = route.params || {};
-  const { status, queueOperation } = useOfflineSync();
+  const { user } = useAuthContext();
+  // GUEST MODE: an account is not required to build or export a CV here. Every
+  // write below is to the device; the network is only involved for someone who
+  // has an account to sync to. The owner id is what makes the CV the user just
+  // saved visible to the CV list (which reads the same id) — and what makes a
+  // guest's CV claimable when they do sign in (lib/local-owner.ts).
+  const owner = ownerIdFor(user);
+  const isGuest = !user;
+  // Never run the upload loop without an account: a queued op would retry
+  // unauthenticated forever and count against the "N to sync" pill.
+  const { status, queueOperation } = useOfflineSync({ enabled: !isGuest });
   const insets = useSafeAreaInsets();
   const [showPreview, setShowPreview] = useState(false);
   const [accent, setAccent] = useState("#DA4A1C");
@@ -315,7 +329,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     setSaving(true);
     const cv: CV = {
       id: cvIdRef.current,
-      userId: "me",
+      userId: owner,
       templateId: template,
       title: data.personalInfo.fullName || "My CV",
       data: data as CVData,
@@ -334,8 +348,18 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       track(FUNNEL_EVENTS.cvCreated, { template });
       // Let her learn from real activity, not only from the ATS screen.
       // Rebuilding a CV repeatedly is itself a signal worth noticing.
-      updateMemory((m) =>
-        addEpisode(m, "cv_rebuilt", `Rebuilt a CV using the ${template} template`),
+      //
+      // Recorded as an EVENT, not as a sentence. The old call stored the English
+      // string "Rebuilt a CV using the ${template} template", which a Swahili
+      // user then read verbatim under "MATUKIO YA HIVI KARIBUNI" — and which
+      // consolidation promoted into a Fact `value` injected into every later
+      // conversation. The sentence is now built in the language being read
+      // (lib/ai-memory.ts EPISODE_TEXT), so the same line follows the language
+      // toggle, and the template is named the way the picker names it instead of
+      // by its internal id ("classic" -> "Asili"/"Classic").
+      const templateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
+      updateMemory(owner, (m) =>
+        addEpisodeEvent(m, "cv_rebuilt", { key: "cv_rebuilt", params: { template: templateName } }, t),
       ).catch(() => {});
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.local", cvId: cv.id });
@@ -344,9 +368,19 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     try {
       // Write to the local cache first so the list/home reflect it immediately
       // and it survives being offline, then queue the push to the server.
-      await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
+      //
+      // A GUEST stops at the cache: there is no account to push to. `storedLocally`
+      // above already decided whether the CV is real, so this is only about the
+      // upload — and skipping it is what keeps "save" working with the phone in
+      // aeroplane mode and no account at all. The claim on sign-in uploads it
+      // (lib/local-owner.ts).
+      if (!isGuest) await queueOperation(initialCvId ? "update_cv" : "create_cv", cvIdRef.current, cv);
       haptics.success();
       setDirty(false);
+      // THE DELIVERABLE MOMENT. The CV exists and is safe on the phone; this is
+      // the first point at which an account is worth offering, and the offer
+      // (once ever) says what it earns rather than asking for a sign-in.
+      if (storedLocally) void offerGuestAccountOnce({ isGuest });
     } catch (error) {
       reportError(error, { scope: "cvEditor.save.queue", cvId: cv.id });
       if (storedLocally) {
@@ -390,7 +424,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
     try {
       const cv: CV = {
         id: cvIdRef.current,
-        userId: "me",
+        userId: owner,
         templateId: template,
         title: data.personalInfo?.fullName || "My CV",
         data: data as CVData,
@@ -404,10 +438,70 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       // it is the strongest signal we ever get that the person is actively
       // applying. Three of these across different days becomes a fact she can
       // coach from — "actively applying" — without ever being asked.
-      updateMemory((m) =>
-        addEpisode(m, "cv_exported", `Exported a CV using the ${template} template`),
+      //
+      // Same event-not-sentence rule as the save path above: this used to store
+      // the English "Exported a CV using the ${template} template" that a
+      // Swahili user then read in the memory screen.
+      const exportedTemplateName = CV_TEMPLATES.find((x) => x.id === template)?.name[lang] ?? template;
+      updateMemory(owner, (m) =>
+        addEpisodeEvent(m, "cv_exported", { key: "cv_exported", params: { template: exportedTemplateName } }, t),
       ).catch(() => {});
-      await shareCV(cv, uri);
+      // The Swahili label on this button is "Pakua PDF" — so it has to SAVE the
+      // file, not hand the bytes to the Android share sheet. The 1.6.24 device
+      // sweep measured exactly that lie on the CV card ("Sharing 1 file", with
+      // /sdcard/Download byte-identical before and after), and the same call sat
+      // behind this footer button. Same flow as the CV list's Pakua: the user
+      // picks the folder (Downloads is one tap away — see
+      // services/save-to-device.ts for why SAF is the only honest door), and
+      // sharing stays one tap away inside the confirmation.
+      const saved = await saveToPhone(uri, fileNameFromUri(uri));
+      // Anything short of a real save must still say something — a dismissed
+      // folder picker used to return here in total silence: no file, no
+      // message, no share sheet (measured on 1.6.28). shouldOfferShare() is
+      // the single tested place that decides "not saved", so the two
+      // "download" screens can't drift apart on it.
+      if (shouldOfferShare(saved)) {
+        if (saved.status === "unsupported") {
+          // No SAF (iOS, or an unusual ROM): the share sheet IS the system save path.
+          await shareCV(cv, uri);
+          // The document has left the app — a deliverable either way, so the one
+          // offer still belongs here (queued after this screen, never on top of
+          // the share sheet).
+          void offerGuestAccountOnce({ isGuest });
+          return;
+        }
+        // "cancelled": the user dismissed the folder picker. Nothing failed,
+        // but nothing was written either — say so and offer the share sheet
+        // as the alternative save path, instead of returning in silence.
+        dialog.alert(
+          t("Not saved", "Haikuhifadhiwa"),
+          t(
+            "You didn't choose a folder, so nothing was saved. You can still share it directly.",
+            "Hukuchagua folda, kwa hivyo hakuna kilichohifadhiwa. Bado unaweza kuisambaza moja kwa moja.",
+          ),
+          [
+            { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+            { text: t("Done", "Sawa"), style: "cancel" },
+          ],
+        );
+        return;
+      }
+      dialog.alert(
+        t("Saved to your phone", "Imehifadhiwa kwenye simu yako"),
+        t(
+          `${saved.fileName} is in the folder you chose. Open Files to attach it in WhatsApp.`,
+          `${saved.fileName} iko kwenye folda uliyochagua. Fungua Files ili kuipachika WhatsApp.`,
+        ),
+        [
+          { text: t("Share now", "Sambaza sasa"), onPress: () => void shareCV(cv, uri) },
+          { text: t("Done", "Sawa"), style: "cancel" },
+        ],
+      );
+      // THE DOWNLOAD MOMENT. Pushed after the confirmation above, so the dialog
+      // layer shows it once that one is dismissed — a guest who has just taken
+      // the file away is the person an account is worth offering to. Once ever
+      // (lib/guest-invite.ts), and never for someone who already has an account.
+      void offerGuestAccountOnce({ isGuest });
     } catch {
       haptics.error();
       dialog.alert(t("Export failed", "Kupakua kumeshindwa"), t("Try again in a moment.", "Jaribu tena baada ya muda."));
@@ -437,7 +531,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       <Screen>
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 12 }}>
           <ActivityIndicator color={c.accent} />
-          <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Opening your CV…", "Inafungua CV yako…")}</Text>
+          <Text style={{ color: c.textMuted, fontSize: 13 }}>{t("Opening your CV…", "Ninafungua CV yako…")}</Text>
         </View>
       </Screen>
     );
@@ -512,7 +606,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </ScreenTitle>
 
       <Modal visible={showPreview} animationType="slide" onRequestClose={() => setShowPreview(false)}>
-        <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingTop: insets.top + 8, paddingBottom: 40 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingLeft: 16 + insets.left, paddingRight: 16 + insets.right, paddingTop: insets.top + 8, paddingBottom: 40 }}>
           <Pressable
             onPress={() => setShowPreview(false)}
             hitSlop={10}
@@ -522,7 +616,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
             <Text style={{ color: c.text, fontSize: 15, fontWeight: "700" }}>{t("Back to editing", "Rudi kuhariri")}</Text>
           </Pressable>
           <CvPreviewCard
-            cv={{ id: cvIdRef.current, userId: "me", templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
+            cv={{ id: cvIdRef.current, userId: owner, templateId: template, title: data.personalInfo?.fullName || "CV", data: data as CVData, createdAt: new Date(), updatedAt: new Date() }}
             initialTemplate={template}
             initialColor={accent}
             onTemplateChange={(id) => { setTemplate(id); setDirty(true); }}

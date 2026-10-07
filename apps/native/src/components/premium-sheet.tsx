@@ -33,19 +33,19 @@ type Feature = "templates" | "courses" | "verdict" | "general";
 const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   templates: {
     en: [
-      "The 7 flagship designs — colour sidebars, photo rings, timelines",
+      "Two extra designs — Executive and Compact",
       "Earned by inviting friends — 7 days each time one builds a CV",
       "Everything else stays free",
     ],
     sw: [
-      "Miundo 7 bora — sidebars za rangi, pete za picha, mistari ya muda",
-      "Inapatikana kwa kuwalika marafiki — siku 7 kila mmoja akijenga CV",
+      "Miundo miwili ya ziada — Kiongozi na Fupi",
+      "Inapatikana kwa kualika marafiki — siku 7 kila mmoja akijenga CV",
       "Kila kitu kingine kinabaki bure",
     ],
   },
   courses: {
-    en: ["Deep courses: interview mastery, salary negotiation", "Step-by-step, built for East Africa", "The short guides stay free"],
-    sw: ["Kozi za kina: umahiri wa usaili, majadiliano ya mshahara", "Hatua kwa hatua, kwa Afrika Mashariki", "Miongozo mifupi inabaki bure"],
+    en: ["Deep guides: negotiation, changing fields, LinkedIn", "Step-by-step, built for East Africa", "The short guides stay free"],
+    sw: ["Miongozo ya kina: majadiliano, kubadili fani, LinkedIn", "Hatua kwa hatua, kwa Afrika Mashariki", "Miongozo mifupi inabaki bure"],
   },
   verdict: {
     en: ["A written verdict on your CV, in plain language", "Your 3 highest-impact fixes, ranked", "The deterministic ATS score stays free"],
@@ -53,13 +53,13 @@ const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
   },
   general: {
     en: [
-      "The 7 flagship designs — colour sidebars, photo rings, timelines",
-      "Deep courses: interview mastery, salary negotiation",
+      "Two extra designs — Executive and Compact",
+      "Deep guides: negotiation, changing fields, LinkedIn",
       "Everything essential stays free",
     ],
     sw: [
-      "Miundo 7 bora — sidebars za rangi, pete za picha, mistari ya muda",
-      "Kozi za kina: umahiri wa usaili, majadiliano ya mshahara",
+      "Miundo miwili ya ziada — Kiongozi na Fupi",
+      "Miongozo ya kina: majadiliano, kubadili fani, LinkedIn",
       "Kila kitu muhimu kinabaki bure",
     ],
   },
@@ -151,7 +151,8 @@ export function PremiumSheet({
               borderTopRightRadius: 24,
               paddingTop: 10,
               paddingBottom: insets.bottom + 18,
-              paddingHorizontal: 20,
+              paddingLeft: 20 + insets.left,
+              paddingRight: 20 + insets.right,
               borderTopWidth: 1,
               borderColor: c.border,
             },
@@ -179,13 +180,13 @@ export function PremiumSheet({
           <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 }}>
             {t(
               "Paying isn't open yet — but you don't have to wait. Premium is earned by inviting friends: 7 days each time one of them builds their first CV.",
-              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kuwalika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
+              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kualika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
             )}
           </Text>
 
           {earn && (
             <Button
-              label={t("Earn Premium — invite friends", "Pata Premium — walika marafiki")}
+              label={t("Earn Premium by inviting friends", "Pata Premium kwa kualika marafiki")}
               onPress={() => {
                 haptics.light();
                 onClose();

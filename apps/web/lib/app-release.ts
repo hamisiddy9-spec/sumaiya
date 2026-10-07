@@ -39,7 +39,7 @@ export interface AppReleaseManifest {
 }
 
 export const APP_RELEASE: AppReleaseManifest = {
-  version: "1.6.22",
+  version: "1.6.29",
   // Site link 308-redirects to the public releases repo asset — the manifest
   // never hard-codes GitHub, so hosting can move without breaking updates.
   // ⚠️ Bump this ONLY after the matching APK is uploaded to a GitHub release on
@@ -52,20 +52,28 @@ export const APP_RELEASE: AppReleaseManifest = {
   // every in-app update link 404'd at the DNS layer.
   url: "https://sumaiya.app/downloads/sumaiya.apk",
   notes: {
-    // 1.6.12 and 1.6.13 were built but never announced, so this is the first
-    // bump since 1.6.11 that users will actually see. It is a normal update —
-    // same signing key throughout, no "remove the old app first" dance.
+    // What is true of THIS build that was not true of the one it replaces. These
+    // notes render inside the update modal, so they say what changed for the
+    // person reading them, not what changed in the repo.
     //
-    // What it says is the one thing true of every version before it: sign-in
-    // could not work. 1.6.11 and 1.6.12 shipped without the Supabase anon key
-    // in the bundle, so the email code was refused with "Invalid API key" and
-    // nobody could get in. Users who gave up should be told the cause was ours
-    // and that a retry is worth it now.
+    // 1.6.29 is 1.6.28 plus one fix, so the notes carry both: everything below is what
+    // a user on any older build gains, and the last line is this version's own change.
     //
-    // Deliberately does not promise that the code will arrive: the mailer is
-    // configured on the Supabase side, so this build can accept the request
-    // while delivery is still being fixed. No "you're all set".
-    en: "Crash reporting is on — when something breaks in the app we now capture it and fix it fast. Your CVs and personal details are never sent, only the error.",
-    sw: "Ufuatiliaji wa hitilafu umeanza — app inapokwama sasa tunapata taarifa na kurekebisha haraka. CV zako na taarifa binafsi hazitumwi, hitilafu pekee.",
+    // 1.6.28's line: the document stops being the weak part. Exports were US Letter
+    // while every design is authored A4 (so a one-page CV printed as two), pages were
+    // software-rasterised, small print printed at 5.7pt, and the gallery showed an
+    // identical grey sketch for 224 different designs. Maombi also works without an
+    // account now, and is finally measured.
+    //
+    // 1.6.29's line: on a fresh install with an update pending, the download pill used
+    // to float up over the onboarding language choices — the first screen a new user
+    // sees — and, being pressable, swallowed the tap meant for the last language. It
+    // reserved room for a tab bar that is not on that screen.
+    //
+    // Deliberately does not promise Premium arrives instantly: it is earned when
+    // a friend signs up and builds their first CV, which takes as long as the
+    // friend takes. No "you're all set".
+    en: "Your CV now comes out A4 — the size employers here expect — and pages render sharp, with the small print readable. The gallery shows each design's real look, and you can save a job and track it from saved to offer without signing in. The update bar no longer covers the choices on the first screen.",
+    sw: "CV yako sasa inatoka kama A4 — ukubwa ambao waajiri wanatarajia — na kurasa zinaonekana vizuri, maandishi madogo yanasomeka. Orodha ya miundo inaonyesha kila muundo jinsi unavyoonekana kweli, na unaweza kuhifadhi kazi na kufuatilia kutoka imehifadhiwa hadi ofa bila kuingia. Upau wa kusasisha haufuniki tena chaguo za skrini ya kwanza.",
   },
 };

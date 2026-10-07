@@ -23,7 +23,15 @@ interface MobileSyncQueueItem {
   lastError?: string;
 }
 
-export function useOfflineSync() {
+/**
+ * Offline-first push queue for CV writes.
+ *
+ * `enabled: false` is for the guest path (no account, so no server to push to):
+ * the queue is not polled and nothing is flushed, which keeps an unauthenticated
+ * request from being issued at all on a phone that may not even have data.
+ */
+export function useOfflineSync(options: { enabled?: boolean } = {}) {
+  const enabled = options.enabled !== false;
   const [status, setStatus] = useState<SyncStatus>({
     isSyncing: false,
     pendingCount: 0,
@@ -32,6 +40,7 @@ export function useOfflineSync() {
 
   // Get pending operations from queue on mount
   useEffect(() => {
+    if (!enabled) return;
     const initPendingCount = async () => {
       try {
         const queue = await offlineStorage.getSyncQueue();
@@ -41,7 +50,7 @@ export function useOfflineSync() {
       }
     };
     initPendingCount();
-  }, []);
+  }, [enabled]);
 
   const processSyncQueue = useCallback(async () => {
     setStatus((prev) => ({ ...prev, isSyncing: true, errors: [] }));
@@ -165,19 +174,24 @@ export function useOfflineSync() {
       // Fire-and-forget: this runs in the background even if the screen
       // unmounts right after save() returns, and processSyncQueue's own
       // per-item retry/backoff logic still applies if it's actually offline.
-      void processSyncQueue();
+      //
+      // Skipped entirely without an account (guest mode): an unauthenticated
+      // push can only fail, and the queued edit is uploaded by the claim on
+      // sign-in instead.
+      if (enabled) void processSyncQueue();
     },
-    [processSyncQueue]
+    [processSyncQueue, enabled]
   );
 
   // Auto-sync every 30 seconds
   useEffect(() => {
+    if (!enabled) return;
     const timer = setInterval(() => {
       processSyncQueue();
     }, 30000);
 
     return () => clearInterval(timer);
-  }, [processSyncQueue]);
+  }, [processSyncQueue, enabled]);
 
   return {
     status,

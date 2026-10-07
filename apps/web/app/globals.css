@@ -145,19 +145,39 @@
     transform: translateY(0);
   }
   .reveal.delay-1 { transition-delay: 0.07s; }
-  .reveal.delay-2 { transition-delay: 0.14s; }
-  .reveal.delay-3 { transition-delay: 0.21s; }
-  .reveal.delay-4 { transition-delay: 0.28s; }
+  .reveal.delay-2 { transition-delay: 0.11s; }
+  .reveal.delay-3 { transition-delay: 0.15s; }
+  .reveal.delay-4 { transition-delay: 0.19s; }
 
   /* Hero copy reveal — the h1 is the LCP element, so it must NOT be hidden
      pre-hydration (opacity:0 would gate LCP behind JS + IntersectionObserver
      + a 1.6s fallback, pushing LCP past 4s on mid-range phones). Instead of
      the JS-gated .reveal, animate a pure transform rise: the text is fully
      painted on first frame, LCP counts immediately, and the entrance motion
-     is preserved. */
+     is preserved.
+
+     The hero is a STAGE, not one block: `.hero-reveal` is the base beat and
+     `.hero-reveal-1..6` stagger the lockup, eyebrow, headline, sub-head, the
+     actions, the proof line and the art — the same choreography the siblings'
+     welcoming path uses (a `Reveal` staggered by the shared motion tokens).
+     Every number is a canonical token, so the landing does not run a second
+     motion rhythm: duration = `MOTION.dur.slow` (300ms, "an element entering"),
+     easing = `MOTION.ease.out` (cubic-bezier(0.33,1,0.68,1) — the native
+     `Easing.out(Easing.cubic)` the welcome stage enters on), travel =
+     `MOTION.rise` (12px), and the delays are the house stagger
+     (base 30ms, step 40ms) — identical to the `.rise-1..6` helpers above.
+     Every step is transform-only, so the LCP headline is never hidden and never
+     waits on JavaScript. */
   .hero-reveal {
-    animation: hero-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: hero-rise 300ms cubic-bezier(0.33, 1, 0.68, 1) both;
+    animation-delay: 0.03s;
   }
+  .hero-reveal-1 { animation-delay: 0.07s; }
+  .hero-reveal-2 { animation-delay: 0.11s; }
+  .hero-reveal-3 { animation-delay: 0.15s; }
+  .hero-reveal-4 { animation-delay: 0.19s; }
+  .hero-reveal-5 { animation-delay: 0.23s; }
+  .hero-reveal-6 { animation-delay: 0.27s; }
   @keyframes hero-rise {
     from { transform: translateY(12px); }
     to { transform: translateY(0); }
@@ -220,7 +240,13 @@
       transform: none;
       transition: none;
     }
-    .hero-reveal {
+    .hero-reveal,
+    .hero-reveal-1,
+    .hero-reveal-2,
+    .hero-reveal-3,
+    .hero-reveal-4,
+    .hero-reveal-5,
+    .hero-reveal-6 {
       animation: none;
     }
 
@@ -290,15 +316,28 @@
 .snap-rise-3 { animation-delay: 0.15s; }
 .snap-rise-4 { animation-delay: 0.2s; }
 
-/* RF5 — generic reveal (same language as snap-rise) for non-/snap surfaces:
-   result cards, quick-create tiles, stat rows. `.rise-N` matches the shared
-   motion utility's stagger (riseClass). Reduced-motion collapses these to
-   instant via the app-wide safety net below. */
-.rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.rise-1 { animation-delay: 0.05s; }
-.rise-2 { animation-delay: 0.1s; }
+/* RF5 — generic reveal for non-/snap surfaces: result cards, quick-create
+   tiles, stat rows. `.rise-N` matches the shared motion utility's stagger
+   (riseClass) and the tokens in apps/web/lib/motion.ts + the native app's
+   components/ui/motion.tsx. Delays: base 30ms, step 40ms, capped at 6 items
+   (max 270ms) — a long grid is fully delivered inside one beat rather than
+   trickling in after the page is already usable.
+   Reduced-motion collapses these to instant via the app-wide safety net below. */
+.rise { animation: snap-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: 0.03s; }
+.rise-1 { animation-delay: 0.07s; }
+.rise-2 { animation-delay: 0.11s; }
 .rise-3 { animation-delay: 0.15s; }
-.rise-4 { animation-delay: 0.2s; }
+.rise-4 { animation-delay: 0.19s; }
+.rise-5 { animation-delay: 0.23s; }
+.rise-6 { animation-delay: 0.27s; }
+
+/* Loading → content hand-off. The placeholder fades away where it stands while
+   the real content rises into the space, so a load never ends by swapping one
+   thing out and another in on the same frame (a "boom": the slot goes blank,
+   then content pops into the hole). */
+.swap-in { animation: snap-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.swap-out { animation: swap-out 0.14s cubic-bezier(0.32, 0, 0.67, 0) both; }
+@keyframes swap-out { from { opacity: 1; } to { opacity: 0; } }
 
 /* Snap tab panel — the photo capture UI fades in on Paste ⇄ Photo switch. */
 .snap-panel { animation: snap-rise 0.18s ease-out both; }

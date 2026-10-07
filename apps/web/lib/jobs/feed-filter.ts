@@ -173,8 +173,46 @@ export function topCategories(jobs: FeedJob[], limit = 20): string[] {
  * names below are Tanzanian cities/regions used as a MATCHING AID only — no
  * job is ever given a location it did not state.
  */
-const HOME_MARKET_RE =
-  /\b(tanzania|tanzanian|dar es salaam|dar|dodoma|arusha|mwanza|mbeya|morogoro|tanga|zanzibar|unguja|pemba|kilimanjaro|moshi|kigoma|shinyanga|tabora|songea|iringa|singida|bukoba|musoma|mtwara|lindi|njombe|geita|simiyu|katavi|rukwa|pwani|ruvuma|kagera)\b/i;
+/**
+ * The home-market matching aid, as DATA — one list, two consumers.
+ *
+ * This is deliberately a single source of truth, because the two consumers MUST NOT
+ * drift: the JS predicate below, and the SQL ORDER BY in `lib/api/routes/jobs.ts` that
+ * decides WHICH rows the LIMIT slice is taken from.
+ *
+ * Measured 2026-09-21, and this is why the SQL side exists at all: `homeMarketFirst` is
+ * a stable partition of rows the caller has ALREADY fetched, so it can only reorder what
+ * survived the LIMIT — it cannot promote a row that was never in the slice. The public
+ * feed fetched `ORDER BY featured, created_at LIMIT 100` and every one of those 100 rows
+ * was a German listing, so the partition was a no-op and **365 live Tanzanian jobs were
+ * unreachable** — a user in Dar es Salaam opened the jobs tab on Berlin and Frankfurt.
+ * Ordering in SQL before the LIMIT is the fix; this list is what both halves match on.
+ */
+export const HOME_MARKET_TERMS = [
+  "tanzania", "tanzanian", "dar es salaam", "dar", "dodoma", "arusha", "mwanza",
+  "mbeya", "morogoro", "tanga", "zanzibar", "unguja", "pemba", "kilimanjaro",
+  "moshi", "kigoma", "shinyanga", "tabora", "songea", "iringa", "singida",
+  "bukoba", "musoma", "mtwara", "lindi", "njombe", "geita", "simiyu", "katavi",
+  "rukwa", "pwani", "ruvuma", "kagera",
+] as const;
+
+const HOME_MARKET_RE = new RegExp(`\\b(${HOME_MARKET_TERMS.join("|")})\\b`, "i");
+
+/**
+ * The same list for the SQL ORDER BY, built from `HOME_MARKET_TERMS` so the two can
+ * never diverge — but with Postgres' OWN word-boundary escape.
+ *
+ * `\b` is JavaScript's word boundary and **Postgres does not implement it**: inside an
+ * ARE pattern `\b` is a backspace character. Measured against the live table
+ * (2026-09-21, 1,304 rows, 365 with `location = 'Tanzania'`):
+ *
+ *     location ~* '\b(tanzania)\b'  -> 0 rows     <- silently matches nothing
+ *     location ~* '\y(tanzania)\y'  -> 365 rows   <- Postgres' word boundary
+ *
+ * Copying the JS pattern into SQL would therefore have produced a fix that did nothing,
+ * with no error and no failing test. Postgres' escape is `\y`.
+ */
+export const HOME_MARKET_SQL_PATTERN = `\\y(${HOME_MARKET_TERMS.join("|")})\\y`;
 
 /** True when a listing's own stated location is in the home market. */
 export function isHomeMarketLocation(location: string): boolean {

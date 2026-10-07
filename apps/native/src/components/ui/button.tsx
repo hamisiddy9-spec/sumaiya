@@ -1,8 +1,9 @@
 import React from "react";
 import { ActivityIndicator, Pressable, Text, View, type PressableProps } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { haptics } from "./haptics";
 import { useThemeColors } from "./theme";
+import { EASE, MOTION, enterDurationMs, useMotionReduced } from "./motion";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
@@ -51,6 +52,7 @@ export function Button({
 }: ButtonProps) {
   const c = useThemeColors();
   const s = SIZES[size];
+  const reduceMotion = useMotionReduced();
   const scale = useSharedValue(1);
   const isDisabled = disabled || loading;
 
@@ -111,9 +113,18 @@ export function Button({
           ]}
         >
           {loading ? (
-            <ActivityIndicator color={palette.fg} size="small" />
+            // The spinner fades in over the label rather than replacing it in the
+            // same commit. The label is the only thing announcing what the button
+            // does, and on a slow phone an in-flight action can last seconds — a
+            // hard swap reads as the button having changed identity.
+            <Animated.View entering={FadeIn.duration(enterDurationMs(reduceMotion, MOTION.dur.base)).easing(EASE.out)}>
+              <ActivityIndicator color={palette.fg} size="small" />
+            </Animated.View>
           ) : (
-            <>
+            <Animated.View
+              entering={FadeIn.duration(enterDurationMs(reduceMotion, MOTION.dur.base)).easing(EASE.out)}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: s.gap, flexShrink: 1 }}
+            >
               {leftIcon ? <View>{leftIcon}</View> : null}
               {sublabel ? (
                 // Left-aligned preview, because a second line reads as a
@@ -132,7 +143,7 @@ export function Button({
                 </Text>
               )}
               {rightIcon ? <View>{rightIcon}</View> : null}
-            </>
+            </Animated.View>
           )}
         </Animated.View>
       </Pressable>

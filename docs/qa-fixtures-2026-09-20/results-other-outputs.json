@@ -1,0 +1,105 @@
+{
+ "cvMenu": {
+  "opened": true,
+  "items": [
+   "Wasifu",
+   "Nakuru",
+   "Pakua PDF",
+   "PDF Muundo kamili + maandishi kwa mifumo ya kuajiri",
+   "Word (.docx) Toleo la maandishi · si muundo wa template",
+   "Maandishi (.txt) Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri",
+   "Shiriki mtandaoni MPYA Pata kiungo cha kushiriki WhatsApp",
+   "Shiriki faili… Barua pepe, Drive, WhatsApp…",
+   "Historia ya matoleo Rejesha toleo la awali la CV yako",
+   "1 Kuhusu",
+   "2 Kazi",
+   "3 Elimu",
+   "4 Ujuzi",
+   "5 Nyongeza",
+   "Boresha na AI",
+   "Nyuma",
+   "Endelea",
+   "Pakua PDF",
+   "Muundo",
+   "Boresha",
+   "Nakuru Badilisha",
+   "Ember",
+   "Pine",
+   "Purple",
+   "Forest",
+   "Coral",
+   "Sunset",
+   "Ocean",
+   "Royal",
+   "Midnight",
+   "Slate",
+   "Inter Clean · Modern · ATS-friendly",
+   "Hanken Warm · Geometric · Contemporary",
+   "Helvetica Neutral · Swiss · Crisp",
+   "Verdana Legible · Friendly · Screen-safe",
+   "Trebuchet Humanist · Approachable",
+   "Georgia Classic · Elegant · Traditional",
+   "Palatino Refined · Bookish · Executive",
+   "Garamond Literary · Timeless · Formal",
+   "Cambria Sturdy · Readable · Formal",
+   "Times Academic · Conservative",
+   "JetBrains Technical · Code · Precise",
+   "Courier Typewriter · Retro · Mono",
+   "Fupi Maudhui zaidi",
+   "Kawaida Uwiano",
+   "Wazi Nafasi zaidi",
+   "Boresha na AI"
+  ]
+ },
+ "docx": {
+  "clicked": true,
+  "blobs": 1,
+  "names": [
+   "QA_English_CV.docx"
+  ],
+  "bytes": 9858
+ },
+ "txt": {
+  "clicked": true,
+  "blobs": 1,
+  "names": [
+   "QA_English_CV.txt"
+  ],
+  "bytes": 1773
+ },
+ "shareFile": {
+  "clicked": true,
+  "shareCalls": [
+   {
+    "title": "QA English CV",
+    "files": [
+     "QA_English_CV.pdf:370156"
+    ],
+    "text": "My CV — made with Sumaiya"
+   }
+  ],
+  "blobs": 0
+ },
+ "shareOnline": {
+  "clicked": true,
+  "urls": [
+   "https://…)"
+  ],
+  "dialogText": "Shiriki CV yako Weka mtandaoni kwa kiungo Pata kiungo cha kushiriki WhatsApp au kwa mwajiri. sumaiya.app/cv/amina-joseph-mwakasege-vrqhg3 Nakili Shiriki kwa WhatsApp Onyesha mawasiliano (barua pepe & simu) Kiungo pekee — CV yako haitaonekana kwenye Google."
+ },
+ "shareApi": {
+  "status": 200,
+  "slug": "amina-joseph-mwakasege-vrqhg3",
+  "isPublic": true
+ },
+ "publicCvPage": {
+  "status": 200,
+  "bytes": 56474,
+  "namePresent": true,
+  "hasTextLayer": true
+ },
+ "versionHistory": {
+  "clicked": false,
+  "text": "Ruka hadi maudhui Nyumbani Imehifadhiwa Wasifu Nakuru +5 Pakua PDF 1 Kuhusu 2 Kazi 3 Elimu 4 Ujuzi 5 Nyongeza 86 IMARA NGUVU YA CV Ongeza ujuzi angalau 4 Jina lako linaonekana kwenye onyesho unapoandika. Jina kamili Cheo cha kazi Picha ya wasifu (si lazima) Hakuna picha Pakia picha Hadi 12MB · JPG / PNG / WebP · Huhifadhiwa kwa ukubwa mdogo Si lazima kuweka picha. Ukiweka, inabaki kwenye wasifu wa"
+ }
+}

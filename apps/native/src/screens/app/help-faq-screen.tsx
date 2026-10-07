@@ -1,9 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, {
+  FadeIn,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { useLang } from "../../lib/i18n";
 import { Icon } from "../../components/icon";
-import { haptics, Screen, ScreenTitle, useThemeColors } from "../../components/ui";
+import {
+  EASE,
+  MOTION,
+  Screen,
+  ScreenTitle,
+  enterDurationMs,
+  haptics,
+  staggerDelayMs,
+  useMotionReduced,
+  useThemeColors,
+} from "../../components/ui";
 import type { HelpFaqScreenProps } from "../../navigation/types";
 
 interface Faq {
@@ -83,10 +99,30 @@ function FaqItem({ faq, index }: { faq: Faq; index: number }) {
   const c = useThemeColors();
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
+  const reduce = useMotionReduced();
+  const turn = useSharedValue(0);
+
+  useEffect(() => {
+    turn.value = withTiming(open ? 180 : 0, {
+      duration: reduce ? MOTION.dur.instant : MOTION.dur.base,
+      easing: EASE.inOut,
+    });
+  }, [open, reduce, turn]);
+
+  const chevron = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${turn.value}deg` }],
+  }));
 
   return (
     <Animated.View
-      entering={FadeIn.duration(240).delay(Math.min(index, 6) * 45)}
+      entering={FadeIn.duration(enterDurationMs(reduce, MOTION.dur.slow)).delay(
+        staggerDelayMs(index, { reduceMotion: reduce }),
+      )}
+      // Without a `layout` transition the collapsed answer's height appears in
+      // one frame and pushes every card below it down instantly — the single
+      // most visible "boom" on this screen. The card animates its own resize and
+      // the siblings follow it. Same pattern as the CV editor's Sections.
+      layout={LinearTransition.springify().damping(20)}
       style={{
         borderRadius: 14,
         borderWidth: 1,
@@ -109,12 +145,19 @@ function FaqItem({ faq, index }: { faq: Faq; index: number }) {
           <Icon name="help-circle" size={16} color={c.accent} />
         </View>
         <Text style={{ flex: 1, color: c.text, fontSize: 15, fontWeight: "600", lineHeight: 20 }}>{faq.q[lang]}</Text>
-        <Icon name={open ? "chevron-up" : "chevron-down"} size={17} color={c.textMuted} />
+        {/* One icon that turns, rather than swapping chevron-down for chevron-up.
+            The swap was an instant visual state change with no in-between. */}
+        <Animated.View style={chevron}>
+          <Icon name="chevron-down" size={17} color={c.textMuted} />
+        </Animated.View>
       </Pressable>
       {open ? (
-        <View style={{ paddingHorizontal: 15, paddingBottom: 15, paddingTop: 0 }}>
+        <Animated.View
+          entering={FadeIn.duration(enterDurationMs(reduce, MOTION.dur.base)).easing(EASE.out)}
+          style={{ paddingHorizontal: 15, paddingBottom: 15, paddingTop: 0 }}
+        >
           <Text style={{ color: c.textBody, fontSize: 13.5, lineHeight: 21, paddingLeft: 42 }}>{faq.a[lang]}</Text>
-        </View>
+        </Animated.View>
       ) : null}
     </Animated.View>
   );

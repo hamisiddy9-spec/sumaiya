@@ -1,0 +1,1409 @@
+[
+ {
+  "key": "curated-rift",
+  "group": "curated-template",
+  "templateId": "rift",
+  "name": "Rift",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-rift.pdf",
+  "bytes": 379807,
+  "mime": "application/pdf",
+  "ms": 5205
+ },
+ {
+  "key": "curated-zahabu",
+  "group": "curated-template",
+  "templateId": "zahabu",
+  "name": "Zahabu",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-zahabu.pdf",
+  "bytes": 379724,
+  "mime": "application/pdf",
+  "ms": 4636
+ },
+ {
+  "key": "curated-nuru",
+  "group": "curated-template",
+  "templateId": "nuru",
+  "name": "Nuru",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-nuru.pdf",
+  "bytes": 379807,
+  "mime": "application/pdf",
+  "ms": 5175
+ },
+ {
+  "key": "curated-pemba",
+  "group": "curated-template",
+  "templateId": "pemba",
+  "name": "Pemba",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-pemba.pdf",
+  "bytes": 379779,
+  "mime": "application/pdf",
+  "ms": 4408
+ },
+ {
+  "key": "curated-malachite",
+  "group": "curated-template",
+  "templateId": "malachite",
+  "name": "Malachite",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-malachite.pdf",
+  "bytes": 379774,
+  "mime": "application/pdf",
+  "ms": 4771
+ },
+ {
+  "key": "curated-coral",
+  "group": "curated-template",
+  "templateId": "coral",
+  "name": "Coral",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-coral.pdf",
+  "bytes": 379724,
+  "mime": "application/pdf",
+  "ms": 4742
+ },
+ {
+  "key": "curated-kioo",
+  "group": "curated-template",
+  "templateId": "kioo",
+  "name": "Kioo",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-kioo.pdf",
+  "bytes": 379836,
+  "mime": "application/pdf",
+  "ms": 5197
+ },
+ {
+  "key": "curated-bento",
+  "group": "curated-template",
+  "templateId": "bento",
+  "name": "Bento",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-bento.pdf",
+  "bytes": 379834,
+  "mime": "application/pdf",
+  "ms": 4720
+ },
+ {
+  "key": "curated-zege",
+  "group": "curated-template",
+  "templateId": "zege",
+  "name": "Zege",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-zege.pdf",
+  "bytes": 379815,
+  "mime": "application/pdf",
+  "ms": 4593
+ },
+ {
+  "key": "curated-console",
+  "group": "curated-template",
+  "templateId": "console",
+  "name": "Console",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-console.pdf",
+  "bytes": 379868,
+  "mime": "application/pdf",
+  "ms": 4893
+ },
+ {
+  "key": "curated-riso",
+  "group": "curated-template",
+  "templateId": "riso",
+  "name": "Riso",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-riso.pdf",
+  "bytes": 379815,
+  "mime": "application/pdf",
+  "ms": 4795
+ },
+ {
+  "key": "curated-vibe",
+  "group": "curated-template",
+  "templateId": "vibe",
+  "name": "Vibe",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-vibe.pdf",
+  "bytes": 379724,
+  "mime": "application/pdf",
+  "ms": 4648
+ },
+ {
+  "key": "curated-neon",
+  "group": "curated-template",
+  "templateId": "neon",
+  "name": "Neon",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-neon.pdf",
+  "bytes": 379763,
+  "mime": "application/pdf",
+  "ms": 4583
+ },
+ {
+  "key": "curated-regent",
+  "group": "curated-template",
+  "templateId": "regent",
+  "name": "Regent",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-regent.pdf",
+  "bytes": 379763,
+  "mime": "application/pdf",
+  "ms": 4751
+ },
+ {
+  "key": "curated-marlowe",
+  "group": "curated-template",
+  "templateId": "marlowe",
+  "name": "Marlowe",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-marlowe.pdf",
+  "bytes": 379857,
+  "mime": "application/pdf",
+  "ms": 5094
+ },
+ {
+  "key": "curated-cavendish",
+  "group": "curated-template",
+  "templateId": "cavendish",
+  "name": "Cavendish",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-cavendish.pdf",
+  "bytes": 379805,
+  "mime": "application/pdf",
+  "ms": 5839
+ },
+ {
+  "key": "curated-haven",
+  "group": "curated-template",
+  "templateId": "haven",
+  "name": "Haven",
+  "patch": [],
+  "patchStatus": 429,
+  "patchError": "{\"error\":\"Too many requests\"}",
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-haven.pdf",
+  "bytes": 379820,
+  "mime": "application/pdf",
+  "ms": 4643
+ },
+ {
+  "key": "curated-nakuru",
+  "group": "curated-template",
+  "templateId": "nakuru",
+  "name": "Nakuru",
+  "patch": [],
+  "patchStatus": 429,
+  "patchError": "{\"error\":\"Too many requests\"}",
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-nakuru.pdf",
+  "bytes": 379852,
+  "mime": "application/pdf",
+  "ms": 4758
+ },
+ {
+  "key": "curated-ubuntu",
+  "group": "curated-template",
+  "templateId": "ubuntu",
+  "name": "Ubuntu",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-ubuntu.pdf",
+  "bytes": 379898,
+  "mime": "application/pdf",
+  "ms": 4550
+ },
+ {
+  "key": "curated-mombasa",
+  "group": "curated-template",
+  "templateId": "mombasa",
+  "name": "Mombasa",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-mombasa.pdf",
+  "bytes": 379772,
+  "mime": "application/pdf",
+  "ms": 4807
+ },
+ {
+  "key": "curated-aurora-edge",
+  "group": "curated-template",
+  "templateId": "aurora-edge",
+  "name": "Aurora Edge",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-aurora-edge.pdf",
+  "bytes": 379686,
+  "mime": "application/pdf",
+  "ms": 4821
+ },
+ {
+  "key": "curated-metro",
+  "group": "curated-template",
+  "templateId": "metro",
+  "name": "Metro",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-metro.pdf",
+  "bytes": 379808,
+  "mime": "application/pdf",
+  "ms": 5268
+ },
+ {
+  "key": "curated-meridian",
+  "group": "curated-template",
+  "templateId": "meridian",
+  "name": "Meridian",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-meridian.pdf",
+  "bytes": 379852,
+  "mime": "application/pdf",
+  "ms": 4919
+ },
+ {
+  "key": "curated-serengeti",
+  "group": "curated-template",
+  "templateId": "serengeti",
+  "name": "Serengeti",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-serengeti.pdf",
+  "bytes": 379789,
+  "mime": "application/pdf",
+  "ms": 5182
+ },
+ {
+  "key": "curated-nairobi",
+  "group": "curated-template",
+  "templateId": "nairobi",
+  "name": "Nairobi",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-nairobi.pdf",
+  "bytes": 379790,
+  "mime": "application/pdf",
+  "ms": 4613
+ },
+ {
+  "key": "curated-atlas",
+  "group": "curated-template",
+  "templateId": "atlas",
+  "name": "Atlas",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-atlas.pdf",
+  "bytes": 379820,
+  "mime": "application/pdf",
+  "ms": 5123
+ },
+ {
+  "key": "curated-eclipse",
+  "group": "curated-template",
+  "templateId": "eclipse",
+  "name": "Eclipse",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-eclipse.pdf",
+  "bytes": 379894,
+  "mime": "application/pdf",
+  "ms": 4793
+ },
+ {
+  "key": "curated-horizon",
+  "group": "curated-template",
+  "templateId": "horizon",
+  "name": "Horizon",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-horizon.pdf",
+  "bytes": 379873,
+  "mime": "application/pdf",
+  "ms": 5364
+ },
+ {
+  "key": "curated-nova",
+  "group": "curated-template",
+  "templateId": "nova",
+  "name": "Nova",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-nova.pdf",
+  "bytes": 379747,
+  "mime": "application/pdf",
+  "ms": 4995
+ },
+ {
+  "key": "curated-kilimanjaro",
+  "group": "curated-template",
+  "templateId": "kilimanjaro",
+  "name": "Kilimanjaro",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-kilimanjaro.pdf",
+  "bytes": 379942,
+  "mime": "application/pdf",
+  "ms": 4707
+ },
+ {
+  "key": "curated-victoria",
+  "group": "curated-template",
+  "templateId": "victoria",
+  "name": "Victoria",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-victoria.pdf",
+  "bytes": 379816,
+  "mime": "application/pdf",
+  "ms": 4796
+ },
+ {
+  "key": "curated-monarch",
+  "group": "curated-template",
+  "templateId": "monarch",
+  "name": "Monarch",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-monarch.pdf",
+  "bytes": 379962,
+  "mime": "application/pdf",
+  "ms": 5316
+ },
+ {
+  "key": "curated-oxford",
+  "group": "curated-template",
+  "templateId": "oxford",
+  "name": "Oxford",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-oxford.pdf",
+  "bytes": 379805,
+  "mime": "application/pdf",
+  "ms": 4801
+ },
+ {
+  "key": "curated-titan",
+  "group": "curated-template",
+  "templateId": "titan",
+  "name": "Titan",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-titan.pdf",
+  "bytes": 379760,
+  "mime": "application/pdf",
+  "ms": 5005
+ },
+ {
+  "key": "curated-zanzibar",
+  "group": "curated-template",
+  "templateId": "zanzibar",
+  "name": "Zanzibar",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-zanzibar.pdf",
+  "bytes": 379917,
+  "mime": "application/pdf",
+  "ms": 4466
+ },
+ {
+  "key": "curated-canvas-magazine",
+  "group": "curated-template",
+  "templateId": "canvas-magazine",
+  "name": "Canvas Magazine",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-canvas-magazine.pdf",
+  "bytes": 379824,
+  "mime": "application/pdf",
+  "ms": 4526
+ },
+ {
+  "key": "curated-vertex",
+  "group": "curated-template",
+  "templateId": "vertex",
+  "name": "Vertex",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-vertex.pdf",
+  "bytes": 379799,
+  "mime": "application/pdf",
+  "ms": 4819
+ },
+ {
+  "key": "curated-muse",
+  "group": "curated-template",
+  "templateId": "muse",
+  "name": "Muse",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-muse.pdf",
+  "bytes": 379786,
+  "mime": "application/pdf",
+  "ms": 4993
+ },
+ {
+  "key": "curated-narrative",
+  "group": "curated-template",
+  "templateId": "narrative",
+  "name": "Narrative",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-narrative.pdf",
+  "bytes": 379820,
+  "mime": "application/pdf",
+  "ms": 5174
+ },
+ {
+  "key": "curated-tokyo-grid",
+  "group": "curated-template",
+  "templateId": "tokyo-grid",
+  "name": "Tokyo Grid",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-tokyo-grid.pdf",
+  "bytes": 379804,
+  "mime": "application/pdf",
+  "ms": 4554
+ },
+ {
+  "key": "curated-sahara",
+  "group": "curated-template",
+  "templateId": "sahara",
+  "name": "Sahara",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-sahara.pdf",
+  "bytes": 379788,
+  "mime": "application/pdf",
+  "ms": 5333
+ },
+ {
+  "key": "curated-nordic-minimal",
+  "group": "curated-template",
+  "templateId": "nordic-minimal",
+  "name": "Nordic Minimal",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-nordic-minimal.pdf",
+  "bytes": 379921,
+  "mime": "application/pdf",
+  "ms": 4481
+ },
+ {
+  "key": "curated-berlin",
+  "group": "curated-template",
+  "templateId": "berlin",
+  "name": "Berlin",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-berlin.pdf",
+  "bytes": 379782,
+  "mime": "application/pdf",
+  "ms": 4958
+ },
+ {
+  "key": "curated-grid",
+  "group": "curated-template",
+  "templateId": "grid",
+  "name": "Grid",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-grid.pdf",
+  "bytes": 379853,
+  "mime": "application/pdf",
+  "ms": 4528
+ },
+ {
+  "key": "curated-stripe",
+  "group": "curated-template",
+  "templateId": "stripe",
+  "name": "Stripe",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-stripe.pdf",
+  "bytes": 379933,
+  "mime": "application/pdf",
+  "ms": 4795
+ },
+ {
+  "key": "curated-serif-cv",
+  "group": "curated-template",
+  "templateId": "serif-cv",
+  "name": "Serif",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-serif-cv.pdf",
+  "bytes": 379774,
+  "mime": "application/pdf",
+  "ms": 4856
+ },
+ {
+  "key": "curated-mono-cv",
+  "group": "curated-template",
+  "templateId": "mono-cv",
+  "name": "Mono",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "curated-mono-cv.pdf",
+  "bytes": 379724,
+  "mime": "application/pdf",
+  "ms": 4851
+ },
+ {
+  "key": "legacy-aberdare",
+  "group": "legacy-template",
+  "templateId": "aberdare",
+  "name": "Aberdare",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-aberdare.pdf",
+  "bytes": 379774,
+  "mime": "application/pdf",
+  "ms": 4760
+ },
+ {
+  "key": "legacy-alpine",
+  "group": "legacy-template",
+  "templateId": "alpine",
+  "name": "Alpine",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-alpine.pdf",
+  "bytes": 379774,
+  "mime": "application/pdf",
+  "ms": 5263
+ },
+ {
+  "key": "legacy-austin",
+  "group": "legacy-template",
+  "templateId": "austin",
+  "name": "Austin",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-austin.pdf",
+  "bytes": 379789,
+  "mime": "application/pdf",
+  "ms": 4876
+ },
+ {
+  "key": "legacy-bauhaus",
+  "group": "legacy-template",
+  "templateId": "bauhaus",
+  "name": "Bauhaus",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-bauhaus.pdf",
+  "bytes": 379804,
+  "mime": "application/pdf",
+  "ms": 5127
+ },
+ {
+  "key": "legacy-carbon",
+  "group": "legacy-template",
+  "templateId": "carbon",
+  "name": "Carbon",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-carbon.pdf",
+  "bytes": 379804,
+  "mime": "application/pdf",
+  "ms": 4740
+ },
+ {
+  "key": "legacy-cascade",
+  "group": "legacy-template",
+  "templateId": "cascade",
+  "name": "Cascade",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-cascade.pdf",
+  "bytes": 379788,
+  "mime": "application/pdf",
+  "ms": 5175
+ },
+ {
+  "key": "legacy-chicago",
+  "group": "legacy-template",
+  "templateId": "chicago",
+  "name": "Chicago",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-chicago.pdf",
+  "bytes": 379816,
+  "mime": "application/pdf",
+  "ms": 4518
+ },
+ {
+  "key": "legacy-cirrus",
+  "group": "legacy-template",
+  "templateId": "cirrus",
+  "name": "Cirrus",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-cirrus.pdf",
+  "bytes": 379785,
+  "mime": "application/pdf",
+  "ms": 4867
+ },
+ {
+  "key": "legacy-cipher",
+  "group": "legacy-template",
+  "templateId": "cipher",
+  "name": "Cipher",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-cipher.pdf",
+  "bytes": 379824,
+  "mime": "application/pdf",
+  "ms": 4733
+ },
+ {
+  "key": "legacy-celeste",
+  "group": "legacy-template",
+  "templateId": "celeste",
+  "name": "Celeste",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-celeste.pdf",
+  "bytes": 379775,
+  "mime": "application/pdf",
+  "ms": 4478
+ },
+ {
+  "key": "legacy-boston",
+  "group": "legacy-template",
+  "templateId": "boston",
+  "name": "Boston",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-boston.pdf",
+  "bytes": 416086,
+  "mime": "application/pdf",
+  "ms": 4550
+ },
+ {
+  "key": "legacy-baroque-cv",
+  "group": "legacy-template",
+  "templateId": "baroque-cv",
+  "name": "Baroque",
+  "patch": [],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "legacy-baroque-cv.pdf",
+  "bytes": 420968,
+  "mime": "application/pdf",
+  "ms": 5189
+ },
+ {
+  "key": "colour-Ember",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Ember.pdf",
+  "bytes": 439849,
+  "mime": "application/pdf",
+  "ms": 4749
+ },
+ {
+  "key": "colour-Pine",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Pine.pdf",
+  "bytes": 359748,
+  "mime": "application/pdf",
+  "ms": 4461
+ },
+ {
+  "key": "colour-Purple",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Purple.pdf",
+  "bytes": 326486,
+  "mime": "application/pdf",
+  "ms": 4809
+ },
+ {
+  "key": "colour-Forest",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Forest.pdf",
+  "bytes": 284001,
+  "mime": "application/pdf",
+  "ms": 4524
+ },
+ {
+  "key": "colour-Coral",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Coral.pdf",
+  "bytes": 301382,
+  "mime": "application/pdf",
+  "ms": 4769
+ },
+ {
+  "key": "colour-Sunset",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Sunset.pdf",
+  "bytes": 376071,
+  "mime": "application/pdf",
+  "ms": 4720
+ },
+ {
+  "key": "colour-Ocean",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Ocean.pdf",
+  "bytes": 378493,
+  "mime": "application/pdf",
+  "ms": 4791
+ },
+ {
+  "key": "colour-Royal",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Royal.pdf",
+  "bytes": 350866,
+  "mime": "application/pdf",
+  "ms": 4461
+ },
+ {
+  "key": "colour-Midnight",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Midnight.pdf",
+  "bytes": 368407,
+  "mime": "application/pdf",
+  "ms": 5360
+ },
+ {
+  "key": "colour-Slate",
+  "group": "colour",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "primaryColor"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "colour-Slate.pdf",
+  "bytes": 334699,
+  "mime": "application/pdf",
+  "ms": 4957
+ },
+ {
+  "key": "font-Inter",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Inter.pdf",
+  "bytes": 285752,
+  "mime": "application/pdf",
+  "ms": 4744
+ },
+ {
+  "key": "font-Hanken",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Hanken.pdf",
+  "bytes": 265295,
+  "mime": "application/pdf",
+  "ms": 4915
+ },
+ {
+  "key": "font-Helvetica",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Helvetica.pdf",
+  "bytes": 312422,
+  "mime": "application/pdf",
+  "ms": 5502
+ },
+ {
+  "key": "font-Verdana",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Verdana.pdf",
+  "bytes": 312795,
+  "mime": "application/pdf",
+  "ms": 4863
+ },
+ {
+  "key": "font-Trebuchet",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Trebuchet.pdf",
+  "bytes": 303695,
+  "mime": "application/pdf",
+  "ms": 5100
+ },
+ {
+  "key": "font-Georgia",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Georgia.pdf",
+  "bytes": 391554,
+  "mime": "application/pdf",
+  "ms": 5328
+ },
+ {
+  "key": "font-Palatino",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Palatino.pdf",
+  "bytes": 351423,
+  "mime": "application/pdf",
+  "ms": 4941
+ },
+ {
+  "key": "font-Garamond",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 200,
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Garamond.pdf",
+  "bytes": 361614,
+  "mime": "application/pdf",
+  "ms": 5113
+ },
+ {
+  "key": "font-Cambria",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 429,
+  "patchError": "{\"error\":\"Too many requests\"}",
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Cambria.pdf",
+  "bytes": 361314,
+  "mime": "application/pdf",
+  "ms": 4175
+ },
+ {
+  "key": "font-Times",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 429,
+  "patchError": "{\"error\":\"Too many requests\"}",
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-Times.pdf",
+  "bytes": 361526,
+  "mime": "application/pdf",
+  "ms": 4662
+ },
+ {
+  "key": "font-JetBrainsMono",
+  "group": "font",
+  "templateId": "nakuru",
+  "name": null,
+  "patch": [
+   "fontFamily"
+  ],
+  "patchStatus": 429,
+  "patchError": "{\"error\":\"Too many requests\"}",
+  "editorReady": true,
+  "blobCount": 1,
+  "names": [
+   "QA_English_CV.pdf"
+  ],
+  "file": "font-JetBrainsMono.pdf",
+  "bytes": 361504,
+  "mime": "application/pdf",
+  "ms": 4617
+ }
+]

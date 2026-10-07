@@ -2,6 +2,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { CompositeNavigationProp, NavigatorScreenParams, ParamListBase, RouteProp } from "@react-navigation/native";
 import type { CVData } from "@sumaiya/types";
+import type { JobListing } from "@sumaiya/api-client";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
@@ -9,7 +10,14 @@ export type HomeStackParamList = {
   Guide: { id: string };
   Invite: undefined;
   Jobs: undefined;
-  JobApply: { jd?: string; want?: "cv" | "letter" | "both" } | undefined;
+  /** The advert behind a job card — the card's own route. The listing is
+   *  passed whole: it is already in memory from the feed, and re-fetching it
+   *  by id would make a tap on a card wait on the network. */
+  JobDetail: { job: JobListing; score?: number; reason?: string };
+  /** `job`, when present, is the whole listing (from JobDetail's "Start an
+   *  application"), not a sliced jd string — it carries the company/location/
+   *  applyUrl an Application needs, and JobApply derives the full jd from it. */
+  JobApply: { jd?: string; want?: "cv" | "letter" | "both"; job?: JobListing } | undefined;
   Applications: undefined;
   ApplicationDetail: { id?: string } | undefined;
   AtsChecker: { cvId?: string } | undefined;
@@ -62,7 +70,24 @@ export type ScanStackParamList = {
   ScanMain: undefined;
   PdfTools: undefined;
   ScanProcessing: { photoUri: string };
-  CvEditor: { templateId?: string | null; initialData?: unknown; nonce?: string } | undefined;
+  CvEditor:
+    | {
+        templateId?: string | null;
+        initialData?: unknown;
+        nonce?: string;
+        /**
+         * §3.4 step 2 · Identity travels with the handoff.
+         *
+         * When the chat's document card opens the editor, it passes the id the
+         * thread knows the document by, so a save from the editor can update THIS
+         * document instead of forking a second CV (audit M5: the chat passed
+         * `initialData` only, so the editor received a copy with no identity and
+         * saving produced two CVs). Additive on purpose: the editor may ignore
+         * it until it is wired to read it, and nothing else changes.
+         */
+        sourceCvId?: string;
+      }
+    | undefined;
 };
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -101,6 +126,7 @@ export type LearningHubScreenProps = Screen<HomeStackParamList, "LearningHub">;
 export type GuideScreenProps = Screen<HomeStackParamList, "Guide">;
 export type InviteScreenProps = Screen<HomeStackParamList, "Invite">;
 export type JobsScreenProps = Screen<HomeStackParamList, "Jobs">;
+export type JobDetailScreenProps = Screen<HomeStackParamList, "JobDetail">;
 
 // CV stack
 export type CvListScreenProps = Screen<CvStackParamList, "CvListMain">;

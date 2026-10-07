@@ -97,7 +97,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
         setEditing(false);
         onProfileChange?.(json.data);
       } else {
-        setError(sw ? "Imeshindwa kuhifadhi" : "Failed to save");
+        setError(sw ? "Sikuweza kuhifadhi" : "Failed to save");
       }
     } catch {
       setError(sw ? "Hitilafu ya mtandao" : "Network error");
@@ -138,7 +138,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
       </p>
 
       {loading ? (
-        <div className="text-[10px] text-text-muted animate-pulse">{sw ? "Inapakia wasifu..." : "Loading profile..."}</div>
+        <div className="text-[10px] text-text-muted animate-pulse">{sw ? "Ninapakia wasifu..." : "Loading profile..."}</div>
       ) : editing ? (
         /* Edit mode */
         <div className="space-y-2">
@@ -187,7 +187,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
               disabled={saving || !dirty}
               className="flex-1"
             >
-              {saving ? (sw ? "Inahifadhi..." : "Saving...") : (sw ? "Hifadhi Wasifu" : "Save Profile")}
+              {saving ? (sw ? "Ninahifadhi..." : "Saving...") : (sw ? "Hifadhi Wasifu" : "Save Profile")}
             </Button>
             <Button
               size="sm"

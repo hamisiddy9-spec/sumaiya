@@ -1,0 +1,12 @@
+skills as written by the import adapter ({id,name,level:3})
+   in=9 out=9 names=["TypeScript","Node.js","PostgreSQL","AWS","Docker","Terraform","Kafka","React","Go"]
+skills WITHOUT level (what my API fixture stored)
+   in=9 out=0 names=[]
+skills with level as a STRING "3"
+   in=9 out=0 names=[]
+skills with level 0 (out of the 1-5 literals)
+   in=9 out=0 names=[]
+skills with level 7 (out of range)
+   in=9 out=0 names=[]
+
+control (my fixture, no level): experience=3 education=2 languages=3 certifications=2 projects=2

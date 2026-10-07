@@ -1,0 +1,36 @@
+{
+ "label": "before",
+ "bundle": ".qa-io/bundle-item1-before.js",
+ "geometry": {
+  "pageBoxHeight": 1123,
+  "contentHeight": 2531,
+  "lastFullyVisible": "3",
+  "lastPartlyVisible": "4",
+  "rolesClipped": [
+   "5",
+   "6",
+   "7",
+   "8",
+   "9",
+   "education"
+  ],
+  "clippedPxOfLastFullyVisible": 201
+ },
+ "pdfBytes": 730805,
+ "pageCount": 1,
+ "textHasRole9": true,
+ "textHasTypeScript": true,
+ "pillPixels": 2597,
+ "pageImages": 1,
+ "imageDims": [
+  [
+   1588,
+   2246
+  ]
+ ],
+ "errorName": null,
+ "errorMessage": null,
+ "textLayerChars": 1790,
+ "textLayerHasRole9": true,
+ "consoleErrors": []
+}

@@ -1,0 +1,13 @@
+{
+ "scanned": 266,
+ "rawImg": 1,
+ "flagged": [
+  {
+   "template": "kioo",
+   "frame": "794 x 112"
+  }
+ ],
+ "rawImgTemplates": [
+  "kioo"
+ ]
+}

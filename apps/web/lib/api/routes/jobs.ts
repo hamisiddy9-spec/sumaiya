@@ -4,14 +4,15 @@ import { getAuthUser } from "@/lib/api/auth";
 import { isAdmin } from "@/lib/admin";
 import { z } from "zod";
 import { db, job, userProfile } from "@/lib/db";
-import { eq, desc, inArray, and, or, ilike } from "drizzle-orm";
+import { eq, desc, inArray, and, or, ilike, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { LIVE_STATUSES } from "@/lib/jobs/constants";
-import { homeMarketFirst } from "@/lib/jobs/feed-filter";
+import { homeMarketFirst, HOME_MARKET_SQL_PATTERN } from "@/lib/jobs/feed-filter";
 import { getRecommendations } from "@/lib/jobs/recommend";
 import { enrichJob } from "@/lib/jobs/enrich";
 import { parseCareerProfile } from "@/types";
 import { buildTargetedCv } from "@/lib/targeted-cv";
+import { requestLang } from "@/lib/api/lang";
 import { isPickRequest, normalizePickQuery, parsePickLimit } from "@sumaiya/api-client";
 
 const jobSchema = z.object({
@@ -87,7 +88,21 @@ export const jobRoutes = new Hono()
           })
           .from(job)
           .where(and(...where))
-          .orderBy(desc(job.featured), desc(job.createdAt))
+          // HOME MARKET FIRST, IN SQL — and this ordering is load-bearing.
+          //
+          // `homeMarketFirst(rows)` below is a stable partition of rows this query has
+          // ALREADY fetched, so it can only reorder what survived the LIMIT; it cannot
+          // promote a row that was never in the slice. Measured 2026-09-21: with
+          // `ORDER BY featured, created_at LIMIT 100` every one of the 100 rows was a
+          // German listing, so the partition was a no-op and 365 live Tanzanian jobs
+          // were unreachable — a user in Dar es Salaam opened the jobs tab on Berlin.
+          // Ordering here decides WHICH rows the slice contains; homeMarketFirst then
+          // just keeps the contract for any caller that still sorts in JS.
+          .orderBy(
+            sql`case when ${job.location} ~* ${HOME_MARKET_SQL_PATTERN} then 0 else 1 end`,
+            desc(job.featured),
+            desc(job.createdAt),
+          )
           .limit(limit);
         c.header("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
         return c.json({ success: true, data: homeMarketFirst(rows) });
@@ -103,7 +118,13 @@ export const jobRoutes = new Hono()
         })
         .from(job)
         .where(inArray(job.status, LIVE_STATUSES))
-        .orderBy(desc(job.featured), desc(job.createdAt))
+        // Home market first, in SQL, before the LIMIT — see the note on the pick path
+        // above: homeMarketFirst() can only reorder rows that survived this slice.
+        .orderBy(
+          sql`case when ${job.location} ~* ${HOME_MARKET_SQL_PATTERN} then 0 else 1 end`,
+          desc(job.featured),
+          desc(job.createdAt),
+        )
         .limit(100);
       // Public, cacheable feed — let the CDN hold it for 5 min so every visitor
       // doesn't hit Postgres (the nightly cron refreshes the data).
@@ -147,6 +168,10 @@ export const jobRoutes = new Hono()
     jobTitle: z.string().min(1).max(200),
     company: z.string().max(200).optional(),
     jobDescription: z.string().max(20000).optional(),
+    // The caller's UI language — the "why it moved" bullets are user-facing
+    // prose, not keywords, so the server must be told which language to write
+    // them in (lib/match-explanation.ts). Defaults to English for older clients.
+    lang: z.enum(["en", "sw"]).optional(),
   })), async (c) => {
     const user = await getAuthUser(c);
     if (!user) return c.json({ error: "Unauthorized" }, 401);
@@ -165,7 +190,7 @@ export const jobRoutes = new Hono()
 
     const profile = parseCareerProfile(row.careerProfile);
     const jd = [b.jobTitle, b.company, b.jobDescription ?? ""].filter(Boolean).join("\n");
-    const result = buildTargetedCv(profile, jd);
+    const result = buildTargetedCv(profile, jd, requestLang(c, b.lang));
 
     // Outcome instrumentation (PR-1): the real score the user just saw.
     try {

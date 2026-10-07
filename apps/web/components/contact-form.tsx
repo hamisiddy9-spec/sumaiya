@@ -124,7 +124,7 @@ export function ContactForm() {
           className="w-full"
         >
           {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-          {status === "loading" ? (sw ? "Inatuma..." : "Sending...") : (sw ? "Tuma ujumbe" : "Send message")}
+          {status === "loading" ? (sw ? "Ninatuma..." : "Sending...") : (sw ? "Tuma ujumbe" : "Send message")}
         </Button>
       </form>
     </div>

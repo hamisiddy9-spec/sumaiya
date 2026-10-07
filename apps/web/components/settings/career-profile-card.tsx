@@ -48,7 +48,7 @@ const STRINGS = {
     empty: "Hakuna wasifu wa kazi bado. Jenga kutoka CV yako kamili zaidi.",
     noneFilled: "hakuna kitu kipya (wasifu tayari umekamilika)",
     noCv: "Hakuna CV ya kujengea bado.",
-    loading: "Inapakia…",
+    loading: "Ninapakia…",
     sections: {
       experience: "Uzoefu",
       education: "Elimu",
@@ -60,7 +60,7 @@ const STRINGS = {
       volunteer: "Kujitolea",
       references: "Wadhamini",
     },
-    error: "Imeshindwa kupakia wasifu wako wa kazi.",
+    error: "Sikuweza kupakia wasifu wako wa kazi.",
     entries: "vitu",
   },
 } as const;
@@ -139,9 +139,9 @@ export function CareerProfileCard({ lang }: Props) {
       {loading ? (
         <p className="text-xs text-text-muted animate-pulse">{s.loading}</p>
       ) : error && counts === null ? (
-        <p className="text-xs text-red-600">{s.error}</p>
+        <p className="text-xs text-red-600 swap-in">{s.error}</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 swap-in">
           {counts && counts.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {counts.map((c) => (

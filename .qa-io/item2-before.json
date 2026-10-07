@@ -1,0 +1,82 @@
+{
+ "level:3 (all valid)": {
+  "skillsIn": 9,
+  "skillsOut": 9,
+  "skillNamesOut": [
+   "TypeScript",
+   "React",
+   "Node.js",
+   "PostgreSQL",
+   "Docker",
+   "AWS",
+   "GraphQL",
+   "Kubernetes",
+   "Terraform"
+  ],
+  "levelsOut": [
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3,
+   3
+  ],
+  "experienceOut": 1,
+  "educationOut": 1,
+  "certificationsOut": 1,
+  "languagesOut": 1,
+  "refereesOut": 1,
+  "fullName": "Amina Joseph Mwakasege"
+ },
+ "level missing": {
+  "skillsIn": 9,
+  "skillsOut": 0,
+  "skillNamesOut": [],
+  "levelsOut": [],
+  "experienceOut": 1,
+  "educationOut": 1,
+  "certificationsOut": 1,
+  "languagesOut": 1,
+  "refereesOut": 1,
+  "fullName": "Amina Joseph Mwakasege"
+ },
+ "level:'3' (string)": {
+  "skillsIn": 9,
+  "skillsOut": 0,
+  "skillNamesOut": [],
+  "levelsOut": [],
+  "experienceOut": 1,
+  "educationOut": 1,
+  "certificationsOut": 1,
+  "languagesOut": 1,
+  "refereesOut": 1,
+  "fullName": "Amina Joseph Mwakasege"
+ },
+ "level:0": {
+  "skillsIn": 9,
+  "skillsOut": 0,
+  "skillNamesOut": [],
+  "levelsOut": [],
+  "experienceOut": 1,
+  "educationOut": 1,
+  "certificationsOut": 1,
+  "languagesOut": 1,
+  "refereesOut": 1,
+  "fullName": "Amina Joseph Mwakasege"
+ },
+ "level:7": {
+  "skillsIn": 9,
+  "skillsOut": 0,
+  "skillNamesOut": [],
+  "levelsOut": [],
+  "experienceOut": 1,
+  "educationOut": 1,
+  "certificationsOut": 1,
+  "languagesOut": 1,
+  "refereesOut": 1,
+  "fullName": "Amina Joseph Mwakasege"
+ }
+}

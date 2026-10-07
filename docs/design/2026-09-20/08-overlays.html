@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="sw"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lugha moja ya madirisha (one overlay language) — Sumaiya 2026 redesign</title>
+<style>/* ============================================================================
+   SUMAIYA 2026 DESIGN SYSTEM — reference implementation
+   Colours are READ FROM THE APP (apps/web/tailwind.config.ts +
+   apps/native/src/components/ui/theme.ts). None are invented. None change.
+   This file is inlined into every mockup so each HTML file is standalone.
+   ========================================================================== */
+
+:root{
+  /* ── FIXED PALETTE (Warm Confidence) ─────────────────────────────────── */
+  --ember:#DA4A1C;      --ember-shadow:#A8330F;  --ember-hover:#C13E14;
+  /* ember as TEXT is 3.89:1 on cream and 4.22:1 on white — below WCAG AA
+   * 4.5:1 for 14px. #A8330F is 6.16:1 / 6.68:1. Ember stays a FILL and an
+   * ICON colour; small ember TEXT uses ember-shadow. Same palette, no change. */
+  --ember-text:#A8330F;
+  --ember-tint:#FBE9E1; --ember-fill:#B83A12;    /* accentFill (light) */
+  --pine:#12433D;       --pine-tint:#E4EDEA;
+  --gold:#F2A93B;       --gold-tint:#FBF3E2;     --gold-text:#96630F;
+  --espresso:#211A15;   --espresso-2:#2C231C;    --espresso-line:#3A2E25;
+  --cream:#FAF5EE;      --sand:#EFE7DA;          --sand-2:#F4EEE4;
+  --card:#FFFFFF;       --border:#E9E0D4;        --border-input:#9C8D7B;
+  --text-body:#6B5F54;  --text-muted:#756A5E;
+  --error:#C13E14;      --success:#12766A;       --warning:#96630F;
+
+  /* ── SPACING (base 4px; ONLY these) ──────────────────────────────────── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s8:32px;
+
+  /* ── RADII ───────────────────────────────────────────────────────────── */
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px;
+
+  /* ── ELEVATION (content plane is flat; shadow is for the floating layer) */
+  --shadow-press:0 2px 8px rgba(33,26,21,.05);
+  --shadow-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --shadow-ember:0 3px 0 #A8330F;
+
+  /* ── TYPE ────────────────────────────────────────────────────────────── */
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Hanken Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  /* ── MOTION (mirrors apps/native/src/components/ui/motion.tsx) ───────── */
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-field:340ms;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  --ease-in:cubic-bezier(.32,0,.67,0);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--sand);color:var(--espresso);
+  font-family:var(--font-body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── THE PROPOSAL LAYOUT (this chrome is the deliverable's wrapper, not the
+      product UI) ──────────────────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+.masthead{margin-bottom:40px}
+.masthead .kicker{
+  font-size:11px;font-weight:700;letter-spacing:.56px;text-transform:uppercase;
+  color:var(--ember-text);margin:0 0 8px
+}
+.masthead h1{
+  font-family:var(--font-display);font-size:38px;line-height:1.1;font-weight:800;
+  letter-spacing:-.5px;margin:0 0 12px
+}
+.masthead p{max-width:64ch;color:var(--text-body);margin:0 0 8px}
+.meta{font-size:12.5px;color:var(--text-muted)}
+.meta code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 6px;border-radius:6px;color:var(--espresso)}
+
+.sec{margin:64px 0 0}
+.sec>h2{
+  font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.3px;
+  margin:0 0 6px;padding-bottom:12px;border-bottom:2px solid var(--border)
+}
+.sec>h2 .n{color:var(--ember);font-family:var(--font-mono);font-size:14px;margin-right:10px}
+.sec>p.lede{color:var(--text-body);max-width:72ch;margin:14px 0 24px}
+
+/* ── DEVICE FRAME — the phone is the product, so the phone comes first ─── */
+.stage{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.phone{
+  width:390px;flex:0 0 390px;background:var(--espresso);
+  border-radius:44px;padding:10px;box-shadow:0 30px 70px -30px rgba(33,26,21,.35)
+}
+.phone__screen{
+  position:relative;background:var(--cream);border-radius:36px;overflow:hidden;
+  height:844px;display:flex;flex-direction:column
+}
+.phone__notch{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:96px;height:22px;border-radius:999px;background:var(--espresso);z-index:40
+}
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 22px 0;font-size:12px;font-weight:700;color:var(--espresso);flex:0 0 auto
+}
+.statusbar .right{display:flex;gap:5px;align-items:center}
+.bar{width:3px;height:9px;background:var(--espresso);border-radius:1px;opacity:.85}
+.bar.lg{height:12px}
+
+/* ── APP SHELL ───────────────────────────────────────────────────────── */
+.app{flex:1;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:12px 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.tabbar{
+  flex:0 0 auto;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 10px 22px;background:var(--card);border-top:1px solid var(--border)
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--text-muted);font-size:10.5px;font-weight:700;min-height:44px;justify-content:center}
+.tab.on{color:var(--ember-text)}
+.tab .glyph{width:22px;height:22px;display:grid;place-items:center}
+
+/* ── TYPE ROLES (design system §2) ───────────────────────────────────── */
+.r-display{font-family:var(--font-display);font-size:30px;line-height:36px;font-weight:800;letter-spacing:-.5px}
+.r-screen{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-.5px}
+.r-section{font-size:18px;line-height:24px;font-weight:800;letter-spacing:0}
+.r-cardtitle{font-size:15.5px;line-height:21px;font-weight:700}
+.r-body{font-size:14.5px;line-height:21px;font-weight:600}
+.r-bodysmall{font-size:13.5px;line-height:19px;font-weight:600}
+.r-caption{font-size:12.5px;line-height:18px;font-weight:400}
+.r-micro{font-size:11.5px;line-height:14px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.r-stat{font-size:26px;line-height:1;font-weight:800;letter-spacing:0}
+.muted{color:var(--text-muted)}.body{color:var(--text-body)}
+.eyebrow{color:var(--text-muted);font-size:13px;font-weight:600}
+
+/* ── SURFACES (design system §3–§4) ──────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card)}
+.card--20{border-radius:var(--r-card-lg)}
+.pad{padding:16px}
+.pad-row{padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px}
+.row-tight{display:flex;align-items:center;gap:8px}
+.stack{display:flex;flex-direction:column}
+.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+.sec-head:first-child{margin-top:4px}
+.sec-head .act{color:var(--ember-text);font-size:12.5px;font-weight:800}
+.dashed{border-style:dashed}
+
+/* icon wells — concentric: inner = outer − padding (design system §3.1) */
+.well{display:grid;place-items:center;flex:0 0 auto;background:var(--ember-tint);color:var(--ember)}
+.well--38{width:38px;height:38px;border-radius:11px}
+.well--44{width:44px;height:44px;border-radius:12px}
+.well--30{width:30px;height:30px;border-radius:9px}
+.well--72{width:72px;height:72px;border-radius:22px}
+.well--pine{background:var(--pine-tint);color:var(--pine)}
+.well--gold{background:var(--gold-tint);color:var(--gold-text)}
+.well--success{background:#E3F1EE;color:var(--success)}
+.well--warn{background:#FBF3E2;color:var(--warning)}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:0 18px;border-radius:var(--r-input-lg);border:1px solid transparent;
+  font-family:var(--font-body);font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-out),background var(--dur-base) var(--ease-out)
+}
+.btn--primary{background:var(--ember-fill);color:var(--cream)}
+.btn--secondary{background:var(--card);color:var(--espresso);border-color:var(--border-input)}
+.btn--ghost{background:transparent;color:var(--ember-text);min-height:44px}
+.btn--sm{min-height:44px;font-size:13.5px;padding:0 14px}
+.btn--block{width:100%}
+.btn:active{transform:scale(.975)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-pill);
+  padding:3px 9px;font-size:11.5px;font-weight:800;line-height:1.4
+}
+.badge--success{background:#E3F1EE;color:var(--success)}
+.badge--warn{background:var(--gold-tint);color:var(--warning)}
+.badge--muted{background:var(--sand-2);color:var(--text-muted)}
+.badge--ember{background:var(--ember-tint);color:var(--ember-text)}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;
+  border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);
+  font-size:13.5px;font-weight:600;color:var(--espresso)
+}
+
+/* tab-rail section nav (CV editor) */
+.rail{display:flex;gap:8px;overflow:auto;padding:10px 20px;background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto}
+.rail::-webkit-scrollbar{height:0}
+.rail .chip{min-height:36px;font-size:12.5px;padding:0 12px;white-space:nowrap}
+.rail .chip.on{background:var(--ember-tint);border-color:var(--ember);color:var(--ember-text);font-weight:700}
+
+/* skeleton — shimmer is bounded (2 cycles) per the motion standard */
+.sk{background:linear-gradient(90deg,#EFE7DA 25%,#E9E0D4 50%,#EFE7DA 75%);
+  background-size:200% 100%;border-radius:8px;animation:shimmer 1.5s ease-in-out 2}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-line.w40{width:40%}.sk-line.w60{width:60%}.sk-line.w80{width:80%}
+
+/* ── ENTRANCE: "nothing appears, everything arrives" ──────────────────── */
+.arrive{animation:arrive var(--dur-slow) var(--ease-out) both}
+.arrive-1{animation-delay:30ms}.arrive-2{animation-delay:70ms}
+.arrive-3{animation-delay:110ms}.arrive-4{animation-delay:150ms}
+.arrive-5{animation-delay:190ms}.arrive-6{animation-delay:230ms}
+@keyframes arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.handoff{animation:handoff var(--dur-fast) var(--ease-in) both}
+@keyframes handoff{to{opacity:0;transform:translateY(-4px)}}
+.pressable{transition:transform var(--dur-micro) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.pressable:active{transform:scale(.985);box-shadow:var(--shadow-press)}
+
+/* ── ANNOTATIONS (proposal chrome) ───────────────────────────────────── */
+.notes{flex:1 1 420px;min-width:320px;max-width:640px}
+.note{
+  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--ember);
+  border-radius:var(--r-card);padding:16px;margin-bottom:12px
+}
+.note h4{margin:0 0 6px;font-size:14.5px;font-weight:800;font-family:var(--font-display)}
+.note .tag{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--ember-text);background:var(--ember-tint);border-radius:6px;padding:2px 7px;margin-bottom:8px
+}
+.note p{margin:0;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.note ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--text-body)}
+.note li{margin:4px 0}
+.note li b{color:var(--espresso)}
+.note--before{border-left-color:var(--border-input)}
+.note--before .tag{color:var(--text-muted);background:var(--sand-2)}
+.note--ban{border-left-color:var(--error)}
+.note--ban .tag{color:var(--error);background:#FBE9E1}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+.rule h4{margin:0 0 8px;font-size:13.5px;font-weight:800;font-family:var(--font-display)}
+.rule code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 5px;border-radius:5px;color:var(--ember-shadow)}
+.rule .kv{font-size:12.5px;color:var(--text-body);display:flex;justify-content:space-between;
+  padding:4px 0;border-bottom:1px dashed var(--border)}
+.rule .kv:last-child{border-bottom:0}
+.rule .kv b{color:var(--espresso);font-family:var(--font-mono);font-size:11.5px}
+
+.toast{
+  position:absolute;left:20px;right:20px;bottom:88px;z-index:30;
+  background:var(--espresso);color:var(--cream);border-radius:var(--r-input-lg);
+  padding:12px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-float);
+  display:flex;gap:10px;align-items:center
+}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(33,26,21,.45);z-index:20}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:25;background:var(--card);
+  border-radius:20px 20px 0 0;padding:20px;box-shadow:var(--shadow-float)
+}
+.sheet__grip{width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 14px}
+.sticky-foot{
+  flex:0 0 auto;background:var(--cream);border-top:1px solid var(--border);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px))
+}
+.savepill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--sand-2);
+  border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:700;color:var(--text-muted)
+}
+.savepill--saved{background:#E3F1EE;color:var(--success)}
+.savepill--dirty{background:var(--gold-tint);color:var(--gold-text)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+.ov-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-top:1px solid var(--border)}
+.ov-row.first{border-top:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:24px}
+.varlabel{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--text-muted);margin:16px 0 8px}
+.varlabel.first{margin-top:0}
+.spec{font-size:12.5px;color:var(--text-body)}
+.spec .kv{border-bottom:1px dashed var(--border)}
+.spec .kv:last-child{border-bottom:0}
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table.audit th{text-align:left;font-size:11px;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--text-muted);background:var(--sand-2);padding:9px 12px;border-bottom:1px solid var(--border)}
+table.audit td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text-body)}
+table.audit tr:last-child td{border-bottom:0}
+table.audit code{font-family:var(--font-mono);font-size:11px;color:var(--espresso)}
+.pill{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.pill--ok{background:#E3F1EE;color:var(--success)}
+.pill--chg{background:var(--gold-tint);color:var(--warning)}
+.audit h3{font-family:var(--font-display);font-size:15px;margin:26px 0 10px}
+.scrimbox{position:relative;overflow:hidden;border-radius:12px;border:1px solid var(--border)}
+.scrimbox__bg{position:absolute;inset:0;background:var(--sand);padding:16px}
+.scrimbox__veil{position:absolute;inset:0;background:rgba(33,26,21,.45)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);padding:16px 16px 20px;
+  border-radius:20px 20px 0 0;box-shadow:var(--shadow-float)}
+.sheet__grip{width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 14px}
+.dlgwrap{position:absolute;inset:0;display:grid;place-items:center;padding:20px}
+.dlg{width:100%;max-width:300px;background:var(--card);border-radius:20px;padding:20px;
+  box-shadow:var(--shadow-float);text-align:center}
+.dlg .row{margin-top:18px}
+.fullov{position:absolute;inset:0;background:var(--cream);display:flex;flex-direction:column}
+.fullov__bar{display:flex;align-items:center;gap:12px;padding:14px 16px;
+  border-bottom:1px solid var(--border)}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="masthead">
+    <p class="kicker">Sumaiya · Redesign proposal · 2026-09-20</p>
+    <h1>Lugha moja ya madirisha (one overlay language)</h1>
+    <p>The popups are a zoo: three native sheet radii for the same object, six web scrims and seven z-indices where the theme already defines one scrim. This is one system, five variants, and an audit of every real overlay by file:line.</p>
+    <p class="meta">Colours and the logo are <code>FIXED</code> — read from
+      <code>apps/web/tailwind.config.ts</code> and
+      <code>apps/native/src/components/ui/theme.ts</code>. Motion obeys
+      <code>docs/MOTION-STANDARD-2026-09-20.md</code>. No source file is modified by this proposal.</p>
+  </div>
+  <div class="sec"><h2><span class="n">A</span>Five variants, and only five</h2><p class="lede">Every overlay in both apps maps to one of these. If a new need appears that does not fit one of the five, the answer is the nearest variant, not a sixth shape.</p><div class="grid2"><div><p class="varlabel first">1 &middot; Bottom sheet &mdash; the default for choices</p><div class="scrimbox" style="height:440px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="sheet"><div class="sheet__grip"></div><div class="r-cardtitle" style="margin-bottom:10px">Shiriki CV hii</div><div class="ov-row first"><div class="well " style="width:38px;height:38px;border-radius:11px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7.5 11l4.5 4.5 4.5-4.5"/><path d="M5 20h14"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Pakua PDF</div><div class="r-caption muted">Faili tayari kutumwa</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div><div class="ov-row"><div class="well well--pine" style="width:38px;height:38px;border-radius:11px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Tuma kwa barua pepe</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div><div class="ov-row"><div class="well well--gold" style="width:38px;height:38px;border-radius:11px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Fungua kiungo cha kushiriki</div></div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></div><button class="btn btn--secondary btn--sm btn--block" style="margin-top:12px">Ghairi</button></div></div><div class="card pad" style="margin-top:12px"><div class="spec"><div class="kv"><span>when</span><b>a choice of 2-6 actions, or a short form</b></div><div class="kv"><span>corners</span><b>20px top, 0 bottom</b></div><div class="kv"><span>scrim</span><b>overlay = rgba(33,26,21,.45)</b></div><div class="kv"><span>entry</span><b>translateY 360 to 0 &middot; 220ms &middot; ease.out</b></div><div class="kv"><span>exit</span><b>160ms &middot; ease.in</b></div><div class="kv"><span>drag to dismiss</span><b>yes, only under 60% height</b></div><div class="kv"><span>reduced motion</span><b>1ms + a visible Ghairi</b></div></div></div></div><div><p class="varlabel first">2a &middot; Confirm dialog &mdash; destructive</p><div class="scrimbox" style="height:380px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="dlgwrap"><div class="dlg"><div class="well " style="width:56px;height:56px;border-radius:18px;margin:0 auto 14px;background:#FBE9E1;color:var(--error)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M6 7l1 13h10l1-13"/></svg></div><div class="r-section" style="font-size:16px">Ufute CV hii?</div><div class="r-bodysmall muted" style="margin-top:6px;line-height:19px">&ldquo;CV ya Mhasibu&rdquo; itafutwa kabisa. Haliwezi kurudishwa.</div><div class="row g8"><div style="flex:1"><button class="btn btn--secondary btn--sm btn--block">Ghairi</button></div><div style="flex:1"><button class="btn btn--sm btn--block" style="background:var(--error);color:var(--cream)">Futa</button></div></div></div></div></div><p class="varlabel">2b &middot; Confirm dialog &mdash; not destructive</p><div class="scrimbox" style="height:380px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="dlgwrap"><div class="dlg"><div class="well " style="width:56px;height:56px;border-radius:18px;margin:0 auto 14px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3.2 2"/></svg></div><div class="r-section" style="font-size:16px">Tuache haya kwa sasa?</div><div class="r-bodysmall muted" style="margin-top:6px;line-height:19px">Mabadiliko yako yako salama kwenye akaunti yako na yatakuwa hapa utakaporudi.</div><div class="row g8"><div style="flex:1"><button class="btn btn--secondary btn--sm btn--block">Endelea kuhariri</button></div><div style="flex:1"><button class="btn btn--sm btn--block" style="background:var(--ember-fill);color:var(--cream)">Hifadhi na toka</button></div></div></div></div></div><div class="card pad" style="margin-top:12px"><div class="spec"><div class="kv"><span>when</span><b>an irreversible or surprising action</b></div><div class="kv"><span>corners</span><b>20px all round &middot; max-width 300</b></div><div class="kv"><span>entry</span><b>scale .94 to 1 + scrim &middot; spring.gentle</b></div><div class="kv"><span>exit</span><b>140ms &middot; ease.in</b></div><div class="kv"><span>drag to dismiss</span><b>never</b></div><div class="kv"><span>destructive</span><b>error fill + haptics.error()</b></div><div class="kv"><span>default focus</span><b>the safe action, never Futa</b></div></div></div></div><div><p class="varlabel first">3 &middot; Toast &mdash; transient confirmation</p><div class="scrimbox" style="height:250px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="toast" style="bottom:24px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><div class="grow"><div style="font-weight:700">Imeshirikiwa</div><div style="font-size:12.5px;opacity:.85">CV ya Mhasibu imetumwa.</div></div><span style="font-size:12.5px;font-weight:800;color:var(--gold)">Ondoa</span></div></div><div class="card pad" style="margin-top:12px"><div class="spec"><div class="kv"><span>when</span><b>the action already succeeded; nothing to decide</b></div><div class="kv"><span>corners</span><b>12px (input-lg), not 14</b></div><div class="kv"><span>entry / exit</span><b>220ms ease.out / 140ms ease.in</b></div><div class="kv"><span>dwell</span><b>4s, and it pauses on focus</b></div><div class="kv"><span>drag to dismiss</span><b>no &mdash; swipe to dismiss yes</b></div><div class="kv"><span>a11y</span><b>never the only signal of success</b></div></div></div><p class="varlabel">4 &middot; Full-screen sheet &mdash; a task, not a choice</p><div class="scrimbox" style="height:430px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="fullov"><div class="fullov__bar"><span class="r-bodysmall" style="font-weight:800">Ghairi</span><div class="grow" style="text-align:center"><div class="r-bodysmall" style="font-weight:800">Chagua muundo</div></div><span class="r-bodysmall" style="font-weight:800;color:var(--ember-text)">Tumia</span></div><div style="padding:14px 16px"><div class="card pad" style="margin-bottom:10px;display:flex;gap:12px;align-items:center"><div style="width:44px;height:56px;border-radius:6px;background:var(--sand)"></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Classic</div><div class="r-caption muted">Safisha kwa waajiri</div></div><span class="badge badge--ember"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg> Imechaguliwa</span></div><div class="card pad" style="display:flex;gap:12px;align-items:center"><div style="width:44px;height:56px;border-radius:6px;background:var(--sand)"></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Executive</div><div class="r-caption muted">Kwa nafasi za uongozi</div></div></div></div></div></div><div class="card pad" style="margin-top:12px"><div class="spec"><div class="kv"><span>when</span><b>picking, cropping, reading - it needs the screen</b></div><div class="kv"><span>corners</span><b>0 (it is the screen)</b></div><div class="kv"><span>scrim</span><b>none</b></div><div class="kv"><span>entry / exit</span><b>slide, 260ms / 260ms (dur.screen)</b></div><div class="kv"><span>drag to dismiss</span><b>never &mdash; use the pair in the bar</b></div></div></div></div><div><p class="varlabel first">5 &middot; Share sheet &mdash; the one that differs by platform, on purpose</p><div class="scrimbox" style="height:300px"><div class="scrimbox__bg"><div class="card pad" style="margin-bottom:10px"><div class="r-cardtitle">CV zako</div><div class="r-caption muted" style="margin-top:2px">Mhasibu &middot; Ilibadilishwa leo</div></div><div class="card pad"><div class="r-cardtitle">Mhudumu wa duka</div><div class="r-caption muted" style="margin-top:2px">Ilibadilishwa jana</div></div></div><div class="scrimbox__veil"></div><div class="sheet"><div class="sheet__grip"></div><div class="r-cardtitle" style="margin-bottom:10px">Sumaiya &mdash; shiriki</div><div class="ov-row first"><div class="well " style="width:44px;height:44px;border-radius:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.2A8 8 0 1 1 21 12z"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">WhatsApp</div></div></div><div class="ov-row"><div class="well well--pine" style="width:44px;height:44px;border-radius:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Barua pepe</div></div></div><div class="ov-row"><div class="well well--gold" style="width:44px;height:44px;border-radius:12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7.5 11l4.5 4.5 4.5-4.5"/><path d="M5 20h14"/></svg></div><div class="grow"><div class="r-bodysmall" style="font-weight:700">Hifadhi kwenye simu</div></div></div></div></div><div class="card pad" style="margin-top:12px"><div class="spec"><div class="kv"><span>APK</span><b>the OS sheet (Share.share)</b></div><div class="kv"><span>web</span><b>this sheet; navigator.share if present</b></div><div class="kv"><span>rows</span><b>44px, first is the most likely</b></div><div class="kv"><span>why they differ</span><b>the APK's is trusted and logged in</b></div></div></div><p class="spec" style="margin:0 0 0"><b>WhatsApp first is not decoration.</b> In this market WhatsApp is the connective tissue, so the first row is the channel the user is already in &mdash; on both platforms. On the APK the OS supplies the rows and the app must not reimplement them; on the web the app supplies them, in the same order, so the two read as one behaviour.</p></div></div></div><div class="sec"><h2><span class="n">B</span>The shared rules &mdash; identical on both platforms</h2><div class="rule-grid"><div class="rule"><h4>One scrim, from the theme</h4><div class="kv"><span>light</span><b>rgba(33,26,21,.45)</b></div><div class="kv"><span>dark</span><b>rgba(0,0,0,.6)</b></div><p class="spec" style="margin:8px 0 0">Both already exist as <code>overlay</code> in <code>theme.ts:59,84</code>. No overlay may invent its own scrim and none may use pure black &mdash; see the audit in C.</p></div><div class="rule"><h4>Corner treatment</h4><div class="kv"><span>sheet top</span><b>20 (card-lg)</b></div><div class="kv"><span>dialog</span><b>20 (card-lg)</b></div><div class="kv"><span>toast</span><b>12 (input-lg)</b></div><div class="kv"><span>full-screen</span><b>0</b></div><p class="spec" style="margin:8px 0 0">Concentric, per the design system. The sheet&rsquo;s inner rows follow from the 20: a 38px well inside 16px padding is <b>11-12</b>.</p></div><div class="rule"><h4>Focus and keyboard</h4><div class="kv"><span>web</span><b>focus trap; Escape closes if cancelable</b></div><div class="kv"><span>initial focus</span><b>the dialog body; the safe button</b></div><div class="kv"><span>return focus</span><b>to the trigger on close</b></div><div class="kv"><span>APK</span><b>hardware back = Escape; dialog.isOpen() guards it</b></div><p class="spec" style="margin:8px 0 0"><code>dialog.isOpen()</code> (<code>ui/dialog.tsx:84-86</code>) already exists for exactly this arbitration and is the reference behaviour.</p></div><div class="rule"><h4>Reduced motion &mdash; the same contract everywhere</h4><div class="kv"><span>durations</span><b>collapse to 1ms, never 0</b></div><div class="kv"><span>drag-to-dismiss</span><b>disabled</b></div><div class="kv"><span>in exchange</span><b>Close / Ghairi always visible</b></div><p class="spec" style="margin:8px 0 0">1 ms so <code>withTiming</code>&rsquo;s finished callback still fires and nothing hangs. Nothing here is motion-only: every overlay is legible with motion off.</p></div><div class="rule"><h4>One stacking order</h4><div class="kv"><span>1 &middot; content</span><b>&mdash;</b></div><div class="kv"><span>2 &middot; sticky / tab bar</span><b>z 40</b></div><div class="kv"><span>3 &middot; toast</span><b>z 60</b></div><div class="kv"><span>4 &middot; sheet</span><b>z 70</b></div><div class="kv"><span>5 &middot; dialog</span><b>z 80</b></div><div class="kv"><span>6 &middot; full-screen task</span><b>z 90</b></div><p class="spec" style="margin:8px 0 0">Six levels, replacing the seven ad-hoc values in the audit below.</p></div><div class="rule"><h4>Dismissal</h4><div class="kv"><span>scrim tap</span><b>closes sheet and toast; not full-screen</b></div><div class="kv"><span>dialog + scrim tap</span><b>only if cancelable</b></div><div class="kv"><span>destructive</span><b>never dismiss without an explicit choice</b></div><div class="kv"><span>swipe down</span><b>sheet yes &middot; dialog no &middot; toast yes</b></div></div></div></div><div class="sec"><h2><span class="n">C</span>The audit &mdash; every real overlay, and what it must become</h2><p class="lede">Read from the tree. Native sheet tops use <b>three different radii for the same object</b> (24, 24, 24, 24, 22, 14) and the web uses <b>six different scrims and seven different z-indices where the theme already defines one scrim.</b> That is the zoo, stated as numbers.</p><div class="audit"><h3>Android &mdash; sheets and overlays</h3><table class="audit"><tr><th>file:line</th><th>what it is</th><th>today</th><th>becomes</th></tr><tr><td><code>ui/dialog.tsx:103-200</code></td><td>the confirm dialog host</td><td>spring <code>damping 20, stiffness 240, mass .8</code> (:122) &mdash; matches neither <code>spring.gentle</code> (20/180) nor <code>snappy</code> (22/260)</td><td><span class="pill pill--chg">CHANGE</span> <code>spring.gentle</code>, 140ms out on <code>ease.in</code>. Behaviour is already the reference apart from the stiffness</td></tr><tr><td><code>chat/attach-sheet.tsx:69</code></td><td>chat attachment choices</td><td>top radius <b>24</b></td><td><span class="pill pill--chg">CHANGE</span> 20 + the <code>overlay</code> scrim</td></tr><tr><td><code>chat/attachment-preview-sheet.tsx:92</code></td><td>preview a file before send</td><td>top radius <b>24</b></td><td><span class="pill pill--chg">CHANGE</span> 20</td></tr><tr><td><code>chat/job-choice-sheet.tsx:195</code></td><td>pick which job to tailor for</td><td>top radius <b>24</b></td><td><span class="pill pill--chg">CHANGE</span> 20</td></tr><tr><td><code>premium-sheet.tsx:150</code></td><td>the Premium pitch</td><td>top radius <b>24</b></td><td><span class="pill pill--chg">CHANGE</span> 20 &mdash; and it must become the SAME object as the web's <code>premium-template-modal.tsx</code></td></tr><tr><td><code>learning/lesson-sheet.tsx:121</code></td><td>one lesson</td><td>top radius <b>22</b> &mdash; the odd one out</td><td><span class="pill pill--chg">CHANGE</span> a lesson is a <b>full-screen sheet</b> (variant 4), not a 22px bottom sheet</td></tr><tr><td><code>ui/toast.tsx:133</code></td><td>transient confirmation</td><td>radius <b>14</b> (not a token); motion is already correct &mdash; FadeIn 220 / FadeOut 140 (:94-100)</td><td><span class="pill pill--chg">CHANGE</span> 12 (<code>input-lg</code>). The motion stays: this is the one overlay already fully inside the standard</td></tr><tr><td><code>ui/list-row.tsx:54</code></td><td>grouped row corners</td><td><code>first ? 14 : 0</code></td><td><span class="pill pill--chg">CHANGE</span> 16 (<code>card</code>) on the first row</td></tr><tr><td><code>chat/chat-composer.tsx:30</code></td><td>composer reflow</td><td><code>springify().damping(18).stiffness(200)</code> &mdash; <b>damping 18 breaks the standard's own &ldquo;damping &ge; 20 everywhere&rdquo;</b></td><td><span class="pill pill--chg">CHANGE</span> <code>spring.snappy</code> (22/260)</td></tr><tr><td><code>components/portal-transition.tsx</code></td><td>the onboarding portal</td><td>the 340ms colour-field dissolve</td><td><span class="pill pill--ok">KEEP</span> this is the standard's <code>dur.field</code> and it is correct</td></tr><tr><td><code>components/update-prompt.tsx</code></td><td>update available</td><td>its own shape</td><td><span class="pill pill--chg">CHANGE</span> variant 2b (not destructive)</td></tr><tr><td><code>components/connectivity-gate.tsx</code></td><td>the offline gate</td><td>correct per the motion audit</td><td><span class="pill pill--ok">KEEP</span></td></tr><tr><td><code>components/cv/template-gallery.tsx</code></td><td>pick a design</td><td>a modal over Home</td><td><span class="pill pill--chg">CHANGE</span> variant 4: it is a picking task, not a choice of five</td></tr></table><h3>Web &mdash; scrim, z-index and shape</h3><table class="audit"><tr><th>file:line</th><th>overlay</th><th>scrim today</th><th>z</th><th>becomes</th></tr><tr><td><code>editor/share-cv-modal.tsx:69</code></td><td>share a CV</td><td><code>bg-black/50</code></td><td>80</td><td><span class="pill pill--chg">CHANGE</span> <code>espresso/45</code>, z 70, variant 5</td></tr><tr><td><code>editor/ai-suggestion-modal.tsx:46</code></td><td>AI suggestion</td><td><code>bg-black/40</code></td><td>80</td><td><span class="pill pill--chg">CHANGE</span> scrim from the theme; the bottom-sheet-on-mobile behaviour is already right</td></tr><tr><td><code>editor/template-selection-modal.tsx:82</code></td><td>pick a template</td><td><code>bg-black/50</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> variant 4 &mdash; and its spinner-to-grid hard swap is audit W2</td></tr><tr><td><code>editor/create-entry-options.tsx:108</code></td><td>what to create</td><td><code>bg-black/50</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> variant 1</td></tr><tr><td><code>premium-template-modal.tsx:69</code></td><td>Premium template</td><td><code>bg-black/40</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> the twin of native <code>premium-sheet</code>; both become one object</td></tr><tr><td><code>jobs/targeted-cv-drawer.tsx:240</code></td><td>tailor for a job</td><td><code>bg-espresso/50 backdrop-blur-[2px]</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> drop the blur (banned); scrim from the theme; its every-branch hard swap is audit W5</td></tr><tr><td><code>editor/cv-editor-client.tsx:384</code></td><td>a failure dialog</td><td><code>bg-black/50 backdrop-blur-[3px]</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> drop the blur; 20px radius; add a focus trap</td></tr><tr><td><code>editor/cv-editor-client.tsx:890</code></td><td>a large sheet</td><td><code>bg-black/60</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> <code>espresso/45</code>. The <code>rounded-t-2xl sm:rounded-2xl</code> responsive idea is right &mdash; keep it and make 20px the token</td></tr><tr><td><code>editor/cv-editor-client.tsx:2712</code></td><td>history panel</td><td><code>bg-black/40</code></td><td>70</td><td><span class="pill pill--chg">CHANGE</span> variant 1</td></tr><tr><td><code>editor/cv-editor-client.tsx:2760</code></td><td>enhance preview</td><td><code>bg-black/40</code></td><td>70</td><td><span class="pill pill--chg">CHANGE</span> variant 1</td></tr><tr><td><code>editor/cv-editor-client.tsx:3617,3654</code></td><td>two centred dialogs</td><td><code>bg-espresso/40</code></td><td>100</td><td><span class="pill pill--chg">CHANGE</span> z 80 and the theme scrim &mdash; these are the closest to correct already</td></tr><tr><td><code>editor/cv-editor-client.tsx:385</code></td><td>a small centred dialog</td><td><code>bg-black/50</code></td><td>50</td><td><span class="pill pill--chg">CHANGE</span> <code>shadow-2xl</code> to <code>shadow.floating</code>; it is the only <code>shadow-2xl</code> on the web</td></tr><tr><td><code>dashboard/applications-grid.tsx:465</code></td><td>application sheet</td><td><b>none</b></td><td>70</td><td><span class="pill pill--chg">CHANGE</span> add the scrim &mdash; an overlay with no scrim reads as a layout bug at phone width</td></tr><tr><td><code>dashboard/*-grid.tsx:63,64,106,165</code> &middot; <code>dashboard-header.tsx:192</code> &middot; <code>editor-profile-menu.tsx:262</code></td><td>click-outside backstops</td><td><b>none</b> (transparent)</td><td>40</td><td><span class="pill pill--ok">KEEP</span> these are invisible hit-areas for a menu, not overlays. Correct as-is, and they set the z floor of 40</td></tr><tr><td><code>ui/marketing-nav.tsx:173</code></td><td>mobile marketing menu</td><td><code>bg-espresso/60 backdrop-blur-sm</code></td><td>65</td><td><span class="pill pill--chg">CHANGE</span> drop the blur; the only marketing overlay, and it should match the product's</td></tr><tr><td><code>dashboard/mobile-tab-bar.tsx:81</code></td><td>phone tab bar</td><td>&mdash;</td><td>60</td><td><span class="pill pill--chg">CHANGE</span> z 40 per the ladder; see <code>07-web-nav.html</code></td></tr><tr><td><code>app/globals.css</code></td><td>the reduced-motion net</td><td>collapses all animation to .01ms</td><td>&mdash;</td><td><span class="pill pill--ok">KEEP</span> note it collapses rather than removes &mdash; the same contract as 1ms on native</td></tr></table></div><div class="rule-grid" style="margin-top:24px"><div class="rule"><h4>The five numbers that are the whole finding</h4><div class="kv"><span>scrims defined in the theme</span><b>1 (overlay)</b></div><div class="kv"><span>scrims actually used on web</span><b>6</b></div><div class="kv"><span>of those, pure black</span><b>3</b></div><div class="kv"><span>distinct z-index values</span><b>7 (40, 50, 60, 65, 70, 80, 100)</b></div><div class="kv"><span>native sheet-top radii</span><b>3 (24, 22, 14)</b></div><div class="kv"><span>spring configs on overlays</span><b>3 (18, 20, and 20/240)</b></div></div><div class="rule"><h4>Why this is worth fixing now</h4><p class="spec" style="margin:0">Every one of these overlays is a moment where the user is being asked something or told something important &mdash; a destructive confirm, a share, a paywall. Those are exactly the moments the app must read as one object rather than as a collection of one-off components. The fix is small and mechanical: <b>one scrim constant, one z-ladder, three radii, five variants.</b> No new dependency, no new screen, and the web and the APK become recognisably the same product at the moment the user is deciding something.</p></div></div></div>
+  
+</div>
+</body></html>

@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Linking, Pressable, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Image, Linking, Pressable, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
 import { useColorScheme } from "nativewind";
 import { useAuthContext } from "../../contexts/auth-context";
+import { openAuth } from "../../navigation/root-nav";
 import { isPushAvailable, registerForPush } from "../../lib/push";
 import { useEntitlements } from "../../lib/entitlements";
 import { PremiumSheet } from "../../components/premium-sheet";
 import { apiClient } from "../../lib/api-client";
 import { APP_VERSION } from "../../lib/app-version";
 import { SUPPORT_EMAIL } from "../../lib/app-hosts";
+import { loadProfile } from "../../lib/profile-store";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
 import { Icon } from "../../components/icon";
+import { reportSheet } from "../../components/report-sheet";
 import type { ProfileScreenProps } from "../../navigation/types";
 import {
-  Button,
   ListGroupLabel,
   ListRow,
   Screen,
@@ -34,6 +37,12 @@ function initials(name?: string | null, email?: string | null): string {
 export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const c = useThemeColors();
   const { user, signOut } = useAuthContext();
+  // GUEST MODE: Profile is open to a guest, because language, dark mode,
+  // privacy and support have nothing to do with an account. What changes is
+  // the ACCOUNT group — there is no session to sign out of and no account to
+  // delete, so it offers to create one instead of offering controls that
+  // cannot do anything.
+  const isGuest = !user;
   const { premium } = useEntitlements();
   const [showPremium, setShowPremium] = useState(false);
   const { colorScheme, setColorScheme } = useColorScheme();
@@ -41,6 +50,33 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
   const [notifications, setNotifications] = useState(false);
   const [busy, setBusy] = useState<"signout" | "delete" | "cache" | null>(null);
+
+  /**
+   * The headshot the app asked for, on the screen where the user looks for it.
+   *
+   * Career Profile asks for a photo and tells them "It shows next to your name
+   * and on your CVs" — but this identity card rendered initials and nothing
+   * else, so the one screen that shows their name never showed the photo they
+   * had picked. The CV got it; the identity block could not. Loaded on focus,
+   * not just on mount, so returning from Career Profile after adding the photo
+   * shows it immediately instead of after an app restart.
+   */
+  const [photo, setPhoto] = useState("");
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      loadProfile()
+        .then((p) => {
+          if (alive) setPhoto(p.photo || "");
+        })
+        .catch(() => {
+          /* no local profile yet — the initials stand in */
+        });
+      return () => {
+        alive = false;
+      };
+    }, []),
+  );
 
   // Push can only register a token once app.json carries an Expo/EAS projectId
   // (extra.eas.projectId). Without one `registerForPush` returns false BEFORE it
@@ -133,11 +169,31 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
     // now deliberately keep retrying forever, since it never made it to the
     // server) would be silently discarded, contradicting the dialog's own
     // promise. Check first and say so plainly if that's actually the case.
+    //
+    // FOR A GUEST the promise needs the opposite wording entirely: there is no
+    // cloud copy of anything, so "your cloud copies are safe" would be the
+    // most expensive sentence in the app — it would invite someone to delete
+    // the only copy of their CV.
     let pending = 0;
     try {
       pending = (await offlineStorage.getSyncQueue()).length;
     } catch {
       /* if this fails, fall through with the normal (0-pending) dialog */
+    }
+
+    if (isGuest) {
+      dialog.alert(
+        t("Delete the CVs on this phone?", "Ufute CV zilizo kwenye simu hii?"),
+        t(
+          "These CVs have no account behind them, so this device holds the only copy. Deleting them here deletes them for good. Download the PDFs first if you want to keep them.",
+          "CV hizi hazina akaunti nyuma yake, hivyo kifaa hiki kina nakala pekee. Kufuta hapa kunafuta kabisa. Pakua PDF kwanza ikiwa unataka kuzihifadhi.",
+        ),
+        [
+          { text: t("Cancel", "Ghairi"), style: "cancel" },
+          { text: t("Delete them", "Zifute"), style: "destructive", onPress: () => void doClearCache() },
+        ],
+      );
+      return;
     }
 
     if (pending > 0) {
@@ -248,26 +304,78 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             padding: 16,
           }}
         >
-          <View
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 18,
-              backgroundColor: c.accent,
-              alignItems: "center",
-              justifyContent: "center",
+          {/* The photo the user picked in Career Profile, where they look for
+              it — the initials are the fallback when there is none (and for a
+              user who never added one, the circle is still the control that
+              takes them to do it, like the one on that screen). */}
+          <Pressable
+            onPress={() => {
+              haptics.selection();
+              navigation.navigate("CareerProfile");
             }}
+            accessibilityRole="button"
+            accessibilityLabel={
+              photo
+                ? t("Change your photo", "Badilisha picha yako")
+                : t("Add your photo", "Weka picha yako")
+            }
+            style={{ width: 56, height: 56, borderRadius: 18 }}
           >
-            <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
-              {initials(user?.name, user?.email)}
-            </Text>
-          </View>
+            {photo ? (
+              <Image
+                source={{ uri: photo }}
+                accessibilityLabel={t("Your photo", "Picha yako")}
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.bg,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                }}
+              />
+            ) : isGuest ? (
+              // No account, so no initial to show: the circle is the way to the
+              // photo, and today it says so.
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.accent + "14",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon name="user-plus" size={22} color={c.accent} />
+              </View>
+            ) : (
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 18,
+                  backgroundColor: c.accent,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
+                  {initials(user?.name, user?.email)}
+                </Text>
+              </View>
+            )}
+          </Pressable>
           <View style={{ flex: 1 }}>
             <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-              {user?.name || user?.email?.split("@")[0] || t("Your account", "Akaunti yako")}
+              {user?.name || user?.email?.split("@")[0] || t("Not signed in", "Hujaingia")}
             </Text>
-            <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={1}>
-              {user?.email}
+            <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
+              {user?.email ||
+                t(
+                  "Your CVs are on this phone. Sign in to open them anywhere.",
+                  "CV zako ziko kwenye simu hii. Ingia ili kuzifungua mahali popote.",
+                )}
             </Text>
           </View>
         </View>
@@ -275,7 +383,32 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
       <Animated.View entering={FadeInDown.duration(300).delay(70)}>
         {/* Career profile — the facts Sumaiya reads */}
-        <ListGroupLabel>{t("Your details", "Taarifa zako")}</ListGroupLabel>
+        {/* The only route back into an existing account, at the TOP of the
+            screen. It used to sit in the Account group five sections down - under
+            Appearance, Notifications, Share and Premium - which is not where anyone
+            looks for a login, and a returning user has no other way in. */}
+        {isGuest ? (
+          <>
+            <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
+            <View style={groupBox}>
+              <ListRow
+                first
+                last
+                icon="user-plus"
+                iconColor={c.accent}
+                label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
+                sublabel={t(
+                  "If you already have one, your CVs are waiting for you.",
+                  "Kama unayo, CV zako zinakusubiri.",
+                )}
+                onPress={() => openAuth()}
+                chevron
+              />
+            </View>
+          </>
+        ) : null}
+
+
         <View style={groupBox}>
           <ListRow
             first
@@ -344,16 +477,21 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             icon="bell"
             label={t("Push notifications", "Arifa za simu")}
             sublabel={
-              pushReady
-                ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
-                : t(
-                    "Not available yet — this version can't send alerts to your phone.",
-                    "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
+              isGuest
+                ? t(
+                    "Job matches and sync updates come with a free account.",
+                    "Ajira zinazokufaa na taarifa za usawazishaji huja na akaunti ya bure.",
                   )
+                : pushReady
+                  ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
+                  : t(
+                      "Not available yet — this version can't send alerts to your phone.",
+                      "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
+                    )
             }
-            value={pushReady ? undefined : t("Not yet", "Bado")}
-            toggle={pushReady ? { value: notifications, onValueChange: setNotif } : undefined}
-            disabled={!pushReady}
+            value={pushReady && !isGuest ? undefined : t("Not yet", "Bado")}
+            toggle={pushReady && !isGuest ? { value: notifications, onValueChange: setNotif } : undefined}
+            disabled={!pushReady || isGuest}
           />
         </View>
 
@@ -394,8 +532,11 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
         {/* Account */}
         <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
         <View style={groupBox}>
+          {/* A guest has no session to end and no account to delete, so the
+              group offers the one account action that is real for them, first,
+              and says what it earns. */}
           <ListRow
-            first
+            first={!isGuest}
             icon="trash-2"
             iconColor={c.warning}
             label={t("Clear offline data", "Futa data iliyohifadhiwa")}
@@ -403,6 +544,30 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={clearCache}
             chevron
           />
+          {/* Sign out lives HERE, in Account, not only at the bottom of the
+              screen below "Delete account".
+              The device sweep reported "a user cannot sign out" from a dump of
+              this tab: the AKAAUNTI group held exactly two rows and the bundle
+              supposedly never contained "Toka". Both were artifacts — the dump
+              is clipped to the viewport (the tree ends at "Msaada na Maswali",
+              and scrolling reveals the real button), and the shipped 1.6.24
+              bundle does contain "Toka" once as a deduplicated Hermes string.
+              The control existed; it was one and a half screens down, under the
+              one row nobody taps casually, on a screen where users look for it
+              in the first group. On a shared phone that is the difference
+              between signing out and handing the phone over signed in, so it
+              also moved above the fold and the shadow button at the bottom was
+              removed rather than duplicated. */}
+          {!isGuest ? (
+            <ListRow
+              icon="log-out"
+              label={t("Sign out", "Toka")}
+              sublabel={t("You can sign back in any time", "Unaweza kuingia tena wakati wowote")}
+              disabled={busy === "signout"}
+              onPress={confirmSignOut}
+              chevron
+            />
+          ) : null}
           <ListRow last icon="alert-circle" label={t("Version", "Toleo")} value={version} />
         </View>
 
@@ -436,7 +601,6 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             chevron
           />
           <ListRow
-            last
             icon="mail"
             iconColor={c.accent}
             label={t("Contact support", "Wasiliana nasi")}
@@ -444,25 +608,40 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={() => navigation.navigate("Support")}
             chevron
           />
-        </View>
-
-        {/* Danger */}
-        <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
-        <View style={groupBox}>
           <ListRow
-            first
             last
-            icon="trash-2"
-            label={t("Delete account", "Futa akaunti")}
-            destructive
-            disabled={busy === "delete"}
-            onPress={confirmDelete}
+            icon="flag"
+            iconColor={c.accent}
+            label={t("Report a problem", "Ripoti tatizo")}
+            sublabel={t("Send a screenshot and what happened", "Tuma picha ya skrini na kilichotokea")}
+            onPress={() => reportSheet.open("problem")}
+            chevron
           />
         </View>
 
-        <View style={{ marginTop: 26 }}>
-          <Button label={t("Sign out", "Toka")} variant="secondary" loading={busy === "signout"} onPress={confirmSignOut} />
-        </View>
+        {/* Danger */}
+        {/* A guest has no account to delete — and apiClient.deleteAccount()
+            without a session is a request that can only fail, so the row is
+            hidden rather than offered as a dead end. */}
+        {!isGuest ? (
+          <>
+            <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
+            <View style={groupBox}>
+              <ListRow
+                first
+                last
+                icon="trash-2"
+                label={t("Delete account", "Futa akaunti")}
+                destructive
+                disabled={busy === "delete"}
+                onPress={confirmDelete}
+              />
+            </View>
+          </>
+        ) : null}
+
+        {/* The shadow "Toka" button that used to sit here is gone: sign-out is
+            a row in Account now, above the fold, with the same confirm dialog. */}
 
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
           {t("Sumaiya · Your career, guided", "Sumaiya · Kazi yako, inaongozwa")}{"\n"}{SUPPORT_EMAIL}

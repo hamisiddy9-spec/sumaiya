@@ -7,8 +7,11 @@
  * This is a deterministic SERVER-SIDE backstop: before a reply is returned,
  * compare it (normalized) against the assistant's own recent replies in the
  * thread. If it's too similar, swap in a varied variant so the user never
- * sees the same sentence twice.
+ * sees the same sentence twice — UNLESS the user asked for a concrete
+ * deliverable or the reply already contains one (see guardReplyAgainstRepeat).
  */
+
+import { replyCarriesDeliverable, requestedDeliverable } from "./deliverable";
 
 /** Normalize a string for similarity comparison: lowercase, collapse junk. */
 export function normalizeReply(text: string): string {
@@ -88,19 +91,33 @@ export interface VariantSet {
 
 /**
  * The varied ack used when Sumaiya's fresh reply is too close to one she
- * already gave. These are SHORT, human, and move the conversation forward
- * (never a dead-end) — they acknowledge, vary, and re-offer next steps.
+ * already gave. These are SHORT and human, and each one moves the conversation
+ * forward WITHOUT offering a menu of other actions.
+ *
+ * Two rules these lines must obey, both learned from the live defect of
+ * 2026-09-21 (native 1.6.25):
+ *
+ *   1. NEVER a menu. The old set ('…gusa hapa chini: ukaguzi wa CV, linganisha
+ *      kazi, au tengeneza hati. Tutafanya nini kwanza?') REPLACED the model's
+ *      reply with a list of things the user had not asked for — so a request
+ *      for a CV summary came back as a menu. `guardReplyAgainstRepeat` now
+ *      refuses to swap at all when the user asked for a concrete deliverable,
+ *      and these lines must not reintroduce the shape.
+ *   2. NEVER claim the user repeated themselves. The guard only knows two
+ *      of SUMAIYA'S replies were similar — the user may have said something
+ *      new each time. "Umekwisha niambia hivyo" asserted a fact about the user
+ *      that this module does not know, and it shipped.
  */
 export const REPEAT_VARIANTS: VariantSet = {
   sw: [
-    "Nimekuelewa 😊 Hivi karibuni tumezungumza jambo kama hili — tuchukue hatua inayofuata: naweza kukagua CV yako, kuilinganisha na kazi unayoitaka, au kutengeneza hati mpya. Ni ipi?",
-    "Sawa, nimesikia! Ili tusirudie — tuende mbele: chagua mojawapo — kagua CV, linganisha na kazi, au tengeneza CV/barua mpya. Niko tayari kukusaidia.",
-    "Umekwisha niambia hivyo, asante! Hebu tuende hatua inayofuata — gusa hapa chini: ukaguzi wa CV, linganisha kazi, au tengeneza hati. Tutafanya nini kwanza?",
+    "Nimekusikia 😊 Tuendelee hapa — niambie kile kinachokufaa sasa.",
+    "Sawa. Tuchukue hatua moja kwa wakati: nini kifuatacho kwako?",
+    "Nimekupata. Hebu tusonge mbele — unataka tuanze wapi?",
   ],
   en: [
-    "Got it 😊 We talked about something similar recently — let's move forward: I can run an ATS check on your CV, match it to a job, or build a new document. Which one?",
-    "Okay, I hear you! To avoid going in circles — pick one: ATS check, job match, or build a new CV/letter. I'm ready when you are.",
-    "You've told me that — thanks! Let's take the next step: tap below for an ATS check, job match, or new document. What should we do first?",
+    "I hear you 😊 Let's keep going — tell me what you need now.",
+    "Okay. One step at a time: what comes next for you?",
+    "Got it. Let's move forward — where would you like to start?",
   ],
 };
 
@@ -111,19 +128,55 @@ export function pickRepeatVariant(lang: "sw" | "en", rotation: number): string {
 }
 
 /**
+ * What the caller knows about the turn beyond "these two replies look alike".
+ * Both fields are optional so existing callers keep working; when either says a
+ * concrete deliverable was asked for, the guard abstains (see below).
+ */
+export interface RepeatGuardContext {
+  /** The user's latest message, verbatim. */
+  latestUserMessage?: string;
+  /** Explicit override when the caller already classified the request. */
+  deliverableRequested?: boolean;
+}
+
+/**
  * Guard: given the fresh reply and the assistant's recent replies in the
- * thread, return the reply to actually send. If the fresh reply is a verbatim
- * repeat of an earlier one, replace it with a rotated variant (keeping the
- * conversation moving). Otherwise pass the fresh reply through.
+ * thread, return the reply to actually send.
+ *
+ * It replaces a reply with a rotated variant ONLY when all of the following
+ * hold — the abstain rules exist because the guard once threw away real work:
+ *
+ *   - the user did NOT ask for a concrete deliverable this turn. A menu of
+ *     other actions is never an acceptable answer to "niandikie muhtasari wa
+ *     CV yangu" — this is the live defect of 2026-09-21, where the model's
+ *     fresh reply was swapped for '…gusa hapa chini: ukaguzi wa CV, linganisha
+ *     kazi, au tengeneza hati' and the summary never appeared.
+ *   - the fresh reply does NOT itself carry a written deliverable. Swapping a
+ *     real summary for a variation line destroys the only thing the user
+ *     asked for; a repeated (honest) answer beats a menu.
+ *   - and the reply really is ≥ REPEAT_SIMILARITY_THRESHOLD like an earlier one.
  */
 export function guardReplyAgainstRepeat(
   freshReply: string,
   priorAssistantReplies: ReadonlyArray<string>,
   lang: "sw" | "en",
   rotation: number,
+  ctx?: RepeatGuardContext,
 ): string {
   const norm = normalizeReply(freshReply);
   if (!norm) return freshReply;
+
+  // Rule 1: the user asked for a deliverable — never answer with a menu.
+  const deliverableAsked =
+    ctx?.deliverableRequested === true ||
+    (!!ctx?.latestUserMessage && requestedDeliverable(ctx.latestUserMessage) !== null);
+  if (deliverableAsked) return freshReply;
+
+  // Rule 2: the reply already contains the work — never overwrite it. (For a
+  // reply that asks a question and delivers nothing, the variant is an honest
+  // improvement; for one that carries a summary, it would erase it.)
+  if (replyCarriesDeliverable(freshReply)) return freshReply;
+
   for (const prior of priorAssistantReplies) {
     if (!prior) continue;
     const sim = replySimilarity(freshReply, prior);

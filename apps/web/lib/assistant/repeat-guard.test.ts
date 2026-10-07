@@ -102,8 +102,76 @@ describe("guardReplyAgainstRepeat — server-side backstop", () => {
     expect(pickRepeatVariant("en", 999)).toBeTruthy();
   });
 
-  it("the ack moves the conversation forward (has a next-step offer)", () => {
-    const out = pickRepeatVariant("en", 0);
-    expect(out.toLowerCase()).toMatch(/ats|check|match|build|next step|which one|first/i);
+  it("the ack moves the conversation forward WITHOUT offering a menu", () => {
+    for (const lang of ["sw", "en"] as const) {
+      for (let i = 0; i < 3; i++) {
+        const out = pickRepeatVariant(lang, i);
+        // Forward-moving: it asks what comes next / to continue.
+        expect(out, out).toMatch(/tuendelee|tuchukue|tusonge|tuanze|kifuatacho|keep going|next|move forward|start/i);
+        // And it no longer names a menu of other actions, nor claims the user
+        // repeated themselves ("Umekwisha niambia hivyo").
+        expect(out, out).not.toMatch(/ATS|ukaguzi wa CV, linganisha|chagua mojawapo|which one|pick one/i);
+        expect(out, out).not.toMatch(/umekwisha niambia|you've told me that/i);
+      }
+    }
+  });
+});
+
+/**
+ * REGRESSION — a menu is never a substitute for a deliverable.
+ *
+ * The two replies and the request are quoted VERBATIM from the device run
+ * (native 1.6.25, docs/QA-NATIVE-1625-2026-09-21.md §2.4). Both observed
+ * deflections were REPEAT_VARIANTS — the guard swapped the model's reply for a
+ * menu, twice, and the summary was never written. The old guard had no notion of
+ * a deliverable at all, so it returns a variant here and these tests fail on it.
+ */
+const DEVICE_REQUEST = "Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja.";
+const DEVICE_MENU_REPLY =
+  "Nimekuelewa 😊 Hivi karibuni tumezungumza jambo kama hili — tuchukue hatua inayofuata: naweza kukagua CV yako, kuilinganisha na kazi unayoitaka, au kutengeneza hati mpya. Ni ipi?";
+const DEVICE_MENU_REPLY_2 =
+  "Umekwisha niambia hivyo, asante! Hebu tuende hatua inayofuata — gusa hapa chini: ukaguzi wa CV, linganisha kazi, au tengeneza hati. Tutafanya nini kwanza?";
+const WRITTEN_SUMMARY =
+  "Muhtasari wa CV yako: Msaidizi wa huduma kwa mteja mwenye uzoefu wa miaka mitatu katika mapokezi, kushughulikia malalamiko na kuhudumia wateja kwa heshima. Nimezoea kufanya kazi kwa mfumo wa kompyuta na kutunza rekodi za wateja kwa usahihi.";
+
+describe("a deliverable request is never answered with a menu", () => {
+  it("keeps the model's written summary when the same request is repeated", () => {
+    const out = guardReplyAgainstRepeat(WRITTEN_SUMMARY, [WRITTEN_SUMMARY], "sw", 2, {
+      latestUserMessage: DEVICE_REQUEST,
+    });
+    expect(out).toBe(WRITTEN_SUMMARY);
+    expect(out).not.toBe(pickRepeatVariant("sw", 2));
+  });
+
+  it("keeps the written summary even without the caller's hint", () => {
+    // Rule 2: the reply already carries the work — the guard may vary wording,
+    // but it may not erase the deliverable. (Old behaviour: a variant.)
+    const out = guardReplyAgainstRepeat(WRITTEN_SUMMARY, [WRITTEN_SUMMARY], "sw", 0);
+    expect(out).toBe(WRITTEN_SUMMARY);
+  });
+
+  it("still varies a repeat that carries NO deliverable (the guard is not disabled)", () => {
+    const out = guardReplyAgainstRepeat(DEVICE_MENU_REPLY_2, [DEVICE_MENU_REPLY_2], "sw", 0);
+    expect(out).not.toBe(DEVICE_MENU_REPLY_2);
+    expect(pickRepeatVariant("sw", 0)).toBe(out);
+  });
+
+  it("recognises every deliverable ask from the user's own wording", () => {
+    for (const ask of [
+      DEVICE_REQUEST,
+      "Niandikie barua ya maombi ya kazi ya udereva",
+      "Nisaidie kuandika ujumbe kwa mwajiri",
+      "Write me a short professional summary",
+      "Nijenge kuhusu mimi kwa muhtasari",
+    ]) {
+      const out = guardReplyAgainstRepeat(
+        "Karibu! Unatarget kazi gani?",
+        ["Karibu! Unatarget kazi gani?"],
+        "sw",
+        1,
+        { latestUserMessage: ask },
+      );
+      expect(out, ask).toBe("Karibu! Unatarget kazi gani?");
+    }
   });
 });

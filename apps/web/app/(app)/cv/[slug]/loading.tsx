@@ -9,7 +9,7 @@ import { headers } from "next/headers";
 
 export default async function LoadingPublicCv() {
   const sw = (await headers()).get("x-lang") !== "en";
-  const labelText = sw ? "Inapakia CV…" : "Loading CV…";
+  const labelText = sw ? "Ninapakia CV…" : "Loading CV…";
   return (
     <div className="min-h-dvh bg-sand-2 flex flex-col">
       <main className="flex-1 w-full px-3 sm:px-6 pt-6 sm:pt-10 pb-28">

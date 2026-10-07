@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     title: sw ? "Msaidizi wa Kazi" : "Career Copilot",
     description: sw
       ? "Niambie unachohitaji. Nitaongoza kutoka hapo — CV, ulinganishaji wa kazi, alama ya CV yako au mazoezi ya usaili."
-      : "Tell me what you need. I will lead from there — CV, job match, ATS score or interview practice.",
+      : "Tell me what you need. I'll lead from there — CV, job match, ATS score or interview practice.",
     robots: { index: false, follow: false },
   };
 }

@@ -79,7 +79,7 @@ export function PremiumTemplateModal({ onClose }: { onClose: () => void }) {
         <p className="font-display font-bold text-espresso text-lg mb-1">{sw ? "Templeti ya Premium" : "A premium template"}</p>
         <p className="text-text-body text-sm mb-4">
           {sw
-            ? "Hii ni mojawapo ya miundo 7 ya Premium. Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri: Premium inapatikana kwa kuwalika marafiki, siku 7 kila rafiki anayejenga CV yake ya kwanza."
+            ? "Hii ni mojawapo ya miundo 7 ya Premium. Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri: Premium inapatikana kwa kualika marafiki, siku 7 kila rafiki anayejenga CV yake ya kwanza."
             : "This is one of the 7 Premium designs. Paying isn't open yet — but you don't have to wait for it: Premium is earned by inviting friends, 7 days each time one of them builds their first CV."}
         </p>
         <ul className="space-y-1.5 mb-5">
@@ -97,7 +97,7 @@ export function PremiumTemplateModal({ onClose }: { onClose: () => void }) {
           onClick={onClose}
           className="w-full inline-flex items-center justify-center gap-2 bg-ember text-cream font-semibold text-sm py-2.5 rounded-input-lg hover:bg-ember-hover transition"
         >
-          {sw ? "Pata Premium bure — walika marafiki" : "Earn Premium free — invite friends"}
+          {sw ? "Pata Premium bure kwa kualika marafiki" : "Earn Premium free by inviting friends"}
         </Link>
 
         {/* And what is honestly still pending. */}

@@ -334,7 +334,14 @@ export const goldenPairs: GoldenMatchPair[] = [
     name: "frontend-engineer",
     cv: cvFrontend,
     jd: jdFrontend,
-    pinnedScore: 39, // measured 2026-08-18 (evals/probe-pins.ts)
+    pinnedScore: 40, // re-pinned 2026-09-21. Was 39 (measured 2026-08-18, evals/probe-pins.ts).
+    // Reason for the drift: extractTerms now strips sentence punctuation from the
+    // EDGES of a term ("salaam." -> "salaam") while still keeping it INSIDE one
+    // (c++, c#, node.js, ci/cd), and rejects advert filler ("least", "grow",
+    // "various", "ideally"...) that had been reaching users as keyword chips
+    // (docs/QA-WEB-JOURNEYS-2026-09-20.md D11). Edge-punctuated advert words now
+    // match, which is the point of the change. The semantic invariants below are
+    // unchanged and still pass; only this measured number moved.
     tolerance: 0,
     mustMatch: ["react", "typescript", "jest", "javascript", "aws"],
     mustMiss: ["graphql", "pipelines"],
@@ -343,7 +350,10 @@ export const goldenPairs: GoldenMatchPair[] = [
     name: "sales-manager",
     cv: cvSales,
     jd: jdSales,
-    pinnedScore: 54,
+    pinnedScore: 56, // re-pinned 2026-09-21. Was 54. Same cause as frontend-engineer
+    // above: keyword edges are now punctuation-free, so advert words that carried a
+    // full stop ("customers." / "targets.") match the CV where they previously did
+    // not. Semantic invariants unchanged and passing.
     tolerance: 0,
     mustMatch: ["salesforce", "crm", "excel", "b2b", "negotiation"],
     mustMiss: ["quotas", "coach", "monthly"],
@@ -352,7 +362,10 @@ export const goldenPairs: GoldenMatchPair[] = [
     name: "graduate-data-analyst",
     cv: cvGraduate,
     jd: jdDataAnalyst,
-    pinnedScore: 55,
+    pinnedScore: 54, // re-pinned 2026-09-21. Was 55 — this one went DOWN, and that is
+    // expected: a word the CV and advert shared is now in STOP_WORDS as advert filler,
+    // so it no longer counts as a match. Losing a filler word from the match set is
+    // the improvement, not a regression. Invariants unchanged and passing.
     tolerance: 0,
     mustMatch: ["sql", "tableau", "python", "statistics", "excel"],
     mustMiss: ["queries", "insights", "trends"],

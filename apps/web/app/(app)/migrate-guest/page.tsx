@@ -196,7 +196,7 @@ export default function MigrateGuestPage() {
         </div>
         <Loader2 className="w-6 h-6 text-ember animate-spin mx-auto mb-3" />
         <h1 className="font-display text-espresso text-xl font-semibold">
-          {sw ? "Inahifadhi CV yako kwenye akaunti yako…" : "Saving your CV to your account…"}
+          {sw ? "Ninahifadhi CV yako kwenye akaunti yako…" : "Saving your CV to your account…"}
         </h1>
         <p className="text-text-muted text-sm mt-1">
           {sw ? "Utapelekwa kwenye kihariri baada ya muda mfupi." : "You'll be taken to the editor in a moment."}

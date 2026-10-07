@@ -19,6 +19,8 @@
  * current intent and silences the career script when it does not apply.
  */
 
+import { requestedDeliverable, type DeliverableKind } from "./deliverable";
+
 export type DocKind = "cv" | "cover-letter" | "business-card" | "letter" | null;
 
 export type IntentKind =
@@ -430,6 +432,17 @@ const DOC_LABEL: Record<Exclude<DocKind, null>, string> = {
   letter: "formal letter",
 };
 
+/** Human name of a concrete deliverable, for the prompt. */
+const DELIVERABLE_LABEL: Record<DeliverableKind, string> = {
+  summary: "a CV professional summary (muhtasari wa CV)",
+  "cover-letter": "a cover letter (barua ya maombi)",
+  letter: "a letter (barua)",
+  message: "a written message (ujumbe)",
+  "about-me": "an about-me / self-introduction paragraph (kujitambulisha)",
+  experience: "experience bullets for their CV (uzoefu)",
+  skills: "a skills list (ujuzi)",
+};
+
 /** One-line human label of the latest intent (English, for the prompt). */
 function intentLabel(kind: IntentKind): string {
   switch (kind) {
@@ -486,6 +499,23 @@ export function buildConversationGuidance(state: ConversationState): string {
   );
   const follow = intentFollow(state.latest);
   if (follow) lines.push(`  ${follow}`);
+
+  // ⚠️ DELIVER-FIRST. The measured defect (native 1.6.25, 2026-09-21): the user
+  // asked "Nisaidie kuandika muhtasari mfupi wa CV ya huduma kwa mteja." and was
+  // answered with a menu of other actions — twice — with the summary never
+  // written. The cause is this branch order: a career noun ("CV") put the turn
+  // into document-intake, so the model gathered instead of delivering. Whenever
+  // the latest message asks for a concrete deliverable, that outranks the
+  // gathering script — the deliverable is written THIS turn, in the reply.
+  const asked = requestedDeliverable(state.latestText);
+  if (asked) {
+    lines.push(
+      `• ⚠️ DELIVER-FIRST — the user's latest message asks for ${DELIVERABLE_LABEL[asked]}. Your REPLY this turn must CONTAIN that deliverable, written out in full, in their language, ready to copy — the actual sentences, not a description of them. A menu of things you COULD do ("naweza kukagua CV yako, kuilinganisha na kazi, au kutengeneza hati — ni ipi?") is NOT an answer and must never replace it. A menu MAY follow the deliverable; it may not stand in for it. Do NOT start with questions.`,
+    );
+    lines.push(
+      "• If you are missing a fact you genuinely need, you may ask AT MOST ONE question — say plainly what is missing and why — but you still write the best version you can from what you know (use a clear marker like [jina lako] for a gap rather than leaving the deliverable out), and you show the work you have done. Never offer to do the work later as a substitute for doing it now. Never invent facts that are not in this conversation or the user's profile.",
+    );
+  }
 
   if (state.lockout) {
     lines.push(

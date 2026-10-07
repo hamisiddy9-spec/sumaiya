@@ -1,11 +1,19 @@
-import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { Icon } from "../icon";
-import { haptics, useThemeColors } from "../ui";
+import { haptics, useMotionReduced, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
+import { CHAT_MOTION, chatEnterMs, chatExitMs } from "./chat-motion";
 
-export type AttachKind = "camera" | "photo" | "file" | "link" | "myDoc";
+/**
+ * `jobTarget` is the fifth row (§3.5, "Entry, always available"): a door the
+ * user can always walk through, so job targeting no longer depends on their
+ * words happening to contain `kazi` / `lenga` / `tangazo` (audit J2). It replaces
+ * nothing — the chip stays as a second way in.
+ */
+export type AttachKind = "camera" | "photo" | "file" | "link" | "myDoc" | "jobTarget";
 
 interface Row {
   kind: AttachKind;
@@ -22,6 +30,9 @@ const ROWS: Row[] = [
   { kind: "file", icon: "file-text", en: "Upload a file", sw: "Pakia faili", hintEn: "PDF, Word or a text file", hintSw: "PDF, Word au maandishi" },
   { kind: "link", icon: "link", en: "Paste a job link", sw: "Bandika kiungo cha ajira", hintEn: "I'll use it as context, not read the page", hintSw: "Nitatumia kama muktadha, sitasoma ukurasa" },
   { kind: "myDoc", icon: "briefcase", en: "One of my CVs", sw: "Moja ya CV zako", hintEn: "Use it as a starting point", hintSw: "Ianzie hapo" },
+  // §3.5: beneath "One of my CVs", and always there — our live listings lead,
+  // the user's own advert is one tap away (option A).
+  { kind: "jobTarget", icon: "target", en: "Target a job", sw: "Lenga kwenye kazi", hintEn: "Our live listings, or paste your own advert", hintSw: "Kazi zetu za sasa, au bandika tangazo lako" },
 ];
 
 /**
@@ -45,8 +56,51 @@ export function AttachSheet({
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
+  const reduce = useMotionReduced();
 
-  if (!visible) return null;
+  // V1 · the bottom sheet, with the entrance the motion standard already
+  // specifies (backdrop 220 `ease.out`; panel `translateY 360→0` 220; exit 140
+  // `ease.in`). The sheet used to be `if (!visible) return null` — it appeared
+  // and vanished on one frame, which is the audit's J3/§3.6b conflict, so it now
+  // stays mounted for the length of its own exit.
+  const [shown, setShown] = useState(visible);
+  const progress = useSharedValue(0);
+
+  // The Android hardware back button. This sheet is NOT a <Modal> (see the note at the
+  // top), so nothing dismissed it on back: the press fell through to the navigator and
+  // changed screen with the sheet still standing. The two sheets that ARE Modals pass
+  // `onRequestClose` and close correctly — this is that same behaviour.
+  useEffect(() => {
+    if (!visible) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      onClose();
+      return true; // handled — do not also navigate
+    });
+    return () => sub.remove();
+  }, [visible, onClose]);
+
+  useEffect(() => {
+    if (visible) {
+      setShown(true);
+      progress.value = withTiming(1, {
+        duration: chatEnterMs(reduce, CHAT_MOTION.sheet.panel),
+        easing: Easing.out(Easing.cubic),
+      });
+      return;
+    }
+    progress.value = withTiming(
+      0,
+      { duration: chatExitMs(reduce, CHAT_MOTION.sheet.exit), easing: Easing.in(Easing.cubic) },
+      (finished) => {
+        if (finished) runOnJS(setShown)(false);
+      },
+    );
+  }, [visible, reduce, progress]);
+
+  const backdrop = useAnimatedStyle(() => ({ opacity: progress.value }));
+  const panel = useAnimatedStyle(() => ({ transform: [{ translateY: (1 - progress.value) * 360 }] }));
+
+  if (!shown) return null;
 
   const choose = (kind: AttachKind) => {
     haptics.selection();
@@ -56,32 +110,38 @@ export function AttachSheet({
 
   return (
     <View style={[StyleSheet.absoluteFill, { justifyContent: "flex-end", zIndex: 1000, elevation: 1000 }]}>
-      <Pressable
-        style={[StyleSheet.absoluteFill, { backgroundColor: c.overlay }]}
-        onPress={onClose}
-        accessibilityRole="button"
-        accessibilityLabel={t("Close", "Funga")}
-      />
+      <Animated.View style={[StyleSheet.absoluteFill, backdrop]}>
+        <Pressable
+          style={[StyleSheet.absoluteFill, { backgroundColor: c.overlay }]}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t("Close", "Funga")}
+        />
+      </Animated.View>
 
-      <View
-        style={{
+      <Animated.View
+        style={[
+          panel,
+          {
           backgroundColor: c.bgElevated,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
           paddingTop: 8,
           paddingBottom: insets.bottom + 16,
-          paddingHorizontal: 12,
+          paddingLeft: 12 + insets.left,
+          paddingRight: 12 + insets.right,
           borderTopWidth: 1,
           borderColor: c.border,
           maxHeight: "80%",
-        }}
+          },
+        ]}
       >
         <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 14 }} />
         <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", marginLeft: 8, marginBottom: 6 }}>
           {t("Add to the chat", "Ongeza kwenye mazungumzo")}
         </Text>
 
-        <ScrollView bounces={false}>
+        <ScrollView bounces={false} keyboardShouldPersistTaps="handled">
           {ROWS.map((r, i) => (
             <View key={r.kind}>
               <Pressable
@@ -132,7 +192,7 @@ export function AttachSheet({
             </View>
           ))}
         </ScrollView>
-      </View>
+      </Animated.View>
     </View>
   );
 }

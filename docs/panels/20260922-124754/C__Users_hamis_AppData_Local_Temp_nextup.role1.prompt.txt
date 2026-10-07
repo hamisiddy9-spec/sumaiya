@@ -1,0 +1,62 @@
+
+
+===== C:/Users/hamis/AppData/Local/Temp/nextup/EVIDENCE.md =====
+# Production evidence (Sumaiya, 22 Sept 2026)
+
+FUNNEL, from telemetry (app_event) and the database — nobody's opinion:
+  9 installs · 4 accounts · 2 CVs · 0 cover letters · 0 applications (ever)
+
+THE LEAK — four separate installs, four different devices:
+  Pixel 6a      10:30 -> 10:30   events: onboarding.slide x4, app.open, onboarding.start, onboarding.done
+  SM-A346E      13:10 -> 13:11   same shape
+  Pixel 7       06:15 -> 06:15   same shape
+  SM-A165F      08:15 -> 08:16   same shape
+  In every case onboarding.done is the LAST event. No firstrun.start (so they never opened the
+  profile wizard), no chat event, no CV, no error. First event and last event are the same minute.
+
+THE ONE THAT CONVERTED:
+  SM-A175F  04:49 onboarded -> 05:03 signed up -> 05:03 created a CV titled with her own name.
+  She finished, she signed up, she built. Nobody else has done any of it.
+
+WHAT SITS AFTER ONBOARDING (read from navigation/root-navigator.tsx):
+  Splash -> auth state + onboarding status
+    signed in && !firstRunDone  -> FirstRun (an 8-step profile wizard: intro, name, photo, fields,
+                                   experience, skills, recent, look)
+    otherwise                   -> the app tabs (Home, CVs, Scan, Profile, Settings)
+  The account wall was REMOVED on purpose: "a stranger who installed the APK met an account wall
+  before they [could do anything] ... the app tabs render for everyone; the account-only surfaces
+  gate themselves". So a guest DOES get the app.
+
+THE GUEST HOME IS THIN BY DESIGN (components + screens/app/home-screen.tsx):
+  A guest sees only THREE quick actions — the assistant, the CV check (scored on device), and
+  TemplateHub. Job matches, applications and cover letters are hidden from a guest because they
+  are "written on the server against an account".
+  So the differentiated flow — paste an advertised job, get the letter + tailored CV + checklist —
+  is exactly the part a new guest cannot reach.
+
+THE COMMODITY IS WHAT THEY CAN REACH:
+  A guest can build and download a plain CV. That is also what Careergo (TZ) and CV King (UG) sell,
+  so it differentiates nothing. The thing nobody else in this market ships is the complete
+  application package for one advertised job — and it has ZERO completions, including by the
+  user who did sign up.
+
+
+---
+
+SCOPE: product
+QUESTION: Sumaiya is a bilingual CV + job-application app for Tanzania. Given the evidence above: nine installs, four accounts, and FOUR separate installs that completed onboarding and then produced no further event at all in the same minute — never opening the profile wizard, chat, or a CV. The screen they landed on is Home as a guest, where only three things are reachable and the differentiated flow (paste an advertised job -> letter + tailored CV + checklist) is account-wailed. The plain CV builder they CAN reach is a commodity competitors already sell. What should the NEXT app update change, in strict priority order, to convert someone who just finished onboarding? Be specific about the first screen after onboarding: what must it show, what must it stop showing, and what is the single highest-leverage change? Assume ONE update only.
+
+Judge whether this is the thing a user actually needs, and what it should drop.
+
+YOUR ROLE: a product strategist who has launched consumer products in East Africa
+
+Answer in EXACTLY this shape, nothing before VERDICT:
+
+VERDICT: <one sentence, your ruling>
+WHY: <at most 3 short bullets>
+ACTION: <at most 3 imperative next steps, one per line, each starting with ACTION: >
+RISK: <the one thing that would make your ruling wrong>
+DOUBT: <what you could not judge from the material given>
+
+No preamble, no restating the question, no apologies. If the material is insufficient, say so
+in DOUBT and still give a VERDICT.

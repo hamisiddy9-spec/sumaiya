@@ -134,11 +134,11 @@ export function TemplateSelectionModal({
                   <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                 </div>
               ) : familyTemplates.length === 0 ? (
-                <div className="rounded-lg bg-gray-50 p-8 text-center text-gray-600">
+                <div className="rounded-lg bg-gray-50 p-8 text-center text-gray-600 swap-in">
                   <p>No templates available in this family</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4 swap-in">
                   {familyTemplates.map((template) => (
                     <div
                       key={template.id}

@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { useAuthContext } from "../../contexts/auth-context";
+import { canDismissAuth, dismissAuth } from "../../navigation/root-nav";
 import { track } from "../../lib/telemetry";
 import { Button, Screen, TextField, haptics, useThemeColors } from "../../components/ui";
 import { SumaiyaMark } from "../../components/sumaiya-mark";
@@ -79,6 +80,11 @@ function CodeInput({
 export function SignInScreen(_props: Props) {
   const c = useThemeColors();
   const { t } = useLang();
+  // True when sign-in was opened OVER the app (guest mode: the invitation after
+  // a download, a gated surface, the Profile row) rather than being the app's
+  // only screen. That is when there is work to go back to, so the screen says
+  // what an account does with it and offers a way out.
+  const canGoBackToApp = canDismissAuth();
   const { loading, error, sendCode, verifyCode, signInWithGoogle, clearError } = useAuthContext();
 
   const [step, setStep] = useState<"email" | "code">("email");
@@ -161,14 +167,43 @@ export function SignInScreen(_props: Props) {
     <Screen
       contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
       footer={
-        step === "email" ? (
-          <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
-            {t(
-              "First time? The same code creates your account.",
-              "Ni mara ya kwanza? Msimbo huohuo unatengeneza akaunti yako.",
-            )}
-          </Text>
-        ) : undefined
+        <View style={{ gap: 10, alignItems: "center" }}>
+          {canGoBackToApp ? (
+            // Arrived here from inside the app (the invitation after a download,
+            // a gated surface, the Profile row) — so say what the account earns
+            // and leave an obvious way back to the work.
+            <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
+              {t(
+                "Your CVs on this phone move to your account.",
+                "CV zako zilizo kwenye simu hii zitahamia kwenye akaunti yako.",
+              )}
+            </Text>
+          ) : null}
+          {step === "email" ? (
+            <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
+              {t(
+                "First time? The same code creates your account.",
+                "Ni mara ya kwanza? Msimbo huohuo unatengeneza akaunti yako.",
+              )}
+            </Text>
+          ) : null}
+          {canGoBackToApp ? (
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                clearError();
+                dismissAuth();
+              }}
+              accessibilityRole="button"
+              hitSlop={8}
+              style={{ paddingVertical: 6 }}
+            >
+              <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>
+                {t("Not now", "Si sasa")}
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
       }
     >
       {brand}

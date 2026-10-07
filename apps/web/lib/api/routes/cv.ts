@@ -13,51 +13,16 @@ import { seedProfileFromCv } from "@/lib/career-profile/sync";
 import { toStoredCvData } from "@sumaiya/utils/cv-shape";
 
 /**
- * ── Writing jsonb: JSON TEXT + an explicit cast, never a bare object ─────────
- *
- * Handing drizzle a plain object/array for a jsonb column DOUBLE-ENCODES it on
- * this stack (drizzle + postgres-js): drizzle's jsonb mapper `JSON.stringify`s
- * the value, then postgres-js serialises that *string* again — its jsonb
- * serialiser is `JSON.stringify` — so the column ends up holding a JSON
- * **string** (`jsonb_typeof(data) = 'string'`). Every SQL jsonb operator then
- * returns NULL on a row that really holds the data:
- *
- *   select data->'personal'->>'fullName' from cv …   -- NULL
- *
- * Nothing looks wrong on screen, because the JS reader parses the string back
- * into an object. That is the trap: the app looks right while the database
- * cannot query its own content — no server-side report, migration or admin view
- * over CV contents can ever see it.
- *
- * Probed against the live database (all four confirmed, 2026-09-20):
- *   bare object                       → jsonb_typeof = 'string'   ✗
- *   sql`${obj}::jsonb`                → 'object'                  ✓ (objects only)
- *   sql`${JSON.stringify(obj)}::jsonb`→ 'string'                  ✗
- *   sql`${JSON.stringify(obj)}::text::jsonb` → 'object'           ✓ objects, arrays,
- *                                                  and DB-read values alike
- * The `::text` in the middle matters: it pins the parameter to text so the
- * driver sends the JSON verbatim, and Postgres does the one real parse.
- *
- * `jsonbText` also unwraps a value that arrives as a JSON *string* — every row
- * written before this fix is one — so copying a legacy row (duplicate) repairs
- * the copy instead of carrying the broken shape forward.
+ * jsonb writes go through the shared helper in `lib/db/jsonb.ts` — JSON TEXT
+ * plus an explicit `::text::jsonb` cast, never a bare object. Handing drizzle a
+ * plain object/array stores a JSON *string* inside jsonb on this stack, which
+ * looks fine on screen (the JS reader parses it back) while every SQL jsonb
+ * operator returns NULL or throws. The reasoning and the live probe are in that
+ * module's header; it is re-exported here because the CV route was the first
+ * caller and its tests import these names from this path.
  */
-export function jsonbText(value: unknown): string {
-  let v: unknown = value;
-  for (let i = 0; i < 2 && typeof v === "string"; i++) {
-    try {
-      v = JSON.parse(v);
-    } catch {
-      break;
-    }
-  }
-  return JSON.stringify(v ?? {});
-}
-
-/** The value to hand a jsonb column. See `jsonbText` for why this exists. */
-export function jsonbParam(value: unknown) {
-  return sql`${jsonbText(value)}::text::jsonb`;
-}
+import { jsonbText, jsonbParam } from "@/lib/db/jsonb";
+export { jsonbText, jsonbParam };
 
 // The native app's api-client normalizes to the stored (web) shape before
 // writing, but a row written by an older/unpatched client — or anything that
@@ -234,7 +199,9 @@ export const cvRoutes = new Hono()
           id: `dbg_${nanoid()}`,
           kind: "cv-list-empty",
           userId,
-          detail: { path: "/api/cv", method: "GET" },
+          // `detail` is jsonb: handed a bare object it is stored as a JSON
+          // *string*, so no SQL view of this diagnostic can read it back.
+          detail: jsonbParam({ path: "/api/cv", method: "GET" }),
         });
       } catch (e) {
         console.error("[cv-list-diag] durable log write failed:", e);

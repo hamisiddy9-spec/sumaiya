@@ -39,6 +39,21 @@ export interface DesignTokens {
 
 export type DensityMode = "compact" | "normal" | "airy";
 
+/**
+ * 8pt at 96dpi (this sheet is authored at 96dpi — 794px = A4's 8.27in, so
+ * 8 × 96/72 = 10.667, rounded to 10.7). Below this, printed text reads as a
+ * grey smudge, and at the gallery's ~0.45 preview scale it isn't text at all.
+ * Nothing the token scale emits — at any density, before or after an
+ * override — may render smaller than this.
+ */
+export const SMALL_PRINT_FLOOR_PX = 10.7;
+
+/** Raises `px` to the floor when it falls under it; otherwise returns it
+ *  unchanged, so applying it more than once is a no-op. */
+export function clampFontPx(px: number): number {
+  return px < SMALL_PRINT_FLOOR_PX ? SMALL_PRINT_FLOOR_PX : px;
+}
+
 const DENSITY: Record<DensityMode, { mul: number; space: DesignTokens["space"] }> = {
   compact: {
     mul: 0.9,
@@ -68,18 +83,23 @@ export function makeTokens(
   const m = d.mul;
   const r = (n: number) => Math.round(n * m * 10) / 10;
 
+  const font = {
+    name: r(26),
+    nameTitle: r(12),
+    sectionLabel: r(9),
+    roleTitle: r(12),
+    orgName: r(10.5),
+    body: r(9.75),
+    meta: r(8.5),
+    tag: r(8.5),
+    ...overrides.font,
+  };
+  (Object.keys(font) as (keyof typeof font)[]).forEach((key) => {
+    font[key] = clampFontPx(font[key]);
+  });
+
   return {
-    font: {
-      name: r(26),
-      nameTitle: r(12),
-      sectionLabel: r(9),
-      roleTitle: r(12),
-      orgName: r(10.5),
-      body: r(9.75),
-      meta: r(8.5),
-      tag: r(8.5),
-      ...overrides.font,
-    },
+    font,
     space: { ...d.space, ...overrides.space },
     color: {
       accent,

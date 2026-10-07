@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import Svg, { Path, Circle, G, Defs, LinearGradient, Stop } from "react-native-svg";
 import Animated, {
+  cancelAnimation,
   useSharedValue,
   useAnimatedStyle,
   useFrameCallback,
@@ -81,6 +82,17 @@ export function SumaiyaMark({ size = 20, state = "idle", color = "#DA4A1C" }: Pr
     } else {
       breath.value = withTiming(1, { duration: 380 });
     }
+
+    // Cancel both on unmount. Reanimated keeps a running animation alive after
+    // the component that started it unmounts, so an infinite `withRepeat` here
+    // continues to queue prop updates for a node that is gone and they land as
+    // `RetryableMountingLayerException` inside an unrelated screen transition —
+    // measured on this app: ~3 per frame for the whole 340ms root cross-fade
+    // while the splash (which renders this mark as "thinking") was leaving.
+    return () => {
+      cancelAnimation(breath);
+      cancelAnimation(dps);
+    };
   }, [state, reduce, dps, breath]);
 
   const style = useAnimatedStyle(() => ({

@@ -1,0 +1,113 @@
+[
+ {
+  "file": "photo-oversize.jpg",
+  "label": "14.3 MB JPEG — OVER the 12 MB source cap",
+  "bytes": 14306875,
+  "inputFound": true,
+  "photoBefore": false,
+  "after": {
+   "toasts": [],
+   "hasPhoto": false,
+   "dataUrlLen": 0,
+   "payloadBytes": 0,
+   "dims": null,
+   "mime": null
+  }
+ },
+ {
+  "file": "photo-noisy.jpg",
+  "label": "7.9 MB high-noise JPEG — just under the cap, forces the 400 KB step-down",
+  "bytes": 7940760,
+  "inputFound": true,
+  "photoBefore": false,
+  "after": {
+   "toasts": [],
+   "hasPhoto": false,
+   "dataUrlLen": 0,
+   "payloadBytes": 0,
+   "dims": null,
+   "mime": null
+  }
+ },
+ {
+  "file": "cv-photo.jpg",
+  "label": "378 KB JPEG photo of a CV (1600px)",
+  "bytes": 378773,
+  "inputFound": true,
+  "photoBefore": false,
+  "after": {
+   "toasts": [],
+   "hasPhoto": true,
+   "dataUrlLen": 98215,
+   "payloadBytes": 73644,
+   "dims": "decode-failed",
+   "mime": "image/jpeg"
+  }
+ },
+ {
+  "file": "cv-photo-sw.png",
+  "label": "222 KB PNG photo of a CV (1400px)",
+  "bytes": 222099,
+  "inputFound": true,
+  "photoBefore": false,
+  "after": {
+   "toasts": [],
+   "hasPhoto": true,
+   "dataUrlLen": 96171,
+   "payloadBytes": 72109,
+   "dims": "decode-failed",
+   "mime": "image/jpeg"
+  }
+ },
+ {
+  "file": "photo-tall-alpha.png",
+  "label": "7.6 KB tall PNG with alpha (700x1000)",
+  "bytes": 7618,
+  "inputFound": true,
+  "photoBefore": true,
+  "after": {
+   "toasts": [],
+   "hasPhoto": true,
+   "dataUrlLen": 12919,
+   "payloadBytes": 9670,
+   "dims": "decode-failed",
+   "mime": "image/jpeg"
+  }
+ },
+ {
+  "file": "photo.webp",
+  "label": "290 KB WebP",
+  "bytes": 289812,
+  "inputFound": true,
+  "photoBefore": true,
+  "after": {
+   "toasts": [],
+   "hasPhoto": true,
+   "dataUrlLen": 87995,
+   "payloadBytes": 65979,
+   "dims": "decode-failed",
+   "mime": "image/jpeg"
+  }
+ },
+ {
+  "file": "photo.svg",
+  "label": "99 B SVG — deliberately excluded type",
+  "bytes": 99,
+  "inputFound": true,
+  "photoBefore": true,
+  "after": {
+   "toasts": [],
+   "hasPhoto": true,
+   "dataUrlLen": 87995,
+   "payloadBytes": 65979,
+   "dims": "decode-failed",
+   "mime": "image/jpeg"
+  }
+ },
+ {
+  "file": "cv.docx",
+  "label": "DOCX picked into the photo input — wrong type",
+  "bytes": 9547,
+  "harnessError": "TimeoutError: page.goto: Timeout 60000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"https://sumaiya.app/editor/cv/wK6Sbmsbm8GNccU39whVb?lang=en\", waiting until \"domcontentloaded\"\u001b[22m\n"
+ }
+]

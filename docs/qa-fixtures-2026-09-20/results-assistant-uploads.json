@@ -1,0 +1,521 @@
+[
+ {
+  "file": "cv-text.pdf",
+  "label": "text-layer PDF (English)",
+  "bytes": 3283,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 4,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 811,
+  "chips": 1,
+  "wallMs": 876,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 5302,
+  "extractedChars": 1725,
+  "extractedHead": "Amina Joseph Mwakasege  Software Engineer amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege  PROFESSIONAL SUMMARY  Software engineer with 6 years building payment",
+  "extractedTail": ". Baraka Mushi | CTO, Selcom baraka.mushi@example.co.tz | +255 786 333 444  INTERESTS  Long-distance running, chess, and Swahili literature.",
+  "attachmentLocated": true,
+  "serverCalls": 0
+ },
+ {
+  "file": "cv-sw.pdf",
+  "label": "text-layer PDF (Swahili)",
+  "bytes": 2880,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 828,
+  "chips": 2,
+  "wallMs": 881,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 6960,
+  "extractedChars": 1373,
+  "extractedHead": "Juma Hamisi Chang'ombe  Mhandisi wa Programu juma.chang'ombe@example.co.tz | +255 715 998 877 | Ubungo, Dar es Salaam  PROFESSIONAL SUMMARY  Mhandisi wa programu mwenye uzoefu wa miaka saba katika kujenga mifumo ya malip",
+  "extractedTail": "MB mwajuma.salum@example.co.tz | +255 713 555 666  INTERESTS  Kuendesha baiskeli, kusoma vitabu vya Kiswahili na kufundisha vijana programu.",
+  "attachmentLocated": true,
+  "serverCalls": 0
+ },
+ {
+  "file": "cv-long.pdf",
+  "label": "7-page text PDF",
+  "bytes": 17551,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 1262,
+  "chips": 3,
+  "wallMs": 1317,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 29742,
+  "extractedChars": 9994,
+  "extractedHead": "Amina Joseph Mwakasege  Software Engineer amina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege  PROFESSIONAL SUMMARY  Software engineer with 6 years building payment",
+  "extractedTail": "tions Architect Associate | Amazon Web Services | 2023 - Certified Scrum Master | Scrum Alliance | 2021  PROJECTS  Boda Route Optimiser | Le",
+  "attachmentLocated": true,
+  "serverCalls": 0
+ },
+ {
+  "file": "cv-scanned.pdf",
+  "label": "scanned / image-only PDF",
+  "bytes": 242440,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   },
+   {
+    "at": 6211,
+    "text": "Inasoma picha… 1%"
+   },
+   {
+    "at": 6626,
+    "text": "Inasoma picha… 9%"
+   },
+   {
+    "at": 7030,
+    "text": "Inasoma picha… 14%"
+   },
+   {
+    "at": 7445,
+    "text": "Inasoma picha… 23%"
+   },
+   {
+    "at": 7861,
+    "text": "Inasoma picha… 30%"
+   },
+   {
+    "at": 8278,
+    "text": "Inasoma picha… 37%"
+   },
+   {
+    "at": 8692,
+    "text": "Inasoma picha… 47%"
+   },
+   {
+    "at": 9110,
+    "text": "Inasoma picha… 57%"
+   },
+   {
+    "at": 9519,
+    "text": "Inasoma picha… 64%"
+   },
+   {
+    "at": 9935,
+    "text": "Inasoma picha… 100%"
+   }
+  ],
+  "at": 10353,
+  "chips": 4,
+  "wallMs": 10418,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 22151,
+  "extractedChars": 1588,
+  "extractedHead": "Ami na Joseph Mwakasege\namina.mwakasege@example.co.iz | +255 712 345 678 | Dar es Salaam, Tanzania |\nlinkedin.com/inf/aminamwakasege\n\nPROFESSIONAL SUMMARY\n\nSoftware engineer with 6 years building payment and logistics pl",
+  "extractedTail": "iliation tool for 42 schools.\n\nREFEREES\n\nDr. Neema Kimaro | Head of Engineering, Nala Payments\nneema.kimaro@example.co.tz | +255 754 111 222",
+  "attachmentLocated": true,
+  "serverCalls": 0
+ },
+ {
+  "file": "cv-blank.pdf",
+  "label": "blank PDF (no text at all)",
+  "bytes": 1708,
+  "kind": "message",
+  "message": "Nenda mwanzo / · imeshindwa / Jaribu tena",
+  "seen": [
+   {
+    "at": 4,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 4943,
+  "wallMs": 5000,
+  "serverCalls": 0
+ },
+ {
+  "file": "cv-huge.pdf",
+  "label": "27 MB PDF (over the 25 MB cap)",
+  "bytes": 27001436,
+  "kind": "TIMEOUT_NO_TERMINAL_STATE",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 60000,
+  "finalTextTail": "aiya 😊 Niko hapa kukusaidia kutengeneza CV yako ya kitaalamu — bure, kwa dakika chache. Gusa kimoja hapa chini, pakia CV yako ya zamani, au niambie tu jina lako. 📎 cv-text.pdf 📎 cv-sw.pdf 📎 cv-long.pdf 📎 cv-scanned.pdf Inasoma faili yako… cv-huge.pdf · inasoma… Ondoa Ninachoweza kufanya Wastani",
+  "wallMs": 60292,
+  "serverCalls": 1
+ },
+ {
+  "file": "cv-zero.pdf",
+  "label": "zero-byte .pdf",
+  "bytes": 0,
+  "kind": "message",
+  "message": "Nenda mwanzo / · imeshindwa / Jaribu tena",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 17048,
+  "wallMs": 17102,
+  "serverCalls": 2
+ },
+ {
+  "file": "cv-corrupt.pdf",
+  "label": "corrupt PDF",
+  "bytes": 11515,
+  "kind": "message",
+  "message": "Nenda mwanzo / · imeshindwa / Jaribu tena",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 1647,
+  "wallMs": 1697,
+  "serverCalls": 3
+ },
+ {
+  "file": "cv-protected.pdf",
+  "label": "password-protected PDF",
+  "bytes": 3418,
+  "kind": "message",
+  "message": "Nenda mwanzo / · imeshindwa / Jaribu tena",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 1245,
+  "wallMs": 1309,
+  "serverCalls": 4
+ },
+ {
+  "file": "cv-docx-content-mismatch.pdf",
+  "label": "DOCX bytes named .pdf",
+  "bytes": 9547,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 2083,
+  "chips": 5,
+  "wallMs": 2146,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 23000,
+  "extractedChars": 926,
+  "extractedHead": "Amina Joseph Mwakasege\n\nSoftware Engineer\n\namina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania\n\nPROFESSIONAL SUMMARY\n\nSoftware engineer with 6 years building payment and logistics platforms across ",
+  "extractedTail": "ATIONS\n\nAWS Solutions Architect Associate  •  Amazon Web Services  •  2023\n\nINTERESTS\n\nLong-distance running, chess, and Swahili literature.",
+  "attachmentLocated": true,
+  "serverCalls": 5
+ },
+ {
+  "file": "cv-png-content-mismatch.pdf",
+  "label": "PNG bytes named .pdf",
+  "bytes": 222099,
+  "kind": "message",
+  "message": "Nenda mwanzo / · imeshindwa / Jaribu tena",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 9902,
+  "wallMs": 9961,
+  "serverCalls": 6
+ },
+ {
+  "file": "cv-pdf-content-mismatch.docx",
+  "label": "PDF bytes named .docx",
+  "bytes": 3283,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 1,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 5790,
+  "chips": 6,
+  "wallMs": 5850,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 26428,
+  "extractedChars": 1725,
+  "extractedHead": "Amina Joseph Mwakasege\nSoftware Engineer\namina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania |\nlinkedin.com/in/aminamwakasege\nPROFESSIONAL SUMMARY\nSoftware engineer with 6 years building payment an",
+  "extractedTail": "Mr. Baraka Mushi | CTO, Selcom\nbaraka.mushi@example.co.tz | +255 786 333 444\nINTERESTS\nLong-distance running, chess, and Swahili literature.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-noextension",
+  "label": "DOCX bytes, no extension",
+  "bytes": 9547,
+  "kind": "TIMEOUT_NO_TERMINAL_STATE",
+  "seen": [],
+  "at": 60000,
+  "finalTextTail": " ya zamani, au niambie tu jina lako. 📎 cv-text.pdf 📎 cv-sw.pdf 📎 cv-long.pdf 📎 cv-scanned.pdf 📎 cv-docx-content-mismatch.pdf 📎 cv-pdf-content-mismatch.docx Imeshindwa kusoma faili. Jaribu tena. Jaribu tena Nenda mwanzo cv-noextension · imeshindwa Jaribu tena Ondoa Ninachoweza kufanya Wastani",
+  "wallMs": 60214,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv.docx",
+  "label": "genuine DOCX (English)",
+  "bytes": 9547,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 422,
+  "chips": 7,
+  "wallMs": 537,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 27123,
+  "extractedChars": 926,
+  "extractedHead": "Amina Joseph Mwakasege\n\nSoftware Engineer\n\namina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania\n\nPROFESSIONAL SUMMARY\n\nSoftware engineer with 6 years building payment and logistics platforms across ",
+  "extractedTail": "ATIONS\n\nAWS Solutions Architect Associate  •  Amazon Web Services  •  2023\n\nINTERESTS\n\nLong-distance running, chess, and Swahili literature.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-sw.docx",
+  "label": "genuine DOCX (Swahili)",
+  "bytes": 9514,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 2,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 413,
+  "chips": 8,
+  "wallMs": 512,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 28732,
+  "extractedChars": 927,
+  "extractedHead": "Juma Hamisi Chang'ombe\n\nMhandisi wa Programu\n\njuma.chang'ombe@example.co.tz | +255 715 998 877 | Ubungo, Dar es Salaam\n\nPROFESSIONAL SUMMARY\n\nMhandisi wa programu mwenye uzoefu wa miaka saba katika kujenga mifumo ya mali",
+  "extractedTail": "ama wa Mtandao  •  Taasisi ya Teknolojia  •  2022\n\nINTERESTS\n\nKuendesha baiskeli, kusoma vitabu vya Kiswahili na kufundisha vijana programu.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-long.docx",
+  "label": "long genuine DOCX",
+  "bytes": 9679,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 3,
+    "text": "Inasoma faili yako…"
+   }
+  ],
+  "at": 415,
+  "chips": 9,
+  "wallMs": 490,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 52545,
+  "extractedChars": 10464,
+  "extractedHead": "Amina Joseph Mwakasege\n\nEXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENCE EXPERIENC",
+  "extractedTail": "ive 8.7 with measurable impact on settlement throughput.\n\nDelivered initiative 8.8 with measurable impact on settlement throughput.\n\nDeliver",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv.txt",
+  "label": "plain .txt CV",
+  "bytes": 2128,
+  "kind": "chip",
+  "seen": [],
+  "at": 6,
+  "chips": 10,
+  "wallMs": 81,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 45077,
+  "extractedChars": 1725,
+  "extractedHead": "Amina Joseph Mwakasege\r\nSoftware Engineer\r\namina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege\r\n\r\nPROFESSIONAL SUMMARY\r\nSoftware engineer with 6 years building paym",
+  "extractedTail": "araka Mushi | CTO, Selcom\r\nbaraka.mushi@example.co.tz | +255 786 333 444\r\n\r\nINTERESTS\r\nLong-distance running, chess, and Swahili literature.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-sw.txt",
+  "label": "plain .txt CV (Swahili)",
+  "bytes": 1690,
+  "kind": "chip",
+  "seen": [],
+  "at": 5,
+  "chips": 11,
+  "wallMs": 107,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 46817,
+  "extractedChars": 1373,
+  "extractedHead": "Juma Hamisi Chang'ombe\r\nMhandisi wa Programu\r\njuma.chang'ombe@example.co.tz | +255 715 998 877 | Ubungo, Dar es Salaam\r\n\r\nPROFESSIONAL SUMMARY\r\nMhandisi wa programu mwenye uzoefu wa miaka saba katika kujenga mifumo ya ma",
+  "extractedTail": "\nmwajuma.salum@example.co.tz | +255 713 555 666\r\n\r\nINTERESTS\r\nKuendesha baiskeli, kusoma vitabu vya Kiswahili na kufundisha vijana programu.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-photo.jpg",
+  "label": "JPEG photo of a CV",
+  "bytes": 378773,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 12,
+    "text": "Inasoma faili yako…"
+   },
+   {
+    "at": 34579,
+    "text": "Inasoma picha… 3%"
+   },
+   {
+    "at": 34987,
+    "text": "Inasoma picha… 7%"
+   },
+   {
+    "at": 35398,
+    "text": "Inasoma picha… 13%"
+   },
+   {
+    "at": 35807,
+    "text": "Inasoma picha… 19%"
+   },
+   {
+    "at": 36215,
+    "text": "Inasoma picha… 21%"
+   },
+   {
+    "at": 36631,
+    "text": "Inasoma picha… 27%"
+   },
+   {
+    "at": 37051,
+    "text": "Inasoma picha… 29%"
+   },
+   {
+    "at": 37458,
+    "text": "Inasoma picha… 31%"
+   },
+   {
+    "at": 37863,
+    "text": "Inasoma picha… 37%"
+   },
+   {
+    "at": 38282,
+    "text": "Inasoma picha… 41%"
+   },
+   {
+    "at": 38688,
+    "text": "Inasoma picha… 56%"
+   },
+   {
+    "at": 39093,
+    "text": "Inasoma picha… 63%"
+   },
+   {
+    "at": 39501,
+    "text": "Inasoma picha… 100%"
+   }
+  ],
+  "at": 39907,
+  "chips": 12,
+  "wallMs": 39996,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 49376,
+  "extractedChars": 1546,
+  "extractedHead": "Amina Joseph Mwakasege\namina.mwakasege@example.co.tz | +255 712 345 678 | Dar es Salaam, Tanzania |\nlinkedin.com/infaminamwakasege\n\nPROFESSIONAL SUMMARY\n\nSoftware engineer with 6 years building payment and logistics plat",
+  "extractedTail": "Tracker | Creator | 2019\n\n- School-fees reconciliation tool for 42 schools.\n\nREFEREES\n\nDr. Neema Kimaro | Head of Engineering, Nala Payments",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ },
+ {
+  "file": "cv-photo-sw.png",
+  "label": "PNG photo of a CV (Swahili)",
+  "bytes": 222099,
+  "kind": "chip",
+  "seen": [
+   {
+    "at": 6,
+    "text": "Inasoma faili yako…"
+   },
+   {
+    "at": 25457,
+    "text": "Inasoma picha… 1%"
+   },
+   {
+    "at": 25865,
+    "text": "Inasoma picha… 6%"
+   },
+   {
+    "at": 26272,
+    "text": "Inasoma picha… 11%"
+   },
+   {
+    "at": 26691,
+    "text": "Inasoma picha… 17%"
+   },
+   {
+    "at": 27098,
+    "text": "Inasoma picha… 23%"
+   },
+   {
+    "at": 27509,
+    "text": "Inasoma picha… 26%"
+   },
+   {
+    "at": 27915,
+    "text": "Inasoma picha… 34%"
+   },
+   {
+    "at": 28323,
+    "text": "Inasoma picha… 44%"
+   },
+   {
+    "at": 28734,
+    "text": "Inasoma picha… 53%"
+   },
+   {
+    "at": 29141,
+    "text": "Inasoma picha… 64%"
+   },
+   {
+    "at": 29551,
+    "text": "Inasoma picha… 100%"
+   }
+  ],
+  "at": 29957,
+  "chips": 13,
+  "wallMs": 30072,
+  "aiEndpoint": "https://sumaiya.app/api/ai/assistant-turn",
+  "aiPayloadBytes": 51202,
+  "extractedChars": 1372,
+  "extractedHead": "Juma Hamisi Chang'ombe\nhandisi wa Programu\njuma.chang'ombe@example.co.tz | +255 715 998 877 | Ubungo, Dar es Salaam\nPROFESSIONAL SUMMARY\nMhandisi wa programu mwenye uzoefu wa miaka saba katika kujenga mifumo ya\nmalipo na",
+  "extractedTail": " NMB\nmwajuma.salum@example.co.tz | +255 713 555 666\nINTERESTS\nKuendesha baiskeli, kusoma vitabu vya Kiswahili na kufundisha vijana programu.",
+  "attachmentLocated": true,
+  "serverCalls": 7
+ }
+]

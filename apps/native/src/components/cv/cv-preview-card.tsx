@@ -5,7 +5,7 @@ import { WebView } from "react-native-webview";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { CV } from "@sumaiya/types";
 import { isEmptyCv } from "@sumaiya/utils/cv-shape";
-import { cvToHtml, CV_TEMPLATES, type CvTemplateId } from "../../lib/cv-html";
+import { cvToHtml, isRenderable, templateMeta, CV_TEMPLATES, type CvTemplateId } from "../../lib/cv-html";
 import { useEntitlements } from "../../lib/entitlements";
 import { getDefaultTemplate } from "../../lib/prefs";
 import { exportCVAsPDF } from "../../services/pdf-export";
@@ -76,6 +76,15 @@ export function CvPreviewCard({
   // page with zero explanation, right above "Download PDF"/"Save". The ATS
   // checker already warns for exactly this case; this card didn't.
   const cvIsEmpty = useMemo(() => isEmptyCv(cv.data), [cv.data]);
+
+  // Some pickable ids (the "bespoke" flagship designs) have no renderer yet —
+  // cvToHtml() silently substitutes "classic" for them. The owner's ruling on
+  // seeing this: it deserves a caution, not silence and not a block — export
+  // and sharing must still work, this just says which design actually shows.
+  const templateUnavailable = !isRenderable(template);
+  const classicName = CV_TEMPLATES.find((tpl) => tpl.id === "classic")!.name;
+  const unavailableName = templateMeta(template)?.name ?? { en: template, sw: template };
+
   const { width: screenW } = useWindowDimensions();
   const thumbW = Math.min(screenW - 64, 300);
   const thumbH = Math.round(thumbW * PAGE_RATIO);
@@ -237,6 +246,17 @@ export function CvPreviewCard({
         </View>
       ) : null}
 
+      {templateUnavailable ? (
+        <View style={{ padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.warning + "55", backgroundColor: c.warning + "12" }}>
+          <Text style={{ color: c.warning, fontSize: 12.5, lineHeight: 18 }}>
+            {t(
+              `${unavailableName.en} isn't available on this device yet — showing ${classicName.en} below instead. You can still download and share.`,
+              `${unavailableName.sw} haipatikani kwenye kifaa hiki bado — inaonyesha ${classicName.sw} hapa chini badala yake. Bado unaweza kupakua na kushiriki.`,
+            )}
+          </Text>
+        </View>
+      ) : null}
+
       {/* preview — a real page thumbnail; the viewport meta in cvToHtml scales
           the 794px page down to fit (no zoom hack, which rendered blank on the
           Android WebView). Tap to open the full-screen view. */}
@@ -265,7 +285,6 @@ export function CvPreviewCard({
           pointerEvents="none"
           onLoadEnd={() => setThumbReady(true)}
           style={{ width: thumbW, height: thumbH, backgroundColor: "#fff", opacity: thumbReady ? 1 : 0 }}
-          androidLayerType="software"
         />
         {!thumbReady ? (
           <View style={{ position: "absolute", inset: 0, alignItems: "center", justifyContent: "center", backgroundColor: "#fff" }}>
@@ -367,7 +386,7 @@ export function CvPreviewCard({
 
       {/* L3 — full screen */}
       <Modal visible={full} animationType="slide" onRequestClose={() => setFull(false)}>
-        <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+        <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 10 }}>
             <Pressable onPress={() => setFull(false)} hitSlop={10} style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
               <Icon name="arrow-left" size={20} color={c.text} />
@@ -375,8 +394,18 @@ export function CvPreviewCard({
             </Pressable>
           </View>
           <View style={{ paddingHorizontal: 12, paddingBottom: 8 }}>{templateRow}</View>
+          {templateUnavailable ? (
+            <View style={{ marginHorizontal: 12, marginBottom: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.warning + "55", backgroundColor: c.warning + "12" }}>
+              <Text style={{ color: c.warning, fontSize: 12.5, lineHeight: 18 }}>
+                {t(
+                  `${unavailableName.en} isn't available on this device yet — showing ${classicName.en} below instead. You can still download and share.`,
+                  `${unavailableName.sw} haipatikani kwenye kifaa hiki bado — inaonyesha ${classicName.sw} hapa chini badala yake. Bado unaweza kupakua na kushiriki.`,
+                )}
+              </Text>
+            </View>
+          ) : null}
           <Animated.View entering={FadeIn} style={{ flex: 1, backgroundColor: "#fff" }}>
-            <WebView originWhitelist={["*"]} source={{ html: htmlFull }} style={{ flex: 1, backgroundColor: "#fff" }} androidLayerType="software" />
+            <WebView originWhitelist={["*"]} source={{ html: htmlFull }} style={{ flex: 1, backgroundColor: "#fff" }} />
           </Animated.View>
           <View style={{ padding: 16, paddingBottom: insets.bottom + 16 }}>
             <Button

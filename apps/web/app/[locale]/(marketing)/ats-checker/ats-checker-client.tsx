@@ -77,7 +77,7 @@ export function AtsCheckerClient() {
       const res = await fetch("/api/tools/extract-text", { method: "POST", body: fd, signal: controller.signal });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        setError(json.error ?? (sw ? "Imeshindwa kusoma PDF." : "Couldn't read that PDF."));
+        setError(json.error ?? (sw ? "Sikuweza kusoma PDF." : "Couldn't read that PDF."));
         return;
       }
       const extracted: string = json.text ?? "";
@@ -159,7 +159,7 @@ export function AtsCheckerClient() {
                 {loading ? <Loader2 className="w-8 h-8 text-cream animate-spin" /> : <FileUp className="w-8 h-8 text-cream" />}
               </div>
               <p className="text-base font-semibold text-espresso">
-                {loading ? (sw ? "Inakagua CV yako…" : "Checking your CV…") : (sw ? "Pakia CV yako (PDF)" : "Upload your CV (PDF)")}
+                {loading ? (sw ? "Ninakagua CV yako…" : "Checking your CV…") : (sw ? "Pakia CV yako (PDF)" : "Upload your CV (PDF)")}
               </p>
               <p className="text-xs text-text-muted mt-1">
                 {loading ? fileName : (sw ? `Buruta hapa au bofya kuchagua · PDF hadi MB ${MAX_PDF_UPLOAD_MB} · haifadhiwi` : `Drag here or click to choose · PDF up to ${MAX_PDF_UPLOAD_MB} MB · never stored`)}
@@ -216,7 +216,7 @@ export function AtsCheckerClient() {
               </h2>
               <p className="text-sm text-text-body mt-1.5 leading-relaxed">
                 {result.status === "ready"
-                  ? (sw ? "CV yako inapita vichujio vya waajiri wengi. Rekebisha vidokezo vichache hapo chini." : "Your CV clears most ATS checks. Tidy up the few items below and you're set.")
+                  ? (sw ? "CV yako inapita vigezo vya waajiri wengi. Rekebisha vidokezo vichache hapo chini." : "Your CV clears most ATS checks. Tidy up the few items below and you're set.")
                   : (sw ? "Kuna mambo yanayoweza kukufanya ukataliwe kabla ya mwajiri kuona CV yako. Rekebisha yaliyo hapa chini." : "A few things could get you filtered out by an ATS. Fix the flagged items below.")}
               </p>
               <button onClick={reset} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-ember-hover transition">

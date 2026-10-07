@@ -11,7 +11,7 @@ import Animated, {
 import * as FileSystem from "expo-file-system/legacy";
 import { useAppNavigation } from "../../hooks/use-app-navigation";
 import { apiClient } from "../../lib/api-client";
-import { friendlyApiError, isTransportError } from "../../lib/app-errors";
+import { friendlyImportError, isTransportError } from "../../lib/app-errors";
 import type { CV, CVData } from "@sumaiya/types";
 import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const STEPS_EN = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];
-const STEPS_SW = ["Inasoma maandishi…", "Inatafuta uzoefu wako…", "Inapanga CV yako…"];
+const STEPS_SW = ["Ninasoma maandishi…", "Ninatafuta uzoefu wako…", "Ninapanga CV yako…"];
 
 export function ScanProcessingScreen({ route }: Props) {
   const c = useThemeColors();
@@ -84,7 +84,7 @@ export function ScanProcessingScreen({ route }: Props) {
         // deliberately localised, so it is passed through as-is.
         setErrorMsg(
           isTransportError(err)
-            ? friendlyApiError(err, lang)
+            ? friendlyImportError(err, lang)
             : err instanceof Error
               ? err.message
               : t("I couldn't read this photo. Try again.", "Sikuweza kusoma picha hii. Jaribu tena."),

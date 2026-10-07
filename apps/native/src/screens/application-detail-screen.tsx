@@ -13,6 +13,9 @@ import { useLang } from "../lib/i18n";
 import { Button, Screen, ScreenTitle, TextField, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
+import { FUNNEL_EVENTS } from "../lib/analytics";
+import { track } from "../lib/telemetry";
+import { useAuthContext } from "../contexts/auth-context";
 import type { ApplicationDetailScreenProps } from "../navigation/types";
 
 export function ApplicationDetailScreen({ route, navigation }: ApplicationDetailScreenProps) {
@@ -22,6 +25,8 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
   const id: string | undefined = route?.params?.id;
   const isNew = !id;
 
+  const { user } = useAuthContext();
+  const isGuest = !user;
   const { cvs } = useCvs();
   const [loaded, setLoaded] = useState(isNew);
   const [role, setRole] = useState("");
@@ -30,6 +35,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
   const [jobUrl, setJobUrl] = useState("");
   const [jd, setJd] = useState("");
   const [status, setStatus] = useState<AppStatus>("saved");
+  const [initialStatus, setInitialStatus] = useState<AppStatus | undefined>();
   const [cvId, setCvId] = useState<string | undefined>();
   const [coverLetter, setCoverLetter] = useState("");
   const [notes, setNotes] = useState("");
@@ -43,6 +49,7 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
       if (a) {
         setRole(a.role); setCompany(a.company); setLocation(a.location ?? "");
         setJobUrl(a.jobUrl ?? ""); setJd(a.jobDescription ?? ""); setStatus(a.status);
+        setInitialStatus(a.status);
         setCvId(a.cvId); setCoverLetter(a.coverLetter ?? ""); setNotes(a.notes ?? "");
       }
       setLoaded(true);
@@ -68,8 +75,17 @@ export function ApplicationDetailScreen({ route, navigation }: ApplicationDetail
       fitScore,
     };
     try {
-      if (isNew) await createApplication({ company: payload.company!, role: payload.role!, ...payload });
-      else await updateApplication(id!, payload);
+      if (isNew) {
+        await createApplication({ company: payload.company!, role: payload.role!, ...payload });
+        const props = { via: "manual", has_jd: Boolean(payload.jobDescription), has_cv: Boolean(payload.cvId), guest: isGuest };
+        track("application.created", props);
+        track(FUNNEL_EVENTS.applicationCreated, props);
+      } else {
+        await updateApplication(id!, payload);
+        if (initialStatus !== undefined && initialStatus !== status) {
+          track("application.status", { from: initialStatus, to: status });
+        }
+      }
       haptics.success();
       navigation.goBack();
     } catch {

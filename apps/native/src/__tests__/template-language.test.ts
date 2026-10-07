@@ -33,8 +33,11 @@ describe("real-template-thumb.tsx — no hardcoded language", () => {
 
 describe("template-gallery.tsx — every RealTemplateThumb passes lang", () => {
   it("every call site passes lang={lang}", () => {
+    // Only the full-screen preview mounts a WebView now — the grid cell uses
+    // the pure-RN TemplateThumb (no WebView per cell; see the print-pagination /
+    // gallery-scroll-performance audit), which has no lang prop to check.
     const calls = [...GALLERY.matchAll(/<RealTemplateThumb\b/g)];
-    expect(calls.length).toBe(2);
+    expect(calls.length).toBe(1);
 
     for (const call of calls) {
       const tagStart = call.index!;

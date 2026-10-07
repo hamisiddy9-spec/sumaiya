@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db, documentVersion, cv, coverLetter, letter, businessCard } from "@/lib/db";
 import { eq, and, desc, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { jsonbParam } from "@/lib/db/jsonb";
 
 // Map a document type to its owning table so a snapshot can only be attached to
 // a document the caller actually owns.
@@ -52,7 +53,10 @@ export const versionRoutes = new Hono()
       documentId: body.documentId,
       documentType: body.documentType,
       title: body.title,
-      snapshot: body.snapshot,
+      // jsonb: a bare object is stored as a JSON *string*, which the app's own
+      // reader hides (it parses it back) while `snapshot->>'title'` is NULL for
+      // every SQL statement that is not the app. See lib/db/jsonb.ts.
+      snapshot: jsonbParam(body.snapshot),
     }).returning({ id: documentVersion.id, createdAt: documentVersion.createdAt });
 
     // Keep only the newest MAX_VERSIONS_PER_DOC snapshots for this doc.

@@ -1,0 +1,50 @@
+[
+ {
+  "version": "before",
+  "box": {
+   "tag": "IMG",
+   "w": 272,
+   "h": 300,
+   "style": "width:100%;height:100%;object-fit:cover;display:block",
+   "hasObjectFit": true
+  },
+  "screen": {
+   "px": 31480,
+   "w": 200,
+   "h": 200,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 114265,
+   "w": 363,
+   "h": 401,
+   "aspect": 0.905
+  },
+  "rasterVsScreenPct": -9.5,
+  "faithful": false
+ },
+ {
+  "version": "after",
+  "box": {
+   "tag": "DIV",
+   "w": 272,
+   "h": 300,
+   "style": "width:100%;height:100%;background-image:url(\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAIAAAAxBA+LAAAOL0lEQVR4nO3c260m1RGAUUDOBnJxIhOOA8G5OCDLQhrGc",
+   "hasObjectFit": false
+  },
+  "screen": {
+   "px": 31480,
+   "w": 200,
+   "h": 200,
+   "aspect": 1
+  },
+  "raster": {
+   "px": 125449,
+   "w": 400,
+   "h": 400,
+   "aspect": 1
+  },
+  "rasterVsScreenPct": 0,
+  "faithful": true
+ }
+]

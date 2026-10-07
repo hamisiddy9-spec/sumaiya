@@ -25,6 +25,9 @@ import { CreateMenu } from "@/components/dashboard/create-menu";
 import { CreateEntryButton } from "@/components/editor/create-entry-options";
 import { RecommendedJobsSection } from "@/components/jobs/recommended-jobs-section";
 import { label } from "@/lib/i18n/labels";
+import { accessCopy } from "@/lib/access-copy";
+import { subjectForUser } from "@/lib/entitlements-server";
+import { isPremiumActive } from "@/lib/entitlements";
 import { isReturningUser, dashboardGreetingKey } from "@/lib/dashboard/returning";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -165,6 +168,14 @@ export default async function DashboardPage({ searchParams }: Props) {
   const docCount = cvCount + clCount + bcCount + letCount;
 
   const sw = lang === "sw";
+
+  // This account's REAL access, from the same source /api/entitlements answers
+  // from — the inline banner below used to read "Huduma zote zimefunguliwa"
+  // ("everything unlocked") unconditionally, while `template.premium` was false
+  // (D2). lib/access-copy.ts owns the wording and never claims full access for a
+  // non-Premium account.
+  const premium = isPremiumActive((await subjectForUser(userId)).premiumUntil);
+  const access = accessCopy(premium, sw);
   const appPipe = appStatuses.reduce((acc, a) => { acc[a.status] = (acc[a.status] ?? 0) + 1; return acc; }, {} as Record<string, number>);
   const followUpCount = appStatuses.filter(needsFollowUp).length;
 
@@ -604,12 +615,24 @@ export default async function DashboardPage({ searchParams }: Props) {
           </div>
         )}
 
-        {/* ── "everything free" banner with real usage stats ── */}
+        {/* ── access banner with real usage stats — states what THIS account
+            actually has (see lib/access-copy.ts) ── */}
         <div className="bg-pine-tint border border-pine/20 rounded-card-lg px-5 py-3 mb-8 flex flex-wrap items-center gap-x-3 gap-y-1">
           <Icon name="check" size={16} className="text-pine flex-shrink-0" />
           <span className="font-semibold text-espresso text-sm min-w-0">
-            {sw ? "Huduma zote zimefunguliwa" : "Everything free & unlocked"}
+            {access.title}
           </span>
+          <span className="text-xs text-text-body min-w-0 max-w-[60ch]">
+            {access.body}
+          </span>
+          {access.cta && (
+            <Link
+              href={access.cta.href}
+              className="text-xs font-semibold text-ember-hover hover:underline"
+            >
+              {access.cta.label} →
+            </Link>
+          )}
           <span className="ml-auto text-[10px] text-text-muted whitespace-nowrap">
             {docCount} {lang === "sw" ? "hati" : "docs"} · {totalDownloads} {lang === "sw" ? "pakuliwa" : "downloads"}
           </span>

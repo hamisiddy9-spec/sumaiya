@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="sw"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mfumo wa kubuni (design system) — Sumaiya 2026 redesign</title>
+<style>/* ============================================================================
+   SUMAIYA 2026 DESIGN SYSTEM — reference implementation
+   Colours are READ FROM THE APP (apps/web/tailwind.config.ts +
+   apps/native/src/components/ui/theme.ts). None are invented. None change.
+   This file is inlined into every mockup so each HTML file is standalone.
+   ========================================================================== */
+
+:root{
+  /* ── FIXED PALETTE (Warm Confidence) ─────────────────────────────────── */
+  --ember:#DA4A1C;      --ember-shadow:#A8330F;  --ember-hover:#C13E14;
+  /* ember as TEXT is 3.89:1 on cream and 4.22:1 on white — below WCAG AA
+   * 4.5:1 for 14px. #A8330F is 6.16:1 / 6.68:1. Ember stays a FILL and an
+   * ICON colour; small ember TEXT uses ember-shadow. Same palette, no change. */
+  --ember-text:#A8330F;
+  --ember-tint:#FBE9E1; --ember-fill:#B83A12;    /* accentFill (light) */
+  --pine:#12433D;       --pine-tint:#E4EDEA;
+  --gold:#F2A93B;       --gold-tint:#FBF3E2;     --gold-text:#96630F;
+  --espresso:#211A15;   --espresso-2:#2C231C;    --espresso-line:#3A2E25;
+  --cream:#FAF5EE;      --sand:#EFE7DA;          --sand-2:#F4EEE4;
+  --card:#FFFFFF;       --border:#E9E0D4;        --border-input:#9C8D7B;
+  --text-body:#6B5F54;  --text-muted:#756A5E;
+  --error:#C13E14;      --success:#12766A;       --warning:#96630F;
+
+  /* ── SPACING (base 4px; ONLY these) ──────────────────────────────────── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s8:32px;
+
+  /* ── RADII ───────────────────────────────────────────────────────────── */
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px;
+
+  /* ── ELEVATION (content plane is flat; shadow is for the floating layer) */
+  --shadow-press:0 2px 8px rgba(33,26,21,.05);
+  --shadow-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --shadow-ember:0 3px 0 #A8330F;
+
+  /* ── TYPE ────────────────────────────────────────────────────────────── */
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Hanken Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  /* ── MOTION (mirrors apps/native/src/components/ui/motion.tsx) ───────── */
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-field:340ms;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  --ease-in:cubic-bezier(.32,0,.67,0);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--sand);color:var(--espresso);
+  font-family:var(--font-body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── THE PROPOSAL LAYOUT (this chrome is the deliverable's wrapper, not the
+      product UI) ──────────────────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+.masthead{margin-bottom:40px}
+.masthead .kicker{
+  font-size:11px;font-weight:700;letter-spacing:.56px;text-transform:uppercase;
+  color:var(--ember-text);margin:0 0 8px
+}
+.masthead h1{
+  font-family:var(--font-display);font-size:38px;line-height:1.1;font-weight:800;
+  letter-spacing:-.5px;margin:0 0 12px
+}
+.masthead p{max-width:64ch;color:var(--text-body);margin:0 0 8px}
+.meta{font-size:12.5px;color:var(--text-muted)}
+.meta code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 6px;border-radius:6px;color:var(--espresso)}
+
+.sec{margin:64px 0 0}
+.sec>h2{
+  font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.3px;
+  margin:0 0 6px;padding-bottom:12px;border-bottom:2px solid var(--border)
+}
+.sec>h2 .n{color:var(--ember);font-family:var(--font-mono);font-size:14px;margin-right:10px}
+.sec>p.lede{color:var(--text-body);max-width:72ch;margin:14px 0 24px}
+
+/* ── DEVICE FRAME — the phone is the product, so the phone comes first ─── */
+.stage{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.phone{
+  width:390px;flex:0 0 390px;background:var(--espresso);
+  border-radius:44px;padding:10px;box-shadow:0 30px 70px -30px rgba(33,26,21,.35)
+}
+.phone__screen{
+  position:relative;background:var(--cream);border-radius:36px;overflow:hidden;
+  height:844px;display:flex;flex-direction:column
+}
+.phone__notch{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:96px;height:22px;border-radius:999px;background:var(--espresso);z-index:40
+}
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 22px 0;font-size:12px;font-weight:700;color:var(--espresso);flex:0 0 auto
+}
+.statusbar .right{display:flex;gap:5px;align-items:center}
+.bar{width:3px;height:9px;background:var(--espresso);border-radius:1px;opacity:.85}
+.bar.lg{height:12px}
+
+/* ── APP SHELL ───────────────────────────────────────────────────────── */
+.app{flex:1;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:12px 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.tabbar{
+  flex:0 0 auto;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 10px 22px;background:var(--card);border-top:1px solid var(--border)
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--text-muted);font-size:10.5px;font-weight:700;min-height:44px;justify-content:center}
+.tab.on{color:var(--ember-text)}
+.tab .glyph{width:22px;height:22px;display:grid;place-items:center}
+
+/* ── TYPE ROLES (design system §2) ───────────────────────────────────── */
+.r-display{font-family:var(--font-display);font-size:30px;line-height:36px;font-weight:800;letter-spacing:-.5px}
+.r-screen{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-.5px}
+.r-section{font-size:18px;line-height:24px;font-weight:800;letter-spacing:0}
+.r-cardtitle{font-size:15.5px;line-height:21px;font-weight:700}
+.r-body{font-size:14.5px;line-height:21px;font-weight:600}
+.r-bodysmall{font-size:13.5px;line-height:19px;font-weight:600}
+.r-caption{font-size:12.5px;line-height:18px;font-weight:400}
+.r-micro{font-size:11.5px;line-height:14px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.r-stat{font-size:26px;line-height:1;font-weight:800;letter-spacing:0}
+.muted{color:var(--text-muted)}.body{color:var(--text-body)}
+.eyebrow{color:var(--text-muted);font-size:13px;font-weight:600}
+
+/* ── SURFACES (design system §3–§4) ──────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card)}
+.card--20{border-radius:var(--r-card-lg)}
+.pad{padding:16px}
+.pad-row{padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px}
+.row-tight{display:flex;align-items:center;gap:8px}
+.stack{display:flex;flex-direction:column}
+.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+.sec-head:first-child{margin-top:4px}
+.sec-head .act{color:var(--ember-text);font-size:12.5px;font-weight:800}
+.dashed{border-style:dashed}
+
+/* icon wells — concentric: inner = outer − padding (design system §3.1) */
+.well{display:grid;place-items:center;flex:0 0 auto;background:var(--ember-tint);color:var(--ember)}
+.well--38{width:38px;height:38px;border-radius:11px}
+.well--44{width:44px;height:44px;border-radius:12px}
+.well--30{width:30px;height:30px;border-radius:9px}
+.well--72{width:72px;height:72px;border-radius:22px}
+.well--pine{background:var(--pine-tint);color:var(--pine)}
+.well--gold{background:var(--gold-tint);color:var(--gold-text)}
+.well--success{background:#E3F1EE;color:var(--success)}
+.well--warn{background:#FBF3E2;color:var(--warning)}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:0 18px;border-radius:var(--r-input-lg);border:1px solid transparent;
+  font-family:var(--font-body);font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-out),background var(--dur-base) var(--ease-out)
+}
+.btn--primary{background:var(--ember-fill);color:var(--cream)}
+.btn--secondary{background:var(--card);color:var(--espresso);border-color:var(--border-input)}
+.btn--ghost{background:transparent;color:var(--ember-text);min-height:44px}
+.btn--sm{min-height:44px;font-size:13.5px;padding:0 14px}
+.btn--block{width:100%}
+.btn:active{transform:scale(.975)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-pill);
+  padding:3px 9px;font-size:11.5px;font-weight:800;line-height:1.4
+}
+.badge--success{background:#E3F1EE;color:var(--success)}
+.badge--warn{background:var(--gold-tint);color:var(--warning)}
+.badge--muted{background:var(--sand-2);color:var(--text-muted)}
+.badge--ember{background:var(--ember-tint);color:var(--ember-text)}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;
+  border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);
+  font-size:13.5px;font-weight:600;color:var(--espresso)
+}
+
+/* tab-rail section nav (CV editor) */
+.rail{display:flex;gap:8px;overflow:auto;padding:10px 20px;background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto}
+.rail::-webkit-scrollbar{height:0}
+.rail .chip{min-height:36px;font-size:12.5px;padding:0 12px;white-space:nowrap}
+.rail .chip.on{background:var(--ember-tint);border-color:var(--ember);color:var(--ember-text);font-weight:700}
+
+/* skeleton — shimmer is bounded (2 cycles) per the motion standard */
+.sk{background:linear-gradient(90deg,#EFE7DA 25%,#E9E0D4 50%,#EFE7DA 75%);
+  background-size:200% 100%;border-radius:8px;animation:shimmer 1.5s ease-in-out 2}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-line.w40{width:40%}.sk-line.w60{width:60%}.sk-line.w80{width:80%}
+
+/* ── ENTRANCE: "nothing appears, everything arrives" ──────────────────── */
+.arrive{animation:arrive var(--dur-slow) var(--ease-out) both}
+.arrive-1{animation-delay:30ms}.arrive-2{animation-delay:70ms}
+.arrive-3{animation-delay:110ms}.arrive-4{animation-delay:150ms}
+.arrive-5{animation-delay:190ms}.arrive-6{animation-delay:230ms}
+@keyframes arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.handoff{animation:handoff var(--dur-fast) var(--ease-in) both}
+@keyframes handoff{to{opacity:0;transform:translateY(-4px)}}
+.pressable{transition:transform var(--dur-micro) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.pressable:active{transform:scale(.985);box-shadow:var(--shadow-press)}
+
+/* ── ANNOTATIONS (proposal chrome) ───────────────────────────────────── */
+.notes{flex:1 1 420px;min-width:320px;max-width:640px}
+.note{
+  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--ember);
+  border-radius:var(--r-card);padding:16px;margin-bottom:12px
+}
+.note h4{margin:0 0 6px;font-size:14.5px;font-weight:800;font-family:var(--font-display)}
+.note .tag{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--ember-text);background:var(--ember-tint);border-radius:6px;padding:2px 7px;margin-bottom:8px
+}
+.note p{margin:0;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.note ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--text-body)}
+.note li{margin:4px 0}
+.note li b{color:var(--espresso)}
+.note--before{border-left-color:var(--border-input)}
+.note--before .tag{color:var(--text-muted);background:var(--sand-2)}
+.note--ban{border-left-color:var(--error)}
+.note--ban .tag{color:var(--error);background:#FBE9E1}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+.rule h4{margin:0 0 8px;font-size:13.5px;font-weight:800;font-family:var(--font-display)}
+.rule code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 5px;border-radius:5px;color:var(--ember-shadow)}
+.rule .kv{font-size:12.5px;color:var(--text-body);display:flex;justify-content:space-between;
+  padding:4px 0;border-bottom:1px dashed var(--border)}
+.rule .kv:last-child{border-bottom:0}
+.rule .kv b{color:var(--espresso);font-family:var(--font-mono);font-size:11.5px}
+
+.toast{
+  position:absolute;left:20px;right:20px;bottom:88px;z-index:30;
+  background:var(--espresso);color:var(--cream);border-radius:var(--r-input-lg);
+  padding:12px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-float);
+  display:flex;gap:10px;align-items:center
+}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(33,26,21,.45);z-index:20}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:25;background:var(--card);
+  border-radius:20px 20px 0 0;padding:20px;box-shadow:var(--shadow-float)
+}
+.sheet__grip{width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 14px}
+.sticky-foot{
+  flex:0 0 auto;background:var(--cream);border-top:1px solid var(--border);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px))
+}
+.savepill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--sand-2);
+  border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:700;color:var(--text-muted)
+}
+.savepill--saved{background:#E3F1EE;color:var(--success)}
+.savepill--dirty{background:var(--gold-tint);color:var(--gold-text)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="masthead">
+    <p class="kicker">Sumaiya · Redesign proposal · 2026-09-20</p>
+    <h1>Mfumo wa kubuni (design system)</h1>
+    <p>The rules every screen obeys, written so a developer implements them without judgement calls. Palette and logo untouched &mdash; the palette is reproduced here verbatim as proof.</p>
+    <p class="meta">Colours and the logo are <code>FIXED</code> — read from
+      <code>apps/web/tailwind.config.ts</code> and
+      <code>apps/native/src/components/ui/theme.ts</code>. Motion obeys
+      <code>docs/MOTION-STANDARD-2026-09-20.md</code>. No source file is modified by this proposal.</p>
+  </div>
+  <div class="sec"><h2><span class="n">&sect;1</span>The palette is fixed &mdash; what changes is which token does which job</h2><p class="lede">Read verbatim from <code>apps/web/tailwind.config.ts</code> and <code>apps/native/src/components/ui/theme.ts</code>. 24 values, not one of them new. The only change is a <b>usage rule</b>, forced by measurement, not taste: <code>--ember #DA4A1C</code> measures <b>3.89:1</b> on cream and <b>4.22:1</b> on white &mdash; below WCAG AA 4.5:1 for 14px text. <code>--ember-shadow #A8330F</code> measures <b>6.16:1</b> and <b>6.68:1</b>. So ember stays the fill and the icon; small ember <i>text</i> uses the darker existing token. Same family, same brand, legible.</p><div class="rule-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))"><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#DA4A1C"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">ember</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#DA4A1C</div><div class="r-caption muted" style="margin-top:4px">FILL + ICON</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#A8330F"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">ember-shadow</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#A8330F</div><div class="r-caption muted" style="margin-top:4px">TEXT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#C13E14"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">ember-hover</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#C13E14</div><div class="r-caption muted" style="margin-top:4px">STATE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#FBE9E1"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">ember-tint</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#FBE9E1</div><div class="r-caption muted" style="margin-top:4px">TINT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#12433D"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">pine</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#12433D</div><div class="r-caption muted" style="margin-top:4px">FILL</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#E4EDEA"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">pine-tint</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#E4EDEA</div><div class="r-caption muted" style="margin-top:4px">TINT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#F2A93B"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">gold</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#F2A93B</div><div class="r-caption muted" style="margin-top:4px">ACCENT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#FBF3E2"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">gold-tint</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#FBF3E2</div><div class="r-caption muted" style="margin-top:4px">TINT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#96630F"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">gold-text</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#96630F</div><div class="r-caption muted" style="margin-top:4px">TEXT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#211A15"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">espresso</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#211A15</div><div class="r-caption muted" style="margin-top:4px">TEXT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#2C231C"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">espresso-2</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#2C231C</div><div class="r-caption muted" style="margin-top:4px">SURFACE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#3A2E25"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">espresso-line</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#3A2E25</div><div class="r-caption muted" style="margin-top:4px">BORDER</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#FAF5EE"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">cream</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#FAF5EE</div><div class="r-caption muted" style="margin-top:4px">PAGE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#EFE7DA"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">sand</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#EFE7DA</div><div class="r-caption muted" style="margin-top:4px">PAGE2</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#F4EEE4"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">sand-2</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#F4EEE4</div><div class="r-caption muted" style="margin-top:4px">INSET</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#FFFFFF"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">card</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#FFFFFF</div><div class="r-caption muted" style="margin-top:4px">SURFACE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#E9E0D4"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">border</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#E9E0D4</div><div class="r-caption muted" style="margin-top:4px">BORDER</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#9C8D7B"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">border-input</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#9C8D7B</div><div class="r-caption muted" style="margin-top:4px">BORDER</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#6B5F54"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">text-body</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#6B5F54</div><div class="r-caption muted" style="margin-top:4px">TEXT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#756A5E"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">text-muted</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#756A5E</div><div class="r-caption muted" style="margin-top:4px">TEXT</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#C13E14"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">error</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#C13E14</div><div class="r-caption muted" style="margin-top:4px">STATE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#12766A"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">success</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#12766A</div><div class="r-caption muted" style="margin-top:4px">STATE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#96630F"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">warning</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#96630F</div><div class="r-caption muted" style="margin-top:4px">STATE</div></div></div><div class="card" style="padding:0;overflow:hidden"><div style="height:56px;background:#B83A12"></div><div style="padding:10px 12px"><div class="r-micro" style="letter-spacing:0">accentFill</div><div style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-body);margin-top:2px">#B83A12</div><div class="r-caption muted" style="margin-top:4px">FILL</div></div></div></div></div><div class="sec"><h2><span class="n">&sect;2</span>Type scale &mdash; nine roles, and every text node is exactly one of them</h2><p class="lede">Consolidated from the sizes already in the tree (11, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16, 18, 19, 20, 24, 26, 28, 30, 36). No new size is introduced. If a screen seems to need a tenth, it needs a different role, not a new number.</p><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.1</span><span class="r-display grow">Display</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">30 / 36 &middot; 800 &middot; &minus;0.5</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Onboarding hero, first-run step titles</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.2</span><span class="r-screen grow">ScreenTitle</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">28 / 34 &middot; 800 &middot; &minus;0.5</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">One per screen, top of Screen. Never two.</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.3</span><span class="r-section grow">SectionTitle</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">18 / 24 &middot; 800 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">SectionHeader, dashboard h2</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.4</span><span class="r-cardtitle grow">CardTitle</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">15.5 / 21 &middot; 700 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Job title, CV title &mdash; the row's primary line</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.5</span><span class="r-body grow">Body</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">14.5 / 21 &middot; 600-700 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Buttons, quick-action labels</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.6</span><span class="r-bodysmall grow">BodySmall</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">13.5 / 19 &middot; 600 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Secondary line under a CardTitle</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.7</span><span class="r-caption grow">Caption</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">12.5 / 18 &middot; 400-600 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Dates, counts, sublabels</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.8</span><span class="r-micro grow">Micro</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">11.5 / 14 &middot; 700 &middot; +0.4</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">Uppercase eyebrows, badge numerals</p></div><div class="card pad-row" style="display:flex;align-items:baseline;gap:16px;margin-bottom:8px"><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);width:26px;flex:0 0 26px">1.9</span><span class="r-stat grow">Stat</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);flex:0 0 auto">26 / 1.0 &middot; 800 &middot; 0</span></div><div class="note" style="border-left-color:var(--border);margin-bottom:20px"><p style="font-size:12.5px">A headline number you read, not compare</p></div></div><div class="sec"><h2><span class="n">&sect;3</span>Spacing rhythm &mdash; base 4px</h2><div class="rule-grid"><div class="rule"><h4>Allowed gaps only</h4><div class="kv"><span>scale</span><b>4 &middot; 8 &middot; 12 &middot; 16 &middot; 20 &middot; 24 &middot; 32</b></div><div class="kv"><span>screen padding</span><b>20</b></div><div class="kv"><span>card padding</span><b>16</b></div><div class="kv"><span>row padding</span><b>14-16</b></div><div class="kv"><span>grid gutter</span><b>12</b></div><div class="kv"><span>icon to label</span><b>8</b> (12 in an icon well)</div><div class="kv"><span>section to section</span><b>20-24</b></div></div><div class="rule"><h4>Round the ad-hoc values</h4><p class="spec" style="margin:0">The tree carries <code>gap: 9</code>, <code>gap: 11</code>, <code>gap: 2</code> and <code>padding: 15</code> inline. Each rounds to the nearest allowed value &mdash; 8, 12, 4, 16. This is the single cheapest consistency win in the codebase: no layout changes, just one scale.</p></div><div class="rule"><h4>Density: 844px is the budget</h4><p class="spec" style="margin:0">Six quick-action tiles at 104px cost <b>336px</b> &mdash; more than a whole job card and more than a third of the screen. At 60px each as an icon-well row they cost <b>196px</b>, and the first job listing moves above the fold. <b>Confirmed on the live device:</b> the six tiles really do occupy about <b>875px of 2992</b> (&asymp;29% of the screen). Nothing was removed; it was made shorter.</p></div></div></div><div class="sec"><h2><span class="n">&sect;4</span>Corner treatment &mdash; one formula, not a mood</h2><p class="lede">The app already applies this correctly in the icon wells (16 &minus; 16 = 11-12 for a 38&times;38 well, 9 for a 30&times;30 well). It just needs to be the rule everywhere instead of a habit in some places.</p><div class="note" style="border-left-color:var(--ember)"><span class="tag">RULE &sect;4.1</span><h4>inner radius = outer radius &minus; outer padding</h4><p>Clamp to the nearest token <b>below</b>. A <code>card</code> (16) with 16px padding holding a 38&times;38 element gets <code>input-lg</code> (12). A <code>card-lg</code> (20) with 20px padding gets <code>card</code> (16). <b>Never hand-write 14</b> &mdash; it is neither an outer nor an inner token, and it is used today by <code>ui/toast.tsx:133</code> and <code>ui/list-row.tsx:54</code>, and by <code>profile-screen.tsx</code> for a card-level container.</p></div><div class="row g16" style="flex-wrap:wrap;margin-top:20px"><div style="text-align:center"><div style="width:64px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:999px"></div><div class="r-micro muted" style="letter-spacing:0;margin-top:8px">pill</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-body)">999px</div></div><div style="text-align:center"><div style="width:64px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:20px"></div><div class="r-micro muted" style="letter-spacing:0;margin-top:8px">card-lg</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-body)">20px</div></div><div style="text-align:center"><div style="width:64px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:16px"></div><div class="r-micro muted" style="letter-spacing:0;margin-top:8px">card</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-body)">16px</div></div><div style="text-align:center"><div style="width:64px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:12px"></div><div class="r-micro muted" style="letter-spacing:0;margin-top:8px">input-lg</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-body)">12px</div></div><div style="text-align:center"><div style="width:64px;height:64px;background:var(--card);border:1px solid var(--border);border-radius:8px"></div><div class="r-micro muted" style="letter-spacing:0;margin-top:8px">input</div><div style="font-family:var(--font-mono);font-size:11px;color:var(--text-body)">8px</div></div></div></div><div class="sec"><h2><span class="n">&sect;5</span>Elevation &mdash; the content plane is flat, the floating layer has shadow</h2><div class="rule-grid"><div class="rule"><h4>Content (the default)</h4><div class="kv"><span>surface</span><b>card #FFFFFF</b></div><div class="kv"><span>edge</span><b>1px border #E9E0D4</b></div><div class="kv"><span>shadow</span><b>NONE at rest</b></div><p class="spec" style="margin:8px 0 0">A shadow on every card is an offscreen compositing pass per card, per frame, on a GPU with a third of the throughput of a Pixel. For content that does not move it buys nothing.</p></div><div class="rule"><h4>Pressable content</h4><div class="kv"><span>at rest</span><b>flat, like content</b></div><div class="kv"><span>on press</span><b>scale .975-.985</b></div><div class="kv"><span>on hover (web)</span><b>shadow.card-hover</b></div></div><div class="rule"><h4>The floating layer</h4><div class="kv"><span>dialogs / sheets</span><b>shadow.floating</b></div><div class="kv"><span>toasts</span><b>shadow.floating</b></div><div class="kv"><span>sticky action bar</span><b>shadow.floating</b></div><div class="kv"><span>ember CTA</span><b>shadow.ember-hard</b></div></div><div class="rule"><h4>Two more surface rules</h4><div class="kv"><span>page background</span><b>cream / sand only</b></div><div class="kv"><span>dashed border</span><b>empty / placeholder only</b></div><p class="spec" style="margin:8px 0 0"><code>home-screen.tsx:540</code> already uses dashed for exactly this and nowhere else &mdash; and the live device shows the same dashed &ldquo;Bado hakuna CV&rdquo; card. Keep it as the only meaning of dashed.</p></div></div></div><div class="sec"><h2><span class="n">&sect;6</span>Iconography</h2><div class="rule-grid"><div class="rule"><h4>Three sizes only</h4><div class="kv"><span>14</span><b>inline with text, badges</b></div><div class="kv"><span>18</span><b>row leading icon, header action</b></div><div class="kv"><span>20</span><b>icon-well centrepiece, empty state</b></div><p class="spec" style="margin:8px 0 0">The tree also uses 11, 15, 16 and 19. Each rounds to one of the three.</p></div><div class="rule"><h4>Weight and fill</h4><div class="kv"><span>stroke</span><b>outline, 1.75</b></div><div class="kv"><span>filled</span><b>only 2 cases</b></div><p class="spec" style="margin:8px 0 0">Filled is reserved for (a) the active tab-bar icon, (b) the <code>SumaiyaMark</code> glyph. Everything else in this set is outline, and a filled icon visibly changes its weight.</p></div><div class="rule"><h4>Colour split (from &sect;1)</h4><div class="kv"><span>icon on tint</span><b>ember #DA4A1C &middot; 3.59:1</b></div><div class="kv"><span>text at 14px</span><b>ember-shadow &middot; 6.16:1</b></div><p class="spec" style="margin:8px 0 0">Icons are non-text: WCAG asks 3:1 and ember passes. Text asks 4.5:1 and ember does not &mdash; which is why the two roles diverge. Stated as two rules so nobody has to remember the ratio.</p></div><div class="rule"><h4>An icon never carries meaning alone</h4><div class="kv"><span>ok</span><b>chevron, drag handle</b></div><div class="kv"><span>not ok</span><b>an icon with no label</b></div><div class="kv"><span>or</span><b>accessibilityLabel</b></div></div></div></div><div class="sec"><h2><span class="n">&sect;7</span>Motion &mdash; the existing standard, plus four named additions and a ban list</h2><p class="lede"><code>docs/MOTION-STANDARD-2026-09-20.md</code> already names every composite the app needs. The gap is <b>adoption</b>, not missing rules &mdash; so this section adds only what the standard does not yet cover, and one honest ban list.</p><div class="rule-grid"><div class="rule"><h4>The tokens (unchanged)</h4><div class="kv"><span>dur.instant</span><b>1ms</b></div><div class="kv"><span>dur.micro</span><b>90ms</b></div><div class="kv"><span>dur.fast (leaving)</span><b>140ms</b></div><div class="kv"><span>dur.base (in place)</span><b>220ms</b></div><div class="kv"><span>dur.slow (entering)</span><b>300ms</b></div><div class="kv"><span>dur.screen (push/pop)</span><b>260ms</b></div><div class="kv"><span>dur.field (root fade)</span><b>340ms</b></div><div class="kv"><span>stagger.base / .step</span><b>30ms / 40ms</b></div><div class="kv"><span>stagger.cap</span><b>6 items</b></div><div class="kv"><span>MAX_STAGGER_MS</span><b>270ms</b></div><div class="kv"><span>rise</span><b>12px</b></div><div class="kv"><span>ease.out (enter)</span><b>cubic-bezier(.33,1,.68,1)</b></div><div class="kv"><span>ease.in (leave)</span><b>cubic-bezier(.32,0,.67,0)</b></div></div><div class="rule"><h4>ADDED &sect;7.1 &mdash; Metric refresh</h4><p class="spec" style="margin:0">A match-score or ATS badge whose value changes while on screen updates its <b>digits</b> instantly (&sect;4 already bans animating compared numbers) but its container may take <code>dur.micro</code> / <code>ease.inOut</code> on the background tint only. A fresh score no longer looks identical to a stale one, and the number the user is comparing never moves.</p></div><div class="rule"><h4>ADDED &sect;7.2 &mdash; Banner stack</h4><p class="spec" style="margin:0">When more than one nudge renders above the fold (the web dashboard can render seven), they do <b>not</b> each animate. One <code>Reveal</code> on the <b>group</b>. Eight things arriving at once is noise pretending to be hierarchy.</p></div><div class="rule"><h4>ADDED &sect;7.3 &mdash; Loading to content, enforced</h4><p class="spec" style="margin:0">Every ternary loading branch in the tree resolves to the standard&rsquo;s &ldquo;Loading to content&rdquo; row: placeholder <code>FadeOut</code> 140ms <code>ease.in</code> <b>while</b> content enters at 300ms <code>ease.out</code>. A code-review checklist item, not new design.</p></div><div class="rule"><h4>ADDED &sect;7.4 &mdash; The ban list</h4><p class="spec" style="margin:0">Banned outright: scroll parallax &middot; <code>backdrop-filter</code> / blur transitions &middot; spring-based list-item entrances (timing curves only) &middot; any <code>withRepeat</code> without a 2-cycle bound <b>and</b> a <code>cancelAnimation</code> cleanup &middot; more than about 100 simultaneously animated nodes.</p></div></div><div class="note" style="border-left-color:var(--error);margin-top:20px"><span class="tag">STAYS INSTANT &mdash; do not add motion here</span><h4>Typing &middot; taps &middot; scrolling &middot; selection &middot; numbers being compared &middot; list text updating &middot; keyboard avoidance</h4><p>Apple-grade is not &ldquo;everything moves&rdquo;. Adding motion to any of these is a regression, and Reduce Motion collapses the rest to <b>1ms &mdash; never 0ms</b>, so <code>withTiming</code>&rsquo;s finished callback still fires.</p></div></div>
+  
+</div>
+</body></html>

@@ -4,9 +4,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, haptics, useThemeColors } from "../../components/ui";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
+import { useAuthContext } from "../../contexts/auth-context";
+import { ownerIdFor } from "../../lib/local-owner";
 import {
   EMPTY_MEMORY,
+  episodeText,
   eraseMemory,
+  factText,
   forget,
   loadConsent,
   loadMemory,
@@ -32,22 +36,39 @@ export function MemoryScreen() {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { t } = useLang();
+  // What she knows belongs to the PERSON, not the handset (lib/ai-memory.ts):
+  // the memory is read, written and erased under this owner's key, so a second
+  // person on a shared phone is never shown the first person's conclusions.
+  const { user, loading: authLoading } = useAuthContext();
+  const ownerId = ownerIdFor(user);
   const [memory, setMemory] = useState<Memory | null>(null);
   const [consent, setConsentState] = useState<Consent>("unasked");
   const [showAllActivity, setShowAllActivity] = useState(false);
 
   useEffect(() => {
+    // Never read (or claim — lib/owner-scope.ts) while the session is still
+    // restoring: the owner is not known yet, so ownerId would be the guest
+    // bucket and a read would steal the signed-in user's memory into it.
+    if (authLoading) return;
+    let alive = true;
     (async () => {
-      const [m, k] = await Promise.all([loadMemory(), loadConsent()]);
+      const [m, k] = await Promise.all([loadMemory(ownerId), loadConsent(ownerId)]);
+      if (!alive) return;
       setMemory(m);
       setConsentState(k);
     })();
-  }, []);
+    return () => {
+      alive = false;
+    };
+  }, [ownerId, authLoading]);
 
-  const refresh = useCallback(async (next: Memory) => {
-    setMemory(next);
-    await saveMemory(next);
-  }, []);
+  const refresh = useCallback(
+    async (next: Memory) => {
+      setMemory(next);
+      await saveMemory(ownerId, next);
+    },
+    [ownerId],
+  );
 
   const onForget = useCallback(
     (key: string) => {
@@ -73,8 +94,8 @@ export function MemoryScreen() {
           style: "destructive",
           onPress: () => {
             void (async () => {
-              await eraseMemory();
-              await setConsent("declined");
+              await eraseMemory(ownerId);
+              await setConsent(ownerId, "declined");
               setConsentState("declined");
               setMemory(EMPTY_MEMORY);
               haptics.success();
@@ -83,15 +104,15 @@ export function MemoryScreen() {
         },
       ],
     );
-  }, [t]);
+  }, [t, ownerId]);
 
   const onAllow = useCallback(() => {
     haptics.light();
     void (async () => {
-      await setConsent("granted");
+      await setConsent(ownerId, "granted");
       setConsentState("granted");
     })();
-  }, []);
+  }, [ownerId]);
 
   const facts = memory?.facts ?? [];
   const episodes = memory?.episodes ?? [];
@@ -99,7 +120,7 @@ export function MemoryScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40, gap: 18 }}
+      contentContainerStyle={{ padding: 20, paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, paddingBottom: insets.bottom + 40, gap: 18 }}
       style={{ backgroundColor: c.bg }}
     >
       {/* What this is — the same plain-language framing as the policy, because a
@@ -150,7 +171,7 @@ export function MemoryScreen() {
               style={{ backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, borderRadius: 14, padding: 14, flexDirection: "row", alignItems: "center", gap: 12 }}
             >
               <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: c.text, fontSize: 14.5, lineHeight: 20 }}>{f.value}</Text>
+                <Text style={{ color: c.text, fontSize: 14.5, lineHeight: 20 }}>{factText(f, t)}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 11.5 }}>
                   {f.confirmed
                     ? t("You told her this", "Ulimwambia hivi")
@@ -159,7 +180,7 @@ export function MemoryScreen() {
               </View>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t(`Forget: ${f.value}`, `Sahau: ${f.value}`)}
+                accessibilityLabel={t(`Forget: ${factText(f, t)}`, `Sahau: ${factText(f, t)}`)}
                 hitSlop={10}
                 onPress={() => onForget(f.key)}
                 style={{ padding: 6 }}
@@ -179,7 +200,11 @@ export function MemoryScreen() {
           </Text>
           {activity.map((e) => (
             <Text key={e.id} style={{ color: c.textBody, fontSize: 13.5, lineHeight: 19 }}>
-              • {e.detail || e.topic.replace(/_/g, " ")}
+              {/* In the READER's language, not the language it was written in:
+                  an episode is stored with the event that produced it, so a
+                  Swahili user reading "MATUKIO YA HIVI KARIBUNI" sees Swahili
+                  even for rows written before the toggle was flipped. */}
+              • {episodeText(e, t)}
             </Text>
           ))}
           {episodes.length > 5 ? (

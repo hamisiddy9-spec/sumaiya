@@ -1,0 +1,9 @@
+# free-panel 20260921-170821
+scope=product style=digest
+QUESTION: The page is A4 (794x1123px) on both web and phone, correctly. The fill engine shrinks content to fit but refuses to go below scale 0.92, and the page has overflow:hidden - so when content needs more than 8% shrink the remainder is CLIPPED OFF and silently lost (mono-cv loses 137px, about 5 lines). A warning exists on screen but is marked data-pdf-exclude, so the exported PDF - the thing the user sends to an employer - shows nothing. Options: (A) confirm at export time that the CV is cut off; (B) continue to a second A4 page; (C) allow shrinking below 0.92; (D) make the existing spacing tiers work harder first. 99% of documents here are A4. Which combination should ship, and is silent clipping at export a correctness bug or an acceptable design limit?
+
+- C:\Users\hamis\AppData\Local/Temp/fit-panel  [1 ling-3.0-flash-vl:free (ro]  Silent clipping at export is a correctness bug — ship A (export confirmation) as a non-negotiable floor, B (second A4 page) as the honest fix for genuine overflow like mono-cv, and D (harder-working spacing tiers) to reduce how often either is triggered; keep C (shrink below 0.92) as a distant last 
+- C:\Users\hamis\AppData\Local/Temp/fit-panel  [2 ling-3.0-flash-vl:free]  Silent clipping at export is a correctness bug, not a design limit — ship A (export warning) immediately as the minimum, B (second A4 page) as the real fix for cases like mono-cv, and D (tighter tiers) to reduce how often either is needed; C only as a last resort with a hard floor no lower than 0.88
+    ACTION: ACTION: Ship the export warning (Option A) immediately — it must appear before PDF download, not just on screen.
+    ACTION: Implement second-page continuation (Option B) for content that exceeds the fill band after all tiers are applied.
+    ACTION: Tighten spacing tiers (Option D) so fewer CVs reach the overflow floor in the first place.

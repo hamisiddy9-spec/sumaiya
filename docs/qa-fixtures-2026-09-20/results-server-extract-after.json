@@ -1,0 +1,142 @@
+[
+ {
+  "file": "cv-text.pdf",
+  "label": "text-layer PDF (English)",
+  "bytes": 3283,
+  "status": 200,
+  "ms": 203,
+  "error": null,
+  "textChars": 2050,
+  "pages": 1
+ },
+ {
+  "file": "cv-photo.jpg",
+  "label": "JPEG photo (1600px)",
+  "bytes": 378773,
+  "status": 415,
+  "ms": 5,
+  "error": "That's a photo (JPEG), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-photo-sw.png",
+  "label": "PNG photo (1400px)",
+  "bytes": 222099,
+  "status": 415,
+  "ms": 5,
+  "error": "That's a photo (PNG), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "photo.webp",
+  "label": "WebP image",
+  "bytes": 289812,
+  "status": 415,
+  "ms": 7,
+  "error": "That's a photo (WebP), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "photo-tall-alpha.png",
+  "label": "tall PNG with alpha",
+  "bytes": 7618,
+  "status": 415,
+  "ms": 4,
+  "error": "That's a photo (PNG), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-scanned.pdf",
+  "label": "image-only / scanned PDF",
+  "bytes": 242440,
+  "status": 422,
+  "ms": 19,
+  "error": "That PDF is a scan — its pages are pictures, so there is no text to copy out of it. Send the original PDF (exported from Word, Google Docs…, not photographed), or attach the photo in the AI Assistant, which reads photos.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-blank.pdf",
+  "label": "blank PDF",
+  "bytes": 1708,
+  "status": 422,
+  "ms": 12,
+  "error": "There's no text in that PDF — it looks blank (no words on any page). Send the document you meant to upload.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-zero.pdf",
+  "label": "zero-byte file named .pdf",
+  "bytes": 0,
+  "status": 400,
+  "ms": 3,
+  "error": "That file is empty (0 bytes) — it didn't upload properly. Choose the file again, or send a different copy.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-zero.docx",
+  "label": "zero-byte file named .docx",
+  "bytes": 0,
+  "status": 400,
+  "ms": 3,
+  "error": "That file is empty (0 bytes) — it didn't upload properly. Choose the file again, or send a different copy.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-corrupt.pdf",
+  "label": "corrupt/garbage PDF",
+  "bytes": 11515,
+  "status": 422,
+  "ms": 8,
+  "error": "That PDF is damaged — it isn't a valid PDF, so nothing can be read out of it. Save it again from the app that made it (Word, Google Docs…), or send a different copy.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-protected.pdf",
+  "label": "password-protected PDF",
+  "bytes": 3418,
+  "status": 422,
+  "ms": 7,
+  "error": "That PDF is password-protected, so its text can't be read. Open it, save or export a copy without the password, then send that copy.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-png-content-mismatch.pdf",
+  "label": "real PNG bytes named .pdf",
+  "bytes": 222099,
+  "status": 415,
+  "ms": 4,
+  "error": "That's a photo (PNG), not a document — this tool only reads text out of PDF and Word files, and a photo has no text layer for it to read. To read a CV from a photo, attach it in the AI Assistant (it reads photos on your device), or send the PDF/Word file.",
+  "textChars": null,
+  "pages": null
+ },
+ {
+  "file": "cv-noextension",
+  "label": "DOCX bytes with no extension",
+  "bytes": 9547,
+  "status": 200,
+  "ms": 326,
+  "error": null,
+  "textChars": 1144,
+  "pages": 1
+ },
+ {
+  "file": "cv-huge.pdf",
+  "label": "27 MB PDF (over the 4 MB network cap)",
+  "bytes": 27001436,
+  "status": 413,
+  "ms": 239,
+  "error": "That file is too large (max 4 MB). Send a smaller one, or paste the text.",
+  "textChars": null,
+  "pages": null
+ }
+]

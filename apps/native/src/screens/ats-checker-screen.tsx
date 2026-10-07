@@ -5,9 +5,11 @@ import type { CV, CVData } from "@sumaiya/types";
 import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { useCvs } from "../hooks/use-cvs";
 import { useAuthContext } from "../contexts/auth-context";
+import { ownerIdFor } from "../lib/local-owner";
+import { offerAccountForGate } from "../components/account-gate";
 import { cvErrorCopy } from "../lib/cv-fetch-error";
 import { analyzeCv, atsScore, atsBreakdown, lineFindings, matchJd } from "../lib/ats";
-import { addEpisode, updateMemory } from "../lib/ai-memory";
+import { addEpisodeEvent, updateMemory } from "../lib/ai-memory";
 import { useLang } from "../lib/i18n";
 import { useEntitlements } from "../lib/entitlements";
 import { PremiumSheet } from "../components/premium-sheet";
@@ -39,7 +41,11 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   const { t, lang } = useLang();
   const sw = lang === "sw";
   const { cvs, loading, error, errorKind, loadCVs } = useCvs();
-  const { signOut } = useAuthContext();
+  const { user, signOut } = useAuthContext();
+  // Her memory is the OWNER's, not the handset's (lib/ai-memory.ts) — the same
+  // owner id the CV store uses, so what she learns from this check follows the
+  // person who did it and is never shown to the next person on the device.
+  const ownerId = ownerIdFor(user);
   // Same truth as Home: the reason decides the message AND the action.
   const cvError = cvErrorCopy(errorKind ?? "unknown");
   const { premium } = useEntitlements();
@@ -74,6 +80,15 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
   }, [picked, jd]);
 
   const runVerdict = async () => {
+    // GUEST: the written review is generated on the server, for an account, so
+    // it cannot be run without one — and the old order here would have shown
+    // the PREMIUM paywall to a guest, which is both a dead end and the wrong
+    // ask. The score, the checks and the line findings above are all computed
+    // on the device (lib/ats.ts) and stay exactly as they are.
+    if (!user) {
+      offerAccountForGate("atsVerdict");
+      return;
+    }
     if (!premium) { setShowPremium(true); return; }
     if (!picked || !analysis || verdictBusy) return;
     setVerdictBusy(true);
@@ -100,22 +115,32 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
       // instead of rediscovering it from scratch every time.
       const firstFailure = analysis.checks.find((ch) => !ch.pass);
       if (firstFailure) {
-        const topic = `ats_${firstFailure.label
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "_")
-          .slice(0, 30)}`;
-        updateMemory((m) =>
+        // The topic is a MACHINE key and must not depend on the language in
+        // play. It used to be built from `firstFailure.label`, and that label is
+        // localized (analyzeCv(data, sw)) — so the same failing check on a
+        // Swahili phone produced `ats_taarifa_kamili_za_mawasiliano` while the
+        // English phone produced `ats_complete_contact_info`, and consolidation
+        // could never accumulate evidence for either. `ch.id` is the stable
+        // identifier; `label` stays for the sentence, where it belongs.
+        const topic = `ats_${firstFailure.id.slice(0, 30)}`;
+        updateMemory(ownerId, (m) =>
           // NOT internal. This string reaches the user by three routes, which is
-          // why the acronym must not be here:
-          //   1. memory-screen.tsx:182 renders `e.detail` verbatim under
-          //      "MATUKIO YA HIVI KARIBUNI" / "RECENT ACTIVITY SHE NOTED";
+          // why the acronym must not be here and why it must be written in the
+          // language the person is reading:
+          //   1. memory-screen.tsx renders it under "MATUKIO YA HIVI KARIBUNI" /
+          //      "RECENT ACTIVITY SHE NOTED", via episodeText();
           //   2. ai-memory.ts renderMemoryBlock() puts it in the chat prompt as
-          //      "Recently: - <detail>", so she can paraphrase it back in Swahili;
-          //   3. consolidate() promotes it to a Fact `value`, which is then
-          //      injected into EVERY later conversation as "Known: - <value>".
-          // Naming the mechanism here put it in front of the user through the
-          // memory layer instead of the UI layer, where no lint looks.
-          addEpisode(m, topic, `CV check scored ${analysis.score}/100, losing points on "${firstFailure.label}"`),
+          //      "Recently: - <detail>", so she can paraphrase it back to them;
+          //   3. consolidate() promotes it to a Fact `value` (with the event) that
+          //      is injected into EVERY later conversation as "Known: - <value>".
+          // It is recorded as an event, so the sentence is built in the reader's
+          // language instead of being frozen in whatever language wrote it.
+          addEpisodeEvent(
+            m,
+            topic,
+            { key: "cv_check_failed", params: { score: analysis.score, check: firstFailure.label } },
+            t,
+          ),
         ).catch(() => {});
       }
     } catch {

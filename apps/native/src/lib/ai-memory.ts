@@ -25,8 +25,15 @@
  * identical prefix — see docs/sumaiya-ai-cost-sweet-spot.md. Reordering this
  * silently multiplies the bill.
  */
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { clearScoped, readScoped, writeScoped } from "./owner-scope";
 
+/**
+ * The pre-scope device key memory used to live under with NO owner in it — the
+ * same defect the chat transcript had (see lib/chat-scope.ts). Every read/write
+ * below goes through lib/owner-scope.ts, which names the owner in the key and
+ * claims this unscoped value (and a guest's) exactly once, for the owner present
+ * when it is first read.
+ */
 const KEY = "sumaiya.memory.v1";
 
 /** How many episodes of the same topic before it is allowed to become a fact. */
@@ -37,20 +44,54 @@ const MAX_PLAYBOOKS = 12;
 /** Facts untouched for this long stop steering advice. */
 const FACT_TTL_MS = 1000 * 60 * 60 * 24 * 180; // 180 days
 
+/**
+ * Pick a string for the language the READER is using right now.
+ * `useLang().t` satisfies this; the default is English so tests, logs and any
+ * caller without a language context keep working unchanged.
+ */
+export type Translate = (en: string, sw: string) => string;
+/** The default: no language context, so take the English slot. */
+export const englishOnly: Translate = (en) => en;
+
+/**
+ * A known event, described so its sentence can be built LATER, in whatever
+ * language the person is reading in when it is shown.
+ *
+ * Why this exists: `detail` is a rendered string, and a rendered string is
+ * frozen in the language it was written in. Before this, every detail was
+ * written in English by construction (the call sites had no language), so a
+ * Swahili user opened "MATUKIO YA HIVI KARIBUNI" / "RECENT ACTIVITY SHE NOTED"
+ * and read English — and consolidation then promoted that English sentence into
+ * a Fact `value`, which is injected into every later conversation. Storing the
+ * event instead of only the sentence means one write renders in either
+ * language, and flipping the language toggle re-renders the whole history
+ * rather than leaving a half-translated memory behind.
+ *
+ * `key` is a member of EPISODE_TEXT; `params` is the data the sentence needs.
+ * An episode with no `event` (anything written before this existed, or by a
+ * caller that only has a sentence) falls back to its stored `detail`.
+ */
+export interface EpisodeEvent {
+  key: string;
+  params?: Record<string, string | number>;
+}
+
 export interface Episode {
   id: string;
   /** Short machine-readable topic, e.g. "interview_practice". */
   topic: string;
-  /** One line of what actually happened. */
+  /** One line of what actually happened, in the language it was written in. */
   detail: string;
   at: number;
+  /** Machine-readable form of `detail` — lets it be re-rendered in any language. */
+  event?: EpisodeEvent;
 }
 
 export interface Fact {
   id: string;
   /** Machine key, e.g. "target_field". Stable across updates. */
   key: string;
-  /** Plain sentence shown to the model. */
+  /** Plain sentence shown to the model, in the language it was written in. */
   value: string;
   /** How many episodes support it. This is the evidence, and it is visible. */
   evidence: number;
@@ -58,6 +99,8 @@ export interface Fact {
   updatedAt: number;
   /** True when the person confirmed or corrected it — never auto-demoted. */
   confirmed?: boolean;
+  /** Inherited from the episode that formed the fact, so a fact renders in the reader's language too. */
+  valueEvent?: EpisodeEvent;
 }
 
 export interface Playbook {
@@ -95,12 +138,79 @@ function cap<T>(items: T[], max: number): T[] {
 }
 
 /**
+ * The catalogue of events the memory can record, each written once per language.
+ *
+ * ONE entry per `addEpisodeEvent` call site — this is the only place an episode
+ * sentence is authored, so there is exactly one thing to review when copy
+ * changes, and no screen can write a sentence in the wrong language again.
+ * `params` are interpolated verbatim (a template name, a score, a check label);
+ * only the frame around them is translated.
+ *
+ * Swahili rules applied here, same as the UI copy: no "ATS" (name the
+ * mechanism as "ukaguzi wa CV" / "mifumo ya kuajiri" instead — the acronym in
+ * Swahili copy fails `lib/swahili-lint.test.ts`), the passive voice where the
+ * actor would be ambiguous ("CV imeundwa upya…" rather than picking a person),
+ * and second person for the user's own objects if a possessive is ever needed.
+ */
+const EPISODE_TEXT: Record<string, (params: Record<string, string | number>, t: Translate) => string> = {
+  /** cv-editor-screen.tsx — a CV was built or rebuilt from the editor. */
+  cv_rebuilt: (p, t) =>
+    t(`Rebuilt a CV using the ${p.template} template`, `CV imeundwa upya kwa muundo wa ${p.template}`),
+  /** cv-editor-screen.tsx — a PDF left the app (the strongest "actively applying" signal). */
+  cv_exported: (p, t) =>
+    t(`Exported a CV using the ${p.template} template`, `CV imepakuliwa kwa muundo wa ${p.template}`),
+  /** ats-checker-screen.tsx — a check scored the CV and named the biggest gap. */
+  cv_check_failed: (p, t) =>
+    t(
+      `CV check scored ${p.score}/100, losing points on "${p.check}"`,
+      `Ukaguzi wa CV ulipata alama ${p.score}/100; sehemu iliyopunguza: "${p.check}"`,
+    ),
+};
+
+/**
+ * Render an event in the reader's language. An unknown or malformed key is a
+ * programming error (or a store from a newer build), not a crash: it renders as
+ * the key with its underscores spaced, which is wrong-looking but honest and
+ * never takes the memory screen down. Returns "" for nothing usable, so the
+ * callers below can fall through to the stored sentence.
+ */
+export function eventText(event: EpisodeEvent | undefined, t: Translate = englishOnly): string {
+  const key = typeof event?.key === "string" ? event.key : "";
+  const build = key ? EPISODE_TEXT[key] : undefined;
+  if (!build) return key.replace(/_/g, " ");
+  return build(event?.params ?? {}, t);
+}
+
+/**
+ * What to show for an episode, in the language the reader is using NOW.
+ * An episode written before this mechanism existed has no `event`, so its
+ * stored sentence is all there is — that is the honest fallback, not a blank.
+ */
+export function episodeText(e: Episode, t: Translate = englishOnly): string {
+  return eventText(e.event, t) || e.detail || e.topic.replace(/_/g, " ");
+}
+
+/** What to show for a fact, in the language the reader is using NOW. */
+export function factText(f: Fact, t: Translate = englishOnly): string {
+  return eventText(f.valueEvent, t) || f.value || f.key.replace(/_/g, " ");
+}
+
+/**
  * Record something that happened. A repeat of the same topic within the same
  * day replaces rather than piles up — five identical entries are not five
  * pieces of evidence, and pretending they are is how a coach talks itself into
  * a wrong conclusion.
+ *
+ * `event` is optional because some callers genuinely only have a sentence;
+ * prefer `addEpisodeEvent`, which stores both.
  */
-export function addEpisode(memory: Memory, topic: string, detail: string, now = Date.now()): Memory {
+export function addEpisode(
+  memory: Memory,
+  topic: string,
+  detail: string,
+  now = Date.now(),
+  event?: EpisodeEvent,
+): Memory {
   const cleanTopic = topic.trim().slice(0, 40);
   if (!cleanTopic) return memory;
   const dayStart = new Date(now).setHours(0, 0, 0, 0);
@@ -111,8 +221,28 @@ export function addEpisode(memory: Memory, topic: string, detail: string, now = 
     topic: cleanTopic,
     detail: detail.trim().slice(0, 160),
     at: now,
+    ...(event ? { event } : {}),
   };
   return { ...memory, episodes: cap([...memory.episodes, episode], MAX_EPISODES) };
+}
+
+/**
+ * Record something that happened, from a described event rather than a
+ * sentence. The one call sites should use.
+ *
+ * The sentence is written in the language in play when it happened (so the
+ * stored `detail` is never a lie about what the person was reading), AND the
+ * event is stored alongside it, so the same episode re-renders in the other
+ * language the moment the reader switches. See EpisodeEvent for why both.
+ */
+export function addEpisodeEvent(
+  memory: Memory,
+  topic: string,
+  event: EpisodeEvent,
+  t: Translate = englishOnly,
+  now = Date.now(),
+): Memory {
+  return addEpisode(memory, topic, eventText(event, t), now, event);
 }
 
 /**
@@ -149,6 +279,11 @@ export function consolidate(memory: Memory, now = Date.now()): { memory: Memory;
               ...f,
               evidence: episodes.length,
               value: latest.detail || f.value,
+              // Carried so the fact re-renders in the reader's language, like
+              // the episode it was promoted from. Set unconditionally (not
+              // merged) so a newer episode WITHOUT an event cannot leave an
+              // older event describing a different sentence.
+              valueEvent: latest.event,
               updatedAt: hasNewEvidence ? now : f.updatedAt,
             }
           : f,
@@ -162,6 +297,7 @@ export function consolidate(memory: Memory, now = Date.now()): { memory: Memory;
       evidence: episodes.length,
       at: now,
       updatedAt: now,
+      ...(latest.event ? { valueEvent: latest.event } : {}),
     };
     facts.push(fact);
     promoted.push(fact);
@@ -179,7 +315,7 @@ export function setFact(memory: Memory, key: string, value: string, confirmed = 
   if (existing) {
     return {
       ...memory,
-      facts: memory.facts.map((f) => (f.key === key ? { ...f, value, confirmed, updatedAt: now } : f)),
+      facts: memory.facts.map((f) => (f.key === key ? { ...f, value, valueEvent: undefined, confirmed, updatedAt: now } : f)),
     };
   }
   const fact: Fact = { id: idOf(`fact:${key}`), key, value, evidence: 1, at: now, updatedAt: now, confirmed };
@@ -218,8 +354,16 @@ export function recordPlaybook(memory: Memory, trigger: string, steps: string[],
  *
  * Returns "" when there is nothing worth saying, so an empty memory costs no
  * tokens and cannot leak a half-formed impression into the conversation.
+ *
+ * `t` is the language the person is reading in. The one-line factual content
+ * (each fact and each episode) is rendered in that language: a Swahili user's
+ * memory used to enter every conversation as English sentences, so the coach
+ * saw "Rebuilt a CV using the Aurora template" while the person had asked for
+ * Kiswahili — and could paraphrase that English straight back at them. The
+ * scaffold around the content stays English because it is an instruction to the
+ * model, not copy for the reader.
  */
-export function renderMemoryBlock(memory: Memory): string {
+export function renderMemoryBlock(memory: Memory, t: Translate = englishOnly): string {
   if (memory.facts.length === 0 && memory.playbooks.length === 0 && memory.episodes.length === 0) return "";
 
   const parts: string[] = [
@@ -233,7 +377,7 @@ export function renderMemoryBlock(memory: Memory): string {
       // Evidence is stated so the model can weigh a 3-episode hunch differently
       // from something the person told us outright.
       const basis = f.confirmed ? "they told you" : `seen ${f.evidence}x`;
-      parts.push(`- ${f.value} (${basis})`);
+      parts.push(`- ${factText(f, t)} (${basis})`);
     }
   }
 
@@ -246,7 +390,7 @@ export function renderMemoryBlock(memory: Memory): string {
   if (memory.episodes.length > 0) {
     const recent = memory.episodes.slice(-5);
     parts.push("Recently:");
-    for (const e of recent) parts.push(`- ${e.detail || e.topic.replace(/_/g, " ")}`);
+    for (const e of recent) parts.push(`- ${episodeText(e, t)}`);
   }
 
   return parts.join("\n");
@@ -266,29 +410,27 @@ export function renderMemoryBlock(memory: Memory): string {
 const CONSENT_KEY = "sumaiya.memory.consent.v1";
 export type Consent = "unasked" | "granted" | "declined";
 
-export async function loadConsent(): Promise<Consent> {
-  try {
-    const raw = await AsyncStorage.getItem(CONSENT_KEY);
-    return raw === "granted" || raw === "declined" ? raw : "unasked";
-  } catch {
-    return "unasked";
-  }
+/**
+ * Consent is scoped to the OWNER, like the memory it governs — one person's
+ * "granted" must never become another person's. A pre-scope or guest consent is
+ * claimed once, alongside the memory it belongs to, so an upgrading user is not
+ * re-asked while a different person on the handset still is.
+ */
+export async function loadConsent(ownerId: string): Promise<Consent> {
+  const raw = await readScoped(CONSENT_KEY, ownerId);
+  return raw === "granted" || raw === "declined" ? raw : "unasked";
 }
 
-export async function setConsent(value: Consent): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CONSENT_KEY, value);
-  } catch {
-    /* silent */
-  }
+export function setConsent(ownerId: string, value: Consent): Promise<void> {
+  return writeScoped(CONSENT_KEY, ownerId, value);
 }
 
 /* ------------------------------------------------------------ persistence --- */
 
 /** Never throws: a broken store must not take the assistant down. */
-export async function loadMemory(): Promise<Memory> {
+export async function loadMemory(ownerId: string): Promise<Memory> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await readScoped(KEY, ownerId);
     if (!raw) return EMPTY_MEMORY;
     const parsed = JSON.parse(raw) as Partial<Memory>;
     return {
@@ -302,12 +444,8 @@ export async function loadMemory(): Promise<Memory> {
   }
 }
 
-export async function saveMemory(memory: Memory): Promise<void> {
-  try {
-    await AsyncStorage.setItem(KEY, JSON.stringify(memory));
-  } catch {
-    /* silent — memory is an enhancement, never a dependency */
-  }
+export function saveMemory(ownerId: string, memory: Memory): Promise<void> {
+  return writeScoped(KEY, ownerId, JSON.stringify(memory));
 }
 
 /**
@@ -319,23 +457,20 @@ export async function saveMemory(memory: Memory): Promise<void> {
  * memory, so a refusal never breaks a screen that reads it.
  */
 export async function updateMemory(
+  ownerId: string,
   change: (memory: Memory) => Memory,
 ): Promise<{ memory: Memory; promoted: Fact[]; blocked: boolean }> {
-  const before = await loadMemory();
-  if ((await loadConsent()) !== "granted") {
+  const before = await loadMemory(ownerId);
+  if ((await loadConsent(ownerId)) !== "granted") {
     return { memory: before, promoted: [], blocked: true };
   }
   const changed = change(before);
   const { memory, promoted } = consolidate(changed);
-  if (promoted.length > 0 || memory !== before) await saveMemory(memory);
+  if (promoted.length > 0 || memory !== before) await saveMemory(ownerId, memory);
   return { memory, promoted, blocked: false };
 }
 
-/** Wipe everything she has learned. PDPA s.38 — erasure, and it is total. */
-export async function eraseMemory(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(KEY);
-  } catch {
-    /* silent */
-  }
+/** Wipe everything she has learned about ONE owner. PDPA s.38 — erasure, and it is total. */
+export function eraseMemory(ownerId: string): Promise<void> {
+  return clearScoped(KEY, ownerId);
 }

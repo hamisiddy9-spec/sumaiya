@@ -9,9 +9,12 @@ import type { Lang } from "./i18n";
  * including the reverse (something 20h old but from yesterday evening
  * previously read "Leo" instead of "Jana").
  */
-export function relativeDate(d: string | Date, lang: Lang): string {
+/**
+ * `now` is injectable so a caller with a pinned clock (closingLabel, tests) cannot
+ * silently fall back to the wall clock and make the result date-dependent.
+ */
+export function relativeDate(d: string | Date, lang: Lang, now: Date = new Date()): string {
   const date = new Date(d);
-  const now = new Date();
   const startOfDay = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
   const dayDiff = Math.round((startOfDay(now) - startOfDay(date)) / 86_400_000);
 

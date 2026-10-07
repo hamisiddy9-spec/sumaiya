@@ -1,4 +1,5 @@
-import { cvToHtml, CV_TEMPLATES, type CvTemplateId } from "./cv-html";
+import { cvToHtml, isRenderable, CV_TEMPLATES, type CvTemplateId } from "./cv-html";
+import { BESPOKE_IDS } from "./templates/registry";
 import type { CV, CVData } from "@sumaiya/types";
 
 const BASE_DATA: CVData = {
@@ -35,8 +36,66 @@ describe("cvToHtml — photo rendering", () => {
     expect(html).not.toContain("onerror");
   });
 
+  it("rejects an https URL that tries to break out of the src attribute with a quote (XSS)", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: 'https://x/a"onerror="alert(1)' } }));
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("onerror");
+  });
+
+  it("rejects an https URL that tries to break out of the tag with an angle bracket (XSS)", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: "https://x/a><script>" } }));
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("<script>");
+  });
+
   it("accepts an https URL as well as a base64 data URI", () => {
     const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: "https://example.com/p.jpg" } }));
     expect(html).toContain('src="https://example.com/p.jpg"');
+  });
+
+  it("still renders a legitimate base64 data URI photo", () => {
+    const html = cvToHtml(cv({ personalInfo: { ...BASE_DATA.personalInfo, profilePhoto: PHOTO } }));
+    expect(html).toContain(`src="${PHOTO}"`);
+  });
+});
+
+describe("isRenderable", () => {
+  it("is true for the legacy hand-written templates", () => {
+    expect(isRenderable("classic")).toBe(true);
+    expect(isRenderable("modern")).toBe(true);
+  });
+
+  it("is true for an engine-backed template with a renderer", () => {
+    expect(isRenderable("aberdare")).toBe(true);
+  });
+
+  it("is false for a bespoke id that has no renderer yet (cvToHtml falls back to classic for these)", () => {
+    expect(BESPOKE_IDS.length).toBeGreaterThan(0);
+    for (const id of BESPOKE_IDS) {
+      expect(isRenderable(id)).toBe(false);
+    }
+  });
+
+  it("is false for an unknown id", () => {
+    expect(isRenderable("not-a-real-template")).toBe(false);
+    expect(isRenderable(undefined)).toBe(false);
+    expect(isRenderable(null)).toBe(false);
+  });
+});
+
+describe("cvToHtml — falls back to classic for a non-renderable template id", () => {
+  it("renders successfully (the classic layout) instead of throwing, matching isRenderable's false", () => {
+    expect(isRenderable(BESPOKE_IDS[0])).toBe(false);
+    expect(() => cvToHtml(cv(), { template: BESPOKE_IDS[0] })).not.toThrow();
+    expect(cvToHtml(cv(), { template: BESPOKE_IDS[0] })).toContain("@page");
+  });
+});
+
+describe("cvToHtml — print pagination", () => {
+  it.each(CV_TEMPLATES.map((t) => t.id))("declares an A4 page and protects entries from splitting for the %s template", (id: CvTemplateId) => {
+    const html = cvToHtml(cv(), { template: id });
+    expect(html).toContain("@page");
+    expect(html).toMatch(/size:\s*A4/);
+    expect(html).toMatch(/\.entry\s*\{[^}]*break-inside:\s*avoid/);
   });
 });

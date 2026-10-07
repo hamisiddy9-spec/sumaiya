@@ -1,0 +1,176 @@
+[
+ {
+  "key": "base-with-level",
+  "why": "baseline: skills carry level:3",
+  "onScreen": {
+   "hasSkillsHeading": false,
+   "skillNames": [],
+   "textLen": 53
+  },
+  "bytes": 10820
+ },
+ {
+  "key": "base-no-level",
+  "why": "the failing shape: skills have no level",
+  "onScreen": {
+   "hasSkillsHeading": false,
+   "skillNames": [],
+   "textLen": 1589
+  },
+  "bytes": 370050
+ },
+ {
+  "key": "hide-summary",
+  "why": "hiddenSections=[\"summary\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1472
+  },
+  "bytes": 391807
+ },
+ {
+  "key": "hide-experience",
+  "why": "hiddenSections=[\"experience\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1045
+  },
+  "bytes": 395944
+ },
+ {
+  "key": "hide-projects",
+  "why": "hiddenSections=[\"projects\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1663
+  },
+  "bytes": 395039
+ },
+ {
+  "key": "hide-education",
+  "why": "hiddenSections=[\"education\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1467
+  },
+  "bytes": 416251
+ },
+ {
+  "key": "hide-skills",
+  "why": "hiddenSections=[\"skills\"]",
+  "onScreen": {
+   "hasSkillsHeading": false,
+   "skillNames": [],
+   "textLen": 1589
+  },
+  "bytes": 370260
+ },
+ {
+  "key": "hide-languages",
+  "why": "hiddenSections=[\"languages\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1612
+  },
+  "bytes": 383299
+ },
+ {
+  "key": "hide-certifications",
+  "why": "hiddenSections=[\"certifications\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1548
+  },
+  "bytes": 412940
+ },
+ {
+  "key": "hide-referees",
+  "why": "hiddenSections=[\"referees\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1471
+  },
+  "bytes": 418515
+ },
+ {
+  "key": "hide-hobbies",
+  "why": "hiddenSections=[\"hobbies\"]",
+  "onScreen": {
+   "hasSkillsHeading": true,
+   "skillNames": [
+    "TypeScript",
+    "Node.js",
+    "PostgreSQL",
+    "Terraform",
+    "Kafka",
+    "React",
+    "Go"
+   ],
+   "textLen": 1598
+  },
+  "bytes": 413073
+ }
+]

@@ -8,5 +8,5 @@ import { RouteProgress } from "@/components/ui/route-progress";
 // signals the transition honestly. Client component: see the [locale] loader.
 export default function MarketingLoading() {
   const lang = useLang();
-  return <RouteProgress label={lang === "sw" ? "Inapakia…" : "Loading…"} />;
+  return <RouteProgress label={lang === "sw" ? "Ninapakia…" : "Loading…"} />;
 }

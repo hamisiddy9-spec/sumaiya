@@ -26,6 +26,7 @@ const MARK = {
   FAIL: "FAIL      ",
   BLOCKED: "BLOCKED   ",
   UNVERIFIED: "UNVERIFIED",
+  INVALID: "INVALID-HARNESS",
   INFO: "note      ",
 };
 
@@ -57,8 +58,8 @@ export class Report {
   }
 
   /** Assertion outcome. `evidence` says where the claim comes from. */
-  check(kind, text, { evidence = EVIDENCE.SERVER, detail } = {}) {
-    const entry = { kind, text, evidence, detail, step: this.currentStep?.title ?? "(pre-flight)" };
+  check(kind, text, { evidence = EVIDENCE.SERVER, detail, receipt = false } = {}) {
+    const entry = { kind, text, evidence, detail, receipt, step: this.currentStep?.title ?? "(pre-flight)" };
     if (this.currentStep) this.currentStep.results.push(entry);
     else this.results.push(entry);
     this.say(`   ${MARK[kind] ?? kind}  ${text}  [${evidence}]`);
@@ -78,6 +79,16 @@ export class Report {
   unverified(text, opts) {
     return this.check("UNVERIFIED", text, opts);
   }
+  /**
+   * The harness itself could not be trusted for this step: a page that failed to
+   * load its own chunks, a server nobody could reach, a driver that refused the
+   * request. It is NOT a product failure and must never be reported as one — a
+   * test that accuses a working feature with the wrong reason is worse than no
+   * test at all. It still keeps the run red: nothing was verified.
+   */
+  invalid(text, opts) {
+    return this.check("INVALID", text, opts);
+  }
   info(text, opts) {
     return this.check("INFO", text, opts);
   }
@@ -96,16 +107,31 @@ export class Report {
     return this.all().filter((r) => r.kind === kind).length;
   }
 
+  /** PASSes marked as receipts — the things this run PROVED, stated plainly. */
+  receipts() {
+    return this.all().filter((r) => r.kind === "PASS" && r.receipt);
+  }
+
   summary() {
     const failed = this.count("FAIL");
     const blocked = this.count("BLOCKED");
     const unverified = this.count("UNVERIFIED");
+    const invalid = this.count("INVALID");
     const passed = this.count("PASS");
 
     this.say("");
     this.say("════════════════════════════════════════════════════════════════════");
-    this.say(`SEAM SUMMARY: ${passed} passed · ${failed} FAILED · ${blocked} BLOCKED · ${unverified} unverified`);
+    this.say(
+      `SEAM SUMMARY: ${passed} passed · ${failed} FAILED · ${invalid} HARNESS-INVALID · ${blocked} BLOCKED · ${unverified} unverified`,
+    );
     this.say("════════════════════════════════════════════════════════════════════");
+
+    const receipts = this.receipts();
+    if (receipts.length) {
+      this.say("");
+      this.say("CONFIRMED BY THIS RUN (receipts — these were observed, not assumed):");
+      for (const r of receipts) this.say(`  PASS  ${r.text}`);
+    }
 
     if (failed) {
       this.say("");
@@ -113,6 +139,14 @@ export class Report {
       for (const r of this.all().filter((x) => x.kind === "FAIL")) {
         this.say(`  FAIL  [${r.step}] ${r.text}`);
         if (r.detail) this.say(`        ${r.detail}`);
+      }
+    }
+    if (invalid) {
+      this.say("");
+      this.say("HARNESS-INVALID — OUR fault, NOT the product's. No product claim is made about these steps:");
+      for (const r of this.all().filter((x) => x.kind === "INVALID")) {
+        this.say(`  INVALID-HARNESS  [${r.step}] ${r.text}`);
+        if (r.detail) this.say(`                   ${r.detail}`);
       }
     }
     if (blocked) {
@@ -132,15 +166,16 @@ export class Report {
     }
 
     // A seam test is only green when the WHOLE journey was verified. Anything
-    // blocked keeps it red on purpose: "we could not check" is not "it works".
-    const exitCode = failed + blocked > 0 ? 1 : 0;
+    // blocked or harness-invalid keeps it red on purpose: "we could not check"
+    // is not "it works".
+    const exitCode = failed + blocked + invalid > 0 ? 1 : 0;
     this.say("");
     this.say(
       exitCode === 0
         ? "SEAM: GREEN — the whole journey was exercised and every assertion held."
-        : `SEAM: RED — ${failed} broken, ${blocked} unverifiable. This is not a working journey.`,
+        : `SEAM: RED — ${failed} broken, ${invalid} harness-invalid, ${blocked} unverifiable. This is not a working journey.`,
     );
-    return { passed, failed, blocked, unverified, exitCode };
+    return { passed, failed, blocked, invalid, unverified, exitCode };
   }
 }
 

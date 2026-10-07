@@ -15,6 +15,7 @@ import type { CVData } from "@/types";
 import { matchCvToJd } from "@/lib/job-match";
 import { analyzeJob, rankSkillsForJob, rankExperienceForJob } from "@/lib/job-analysis";
 import { TRUTH_CONSTRAINT } from "@/lib/api/ai-guardrails";
+import { matchExplanation } from "@/lib/match-explanation";
 import type { EvidenceReport } from "@/lib/career-profile/evidence";
 
 export type SnapLang = "en" | "sw";
@@ -42,7 +43,7 @@ export interface SnapMatch {
   tailored: boolean;
 }
 
-export function snapMatch(cvData: CVData, jd: string): SnapMatch {
+export function snapMatch(cvData: CVData, jd: string, lang: SnapLang = "en"): SnapMatch {
   const analysis = analyzeJob(jd, cvData.personal.jobTitle);
 
   const reordered: CVData = {
@@ -54,24 +55,17 @@ export function snapMatch(cvData: CVData, jd: string): SnapMatch {
   const before = matchCvToJd(cvData, jd);
   const after = matchCvToJd(reordered, jd);
 
-  const explanation: string[] = [];
-  const newlyMatched = after.matched.filter((t) => !before.matched.includes(t));
-  if (newlyMatched.length) {
-    explanation.push(
-      `Reordering surfaced ${newlyMatched.length} keyword${newlyMatched.length === 1 ? "" : "s"} already in your profile: ${newlyMatched.slice(0, 6).join(", ")}${newlyMatched.length > 6 ? "…" : ""}.`,
-    );
-  }
-  const stillMissing = after.missing.slice(0, 6);
-  if (stillMissing.length) {
-    explanation.push(`Still missing from your profile: ${stillMissing.join(", ")}.`);
-  }
-  if (after.score > before.score) {
-    explanation.push("Your best skills and experience for this role moved to the top, so ATS keyword scanning sees them first.");
-  } else if (after.score === before.score) {
-    explanation.push("Your profile already covers this job well — the reorder keeps the same match while putting the most relevant content first for a human recruiter.");
-  } else {
-    explanation.push("This job asks for skills outside your profile — the score reflects the real gap.");
-  }
+  // The bullets follow the caller's language. They used to be hardcoded English
+  // in two places (here and lib/targeted-cv.ts) and the client could only print
+  // what it was handed, so a Swahili snap screen showed English "why" text
+  // (D3). One shared builder, both languages — see lib/match-explanation.ts.
+  const explanation = matchExplanation({
+    lang,
+    newlyMatched: after.matched.filter((t) => !before.matched.includes(t)),
+    stillMissing: after.missing.slice(0, 6),
+    beforeScore: before.score,
+    afterScore: after.score,
+  });
 
   return {
     before: { score: before.score, matched: before.matched, missing: before.missing },

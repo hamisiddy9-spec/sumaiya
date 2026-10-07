@@ -28,8 +28,8 @@ export async function generateMetadata({
       ? "TemplateHub Pro — miundo ya CV ya kitaalamu"
       : "TemplateHub Pro — professional CV designs",
     description: sw
-      ? "Chagua kutoka miundo 260+ ya CV, kisha Sumaiya anakusaidia kuandika kila sehemu na kukupatia PDF inayosomeka kwa mifumo ya kuajiri. Pakua bure kwa Android, kwa Kiswahili au Kiingereza."
-      : "Choose from 260+ CV designs, then Sumaiya writes every section and hands you an ATS-ready PDF. Free on Android, in Swahili or English.",
+      ? "Chagua kutoka miundo ya CV ya kitaalamu, kisha Sumaiya anakusaidia kuandika kila sehemu na kukupatia PDF inayosomeka kwa mifumo ya kuajiri. Pakua bure kwa Android, kwa Kiswahili au Kiingereza."
+      : "Pick from professionally designed CVs, then Sumaiya writes every section and hands you an ATS-ready PDF. Free on Android, in Swahili or English.",
     openGraph: {
       title: sw ? "TemplateHub Pro" : "TemplateHub Pro",
       description: sw

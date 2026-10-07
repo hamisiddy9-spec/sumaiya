@@ -1,0 +1,104 @@
+{
+ "personal": {
+  "fullName": "Juma Hamisi Chang'ombe",
+  "jobTitle": "Mhandisi wa Programu",
+  "email": "juma.chang'ombe@example.co.tz",
+  "phone": "+255 715 998 877",
+  "location": "Ubungo, Dar es Salaam",
+  "linkedin": "",
+  "website": ""
+ },
+ "summary": "Mhandisi wa programu mwenye uzoefu wa miaka saba katika kujenga mifumo ya malipo na usimamizi wa taarifa kwa taasisi za kifedha Tanzania. Nimeliongoza timu ya watu watano kutengeneza mfumo unaotumika na wateja elfu hamsini.",
+ "experience": [
+  {
+   "id": "e1",
+   "position": "Mhandisi Mkuu wa Programu",
+   "company": "Benki ya NMB",
+   "location": "Dar es Salaam",
+   "startDate": "Januari 2021",
+   "endDate": "",
+   "current": true,
+   "description": "- Nilitengeneza programu za simu za mkononi kwa ajili ya wakulima wa ng'ombe na mifugo.\n- Nilipunguza muda wa kuhakiki malipo kutoka saa nane hadi dakika arobaini.\n- Nilifundisha wafanyakazi wapya wanne kuhusu usalama wa mifumo."
+  },
+  {
+   "id": "e2",
+   "position": "Mhandisi wa Programu",
+   "company": "Vodacom Tanzania",
+   "location": "Dar es Salaam",
+   "startDate": "Machi 2018",
+   "endDate": "Desemba 2020",
+   "current": false,
+   "description": "- Niliboresha kasi ya mfumo kutoka sekunde mbili hadi milisekunde mia tatu."
+  }
+ ],
+ "education": [
+  {
+   "id": "d1",
+   "degree": "Shahada ya Kwanza",
+   "field": "Sayansi ya Kompyuta",
+   "institution": "Chuo Kikuu cha Dar es Salaam",
+   "startDate": "2012",
+   "endDate": "2016",
+   "grade": "Daraja la Pili"
+  }
+ ],
+ "skills": [
+  {
+   "id": "s1",
+   "name": "Uhandisi wa Programu"
+  },
+  {
+   "id": "s2",
+   "name": "Usimamizi wa Hifadhidata"
+  },
+  {
+   "id": "s3",
+   "name": "Uchanganuzi wa Taarifa"
+  },
+  {
+   "id": "s4",
+   "name": "Usalama wa Mitandao"
+  }
+ ],
+ "projects": [
+  {
+   "id": "p1",
+   "name": "Mfumo wa Ng'ombe",
+   "role": "Mtengenezaji",
+   "date": "2019",
+   "description": "Mfumo wa kufuatilia mifugo na mazao kwa wakulima wadogo.",
+   "url": ""
+  }
+ ],
+ "languages": [
+  {
+   "id": "l1",
+   "name": "Kiswahili",
+   "proficiency": "Lugha ya Mama"
+  },
+  {
+   "id": "l2",
+   "name": "Kiingereza",
+   "proficiency": "Vizuri"
+  }
+ ],
+ "certifications": [
+  {
+   "id": "c1",
+   "name": "Uthibitisho wa Usalama wa Mtandao",
+   "issuer": "Taasisi ya Teknolojia",
+   "date": "2022"
+  }
+ ],
+ "referees": [
+  {
+   "id": "r1",
+   "name": "Dkt. Mwajuma Salum",
+   "title": "Mkuu wa Idara",
+   "company": "NMB",
+   "email": "mwajuma.salum@example.co.tz",
+   "phone": "+255 713 555 666"
+  }
+ ],
+ "hobbies": "Kuendesha baiskeli, kusoma vitabu vya Kiswahili na kufundisha vijana programu."
+}

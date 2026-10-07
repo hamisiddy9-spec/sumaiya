@@ -70,7 +70,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { summary: string; experience: { id: string; description: string }[] }; evidence?: { unconfirmed?: { claim: string; location: string }[] } | null; error?: string };
       if (!res.ok || !json.success || !json.data) {
-        setTailorCvError(json.error || (sw ? "Imeshindwa kuboresha CV sasa. Jaribu tena." : "Couldn't tailor the CV right now. Please try again."));
+        setTailorCvError(json.error || (sw ? "Sikuweza kuboresha CV sasa. Jaribu tena." : "Couldn't tailor the CV right now. Please try again."));
       } else {
         setTailorCvResult(json.data);
         setTailorEvidence(json.evidence?.unconfirmed ?? null);
@@ -102,7 +102,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { keywords?: AiKeyword[] }; error?: string };
       if (!res.ok || !json.success || !json.data?.keywords?.length) {
-        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
+        setAiError(json.error || (sw ? "Sikuweza kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
       } else {
         setAiKeywords(json.data.keywords);
         setAnalyzed(true);
@@ -131,7 +131,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { summary?: string }; error?: string };
       if (!res.ok || !json.success || !json.data?.summary) {
-        setTailorError(json.error || (sw ? "Imeshindwa kuboresha sasa. Tafadhali jaribu tena." : "Couldn't tailor right now. Please try again."));
+        setTailorError(json.error || (sw ? "Sikuweza kuboresha sasa. Tafadhali jaribu tena." : "Couldn't tailor right now. Please try again."));
       } else {
         setTailored(json.data.summary);
       }
@@ -260,7 +260,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
             className="flex-1"
           >
             <Icon name="magic" size={14} />
-            {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
+            {aiLoading ? (sw ? "Ninachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
           </Button>
         </div>
         {aiError && <p className="text-[10px] text-gold-text mt-1.5">{aiError}</p>}
@@ -346,7 +346,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   </p>
                   <Button onClick={handleTailorCv} disabled={tailorCvBusy || !jd.trim()} size="sm" className="w-full">
                     <Icon name="magic" size={14} />
-                    {tailorCvBusy ? (sw ? "Inaboresha CV…" : "Tailoring your CV…") : (sw ? "Boresha CV yako" : "Tailor my CV")}
+                    {tailorCvBusy ? (sw ? "Ninaboresha CV…" : "Tailoring your CV…") : (sw ? "Boresha CV yako" : "Tailor my CV")}
                   </Button>
                 </>
               ) : (
@@ -409,7 +409,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                     </Button>
                   </div>
                   <button onClick={handleTailorCv} disabled={tailorCvBusy} className="w-full text-[10px] text-text-muted hover:text-ember transition">
-                    {tailorCvBusy ? (sw ? "Inatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
+                    {tailorCvBusy ? (sw ? "Ninatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
                   </button>
                 </div>
               )}
@@ -432,7 +432,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   {!tailored ? (
                     <Button onClick={handleTailor} disabled={tailoring} size="sm" className="w-full">
                       <Icon name="magic" size={14} />
-                      {tailoring ? (sw ? "Inaboresha…" : "Tailoring…") : (sw ? "Boresha kulenga kazi hii" : "Tailor to this job")}
+                      {tailoring ? (sw ? "Ninaboresha…" : "Tailoring…") : (sw ? "Boresha kulenga kazi hii" : "Tailor to this job")}
                     </Button>
                   ) : (
                     <div className="space-y-2">
@@ -448,7 +448,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                         </Button>
                       </div>
                       <button onClick={handleTailor} disabled={tailoring} className="w-full text-[10px] text-text-muted hover:text-ember transition">
-                        {tailoring ? (sw ? "Inatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
+                        {tailoring ? (sw ? "Ninatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
                       </button>
                     </div>
                   )}
@@ -471,7 +471,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
               </p>
               <Button onClick={() => onGenerateCoverLetter(jd)} disabled={coverLetterBusy} size="sm" className="w-full">
                 <Icon name="mail" size={14} />
-                {coverLetterBusy ? (sw ? "Inatengeneza…" : "Creating…") : (sw ? "Tengeneza barua inayolingana" : "Generate matching cover letter")}
+                {coverLetterBusy ? (sw ? "Ninatengeneza…" : "Creating…") : (sw ? "Tengeneza barua inayolingana" : "Generate matching cover letter")}
               </Button>
             </div>
           )}

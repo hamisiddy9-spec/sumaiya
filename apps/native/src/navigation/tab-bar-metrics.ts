@@ -25,13 +25,33 @@ const TAB_BAR_CONTENT_HEIGHT = 52;
 const TAB_BAR_DEFAULT_BOTTOM_PAD = 10;
 
 let measured = 0;
+let live = false;
 const subscribers = new Set<() => void>();
+
+function notify(): void {
+  subscribers.forEach((fn) => fn());
+}
 
 /** Called by AnimatedTabBar on layout — the bar is the only writer. */
 export function publishTabBarHeight(height: number): void {
   if (!(height > 0) || Math.abs(height - measured) < 0.5) return;
   measured = height;
-  subscribers.forEach((fn) => fn());
+  notify();
+}
+
+/**
+ * Called by AnimatedTabBar on mount/unmount — is a bar on screen under the overlay?
+ *
+ * Separate from the height on purpose. A carousel/onboarding screen sits OUTSIDE the
+ * tab navigator, so no bar has ever published there; the height-only fallback below
+ * still reserved the bar's height, and the update pill floated ~60dp up — directly
+ * over the onboarding language choices, which it then swallowed taps for (it is
+ * pressable, zIndex 999). A bar that is not mounted must reserve NO height.
+ */
+export function publishTabBarLive(next: boolean): void {
+  if (live === next) return;
+  live = next;
+  notify();
 }
 
 function subscribe(fn: () => void): () => void {
@@ -43,18 +63,42 @@ function subscribe(fn: () => void): () => void {
 
 const getSnapshot = (): number => measured;
 const getServerSnapshot = (): number => 0;
+const getLive = (): boolean => live;
+const getLiveServer = (): boolean => false;
 
 /**
- * How much room floating UI must leave at the bottom to clear the tab bar.
- * Falls back to the derived height until the bar's first layout pass, so the
- * pill never flashes over the tabs on the opening frame.
+ * How much room floating UI must leave at the bottom. Pure, so the onboarding
+ * regression is testable without a renderer:
+ *
+ * - no bar mounted → the safe inset only (0 on a device without one). Reserving the
+ *   bar's height here is the bug: nothing is under the overlay to clear.
+ * - bar mounted, height measured → that height.
+ * - bar mounted, first frame before its layout lands → the derived height, so the
+ *   pill never flashes over the tabs on the opening frame.
  */
+export function clearanceFor(state: { live: boolean; measured: number; insetBottom: number }): number {
+  if (!state.live) return state.insetBottom;
+  if (state.measured > 0) return state.measured;
+  return (
+    TAB_BAR_CONTENT_HEIGHT +
+    (state.insetBottom > 0 ? state.insetBottom : TAB_BAR_DEFAULT_BOTTOM_PAD)
+  );
+}
+
 export function useTabBarClearance(): number {
   const insets = useSafeAreaInsets();
   const height = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  if (height > 0) return height;
-  return (
-    TAB_BAR_CONTENT_HEIGHT +
-    (insets.bottom > 0 ? insets.bottom : TAB_BAR_DEFAULT_BOTTOM_PAD)
-  );
+  const mounted = useSyncExternalStore(subscribe, getLive, getLiveServer);
+  return clearanceFor({ live: mounted, measured: height, insetBottom: insets.bottom });
+}
+
+/** Test-only read of the store's state — the publish guards are otherwise unobservable. */
+export function tabBarMetricsSnapshot(): { live: boolean; measured: number; subscribers: number } {
+  return { live, measured, subscribers: subscribers.size };
+}
+
+/** Test-only: reset the module-level store between cases. */
+export function resetTabBarMetrics(): void {
+  live = false;
+  measured = 0;
 }

@@ -50,7 +50,8 @@ function randomId(): string {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function deviceLabel(): string | null {
+/** Exported for the problem-report sheet, which sends the same device string. */
+export function deviceLabel(): string | null {
   try {
     const model = Device.modelName ?? Device.deviceName ?? null;
     // NOT Device.osName: on Android it hands back the whole build fingerprint

@@ -6,6 +6,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useLang } from "../lib/i18n";
 import { requestCameraAccess, showCameraRefusal } from "../lib/permissions";
+import { A4_H_PT, A4_W_PT } from "../services/pdf-export";
 import { Button, Screen, ScreenTitle, dialog, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 
@@ -48,6 +49,15 @@ export function PdfToolsScreen() {
       const next = res.assets
         .filter((a) => a.base64)
         .map((a) => ({ uri: a.uri, base64: a.base64! }));
+      // expo-image-picker's `base64` field is nullable by contract even when
+      // `base64: true` is requested — seen in practice with multi-select on
+      // Android. If every asset came back without it, the picker didn't fail,
+      // it just gave us nothing usable: say so instead of a silent no-op.
+      if (next.length === 0) {
+        haptics.error();
+        dialog.alert(t("Couldn't add that photo", "Imeshindwa kuongeza picha hiyo"), t("Try again.", "Jaribu tena."));
+        return;
+      }
       setPics((p) => [...p, ...next].slice(0, 30));
     } catch {
       haptics.error();
@@ -79,7 +89,7 @@ export function PdfToolsScreen() {
         )
         .join("");
       const html = `<html><head><meta name="viewport" content="width=device-width"/><style>*{margin:0;padding:0}</style></head><body>${pages}</body></html>`;
-      const { uri } = await Print.printToFileAsync({ html });
+      const { uri } = await Print.printToFileAsync({ html, width: A4_W_PT, height: A4_H_PT });
       haptics.success();
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "application/pdf", dialogTitle: t("Save or share PDF", "Hifadhi au shiriki PDF") });

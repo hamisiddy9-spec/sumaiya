@@ -20,6 +20,86 @@ interface ExportOptions {
    * résumé parsers). Without this a screenshot-style PDF parses as blank.
    */
   textLayer?: string;
+  /**
+   * Refuse to rasterize (throwing `ExportOverflowError`) when the content
+   * extends past the capture element's own box — a clipped CV, not a
+   * legitimately multi-page document. Opt-in because a surface that is
+   * genuinely taller than one page relies on the multi-page slicing path
+   * below and must still paginate normally, never be refused. Set by the CV
+   * export call sites (`editor-store.exportPdf`, `cv-editor-client`'s
+   * `handleDownload`/`handleShare`, the assistant's
+   * `downloadBuiltPdf`/`CvReadyCard.download`, `use-cv-export`), whose capture
+   * target is the fixed-height A4 sheet that clips its own overflow.
+   */
+  refuseIfClipped?: boolean;
+}
+
+/**
+ * Marks UI that must never appear in an exported document. html2canvas paints
+ * the element's whole subtree, so any overlay drawn INSIDE the capture target
+ * (the fit engine's "CV too long" warning pill) was rasterised into the
+ * delivered PDF and printed on the employer's copy. `ignoreElements` is
+ * html2canvas's own mechanism and the equivalent of FitFrame's `overlay`
+ * slot, which renders the watermark as a SIBLING of the sheet and is
+ * therefore never captured in the first place.
+ */
+export const EXPORT_EXCLUDE_ATTR = "data-pdf-exclude";
+export function isExportExcluded(node: unknown): boolean {
+  return typeof Element !== "undefined" && node instanceof Element && node.hasAttribute(EXPORT_EXCLUDE_ATTR);
+}
+
+export interface ExportOverflow { contentBottom: number; boxHeight: number; overflowPx: number }
+/** Sub-pixel/rounding only — one genuinely clipped line is ~14px. */
+export const EXPORT_OVERFLOW_TOLERANCE_PX = 8;
+
+/** code + fields, so callers can match without importing a class instance check */
+export class ExportOverflowError extends Error {
+  readonly code = "CV_TOO_LONG";
+  constructor(readonly overflow: ExportOverflow) {
+    super(exportOverflowMessage(false, overflow));
+    this.name = "ExportOverflowError";
+  }
+}
+
+/**
+ * How far the lowest text-bearing descendant of `el` extends below `el`'s own
+ * box. Measured with getBoundingClientRect so a CSS transform (the preview's
+ * scale, the fit engine's inner scale) is accounted for; subtrees marked
+ * EXPORT_EXCLUDE_ATTR (UI overlays) are skipped. html2canvas renders into a
+ * canvas the size of `el`, so anything past that edge is simply not in the file.
+ */
+export function measureExportOverflow(el: HTMLElement, excludeAttr = EXPORT_EXCLUDE_ATTR): ExportOverflow {
+  const rect = el.getBoundingClientRect();
+  const boxHeight = rect.height;
+  let contentBottom = 0;
+  for (const node of Array.from(el.querySelectorAll<HTMLElement>("*"))) {
+    if (node.closest(`[${excludeAttr}]`)) continue;
+    const hasText = Array.from(node.childNodes).some(
+      (n) => n.nodeType === 3 && (n.textContent ?? "").trim().length > 0,
+    );
+    if (!hasText) continue;
+    const r = node.getBoundingClientRect();
+    if (r.height <= 0) continue;
+    contentBottom = Math.max(contentBottom, r.bottom - rect.top);
+  }
+  return { contentBottom, boxHeight, overflowPx: Math.max(0, contentBottom - boxHeight) };
+}
+
+/** "1408" → "1 408" — matches the space-grouped style used in the message. */
+function formatPx(n: number): string {
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+/** The user-facing message, both languages. */
+export function exportOverflowMessage(sw: boolean, o?: ExportOverflow): string {
+  const amount = o
+    ? sw
+      ? ` (takriban px ${formatPx(o.overflowPx)} za maudhui)`
+      : ` (about ${formatPx(o.overflowPx)} px of content)`
+    : "";
+  return sw
+    ? `CV yako ni ndefu mno kwa ukurasa mmoja — sehemu ya mwisho ingekatwa, kwa hivyo hatukutengeneza PDF.${amount} Ondoa baadhi ya maudhui (au chagua mfano mfupi zaidi), kisha upakue tena.`
+    : `Your CV is too long for one page — the last part would be cut off, so we did not make the PDF.${amount} Remove some content (or pick a shorter template), then download again.`;
 }
 
 /** How an exported PDF was delivered to the user's device. */
@@ -204,32 +284,43 @@ async function renderPdfDoc(el: HTMLElement, opts: ExportOptions): Promise<any> 
   el.style.transform = "none";
   el.style.transformOrigin = "top left";
 
-  // Wait for webfonts to finish loading before rasterizing. Without this a cold
-  // export (fired right after the editor mounts, fonts still swapping in) can
-  // capture fallback glyphs, so the PDF's typography differs from the on-screen
-  // preview. Best-effort — guard for environments without the Font Loading API.
-  try {
-    if (typeof document !== "undefined" && document.fonts?.ready) {
-      await document.fonts.ready;
-    }
-  } catch { /* ignore — proceed with whatever is loaded */ }
-
-  // Wait for images (the CV profile photo) to be DECODED before rasterizing.
-  // The photo is a base64 data URL held in React state: the moment it is set,
-  // the <img> exists in the DOM but its pixels may not be decoded yet, and
-  // html2canvas draws whatever is there. Without this the photo silently
-  // rasterizes blank in the PDF while looking perfect on screen — a defect the
-  // user only discovers in the file they sent to an employer.
-  await waitForImages(el);
-
   let canvas: HTMLCanvasElement;
   try {
+    // Refuse to deliver a document the page box would silently clip — see
+    // ExportOverflowError. Opt-in (ExportOptions.refuseIfClipped) and measured
+    // BEFORE rasterization, so a clipped CV never reaches html2canvas. Lives in
+    // this try so the transform/hidden-ancestor reset below always runs, even
+    // on refusal.
+    if (opts.refuseIfClipped) {
+      const overflow = measureExportOverflow(el);
+      if (overflow.overflowPx > EXPORT_OVERFLOW_TOLERANCE_PX) throw new ExportOverflowError(overflow);
+    }
+
+    // Wait for webfonts to finish loading before rasterizing. Without this a cold
+    // export (fired right after the editor mounts, fonts still swapping in) can
+    // capture fallback glyphs, so the PDF's typography differs from the on-screen
+    // preview. Best-effort — guard for environments without the Font Loading API.
+    try {
+      if (typeof document !== "undefined" && document.fonts?.ready) {
+        await document.fonts.ready;
+      }
+    } catch { /* ignore — proceed with whatever is loaded */ }
+
+    // Wait for images (the CV profile photo) to be DECODED before rasterizing.
+    // The photo is a base64 data URL held in React state: the moment it is set,
+    // the <img> exists in the DOM but its pixels may not be decoded yet, and
+    // html2canvas draws whatever is there. Without this the photo silently
+    // rasterizes blank in the PDF while looking perfect on screen — a defect the
+    // user only discovers in the file they sent to an employer.
+    await waitForImages(el);
+
     try {
       canvas = await html2canvas(el, {
         scale,
         useCORS: true,
         logging: false,
         backgroundColor: "#ffffff",
+        ignoreElements: isExportExcluded,
       });
     } catch (err) {
       // OOM guard: if the first rasterization throws (large canvas on a
@@ -240,6 +331,7 @@ async function renderPdfDoc(el: HTMLElement, opts: ExportOptions): Promise<any> 
           useCORS: true,
           logging: false,
           backgroundColor: "#ffffff",
+          ignoreElements: isExportExcluded,
         });
       } else {
         throw err;

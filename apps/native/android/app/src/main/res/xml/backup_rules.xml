@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and lower Auto Backup configuration. Mirrors
+     data_extraction_rules.xml (Android 12+) — see that file for why the
+     AsyncStorage database is excluded while the CV database is not. -->
+<full-backup-content>
+  <exclude domain="database" path="RKStorage"/>
+  <exclude domain="database" path="RKStorage-journal"/>
+  <exclude domain="database" path="RKStorage-wal"/>
+  <exclude domain="database" path="RKStorage-shm"/>
+  <exclude domain="database" path="AsyncStorage"/>
+  <exclude domain="database" path="AsyncStorage-journal"/>
+  <exclude domain="database" path="AsyncStorage-wal"/>
+  <exclude domain="database" path="AsyncStorage-shm"/>
+</full-backup-content>

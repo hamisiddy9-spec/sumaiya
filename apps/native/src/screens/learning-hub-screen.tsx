@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { confirmAndOpenUrl } from "../lib/external-link";
 import { useFocusEffect } from "@react-navigation/native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import type { CVData } from "@sumaiya/types";
 import type { JobRecommendation } from "@sumaiya/api-client";
 import { CourseCard } from "../components/learning/course-card";
@@ -23,7 +23,7 @@ import { useCvs } from "../hooks/use-cvs";
 import { loadProfile, saveProfile, type CareerProfile } from "../lib/profile-store";
 import { computeSkillGaps, type GapResult, type SkillGap } from "../lib/skill-gaps";
 import { getSkillProgress, setSkillState, type SkillState } from "../lib/course-progress";
-import { Button, Card, EmptyState, ProgressBar, Screen, SkeletonCard, Stagger, haptics, useThemeColors } from "../components/ui";
+import { Button, Card, EASE, EmptyState, MOTION, ProgressBar, Screen, SkeletonList, Stagger, enterDurationMs, exitDurationMs, haptics, useMotionReduced, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { SumaiyaMark } from "../components/sumaiya-mark";
 import { useLang } from "../lib/i18n";
@@ -168,6 +168,7 @@ function GapCard({
 
 export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
   const c = useThemeColors();
+  const reduceMotion = useMotionReduced();
   const { t, lang } = useLang();
   const { premium } = useEntitlements();
   const { cvs } = useCvs();
@@ -349,14 +350,14 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
       </View>
 
       {toast ? (
-        <Animated.View entering={FadeIn} style={{ backgroundColor: c.success + "1a", borderRadius: 12, borderWidth: 1, borderColor: c.success + "40", padding: 12, flexDirection: "row", gap: 8, alignItems: "center" }}>
+        <Animated.View entering={FadeIn.duration(enterDurationMs(reduceMotion, MOTION.dur.base)).easing(EASE.out)} exiting={FadeOut.duration(exitDurationMs(reduceMotion, MOTION.dur.fast)).easing(EASE.in)} style={{ backgroundColor: c.success + "1a", borderRadius: 12, borderWidth: 1, borderColor: c.success + "40", padding: 12, flexDirection: "row", gap: 8, alignItems: "center" }}>
           <Icon name="check-circle" size={16} color={c.success} />
           <Text style={{ color: c.text, fontSize: 12.5, flex: 1 }}>{toast}</Text>
         </Animated.View>
       ) : null}
 
       {loading ? (
-        <View style={{ gap: 10 }}><SkeletonCard /><SkeletonCard /></View>
+        <SkeletonList count={2} gap={10} />
       ) : (
         <>
           {/* target + readiness */}

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="sw"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Njia ya kukaribisha (the welcoming sequence) — Sumaiya 2026 redesign</title>
+<style>/* ============================================================================
+   SUMAIYA 2026 DESIGN SYSTEM — reference implementation
+   Colours are READ FROM THE APP (apps/web/tailwind.config.ts +
+   apps/native/src/components/ui/theme.ts). None are invented. None change.
+   This file is inlined into every mockup so each HTML file is standalone.
+   ========================================================================== */
+
+:root{
+  /* ── FIXED PALETTE (Warm Confidence) ─────────────────────────────────── */
+  --ember:#DA4A1C;      --ember-shadow:#A8330F;  --ember-hover:#C13E14;
+  /* ember as TEXT is 3.89:1 on cream and 4.22:1 on white — below WCAG AA
+   * 4.5:1 for 14px. #A8330F is 6.16:1 / 6.68:1. Ember stays a FILL and an
+   * ICON colour; small ember TEXT uses ember-shadow. Same palette, no change. */
+  --ember-text:#A8330F;
+  --ember-tint:#FBE9E1; --ember-fill:#B83A12;    /* accentFill (light) */
+  --pine:#12433D;       --pine-tint:#E4EDEA;
+  --gold:#F2A93B;       --gold-tint:#FBF3E2;     --gold-text:#96630F;
+  --espresso:#211A15;   --espresso-2:#2C231C;    --espresso-line:#3A2E25;
+  --cream:#FAF5EE;      --sand:#EFE7DA;          --sand-2:#F4EEE4;
+  --card:#FFFFFF;       --border:#E9E0D4;        --border-input:#9C8D7B;
+  --text-body:#6B5F54;  --text-muted:#756A5E;
+  --error:#C13E14;      --success:#12766A;       --warning:#96630F;
+
+  /* ── SPACING (base 4px; ONLY these) ──────────────────────────────────── */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s8:32px;
+
+  /* ── RADII ───────────────────────────────────────────────────────────── */
+  --r-input:8px; --r-input-lg:12px; --r-card:16px; --r-card-lg:20px; --r-pill:999px;
+
+  /* ── ELEVATION (content plane is flat; shadow is for the floating layer) */
+  --shadow-press:0 2px 8px rgba(33,26,21,.05);
+  --shadow-float:0 12px 30px -12px rgba(33,26,21,.25);
+  --shadow-ember:0 3px 0 #A8330F;
+
+  /* ── TYPE ────────────────────────────────────────────────────────────── */
+  --font-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --font-body:'Hanken Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  /* ── MOTION (mirrors apps/native/src/components/ui/motion.tsx) ───────── */
+  --dur-micro:90ms; --dur-fast:140ms; --dur-base:220ms; --dur-slow:300ms; --dur-field:340ms;
+  --ease-out:cubic-bezier(.33,1,.68,1);
+  --ease-in:cubic-bezier(.32,0,.67,0);
+  --ease-inout:cubic-bezier(.65,0,.35,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--sand);color:var(--espresso);
+  font-family:var(--font-body);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── THE PROPOSAL LAYOUT (this chrome is the deliverable's wrapper, not the
+      product UI) ──────────────────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:40px 24px 96px}
+.masthead{margin-bottom:40px}
+.masthead .kicker{
+  font-size:11px;font-weight:700;letter-spacing:.56px;text-transform:uppercase;
+  color:var(--ember-text);margin:0 0 8px
+}
+.masthead h1{
+  font-family:var(--font-display);font-size:38px;line-height:1.1;font-weight:800;
+  letter-spacing:-.5px;margin:0 0 12px
+}
+.masthead p{max-width:64ch;color:var(--text-body);margin:0 0 8px}
+.meta{font-size:12.5px;color:var(--text-muted)}
+.meta code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 6px;border-radius:6px;color:var(--espresso)}
+
+.sec{margin:64px 0 0}
+.sec>h2{
+  font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.3px;
+  margin:0 0 6px;padding-bottom:12px;border-bottom:2px solid var(--border)
+}
+.sec>h2 .n{color:var(--ember);font-family:var(--font-mono);font-size:14px;margin-right:10px}
+.sec>p.lede{color:var(--text-body);max-width:72ch;margin:14px 0 24px}
+
+/* ── DEVICE FRAME — the phone is the product, so the phone comes first ─── */
+.stage{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.phone{
+  width:390px;flex:0 0 390px;background:var(--espresso);
+  border-radius:44px;padding:10px;box-shadow:0 30px 70px -30px rgba(33,26,21,.35)
+}
+.phone__screen{
+  position:relative;background:var(--cream);border-radius:36px;overflow:hidden;
+  height:844px;display:flex;flex-direction:column
+}
+.phone__notch{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  width:96px;height:22px;border-radius:999px;background:var(--espresso);z-index:40
+}
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 22px 0;font-size:12px;font-weight:700;color:var(--espresso);flex:0 0 auto
+}
+.statusbar .right{display:flex;gap:5px;align-items:center}
+.bar{width:3px;height:9px;background:var(--espresso);border-radius:1px;opacity:.85}
+.bar.lg{height:12px}
+
+/* ── APP SHELL ───────────────────────────────────────────────────────── */
+.app{flex:1;display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow:auto;padding:12px 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.tabbar{
+  flex:0 0 auto;display:flex;justify-content:space-between;align-items:flex-start;
+  padding:10px 10px 22px;background:var(--card);border-top:1px solid var(--border)
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--text-muted);font-size:10.5px;font-weight:700;min-height:44px;justify-content:center}
+.tab.on{color:var(--ember-text)}
+.tab .glyph{width:22px;height:22px;display:grid;place-items:center}
+
+/* ── TYPE ROLES (design system §2) ───────────────────────────────────── */
+.r-display{font-family:var(--font-display);font-size:30px;line-height:36px;font-weight:800;letter-spacing:-.5px}
+.r-screen{font-family:var(--font-display);font-size:28px;line-height:34px;font-weight:800;letter-spacing:-.5px}
+.r-section{font-size:18px;line-height:24px;font-weight:800;letter-spacing:0}
+.r-cardtitle{font-size:15.5px;line-height:21px;font-weight:700}
+.r-body{font-size:14.5px;line-height:21px;font-weight:600}
+.r-bodysmall{font-size:13.5px;line-height:19px;font-weight:600}
+.r-caption{font-size:12.5px;line-height:18px;font-weight:400}
+.r-micro{font-size:11.5px;line-height:14px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.r-stat{font-size:26px;line-height:1;font-weight:800;letter-spacing:0}
+.muted{color:var(--text-muted)}.body{color:var(--text-body)}
+.eyebrow{color:var(--text-muted);font-size:13px;font-weight:600}
+
+/* ── SURFACES (design system §3–§4) ──────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card)}
+.card--20{border-radius:var(--r-card-lg)}
+.pad{padding:16px}
+.pad-row{padding:14px 16px}
+.row{display:flex;align-items:center;gap:12px}
+.row-tight{display:flex;align-items:center;gap:8px}
+.stack{display:flex;flex-direction:column}
+.g4{gap:4px}.g8{gap:8px}.g12{gap:12px}.g16{gap:16px}.g20{gap:20px}.g24{gap:24px}
+.grow{flex:1;min-width:0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;margin:24px 0 12px}
+.sec-head:first-child{margin-top:4px}
+.sec-head .act{color:var(--ember-text);font-size:12.5px;font-weight:800}
+.dashed{border-style:dashed}
+
+/* icon wells — concentric: inner = outer − padding (design system §3.1) */
+.well{display:grid;place-items:center;flex:0 0 auto;background:var(--ember-tint);color:var(--ember)}
+.well--38{width:38px;height:38px;border-radius:11px}
+.well--44{width:44px;height:44px;border-radius:12px}
+.well--30{width:30px;height:30px;border-radius:9px}
+.well--72{width:72px;height:72px;border-radius:22px}
+.well--pine{background:var(--pine-tint);color:var(--pine)}
+.well--gold{background:var(--gold-tint);color:var(--gold-text)}
+.well--success{background:#E3F1EE;color:var(--success)}
+.well--warn{background:#FBF3E2;color:var(--warning)}
+
+/* buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;padding:0 18px;border-radius:var(--r-input-lg);border:1px solid transparent;
+  font-family:var(--font-body);font-size:14.5px;font-weight:700;cursor:pointer;
+  transition:transform var(--dur-micro) var(--ease-out),background var(--dur-base) var(--ease-out)
+}
+.btn--primary{background:var(--ember-fill);color:var(--cream)}
+.btn--secondary{background:var(--card);color:var(--espresso);border-color:var(--border-input)}
+.btn--ghost{background:transparent;color:var(--ember-text);min-height:44px}
+.btn--sm{min-height:44px;font-size:13.5px;padding:0 14px}
+.btn--block{width:100%}
+.btn:active{transform:scale(.975)}
+
+/* badges */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-pill);
+  padding:3px 9px;font-size:11.5px;font-weight:800;line-height:1.4
+}
+.badge--success{background:#E3F1EE;color:var(--success)}
+.badge--warn{background:var(--gold-tint);color:var(--warning)}
+.badge--muted{background:var(--sand-2);color:var(--text-muted)}
+.badge--ember{background:var(--ember-tint);color:var(--ember-text)}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;
+  border-radius:var(--r-pill);border:1px solid var(--border);background:var(--card);
+  font-size:13.5px;font-weight:600;color:var(--espresso)
+}
+
+/* tab-rail section nav (CV editor) */
+.rail{display:flex;gap:8px;overflow:auto;padding:10px 20px;background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto}
+.rail::-webkit-scrollbar{height:0}
+.rail .chip{min-height:36px;font-size:12.5px;padding:0 12px;white-space:nowrap}
+.rail .chip.on{background:var(--ember-tint);border-color:var(--ember);color:var(--ember-text);font-weight:700}
+
+/* skeleton — shimmer is bounded (2 cycles) per the motion standard */
+.sk{background:linear-gradient(90deg,#EFE7DA 25%,#E9E0D4 50%,#EFE7DA 75%);
+  background-size:200% 100%;border-radius:8px;animation:shimmer 1.5s ease-in-out 2}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-line.w40{width:40%}.sk-line.w60{width:60%}.sk-line.w80{width:80%}
+
+/* ── ENTRANCE: "nothing appears, everything arrives" ──────────────────── */
+.arrive{animation:arrive var(--dur-slow) var(--ease-out) both}
+.arrive-1{animation-delay:30ms}.arrive-2{animation-delay:70ms}
+.arrive-3{animation-delay:110ms}.arrive-4{animation-delay:150ms}
+.arrive-5{animation-delay:190ms}.arrive-6{animation-delay:230ms}
+@keyframes arrive{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.handoff{animation:handoff var(--dur-fast) var(--ease-in) both}
+@keyframes handoff{to{opacity:0;transform:translateY(-4px)}}
+.pressable{transition:transform var(--dur-micro) var(--ease-out),box-shadow var(--dur-base) var(--ease-out)}
+.pressable:active{transform:scale(.985);box-shadow:var(--shadow-press)}
+
+/* ── ANNOTATIONS (proposal chrome) ───────────────────────────────────── */
+.notes{flex:1 1 420px;min-width:320px;max-width:640px}
+.note{
+  background:var(--card);border:1px solid var(--border);border-left:3px solid var(--ember);
+  border-radius:var(--r-card);padding:16px;margin-bottom:12px
+}
+.note h4{margin:0 0 6px;font-size:14.5px;font-weight:800;font-family:var(--font-display)}
+.note .tag{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;font-weight:700;
+  color:var(--ember-text);background:var(--ember-tint);border-radius:6px;padding:2px 7px;margin-bottom:8px
+}
+.note p{margin:0;font-size:13.5px;line-height:1.55;color:var(--text-body)}
+.note ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;color:var(--text-body)}
+.note li{margin:4px 0}
+.note li b{color:var(--espresso)}
+.note--before{border-left-color:var(--border-input)}
+.note--before .tag{color:var(--text-muted);background:var(--sand-2)}
+.note--ban{border-left-color:var(--error)}
+.note--ban .tag{color:var(--error);background:#FBE9E1}
+
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+.rule h4{margin:0 0 8px;font-size:13.5px;font-weight:800;font-family:var(--font-display)}
+.rule code{font-family:var(--font-mono);font-size:11.5px;background:var(--sand-2);
+  padding:2px 5px;border-radius:5px;color:var(--ember-shadow)}
+.rule .kv{font-size:12.5px;color:var(--text-body);display:flex;justify-content:space-between;
+  padding:4px 0;border-bottom:1px dashed var(--border)}
+.rule .kv:last-child{border-bottom:0}
+.rule .kv b{color:var(--espresso);font-family:var(--font-mono);font-size:11.5px}
+
+.toast{
+  position:absolute;left:20px;right:20px;bottom:88px;z-index:30;
+  background:var(--espresso);color:var(--cream);border-radius:var(--r-input-lg);
+  padding:12px 16px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-float);
+  display:flex;gap:10px;align-items:center
+}
+.sheet-backdrop{position:absolute;inset:0;background:rgba(33,26,21,.45);z-index:20}
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;z-index:25;background:var(--card);
+  border-radius:20px 20px 0 0;padding:20px;box-shadow:var(--shadow-float)
+}
+.sheet__grip{width:36px;height:4px;border-radius:999px;background:var(--border);margin:0 auto 14px}
+.sticky-foot{
+  flex:0 0 auto;background:var(--cream);border-top:1px solid var(--border);
+  padding:10px 20px calc(10px + env(safe-area-inset-bottom,0px))
+}
+.savepill{
+  display:inline-flex;align-items:center;gap:6px;background:var(--sand-2);
+  border-radius:var(--r-pill);padding:4px 10px;font-size:11.5px;font-weight:700;color:var(--text-muted)
+}
+.savepill--saved{background:#E3F1EE;color:var(--success)}
+.savepill--dirty{background:var(--gold-tint);color:var(--gold-text)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+.strip{display:flex;gap:14px;overflow-x:auto;padding:4px 0 14px}
+.card6{flex:0 0 200px;width:200px}
+.card6 .screen6{border:8px solid var(--espresso);border-radius:26px;background:var(--cream);
+  height:404px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.card6 .screen6.dark{background:#171009}
+.card6 .screen6.k{background:var(--cream)}
+.stepbar{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+.stepdot{height:5px;border-radius:999px;background:var(--border);flex:1}
+.stepdot.on{background:var(--ember)}
+.stepdot.done{background:var(--border-input)}
+.now{font-size:10px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--ember-text);margin:0 0 4px}
+.was{font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--text-body);
+  background:var(--sand-2);border-radius:8px;padding:6px 8px;margin-top:6px}
+.was b{color:var(--espresso)}
+.should{font-size:12.5px;line-height:1.5;color:var(--text-body);margin-top:6px}
+.should b{color:var(--espresso)}
+table.audit{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);
+  border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table.audit th{text-align:left;font-size:11px;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--text-muted);background:var(--sand-2);padding:9px 12px;border-bottom:1px solid var(--border)}
+table.audit td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text-body)}
+table.audit tr:last-child td{border-bottom:0}
+table.audit code{font-family:var(--font-mono);font-size:11px;color:var(--espresso)}
+.bad{color:var(--error);font-weight:700}
+.pill{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap}
+.pill--chg{background:var(--gold-tint);color:var(--warning)}
+.pill--ok{background:#E3F1EE;color:var(--success)}
+.mk{display:grid;place-items:center;border-radius:22px;background:var(--ember);color:var(--cream)}
+</style>
+</head><body>
+<div class="wrap">
+  <div class="masthead">
+    <p class="kicker">Sumaiya · Redesign proposal · 2026-09-20</p>
+    <h1>Njia ya kukaribisha (the welcoming sequence)</h1>
+    <p>The owner&rsquo;s words: &ldquo;the app onboarding animations and other welcoming screens &hellip; they don&rsquo;t match, like different elements stacked together.&rdquo; This treats the welcoming path as ONE sequence, audits what each screen does differently, and gives the six divergences a single fix each.</p>
+    <p class="meta">Colours and the logo are <code>FIXED</code> — read from
+      <code>apps/web/tailwind.config.ts</code> and
+      <code>apps/native/src/components/ui/theme.ts</code>. Motion obeys
+      <code>docs/MOTION-STANDARD-2026-09-20.md</code>. No source file is modified by this proposal.</p>
+  </div>
+  <div class="sec"><h2><span class="n">A</span>The welcoming path as ONE sequence</h2><p class="lede">The owner&rsquo;s words: <i>&ldquo;the app onboarding animations and other welcoming screens &hellip; they don&rsquo;t match, like different elements stacked together.&rdquo;</i> That is a systems diagnosis, and the frames below are the evidence: six screens, four entry origins, thirteen durations, five easing families, and nothing that survives a boundary.</p><div class="strip"><div class="card6"><p class="now">1 / 6 &middot; Kuwasha (launch)</p><div class="stepbar"><div class="stepdot on"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div></div><div class="screen6"><div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center"><div class="mk" style="width:84px;height:84px"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3.1" fill="var(--ember)"/><path d="M12 3.2c2.4 2.2 3.4 5 3.4 8.8s-1 6.6-3.4 8.8" stroke="var(--ember)" stroke-width="1.9" stroke-linecap="round" opacity=".82"/><path d="M20.8 12c-2.2 2.4-5 3.4-8.8 3.4s-6.6-1-8.8-3.4" stroke="var(--ember)" stroke-width="1.9" stroke-linecap="round" opacity=".6"/></svg></div><div style="font-family:var(--font-display);font-weight:800;font-size:17px;margin-top:16px">Sumaiya</div><div class="r-caption muted" style="margin-top:6px">Kazi yako, kwa Kiswahili</div></div></div><div class="was"><b>today:</b> cream mark at 480ms with <b>Easing.back(1.6)</b> &mdash; the only overshoot in the app; word at 240ms + 420ms; a 2-cycle breath at 900ms</div><div class="should">the mark arrives by <b>opacity + 12px rise</b> at <b>dur.slow</b>, no overshoot. The breath stays but is bounded and cancelled on unmount.</div></div><div class="card6"><p class="now">2 / 6 &middot; Lugha (language)</p><div class="stepbar"><div class="stepdot done"></div><div class="stepdot on"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div></div><div class="screen6"><div style="padding:24px 16px"><div class="r-section" style="font-size:15px;margin-bottom:12px">Chagua lugha</div><div class="card pad-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;border-color:var(--ember);background:var(--ember-tint)"><div class="r-body" style="font-weight:800;font-size:13px;width:30px">SW</div><div class="grow r-bodysmall" style="font-weight:700">Kiswahili</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--ember-text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg></div><div class="card pad-row" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><div class="r-body" style="font-weight:800;font-size:13px;width:30px">EN</div><div class="grow r-bodysmall" style="font-weight:700">English</div></div></div></div><div class="was"><b>today:</b> cards <b>FadeInDown.delay(200 + i*80)</b>, 360ms &mdash; a <b>rise</b>, with an uncapped 80ms stagger</div><div class="should">same <b>rise</b> idiom as every other list in the app, stagger through <code>staggerDelayMs</code> so it is capped at 6 items.</div></div><div class="card6"><p class="now">3 / 6 &middot; Onyesho (slides)</p><div class="stepbar"><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot on"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div></div><div class="screen6"><div style="padding:24px 16px;text-align:center"><div class="well" style="width:64px;height:64px;border-radius:20px;margin:8px auto 14px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h4"/></svg></div><div class="r-section" style="font-size:15px">CV inayokufikisha mwajini</div><div class="r-bodysmall muted" style="margin-top:8px;line-height:19px">Bandika tangazo la kazi, nami nitaandika CV inayolingana nalo.</div><div class="row-tight" style="justify-content:center;gap:6px;margin-top:20px"><div style="width:6px;height:6px;border-radius:99px;background:var(--ember)"></div><div style="width:6px;height:6px;border-radius:99px;background:var(--border)"></div><div style="width:6px;height:6px;border-radius:99px;background:var(--border)"></div></div></div><div style="padding:0 16px 16px"><button class="btn btn--primary btn--sm btn--block">Endelea</button></div></div><div class="was"><b>today:</b> container <b>FadeIn 360 / FadeOut 220</b>; art <b>FadeIn 420</b>; CTA <b>FadeInDown.delay(300)</b> default duration; scroll-linked <b>opacity interpolation</b> on 3 different ranges</div><div class="should">ONE origin for the slide (<b>rise 12px</b>, <code>dur.slow</code>) and one for the CTA (<code>dur.slow</code> + <code>dur.fast</code> delay). No scroll-linked opacity: the standard bans scroll-driven reveals on a phone.</div></div><div class="card6"><p class="now">4 / 6 &middot; Hatua ya kwanza (first run)</p><div class="stepbar"><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot on"></div><div class="stepdot"></div><div class="stepdot"></div></div><div class="screen6"><div style="padding:20px 16px"><div class="r-micro muted" style="margin-bottom:10px">Hatua 3 kati ya 8</div><div class="stepbar" style="margin-bottom:16px"><div class="stepdot on"></div><div class="stepdot on"></div><div class="stepdot on"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div><div class="stepdot"></div></div><div class="r-section" style="font-size:15px;margin-bottom:12px">Uzoefu wako</div><div style="min-height:44px;border:1px solid var(--border-input);border-radius:12px;background:var(--card);padding:11px 13px;font-size:14px">Mhasibu &middot; Azania Bank</div><div style="min-height:44px;border:1px solid var(--border-input);border-radius:12px;background:var(--card);padding:11px 13px;font-size:14px;margin-top:8px">Miaka 3</div></div><div style="padding:0 16px 16px"><button class="btn btn--primary btn--sm btn--block">Endelea</button></div></div><div class="was"><b>today:</b> <b>FadeInRight 260 / FadeOutLeft 150</b> &mdash; a <b>horizontal</b> origin, and the only screen in the sequence that moves sideways</div><div class="should">the same <b>rise</b> as the slides, with a <b>progress bar that persists</b> across steps instead of a step counter that vanishes. Horizontal motion is reserved for push/pop.</div></div><div class="card6"><p class="now">5 / 6 &middot; Kuingia (sign-in)</p><div class="stepbar"><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot on"></div><div class="stepdot"></div></div><div class="screen6"><div style="padding:24px 16px"><div class="r-section" style="font-size:15px;margin-bottom:4px">Ingia</div><div class="r-caption muted" style="margin-bottom:14px">Tumetuma msimbo kwa asha@example.com</div><div style="min-height:44px;border:1px solid var(--ember);border-radius:12px;background:var(--card);padding:11px 13px;font-family:var(--font-mono);font-size:16px;letter-spacing:6px">4 2 _ _ _ _</div></div><div style="padding:0 16px 16px"><button class="btn btn--primary btn--sm btn--block">Thibitisha</button></div></div><div class="was"><b>today:</b> step <b>FadeInRight 200 / FadeOutLeft 140</b>; then inner blocks <b>FadeIn 240</b> and <b>FadeIn 200</b> &mdash; three durations for one screen</div><div class="should">one entry for the screen (<b>rise</b>, <code>dur.slow</code>) and one for the code field appearing (<code>dur.base</code>, in place). The email you typed <b>persists across the boundary</b> into the code step, as a visible chip.</div></div><div class="card6"><p class="now">6 / 6 &middot; Kuwasili (arrival at home)</p><div class="stepbar"><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot done"></div><div class="stepdot on"></div></div><div class="screen6 dark"><div style="padding:18px 14px"><div class="r-caption muted">Habari za leo asubuhi,</div><div class="r-screen" style="font-size:20px">Asha</div><div class="card pad" style="margin-top:12px"><div class="r-bodysmall" style="font-weight:800">Mhasibu, Dar es Salaam</div><div class="r-caption muted" style="margin-top:3px">Azania Bank &middot; Ulinganifu 78%</div></div><div class="card pad" style="margin-top:10px"><div class="r-bodysmall" style="font-weight:800">Shughuli za haraka</div><div class="r-caption muted" style="margin-top:3px">Tafuta kazi &middot; Miundo 224</div></div></div></div><div class="was"><b>today:</b> root mode switch <b>fade 340</b>, and the home content then plays its own <b>FadeInDown 320</b> entrances at delays 40/60/120/170/180 &mdash; a second, unrelated arrival stacked on the first</div><div class="should">the root fade <b>is</b> the arrival: the home header is already painted as the colour field dissolves, and its blocks rise once, on the shared stagger. No second entrance.</div></div></div><p class="spec">Read the strip left to right. Under each frame: what it does <b>today</b>, and what it should do under one shared language. The <code>today</code> values are read from the files named in the audit below.</p></div><div class="sec"><h2><span class="n">B</span>The audit &mdash; what each welcoming screen does differently from its neighbours</h2><p class="lede">This list of divergences <i>is</i> the &ldquo;stacked together&rdquo;. Every row is a place where two adjacent screens disagree about how a thing arrives.</p><table class="audit"><tr><th>screen</th><th>entry animation</th><th>duration</th><th>easing</th><th>origin</th><th>what it shares with its neighbour</th></tr><tr><td>splash mark <code>splash-screen.tsx:36</code></td><td>opacity + scale</td><td>480ms</td><td>back(1.6)</td><td><b class='bad'>scale, overshoot</b></td><td>nothing</td></tr><tr><td>splash word <code>:37</code></td><td>opacity</td><td>420ms after 240ms delay</td><td>out(cubic)</td><td>fade</td><td>nothing</td></tr><tr><td>root mode switch <code>nav-config.ts:44-53</code></td><td>cross-fade</td><td>340ms</td><td>platform</td><td>fade</td><td>duration only</td></tr><tr><td>onboarding container <code>onboarding-screen.tsx:172</code></td><td>FadeIn / FadeOut</td><td>360 / 220</td><td>default</td><td>fade</td><td>nothing</td></tr><tr><td>onboarding language <code>:204</code></td><td>FadeInDown</td><td>360ms, delay 200+i*80</td><td>default</td><td><b>rise from below</b></td><td>nothing</td></tr><tr><td>onboarding art <code>:362</code></td><td>FadeIn</td><td>420</td><td>default</td><td>fade</td><td>nothing</td></tr><tr><td>onboarding collapse <code>:318</code></td><td>withTiming on an interpolated value</td><td>320</td><td>in(cubic)</td><td><b class='bad'>scroll-linked opacity</b></td><td>banned by the standard</td></tr><tr><td>onboarding CTA <code>:415</code></td><td>FadeInDown</td><td>300 default</td><td>default</td><td><b>rise</b></td><td>origin with the language cards</td></tr><tr><td>sign-in step <code>sign-in-screen.tsx:144</code></td><td>FadeInRight / FadeOutLeft</td><td>200 / 140</td><td>default</td><td><b class='bad'>horizontal from the right</b></td><td>nothing</td></tr><tr><td>sign-in inner <code>:241</code></td><td>FadeIn</td><td>240</td><td>default</td><td>fade</td><td>nothing</td></tr><tr><td>sign-in inner <code>:265</code></td><td>FadeIn</td><td>200</td><td>default</td><td>fade</td><td>nothing</td></tr><tr><td>first-run step <code>first-run-screen.tsx:553</code></td><td>FadeInRight / FadeOutLeft</td><td>260 / 150</td><td>default</td><td><b class='bad'>horizontal from the right</b></td><td>origin with sign-in's step</td></tr><tr><td>home blocks <code>home-screen.tsx:305,366,401,432,466</code></td><td>FadeInDown</td><td>320ms at delays 40/60/120/170/180</td><td>default</td><td><b>rise from below</b></td><td>origin with nothing in the sequence above it</td></tr></table></div><div class="sec"><h2><span class="n">C</span>The six divergences, named</h2><table class="audit"><tr><th>the divergence</th><th>why it reads as a separate piece</th></tr><tr><td><code>480 / 420 / 340 / 360 / 360 / 420 / 320 / 300 / 200 / 240 / 200 / 260 / 320</code></td><td>Thirteen durations across six screens. The motion tokens define <b>seven</b> (1, 90, 140, 220, 260, 300, 340). At least eight of these are not tokens, so no two screens share a rhythm.</td></tr><tr><td><code>scale-with-overshoot &middot; rise &middot; horizontal &middot; cross-fade</code></td><td>Four different <b>origins</b> in one sequence. An element that comes from the side, then one that rises, then one that pops, then one that fades, reads as four different apps.</td></tr><tr><td><code>back(1.6) &middot; out(cubic) &middot; in(cubic) &middot; inOut(quad) &middot; default</code></td><td>Five easing families. The overshoot on the splash is the standard's single sanctioned exception, but nothing else in the sequence is even on the same curve family.</td></tr><tr><td><code>cream &rarr; espresso &rarr; cream (measured on the device)</code></td><td>The splash is pinned light (<code>root-navigator.tsx:216,228</code> <code>ThemeScope mode="light"</code>) while the root container paints <code>c.bg</code> from the <b>unpinned</b> theme (<code>nav-config.ts:44-53</code>). On a dark-mode phone that is a dark, blank gap between two cream screens &mdash; twice. <b>This is the one divergence the user sees as a flash.</b></td></tr><tr><td><code>the mark inside a circle, then inside a rounded square</code></td><td>Two renderings of the same mark on two different backgrounds, in the same cold start. The logo is fixed; its container is not.</td></tr><tr><td><code>each screen enters from zero</code></td><td>Nothing <b>persists</b> across a boundary. The screen you leave takes its layout with it and the next builds its own from nothing, so there is no object that travels &mdash; and without one travelling object there is no sequence, only a queue.</td></tr></table></div><div class="sec"><h2><span class="n">D</span>The shared language that binds the sequence</h2><div class="rule-grid"><div class="rule"><h4>D1 &middot; ONE entry idiom</h4><div class="kv"><span>the idiom</span><b>rise</b></div><div class="kv"><span>distance</span><b>12px</b> (the standard&rsquo;s <code>rise</code>)</div><div class="kv"><span>entering</span><b>dur.slow 300ms &middot; ease.out</b></div><div class="kv"><span>leaving</span><b>dur.fast 140ms &middot; ease.in</b></div><p class="spec" style="margin:8px 0 0">If something rises, <b>everything</b> rises. Horizontal motion is reserved for push/pop between screens, and the splash&rsquo;s overshoot stays the standard&rsquo;s one sanctioned exception &mdash; it is the only element allowed to be different, and that is what makes it feel like a signature rather than a mistake.</p></div><div class="rule"><h4>D2 &middot; ONE duration family</h4><div class="kv"><span>entering</span><b>300 (dur.slow)</b></div><div class="kv"><span>in place</span><b>220 (dur.base)</b></div><div class="kv"><span>leaving</span><b>140 (dur.fast)</b></div><div class="kv"><span>a screen push</span><b>260 (dur.screen)</b></div><div class="kv"><span>the root mode switch</span><b>340 (dur.field)</b></div><p class="spec" style="margin:8px 0 0">Five tokens replace thirteen ad-hoc numbers. Nothing in the welcoming path needs a duration that is not already defined.</p></div><div class="rule"><h4>D3 &middot; ONE progress treatment</h4><div class="kv"><span>form</span><b>a bar that persists across steps</b></div><div class="kv"><span>slides</span><b>the same bar, same height, same colour</b></div><div class="kv"><span>never</span><b>a per-screen counter that resets</b></div><p class="spec" style="margin:8px 0 0">Today the slides use three dots, first-run uses a &ldquo;Hatua 3 kati ya 8&rdquo; line, and neither survives its screen. One bar, one geometry, carried across every step &mdash; it is the cheapest possible continuity signal and the one the user reads as &ldquo;I am X% of the way in&rdquo;.</p></div><div class="rule"><h4>D4 &middot; ONE type and spacing rhythm</h4><div class="kv"><span>screen heading</span><b>Display 30/36/800/-0.5</b></div><div class="kv"><span>body</span><b>Body 14.5 or BodySmall 13.5</b></div><div class="kv"><span>padding</span><b>20 screen &middot; 16 card</b></div><div class="kv"><span>gaps</span><b>4 &middot; 8 &middot; 12 &middot; 16 &middot; 20 &middot; 24 &middot; 32</b></div><p class="spec" style="margin:8px 0 0">The welcoming path currently rolls its own sizes per screen. Under the design system it is the same nine roles as everywhere else, which is what makes six screens look like one product.</p></div><div class="rule"><h4>D5 &middot; THE HAND-OFF &mdash; what makes it continuous</h4><p class="spec" style="margin:0">This is the rule that actually fixes his complaint. <b>One object travels.</b> At every boundary something from the outgoing screen is still present in the incoming frame:</p><div class="kv"><span>launch &rarr; language</span><b>the mark shrinks to the header and stays</b></div><div class="kv"><span>language &rarr; slides</span><b>the chosen language&rsquo;s code persists as a chip</b></div><div class="kv"><span>slides &rarr; first run</span><b>the progress bar is the same object</b></div><div class="kv"><span>step &rarr; step</span><b>the entered value persists where it was typed</b></div><div class="kv"><span>first run &rarr; sign-in</span><b>the name/email already typed is shown, not asked again</b></div><div class="kv"><span>sign-in &rarr; home</span><b>the root fade arrives over an already-painted home</b></div><p class="spec" style="margin:8px 0 0">No new animation is required for any of these. Each is a <b>layout</b> decision: keep one element mounted across the boundary and the sequence stops being a queue of screens. The outgoing content leaves at <code>dur.fast</code> <i>while</i> the incoming arrives at <code>dur.slow</code> &mdash; never one after the other, which is what produces the blank beat the user reads as a new app starting.</p></div><div class="rule"><h4>D6 &middot; One theme across the whole path</h4><p class="spec" style="margin:0">The pre-auth path is legitimately a light brand runway (<code>root-navigator.tsx</code> pins <code>ThemeScope mode="light"</code> and that is a good decision). The defect is that the <b>container</b> does not share it: <code>rootScreenOptions(c)</code> paints <code>c.bg</code> from the unpinned theme, so on a dark-mode phone the gaps between the light screens are dark. <b>One fix:</b> the root container&rsquo;s <code>contentStyle.backgroundColor</code> must be the same cream the pinned screens use. Nothing else changes, and the flash disappears.</p></div></div></div><div class="sec"><h2><span class="n">E</span>What it costs on a cheap phone</h2><div class="rule-grid"><div class="rule"><h4>Downloads</h4><div class="kv"><span>the whole welcoming path</span><b>0 new bytes</b></div><div class="kv"><span>new images</span><b>none</b></div><div class="kv"><span>new fonts</span><b>none</b></div><p class="spec" style="margin:8px 0 0">This proposal is layout and timing only. It removes screens from the path rather than adding any, so it makes the first session <b>cheaper</b>: four onboarding slides collapse to one (behind a flag, per &sect;6 of the spec).</p></div><div class="rule"><h4>What it paints</h4><div class="kv"><span>simultaneous animated nodes</span><b>fewer than today</b></div><div class="kv"><span>the removed scroll-linked opacity</span><b>one continuous per-frame interpolation deleted</b></div><div class="kv"><span>the removed doubled entrance</span><b>a second full set of FadeInDown blocks deleted</b></div><div class="kv"><span>animation class</span><b>transform + opacity only</b></div><p class="spec" style="margin:8px 0 0">The two things removed are both per-frame work: the onboarding collapse drives an interpolated opacity from the scroll position, and home replays five block entrances on top of the root fade. Deleting both makes the arrival <b>cheaper</b> than the current one.</p></div><div class="rule"><h4>What stays instant</h4><div class="kv"><span>typing the code</span><b>never animated</b></div><div class="kv"><span>the language tap</span><b>selected on the frame it is tapped</b></div><div class="kv"><span>the progress bar</span><b>moves once per step, not per frame</b></div></div><div class="rule"><h4>Reduced motion</h4><div class="kv"><span>every duration</span><b>1ms, never 0</b></div><div class="kv"><span>the sequence</span><b>still legible: six static screens</b></div><div class="kv"><span>nothing</span><b>is understood only by watching it move</b></div><p class="spec" style="margin:8px 0 0">The hand-off objects (the chip, the bar, the typed value) are <b>static</b> evidence of continuity, so a user with motion off gets the strongest part of this proposal and loses only the pleasure of the travel.</p></div></div></div><div class="sec"><h2><span class="n">F</span>What the device showed, and what it disagreed with</h2><p class="lede">A 6.3 MB <code>screenrecord</code> of a real cold start on the owner&rsquo;s phone (1344&times;2992, density 408), 12 frames extracted at 0.5s spacing, judged by a free vision model. The frames are in <code>_device/welcome-contact-sheet.png</code>.</p><div class="rule-grid"><div class="rule"><h4>What the frames show (measured, not inferred)</h4><div class="kv"><span>frame 1</span><b>cream background, mark in a CIRCLE</b></div><div class="kv"><span>frames 2-3</span><b>dark background, COMPLETELY BLANK (~1s)</b></div><div class="kv"><span>frame 4</span><b>cream background, mark in a ROUNDED SQUARE</b></div><div class="kv"><span>frames 5-12</span><b>dark home with content</b></div><div class="kv"><span>background order</span><b>cream &rarr; dark &rarr; dark &rarr; cream &rarr; dark</b></div><p class="spec" style="margin:8px 0 0">The model read the background order as <i>&ldquo;white &rarr; black &rarr; black &rarr; white &rarr; black&rdquo;</i> and said <i>&ldquo;the white-to-black switch would be perceived as a flash&rdquo;</i>, and that the logo <i>&ldquo;appears twice &hellip; the symbol is identical, but the container differs (circle vs. square), so it is not identical&rdquo;</i>. Both are its readings of real pixels and both corroborate the owner.</p></div><div class="rule"><h4>Where the model disagreed with the owner</h4><p class="spec" style="margin:0">Asked whether the sequence reads as one arrival or as unrelated screens, it answered: <i>&ldquo;It reads as ONE continuous cold-start arrival. The only possible break is frames 2-3 (blank black), but they are part of the loading sequence, not unrelated screens&rdquo;</i> and <i>&ldquo;This is a designed welcome sequence, not a disjointed stack of separate pieces.&rdquo;</i></p><p class="spec" style="margin:8px 0 0"><b>I am reporting the owner&rsquo;s read over the model&rsquo;s.</b> Two reasons, stated so he can judge: the model was shown the cold start only &mdash; the part of the path he is most likely to be describing is the <i>slides and first-run steps</i>, which I could not re-trigger without clearing his app data (forbidden). And its factual readings (the flash, the two containers, the blank second) support the complaint even where its verdict did not. A judgement of &ldquo;does this feel like one arrival&rdquo; is also precisely the kind of impression a vision transcript is weakest at.</p></div><div class="rule"><h4>What I could not record</h4><div class="kv"><span>onboarding slides</span><b>UNRECORDED &mdash; needs a first run</b></div><div class="kv"><span>first-run steps</span><b>UNRECORDED &mdash; needs a first run</b></div><div class="kv"><span>why</span><b>re-triggering needs clearing app data</b></div><p class="spec" style="margin:8px 0 0">Reproducing them requires clearing the app&rsquo;s data on the owner&rsquo;s live phone, which would destroy his session and his data. I did not do it. The audit in B is therefore from source for those two screens, and from pixels only for the cold start.</p></div></div></div>
+  
+</div>
+</body></html>

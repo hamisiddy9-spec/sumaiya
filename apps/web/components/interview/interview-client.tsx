@@ -82,7 +82,7 @@ export function InterviewClient({ lang, cvContext = "", jobTitle = "", hasCv = f
       setMessages((m) => [...m, { role: "assistant", content: json.data!.reply }]);
       if (json.data.done) setDone(true);
     } catch {
-      setError(sw ? "Samahani, imeshindwa. Jaribu tena." : "Sorry, that failed. Please try again.");
+      setError(sw ? "Samahani, sikuweza. Jaribu tena." : "Sorry, that failed. Please try again.");
     } finally {
       setSending(false);
       setTimeout(() => inputRef.current?.focus(), 0);

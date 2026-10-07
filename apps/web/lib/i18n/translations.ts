@@ -11,13 +11,13 @@ export const translations = {
       badge: "For job seekers in Tanzania",
       title: "The CV that reaches the employer",
       subtitle: "Paste the job advert. I'm Sumaiya — I'll write the CV that matches it, in Swahili, on your phone, free, with no account.",
-      cta: "Start your CV — free",
+      cta: "Write your CV — free",
       ctaSub: "No account, no card, nothing to pay",
       tryFree: "Start free →",
     },
     features: {
       title: "Everything an application needs",
-      subtitle: "One place to write your CV, aim it at the advert you are applying for, and download the file you send.",
+      subtitle: "Write your CV here, aim it at the advert you are applying for, and download the file you send.",
     },
     pricing: {
       title: "Free right now",
@@ -30,7 +30,10 @@ export const translations = {
       // Shown when the account has never produced anything — a brand-new
       // account greeted "Welcome back" reads as someone else's session.
       welcomeFirst: "Welcome",
-      manage: "Your CVs, cover letters, and business cards — all in one place.",
+      // Not "all in one place": the APK keeps its own application store on the
+      // device while this dashboard keeps the account's, so a claim of one
+      // unified place is false until the two sync. Scope it to the account.
+      manage: "Your CVs, cover letters, and business cards — saved to your account.",
       newCV: "New CV",
       newCoverLetter: "New Cover Letter",
       newBusinessCard: "New Business Card",
@@ -163,13 +166,13 @@ export const translations = {
       badge: "Kwa watafuta kazi Tanzania",
       title: "CV inayokufikisha kwa mwajiri.",
       subtitle: "Bandika tangazo la kazi. Mimi ni Sumaiya — nitakuandikia CV inayolingana nalo, kwa Kiswahili, kwenye simu yako, bila malipo, bila akaunti.",
-      cta: "Anza CV yako — Bure",
+      cta: "Andika CV yako — bure",
       ctaSub: "Hakuna akaunti, hakuna kadi, hakuna malipo",
       tryFree: "Anza bure →",
     },
     features: {
       title: "Kila kitu ambacho maombi yanahitaji",
-      subtitle: "Mahali pamoja pa kuandika CV yako, kuilenga kwa tangazo la kazi unayoomba, na kupakua faili unalotuma.",
+      subtitle: "Andika CV yako hapa, ilenge kwa tangazo la kazi unayoomba, na pakua faili unalotuma.",
     },
     pricing: {
       title: "Bure kwa sasa",
@@ -183,7 +186,10 @@ export const translations = {
       // (welcome BACK) on a first run is the clearest instance of the app
       // greeting a new user as if they had been here before.
       welcomeFirst: "Karibu",
-      manage: "Simamia nyaraka zako zote mahali pamoja.",
+      // Si "mahali pamoja": app ya simu ina hifadhi yake ya maombi kwenye kifaa
+      // wakati dashibodi hii ina ya akaunti, hivyo madai ya mahali kimoja si
+      // ya kweli hadi hizo mbili zisawazishwe. Eleza wigo: akaunti yako.
+      manage: "CV zako, barua zako za maombi na kadi zako za biashara — zimehifadhiwa kwenye akaunti yako.",
       newCV: "CV Mpya",
       newCoverLetter: "Barua Mpya ya Maombi",
       newBusinessCard: "Kadi Mpya ya Biashara",
@@ -207,10 +213,10 @@ export const translations = {
     editor: {
       back: "Nyumbani",
       save: "Hifadhi",
-      saving: "Inahifadhi...",
+      saving: "Ninahifadhi...",
       saved: "Imehifadhiwa",
       download: "Pakua PDF",
-      generating: "Inatengeneza...",
+      generating: "Ninatengeneza...",
       downloaded: "Imepakuliwa!",
       template: "Muundo",
       color: "Rangi",
@@ -242,7 +248,7 @@ export const translations = {
       emailPlaceholder: "wewe@mfano.com",
       saveChanges: "Hifadhi Mabadiliko",
       updateSuccess: "Wasifu umesasishwa.",
-      updateError: "Imeshindwa kusasisha wasifu.",
+      updateError: "Sikuweza kusasisha wasifu.",
       somethingWentWrong: "Kuna hitilafu. Tafadhali jaribu tena.",
       dangerZone: "Eneo Hatari",
       dangerZoneDesc: "Ukifuta akaunti yako, hakuna njia ya kurudi. CV zako zote na barua za maombi zitafutwa kabisa.",
@@ -251,12 +257,12 @@ export const translations = {
       deleteConfirmDesc: "Kitendo hiki hakiwezi kutenduliwa. Data yako yote itafutwa kabisa.",
       yesDelete: "Ndiyo, futa akaunti yangu",
       cancel: "Ghairi",
-      deleteError: "Imeshindwa kufuta akaunti. Tafadhali wasiliana na msaada.",
+      deleteError: "Sikuweza kufuta akaunti. Tafadhali wasiliana na msaada.",
     },
     templates: {
       badge: "Muonekano",
       title: "Miundo 47 — chagua mmoja, uanze",
-      subtitle: "CV, barua ya maombi, kadi au barua rasmi — miundo 47, yote inasomeka kwa urahisi. Sumaiya anachagua unaokufaa, nawe unaweza kuubadilisha wakati wowote.",
+      subtitle: "CV, barua ya maombi, kadi au barua rasmi — miundo 47, yote inasomeka kwa urahisi. Ninachagua unaokufaa, nawe unaweza kuubadilisha wakati wowote.",
       ctaHeading: "Hujui wa kuchagua?",
       ctaDescription: "Anza na Nakuru, kisha ipitishe kwenye kikagua CV bila malipo na uone alama mwenyewe.",
       ctaSwitch: "Badilisha muonekano wakati wowote kwenye kihariri kwa mguso mmoja — maudhui yako yanabaki.",
@@ -287,7 +293,7 @@ export const translations = {
       importCvDesc: "Pakia CV ya PDF iliyopo na uibadilishe kuwa CV ya Sumaiya inayoharirika.",
       uploadHere: "Achia faili hapa au bofya kupakia",
       process: "Tengeneza",
-      processing: "Inatengeneza...",
+      processing: "Ninatengeneza...",
       download: "Pakua",
       password: "Nenosiri",
       pages: "Kurasa (mf. 1,3,5-7)",

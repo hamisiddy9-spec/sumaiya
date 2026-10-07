@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { translations, type Lang } from "@/lib/i18n/translations";
 import { alternatesFor } from "@/lib/seo";
+import { CANONICAL_ORIGIN } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const lang = (params.locale ?? "sw") as Lang;
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: { params: { locale: string } 
   // Absolute og image — this page's openGraph REPLACES the marketing layout's
   // (Next shallow-merges at the openGraph key), so the image must be declared
   // here or the template gallery ships without a social preview.
-  const ogImage = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://sumaiya.app"}/og-image.png`;
+  const ogImage = `${CANONICAL_ORIGIN}/og-image.png`;
   return {
     alternates: alternatesFor("/templates", params.locale),
     title: tr.title,

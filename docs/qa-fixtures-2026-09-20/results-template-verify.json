@@ -1,0 +1,486 @@
+[
+ {
+  "id": "rift",
+  "expectedName": "Rift",
+  "ready": true,
+  "toolbarName": "Rift",
+  "fp": {
+   "nodes": 118,
+   "divs": 52,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(218, 74, 28)",
+    "rgba(0, 0, 0, 0.25)",
+    "rgb(242, 169, 59)",
+    "rgba(255, 255, 255, 0.25)"
+   ],
+   "firstSectionText": [
+    "MAWASILIANO",
+    "Dar es Salaam, Tanzania",
+    "LUGHA",
+    "Swahili"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 12868,
+  "textLen": 1063
+ },
+ {
+  "id": "coral",
+  "expectedName": "Coral",
+  "ready": true,
+  "toolbarName": "Coral",
+  "fp": {
+   "nodes": 138,
+   "divs": 61,
+   "svgs": 12,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(250, 247, 245)",
+    "rgb(218, 74, 28)",
+    "rgba(218, 74, 28, 0.133)",
+    "rgba(218, 74, 28, 0.333)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "MAWASILIANO",
+    "Dar es Salaam, Tanzania"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 14446,
+  "textLen": 1074
+ },
+ {
+  "id": "zahabu",
+  "expectedName": "Zahabu",
+  "ready": true,
+  "toolbarName": "Zahabu",
+  "fp": {
+   "nodes": 129,
+   "divs": 63,
+   "svgs": 9,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(30, 26, 22)",
+    "rgb(218, 74, 28)",
+    "rgb(44, 38, 32)",
+    "rgba(255, 255, 255, 0.12)",
+    "rgba(255, 255, 255, 0.14)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "SOFTWARE ENGINEER",
+    "LUGHA",
+    "Swahili"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 14119,
+  "textLen": 1077
+ },
+ {
+  "id": "vibe",
+  "expectedName": "Vibe",
+  "ready": true,
+  "toolbarName": "Vibe",
+  "fp": {
+   "nodes": 110,
+   "divs": 55,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgba(255, 255, 255, 0.3)",
+    "rgba(255, 255, 255, 0.2)",
+    "rgb(238, 240, 243)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "Muhtasari"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 12151,
+  "textLen": 1064
+ },
+ {
+  "id": "mono-cv",
+  "expectedName": "Mono",
+  "ready": true,
+  "toolbarName": "Mono",
+  "fp": {
+   "nodes": 101,
+   "divs": 68,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(249, 250, 251)",
+    "rgb(17, 24, 39)",
+    "rgb(243, 244, 246)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "Software engineer with 6 years building payment and logistics"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 12314,
+  "textLen": 1060
+ },
+ {
+  "id": "cavendish",
+  "expectedName": "Cavendish",
+  "ready": true,
+  "toolbarName": "Cavendish",
+  "fp": {
+   "nodes": 55,
+   "divs": 29,
+   "svgs": 0,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania | linkedin.com/in/aminamwakasege",
+    "Muhtasari"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 7012,
+  "textLen": 1093
+ },
+ {
+  "id": "oxford",
+  "expectedName": "Oxford",
+  "ready": true,
+  "toolbarName": "Oxford",
+  "fp": {
+   "nodes": 102,
+   "divs": 61,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "WASIFU"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 10232,
+  "textLen": 1061
+ },
+ {
+  "id": "malachite",
+  "expectedName": "Malachite",
+  "ready": true,
+  "toolbarName": "Malachite",
+  "fp": {
+   "nodes": 88,
+   "divs": 56,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(5, 150, 105)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "MUHTASARI"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 9911,
+  "textLen": 1068
+ },
+ {
+  "id": "serif-cv",
+  "expectedName": "Serif",
+  "ready": true,
+  "toolbarName": "Serif",
+  "fp": {
+   "nodes": 135,
+   "divs": 102,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(255, 254, 249)",
+    "rgb(220, 38, 38)",
+    "rgb(243, 244, 246)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "MUHTASARI"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 16115,
+  "textLen": 1162
+ },
+ {
+  "id": "meridian",
+  "expectedName": "Meridian",
+  "ready": true,
+  "toolbarName": "Meridian",
+  "fp": {
+   "nodes": 125,
+   "divs": 92,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(243, 244, 246)",
+    "rgb(15, 23, 42)",
+    "rgb(217, 119, 6)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "MAWASILIANO",
+    "Dar es Salaam, Tanzania"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 16184,
+  "textLen": 1171
+ },
+ {
+  "id": "nakuru",
+  "expectedName": "Nakuru",
+  "ready": true,
+  "toolbarName": "Nakuru",
+  "fp": {
+   "nodes": 126,
+   "divs": 68,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(217, 119, 6)",
+    "rgba(255, 255, 255, 0.2)",
+    "rgba(255, 255, 255, 0.9)",
+    "rgba(255, 255, 255, 0.22)",
+    "rgb(241, 245, 249)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "MAWASILIANO",
+    "Dar es Salaam, Tanzania"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 13636,
+  "textLen": 1102
+ },
+ {
+  "id": "neon",
+  "expectedName": "Neon",
+  "ready": true,
+  "toolbarName": "Neon",
+  "fp": {
+   "nodes": 103,
+   "divs": 57,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(11, 11, 20)",
+    "rgb(20, 20, 31)",
+    "rgba(255, 255, 255, 0.1)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "SOFTWARE ENGINEER",
+    "Dar es Salaam, Tanzania",
+    "Software engineer with 6 years building payment and logistics"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 12007,
+  "textLen": 1054
+ },
+ {
+  "id": "regent",
+  "expectedName": "Regent",
+  "ready": true,
+  "toolbarName": "Regent",
+  "fp": {
+   "nodes": 86,
+   "divs": 48,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(37, 99, 235)",
+    "rgb(176, 141, 59)",
+    "rgb(250, 250, 250)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "SOFTWARE ENGINEER",
+    "Dar es Salaam, Tanzania",
+    "WASIFU"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 10389,
+  "textLen": 1062
+ },
+ {
+  "id": "serengeti",
+  "expectedName": "Serengeti",
+  "ready": true,
+  "toolbarName": "Serengeti",
+  "fp": {
+   "nodes": 96,
+   "divs": 42,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(229, 231, 235)",
+    "rgba(15, 23, 42, 0.082)",
+    "rgb(241, 245, 249)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "Software engineer with 6 years building payment and logistics"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 10764,
+  "textLen": 1081
+ },
+ {
+  "id": "aberdare",
+  "expectedName": "Aberdare",
+  "ready": true,
+  "toolbarName": "Aberdare",
+  "fp": {
+   "nodes": 118,
+   "divs": 79,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(243, 244, 246)",
+    "rgb(17, 24, 39)",
+    "rgb(100, 116, 139)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "Swahili"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 14957,
+  "textLen": 1119
+ },
+ {
+  "id": "alpine",
+  "expectedName": "Alpine",
+  "ready": true,
+  "toolbarName": "Alpine",
+  "fp": {
+   "nodes": 115,
+   "divs": 70,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(100, 116, 139)",
+    "rgb(229, 231, 235)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "Profile"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 11569,
+  "textLen": 1112
+ },
+ {
+  "id": "bauhaus",
+  "expectedName": "Bauhaus",
+  "ready": true,
+  "toolbarName": "Bauhaus",
+  "fp": {
+   "nodes": 127,
+   "divs": 92,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(100, 116, 139)",
+    "rgb(243, 244, 246)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "MUHTASARI"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 16004,
+  "textLen": 1159
+ },
+ {
+  "id": "carbon",
+  "expectedName": "Carbon",
+  "ready": true,
+  "toolbarName": "Carbon",
+  "fp": {
+   "nodes": 109,
+   "divs": 74,
+   "svgs": 4,
+   "photos": 0,
+   "bgColors": [
+    "rgb(255, 255, 255)",
+    "rgb(17, 24, 39)",
+    "rgb(24, 24, 27)",
+    "rgb(100, 116, 139)",
+    "rgba(100, 116, 139, 0.145)",
+    "rgb(243, 244, 246)"
+   ],
+   "firstSectionText": [
+    "Amina Joseph Mwakasege",
+    "Software Engineer",
+    "Dar es Salaam, Tanzania",
+    "LUGHA"
+   ],
+   "h": 1123
+  },
+  "htmlLen": 13216,
+  "textLen": 945
+ }
+]

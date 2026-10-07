@@ -173,7 +173,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
         await patch({ coverLetterId: json.data.id });
         router.push(`/editor/cover-letter/${json.data.id}?fromApp=${app.id}`);
       } else {
-        setClError(sw ? "Imeshindwa kutengeneza barua. Jaribu tena." : "Couldn't create the letter. Please try again.");
+        setClError(sw ? "Sikuweza kutengeneza barua. Jaribu tena." : "Couldn't create the letter. Please try again.");
       }
     } catch {
       setClError(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -200,7 +200,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
         router.push("/dashboard?tab=applications");
         return;
       }
-      setDeleteError(sw ? "Imeshindwa kufuta. Jaribu tena." : "Couldn't delete. Please try again.");
+      setDeleteError(sw ? "Sikuweza kufuta. Jaribu tena." : "Couldn't delete. Please try again.");
       setDeleting(false);
     } catch {
       setDeleteError(sw ? "Hitilafu ya mtandao. Jaribu tena." : "Network error. Please try again.");
@@ -228,7 +228,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
       });
       const json = await res.json().catch(() => ({})) as { success?: boolean; data?: { keywords?: AiKw[] }; error?: string };
       if (!res.ok || !json.success || !json.data?.keywords?.length) {
-        setAiError(json.error || (sw ? "Imeshindwa kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
+        setAiError(json.error || (sw ? "Sikuweza kuendesha ulinganishaji. Tunaonyesha ulinganishaji wa haraka." : "Couldn't run the smart match. Showing the quick match instead."));
       } else {
         setAiKw(json.data.keywords);
       }
@@ -375,7 +375,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                   <button onClick={generateCoverLetter} disabled={!cvId || generatingCl}
                     className="text-[11px] font-semibold text-ember-hover hover:underline disabled:opacity-50 disabled:no-underline"
                     title={!cvId ? (sw ? "Ambatisha CV kwanza" : "Attach a CV first") : undefined}>
-                    {generatingCl ? (sw ? "Inatengeneza…" : "Generating…") : (sw ? "Tengeneza →" : "Generate →")}
+                    {generatingCl ? (sw ? "Ninatengeneza…" : "Generating…") : (sw ? "Tengeneza →" : "Generate →")}
                   </button>
                 )}
               </span>
@@ -592,7 +592,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                 <button onClick={handleSmartMatch} disabled={aiLoading}
                   className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-ember-hover hover:text-ember disabled:opacity-50 transition">
                   <Sparkles className="w-3.5 h-3.5" />
-                  {aiLoading ? (sw ? "Inachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
+                  {aiLoading ? (sw ? "Ninachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
                 </button>
               )}
               {aiError && <p className="text-[11px] text-gold-text mt-1.5">{aiError}</p>}

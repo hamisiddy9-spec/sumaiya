@@ -127,11 +127,11 @@ export function TemplatePicker({ onSelectTemplate, isLoading = false }: Template
               <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
             </div>
           ) : familyTemplates.length === 0 ? (
-            <div className="rounded-lg bg-gray-50 p-4 text-gray-600">
+            <div className="rounded-lg bg-gray-50 p-4 text-gray-600 swap-in">
               <p>No templates available in this family</p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 swap-in">
               {familyTemplates.map((template) => (
                 <div
                   key={template.id}

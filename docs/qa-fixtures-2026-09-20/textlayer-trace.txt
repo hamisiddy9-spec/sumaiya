@@ -1,0 +1,17 @@
+===== lang=en =====
+pageW=446.46 pageH=631.42 margin=26.79 usableH=577.84 pageCount=1
+initial wrapped lines = 58
+  fontSize=9 wrappedLines=50 lineH=7.76 linesPerPage=74 capacity=74 fits=true
+FINAL fontSize=9 linesPerPage=74 wrapped=50 drawn=50 DROPPED=0
+dropped lines: []
+skills line drawn? true
+heading line drawn? true
+
+===== lang=sw =====
+pageW=446.46 pageH=631.42 margin=26.79 usableH=577.84 pageCount=1
+initial wrapped lines = 58
+  fontSize=9 wrappedLines=50 lineH=7.76 linesPerPage=74 capacity=74 fits=true
+FINAL fontSize=9 linesPerPage=74 wrapped=50 drawn=50 DROPPED=0
+dropped lines: []
+skills line drawn? true
+heading line drawn? true

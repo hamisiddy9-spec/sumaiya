@@ -1,0 +1,376 @@
+
+
+===== C:/Users/hamis/AppData/Local/Temp/fit-panel/fit.tsx =====
+"use client";
+
+// SmartFit engine — wraps template output in an A4-fixed container and makes the
+// sheet come out right, in both directions:
+//
+//   1. CONTENT THAT DOESN'T FIT. Tier 1 (overflow ≤ 8%): tighten spacing via
+//      CSS custom props. Tier 2 (8–22%): clamp descriptions + tighter spacing.
+//      Tier 3 (> 22%): scale down (floor 0.92) + a "CV too long" warning.
+//   2. A SHEET THAT ISN'T FILLED. A two-role CV used to occupy 52–71% of A4 and
+//      a new graduate's 45% — half a blank page on almost every template
+//      (docs/CV_DESIGN_AUDIT.md). SmartFit now *fills*: the design is laid out
+//      at a narrower width and magnified, so short content is poured into the
+//      sheet instead of huddled at the top of it.
+//
+// The magnification is held inside a NARROW BAND (FIT_BAND, 0.92–1.12). It used
+// to run 0.84–1.5, which meant the same 10px body text rendered at 15px on a
+// short CV and 8.4px on a long one — adding a bullet visibly changed the
+// typography and two CVs from one template read as two designs. The band is the
+// product decision; the preview and the PDF must both use it (never `fill:false`
+// for a preview — a preview that disagrees with the download is worse than an
+// inflated one).
+//
+// Both directions are driven by MEASURING THE REAL DOM (the bottom edge of the
+// lowest element that contains text) and iterating, never by guessing from the
+// CV data: the templates are hand-written with inline pixel sizes, so nothing
+// but the rendered layout knows how tall a CV actually is.
+//
+// Why the width change and not a plain `transform: scale()`: magnifying a
+// 794-wide layout makes it 794·s wide, which the page cannot show. Laying the
+// design out at 794/s and magnifying by s keeps the sheet exactly filled, and
+// the same trick in reverse lets an over-long CV breathe across the full width
+// instead of being scaled into a narrow strip with a white margin beside it.
+
+import { useCallback, useEffect, useRef, useState, createContext, useContext } from "react";
+
+const PAGE_W = 794;
+const PAGE_H = 1123;
+
+// A sheet counts as filled at 90% of A4 by ink height. The loop stops as soon
+// as the page is within FILL_TOLERANCE of that, so the resting fill lands at
+// 87%+ — above the 85% an audit would call "filled" — while leaving a template
+// that already fills the sheet (sahara, 90%) completely alone.
+const FILL_TARGET = 0.9;
+const FILL_TOLERANCE = 0.03;
+// Never magnify past this, and never shrink past SHRINK_MIN. The band is
+// deliberately NARROW (1.12 / 0.92 = a 1.22x spread, where it used to be
+// 1.5 / 0.84 = 1.79x).
+//
+// The defect was never magnification as such — it was VARIANCE. At 1.5x a
+// two-role CV rendered its 10px body text at 15px (a poster, not a CV) while a
+// long CV rendered the same 10px at 8.4px; adding or deleting one bullet
+// visibly changed the typography, and two CVs from one template looked like two
+// different designs. Narrowing the band costs slice on very short CVs and
+// accepts slight overflow on very long ones, and buys back a stable type size.
+const FILL_MAX = 1.12;
+// Minimum shrink — was the old tier-3 floor of 0.84, which made the same body
+// text 16% smaller on a long CV than on a short one from the same design.
+const SHRINK_MIN = 0.92;
+// Templates are at least this tall, so a per-iteration step can't run away.
+const STEP_MAX = 0.22;
+const ITERATIONS = 7;
+
+/**
+ * The magnification band, exported so it can be pinned by a test
+ * (components/templates/engine/fit-band.test.ts). `max / min` is the spread:
+ * the same body text is never rendered more than that much larger or smaller
+ * than the design intends, whichever CV it is on.
+ */
+export const FIT_BAND = { min: SHRINK_MIN, max: FILL_MAX } as const;
+
+/** Clamp a candidate scale into the band — the ONE place the band is applied. */
+export function clampFitScale(scale: number): number {
+  return Math.min(FILL_MAX, Math.max(SHRINK_MIN, scale));
+}
+
+// Context lets sections read fit state and adapt their own rendering
+export interface FitContextValue {
+  descriptionClamp: number;   // max lines for experience/summary descriptions
+  spacingFactor: number;      // 0.7–1.0 multiplier sections can apply to gaps
+}
+export const FitContext = createContext<FitContextValue>({
+  descriptionClamp: 4,
+  spacingFactor: 1,
+});
+export function useFit() { return useContext(FitContext); }
+
+function deriveContext(overflowRatio: number): { ctx: FitContextValue; warn: boolean } {
+  if (overflowRatio <= 1.0) {
+    return { ctx: { descriptionClamp: 4, spacingFactor: 1 }, warn: false };
+  }
+  if (overflowRatio <= 1.08) {
+    // Tier 1 — tighten spacing only
+    return { ctx: { descriptionClamp: 4, spacingFactor: 0.78 }, warn: false };
+  }
+  if (overflowRatio <= 1.22) {
+    // Tier 2 — clamp descriptions + tighter spacing
+    return { ctx: { descriptionClamp: 2, spacingFactor: 0.65 }, warn: false };
+  }
+  // Tier 3 — scale (last resort)
+  return { ctx: { descriptionClamp: 2, spacingFactor: 0.6 }, warn: true };
+}
+
+/**
+ * How full the sheet is: the bottom edge of the lowest element containing
+ * visible text, as a fraction of the page box.
+ *
+ * Measured against the page element's OWN rendered height rather than the
+ * PAGE_H constant, because the page is often mounted inside a scaled container
+ * (the editor preview and the public marketing pages both scale it). Normalising
+ * by what the page actually renders as keeps the number identical at any
+ * ancestor zoom — this is the same rule the design audit measured fill with
+ * (`fill.cjs`: bottom-of-lowest-text ÷ page height), so before/after numbers and
+ * the audit's numbers are comparable.
+ */
+function renderedFill(page: HTMLElement): number {
+  const rect = page.getBoundingClientRect();
+  if (rect.height <= 0) return 0;
+  let bottom = 0;
+  for (const el of Array.from(page.querySelectorAll<HTMLElement>("*"))) {
+    const hasText = Array.from(el.childNodes).some(
+      (n) => n.nodeType === 3 && (n.textContent ?? "").trim().length > 0,
+    );
+    if (!hasText) continue;
+    const r = el.getBoundingClientRect();
+    if (r.height <= 0) continue;
+    bottom = Math.max(bottom, r.bottom - rect.top);
+  }
+  return bottom / rect.height;
+}
+
+export interface AutoFitPageProps {
+  children: React.ReactNode;
+  /**
+   * `false` restores the shrink-only engine (no filling). It exists so the fill
+   * change can be measured against the old behaviour on the same page, same
+   * data, same fonts — a before/after comparison, not two different renders.
+   */
+  fill?: boolean;
+}
+
+export function AutoFitPage({ children, fill = true }: AutoFitPageProps) {
+  const pageRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [fitResult, setFitResult] = useState(() => deriveContext(1));
+
+  const apply = useCallback((scale: number) => {
+    const inner = innerRef.current;
+    if (!inner) return;
+    const layoutW = `${PAGE_W / scale}px`;
+    inner.style.transformOrigin = "top left";
+    inner.style.transform = scale === 1 ? "" : `scale(${scale})`;
+    inner.style.width = layoutW;
+    // The template root carries its own inline `width: 794px`, which would win
+    // over the container — so the width has to be set on it directly.
+    const root = inner.firstElementChild as HTMLElement | null;
+    if (root) root.style.width = layoutW;
+  }, []);
+
+  const run = useCallback(() => {
+    const page = pageRef.current;
+    const inner = innerRef.current;
+    if (!page || !inner) return;
+
+    // First pass at natural size: what the template does with no help at all.
+    apply(1);
+    let scale = 1;
+    const naturalOverflow = renderedFill(page);
+    const { ctx, warn } = deriveContext(naturalOverflow);
+
+    // Then iterate toward the target. `best` keeps the fullest legal result so
+    // a pass that overshoots (and gets clipped) can't be the one we keep.
+    let best = { scale: 1, fill: naturalOverflow };
+    for (let i = 0; i < ITERATIONS; i++) {
+      const measured = renderedFill(page);
+      if (measured > 0 && measured <= 1.02 && measured > best.fill) best = { scale, fill: measured };
+
+      const overflow = measured > 1.005;
+      const under = fill && measured < FILL_TARGET - FILL_TOLERANCE;
+      if (!overflow && !under) break;
+
+      // Over-long: shrink by the measured amount (damped, so a re-wrap at the
+      // new width can't lurch). Too empty: grow toward the target, damped for
+      // the same reason — text no longer wraps identically once the layout box
+      // changes width.
+      const raw = overflow
+        ? scale * (1 / Math.max(measured, 0.5)) * 0.999
+        : scale * Math.pow(FILL_TARGET / Math.max(measured, 0.1), 0.6);
+      const stepped = Math.min(
+        Math.max(raw, scale * (1 - STEP_MAX)),
+        scale * (1 + STEP_MAX),
+      );
+      const next = clampFitScale(stepped);
+      if (Math.abs(next - scale) < 0.005) break;
+      scale = next;
+      apply(scale);
+    }
+
+    // A final measurement AFTER the last applied scale decides the keep.
+    const finalFill = renderedFill(page);
+    if (finalFill > 1.02 && best.fill <= 1.02 && best.scale !== scale) {
+      apply(best.scale);
+    }
+    setFitResult({ ctx, warn: warn || scale <= SHRINK_MIN + 0.001 });
+  }, [apply, fill]);
+
+  useEffect(() => {
+    const inner = innerRef.current;
+    if (!inner) return;
+
+    let raf = 0;
+    let adjusting = false;
+    const schedule = () => {
+      if (adjusting) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        adjusting = true;
+        try { run(); } finally { adjusting = false; }
+      });
+    };
+
+    schedule();
+    // Re-run when the content itself changes (typing in the editor, a new
+    // template) — and after webfonts land, because font metrics change every
+    // measurement above.
+    const obs = new ResizeObserver(schedule);
+    obs.observe(inner);
+    if (typeof document !== "undefined" && document.fonts?.ready) {
+      document.fonts.ready.then(schedule).catch(() => {});
+    }
+    return () => {
+      cancelAnimationFrame(raf);
+      obs.disconnect();
+    };
+  }, [run]);
+
+  return (
+    <FitContext.Provider value={fitResult.ctx}>
+      <div
+        ref={pageRef}
+        style={{ width: PAGE_W, height: PAGE_H, overflow: "hidden", position: "relative" }}
+      >
+        <div ref={innerRef} style={{ width: PAGE_W }}>
+          {children}
+        </div>
+        {fitResult.warn && (
+          // UI only — never part of an exported document (see lib/pdf.ts).
+          <div data-pdf-exclude="" style={{
+            position: "absolute", bottom: 10, right: 10,
+            backgroundColor: "#FEF2F2", border: "1px solid #FCA5A5",
+            borderRadius: 6, padding: "3px 8px",
+            fontSize: 8.5, color: "#DC2626", fontFamily: "system-ui, sans-serif",
+            pointerEvents: "none",
+          }}>
+            ⚠ CV too long — remove some content
+          </div>
+        )}
+      </div>
+    </FitContext.Provider>
+  );
+}
+
+
+===== C:/Users/hamis/AppData/Local/Temp/fit-panel/TEMPLATE-FIT-FINDINGS-2026-09-21.md =====
+# TEMPLATE FIT — what actually goes wrong at the A4 edge
+
+Measured 2026-09-21 against the live probe (`docs/template-renders/probe.json`, 47 curated
+templates) and read out of `components/templates/engine/fit.tsx`. Every number below is
+quoted from a run or a file line — nothing here is inferred from a screenshot.
+
+## 1. The page is A4, on both surfaces, correctly
+
+| Surface | Source | Value |
+|---|---|---|
+| Web | `engine/fit.tsx:36-37` | `PAGE_W = 794`, `PAGE_H = 1123` |
+| Phone | `apps/native/src/lib/cv-engine/fit.ts` | same 794 × 1123; `fitScaleFor(794) === 1`; css `#cv-page { width: 794px; transform: scale(frame/794) }` |
+
+794 × 1123 px @96dpi = **210.1 × 297.1 mm** — A4. Both clients render the same A4 sheet and
+scale it to their frame. There is no page-size bug. **The question is only what happens when
+content does not fit A4.**
+
+## 2. `usedFraction` is NOT an overflow metric — retraction
+
+`docs/TEMPLATE-DESIGN-JUDGEMENT-2026-09-21.md` cited `usedFraction 1.254` and this session
+earlier read "42 of 47 templates overflow". **That reading was wrong.** The probe computes it
+over *all* elements, including non-text boxes, so any full-height decorative band pushes it
+past 1.0 and the metric's floor is 1.000 by construction:
+
+```
+value counts across 47:  {1.0: 4, 1.12: 29, 1.254: 3, 1.019: 1, 1.034...1.116: 10}
+min 1.0   median 1.12   max 1.254
+```
+
+29 templates sharing exactly `1.12` is a measurement artefact, not a shared defect.
+
+**The probe's real overflow signals are two other fields**, and they are much narrower:
+
+- **Vertical spill** — `belowCount > 0`, i.e. elements whose bottom passes the page edge:
+
+  | template | spill |
+  |---|---|
+  | `mono-cv` | **+137px** |
+  | `rift`, `metro` | +64px |
+  | `vertex` | +49px |
+  | `monarch` | +45px |
+  | `stripe` | +41px |
+  | `serif-cv` | +10px |
+
+  **7 of 47.**
+
+- **Horizontal overflow** — `overflowCount > 0`: `grid` (56 elements), `mono-cv` (49),
+  `meridian` (31). **3 of 47.** They use three *different* layouts (Sidebar, Minimal,
+  AccentBand), so the cause is not the layout.
+
+## 3. The mechanism: the engine clips, and will not shrink past 0.92
+
+`engine/fit.tsx` is a fill engine, not a paginator. `AutoFitPage`:
+
+1. measures fill (text-bearing elements only), derives a tier from `deriveContext(ratio)`,
+2. rewrites the layout width to `PAGE_W / scale` and transform-scales, iterating to a target
+   fill of 0.9,
+3. clamps every step with `clampFitScale` → **`FIT_BAND = { min: 0.92, max: 1.12 }`**,
+4. renders inside `style={{ width: PAGE_W, height: PAGE_H, overflow: "hidden" }}`.
+
+So when content needs more than 8% of shrink, the loop stops making progress, `break`s, and
+**`overflow: hidden` discards the remainder.** That is the whole defect class: not nine broken
+templates, one engine with a floor and a clip.
+
+## 4. The warning exists — and the export deliberately excludes it
+
+`fit.tsx:203` sets `warn: warn || scale <= SHRINK_MIN + 0.001`, and `fit.tsx:245` renders:
+
+```
+⚠ CV too long — remove some content      // data-pdf-exclude — "UI only, never part of an exported document"
+```
+
+The intent behind that attribute is right (a warning must not print on the CV). The
+consequence is the defect: **the person most affected — the one who downloads the PDF — is
+the only one who never sees it.** The screen shows a badge in 8.5px with `pointerEvents:
+none`; the file that leaves the app shows nothing, and 137px of content is simply absent.
+
+## 5. So what is the fix (A4 preserved in every option)
+
+| Option | What it does | Cost | Against |
+|---|---|---|---|
+| **A. Surface it at export** | Keep the clip, but confirm at download: "your CV is cut off — fix it or download anyway" | tiny | still ships a cut CV if the user insists |
+| **B. Continue to a second A4 page** | Real pagination: page 2 is still A4 | large | CVs are conventionally 1–2 pages; the adverts often say so |
+| **C. Shrink further** | Lower `SHRINK_MIN` toward the old 0.84 tier | small | makes type smaller — collides with the legibility floor in `typography.ts` |
+| **D. Tighten before shrinking** | The engine already has tiers (spacing 1 → 0.78 → 0.65 → 0.6 + `descriptionClamp`); make Tier 2/3 do more work so fewer files reach the floor | medium | bounded; can only buy a few percent |
+
+**A is the one that must not be missing regardless of which of B–D is chosen:** an export
+that silently drops content is a correctness defect, not a design opinion. **B is the honest
+answer for `mono-cv` (+137px), because no amount of tightening recovers 12% of a page.**
+
+
+---
+
+SCOPE: product
+QUESTION: The page is A4 (794x1123px) on both web and phone, correctly. The fill engine shrinks content to fit but refuses to go below scale 0.92, and the page has overflow:hidden - so when content needs more than 8% shrink the remainder is CLIPPED OFF and silently lost (mono-cv loses 137px, about 5 lines). A warning exists on screen but is marked data-pdf-exclude, so the exported PDF - the thing the user sends to an employer - shows nothing. Options: (A) confirm at export time that the CV is cut off; (B) continue to a second A4 page; (C) allow shrinking below 0.92; (D) make the existing spacing tiers work harder first. 99% of documents here are A4. Which combination should ship, and is silent clipping at export a correctness bug or an acceptable design limit?
+
+Judge whether this is the thing a user actually needs, and what it should drop.
+
+YOUR ROLE: a user who is unemployed and applying for their first formal job
+
+Answer in EXACTLY this shape, nothing before VERDICT:
+
+VERDICT: <one sentence, your ruling>
+WHY: <at most 3 short bullets>
+ACTION: <at most 3 imperative next steps, one per line, each starting with ACTION: >
+RISK: <the one thing that would make your ruling wrong>
+DOUBT: <what you could not judge from the material given>
+
+No preamble, no restating the question, no apologies. If the material is insufficient, say so
+in DOUBT and still give a VERDICT.

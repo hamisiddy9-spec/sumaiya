@@ -49,7 +49,7 @@ export function ShareCvModal({ cvId, accessToken, sw, initialIsPublic, initialSl
       onChange?.({ isPublic: json.data.isPublic, slug: json.data.publicSlug, showContact: json.data.publicShowContact });
       return true;
     } catch {
-      setError(sw ? "Imeshindwa. Jaribu tena." : "Something went wrong. Try again.");
+      setError(sw ? "Sikuweza. Jaribu tena." : "Something went wrong. Try again.");
       return false;
     } finally {
       setBusy(null);

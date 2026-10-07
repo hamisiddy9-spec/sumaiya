@@ -1,0 +1,13 @@
+{
+ "email": "qa-io-matrix-1@sumaiya-seam.invalid",
+ "before": {
+  "cv": 3,
+  "download_log": 265,
+  "document_version": 20,
+  "job_recommendation": 8,
+  "referral_code": 1
+ },
+ "after": {},
+ "residualSeamUsers": 5,
+ "realUsers": 1
+}

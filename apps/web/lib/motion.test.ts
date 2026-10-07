@@ -69,13 +69,17 @@ describe("countUpValueAt", () => {
 });
 
 describe("riseClass", () => {
-  it("stagger sequence matches the /snap D9 language", () => {
+  it("uses the capped token stagger (base 30ms, step 40ms, cap 6)", () => {
+    // The old mapping was `index <= 3 → rise-(index+1)`, which made `rise-1`
+    // unreachable and left the cap unenforced in the language. The steps now
+    // correspond 1:1 to the shared tokens, and index > cap shares the last step.
     expect(riseClass(0)).toBe("rise");
-    expect(riseClass(1)).toBe("rise rise-2");
-    expect(riseClass(2)).toBe("rise rise-3");
-    expect(riseClass(3)).toBe("rise rise-4");
-    expect(riseClass(4)).toBe("rise rise-4"); // capped
-    expect(riseClass(99)).toBe("rise rise-4"); // capped
+    expect(riseClass(1)).toBe("rise rise-1");
+    expect(riseClass(2)).toBe("rise rise-2");
+    expect(riseClass(3)).toBe("rise rise-3");
+    expect(riseClass(6)).toBe("rise rise-6");
+    expect(riseClass(7)).toBe("rise rise-6"); // capped
+    expect(riseClass(99)).toBe("rise rise-6"); // capped
   });
 
   it("safe for negative indexes", () => {

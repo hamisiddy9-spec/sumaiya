@@ -2,22 +2,31 @@ import React, { useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { openAuth } from "../navigation/root-nav";
 import Animated, {
-  Easing,
+  cancelAnimation,
   FadeIn,
-  FadeInDown,
   FadeOut,
-  interpolate,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  type SharedValue,
 } from "react-native-reanimated";
-import { Button, haptics, useThemeColors } from "../components/ui";
-import { SumaiyaMark, type SumaiyaMarkState } from "../components/sumaiya-mark";
-import { OnboardingArt } from "../components/onboarding-art";
+import {
+  Button,
+  EASE,
+  MOTION,
+  Reveal,
+  enterDurationMs,
+  exitDurationMs,
+  haptics,
+  staggerDelayMs,
+  useMotionReduced,
+  useThemeColors,
+} from "../components/ui";
+import type { SumaiyaMarkState } from "../components/sumaiya-mark";
+import { MarkWell } from "../components/mark-well";
 import { PortalTransition } from "../components/portal-transition";
+import { activeDotIndex, settlePage } from "../lib/pager";
 import { useLang, type Lang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
 import { track as trackActivation, FUNNEL_EVENTS } from "../lib/analytics";
@@ -28,16 +37,24 @@ interface Props {
 }
 
 interface SlideData {
-  /** Slide 0 renders the live Sumaiya mark; the rest use branded OnboardingArt. */
-  mark?: boolean;
-  art?: 0 | 1 | 2 | 3;
   title: { en: string; sw: string };
   body: { en: string; sw: string };
 }
 
+/**
+ * Beats 2 and 3 of the welcoming path — the language question, then the slides.
+ *
+ * Both stages render the SAME object the launch screen handed over: `MarkWell`
+ * (one container, one mark size, from `ui/mark-well-tokens`). The slides
+ * previously rendered the live mark on slide 0 and a separate `OnboardingArt`
+ * scene on the other three — a different drawing system (its own rosette
+ * geometry, its own linear loops, a gold core instead of the mark's accent
+ * core) appearing mid-flow, which is what "the artwork swaps from the mark to a
+ * different system" means on screen. Now every slide carries the mark, and the
+ * only thing that differs between slides is the sentence under it.
+ */
 const SLIDES: SlideData[] = [
   {
-    mark: true,
     title: { en: "Meet Sumaiya", sw: "Karibu — mimi ni Sumaiya" },
     body: {
       en: "Your job companion. I write your CV, target it to the job, check it against employer screening, and get you ready for the interview.",
@@ -45,7 +62,6 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    art: 1,
     title: { en: "I write it with you", sw: "Ninakuandikia" },
     body: {
       en: "Answer a few questions — or just talk to me, in English or Swahili. I build the whole thing.",
@@ -53,7 +69,6 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    art: 2,
     title: { en: "I target every job", sw: "Ninailenga kila ajira" },
     body: {
       en: "Paste a job and I rewrite your CV to match it — truthfully — so it passes the software that reads it first.",
@@ -61,7 +76,6 @@ const SLIDES: SlideData[] = [
     },
   },
   {
-    art: 3,
     title: { en: "I prep you for the interview", sw: "Ninakuandaa kwa usaili" },
     body: {
       en: "Practice real interview questions with me, then export a clean PDF and apply.",
@@ -70,29 +84,51 @@ const SLIDES: SlideData[] = [
   },
 ];
 
-function Dot({ index, scrollX }: { index: number; scrollX: SharedValue<number> }) {
+/**
+ * One dot. Active or not — never part-way.
+ *
+ * It used to be interpolated from the raw scroll offset (`interpolate(scrollX,
+ * [(i-1)W, iW, (i+1)W], [8, 24, 8])`), i.e. a continuous ramp per dot driven by
+ * a value four animated nodes shared on every scroll frame. A device capture of
+ * the last slide shows what that can paint: TWO dots at full width and full
+ * opacity at once, and adding the offset snap to `onMomentumScrollEnd` did not
+ * change it (the capture is from a build that already had the snap).
+ *
+ * Now the dot is told whether it is the page, so exactly one dot is ever active
+ * and no two nodes can disagree about which one it is. It costs less, too: the
+ * width/opacity ramp runs once per page change instead of on every scroll
+ * frame, and the ScrollView no longer needs `onScroll` at all.
+ */
+function Dot({ active }: { active: boolean }) {
   const c = useThemeColors();
-  const { width } = useWindowDimensions();
-  const style = useAnimatedStyle(() => {
-    const input = [(index - 1) * width, index * width, (index + 1) * width];
-    return {
-      width: interpolate(scrollX.value, input, [8, 24, 8], "clamp"),
-      opacity: interpolate(scrollX.value, input, [0.35, 1, 0.35], "clamp"),
-    };
-  });
+  const reduce = useMotionReduced();
+  const progress = useSharedValue(active ? 1 : 0);
+  useEffect(() => {
+    progress.value = withTiming(active ? 1 : 0, {
+      duration: enterDurationMs(reduce, MOTION.dur.base),
+      easing: active ? EASE.out : EASE.in,
+    });
+    // Same rule as everywhere else on this path: a shared value must not keep
+    // animating against a node that has gone away.
+    return () => cancelAnimation(progress);
+  }, [active, reduce, progress]);
+  const style = useAnimatedStyle(() => ({
+    width: 8 + progress.value * 16, // 8 → 24
+    opacity: 0.35 + progress.value * 0.65, // 0.35 → 1
+  }));
   return <Animated.View style={[style, { height: 8, borderRadius: 4, backgroundColor: c.accent }]} />;
 }
 
 function Slide({
   item,
-  index,
-  scrollX,
+  live,
   markState,
   artRef,
 }: {
   item: SlideData;
-  index: number;
-  scrollX: SharedValue<number>;
+  /** True for the slide currently on screen. Only the live slide's mark turns:
+   *  an off-screen mark is `static`, which parks its frame callback. */
+  live: boolean;
   markState: SumaiyaMarkState;
   artRef?: React.Ref<View>;
 }) {
@@ -100,53 +136,24 @@ function Slide({
   const { lang } = useLang();
   const { width } = useWindowDimensions();
 
-  const visualStyle = useAnimatedStyle(() => {
-    const input = [(index - 1) * width, index * width, (index + 1) * width];
-    return {
-      transform: [
-        { scale: interpolate(scrollX.value, input, [0.6, 1, 0.6], "clamp") },
-        { translateY: interpolate(scrollX.value, input, [40, 0, 40], "clamp") },
-      ] as never,
-      opacity: interpolate(scrollX.value, input, [0, 1, 0], "clamp"),
-    };
-  });
-  const textStyle = useAnimatedStyle(() => {
-    const input = [(index - 1) * width, index * width, (index + 1) * width];
-    return { opacity: interpolate(scrollX.value, input, [0, 1, 0], "clamp") };
-  });
-
   return (
     <View style={{ width, alignItems: "center", justifyContent: "center", paddingHorizontal: 32, gap: 30 }}>
-      <Animated.View
-        ref={artRef}
-        collapsable={false}
-        style={[visualStyle, { alignItems: "center", justifyContent: "center" }]}
-      >
-        {item.mark ? (
-          <View
-            style={{
-              width: 148,
-              height: 148,
-              borderRadius: 44,
-              backgroundColor: c.accent + "14",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <SumaiyaMark size={78} state={markState} color={c.accent} />
-          </View>
-        ) : (
-          <OnboardingArt variant={item.art ?? 0} size={168} />
-        )}
-      </Animated.View>
-      <Animated.View style={[textStyle, { alignItems: "center", gap: 12 }]}>
+      {/* No scroll-linked transform here: the previous version scaled this from
+          0.6 → 1.0 and translated it 40px from the raw scroll offset, so the
+          mark's on-screen size changed as you swiped, and the standard bans
+          scroll-driven reveals on a phone. The visual is static; the stage's
+          own entrance is the one beat. */}
+      <View ref={artRef} collapsable={false} style={{ alignItems: "center", justifyContent: "center" }}>
+        <MarkWell state={live ? markState : "static"} />
+      </View>
+      <View style={{ alignItems: "center", gap: 12 }}>
         <Text style={{ color: c.text, fontSize: 26, fontWeight: "800", textAlign: "center", letterSpacing: -0.5 }}>
           {item.title[lang]}
         </Text>
         <Text style={{ color: c.textBody, fontSize: 15.5, textAlign: "center", lineHeight: 23, maxWidth: 320 }}>
           {item.body[lang]}
         </Text>
-      </Animated.View>
+      </View>
     </View>
   );
 }
@@ -161,6 +168,7 @@ function WelcomeStage({
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const reduce = useMotionReduced();
 
   const choices: { lang: Lang; label: string; hint: string }[] = [
     { lang: "sw", label: "Kiswahili", hint: "Endelea kwa Kiswahili" },
@@ -169,30 +177,23 @@ function WelcomeStage({
 
   return (
     <Animated.View
-      entering={FadeIn.duration(360)}
-      exiting={FadeOut.duration(220)}
+      entering={FadeIn.duration(enterDurationMs(reduce, MOTION.dur.slow)).easing(EASE.out)}
+      exiting={FadeOut.duration(exitDurationMs(reduce, MOTION.dur.fast)).easing(EASE.in)}
       style={{ flex: 1, backgroundColor: c.bg, paddingHorizontal: 28 }}
     >
       {/* Hero centred in the space above; the language choices sit low and
           centred, width-constrained so they read as a deliberate pair — not
-          left-hugging list rows. */}
+          left-hugging list rows. The mark is the one the launch screen left
+          here: same well, same size, no entrance of its own. */}
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 20 }}>
-        <View
-          style={{
-            width: 128,
-            height: 128,
-            borderRadius: 40,
-            backgroundColor: c.accent + "14",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <SumaiyaMark size={72} state={markState} color={c.accent} />
-        </View>
+        <MarkWell state={markState} />
         <View style={{ alignItems: "center", gap: 8 }}>
-          <Text style={{ color: c.text, fontSize: 29, fontWeight: "800", letterSpacing: -0.6 }}>
-            Karibu · Welcome
-          </Text>
+          {/* No separator dot. The heading has to stand on its own: one word,
+              the app's own greeting, with the bilingual line under it doing the
+              explaining. A "·" between two words was a second piece of
+              punctuation on a screen whose subject is the mark above it — and
+              on a device it reads as a stray dot sitting under the logo. */}
+          <Text style={{ color: c.text, fontSize: 29, fontWeight: "800", letterSpacing: -0.6 }}>Karibu</Text>
           <Text style={{ color: c.textBody, fontSize: 15, textAlign: "center", lineHeight: 22, maxWidth: 290 }}>
             Mimi ni Sumaiya. Chagua lugha yako.{"\n"}I'm Sumaiya. Choose your language.
           </Text>
@@ -201,7 +202,13 @@ function WelcomeStage({
 
       <View style={{ width: "100%", maxWidth: 360, alignSelf: "center", gap: 12, paddingBottom: insets.bottom + 52 }}>
         {choices.map((ch, i) => (
-          <Animated.View key={ch.lang} entering={FadeInDown.delay(200 + i * 80).duration(360)}>
+          // `Reveal`, not an `entering` layout animation: this wrapper holds a
+          // Pressable, and a layout-animation intercept on a wrapper has already
+          // left a Button non-interactive on Fabric once in this app
+          // (`empty-state.tsx`). Shared values have no mounting-layer
+          // involvement, so the buttons stay tappable. The stagger is capped by
+          // `staggerDelayMs`, and collapses to instant under Reduce Motion.
+          <Reveal key={ch.lang} delayMs={staggerDelayMs(i)}>
             <Pressable
               accessibilityRole="button"
               onPress={() => {
@@ -222,7 +229,7 @@ function WelcomeStage({
               <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
               <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
             </Pressable>
-          </Animated.View>
+          </Reveal>
         ))}
       </View>
     </Animated.View>
@@ -236,7 +243,7 @@ export function OnboardingScreen({ onComplete }: Props) {
   const { t, setLang } = useLang();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const scrollX = useSharedValue(0);
+  const reduce = useMotionReduced();
   const ref = useRef<Animated.ScrollView>(null);
   const [stage, setStage] = useState<Stage>("welcome");
   const [page, setPage] = useState(0);
@@ -247,11 +254,11 @@ export function OnboardingScreen({ onComplete }: Props) {
     return () => clearTimeout(id);
   }, []);
 
-  const onScroll = useAnimatedScrollHandler({
-    onScroll: (e) => {
-      scrollX.value = e.contentOffset.x;
-    },
-  });
+  // No `onScroll` handler here on purpose. The carousel used to publish every
+  // scroll frame into a shared value that the art transform and the pager both
+  // read; nothing on this screen needs the mid-flight offset. The page is what
+  // the eye and the indicator both key off, and it only changes when the swipe
+  // settles.
 
   const goTo = (p: number) => {
     haptics.selection();
@@ -303,7 +310,7 @@ export function OnboardingScreen({ onComplete }: Props) {
   // true centre visibly jumped away from where the art actually was — read as
   // the transition "appearing out of nowhere" rather than growing out of it.
   const [portalOrigin, setPortalOrigin] = useState<{ x: number; y: number } | null>(null);
-  const finish = (via: "skip" | "start" = "skip") => {
+  const finish = (via: "skip" | "start" | "signin" = "skip") => {
     // The slide someone was on when they left IS the answer to "do the four
     // slides cost us people before they even sign up?" — and it is the cheapest
     // point in the whole funnel to lose someone, because they have no account
@@ -315,7 +322,7 @@ export function OnboardingScreen({ onComplete }: Props) {
     // instant it mounts (this call), so a tap-acknowledgment tick here would
     // double up with it almost simultaneously.
     setMarkState("thinking");
-    collapse.value = withTiming(1, { duration: 320, easing: Easing.in(Easing.cubic) });
+    collapse.value = withTiming(1, { duration: MOTION.dur.screen, easing: EASE.in });
     // Measure *before* mounting the portal. The origin is applied to the
     // flood's static left/top, so committing it a frame late made the field
     // visibly jump position mid-bloom. Collapse already started, so the one
@@ -359,7 +366,7 @@ export function OnboardingScreen({ onComplete }: Props) {
       <StatusBar style="dark" />
       {(stage === "slides" || stage === "portal") && (
         <Animated.View
-          entering={FadeIn.duration(420)}
+          entering={FadeIn.duration(enterDurationMs(reduce, MOTION.dur.slow)).easing(EASE.out)}
           style={[{ flex: 1 }, slidesStyle]}
           pointerEvents={stage === "portal" ? "none" : "auto"}
         >
@@ -369,7 +376,7 @@ export function OnboardingScreen({ onComplete }: Props) {
             accessibilityRole="button"
             onPress={() => finish("skip")}
             hitSlop={10}
-            style={{ alignSelf: "flex-end", paddingHorizontal: 20, paddingVertical: 8 }}
+            style={{ alignSelf: "flex-end", paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, paddingVertical: 8 }}
           >
             <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>{t("Skip", "Ruka")}</Text>
           </Pressable>
@@ -379,17 +386,14 @@ export function OnboardingScreen({ onComplete }: Props) {
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            onScroll={onScroll}
-            scrollEventThrottle={16}
             onMomentumScrollEnd={(e) => {
-              const settled = Math.round(e.nativeEvent.contentOffset.x / width);
-              setPage(settled);
-              // Snap to the exact expected offset — the raw contentOffset at rest
-              // can land a fraction of a pixel off (e.g. 1007.6 instead of 1008),
-              // which leaves the dot interpolation's shared boundary between two
-              // dots ambiguous and paints both as partially active (seen on the
-              // last slide, where there's no further slide to mask it).
-              scrollX.value = settled * width;
+              // The page is settled from the offset, never the offset itself:
+              // the raw contentOffset at rest can land a fraction of a pixel off
+              // (e.g. 1007.6 instead of 1008), and anything derived from that
+              // fraction is ambiguous at rest. `settlePage` is the one place the
+              // division happens, and `lib/pager.test.ts` pins it — including
+              // the 1007.6 case.
+              setPage(settlePage(e.nativeEvent.contentOffset.x, width));
             }}
             style={{ flex: 1 }}
           >
@@ -397,22 +401,23 @@ export function OnboardingScreen({ onComplete }: Props) {
               <Slide
                 key={i}
                 item={item}
-                index={i}
-                scrollX={scrollX}
+                live={i === page}
                 markState={markState}
-                artRef={(node) => { artRefs.current[i] = node; }}
+                artRef={(node) => {
+                  artRefs.current[i] = node;
+                }}
               />
             ))}
           </Animated.ScrollView>
 
-          <View style={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 20, gap: 22 }}>
+          <View style={{ paddingLeft: 24 + insets.left, paddingRight: 24 + insets.right, paddingBottom: insets.bottom + 20, gap: 22 }}>
             <View style={{ flexDirection: "row", justifyContent: "center", gap: 7 }}>
               {SLIDES.map((_, i) => (
-                <Dot key={i} index={i} scrollX={scrollX} />
+                <Dot key={i} active={i === activeDotIndex(page, SLIDES.length)} />
               ))}
             </View>
 
-            <Animated.View entering={FadeInDown.delay(300)}>
+            <Reveal delayMs={MOTION.dur.fast}>
               <Button
                 label={isLast ? t("Start", "Anza") : t("Next", "Endelea")}
                 size="lg"
@@ -425,7 +430,32 @@ export function OnboardingScreen({ onComplete }: Props) {
                   }
                 }}
               />
-            </Animated.View>
+            </Reveal>
+
+              {/* A returning user who has just cleared their data should not have
+                  to accept the slides and then hunt for a login. Finishing first
+                  keeps the guest path intact; the modal then presents over the app.
+                  openAuth() is a no-op until the container is ready, so it retries
+                  once rather than failing silently. */}
+              {isLast ? (
+                <Pressable
+                  onPress={() => {
+                    haptics.selection();
+                    finish("signin");
+                    setTimeout(() => {
+                      if (!openAuth()) setTimeout(() => openAuth(), 600);
+                    }, 400);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("I already have an account", "Nina akaunti tayari")}
+                  style={{ alignSelf: "center", marginTop: 14, paddingVertical: 8, paddingHorizontal: 12 }}
+                >
+                  <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>
+                    {t("I already have an account — sign in", "Nina akaunti tayari — ingia")}
+                  </Text>
+                </Pressable>
+              ) : null}
+
           </View>
         </Animated.View>
       )}
