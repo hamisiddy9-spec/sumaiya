@@ -563,11 +563,26 @@ export default function LandingPage() {
                 Sumaiya was a chatbot, a voice, or a person. The name now appears in
                 the sentence directly below, where it has a job to do.
 
+                It then read "CV inayolingana na kazi unayoomba." / "A CV that
+                matches the job you are applying for." — which was TRUE and still
+                wrong: it sold a document type. Sumaiya is not a CV generator with
+                extras bolted on; it walks the whole search with you — the CV, the
+                advert you are aiming at, the letters, the check before you send.
+                Naming the document makes the product sound like every other CV
+                builder, and a stranger skims past it.
+
+                So the headline names the RELATIONSHIP and the ARENA (a coach, in
+                the job market) and the CV becomes the mechanism, mentioned in the
+                line below where it has a job to do — the same reasoning that moved
+                the product's own name out of the h1. "Kocha" is deliberately the
+                Swahili-first word here: Kiswahili is Sumaiya's first language, and
+                the English follows it rather than leading.
+
                 Deliberately a bare string: this h1 is painted pre-hydration (see
                 `hero-reveal` above), so it must not gain markup that JS has to
                 resolve before the LCP element can render. */}
             <h1 className="hero-reveal-2 font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
-              {lang === "sw" ? "CV inayolingana na kazi unayoomba." : "A CV that matches the job you are applying for."}
+              {lang === "sw" ? "Kocha wako katika soko la ajira." : "Your coach in the job market."}
             </h1>
 
             {/* Sub-headline — the instruction, in the order the visitor performs it:
