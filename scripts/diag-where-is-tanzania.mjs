@@ -11,7 +11,8 @@ import pg from "pg";
 
 const env = readFileSync("C:/Users/hamis/projects/_hdd-data/env/supabase.env", "utf8");
 const url = (env.match(/^DATABASE_URL=(.*)$/m) || [])[1]?.trim().replace(/^["']|["']$/g, "");
-const c = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+const { connectOptions } = await import("./lib/db-connect.mjs");
+const c = new pg.Client(connectOptions(url));
 await c.connect();
 const q = async (sql, a = []) => (await c.query(sql, a)).rows;
 

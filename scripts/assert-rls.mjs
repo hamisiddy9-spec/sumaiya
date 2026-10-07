@@ -11,6 +11,10 @@
  *
  *   node scripts/assert-rls.mjs           # needs DATABASE_URL in the env
  *
+ * Exits 0 when the schema is closed, 1 when it lists offenders, 2 when DATABASE_URL is absent, and
+ * 3 when the database could not be reached. The codes are distinct ON PURPOSE: an unreachable
+ * database must never be reportable as "offenders found" (see the connect block below).
+ *
  * Exits 1 with a list of offenders. Exits 2 if DATABASE_URL is not set, so a CI
  * run cannot silently skip the check.
  *
@@ -54,6 +58,8 @@ if (!DB) {
   process.exit(2);
 }
 
+const { connectOptions, isConnectFailure } = await import('./lib/db-connect.mjs');
+
 /**
  * Tables the product deliberately exposes for public read, with the reason.
  *
@@ -76,8 +82,29 @@ const NEVER_ANON_READABLE = {
 /** Server-side telemetry: RLS on, deliberately zero policies. */
 const DENY_BY_DEFAULT = ['app_event', 'app_release', 'campaign_event', 'eval_sample', 'outcome_event'];
 
-const c = new Client({ connectionString: DB, ssl: { rejectUnauthorized: false } });
-await c.connect();
+const c = new Client(connectOptions(DB));
+try {
+  await c.connect();
+} catch (err) {
+  // A monitor that cannot reach the database must SAY SO, and say it differently from a finding.
+  //
+  // This is the four-day bug: the script exited 1 on a TLS handshake failure, and exit 1 here means
+  // "offenders found". So a dead connection was indistinguishable from a live RLS hole, and the
+  // nightly red was read as the security problem instead of as the monitor being broken. A guard
+  // that cannot connect proves NOTHING — it must not be able to look like a pass OR a fail.
+  const msg = String(err?.message ?? err).split("\n")[0];
+  console.error("assert-rls: COULD NOT CONNECT — this run proves NOTHING about RLS.");
+  console.error("  " + msg);
+  if (isConnectFailure(err)) {
+    console.error("  The database refused the connection. Check DATABASE_URL, and if the message");
+    console.error("  names a tenant/user (e.g. 'postgres.<ref> not found'), the project it points at");
+    console.error("  no longer exists — the secret is stale, not the schema.");
+  }
+  process.exit(3);
+}
+console.warn(
+  "assert-rls: NOTE — TLS certificate verification is skipped; see scripts/lib/db-connect.mjs.",
+);
 const q = async (sql, p) => (await c.query(sql, p)).rows;
 
 const failures = [];

@@ -18,7 +18,8 @@ const env = readFileSync("C:/Users/hamis/projects/_hdd-data/env/supabase.env", "
 const url = (env.match(/^DATABASE_URL=(.*)$/m) || [])[1]?.trim().replace(/^["']|["']$/g, "");
 if (!url) { console.error("no DATABASE_URL"); process.exit(1); }
 
-const c = new pg.Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
+const { connectOptions } = await import("./lib/db-connect.mjs");
+const c = new pg.Client(connectOptions(url));
 await c.connect();
 const q = async (sql, args = []) => (await c.query(sql, args)).rows;
 
