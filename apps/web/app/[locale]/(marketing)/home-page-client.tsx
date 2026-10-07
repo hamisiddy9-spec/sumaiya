@@ -184,7 +184,7 @@ function CyclingCell({
         <p className="font-display font-bold text-sm text-cream mb-3 tracking-tight">{cur.name}</p>
         <Link
           href={"/editor/cv/try?template=" + cur.id}
-          className="w-full text-center text-sm font-semibold text-cream bg-ember shadow-ember-hard rounded-[10px] px-4 py-3 hover:bg-ember-hover active:shadow-ember-active active:translate-y-[2px] transition-all duration-150"
+          className="w-full text-center text-sm font-semibold text-cream bg-ember shadow-ember-hard rounded-[10px] px-4 py-2 hover:bg-ember-hover active:shadow-ember-active active:translate-y-[2px] transition-all duration-150"
         >
           {lang === "sw" ? "Tumia muundo huu" : "Use this look"}
         </Link>
@@ -346,6 +346,28 @@ export default function LandingPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cardScale, setCardScale] = useState(210 / 794);
   const firstCardRef = useRef<HTMLDivElement>(null);
+
+  // Hero art scale. The floating CV stack is a fixed ~506px object (two 240px
+  // panels + gap, plus the rotateY overhang). In the 1024–1200px band the hero
+  // column is NARROWER than that, so the stack bled past the right edge and put
+  // a horizontal scrollbar on the page at 1024x768 (measured: 14px of overflow,
+  // nine elements out of bounds). The stack is already one transform, so scaling
+  // it to its own column keeps it inside the viewport at every width and in both
+  // orientations without touching the layout or the entrance beat.
+  const [heroStackScale, setHeroStackScale] = useState(1);
+  const heroArtRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = heroArtRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (w > 0) setHeroStackScale(Math.min(1, w / 512));
+    };
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
   const nextPanelRef = useRef(0);
   const nextTemplateRef = useRef(0);
   const lang = useLang();
@@ -544,7 +566,7 @@ export default function LandingPage() {
                 Deliberately a bare string: this h1 is painted pre-hydration (see
                 `hero-reveal` above), so it must not gain markup that JS has to
                 resolve before the LCP element can render. */}
-            <h1 className="hero-reveal-2 font-display font-extrabold text-5xl md:text-6xl xl:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
+            <h1 className="hero-reveal-2 font-display font-extrabold text-5xl md:text-6xl lg:text-7xl tracking-[-2.5px] leading-[1.02] text-espresso mb-5">
               {lang === "sw" ? "CV inayolingana na kazi unayoomba." : "A CV that matches the job you are applying for."}
             </h1>
 
@@ -554,16 +576,11 @@ export default function LandingPage() {
                 endpoint. It no longer promises AI writing: the assistant's AI is dark in
                 production (`/api/ai/status` → {"configured":false,"provider":null}) and
                 401s a guest, so promising it here would promise the one thing the page
-                cannot hand over.
-
-                It no longer opens with "Mimi ni Sumaiya." — the welcome lockup directly
-                above now introduces her, in the spec's own words, and two identical
-                self-introductions three lines apart is the near-duplicate stacking the
-                siblings' home deliberately avoids. The instruction is unchanged. */}
+                cannot hand over. */}
             <p className="hero-reveal-3 text-espresso text-lg md:text-xl max-w-lg leading-snug font-medium mb-8">
               {lang === "sw"
-                ? "Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
-                : "Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
+                ? "Mimi ni Sumaiya. Fungua kihariri, ingiza ujazo wako, pakua PDF yako — bure, bila akaunti. Kiswahili kwanza."
+                : "I'm Sumaiya. Open the editor, put in your details, download your PDF — free, no account needed. Swahili first."}
             </p>
 
             {/* Primary action = the guest CV editor: the one thing a stranger can
@@ -592,7 +609,7 @@ export default function LandingPage() {
               <a
                 href="#how-it-works"
                 onClick={() => posthog.capture('landing_cta_click', { cta: 'hero_steps' })}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
+                className="inline-flex items-center gap-1.5 py-3 -my-3 text-sm font-semibold text-ember-hover hover:text-ember transition-colors"
               >
                 {lang === "sw" ? "Ona hatua tatu" : "See the three steps"}
                 <Icon name="chevron-right" size={14} />
@@ -651,11 +668,11 @@ export default function LandingPage() {
           </div>
 
           {/* Right — floating CV card stack with perspective */}
-          <div className="hero-reveal-3 hidden lg:flex relative justify-center items-center min-h-[600px]"
+          <div ref={heroArtRef} className="hero-reveal-3 hidden lg:flex relative justify-center items-center min-h-[600px]"
             style={{ perspective: "1000px" }}
           >
             <div className="flex gap-4 items-start"
-              style={{ transform: "perspective(1000px) rotateY(-8deg) rotateX(2deg)" }}
+              style={{ transform: `perspective(1000px) rotateY(-8deg) rotateX(2deg) scale(${heroStackScale})`, transformOrigin: "center" }}
             >
               <div className="flex flex-col gap-4 mt-8">
                 <HeroCVPanel
@@ -809,7 +826,7 @@ export default function LandingPage() {
           </div>
 
           {/* The honest limit, said plainly rather than implied. */}
-          <p className="mt-10 text-sm text-text-muted max-w-2xl">
+          <p className="mt-10 text-sm text-text-muted max-w-lg">
             {lang === "sw"
               ? "Ukurasa wenyewe unahitaji mtandao mara moja ili ufunguke. Baada ya hapo, kuandika na kupakua hakuhitaji bando lingine."
               : "The page itself needs a connection once, to open. After that, typing and downloading do not need another bundle."}
@@ -914,7 +931,7 @@ export default function LandingPage() {
           <h2 className="font-display font-extrabold tracking-tight text-espresso text-3xl sm:text-4xl lg:text-5xl mb-3">
             {lang === "sw" ? "Miundo 47 — chagua mmoja, uanze" : "47 looks — pick one and start"}
           </h2>
-          <p className="text-lg text-text-body">
+          <p className="text-lg text-text-body max-w-2xl">
             {lang === "sw"
               ? "Mfano unaoona hapa ni wa Neema, msimamizi wa ofisi Dar es Salaam. Maudhui yako hayabadiliki ukibadilisha muundo."
               : "The example you see here is Neema, an office administrator in Dar es Salaam. Your content does not change when you switch designs."}
@@ -1015,7 +1032,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24 max-w-3xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-8 pb-20 lg:pb-24 max-w-2xl mx-auto">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -1033,23 +1050,17 @@ export default function LandingPage() {
         <h2 className="reveal font-display font-extrabold tracking-tight text-espresso text-2xl sm:text-3xl text-center mb-3">
           {lang === "sw" ? "Maswali yanayoulizwa mara kwa mara" : "Frequently asked questions"}
         </h2>
-        <p className="reveal text-text-muted text-center text-sm mb-10">
+        <p className="reveal text-text-muted text-center text-sm mb-10 max-w-xl mx-auto">
           {lang === "sw" ? "Kila unachohitaji kujua kabla ya kuanza." : "Everything you need to know before you start."}
         </p>
         <div className="reveal space-y-3">
           {FAQS.map((f, i) => (
-            <details key={i} className="group bg-card border border-border rounded-card px-5 [&_summary::-webkit-details-marker]:hidden">
-              {/* The padding lives on the summary, not the details, so the whole
-                  52px band is the clickable target (WCAG 2.5.8 AA needs 24px
-                  minimum; Apple HIG wants 44). Visually identical to the old
-                  `details px-5 py-4` + bare summary — same 16px gap above the
-                  question and below the answer — but the target is now 52px
-                  instead of the 20px text line. */}
-              <summary className="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-espresso text-sm sm:text-base py-4">
+            <details key={i} className="group bg-card border border-border rounded-card px-5 py-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-espresso text-sm sm:text-base">
                 {f.q}
                 <Icon name="chevron-down" size={18} className="text-text-muted shrink-0 transition-transform duration-200 group-open:rotate-180" />
               </summary>
-              <p className="text-text-body text-sm leading-relaxed mt-3 pb-4">{f.a}</p>
+              <p className="text-text-body text-sm leading-relaxed mt-3 max-w-prose">{f.a}</p>
             </details>
           ))}
         </div>
