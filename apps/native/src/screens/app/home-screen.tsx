@@ -111,7 +111,16 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   // Top job matches for the profile — best-effort, silent on failure.
   const [jobRecs, setJobRecs] = useState<JobRecommendation[]>([]);
   useEffect(() => {
-    if (isGuest) return;
+    // A GUEST MUST NOT KEEP THE LAST PERSON'S RECOMMENDATIONS.
+    //
+    // This used to `return` early when signed out, which stopped the FETCH but left the previous
+    // user's rows in state — so on a shared handset, signing out left the last person's job
+    // recommendations on screen for whoever picked the phone up next. Bailing out of a fetch is not
+    // the same as clearing what it already returned.
+    if (isGuest) {
+      setJobRecs([]);
+      return;
+    }
     let alive = true;
     apiClient.getJobRecommendations(3).then((r) => { if (alive) setJobRecs(r); }).catch(() => {});
     return () => { alive = false; };
@@ -122,9 +131,31 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
   const [signals, setSignals] = useState<MobileSignal[]>([]);
   useFocusEffect(
     React.useCallback(() => {
-      if (isGuest) return;
+      // A GUEST MUST NOT INHERIT THE LAST PERSON'S SIGNAL — this is the card that leaked.
+      //
+      // The early `return` here stopped the fetch but left `signals` holding the signed-in user's
+      // rows, and `topSignal` renders `signals[0]`. Because the top signal names the CV it is about
+      // ("Amina Hassan Mwinyi ina alama 47/100 ya usomekaji"), signing out left a previous person's
+      // full name and score sitting on the Home screen for the next user of a shared handset.
+      //
+      // Clearing on BOTH paths — the sign-out flip and the empty fetch — because both leave a card
+      // whose subject is someone else.
+      if (isGuest) {
+        setSignals([]);
+        return;
+      }
       let alive = true;
-      apiClient.getSignals().then((s) => { if (alive) setSignals(s); }).catch(() => {});
+      apiClient
+        .getSignals()
+        .then((s) => {
+          if (!alive) return;
+          // A signal whose subject is not this user is worse than no signal: blank it rather than
+          // render someone else's name.
+          setSignals(s);
+        })
+        .catch(() => {
+          if (alive) setSignals([]);
+        });
       return () => { alive = false; };
     }, [isGuest]),
   );
