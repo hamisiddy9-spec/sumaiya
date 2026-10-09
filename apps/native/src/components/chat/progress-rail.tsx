@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from "react-native-reanimated";
 import { Icon } from "../icon";
+import { SumaiyaMark } from "../sumaiya-mark";
 import { useMotionReduced, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
 import type { ChatStep } from "./chat-progress";
 import { currentStep, finishedSteps, receiptLabel } from "./chat-progress";
+import { shouldEscalate } from "./rail-escalation";
 import {
   CHAT_MOTION,
   CHAT_STEP_BEAT_CYCLES,
@@ -177,6 +179,19 @@ export function ProgressRail({
   const { t } = useLang();
   const progress = useSharedValue(reduce ? 1 : 0);
   const [seconds, setSeconds] = useState(() => Math.max(0, Math.round((Date.now() - startedAt) / 1000)));
+  /**
+   * Whether the detailed view is open.
+   *
+   * The rail used to be ONE object: a full-width bordered panel with four rows, a bar, a
+   * disclaimer sentence and a filled Stop button — thrown into the conversation for every turn,
+   * including the two-second ones. It read as a system dialog rather than something happening in a
+   * chat, and it grew taller the more work there was, shoving the conversation around.
+   *
+   * It is now PROPORTIONAL: a quiet one-line strip by default, the detail only when it carries
+   * information — either because the user opened it, or because the turn earned it (see
+   * `escalate` below).
+   */
+  const [open, setOpen] = useState(false);
 
   // Move 6 — enter 300, rise 12. A shared value, not an `entering` layout
   // animation: an `entering` wrapper has already left a child non-interactive
@@ -205,6 +220,54 @@ export function ProgressRail({
 
   const current = currentStep(steps);
   const finished = finishedSteps(steps);
+
+  /**
+   * A turn that has taken long enough, or that has FAILED, opens itself.
+   *
+   * This is the part that must never be dropped in a redesign. The rail exists because three
+   * pulsing dots look identical whether a request is healthy or dead, and on metered data a user
+   * who cannot tell re-sends and pays twice. A quiet one-liner would silently re-introduce exactly
+   * that — so the quiet state is only allowed while the turn still looks healthy and brief.
+   */
+  const escalate = shouldEscalate(steps, seconds);
+  const expanded = open || escalate;
+
+  if (!expanded) {
+    return (
+      <Animated.View style={[enter, { marginTop: 6 }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityState={{ expanded: false }}
+          accessibilityLabel={`${railElapsedLabel(seconds)}. ${steps.map((s) => t(s.label.en, s.label.sw)).join(". ")}`}
+          onPress={() => setOpen(true)}
+          style={{ flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44, paddingVertical: 6, alignSelf: "flex-start", maxWidth: "100%" }}
+        >
+          {/* The resting mark, not "thinking": the mark's thinking state rotates CONTINUOUSLY, and
+              unbounded motion is the WCAG 2.2.2 case the detail view bounds its own beat for. */}
+          <SumaiyaMark size={16} state="idle" color={c.accent} />
+          <Text style={{ flex: 1, color: c.text, fontSize: 14, fontWeight: "600" }} numberOfLines={1}>
+            {t("Sumaiya is writing…", "Sumaiya anaandika…")}
+          </Text>
+          <Text style={{ color: c.textMuted, fontSize: 12, fontVariant: ["tabular-nums"] }}>
+            {railElapsedLabel(seconds)}
+          </Text>
+          {onStop ? (
+            <Pressable
+              onPress={onStop}
+              accessibilityRole="button"
+              accessibilityLabel={t("Stop", "Acha")}
+              hitSlop={14}
+              style={{ minWidth: 44, minHeight: 44, alignItems: "flex-end", justifyContent: "center" }}
+            >
+              <Text style={{ color: c.textMuted, fontSize: 14, fontWeight: "700" }}>
+                {stopLabel ?? t("Stop", "Acha")}
+              </Text>
+            </Pressable>
+          ) : null}
+        </Pressable>
+      </Animated.View>
+    );
+  }
 
   return (
     <Animated.View

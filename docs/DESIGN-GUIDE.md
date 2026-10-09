@@ -192,10 +192,25 @@ enforces this with a test; Sumaiya's strings must pass it too.
 
 ---
 
-## 9. THE PROCESSING SURFACE — Stitch kept the panel; decide once
+## 9. THE PROCESSING SURFACE — DECIDED AND IMPLEMENTED
 
-Stitch built the **content** correctly and it must be preserved:
+**Decision (recorded, not drifting): proportional two-state. Quiet by default, detail on demand,
+and the detail opens ITSELF when the turn earns it.**
 
+### State A — quiet, one line, no box
+```
+ ✦  Sumaiya anaandika…                     4s        Acha
+```
+- No border, no card background, no bar, no eyebrow label.
+- The **resting** house mark (16dp, `idle`) — *not* `thinking`: that state rotates continuously, and
+  unbounded motion is the WCAG 2.2.2 case the detail view bounds its own beat for.
+- `"Sumaiya anaandika…"` in the present tense, 14/600, `numberOfLines={1}`.
+- Elapsed time as **plain text**, 12, tabular numerals, ticking once per second. Never animated.
+- **"Acha"** as a quiet text affordance, present from the first second, ≥44dp via `hitSlop`.
+- Muted, no bubble tail — it must never read as something Sumaiya *said*.
+- Tapping the strip opens the detail.
+
+### State B — the detail (opens on tap, or by itself)
 ```
  ✦ Sumaiya anaandika…                          4s      Acha
 ─────────────────────────────────────────────────────────────
@@ -204,16 +219,37 @@ Stitch built the **content** correctly and it must be preserved:
  ○ Kuandaa barua ya maombi  Itaundwa kwa Kiswahili…    BAADAYE
 ```
 
-The information is right: real step states, real results, real elapsed time, and **"Acha" present from
-the first second**. That last part is the whole reason the surface exists — three pulsing dots look
-identical whether a request is healthy or dead, and on metered data a user who cannot tell re-sends
-and **pays twice**. Never remove the stop control or the real steps.
+### The escalation rule — the part that protects the original fix
+The quiet state is allowed **only while the turn is healthy and brief**:
 
-**The open decision:** Stitch renders it as a bordered panel. The PRD asked for a **quiet one-line
-default** (`✦ Sumaiya anaandika… 4s — Acha`, no border) that **expands on tap**, and
-**auto-escalates past ~8 s or on first failure**. Either is defensible; the one-line default is
-lighter in a conversation, the panel is more informative at a glance. **Pick one and record it here**
-so it is a decision rather than a drift.
+```
+shouldEscalate(steps, seconds):
+  ANY step failed      → open IMMEDIATELY, whatever the clock says
+  seconds >= 8         → open
+  otherwise            → stay quiet
+```
+
+**A failed request must never keep looking like a healthy wait** — that is the entire reason this
+surface exists. Three pulsing dots look identical whether a request is healthy or dead, and on
+metered data a user who cannot tell re-sends and **pays twice**.
+
+> This rule lives in `src/components/chat/rail-escalation.ts` as a **pure, tested function (6 tests)**
+> rather than inline in the component, precisely because it is the thing a future redesign is most
+> likely to drop by accident. If someone deletes the quiet state or the escalation, the tests fail.
+> **Do not move it back inline.**
+
+### Preserved in both states
+- The bar reflects **real** completion — `scaleX(finished / total)`, never a fabricated ramp.
+- Past steps are **past tense with their real result** as a sub-line. Current is named and animating;
+  future steps are named but still — a named future step is a plan, not silence.
+- The current glyph's beat is **bounded** (2 cycles, ~1.05 s), never `withRepeat(-1)`.
+- **Reduce Motion:** static dot, **every word retained**.
+- Announced at step boundaries only (`accessibilityLiveRegion="polite"`): elapsed time plus every
+  step name — and the quiet state carries the same label, so collapsing changes nothing for a screen
+  reader.
+- Completed turns collapse to the **receipt** (`ProgressReceipt`), which expands on tap.
+
+*Implemented in `src/components/chat/progress-rail.tsx` (`ProgressRail`).*
 
 ---
 
