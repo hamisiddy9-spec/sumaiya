@@ -113,8 +113,18 @@ users, jobs, templates, submissions, campaigns, insights, app.
 ### G. Global work (runs parallel to all of the above)
 1. **Token migration** — replace hardcoded hex with the `tailwind.config.ts` tokens across the 326
    files carrying raw colour. Mechanical, reviewable, one lane.
-2. **Foreign-palette purge** — the 10 files importing `emerald/indigo/slate/blue`. Every one is a
-   design bug: those colours are not Sumaiya's.
+2. **Foreign-palette purge** — 10 files, measured: `components/assistant/confirmations-card.tsx`,
+   `components/contact-form.tsx`, `components/dashboard/dashboard-cover-letter-grid.tsx`,
+   `components/editor/authentic-writing-panel.tsx`, `components/editor/dynamic-template-renderer.tsx`,
+   `components/editor/template-picker.tsx`, `components/editor/template-selection-modal.tsx`,
+   `components/settings/career-profile-card.tsx`, `components/settings/settings-form.tsx`,
+   `app/(app)/snap/snap-client.tsx`.
+   The offending classes are **~112 amber-, ~28 emerald-, 4 blue-**. The config already carries the
+   right end-points (`success: #186A22`, `warning: #B45309`, `error: #BA1A1A`), so the mapping is
+   `amber → warning`, `emerald → success`, `blue → ember`, with the soft tints (`*-50/100/200`) becoming
+   opacity variants of those tokens rather than a flat colour. **Map by intent, not by hue** — amber is
+   not always a warning, and a blind sweep that turns a "pending" state into an error is worse than the
+   drift it fixes. Each of the 10 surfaces gets looked at afterwards.
 3. **Type ramp** — one scale for the whole web, matching the guide (Bricolage display / Hanken body /
    JetBrains numeric), with no page inventing its own sizes.
 4. **Focus and keyboard** — every interactive element reachable and visibly focused; skip links on
