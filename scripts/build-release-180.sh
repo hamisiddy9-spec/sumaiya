@@ -41,7 +41,9 @@ CODE=$(grep -oE 'versionCode [0-9]+' app/build.gradle | head -1 | grep -oE '[0-9
 NAME=$(grep -oE 'versionName "[^"]+"' app/build.gradle | head -1 | tr -d '"' | cut -d' ' -f2)
 echo "   preflight ok — node $(node -v), $(java -version 2>&1 | head -1)"
 echo "   cutting $NAME (versionCode $CODE)"
-[ "$CODE" = "10800" ] || { echo "preflight: gradle versionCode is $CODE, expected 10800"; exit 8; }
+# Must EXCEED the build already on the phone (10800), or Android refuses the
+# upgrade and keeps the old one — silently, which is the trap this catches.
+if [ "$CODE" -le 10800 ]; then echo "preflight: gradle versionCode is $CODE, must be > 10800"; exit 8; fi
 
 # The release keystore. The signing block refuses to fall back to the debug keystore, so a
 # missing/mismatched copy fails the build on purpose — which is what we want: the whole
