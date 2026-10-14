@@ -1,135 +1,85 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import type { JobListing, JobRecommendation } from "@sumaiya/api-client";
+import type { CVData } from "@sumaiya/types";
+import { isEmptyCv } from "@sumaiya/utils/cv-shape";
 import { apiClient } from "../lib/api-client";
+import { useCvs } from "../hooks/use-cvs";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, Screen, ScreenTitle, SectionHeader, SkeletonList, Stagger, haptics, toast, useThemeColors } from "../components/ui";
+import {
+  EmptyState,
+  Screen,
+  ScreenTitle,
+  SectionHeader,
+  SkeletonList,
+  Stagger,
+  haptics,
+  useThemeColors,
+} from "../components/ui";
 import { Icon } from "../components/icon";
-import { confirmAndOpenUrl } from "../lib/external-link";
 import { isExpiredListing } from "../lib/job-listing";
-import { closingLabel } from "../lib/deadline";
-import { createApplication } from "../lib/applications-store";
-import { FUNNEL_EVENTS } from "../lib/analytics";
-import { track } from "../lib/telemetry";
 import { useAuthContext } from "../contexts/auth-context";
+import {
+  FONT,
+  JOB_FILTERS,
+  JOBS_SPACING,
+  JobCard,
+  matchViewFor,
+  matchesFilter,
+  matchesQuery,
+  type JobFilterKey,
+  type MatchView,
+} from "../components/jobs";
 import type { JobsScreenProps } from "../navigation/types";
 
-function MatchBadge({ score }: { score: number }) {
-  const c = useThemeColors();
-  const tone = score >= 60 ? c.success : score >= 35 ? c.warning : c.textMuted;
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: tone + "1f", borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 }}>
-      <Icon name="target" size={11} color={tone} />
-      <Text style={{ color: tone, fontSize: 11.5, fontWeight: "800" }}>{score}%</Text>
-    </View>
-  );
-}
-
-function JobCard({
-  job,
-  score,
-  reason,
-  onTailor,
-  onApply,
-  onOpen,
-  onSave,
-}: {
-  job: JobListing;
-  score?: number;
-  reason?: string;
-  onTailor: () => void;
-  onApply: () => void;
-  onOpen: () => void;
-  onSave: () => Promise<boolean>;
-}) {
-  const c = useThemeColors();
-  const { t, lang } = useLang();
-  const closing = closingLabel(job.applicationDeadline, lang);
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const save = async () => {
-    if (saved || saving) return;
-    setSaving(true);
-    const ok = await onSave();
-    setSaving(false);
-    if (ok) setSaved(true);
-  };
-  return (
-    /* The card body is a real control now, not a View that looked like one.
-       Measured on the device against 1.6.24: the only clickable nodes on this
-       screen were the two buttons and the tab bar, so a user tapping the card
-       — the same shape every other tappable card in the app has — got nothing
-       back. It opens the advert it is showing, and says so. */
-    <Card
-      onPress={onOpen}
-      accessibilityLabel={`${job.title}. ${t("See the full advert", "Ona tangazo kamili")}`}
-      style={{ gap: 10 }}
-    >
-      <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "800" }} numberOfLines={2}>{job.title}</Text>
-          <Text style={{ color: c.textMuted, fontSize: 12.5, marginTop: 2 }} numberOfLines={1}>
-            {[job.company, job.location].filter(Boolean).join(" · ")}
-          </Text>
-        </View>
-        {typeof score === "number" ? <MatchBadge score={score} /> : null}
-      </View>
-      {reason ? <Text style={{ color: c.textBody, fontSize: 12.5 }} numberOfLines={2}>{reason}</Text> : null}
-      {/* The deadline decides whether this is worth doing today, and the feed
-          has always used it to filter — the card just never said it. */}
-      {closing ? (
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <Icon name="calendar-clock" size={13} color={c.textMuted} />
-          <Text style={{ color: c.textMuted, fontSize: 12 }}>
-            {t("Apply by", "Mwisho wa maombi")} — <Text style={{ color: c.textBody, fontWeight: "700" }}>{closing}</Text>
-          </Text>
-        </View>
-      ) : null}
-      <View style={{ flexDirection: "row", gap: 8, marginTop: 2 }}>
-        <View style={{ flex: 1 }}>
-          {/* Tailoring is the app's real value-add over just browsing a
-              listing, so it gets the filled primary treatment; opening the
-              advert is the secondary action here. */}
-          <Button label={t("Tailor my CV", "Lenga CV yako")} size="sm" onPress={onTailor} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Button label={t("Open the advert", "Fungua tangazo")} size="sm" variant="secondary" onPress={onApply} />
-        </View>
-      </View>
-      {/* Local, no account, no network — createApplication writes straight to
-          the phone (lib/applications-store.ts). This is the birth path the
-          feed never had: today the only way to start an Application is the
-          small "+" on the Applications list. */}
-      <Button
-        label={saved ? t("Saved", "Imehifadhiwa") : t("Save this job", "Hifadhi kazi hii")}
-        size="sm"
-        variant="ghost"
-        loading={saving}
-        disabled={saved}
-        onPress={save}
-      />
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 2, justifyContent: "flex-end" }}>
-        <Text style={{ color: c.accent, fontSize: 12.5, fontWeight: "800" }}>
-          {t("See the full advert", "Ona tangazo kamili")}
-        </Text>
-        <Icon name="chevron-right" size={16} color={c.accent} />
-      </View>
-    </Card>
-  );
-}
-
+/**
+ * The feed — B4.
+ *
+ * The design's screen is four things above the fold: the title with its mono
+ * reach line, a real search field, the four filter chips, then the cards. The
+ * card itself is four things: the role and where it is, the match score in
+ * JetBrains Mono, the reason it matched, and a footer pairing when it was
+ * posted with `Tazama Tangazo →`. Everything the card does is open the advert
+ * — B5 is where the actions live (tailor, save, apply), which is why this
+ * screen no longer carries three buttons per card.
+ *
+ * WHERE THE MATCH COMES FROM: `matchViewFor` in `components/jobs` and nothing
+ * else. It prefers a server score when the recommendation payload has one and
+ * falls back to the on-device engine, and it returns a union that cannot
+ * express "a number with no reason". A listing nothing has scored gets no
+ * badge at all — never a placeholder, never `?? 0`.
+ *
+ * The filter and search are real: `matchesFilter` reads the listing's own
+ * location (an unknown location matches `Zote` only — it is never guessed into
+ * a city), and `matchesQuery` searches the three fields the placeholder names.
+ */
 export function JobsScreen({ navigation }: JobsScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { user } = useAuthContext();
+  const { cvs } = useCvs();
   const isGuest = !user;
   const [recs, setRecs] = useState<JobRecommendation[]>([]);
   const [jobs, setJobs] = useState<JobListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<JobFilterKey>("all");
+
+  /**
+   * The CV the device engine scores adverts against. Newest first, and the
+   * first one with real content wins: scoring a job against an empty draft
+   * would produce a low number that says nothing about the user, and §10
+   * forbids showing a number that is not actionable. No CV at all is a
+   * legitimate state (`null`) — the cards then show no match, and B5 says why.
+   */
+  const cvData: CVData | null = useMemo(() => {
+    const withContent = cvs.find((cv) => !isEmptyCv(cv.data));
+    return (withContent ?? cvs[0])?.data ?? null;
+  }, [cvs]);
 
   const load = useCallback(async () => {
     try {
@@ -148,11 +98,9 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
       setJobs(j.filter((job) => !isExpiredListing(job.applicationDeadline)));
       setError(false);
     } catch {
-      // The old code had no catch here at all: an offline/API failure was an
-      // unhandled promise rejection, and either way the empty-lists state
-      // would render "No openings right now" — indistinguishable from a
-      // genuinely empty feed, with no way to tell the user it actually
-      // failed or let them retry.
+      // An offline/API failure is not an empty feed: without this the screen
+      // rendered "No openings right now" — indistinguishable from a genuinely
+      // empty list, with no way to tell the user it actually failed.
       setError(true);
     } finally {
       setLoading(false);
@@ -168,50 +116,45 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   }, [load]);
 
   const recIds = useMemo(() => new Set(recs.map((r) => r.jobId)), [recs]);
-  const rest = useMemo(() => jobs.filter((j) => !recIds.has(j.id)), [jobs, recIds]);
+  const visible = useCallback(
+    (job: JobListing) => matchesFilter(job, filter) && matchesQuery(job, query),
+    [filter, query],
+  );
+  const shownRecs = useMemo(() => recs.filter((r) => visible(r.job)), [recs, visible]);
+  const rest = useMemo(
+    () => jobs.filter((j) => !recIds.has(j.id)).filter(visible),
+    [jobs, recIds, visible],
+  );
+  const hiddenByFilter = recs.length + jobs.length > 0 && shownRecs.length === 0 && rest.length === 0;
 
-  const tailor = (job: JobListing) => {
-    haptics.selection();
-    navigation.navigate("JobApply", { jd: `${job.title}\n${job.company}\n\n${job.description}`.slice(0, 6000) });
-  };
-  const apply = (job: JobListing) => {
-    if (job.applyUrl) confirmAndOpenUrl(job.applyUrl, t);
-  };
   // The card's own route. A tap on the card body used to do nothing at all.
-  const open = (job: JobListing, score?: number, reason?: string) => {
-    navigation.navigate("JobDetail", { job, score, reason });
-  };
-  // The birth path the feed never had: a saved job becomes an Application on
-  // the phone, no tailoring and no account required.
-  const save = async (job: JobListing): Promise<boolean> => {
-    haptics.selection();
-    try {
-      await createApplication({
-        company: job.company,
-        role: job.title,
-        location: job.location || undefined,
-        jobDescription: job.description || undefined,
-        jobUrl: job.applyUrl || undefined,
-        status: "saved",
+  // The match travels as params only when it is a real one, so the advert shows
+  // the same number the card did — and recomputes it if it arrives without.
+  const open = useCallback(
+    (job: JobListing, view: MatchView) => {
+      haptics.selection();
+      navigation.navigate("JobDetail", {
+        job,
+        score: view.state === "scored" ? view.match.score : undefined,
+        reason: view.state === "scored" ? view.match.reason : undefined,
       });
-      const props = { via: "feed", has_jd: Boolean(job.description), has_cv: false, guest: isGuest };
-      track("application.created", props);
-      track(FUNNEL_EVENTS.applicationCreated, props);
-      toast.show(t("Saved to your applications", "Imehifadhiwa kwenye maombi yako"));
-      return true;
-    } catch {
-      haptics.error();
-      toast.show(t("Couldn't save", "Imeshindwa kuhifadhi"));
-      return false;
-    }
-  };
+    },
+    [navigation],
+  );
 
   return (
     <Screen scroll keyboardAvoiding={false} contentContainerStyle={{ gap: 20 }} refreshing={refreshing} onRefresh={onRefresh}>
       {/* Owner's instruction, verbatim: "toa kwako nafasi za kazi is enough" —
-          the "kwako" is gone. It also stops the label promising a personalisation
-          the feed does not do (job_recommendation has 0 rows for every user). */}
-      <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings", "Nafasi za kazi")}</ScreenTitle>
+          the "kwako" is gone. It also stops the label promising a
+          personalisation the feed does not do (job_recommendation has 0 rows
+          for every user). The design's mono line on the right names where the
+          feed reaches, which is a fact about the listings, not a promise. */}
+      <View style={{ gap: 4 }}>
+        <ScreenTitle eyebrow={t("Jobs", "Ajira")}>{t("Openings", "Nafasi za kazi")}</ScreenTitle>
+        <Text style={{ color: c.textMuted, fontSize: 12, fontFamily: FONT.mono }}>
+          {t("Tanzania • Gulf", "Tanzania • Ghuba")}
+        </Text>
+      </View>
 
       {loading ? (
         <SkeletonList count={3} gap={10} />
@@ -233,39 +176,113 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
         />
       ) : (
         <>
-          {recs.length > 0 ? (
+          {/* A real control now, at the design's 44 dp: the app's search used
+              to be the phone keyboard against a list the user could not
+              narrow. */}
+          <View style={{ gap: 12 }}>
+            <View style={{ justifyContent: "center" }}>
+              <View style={{ position: "absolute", left: 13, zIndex: 1 }} pointerEvents="none">
+                <Icon name="search" size={16} color={c.textMuted} />
+              </View>
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder={t("Search a role or company...", "Tafuta cheo au kampuni...")}
+                placeholderTextColor={c.textMuted}
+                accessibilityLabel={t("Search jobs", "Tafuta kazi")}
+                returnKeyType="search"
+                autoCorrect={false}
+                style={{
+                  height: JOBS_SPACING.minTarget,
+                  backgroundColor: c.bgSunken,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  borderRadius: 12,
+                  paddingLeft: 40,
+                  paddingRight: 14,
+                  color: c.text,
+                  fontSize: 13,
+                  fontFamily: FONT.regular,
+                }}
+              />
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: JOBS_SPACING.chipGap }}
+            >
+              {JOB_FILTERS.map((f) => {
+                const active = f.key === filter;
+                return (
+                  <Pressable
+                    key={f.key}
+                    onPress={() => { haptics.selection(); setFilter(f.key); }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={lang === "sw" ? f.sw : f.en}
+                    style={{
+                      minHeight: 36,
+                      justifyContent: "center",
+                      paddingHorizontal: 14,
+                      borderRadius: 999,
+                      backgroundColor: active ? c.accent : c.bgElevated,
+                      borderWidth: 1,
+                      borderColor: active ? c.accent : c.border,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: active ? c.accentText : c.textBody,
+                        fontSize: 12.5,
+                        fontWeight: "600",
+                      }}
+                    >
+                      {lang === "sw" ? f.sw : f.en}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+
+          {shownRecs.length > 0 ? (
             <Animated.View entering={FadeIn.duration(300)}>
               <SectionHeader title={t("Matched to your profile", "Zinazoendana na wasifu wako")} />
-              <View style={{ gap: 12 }}>
-                {recs.map((r, i) => (
-                  <Stagger key={r.jobId} index={i}>
-                    <JobCard
-                      job={r.job}
-                      score={r.score}
-                      reason={r.reason}
-                      onTailor={() => tailor(r.job)}
-                      onApply={() => apply(r.job)}
-                      onOpen={() => open(r.job, r.score, r.reason)}
-                      onSave={() => save(r.job)}
-                    />
-                  </Stagger>
-                ))}
+              <View style={{ gap: JOBS_SPACING.cardGap }}>
+                {shownRecs.map((r, i) => {
+                  const view = matchViewFor(r.job, {
+                    lang,
+                    cvData,
+                    serverScore: r.score,
+                    serverReason: r.reason,
+                  });
+                  return (
+                    <Stagger key={r.jobId} index={i}>
+                      <JobCard
+                        job={r.job}
+                        match={view.state === "scored" ? view.match : undefined}
+                        onOpen={() => open(r.job, view)}
+                      />
+                    </Stagger>
+                  );
+                })}
               </View>
             </Animated.View>
-          ) : (
+          ) : recs.length === 0 && jobs.length > 0 ? (
             <Pressable
               accessibilityRole="button"
               onPress={() => { haptics.selection(); void onRefresh(); }}
-              style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accent + "10", borderWidth: 1, borderColor: c.accent + "24" }}
+              style={{ flexDirection: "row", gap: 12, alignItems: "center", padding: 16, borderRadius: 14, backgroundColor: c.accentTint, borderWidth: 1, borderColor: c.border }}
             >
-              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: c.accentTint, alignItems: "center", justifyContent: "center" }}>
                 <Icon name="target" size={18} color={c.accent} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text style={{ color: c.text, fontSize: 14.5, fontWeight: "800" }}>
                   {t("Nothing matched — tap to search again", "Hakuna kilicholingana — gusa kutafuta tena")}
                 </Text>
-                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
+                <Text style={{ color: c.textBody, fontSize: 12.5, lineHeight: 18, marginTop: 2 }}>
                   {t("Finish your profile and I'll match you to the closest openings — with a fit score.", "Kamilisha wasifu wako nami nikuunganishe na nafasi za kazi zinazokufaa zaidi — pamoja na alama ya ulinganifu.")}
                 </Text>
               </View>
@@ -274,19 +291,39 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
                 <Icon name="chevron-right" size={18} color={c.accent} />
               </View>
             </Pressable>
-          )}
+          ) : null}
 
           {rest.length > 0 ? (
             <View>
               <SectionHeader title={t("All openings", "Nafasi zote za kazi")} />
-              <View style={{ gap: 12 }}>
-                {rest.slice(0, 40).map((j, i) => (
-                  <Stagger key={j.id} index={i}>
-                    <JobCard job={j} onTailor={() => tailor(j)} onApply={() => apply(j)} onOpen={() => open(j)} onSave={() => save(j)} />
-                  </Stagger>
-                ))}
+              <View style={{ gap: JOBS_SPACING.cardGap }}>
+                {rest.slice(0, 40).map((j, i) => {
+                  const view = matchViewFor(j, { lang, cvData });
+                  return (
+                    <Stagger key={j.id} index={i}>
+                      <JobCard
+                        job={j}
+                        match={view.state === "scored" ? view.match : undefined}
+                        onOpen={() => open(j, view)}
+                      />
+                    </Stagger>
+                  );
+                })}
               </View>
             </View>
+          ) : null}
+
+          {/* A filter that hides everything is a state, not an empty feed: the
+              user narrowed it, so the screen says so and offers the way back
+              rather than claiming there are no openings in the country. */}
+          {hiddenByFilter ? (
+            <EmptyState
+              icon="briefcase"
+              title={t("Nothing matches that filter", "Hakuna kinacholingana na kichujio hicho")}
+              body={t("Try another city, or clear the search.", "Jaribu mji mwingine, au futa utafutaji.")}
+              actionLabel={t("Show all", "Onyesha zote")}
+              onAction={() => { setFilter("all"); setQuery(""); }}
+            />
           ) : null}
         </>
       )}
