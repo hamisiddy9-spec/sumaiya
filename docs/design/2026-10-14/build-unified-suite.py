@@ -90,6 +90,25 @@ assert ats in html, "extension badge copy not found"
 html = html.replace(ats, "Kujaza fomu kwa mbofyo mmoja &middot; Ulinganisho wa moja kwa moja")
 log.append("law 1: extension badge reworded in Swahili ('ATS' removed)")
 
+# Law 6 — no version pills. The prototype carried two: a chip in the master chrome
+# and a version string in the rail footer. A version number in a design export is
+# not decorative, it is a claim that goes stale; the mobile rebuild banned them and
+# the web should not reintroduce them. The chip keeps its meaning, not its number.
+before = html
+html = html.replace(
+    '>v1.7 Web &amp; Ext</span>', '>Web &middot; Android &middot; Extension</span>')
+assert html != before, "master-chrome version chip not found"
+html, n = re.subn(r'(<span>)Sumaiya Web \d+\.\d+\.\d+(</span>)', r'\1Sumaiya Web\2', html)
+assert n == 1, "rail version string not found"
+log.append("law 6: two version pills removed (chrome chip, rail footer)")
+
+# A typo in the design's own copy: "Kamil 100%" is missing a vowel - the word is
+# "Kamili". Small, but this is copy a Swahili speaker reads.
+before = html
+html = html.replace("Kamil 100%", "Kamili 100%")
+assert html != before, "the Kamil typo was not found"
+log.append("copy: 'Kamil 100%' -> 'Kamili 100%'")
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. THE WIRING LAYER — annotations on the elements that actually exist
 # ─────────────────────────────────────────────────────────────────────────────
