@@ -1,15 +1,16 @@
 import React, { useRef, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
+import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../../navigation/types";
 import { useAuthContext } from "../../contexts/auth-context";
 import { canDismissAuth, dismissAuth } from "../../navigation/root-nav";
 import { track } from "../../lib/telemetry";
-import { Button, Screen, TextField, haptics, useThemeColors } from "../../components/ui";
+import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
 import { MarkWell } from "../../components/mark-well";
 import { Icon } from "../../components/icon";
+import { FONT } from "../../components/home";
 import { GoogleButton } from "./google-button";
 import { AuthErrorBanner } from "./auth-error-banner";
 import { useLang } from "../../lib/i18n";
@@ -19,7 +20,161 @@ type Props = NativeStackScreenProps<AuthStackParamList, "SignIn">;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Multi-box code entry — one hidden input drives every cell. */
+/**
+ * The hairline + tracked label that separates the two ways in (design A2).
+ * The label is the design's own line; its first sentence names the method.
+ */
+function PathDivider({ label }: { label: string }) {
+  const c = useThemeColors();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 4 }}>
+      <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+      <Text
+        style={{
+          color: c.textMuted,
+          fontSize: 12,
+          fontFamily: FONT.mono,
+          letterSpacing: 0.6,
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </Text>
+      <View style={{ flex: 1, height: 1, backgroundColor: c.border }} />
+    </View>
+  );
+}
+
+/**
+ * The identifier row: a label, then the field with the send control INSIDE it
+ * (the design's shape), on the sunken surface.
+ *
+ * The field is 52 dp with a 44 dp inner control — §8's floor is 44 dp and
+ * `hitSlop` is not a target, so the mockup's 32 dp inner button would have been
+ * a mis-tap waiting to happen on the exact control that starts the code.
+ */
+function IdentifierField({
+  label,
+  value,
+  onChangeText,
+  onSend,
+  sendLabel,
+  busy,
+  disabled,
+  error,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  onSend: () => void;
+  sendLabel: string;
+  busy: boolean;
+  disabled: boolean;
+  error?: string | null;
+}) {
+  const c = useThemeColors();
+  const [focused, setFocused] = useState(false);
+  const border = error ? c.error : focused ? c.accent : c.border;
+
+  return (
+    <View>
+      <Text
+        style={{
+          color: c.textBody,
+          fontSize: 12,
+          fontFamily: FONT.semibold,
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </Text>
+
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          minHeight: 52,
+          paddingLeft: 16,
+          paddingRight: 4,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: border,
+          backgroundColor: c.bgSunken,
+        }}
+      >
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          editable={!busy && !disabled}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          textContentType="emailAddress"
+          returnKeyType="go"
+          onSubmitEditing={onSend}
+          placeholderTextColor={c.textMuted}
+          selectionColor={c.accent}
+          accessibilityLabel={label}
+          style={{
+            flex: 1,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: c.text,
+            fontFamily: FONT.regular,
+          }}
+        />
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={sendLabel}
+          accessibilityState={{ disabled: busy || disabled, busy }}
+          disabled={busy || disabled}
+          onPress={() => {
+            haptics.selection();
+            onSend();
+          }}
+          style={{
+            minHeight: 44,
+            minWidth: 96,
+            paddingHorizontal: 14,
+            borderRadius: 10,
+            backgroundColor: c.accentFillStrong,
+            alignItems: "center",
+            justifyContent: "center",
+            marginLeft: 8,
+            opacity: busy || disabled ? 0.5 : 1,
+          }}
+        >
+          {busy ? (
+            <ActivityIndicator size="small" color={c.accentText} />
+          ) : (
+            <Text style={{ color: c.accentText, fontSize: 12.5, fontFamily: FONT.bold }}>
+              {sendLabel}
+            </Text>
+          )}
+        </Pressable>
+      </View>
+
+      {error ? (
+        <Text style={{ color: c.error, fontSize: 12.5, marginTop: 5, fontFamily: FONT.regular }}>
+          {error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Multi-box code entry — one hidden input drives every cell.
+ *
+ * The cells take `flex: 1` rather than a fixed 48 dp width: the server mails a
+ * code of `EMAIL_OTP_DIGITS` digits and the row has to fit the narrowest phone
+ * this app ships to, which fixed cells stopped doing the moment the code length
+ * changed.
+ */
 function CodeInput({
   value,
   onChange,
@@ -36,24 +191,24 @@ function CodeInput({
 
   return (
     <Pressable onPress={() => ref.current?.focus()} style={{ marginBottom: 18 }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={{ flexDirection: "row", gap: 6 }}>
         {cells.map((digit, i) => {
           const active = i === focusIndex;
           return (
             <View
               key={i}
               style={{
-                width: 48,
-                height: 58,
+                flex: 1,
+                height: 56,
                 borderRadius: 12,
                 borderWidth: active ? 2 : 1,
                 borderColor: active ? c.accent : c.border,
-                backgroundColor: c.bgElevated,
+                backgroundColor: c.bgSunken,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: c.text, fontSize: 24, fontWeight: "800" }}>{digit}</Text>
+              <Text style={{ color: c.text, fontSize: 22, fontFamily: FONT.bold }}>{digit}</Text>
             </View>
           );
         })}
@@ -71,7 +226,7 @@ function CodeInput({
         textContentType="oneTimeCode"
         autoFocus
         maxLength={EMAIL_OTP_DIGITS}
-        style={{ position: "absolute", opacity: 0, width: "100%", height: 58 }}
+        style={{ position: "absolute", opacity: 0, width: "100%", height: 56 }}
       />
     </Pressable>
   );
@@ -87,15 +242,11 @@ export function SignInScreen(_props: Props) {
   const canGoBackToApp = canDismissAuth();
   const { loading, error, sendCode, verifyCode, signInWithGoogle, clearError } = useAuthContext();
 
-  const [step, setStep] = useState<"email" | "code">("email");
+  const [step, setStep] = useState<"identifier" | "code">("identifier");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [sending, setSending] = useState(false);
-  // Lead with one obvious path (Google — zero-friction, proven reliable) rather
-  // than presenting email-OTP and Google as equally-weighted choices; email is
-  // a secondary, opt-in path reached via the link below.
-  const [showEmail, setShowEmail] = useState(false);
 
   const emailError =
     emailTouched && !EMAIL_RE.test(email.trim()) ? t("Enter a valid email address", "Weka barua pepe sahihi") : null;
@@ -139,149 +290,188 @@ export function SignInScreen(_props: Props) {
   }
 
   // Arriving from the onboarding portal, this screen is revealed by the root
-  // stack's own cross-fade as the flood of accent colour clears — it is
-  // already mounted and at rest underneath. So the screen itself must not
-  // animate in: a logo zooming while the colour field is still dissolving is
-  // two unrelated choreographies finishing at once. The step blocks below keep
-  // their slide, but only for an actual step *change* — never on first mount.
+  // stack's own cross-fade as the flood of accent colour clears — it is already
+  // mounted and at rest underneath. So the screen itself must not animate in: a
+  // logo zooming while the colour field is still dissolving is two unrelated
+  // choreographies finishing at once. The step blocks below keep their slide,
+  // but only for an actual step *change* — never on first mount.
   const prevStep = useRef(step);
   const stepChanged = prevStep.current !== step;
   prevStep.current = step;
   const stepEntering = stepChanged ? FadeInRight.duration(200) : undefined;
 
-  // Same treatment as the onboarding intro slide's centred icon — a big mark
-  // in a soft circular backdrop — so sign-in reads as a continuation of that
-  // screen, not a smaller, top-pinned afterthought.
-  const brand = (
-    <View style={{ alignItems: "center", gap: 12, marginBottom: 8 }}>
-      {/* The shared well, not a locally-invented one. This screen is part of the
-          cold start, which is exactly the flow whose four different wells
-          `ui/mark-well-tokens` exists to stop — and the guard now knows about this
-          file, so a fifth cannot appear here again. */}
-      <MarkWell state="static" />
-      <Text style={{ color: c.text, fontSize: 20, fontWeight: "800", letterSpacing: -0.3 }}>Sumaiya</Text>
-    </View>
-  );
-
   return (
     <>
-    <StatusBar style="dark" />
-    <Screen
-      contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-      footer={
-        <View style={{ gap: 10, alignItems: "center" }}>
-          {canGoBackToApp ? (
-            // Arrived here from inside the app (the invitation after a download,
-            // a gated surface, the Profile row) — so say what the account earns
-            // and leave an obvious way back to the work.
-            <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
+      <StatusBar style="dark" />
+      <Screen
+        padded={24}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between", gap: 20, paddingTop: 8 }}
+        footer={
+          /* The privacy footer (design A2). Two lines, in the design's order:
+             the promise, then what continuing means. */
+          <View style={{ alignItems: "center", gap: 4 }}>
+            <Text
+              style={{
+                color: c.textBody,
+                fontSize: 12,
+                lineHeight: 17,
+                textAlign: "center",
+                fontFamily: FONT.regular,
+              }}
+            >
+              <Text style={{ color: c.text, fontFamily: FONT.bold }}>
+                {t("Your device only", "Kifaa chako tu")}
+              </Text>
+              {t(" — we have no account to track you with.", " — hatuna akaunti ya kukufuatilia.")}
+            </Text>
+            <Text
+              style={{
+                color: c.textMuted,
+                fontSize: 11,
+                lineHeight: 16,
+                textAlign: "center",
+                fontFamily: FONT.regular,
+              }}
+            >
               {t(
-                "Your CVs on this phone move to your account.",
-                "CV zako zilizo kwenye simu hii zitahamia kwenye akaunti yako.",
+                "By continuing you accept Sumaiya's Terms and Privacy Policy.",
+                "Kwa kuendelea unakubali Sheria na Sera ya Faragha ya Sumaiya.",
               )}
             </Text>
-          ) : null}
-          {step === "email" ? (
-            <Text style={{ color: c.textMuted, fontSize: 13, textAlign: "center" }}>
-              {t(
-                "First time? The same code creates your account.",
-                "Ni mara ya kwanza? Msimbo huohuo unatengeneza akaunti yako.",
-              )}
-            </Text>
-          ) : null}
-          {canGoBackToApp ? (
+          </View>
+        }
+      >
+        {/* The brand block — the shared well, not a locally-invented one. This
+            screen is part of the cold start, which is exactly the flow whose
+            four different wells `ui/mark-well-tokens` exists to stop — and the
+            guard knows about this file, so a fifth cannot appear here again. */}
+        <View style={{ alignItems: "center" }}>
+          <MarkWell state="static" />
+          <Text
+            style={{
+              color: c.text,
+              fontSize: 24,
+              fontFamily: FONT.display,
+              letterSpacing: -0.5,
+              marginTop: 24,
+              textAlign: "center",
+            }}
+          >
+            {t("Welcome to Sumaiya", "Karibu Sumaiya")}
+          </Text>
+          <Text
+            style={{
+              color: c.textBody,
+              fontSize: 14,
+              lineHeight: 20,
+              marginTop: 4,
+              textAlign: "center",
+              fontFamily: FONT.regular,
+            }}
+          >
+            {canGoBackToApp
+              ? // Opened over the app: the useful sentence is what the account
+                // does with the work already on this phone, not a reassurance.
+                t(
+                  "Your CVs on this phone move to your account.",
+                  "CV zako zilizo kwenye simu hii zitahamia kwenye akaunti yako.",
+                )
+              : t("Your work is safe on your phone.", "Kazi yako iko salama kwenye simu yako.")}
+          </Text>
+        </View>
+
+        {step === "code" ? (
+          <Animated.View key="code" entering={stepEntering} exiting={FadeOutLeft.duration(140)}>
             <Pressable
               onPress={() => {
                 haptics.selection();
                 clearError();
-                dismissAuth();
+                setCode("");
+                setStep("identifier");
               }}
               accessibilityRole="button"
-              hitSlop={8}
-              style={{ paddingVertical: 6 }}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+                minHeight: 44,
+                marginBottom: 10,
+              }}
             >
-              <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>
-                {t("Not now", "Si sasa")}
+              <Icon name="arrow-left" size={18} color={c.accent} />
+              <Text style={{ color: c.accent, fontSize: 14, fontFamily: FONT.bold }}>
+                {t("Change email", "Badili barua pepe")}
               </Text>
             </Pressable>
-          ) : null}
-        </View>
-      }
-    >
-      {brand}
 
-      {step === "code" ? (
-        <Animated.View key="code" entering={stepEntering} exiting={FadeOutLeft.duration(140)}>
-          <Pressable
-            onPress={() => {
-              haptics.selection();
-              clearError();
-              setCode("");
-              setStep("email");
-            }}
-            hitSlop={10}
-            style={{ flexDirection: "row", alignItems: "center", gap: 4, marginTop: 24, marginBottom: 14 }}
+            <Text style={{ color: c.text, fontSize: 24, fontFamily: FONT.display, letterSpacing: -0.5 }}>
+              {t("Enter your code", "Weka msimbo")}
+            </Text>
+            <Text
+              style={{
+                color: c.textBody,
+                fontSize: 14,
+                lineHeight: 20,
+                marginTop: 6,
+                marginBottom: 20,
+                fontFamily: FONT.regular,
+              }}
+            >
+              {t("We sent a code to", "Tumetuma msimbo kwa")} {email}
+            </Text>
+
+            <AuthErrorBanner error={error} onDismiss={clearError} />
+
+            <CodeInput
+              value={code}
+              onChange={(x) => {
+                setCode(x);
+                if (error) clearError();
+              }}
+              onFilled={confirmCode}
+            />
+
+            <Button
+              label={t("Verify and enter", "Thibitisha na Uingie")}
+              onPress={confirmCode}
+              loading={loading}
+              size="lg"
+              disabled={!isCompleteEmailOtp(code)}
+            />
+
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                clearError();
+                setCode("");
+                void requestCode();
+              }}
+              accessibilityRole="button"
+              style={{ alignSelf: "center", minHeight: 44, justifyContent: "center", marginTop: 8 }}
+            >
+              <Text style={{ color: c.textMuted, fontSize: 13.5, fontFamily: FONT.bold }}>
+                {t("Resend code", "Tuma msimbo tena")}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        ) : (
+          <Animated.View
+            key="identifier"
+            entering={stepEntering}
+            exiting={FadeOutLeft.duration(140)}
+            style={{ gap: 14 }}
           >
-            <Icon name="arrow-left" size={18} color={c.accent} />
-            <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>
-              {t("Change email", "Badili barua pepe")}
-            </Text>
-          </Pressable>
+            <AuthErrorBanner error={error} onDismiss={clearError} />
 
-          <Text style={{ color: c.text, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 }}>
-            {t("Enter your code", "Weka msimbo")}
-          </Text>
-          <Text style={{ color: c.textBody, fontSize: 14.5, marginTop: 6, marginBottom: 24 }}>
-            {t("We sent a code to", "Tumetuma msimbo kwa")} {email}
-          </Text>
-
-          <AuthErrorBanner error={error} onDismiss={clearError} />
-
-          <CodeInput value={code} onChange={(x) => { setCode(x); if (error) clearError(); }} onFilled={confirmCode} />
-
-          <Button
-            label={t("Sign in", "Ingia")}
-            onPress={confirmCode}
-            loading={loading}
-            size="lg"
-            disabled={!isCompleteEmailOtp(code)}
-          />
-
-          <Pressable
-            onPress={() => {
-              haptics.selection();
-              clearError();
-              setCode("");
-              void requestCode();
-            }}
-            hitSlop={8}
-            style={{ alignSelf: "center", marginTop: 18 }}
-          >
-            <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>
-              {t("Resend code", "Tuma msimbo tena")}
-            </Text>
-          </Pressable>
-        </Animated.View>
-      ) : (
-        <Animated.View key="email" entering={stepEntering} exiting={FadeOutLeft.duration(140)}>
-          <View style={{ marginTop: 26, marginBottom: 26 }}>
-            <Text style={{ color: c.text, fontSize: 30, fontWeight: "800", letterSpacing: -0.5 }}>
-              {t("Sign in to Sumaiya", "Ingia Sumaiya")}
-            </Text>
-            <Text style={{ color: c.textBody, fontSize: 15, marginTop: 6 }}>
-              {t("One tap, no password.", "Mguso mmoja, hakuna nywila.")}
-            </Text>
-          </View>
-
-          <AuthErrorBanner error={error} onDismiss={clearError} />
-
-          <Animated.View entering={FadeIn.duration(240)} style={{ gap: 14 }}>
+            {/* One obvious path first — Google, zero-friction and proven
+                reliable — then the code path under its own divider, never as an
+                equally-weighted choice beside it. */}
             <GoogleButton
-              label={t("Continue with Google", "Endelea na Google")}
+              label={t("Sign in with Google", "Ingia na Google")}
               // `loading` from the auth context is true for exactly the Google
               // round-trip (play-services check, account picker, token exchange)
               // and false the rest of the time on this step. `disabled` stays
-              // tied to the email-code send so the two paths cannot both fire.
+              // tied to the code send so the two paths cannot both fire.
               loading={loading}
               disabled={sending}
               onPress={async () => {
@@ -298,47 +488,46 @@ export function SignInScreen(_props: Props) {
               }}
             />
 
-            {showEmail ? (
-              <Animated.View entering={FadeIn.duration(200)} style={{ gap: 14, marginTop: 8 }}>
-                <TextField
-                  label={t("Email", "Barua pepe")}
-                  leftIcon="mail"
-                  value={email}
-                  onChangeText={(x) => {
-                    setEmail(x);
-                    if (error) clearError();
-                  }}
-                  onBlur={() => setEmailTouched(true)}
-                  error={emailError}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  textContentType="emailAddress"
-                  returnKeyType="go"
-                  onSubmitEditing={requestCode}
-                  editable={!sending}
-                  autoFocus
-                />
-                <Button label={t("Send me a code", "Nitumie msimbo")} onPress={requestCode} loading={sending} size="lg" />
-              </Animated.View>
-            ) : (
+            <PathDivider label={t("Or with email", "Au kwa barua pepe")} />
+
+            <IdentifierField
+              label={t("Email address", "Barua pepe")}
+              value={email}
+              onChangeText={(x) => {
+                setEmail(x);
+                if (error) clearError();
+              }}
+              onSend={requestCode}
+              sendLabel={t("Send code", "Tuma Kodi")}
+              busy={sending}
+              disabled={loading}
+              error={emailError}
+            />
+
+            {/* The design's single-page pre-auth is the app's two-step code
+                path: `Thibitisha na Uingie` is the VERIFY action, so it lives
+                on the code step below, where pressing it actually verifies
+                something — instead of sitting on this step permanently
+                disabled because no code has been requested yet. */}
+
+            {canGoBackToApp ? (
               <Pressable
                 onPress={() => {
                   haptics.selection();
-                  setShowEmail(true);
+                  clearError();
+                  dismissAuth();
                 }}
-                hitSlop={8}
-                style={{ alignItems: "center", marginTop: 8, paddingVertical: 8 }}
+                accessibilityRole="button"
+                style={{ alignItems: "center", justifyContent: "center", minHeight: 44 }}
               >
-                <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>
-                  {t("Use email instead", "Tumia barua pepe badala yake")}
+                <Text style={{ color: c.textBody, fontSize: 12.5, fontFamily: FONT.semibold }}>
+                  {t("Continue as a guest (no account for now)", "Endelea kama mgeni (Bila akaunti kwa sasa)")}
                 </Text>
               </Pressable>
-            )}
+            ) : null}
           </Animated.View>
-        </Animated.View>
-      )}
-    </Screen>
+        )}
+      </Screen>
     </>
   );
 }

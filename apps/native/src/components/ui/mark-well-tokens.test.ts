@@ -20,9 +20,13 @@ import {
  *
  * The guard used to scan only the three welcoming-path files, so two later
  * screens slipped invented wells past CI: `first-run-screen.tsx` (a 116 / r36 /
- * mark-62 box) and `error-boundary.tsx` (a 76 / r24 / mark-40 box). Both are
- * now registry entries, both carry none of the retired numbers, and the whole
+ * mark-62 box) and `error-boundary.tsx` (a 76 / r24 / mark-40 box). Both were
+ * made registry entries, both carry none of the retired numbers, and the whole
  * tree is swept for a retired mark scale, so a third cannot appear unnoticed.
+ * (First-run left the registry again on 2026-10-14 — its redesigned wizard has
+ * no hero and draws no well — but the tree-walk and the tree-wide scale sweep
+ * are unchanged, so nothing about that screen escaping a second container got
+ * weaker.)
  */
 
 describe("the well's geometry", () => {
@@ -85,16 +89,22 @@ describe("the source guard — no screen writes its own well", () => {
     );
   };
 
-  // Every source file that draws the house mark in a well: the three
-  // welcoming-path surfaces, the shared component itself, and the two screens
-  // that were inventing their own container. Each must take its geometry from
-  // `MARK_WELL` / `MarkWell`, and none may carry a retired size.
+  // Every source file that draws the house mark in a well: the welcoming-path
+  // surfaces, the shared component itself, and the screens that were inventing
+  // their own container. Each must take its geometry from `MARK_WELL` /
+  // `MarkWell`, and none may carry a retired size.
+  //
+  // `screens/first-run-screen.tsx` left this list on 2026-10-14: the wizard's
+  // design (A3) is a question per step with no hero, so the file no longer
+  // renders the well at all — and a registry entry that has stopped being a
+  // well file is a stale exemption, which is why the tree-walk below (which
+  // finds wells by reading every file) is the check that actually holds the
+  // line, not this list.
   const WELL_FILES = [
     "screens/splash-screen.tsx",
     "screens/onboarding-screen.tsx",
     "components/portal-transition.tsx",
     "components/mark-well.tsx",
-    "screens/first-run-screen.tsx",
     "components/error-boundary.tsx",
     // The sign-in brand block carried its own 92/r28/mark-48 well until 2026-10-14;
     // the tree-walk could not see it because it drew a plain View, not `MarkWell`.

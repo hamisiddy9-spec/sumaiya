@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
@@ -11,28 +9,15 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-import Animated, { FadeIn, FadeInRight, FadeOutLeft } from "react-native-reanimated";
+import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { setSecureItem } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
-import { setDefaultTemplate } from "../lib/prefs";
 import { keyboardAvoidingBehavior } from "../lib/keyboard-avoiding";
-import { CV_TEMPLATES, ALL_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
-import { useEntitlements } from "../lib/entitlements";
-import { compressPhotoUri, pickAndCompressPhoto, setPendingOnboardingPhoto } from "../lib/pick-photo";
-import {
-  CAREER_FIELDS,
-  EXPERIENCE_LEVELS,
-  experienceLabel,
-  fieldLabels,
-  skillsForFields,
-} from "../lib/career-fields";
-import { TemplateThumb } from "../components/cv/template-thumb";
-import { TemplateGallery } from "../components/cv/template-gallery";
-import { PremiumSheet } from "../components/premium-sheet";
-import { MarkWell } from "../components/mark-well";
-import { Button, ProgressBar, TextField, dialog, haptics, toast, useThemeColors } from "../components/ui";
+import { fieldLabels } from "../lib/career-fields";
+import { Button, haptics, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
+import { FONT } from "../components/home";
 import { useLang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
 
@@ -42,9 +27,56 @@ interface Props {
   onDone: () => void;
 }
 
-type StepId = "intro" | "name" | "photo" | "fields" | "experience" | "skills" | "recent" | "look";
+/** One question per step (design A3), three steps, every one skippable. */
+type StepId = "name" | "role" | "country";
+const STEPS: StepId[] = ["name", "role", "country"];
 
-/** A tappable pill used for every preset choice. */
+/**
+ * The four presets the design puts under the role question, each mapped to the
+ * app's own career-field id so the answer is a real profile field and not a
+ * label that has to be parsed back out of a string.
+ */
+const ROLE_PRESETS: { id: string; label: { en: string; sw: string } }[] = [
+  { id: "finance-accounting", label: { en: "Accounting", sw: "Uhasibu" } },
+  { id: "it-software", label: { en: "Technology & IT", sw: "Teknolojia & IT" } },
+  { id: "education", label: { en: "Teaching", sw: "Ualimu" } },
+  { id: "healthcare", label: { en: "Health", sw: "Afya" } },
+];
+
+/** The three areas the design's footer line names, stored as the profile's location. */
+const AREA_PRESETS: { id: string; label: { en: string; sw: string } }[] = [
+  { id: "tanzania", label: { en: "Tanzania", sw: "Tanzania" } },
+  { id: "east-africa", label: { en: "East Africa", sw: "Afrika Mashariki" } },
+  { id: "gulf", label: { en: "The Gulf", sw: "Ghuba" } },
+];
+
+/** The design's progress row: one dot per step, filled up to where you are. */
+function StepDots({ total, current }: { total: number; current: number }) {
+  const c = useThemeColors();
+  const { t } = useLang();
+  return (
+    <View
+      accessibilityRole="progressbar"
+      accessibilityLabel={t(`Step ${current + 1} of ${total}`, `Hatua ya ${current + 1} Kati ya ${total}`)}
+      accessibilityValue={{ min: 1, max: total, now: current + 1 }}
+      style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+    >
+      {Array.from({ length: total }, (_, i) => (
+        <View
+          key={i}
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: i <= current ? c.accent : c.border,
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+/** A tappable pill for a preset answer. 44 dp — §8's floor, not `hitSlop`. */
 function Chip({
   label,
   active,
@@ -57,25 +89,86 @@ function Chip({
   const c = useThemeColors();
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
       onPress={() => {
         haptics.selection();
         onPress();
       }}
       style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-        paddingVertical: 10,
+        minHeight: 44,
         paddingHorizontal: 14,
+        alignItems: "center",
+        justifyContent: "center",
         borderRadius: 999,
-        borderWidth: 1.5,
-        borderColor: active ? c.accent : c.border,
-        backgroundColor: active ? c.accent + "16" : c.bgElevated,
+        borderWidth: 1,
+        borderColor: active ? c.accent + "33" : c.border,
+        backgroundColor: active ? c.accentTint : c.bgElevated,
       }}
     >
-      {active ? <Icon name="check" size={13} color={c.accent} /> : null}
-      <Text style={{ color: active ? c.accent : c.text, fontSize: 13.5, fontWeight: "700" }}>{label}</Text>
+      <Text style={{ color: active ? c.accent : c.textBody, fontSize: 12.5, fontFamily: FONT.semibold }}>
+        {label}
+      </Text>
     </Pressable>
+  );
+}
+
+/** The labelled field the design uses for the question that needs typing. */
+function StepField({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  autoFocus,
+  onSubmitEditing,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+  onSubmitEditing?: () => void;
+}) {
+  const c = useThemeColors();
+  const [focused, setFocused] = useState(false);
+  return (
+    <View>
+      <Text style={{ color: c.textBody, fontSize: 12, fontFamily: FONT.semibold, marginBottom: 6 }}>
+        {label}
+      </Text>
+      <View
+        style={{
+          minHeight: 52,
+          justifyContent: "center",
+          paddingHorizontal: 16,
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: focused ? c.accent : c.border,
+          backgroundColor: c.bgSunken,
+        }}
+      >
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
+          placeholderTextColor={c.textMuted}
+          selectionColor={c.accent}
+          autoFocus={autoFocus}
+          returnKeyType="next"
+          onSubmitEditing={onSubmitEditing}
+          accessibilityLabel={label}
+          style={{
+            paddingVertical: 14,
+            fontSize: 15,
+            color: c.text,
+            fontFamily: FONT.regular,
+          }}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -100,57 +193,14 @@ export function FirstRunScreen({ onDone }: Props) {
   const prefillName = looksLikeJunk ? "" : rawName;
   const email = user?.email ?? "";
 
-  const [name, setName] = useState(prefillName);
-  const [photo, setPhoto] = useState("");
-  const [photoBusy, setPhotoBusy] = useState(false);
-  const [fields, setFields] = useState<string[]>([]);
-  const [experience, setExperience] = useState<string>("");
-  const [skills, setSkills] = useState<string[]>([]);
-  const [customSkill, setCustomSkill] = useState("");
-  const [galleryOpen, setGalleryOpen] = useState(false);
-  const [premiumOpen, setPremiumOpen] = useState(false);
-  const { premium } = useEntitlements();
-
-  // The look step shows a few free designs and a taste of premium — not all
-  // 224. The rest live in TemplateHub, one tap away.
-  const lookTemplates = useMemo(
-    () => [
-      ...CV_TEMPLATES.filter((tpl) => tpl.tier === "free"),
-      ...ALL_TEMPLATES.filter((tpl) => tpl.tier === "premium").slice(0, 4),
-    ],
-    [],
-  );
-  const [recent, setRecent] = useState("");
-  const [template, setTemplate] = useState<CvTemplateId>("classic");
-  const [saving, setSaving] = useState(false);
-
-  // Google sign-in already gives us an avatar (user.photoUrl, from Supabase's
-  // user_metadata.avatar_url) — the photo step used to ignore it entirely and
-  // make everyone tap through the picker manually, even people who already
-  // have a perfectly good profile photo. Prefill once, silently; the user can
-  // still tap through to change or remove it exactly as before. Skips
-  // quietly (stays on the camera-icon empty state) if the fetch/compress
-  // fails or there's no avatar — this was never a required step.
-  useEffect(() => {
-    if (!user?.photoUrl || photo) return;
-    let cancelled = false;
-    compressPhotoUri(user.photoUrl)
-      .then((p) => {
-        if (!cancelled) setPhoto(p);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.photoUrl]);
-
-  // The name step is skipped entirely when the account already has a real one.
-  const STEPS: StepId[] = useMemo(
-    () => ["intro", ...(prefillName ? [] : (["name"] as StepId[])), "photo", "fields", "experience", "skills", "recent", "look"],
-    [prefillName],
-  );
   const [i, setI] = useState(0);
-  const step = STEPS[i];
+  const step = STEPS[i] ?? "name";
+
+  const [name, setName] = useState(prefillName);
+  const [fieldId, setFieldId] = useState("");
+  const [role, setRole] = useState("");
+  const [areaId, setAreaId] = useState("");
+  const [saving, setSaving] = useState(false);
 
   // ── Funnel instrumentation ────────────────────────────────────────────────
   // Nothing recorded a first-run before this, so "people probably stall at
@@ -160,78 +210,36 @@ export function FirstRunScreen({ onDone }: Props) {
   // finished — which step they last saw.
   //
   // No PII: step names, positions, counts and durations. Never the name, the
-  // photo, or anything typed into a field.
+  // role or anything typed into a field.
   const openedAt = useRef(Date.now());
   const stepAt = useRef(Date.now());
   const announced = useRef(false);
 
   useEffect(() => {
-    if (announced.current || !STEPS.length) return;
+    if (announced.current) return;
     announced.current = true;
     track("firstrun.start", { steps: STEPS.length, prefilled_name: prefillName });
-  }, [STEPS.length, prefillName]);
+  }, [prefillName]);
 
   useEffect(() => {
     // Runs after the effect above on mount, so `announced` is already true.
     if (!announced.current) return;
-    // `prev_seconds` is the time spent on the step just left, which is what
-    // turns "people leave at skills" into "people spend 40 seconds on skills and
-    // 3 seconds everywhere else".
+    // `prev_seconds` is the time spent on the step just left.
     track("firstrun.step", { step, i, of: STEPS.length, prev_seconds: spentSeconds() });
     stepAt.current = Date.now();
-  }, [step, i, STEPS.length]);
+  }, [step, i]);
 
   const spentSeconds = () => Math.round((Date.now() - stepAt.current) / 1000);
 
-  // ── Progress. Everything after "intro" is a slot; the account already filled
-  // one (name/email) so we open at ~1/n instead of zero.
-  const slots = STEPS.length - 1;
+  // ── Progress. The design's dot row, and the count behind the eyebrow, are
+  // both the real position in the real flow — nothing here is decorative.
+  const slots = STEPS.length;
   const filled =
-    (prefillName || name.trim() ? 1 : 0) +
-    (fields.length ? 1 : 0) +
-    (experience ? 1 : 0) +
-    (skills.length ? 1 : 0) +
-    (recent.trim() ? 1 : 0) +
-    1 + // "look" always has a default
-    1; // "photo" is optional — skipping it still counts as done, same as "look"
-  const pct = Math.min(1, Math.max(0.12, filled / slots));
+    (name.trim() || prefillName ? 1 : 0) +
+    (role.trim() || fieldId ? 1 : 0) +
+    (areaId ? 1 : 0);
 
-  const suggestedSkills = useMemo(() => skillsForFields(fields), [fields]);
-
-  const toggle = (list: string[], set: (v: string[]) => void, id: string, max = 99) => {
-    if (list.includes(id)) set(list.filter((x) => x !== id));
-    else if (list.length < max) set([...list, id]);
-  };
-
-  const addCustomSkill = () => {
-    const v = customSkill.trim();
-    if (v && !skills.includes(v)) {
-      setSkills([...skills, v]);
-      setCustomSkill("");
-      haptics.selection();
-    }
-  };
-
-  const canNext =
-    step === "intro" ||
-    step === "name" ||
-    step === "photo" ||
-    step === "look" ||
-    (step === "fields" && fields.length > 0) ||
-    (step === "experience" && !!experience) ||
-    (step === "skills" && skills.length > 0) ||
-    (step === "recent"); // recent is optional-ish
-
-  const back = () => {
-    haptics.selection();
-    if (i > 0) setI(i - 1);
-    else {
-      // Leaving from the very first screen — the cheapest place in the whole
-      // funnel to lose someone, because they haven't created an account yet.
-      track("firstrun.leave", { step, i, of: STEPS.length, via: "back", seconds: spentSeconds() });
-      onDone();
-    }
-  };
+  const isLast = i === STEPS.length - 1;
 
   const finish = async (skipped: boolean) => {
     if (saving) return;
@@ -247,23 +255,23 @@ export function FirstRunScreen({ onDone }: Props) {
     setSaving(true);
     haptics.selection();
     try {
-      const skillNames = skills.join(", ");
-      const expLine = experience ? `${experienceLabel(experience, "en")}. ` : "";
+      const area = AREA_PRESETS.find((a) => a.id === areaId);
       const next: CareerProfile = {
         ...EMPTY_PROFILE,
         fullName: name.trim() || prefillName,
         email,
-        headline: fieldLabels(fields, "en"),
-        skills: skillNames,
-        experience: (expLine + recent.trim()).trim(),
+        // What they typed wins; a preset answers the same question with the
+        // app's own label for that field.
+        headline: role.trim() || fieldLabels(fieldId ? [fieldId] : [], lang),
+        // The design's third question is about the area they are aiming at,
+        // which is the profile's `location`.
+        location: area ? area.label[lang] : "",
       };
-      const hasSomething = next.fullName || next.headline || next.skills || next.experience;
+      const hasSomething = next.fullName || next.headline || next.location;
       if (!skipped || hasSomething) {
         const { updatedAt, ...rest } = next;
         await saveProfile(rest);
       }
-      if (photo) await setPendingOnboardingPhoto(photo);
-      await setDefaultTemplate(template).catch(() => {});
       await setSecureItem(FIRST_RUN_KEY, "true").catch(() => {});
     } catch {
       // onDone() below still runs either way (finally) — first-run is a
@@ -275,263 +283,127 @@ export function FirstRunScreen({ onDone }: Props) {
     }
   };
 
-  // ── Step body ───────────────────────────────────────────────────────────────
+  // ── The question on this step ──────────────────────────────────────────────
+  const copy: Record<StepId, { eyebrow: string; title: string; body: string; hint?: string }> = useMemo(
+    () => ({
+      name: {
+        eyebrow: t(`Step 1 of ${slots}`, `Hatua ya 1 Kati ya ${slots}`),
+        title: t("What's your name?", "Jina lako ni nani?"),
+        body: t(
+          "Sumaiya will put it on your CV and on your cover letters.",
+          "Sumaiya ataitumia kwenye CV yako na kwenye barua za maombi.",
+        ),
+        hint: t(
+          "Next: the field or the role you are aiming for",
+          "Hatua inayofuata inalenga fani au cheo unacholenga",
+        ),
+      },
+      role: {
+        eyebrow: t(`Step 2 of ${slots}`, `Hatua ya 2 Kati ya ${slots}`),
+        // The design's own question, verbatim.
+        title: t(
+          "What kind of job are you looking for, or what is your field?",
+          "Je, unatafuta kazi ya aina gani au fani yako ni ipi?",
+        ),
+        body: t(
+          "Sumaiya will prepare a profile and CV designs that match your profession.",
+          "Sumaiya ataandaa wasifu na miundo ya CV inayolingana na taaluma yako.",
+        ),
+        hint: t(
+          "The last step is about the country (Tanzania / East Africa / The Gulf)",
+          "Hatua ya mwisho inalenga nchi (Tanzania / Afrika Mashariki / Ghuba)",
+        ),
+      },
+      country: {
+        eyebrow: t(`Step 3 of ${slots}`, `Hatua ya 3 Kati ya ${slots}`),
+        title: t("Where are you looking for work?", "Unatafuta kazi wapi?"),
+        body: t(
+          "Sumaiya will aim your CV at employers in that area.",
+          "Sumaiya atalenga CV yako kwa waajiri wa eneo hilo.",
+        ),
+      },
+    }),
+    [t, slots],
+  );
+  const m = copy[step];
 
   const body = (() => {
     switch (step) {
-      case "intro":
-        return (
-          <View style={{ alignItems: "center", gap: 18, marginTop: 12 }}>
-            {/* The shared well — MARK_WELL's size/radius/mark and the accent
-                tint, not a locally-invented 116/r36/mark-62 container (§3). */}
-            <MarkWell state="idle" />
-          </View>
-        );
       case "name":
         return (
-          <TextField
+          <StepField
             label={t("Your name", "Jina lako")}
             value={name}
             onChangeText={setName}
-            autoCapitalize="words"
             autoFocus
-            returnKeyType="next"
-            onSubmitEditing={() => canNext && setI(i + 1)}
           />
         );
-      case "photo":
+      case "role":
         return (
-          <View style={{ alignItems: "center", gap: 16, marginTop: 8 }}>
-            <Pressable
-              disabled={photoBusy}
-              onPress={async () => {
-                haptics.light();
-                setPhotoBusy(true);
-                try {
-                  const p = await pickAndCompressPhoto();
-                  if (p) setPhoto(p);
-                } catch {
-                  haptics.error();
-                  dialog.alert(t("Couldn't use that photo", "Imeshindwa kutumia picha hiyo"), t("Try a different one — or skip this for now.", "Jaribu nyingine — au ruka kwa sasa."));
-                } finally {
-                  setPhotoBusy(false);
-                }
-              }}
-              style={{
-                width: 116, height: 116, borderRadius: 58, overflow: "hidden",
-                alignItems: "center", justifyContent: "center",
-                backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border,
-              }}
-            >
-              {photoBusy ? (
-                <ActivityIndicator color={c.accent} />
-              ) : photo ? (
-                <Image source={{ uri: photo }} style={{ width: 116, height: 116 }} resizeMode="cover" />
-              ) : (
-                <Icon name="camera" size={30} color={c.textMuted} />
-              )}
-            </Pressable>
-            <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>
-              {photo ? t("Change photo", "Badilisha picha") : t("Add a photo", "Ongeza picha")}
-            </Text>
-            <Text style={{ color: c.textMuted, fontSize: 12.5, textAlign: "center", maxWidth: 260 }}>
-              {t("Totally optional — skip it now and add one later from your CV editor.", "Si lazima kabisa — ruka sasa na uongeze baadaye kwenye kihariri cha CV.")}
-            </Text>
-          </View>
-        );
-      case "fields":
-        return (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
-            {CAREER_FIELDS.map((f) => (
-              <Chip
-                key={f.id}
-                label={f.label[lang]}
-                active={fields.includes(f.id)}
-                onPress={() => toggle(fields, setFields, f.id, 3)}
-              />
-            ))}
-          </View>
-        );
-      case "experience":
-        return (
-          <View style={{ gap: 10 }}>
-            {EXPERIENCE_LEVELS.map((e) => {
-              const active = experience === e.id;
-              return (
-                <Pressable
-                  key={e.id}
-                  onPress={() => { haptics.selection(); setExperience(e.id); }}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    paddingVertical: 15,
-                    paddingHorizontal: 18,
-                    borderRadius: 16,
-                    borderWidth: 1.5,
-                    borderColor: active ? c.accent : c.border,
-                    backgroundColor: active ? c.accent + "12" : c.bgElevated,
-                  }}
-                >
-                  <Text style={{ color: active ? c.accent : c.text, fontSize: 15.5, fontWeight: "700" }}>
-                    {e.label[lang]}
-                  </Text>
-                  {active ? <Icon name="check" size={18} color={c.accent} /> : null}
-                </Pressable>
-              );
-            })}
-          </View>
-        );
-      case "skills":
-        return (
-          <View style={{ gap: 14 }}>
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 9 }}>
-              {suggestedSkills.map((s) => (
-                <Chip key={s} label={s} active={skills.includes(s)} onPress={() => toggle(skills, setSkills, s)} />
-              ))}
-              {skills
-                .filter((s) => !suggestedSkills.includes(s))
-                .map((s) => (
-                  <Chip key={s} label={s} active onPress={() => toggle(skills, setSkills, s)} />
-                ))}
-            </View>
-            <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-              <View style={{ flex: 1 }}>
-                <TextField
-                  placeholder={t("Add another skill", "Ongeza ujuzi mwingine")}
-                  value={customSkill}
-                  onChangeText={setCustomSkill}
-                  returnKeyType="done"
-                  onSubmitEditing={addCustomSkill}
+          <View style={{ gap: 16 }}>
+            <StepField
+              label={t("The field or role you are aiming for", "Fani au Cheo unacholenga")}
+              value={role}
+              onChangeText={setRole}
+              placeholder={t("e.g. Marketing Officer", "Mfano: Afisa Masoko (Marketing Officer)")}
+              autoFocus
+            />
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {ROLE_PRESETS.map((p) => (
+                <Chip
+                  key={p.id}
+                  label={p.label[lang]}
+                  active={fieldId === p.id}
+                  // One target, not three: the question is singular, and the
+                  // design shows exactly one pill selected.
+                  onPress={() => setFieldId((cur) => (cur === p.id ? "" : p.id))}
                 />
-              </View>
-              <Pressable
-                onPress={addCustomSkill}
-                style={{ width: 46, height: 46, borderRadius: 12, backgroundColor: c.accent + "16", alignItems: "center", justifyContent: "center" }}
-              >
-                <Icon name="plus" size={20} color={c.accent} />
-              </Pressable>
+              ))}
             </View>
           </View>
         );
-      case "recent":
+      case "country":
         return (
-          <TextField
-            value={recent}
-            onChangeText={setRecent}
-            placeholder={t(
-              "Example: Storekeeper at Ubungo Distributors, 2021–2024. Ran stock, GRNs and a team of 4.",
-              "Mfano: Mfanyakazi wa Ghala, Ubungo Distributors, 2021–2024. Nilisimamia bidhaa, GRN na timu ya watu 4.",
-            )}
-            multiline
-            numberOfLines={5}
-            inputStyle={{ minHeight: 120, textAlignVertical: "top" }}
-            autoFocus
-          />
-        );
-      case "look":
-        return (
-          <View style={{ gap: 14 }}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 18, paddingVertical: 6, paddingHorizontal: 2 }}>
-              {lookTemplates.map((tpl) => {
-                const locked = tpl.tier === "premium" && !premium;
-                const active = !locked && template === tpl.id;
-                return (
-                  <Pressable
-                    key={tpl.id}
-                    onPress={() => {
-                      haptics.selection();
-                      if (locked) { setPremiumOpen(true); return; }
-                      setTemplate(tpl.id);
-                    }}
-                    style={{ alignItems: "center", gap: 8, width: 116 }}
-                  >
-                    <View style={{ padding: 4, borderRadius: 12, borderWidth: 3, borderColor: active ? c.accent : "transparent", opacity: locked ? 0.6 : 1 }}>
-                      <TemplateThumb id={tpl.id} accent={c.accent} width={104} />
-                    </View>
-                    <Text style={{ color: active ? c.accent : c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
-                      {lang === "sw" ? tpl.name.sw : tpl.name.en}
-                    </Text>
-                    {locked ? (
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-                        <Icon name="lock" size={10} color={c.textMuted} />
-                        <Text style={{ color: c.textMuted, fontSize: 10, fontWeight: "700" }}>Premium</Text>
-                      </View>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            <Pressable
-              onPress={() => { haptics.selection(); setGalleryOpen(true); }}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-                paddingVertical: 11,
-                borderRadius: 12,
-                borderWidth: 1.5,
-                borderColor: c.border,
-              }}
-            >
-              <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "800" }}>
-                {t(`See all ${ALL_TEMPLATES.length} designs`, `Ona miundo yote ${ALL_TEMPLATES.length}`)}
-              </Text>
-              <Icon name="chevron-right" size={16} color={c.accent} />
-            </Pressable>
+          <View style={{ gap: 16 }}>
+            <Text style={{ color: c.textBody, fontSize: 12, fontFamily: FONT.semibold }}>
+              {t("The area you are aiming for", "Eneo unalolenga")}
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              {AREA_PRESETS.map((p) => (
+                <Chip
+                  key={p.id}
+                  label={p.label[lang]}
+                  active={areaId === p.id}
+                  onPress={() => setAreaId((cur) => (cur === p.id ? "" : p.id))}
+                />
+              ))}
+            </View>
           </View>
         );
     }
   })();
-
-  const meta: Record<StepId, { title: { en: string; sw: string }; hint?: { en: string; sw: string } }> = {
-    intro: {
-      title: { en: "Let's set you up", sw: "Tukuandae" },
-      hint: {
-        en: "Six quick taps so I start knowing you — no typing your whole history.",
-        sw: "Migusiko sita mifupi ili nianze kukufahamu — bila kuandika historia yote.",
-      },
-    },
-    name: { title: { en: "What's your name?", sw: "Jina lako ni nani?" } },
-    photo: {
-      title: { en: "Add a profile photo?", sw: "Ongeza picha ya wasifu?" },
-      hint: { en: "Some CV looks show it — you can skip this.", sw: "Baadhi ya miundo ya CV inaonyesha picha — unaweza kuruka hii." },
-    },
-    fields: {
-      title: { en: "What do you work in?", sw: "Unafanya kazi katika nini?" },
-      hint: { en: "Pick up to 3.", sw: "Chagua hadi 3." },
-    },
-    experience: { title: { en: "How much experience?", sw: "Una uzoefu kiasi gani?" } },
-    skills: {
-      title: { en: "What are you good at?", sw: "Unafanya nini vizuri?" },
-      hint: { en: "Tap the ones that fit, add your own.", sw: "Gusa zinazokufaa, ongeza zako." },
-    },
-    recent: {
-      title: { en: "Your most recent job", sw: "Kazi yako ya karibuni" },
-      hint: { en: "Role, employer, years, and what you did. One or two lines.", sw: "Cheo, mwajiri, miaka, na ulichofanya. Mstari mmoja au miwili." },
-    },
-    look: {
-      title: { en: "Pick your look", sw: "Chagua muonekano wako" },
-      hint: { en: "You can change this any time.", sw: "Unaweza kubadilisha wakati wowote." },
-    },
-  };
-  const m = meta[step];
-  const isLast = i === STEPS.length - 1;
-  const isIntro = step === "intro";
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style="dark" />
       <View style={{ height: insets.top + 10 }} />
 
-      {/* progress + skip */}
-      <View style={{ flexDirection: "row", alignItems: "center", paddingLeft: 20 + insets.left, paddingRight: 20 + insets.right, gap: 12 }}>
-        <View style={{ flex: 1 }}>
-          <ProgressBar value={pct} />
-        </View>
+      {/* progress + the one way out. The design's exit is always visible on
+          every step and always does the same thing: keep whatever is answered
+          and go. */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingLeft: 24 + insets.left,
+          paddingRight: 24 + insets.right,
+        }}
+      >
+        <StepDots total={STEPS.length} current={i} />
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("Later", "Baadaye")}
           onPress={() => {
             // "Skip" is a legitimate, well-placed exit — but it is also the
             // clearest signal we get that the step it was pressed on was one
@@ -539,86 +411,116 @@ export function FirstRunScreen({ onDone }: Props) {
             track("firstrun.leave", { step, i, of: STEPS.length, via: "skip", seconds: spentSeconds() });
             void finish(true);
           }}
-          hitSlop={10}
+          style={{ minHeight: 44, justifyContent: "center", paddingLeft: 12 }}
         >
-          <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Skip", "Ruka")}</Text>
+          <Text style={{ color: c.textMuted, fontSize: 13.5, fontFamily: FONT.semibold }}>
+            {t("Later", "Baadaye")}
+          </Text>
         </Pressable>
       </View>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={keyboardAvoidingBehavior()} keyboardVerticalOffset={insets.top + 44}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={keyboardAvoidingBehavior()}
+        keyboardVerticalOffset={insets.top + 44}
+      >
         <ScrollView
-          contentContainerStyle={{ padding: 24, paddingLeft: 24 + insets.left, paddingRight: 24 + insets.right, paddingTop: 28, flexGrow: 1 }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            gap: 24,
+            padding: 24,
+            paddingLeft: 24 + insets.left,
+            paddingRight: 24 + insets.right,
+          }}
           keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View key={step} entering={FadeInRight.duration(260)} exiting={FadeOutLeft.duration(150)}>
-            <Text style={{ color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: -0.5 }}>
-              {m.title[lang]}
-            </Text>
-            {m.hint ? (
-              <Text style={{ color: c.textBody, fontSize: 14, lineHeight: 20, marginTop: 8, marginBottom: 22 }}>
-                {m.hint[lang]}
+          <Animated.View
+            key={step}
+            entering={FadeInRight.duration(260)}
+            exiting={FadeOutLeft.duration(150)}
+            style={{ gap: 24 }}
+          >
+            <View style={{ gap: 8 }}>
+              <Text
+                style={{
+                  color: c.accent,
+                  fontSize: 12,
+                  fontFamily: FONT.mono,
+                  letterSpacing: 1,
+                  textTransform: "uppercase",
+                }}
+              >
+                {m.eyebrow}
               </Text>
-            ) : (
-              <View style={{ height: 22 }} />
-            )}
+              <Text
+                style={{
+                  color: c.text,
+                  fontSize: 24,
+                  lineHeight: 30,
+                  fontFamily: FONT.display,
+                  letterSpacing: -0.5,
+                }}
+              >
+                {m.title}
+              </Text>
+              <Text
+                style={{
+                  color: c.textBody,
+                  fontSize: 14,
+                  lineHeight: 20,
+                  fontFamily: FONT.regular,
+                }}
+              >
+                {m.body}
+              </Text>
+            </View>
+
             {body}
           </Animated.View>
         </ScrollView>
 
-        {/* sticky footer — the primary button is always reachable above the keyboard */}
-        <Animated.View
-          entering={FadeIn}
+        {/* sticky footer — the primary button is always reachable above the
+            keyboard, with the line that says what is still to come. */}
+        <View
           style={{
-            paddingLeft: 20 + insets.left,
-            paddingRight: 20 + insets.right,
+            paddingLeft: 24 + insets.left,
+            paddingRight: 24 + insets.right,
             paddingTop: 12,
-            paddingBottom: insets.bottom + 14,
-            borderTopWidth: 1,
-            borderTopColor: c.border,
-            backgroundColor: c.bg,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 12,
+            paddingBottom: insets.bottom + 16,
+            gap: 8,
           }}
         >
-          {i > 0 ? (
-            <Pressable onPress={back} hitSlop={8} style={{ padding: 10 }}>
-              <Icon name="arrow-left" size={20} color={c.textMuted} />
-            </Pressable>
-          ) : null}
-          <View style={{ flex: 1 }}>
-            <Button
-              label={isLast ? t("Finish", "Maliza") : isIntro ? t("Let's go", "Twende") : t("Continue", "Endelea")}
-              size="lg"
-              loading={saving}
-              disabled={!canNext}
-              onPress={() => {
-                haptics.selection();
-                if (isLast) void finish(false);
-                else setI(i + 1);
+          <Button
+            label={isLast ? t("Finish", "Maliza") : t("Continue", "Endelea")}
+            size="lg"
+            loading={saving}
+            rightIcon={
+              isLast ? undefined : <Icon name="chevron-right" size={18} color={c.accentText} />
+            }
+            onPress={() => {
+              haptics.selection();
+              if (isLast) void finish(false);
+              else setI(i + 1);
+            }}
+          />
+          {m.hint ? (
+            <Text
+              style={{
+                color: c.textMuted,
+                fontSize: 11,
+                lineHeight: 16,
+                textAlign: "center",
+                fontFamily: FONT.regular,
               }}
-            />
-          </View>
-        </Animated.View>
+            >
+              {m.hint}
+            </Text>
+          ) : null}
+        </View>
       </KeyboardAvoidingView>
-
-      <TemplateGallery
-        visible={galleryOpen}
-        selected={template}
-        onSelect={(id) => {
-          setTemplate(id);
-          toast.show(
-            t(
-              "This design has been applied to the CV you're creating.",
-              "Mtindo huu umewekwa kwenye CV unayounda.",
-            ),
-          );
-        }}
-        onClose={() => setGalleryOpen(false)}
-      />
-      <PremiumSheet visible={premiumOpen} onClose={() => setPremiumOpen(false)} feature="templates" />
     </View>
   );
 }

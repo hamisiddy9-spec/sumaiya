@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
   cancelAnimation,
   useAnimatedStyle,
@@ -11,33 +12,38 @@ import { useThemeColors } from "../components/ui/theme";
 import { EASE, MOTION, staggerDelayMs, useMotionReduced } from "../components/ui/motion";
 import { MarkWell } from "../components/mark-well";
 import type { SumaiyaMarkState } from "../components/sumaiya-mark";
+import { FONT } from "../components/home";
 import { useLang } from "../lib/i18n";
 
 /**
  * Beat 1 of the welcoming path — the mark, in the well, with its name.
  *
- * This screen used to be its own effect: the mark at 52 in a solid 96 square on
- * `Easing.back(1.6)` (the app's only overshoot) with a two-cycle pulse layered
- * on the container *while* the mark breathed inside it, then the language stage
- * rendered the same mark at 72 in a tinted 128 square, then the slides at 78 in
- * a 148 square. Four sizes, three containers, three curve families, one cold
- * start — which is what made the flow read as several effects in a queue.
+ * The design (A1 · Mwanzo) is one centred column on the cream surface — the
+ * well, the word `Sumaiya`, one line of what this is, and one line at the foot
+ * saying what it costs you (nothing, and no network). Nothing else: no spinner,
+ * no version string, no bell. The screen used to be its own effect (the mark at
+ * 52 in a solid 96 square on `Easing.back(1.6)` with a two-cycle pulse layered
+ * on the container *while* the mark breathed inside it); the flow's four wells
+ * are gone and `MarkWell` is the ONE container every stage of the cold start
+ * puts the mark in — same size, same mark, same tint, so the hand-off to the
+ * language stage is the same object still in place rather than a second one
+ * arriving.
  *
- * Now it is the first beat of ONE effect. The mark is `MarkWell`: the same
- * container, the same mark, the same scale the language stage and the slides
- * use. Nothing here scales: the well and the word arrive by opacity and a
- * `MOTION.rise`, on the shared decelerate curve, and the mark's own single
- * breath does the breathing (it is the only scale animation in the frame, so it
- * reads as one object breathing rather than two stacked effects).
+ * Nothing here waits on the wire. The root navigator renders this while the
+ * session and the first-run flag are still being read, and it renders the same
+ * frame whether that read takes 40 ms or fails outright — a splash screen that
+ * needs a request is a black screen on a phone with no data.
  *
- * Cost on a Redmi/Android-Go class phone: two timed shared values, both
- * cancelled on unmount, and a frame callback that stops when the mark settles
- * to `idle`. There is no looping animation left on this screen — the previous
- * container pulse looped twice against a mark that was already breathing.
+ * The entrance is opacity plus a `MOTION.rise` on the shared decelerate curve —
+ * never a scale, because the mark's size is the one thing the path holds
+ * constant — and the mark's own single breath does the breathing. Reduce Motion
+ * lands both at their resting frame (§3/§4) and `SumaiyaMark` reads the setting
+ * itself, so the well is simply the still version of the same object.
  */
 export function SplashScreen() {
   const c = useThemeColors();
   const { t } = useLang();
+  const insets = useSafeAreaInsets();
   const reduce = useMotionReduced();
   const well = useSharedValue(0);
   const word = useSharedValue(0);
@@ -55,9 +61,8 @@ export function SplashScreen() {
 
   useEffect(() => {
     // Reduce Motion: land everything at its resting state immediately. The
-    // splash still shows the mark, the word and the tagline — nothing about the
-    // screen depends on having watched it move — and `SumaiyaMark` reads the
-    // same setting itself, so the well is simply the resting frame.
+    // splash still shows the mark, the word and the lines under it — nothing
+    // about the screen depends on having watched it move.
     if (reduce) {
       well.value = 1;
       word.value = 1;
@@ -81,7 +86,7 @@ export function SplashScreen() {
   }, [reduce, well, word]);
 
   // One origin for everything entering the path: opacity plus a `rise`, never a
-  // scale — the mark's size is the one thing the path holds constant.
+  // scale.
   const wellStyle = useAnimatedStyle(() => ({
     opacity: well.value,
     transform: [{ translateY: (1 - well.value) * MOTION.rise }],
@@ -92,19 +97,74 @@ export function SplashScreen() {
   }));
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, alignItems: "center", justifyContent: "center", gap: 22 }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: c.bg,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+      }}
+    >
       <Animated.View style={wellStyle}>
         <MarkWell state={markState} />
       </Animated.View>
 
-      <Animated.View style={[wordStyle, { alignItems: "center", gap: 6 }]}>
-        <Text style={{ color: c.text, fontSize: 26, fontWeight: "800", letterSpacing: -0.5 }}>
+      <Animated.View style={[wordStyle, { alignItems: "center" }]}>
+        <Text
+          style={{
+            marginTop: 32,
+            color: c.text,
+            fontSize: 24,
+            fontFamily: FONT.display,
+            letterSpacing: -0.6,
+          }}
+        >
           Sumaiya
         </Text>
-        <Text style={{ color: c.textMuted, fontSize: 13, fontWeight: "600" }}>
-          {t("Your job companion", "Msaidizi wako wa kupata ajira")}
+        <Text
+          style={{
+            marginTop: 8,
+            maxWidth: 220,
+            color: c.textMuted,
+            fontSize: 12,
+            lineHeight: 17,
+            textAlign: "center",
+            fontFamily: FONT.regular,
+          }}
+        >
+          {t(
+            "The power of work in your pocket • Tanzania & East Africa",
+            "Uwezo wa kazi kiganjani mwako • Tanzania & Afrika Mashariki",
+          )}
         </Text>
       </Animated.View>
+
+      {/* The foot of the screen: the cost of the app, in one line. Static, not
+          part of the entrance — it is a statement about the product, not a step
+          of the greeting — and raised above the gesture bar on devices that
+          have one. */}
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: insets.bottom + 40,
+          paddingHorizontal: 32,
+        }}
+      >
+        <Text
+          style={{
+            color: c.textMuted,
+            fontSize: 11,
+            fontFamily: FONT.mono,
+            textAlign: "center",
+            opacity: 0.8,
+          }}
+        >
+          {t("On your device only • Offline", "Kifaa chako tu • Nje ya mtandao")}
+        </Text>
+      </View>
     </View>
   );
 }
