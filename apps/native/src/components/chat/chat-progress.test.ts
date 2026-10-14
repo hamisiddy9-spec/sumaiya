@@ -1,10 +1,23 @@
-import { buildTurnSteps, charCountLabel, currentStep, fileDetail, finishedSteps, receiptLabel, turnEndingOf } from "./chat-progress";
+import {
+  buildTurnSteps,
+  charCountLabel,
+  currentStep,
+  fileDetail,
+  finishedSteps,
+  RAIL_HEADER,
+  RAIL_STOP_MIN_DP,
+  receiptLabel,
+  stepRowTone,
+  stepStateChip,
+  turnEndingOf,
+  writtenCountLabel,
+} from "./chat-progress";
 
-describe("the progress rail's model (§3.3)", () => {
+describe("the progress rail's model (§3.3 + §9's vocabulary)", () => {
   it("names the steps it has not run yet instead of faking them", () => {
     const steps = buildTurnSteps({ received: true, awaiting: true });
-    expect(steps.map((s) => s.id)).toEqual(["received", "think"]);
-    expect(steps.map((s) => s.state)).toEqual(["done", "current"]);
+    expect(steps.map((s) => s.id)).toEqual(["write", "deliver"]);
+    expect(steps.map((s) => s.state)).toEqual(["current", "pending"]);
   });
 
   it("never has more than one current step, and everything before it is done", () => {
@@ -13,6 +26,8 @@ describe("the progress rail's model (§3.3)", () => {
       { received: true, awaiting: false, answering: true },
       { received: true, awaiting: false, answering: false, files: [{ name: "a.pdf" }] },
       { received: true, awaiting: false, answering: true, outcome: "ok" as const },
+      { received: true, awaiting: true, files: [{ name: "cv.pdf", chars: 1204 }] },
+      { received: true, awaiting: false, answering: false, outcome: "stopped" as const, files: [{ name: "cv.pdf", chars: 12 }] },
     ];
     for (const c of cases) {
       const steps = buildTurnSteps(c);
@@ -33,7 +48,7 @@ describe("the progress rail's model (§3.3)", () => {
       outcome: "ok",
     });
     expect(steps.length).toBeLessThanOrEqual(4);
-    expect(steps.map((s) => s.id)).toEqual(["received", "read", "think", "answer"]);
+    expect(steps.map((s) => s.id)).toEqual(["read", "write", "match", "deliver"]);
   });
 
   it("reports the file's real count, and the real reason when it failed", () => {
@@ -62,15 +77,15 @@ describe("the progress rail's model (§3.3)", () => {
       awaiting: true,
       files: [{ name: "cv.pdf", error: "haikuwa maandishi" }],
     });
-    expect(steps.map((s) => s.id)).toEqual(["received", "read"]);
-    expect(steps.some((s) => s.id === "think")).toBe(false);
+    expect(steps.map((s) => s.id)).toEqual(["read"]);
+    expect(steps.some((s) => s.id === "write")).toBe(false);
   });
 
   it("counts only the steps that really ran, and the bar follows it", () => {
     const steps = buildTurnSteps({ received: true, awaiting: true, files: [{ name: "cv.pdf", chars: 10 }] });
-    expect(finishedSteps(steps)).toBe(2);
-    expect(currentStep(steps)?.id).toBe("think");
-    expect(receiptLabel(steps)).toBe("Nilifanya hivi: hatua 2");
+    expect(finishedSteps(steps)).toBe(1);
+    expect(currentStep(steps)?.id).toBe("write");
+    expect(receiptLabel(steps)).toBe("Nilifanya hivi: hatua 1");
   });
 
   it("ends on a terminal state — no rail that forgets to stop", () => {
@@ -81,6 +96,80 @@ describe("the progress rail's model (§3.3)", () => {
     const failed = buildTurnSteps({ received: true, awaiting: false, answering: false, outcome: "failed" });
     expect(currentStep(failed)).toBeUndefined();
     expect(failed.some((s) => s.state === "failed")).toBe(true);
+  });
+});
+
+/**
+ * §9's own content, asserted word for word. The guide adopts Stitch's layout,
+ * hierarchy and copy, so the rail's vocabulary and its state chips are not a
+ * matter of taste — and a later edit that drifts back to a generic
+ * ("I'm thinking about your request") vocabulary fails here.
+ */
+describe("§9's vocabulary, row for row", () => {
+  const label = (c: Parameters<typeof buildTurnSteps>[0], id: string) =>
+    buildTurnSteps(c).find((s) => s.id === id)?.label;
+
+  it("writes the CV, matches it to the advert, prepares the letter", () => {
+    const c = { received: true, awaiting: true, files: [{ name: "tangazo.pdf", chars: 900 }] };
+    expect(label(c, "write")).toEqual({ en: "Writing your CV", sw: "Kuandika CV yako" });
+    expect(label(c, "match")).toEqual({ en: "Matching it to the advert", sw: "Kuilinganisha na tangazo" });
+    expect(label(c, "deliver")).toEqual({ en: "Preparing your cover letter", sw: "Kuandaa barua ya maombi" });
+  });
+
+  it("keeps the file row the design has no row for, with its real count", () => {
+    const c = { received: true, awaiting: true, files: [{ name: "tangazo.pdf", chars: 900 }] };
+    const read = buildTurnSteps(c).find((s) => s.id === "read");
+    expect(read?.label.sw).toBe("Ninasoma faili yako");
+    expect(read?.detail).toBe("herufi 900");
+  });
+
+  it("names a match against an advert only when there IS one", () => {
+    const withFile = buildTurnSteps({ received: true, awaiting: true, files: [{ name: "tangazo.pdf" }] });
+    expect(withFile.some((s) => s.id === "match")).toBe(true);
+    const withoutFile = buildTurnSteps({ received: true, awaiting: true });
+    expect(withoutFile.some((s) => s.id === "match")).toBe(false);
+  });
+
+  it("prints §9's own sub-line, and only from a count somebody really has", () => {
+    expect(writtenCountLabel(2340)).toBe("herufi 2,340 zimekamilika");
+
+    const counted = buildTurnSteps({ received: true, awaiting: false, answering: true, outcome: "ok", writtenChars: 2340 });
+    expect(counted.find((s) => s.id === "write")?.detail).toBe("herufi 2,340 zimekamilika");
+
+    // No count reported → no number. Never a placeholder, never an estimate.
+    const uncounted = buildTurnSteps({ received: true, awaiting: false, answering: true, outcome: "ok" });
+    expect(uncounted.find((s) => s.id === "write")?.detail).toBeUndefined();
+  });
+
+  it("carries the design's state chips, and a real failure is never softened", () => {
+    expect(stepStateChip("done")).toEqual({ en: "READY", sw: "TAYARI" });
+    expect(stepStateChip("current")).toEqual({ en: "CHECKING", sw: "INAKAGUA" });
+    expect(stepStateChip("pending")).toEqual({ en: "LATER", sw: "BAADAYE" });
+    expect(stepStateChip("failed").sw).not.toBe("BAADAYE");
+
+    const failedRead = buildTurnSteps({ received: true, awaiting: true, files: [{ name: "cv.pdf", error: "si maandishi" }] });
+    expect(stepStateChip(failedRead[0].state).sw).toBe("IMESHINDIKANA");
+  });
+
+  it("gives every state its own row wash (§9's three, plus the failure)", () => {
+    expect(stepRowTone("done")).toBe("well");
+    expect(stepRowTone("current")).toBe("tint");
+    expect(stepRowTone("pending")).toBe("plain");
+    expect(stepRowTone("failed")).toBe("error");
+  });
+
+  it("never marks the CV written while the request is still out", () => {
+    const steps = buildTurnSteps({ received: true, awaiting: true });
+    expect(steps.find((s) => s.id === "write")?.state).toBe("current");
+    expect(finishedSteps(steps)).toBe(0);
+  });
+
+  it("says what is happening, in the design's own sentence, and keeps `Acha` at the §8 floor", () => {
+    expect(RAIL_HEADER.sw).toBe("Sumaiya anaandika…");
+    expect(RAIL_HEADER.en).not.toBe(RAIL_HEADER.sw);
+    // §8: no tap target below 44 dp — the stop control is the smallest one the
+    // design allows, and it is never smaller than the floor.
+    expect(RAIL_STOP_MIN_DP).toBeGreaterThanOrEqual(44);
   });
 });
 
@@ -134,7 +223,7 @@ describe("the rail never claims an answer it did not receive", () => {
         ending: turnEndingOf(reply),
       });
       const last = steps[steps.length - 1];
-      expect(last.id).toBe("answer");
+      expect(last.id).toBe("deliver");
       expect(last.state).toBe("done");
       expect(last.label[lang]).not.toBe(answerLabel);
       expect(last.label.sw).toBe("Nimekuuliza kitu");
@@ -157,5 +246,17 @@ describe("the rail never claims an answer it did not receive", () => {
   it("makes no answer claim when the caller never reported how the reply read", () => {
     const steps = buildTurnSteps({ received: true, awaiting: false, answering: true, outcome: "ok" });
     expect(steps[steps.length - 1].label.sw).toBe("Nimejibu");
+  });
+
+  it("does not name the letter as written when the turn asked a question instead", () => {
+    const steps = buildTurnSteps({
+      received: true,
+      awaiting: false,
+      answering: true,
+      outcome: "ok",
+      ending: "question",
+    });
+    // The plan's own words are gone the moment the turn ends without one.
+    expect(steps.some((s) => s.label.sw === "Kuandaa barua ya maombi")).toBe(false);
   });
 });

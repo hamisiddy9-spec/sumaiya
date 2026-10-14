@@ -1,12 +1,19 @@
 /**
- * The progress rail's model — §3.3 of CHATBOX-REDESIGN-2026-09-20.md.
+ * The progress rail's model — §3.3 of CHATBOX-REDESIGN-2026-09-20.md, with the
+ * step vocabulary the design guide pins in **§9 THE PROCESSING SURFACE**.
  *
- * The rail exists because of a measured harm, on the device, tonight: a user who
+ * The rail exists because of a measured harm, on the device: a user who
  * received nothing re-sent `Hi` four times, and the three-dot bubble they were
  * looking at is identical whether the request is healthy or dead. Re-sending on
  * a metered connection costs them money, so the fix is not "a nicer spinner" —
  * it is a small, **closed set of real steps**, each emitted when the work behind
  * it actually happened.
+ *
+ * §9's content is the design's, verbatim, and it is what this file now builds:
+ *
+ *   ✓ Kuandika CV yako        herufi 2,340 zimekamilika   TAYARI
+ *   △ Kuilinganisha na tangazo Inachanganua ujuzi wa…     INAKAGUA
+ *   ○ Kuandaa barua ya maombi  Itaundwa kwa Kiswahili…    BAADAYE
  *
  * The honesty rules the model enforces, from the research quoted in §3.3:
  *   - every line is emitted by a real event (there is no timer here at all);
@@ -15,13 +22,16 @@
  *     because a named future step is a plan, not a silence;
  *   - exactly one step is `current` at a time, everything before it is `done`;
  *   - a step that fails says so and stops the run (it does not pretend to
- *     continue to the next one).
+ *     continue to the next one);
+ *   - **every number is a real one**: the design's own sub-line
+ *     (`herufi 2,340 zimekamilika`) is only ever printed from a count the caller
+ *     genuinely has. Absent, the sub-line is absent — never a placeholder.
  *
  * Pure: no React, no Reanimated, no i18n. `chat-progress.test.ts` asserts the
  * invariants, and the component that renders this is a renderer only.
  */
 
-export type ChatStepId = "received" | "read" | "think" | "answer";
+export type ChatStepId = "read" | "write" | "match" | "deliver";
 
 export type ChatStepState = "done" | "current" | "pending" | "failed";
 
@@ -55,6 +65,79 @@ const ENDED_LABELS: Record<TurnEnding, { en: string; sw: string }> = {
   other: { en: "I've replied", sw: "Nimejibu" },
 };
 
+/**
+ * §9's step vocabulary, in the design's order.
+ *
+ * `write` and `match` are the design's own words for the work (`Kuandika CV
+ * yako`, `Kuilinganisha na tangazo`); `deliver` carries the design's named next
+ * deliverable (`Kuandaa barua ya maombi`) **while it is still a plan**, and is
+ * replaced by the honest ending line (`Hii hapa jibu lako` / `Nimekuuliza kitu`)
+ * the moment the turn is over — so the row names the work without ever claiming
+ * a letter that was not written.
+ *
+ * `read` is the app's own step and it is kept: the design has no row for the
+ * file the user hands over, and it is the one row that carries a real count of
+ * something that really happened (`herufi 1,204`).
+ */
+const PLAN_LABELS: Record<ChatStepId, { en: string; sw: string }> = {
+  read: { en: "I'm reading your file", sw: "Ninasoma faili yako" },
+  write: { en: "Writing your CV", sw: "Kuandika CV yako" },
+  match: { en: "Matching it to the advert", sw: "Kuilinganisha na tangazo" },
+  deliver: { en: "Preparing your cover letter", sw: "Kuandaa barua ya maombi" },
+};
+
+/**
+ * §9's header sentence — the panel says *what is happening*, in words, from the
+ * first second. Exported so the design's own string is testable without a device.
+ */
+export const RAIL_HEADER = { en: "Sumaiya is writing…", sw: "Sumaiya anaandika…" } as const;
+
+/**
+ * §8's tap floor, and the design's own size for the `Acha` control (§9 puts it
+ * in the header, beside the elapsed time, from the first second).
+ */
+export const RAIL_STOP_MIN_DP = 44;
+
+/**
+ * §9's state chips — one word per real state, and the words are the design's.
+ *
+ * The design has no chip for a step that really failed; this one is not
+ * softened into `BAADAYE` (that would be the lie the rail exists to prevent).
+ */
+const STATE_CHIPS: Record<ChatStepState, { en: string; sw: string }> = {
+  done: { en: "READY", sw: "TAYARI" },
+  current: { en: "CHECKING", sw: "INAKAGUA" },
+  pending: { en: "LATER", sw: "BAADAYE" },
+  failed: { en: "FAILED", sw: "IMESHINDIKANA" },
+};
+
+/** The chip for a row's real state. */
+export function stepStateChip(state: ChatStepState): { en: string; sw: string } {
+  return STATE_CHIPS[state] ?? STATE_CHIPS.pending;
+}
+
+/**
+ * Which wash a row gets (§9 draws the done row darker than the card, the current
+ * row in an ember tint, and leaves the pending row on the card itself). Returned
+ * as a role rather than a colour so the palette stays in `ui/theme.ts` — and the
+ * guide's own substitution applies: the design's `#ffffff` pending row becomes
+ * the card, because §1 forbids white as a surface.
+ */
+export type StepRowTone = "well" | "tint" | "plain" | "error";
+
+export function stepRowTone(state: ChatStepState): StepRowTone {
+  switch (state) {
+    case "done":
+      return "well";
+    case "current":
+      return "tint";
+    case "failed":
+      return "error";
+    default:
+      return "plain";
+  }
+}
+
 /** What the client actually knows, from real events. Nothing here is inferred. */
 export interface TurnProgress {
   /** The user's turn is in the transcript. */
@@ -64,6 +147,12 @@ export interface TurnProgress {
    * and its line reports the real character count or the real failure.
    */
   files?: { name: string; chars?: number; error?: string }[];
+  /**
+   * The real count of characters she has written for this turn, when the caller
+   * has it. It powers §9's own sub-line (`herufi 2,340 zimekamilika`); left out,
+   * the sub-line is simply absent — the rail never estimates it.
+   */
+  writtenChars?: number;
   /** The request is out, the reply has not come back. */
   awaiting: boolean;
   /** The reply is in hand and its bubbles are being staged. Optional so a caller
@@ -78,14 +167,6 @@ export interface TurnProgress {
    */
   ending?: TurnEnding;
 }
-
-const LABELS: Record<ChatStepId, { en: string; sw: string }> = {
-  received: { en: "I've got your message", sw: "Nimeipokea ombi lako" },
-  read: { en: "I'm reading your file", sw: "Ninasoma faili yako" },
-  think: { en: "I'm thinking about your request", sw: "Ninalifikiri ombi lako" },
-  // Named while it is still pending — "a named future step is a plan, not a silence".
-  answer: { en: "I'll write your answer", sw: "Nitakuandikia jibu lako" },
-};
 
 /**
  * How does a reply READ — an answer, a question, or neither?
@@ -156,6 +237,14 @@ export function groupDigits(n: number): string {
   return n < 0 ? `-${out}` : out;
 }
 
+/**
+ * §9's row-1 sub-line, verbatim — `herufi 2,340 zimekamilika`. Built from the
+ * count the caller really has; there is no path to this string without one.
+ */
+export function writtenCountLabel(chars: number): string {
+  return `${charCountLabel(chars)} zimekamilika`;
+}
+
 /** The file line's sub-text: the real outcome, never a placeholder. */
 export function fileDetail(file: { chars?: number; error?: string }): string | undefined {
   if (file.error) return file.error;
@@ -164,10 +253,16 @@ export function fileDetail(file: { chars?: number; error?: string }): string | u
 }
 
 /**
- * Build the rail for one turn. The order is fixed — received → read (only when
- * there is a file) → think → answer — and the state of each row is derived from
- * the events, so the bar (`railBarProgress`) can never report more than has
- * happened.
+ * Build the rail for one turn.
+ *
+ * The order is §9's: the file she was handed (only when one was handed over),
+ * then `Kuandika CV yako` → `Kuilinganisha na tangazo` → `Kuandaa barua ya
+ * maombi`, and the state of each row is derived from the events, so the bar
+ * (`railBarProgress`) can never report more than has happened.
+ *
+ * The `received` row the rail used to open with is gone: the user's own bubble
+ * (and its delivery word) already states that the words arrived, and a row for
+ * it pushed the design's own third row out of the rail's four-row ceiling.
  */
 export function buildTurnSteps(p: TurnProgress): ChatStep[] {
   const files = p.files ?? [];
@@ -181,17 +276,16 @@ export function buildTurnSteps(p: TurnProgress): ChatStep[] {
 
   const done = p.outcome === "ok";
   const dead = p.outcome === "failed" || p.outcome === "stopped";
+  // The writing really is finished the moment the reply is in hand: `outcome`
+  // only lands after its bubbles have been staged.
+  const written = done || p.answering === true;
 
-  steps.push({
-    id: "received",
-    label: LABELS.received,
-    state: p.received ? "done" : "current",
-  });
-
+  // 1 · The document the user handed over. Only present when one was, and the
+  // only row that carries a count of something real.
   if (p.files !== undefined) {
     steps.push({
       id: "read",
-      label: LABELS.read,
+      label: PLAN_LABELS.read,
       detail: failedFile ? fileDetail(failedFile) : files.length === 1 ? fileDetail(files[0]) : undefined,
       state: failedFile
         ? "failed"
@@ -205,23 +299,33 @@ export function buildTurnSteps(p: TurnProgress): ChatStep[] {
 
   if (failedFile) return steps;
 
+  // 2 · §9 row 1 — `Kuandika CV yako`. Its sub-line is the real count of what
+  // she wrote, and only when the caller has one.
   steps.push({
-    id: "think",
-    label: LABELS.think,
-    state: done ? "done" : dead ? "failed" : p.awaiting ? "current" : "pending",
+    id: "write",
+    label: PLAN_LABELS.write,
+    detail: p.writtenChars !== undefined ? writtenCountLabel(p.writtenChars) : undefined,
+    state: written ? "done" : dead ? "failed" : p.awaiting ? "current" : "pending",
   });
 
-  // The last row is only worth naming once the model is answering, or when the
-  // turn is over — naming it while she is still reading is a menu, not a plan.
-  // Once the turn IS over the row's wording must match what came back: the rail
-  // claims an answer only when the reply carries one (see turnEndingOf).
-  if (p.answering || done) {
+  // 3 · §9 row 2 — `Kuilinganisha na tangazo`. Present only when there is an
+  // advert (or a CV) to match against: a row that names an advert must have one.
+  if (p.files !== undefined) {
     steps.push({
-      id: "answer",
-      label: done ? ENDED_LABELS[p.ending ?? "other"] : LABELS.answer,
-      state: done ? "done" : p.awaiting ? "pending" : "current",
+      id: "match",
+      label: PLAN_LABELS.match,
+      state: written ? "done" : "pending",
     });
   }
+
+  // 4 · §9 row 3 — the next deliverable, named while it is a plan. Once the
+  // turn is over the wording must match what came back: the rail claims an
+  // answer only when the reply carries one (see turnEndingOf).
+  steps.push({
+    id: "deliver",
+    label: done ? ENDED_LABELS[p.ending ?? "other"] : PLAN_LABELS.deliver,
+    state: done ? "done" : p.answering ? "current" : "pending",
+  });
 
   return steps;
 }

@@ -4,8 +4,8 @@ import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSeq
 import { Icon } from "../icon";
 import { useMotionReduced, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
-import type { ChatStep } from "./chat-progress";
-import { currentStep, finishedSteps, receiptLabel } from "./chat-progress";
+import type { ChatStep, ChatStepState } from "./chat-progress";
+import { finishedSteps, RAIL_HEADER, RAIL_STOP_MIN_DP, receiptLabel, stepRowTone, stepStateChip } from "./chat-progress";
 import {
   CHAT_MOTION,
   CHAT_STEP_BEAT_CYCLES,
@@ -16,30 +16,71 @@ import {
 } from "./chat-motion";
 
 /**
- * T4 · The progress rail (§3.2/§3.3), and T9 · its receipt.
+ * T4 · The progress rail (§3.2/§3.3), the design guide's §9 processing surface,
+ * and T9 · its receipt.
  *
- * It replaces the bare three-dot bubble. The reason is not aesthetic: on the
- * device tonight a user got no reply and sent `Hi` four times, because three
- * pulsing dots look the same whether the request is healthy or dead — and
- * re-sending on metered data costs them money.
+ * §9 is the binding shape, and it is reproduced here element for element:
  *
- * What the rail is:
+ *   ✦ Sumaiya anaandika…                     4s      Acha
+ *   ──────────────────────────────────────────────────────────
+ *   ✓ Kuandika CV yako        herufi 2,340 zimekamilika   TAYARI
+ *   △ Kuilinganisha na tangazo Inachanganua ujuzi wa…     INAKAGUA
+ *   ○ Kuandaa barua ya maombi  Itaundwa kwa Kiswahili…    BAADAYE
+ *
+ * Why the surface exists: three pulsing dots look identical whether a request is
+ * healthy or dead, and on metered data a user who cannot tell re-sends and pays
+ * twice. So the rail is:
  *   - a card, not a bubble (full width, 1 px border) so it never reads as
  *     something Sumaiya said;
+ *   - a header that says **what is happening in words** (`Sumaiya anaandika…`),
+ *     the real elapsed time as a chip, and **`Acha` beside it from the first
+ *     second** — at 44 dp, the §8 tap floor. It used to sit at the panel's foot,
+ *     under two sentences of reassurance, where a user hunting for it lost the
+ *     seconds it was there to save;
  *   - a **step-truthful bar** — `scaleX(finished / total)`, never a fake ramp;
- *   - up to four rows, past tense when done, with the real result as a sub-line
- *     (`herufi 2,340`), the current one named and moving, the future ones named
- *     but still (a named future step is a plan, not a silence);
- *   - `Acha` from the first second, because interrupting is what saves the
- *     user's bytes;
- *   - elapsed time as **plain text** — never an animated number.
+ *   - rows with a real state each, carrying §9's own chips: `TAYARI`,
+ *     `INAKAGUA`, `BAADAYE` — and a wash per state (a done row is inset, the
+ *     current row takes the ember tint, a pending row stays on the card);
+ *   - the design's own vocabulary (`Kuandika CV yako`, `Kuilinganisha na
+ *     tangazo`, `Kuandaa barua ya maombi`), built in `chat-progress.ts` from
+ *     real events only — a row is never done that did not happen, and a count is
+ *     never printed that nobody measured.
  *
  * Motion, all from the table: enter 300 rise 12 (instant reduced); the bar 220
  * ease.out on transform; the current step's glyph a **bounded** 2-cycle 1.05 s
- * beat (never `withRepeat(-1)` — that is a WCAG 2.2.2 Level-A failure); the
- * collapse to the receipt at 220 with a container layout reflow. Under Reduce
- * Motion the beat is a static dot and every word is still there.
+ * beat (never `withRepeat(-1)` — that is a WCAG 2.2.2 Level-A failure; the
+ * design's infinitely spinning ✦ is deliberately not copied for the same
+ * reason, and the card's own glyph is static). Under Reduce Motion the beat is a
+ * static dot and every word is still there.
  */
+
+/** §9's chips, in the palette: done = success, current = ember, pending = muted. */
+function chipPalette(state: ChatStepState, c: ReturnType<typeof useThemeColors>) {
+  switch (state) {
+    case "done":
+      return { backgroundColor: c.successTint, color: c.success };
+    case "current":
+      return { backgroundColor: c.accentTint, color: c.accentFillStrong };
+    case "failed":
+      return { backgroundColor: c.errorTint, color: c.error };
+    default:
+      return { backgroundColor: c.bgSunken, color: c.textMuted };
+  }
+}
+
+/** §9's per-row wash. The design's `#ffffff` pending row is the card (§1 bans white). */
+function rowBackground(state: ChatStepState, c: ReturnType<typeof useThemeColors>) {
+  switch (stepRowTone(state)) {
+    case "well":
+      return c.bgSunken;
+    case "tint":
+      return c.accentTint;
+    case "error":
+      return c.errorTint;
+    default:
+      return "transparent";
+  }
+}
 
 function StepGlyph({ state }: { state: ChatStep["state"] }) {
   const c = useThemeColors();
@@ -97,34 +138,73 @@ function StepGlyph({ state }: { state: ChatStep["state"] }) {
   return <View style={{ width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: c.borderStrong }} />;
 }
 
-export function StepRows({ steps }: { steps: ChatStep[] }) {
+/** One row of §9: glyph, title, the real result, and the state chip. */
+function StepRow({ step }: { step: ChatStep }) {
   const c = useThemeColors();
   const { t } = useLang();
+  const chip = stepStateChip(step.state);
+  const pending = step.state === "pending";
+  const titleColor = step.state === "failed" ? c.error : pending ? c.textMuted : c.text;
+  const detailColor = step.state === "failed" ? c.error : step.state === "current" ? c.accentFillStrong : c.textMuted;
+
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 8,
+        borderRadius: 8,
+        backgroundColor: rowBackground(step.state, c),
+      }}
+    >
+      <StepGlyph state={step.state} />
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          // Two lines, not one: at 200 % text scale a single-line truncate eats
+          // the step's own name (§8).
+          numberOfLines={2}
+          style={{
+            color: titleColor,
+            fontSize: 13.5,
+            fontWeight: step.state === "current" ? "700" : "600",
+            opacity: pending ? 0.75 : 1,
+          }}
+        >
+          {t(step.label.en, step.label.sw)}
+        </Text>
+        {step.detail ? (
+          <Text
+            numberOfLines={2}
+            style={{ color: detailColor, fontSize: 11.5, marginTop: 2, opacity: pending ? 0.75 : 1 }}
+          >
+            {step.detail}
+          </Text>
+        ) : null}
+      </View>
+      <View
+        style={{
+          backgroundColor: chipPalette(step.state, c).backgroundColor,
+          paddingHorizontal: 6,
+          paddingVertical: 3,
+          borderRadius: 4,
+          flexShrink: 0,
+        }}
+      >
+        <Text style={{ fontSize: 10, fontWeight: "800", letterSpacing: 0.5, color: chipPalette(step.state, c).color }}>
+          {t(chip.en, chip.sw)}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export function StepRows({ steps }: { steps: ChatStep[] }) {
   return (
     <View style={{ gap: 10 }}>
       {steps.map((s) => (
-        <View key={s.id} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }}>
-          <View style={{ paddingTop: 1 }}>
-            <StepGlyph state={s.state} />
-          </View>
-          <View style={{ flex: 1, minWidth: 0 }}>
-            <Text
-              style={{
-                color: s.state === "current" ? c.accentFill : s.state === "failed" ? c.error : c.textMuted,
-                fontSize: 13.5,
-                fontWeight: s.state === "current" ? "700" : "600",
-                opacity: s.state === "pending" ? 0.75 : 1,
-              }}
-            >
-              {t(s.label.en, s.label.sw)}
-            </Text>
-            {s.detail ? (
-              <Text style={{ color: c.textMuted, fontSize: 11.5, marginTop: 2, opacity: s.state === "pending" ? 0.75 : 1 }}>
-                {s.detail}
-              </Text>
-            ) : null}
-          </View>
-        </View>
+        <StepRow key={s.id} step={s} />
       ))}
     </View>
   );
@@ -203,7 +283,6 @@ export function ProgressRail({
     return () => clearInterval(id);
   }, [startedAt]);
 
-  const current = currentStep(steps);
   const finished = finishedSteps(steps);
 
   return (
@@ -224,11 +303,63 @@ export function ProgressRail({
       // Announced at step boundaries only — the rail re-renders per step, never
       // per token (there are no tokens; nothing streams).
       accessibilityLiveRegion="polite"
-      accessibilityLabel={`${railElapsedLabel(seconds)}. ${steps.map((s) => t(s.label.en, s.label.sw)).join(". ")}`}
+      // The chips are words, not decoration: the label carries them too, so a
+      // screen reader hears the same state a sighted user reads.
+      accessibilityLabel={`${railElapsedLabel(seconds)}. ${steps
+        .map((s) => `${t(s.label.en, s.label.sw)} — ${t(stepStateChip(s.state).en, stepStateChip(s.state).sw)}`)
+        .join(". ")}`}
     >
+      {/* §9's status bar header: what is happening, in words · the real elapsed
+          time · `Acha`, 44 dp, from the first second. */}
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "800", letterSpacing: 0.6 }}>SUMAIYA</Text>
-        <Text style={{ color: c.textMuted, fontSize: 11.5 }}>{railElapsedLabel(seconds)}</Text>
+        <Icon name="sparkles" size={16} color={c.accentFill} />
+        <Text style={{ flex: 1, minWidth: 0, color: c.text, fontSize: 14, fontWeight: "700" }}>
+          {t(RAIL_HEADER.en, RAIL_HEADER.sw)}
+        </Text>
+        <View
+          style={{ backgroundColor: c.bgSunken, borderRadius: 6, paddingHorizontal: 7, paddingVertical: 3 }}
+          // The visible chip is the design's bare `4s`; the full sentence
+          // (`inaendelea · 4s`) is on the card's accessibility label, so this
+          // piece is read once, not twice.
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <Text style={{ color: c.accentFillStrong, fontSize: 12, fontWeight: "700", letterSpacing: 0.4 }}>
+            {`${Math.max(0, Math.floor(seconds))}s`}
+          </Text>
+        </View>
+        {onStop ? (
+          <Pressable
+            onPress={onStop}
+            accessibilityRole="button"
+            accessibilityLabel={stopLabel ?? t("Stop", "Acha")}
+            hitSlop={6}
+            style={({ pressed }) => ({
+              // §8: no tap target below 44 dp. This control is the whole reason
+              // the surface exists, so it is the design's ember control at the
+              // full floor.
+              minWidth: 48,
+              minHeight: RAIL_STOP_MIN_DP,
+              paddingHorizontal: 10,
+              borderRadius: 12,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? c.accentFillPressed : c.accentTint,
+            })}
+          >
+            {({ pressed }) => (
+              <Text
+                style={{
+                  color: pressed ? c.accentText : c.accentFillStrong,
+                  fontSize: 13.5,
+                  fontWeight: "700",
+                }}
+              >
+                {stopLabel ?? t("Stop", "Acha")}
+              </Text>
+            )}
+          </Pressable>
+        ) : null}
       </View>
 
       <StepBar finished={finished} total={steps.length} />
@@ -237,43 +368,10 @@ export function ProgressRail({
         <StepRows steps={steps} />
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 12 }}>
-        <Text style={{ flex: 1, color: c.textMuted, fontSize: 11.5, lineHeight: 16 }}>
-          {t(
-            "You can stop waiting at any time — your words stay.",
-            "Unaweza kuacha kusubiri wakati wowote — maneno yako yanabaki.",
-          )}
-        </Text>
-        {onStop ? (
-          <Pressable
-            onPress={onStop}
-            accessibilityRole="button"
-            accessibilityLabel={t("Stop", "Acha")}
-            hitSlop={8}
-            style={({ pressed }) => ({
-              minWidth: 72,
-              minHeight: 40,
-              paddingHorizontal: 18,
-              borderRadius: 12,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: pressed ? c.accentPressed : c.text,
-            })}
-          >
-            <Text style={{ color: c.accentText, fontSize: 13.5, fontWeight: "700" }}>{stopLabel ?? t("Stop", "Acha")}</Text>
-          </Pressable>
-        ) : null}
-      </View>
-
-      {/* A slow connection is named, never hidden behind a spinner. */}
-      {current ? (
-        <Text style={{ color: c.textMuted, fontSize: 11.5, marginTop: 10 }}>
-          {t(
-            "On a slow connection I'll send it without losing what you told me.",
-            "Uko kwenye mtandao wa polepole. Nitatuma bila kupoteza ulichoniambia.",
-          )}
-        </Text>
-      ) : null}
+      {/* §9 draws nothing below the rows: `Acha` is in the header now, and the
+          two reassurance sentences that used to sit here are gone — one of them
+          (`Uko kwenye mtandao wa polepole.`) asserted a slow connection the app
+          had never measured (QA-NATIVE-1625 §2.2). */}
     </Animated.View>
   );
 }
