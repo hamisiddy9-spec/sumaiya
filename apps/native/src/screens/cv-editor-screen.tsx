@@ -23,56 +23,47 @@ import { reportError } from "../lib/reporting";
 import { CV_TEMPLATES, type CvTemplateId } from "../lib/cv-html";
 import { getDefaultTemplate } from "../lib/prefs";
 import { CvPreviewCard } from "../components/cv/cv-preview-card";
+import { SectionCard } from "./cv-editor/section-card";
+import { cvProgress } from "./cv-editor/progress";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 
 function Section({
+  index,
   title,
   icon,
   children,
   defaultOpen = false,
+  count,
+  subtitle,
 }: {
+  /** The design numbers each section; the CV reads as a list of steps. */
+  index: number;
   title: string;
   icon: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  /** Measured by `cvProgress` — omitted when a section has nothing to measure. */
+  count?: { filled: number; total: number };
+  subtitle?: string;
 }) {
-  const c = useThemeColors();
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <Animated.View
-      layout={LinearTransition.springify().damping(20)}
-      style={{
-        backgroundColor: c.bgElevated,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: c.border,
-        marginBottom: 12,
-        overflow: "hidden",
+    <SectionCard
+      index={index}
+      title={title}
+      icon={icon}
+      open={open}
+      onToggle={() => {
+        haptics.selection();
+        setOpen((o) => !o);
       }}
+      count={count}
+      subtitle={subtitle}
     >
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ expanded: open }}
-        onPress={() => {
-          haptics.selection();
-          setOpen((o) => !o);
-        }}
-        style={{ flexDirection: "row", alignItems: "center", gap: 11, padding: 15 }}
-      >
-        <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
-          <Icon name={icon} size={16} color={c.accent} />
-        </View>
-        <Text style={{ flex: 1, color: c.text, fontSize: 15.5, fontWeight: "700" }}>{title}</Text>
-        <Icon name={open ? "chevron-down" : "chevron-right"} size={18} color={c.textMuted} />
-      </Pressable>
-      {open ? (
-        <Animated.View entering={FadeIn.duration(160)} style={{ paddingHorizontal: 15, paddingBottom: 16, gap: 12 }}>
-          {children}
-        </Animated.View>
-      ) : null}
-    </Animated.View>
+      {children}
+    </SectionCard>
   );
 }
 
@@ -313,6 +304,9 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
   const exp = (data.experience ?? []) as Experience[];
   const edu = (data.education ?? []) as Education[];
   const skills = (data.skills ?? []) as Skill[];
+  // The section headers' completeness chips, measured from the CV itself — see
+  // screens/cv-editor/progress.ts for what each section is measured against.
+  const prog = useMemo(() => cvProgress(data), [data]);
 
   const syncPill = useMemo(() => {
     if (status?.pendingCount) return { label: t(`${status.pendingCount} to sync`, `${status.pendingCount} kusawazisha`), color: c.warning, icon: "refresh-cw" };
@@ -626,7 +620,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Modal>
 
       {/* Personal */}
-      <Section title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen>
+      <Section index={1} title={t("Personal details", "Maelezo binafsi")} icon="user" defaultOpen count={prog.personal}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 4 }}>
           <Pressable onPress={pickPhoto} disabled={photoBusy} accessibilityRole="button" accessibilityLabel={data.personalInfo?.profilePhoto ? t("Change photo", "Badilisha picha") : t("Add profile photo", "Ongeza picha ya wasifu")} style={{ width: 64, height: 64, borderRadius: 32, overflow: "hidden", alignItems: "center", justifyContent: "center", backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border }}>
             {photoBusy ? (
@@ -668,7 +662,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Section>
 
       {/* Summary */}
-      <Section title={t("Professional summary", "Muhtasari wa kikazi")} icon="edit" defaultOpen>
+      <Section index={2} title={t("Professional summary", "Muhtasari wa kikazi")} icon="edit" defaultOpen count={prog.summary}>
         <TextField
           placeholder={t("2–3 sentences on who you are and what you do best.", "Sentensi 2–3 kuhusu wewe na unachofanya vizuri zaidi.")}
           value={data.summary || ""}
@@ -680,7 +674,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Section>
 
       {/* Experience */}
-      <Section title={`${t("Experience", "Uzoefu")}${exp.length ? ` · ${exp.length}` : ""}`} icon="briefcase" defaultOpen={exp.length > 0}>
+      <Section index={3} title={t("Experience", "Uzoefu")} icon="briefcase" defaultOpen={exp.length > 0} count={prog.experience.total ? prog.experience : undefined}>
         {exp.map((e, i) => (
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -702,7 +696,7 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Section>
 
       {/* Education */}
-      <Section title={`${t("Education", "Elimu")}${edu.length ? ` · ${edu.length}` : ""}`} icon="graduation-cap" defaultOpen={edu.length > 0}>
+      <Section index={4} title={t("Education", "Elimu")} icon="graduation-cap" defaultOpen={edu.length > 0} count={prog.education.total ? prog.education : undefined}>
         {edu.map((e, i) => (
           <Animated.View key={e.id} layout={LinearTransition} style={{ gap: 10, borderTopWidth: i ? 1 : 0, borderTopColor: c.border, paddingTop: i ? 14 : 0 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
@@ -723,7 +717,15 @@ export function CvEditorScreen({ route, navigation }: CvEditorScreenProps) {
       </Section>
 
       {/* Skills */}
-      <Section title={`${t("Skills", "Ujuzi")}${skills.length ? ` · ${skills.length}` : ""}`} icon="award" defaultOpen={skills.length > 0}>
+      <Section
+        index={5}
+        title={t("Skills", "Ujuzi")}
+        icon="award"
+        defaultOpen={skills.length > 0}
+        // A count, not a ratio: there is no set of skills a user is "supposed"
+        // to have, so a n/m chip here would be an instruction invented by us.
+        subtitle={skills.length ? t(`${skills.length} added`, `${skills.length} zimeongezwa`) : undefined}
+      >
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 7 }}>
           {skills.map((s) => (
             <Pressable
