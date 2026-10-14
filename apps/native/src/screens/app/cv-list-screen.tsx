@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
-import { Text, View } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+import React, { useCallback, useMemo, useState } from "react";
+import { Pressable, ScrollView, Text, View, type DimensionValue } from "react-native";
 import type { CV } from "@sumaiya/types";
 import { useCvs } from "../../hooks/use-cvs";
+import { useApplications } from "../../hooks/use-applications";
 import { useAuthContext } from "../../contexts/auth-context";
 import { openAuth } from "../../navigation/root-nav";
 import { GUEST_KEEP_CARD, guestText } from "../../lib/guest-invite";
@@ -16,10 +16,15 @@ import {
   ScreenTitle,
   SkeletonList,
   Stagger,
+  TextField,
   haptics,
   useThemeColors,
 } from "../../components/ui";
 import { Icon } from "../../components/icon";
+import { TemplateGallery } from "../../components/cv/template-gallery";
+import { cvMetaLine, cvStatusLabel, cvStatusOf, type CvStatus } from "../../components/home/home-labels";
+import { ALL_TEMPLATES } from "../../lib/cv-html";
+import { letterIsEmpty } from "../../lib/letter-html";
 import { useLang } from "../../lib/i18n";
 import { relativeDate } from "../../lib/relative-date";
 import { dialog } from "../../components/ui";
@@ -28,11 +33,210 @@ import { fileNameFromUri, saveToPhone, shouldOfferShare } from "../../services/s
 import type { CvTemplateId } from "../../lib/cv-html";
 import { shareCV } from "../../services/share";
 import type { CvListScreenProps } from "../../navigation/types";
+import type { ThemeColors } from "../../components/ui/theme";
+
+/**
+ * Screen 5 — `CV zako` / Documents & templates (design:
+ * `cv_zako_nyaraka_na_miundo`).
+ *
+ * The design is a document LIBRARY: a sub-header with search and sort, a
+ * document-type filter row, a template-gallery entry card, a `CV za hivi
+ * karibuni` section of thumbnail rows with a state chip and an overflow, and a
+ * sticky `Jenga CV mpya`. What shipped instead was a stack of three-button
+ * cards whose only route into the gallery was Home / first-run / the preview
+ * card — this screen had none.
+ *
+ * TWO THINGS THE DESIGN ASSUMES THAT THE DATA DOES NOT HAVE, resolved honestly
+ * rather than mocked up:
+ *
+ *   1. Stitch prints `Miundo 47`. The app offers every design it can actually
+ *      render, so the number is read from `ALL_TEMPLATES.length` at runtime —
+ *      never typed. (At this revision: 218 registry entries that carry a
+ *      renderer + the six hand-written ids in `lib/cv-html.ts` = 224.)
+ *   2. Stitch's chip row filters by document TYPE (CV / cover letter / card /
+ *      formal letter). The store holds two of those four: a CV
+ *      (`@sumaiya/types` `CV` — no kind field) and a cover letter (the
+ *      `coverLetter` text on a saved application). `Kadi` and `Barua rasmi`
+ *      would be chips that can never hold a document, so they are NOT rendered
+ *      — a filter that always returns nothing is a promise the app cannot keep.
+ *      The row shows the three types the app really has.
+ */
+
+type DocKind = "cv" | "letter";
+
+interface Doc {
+  key: string;
+  kind: DocKind;
+  id: string;
+  title: string;
+  meta: string;
+  status: CvStatus;
+  statusLabel: string;
+  /** This device holds the only copy (CV only). */
+  offline?: boolean;
+  at: number;
+}
+
+/**
+ * The document-type chips. `Swahili leads` — the first label a Swahili reader
+ * sees is `Zote`, and the type names are the product's own words.
+ */
+const FILTERS: { key: DocKind | "all"; en: string; sw: string }[] = [
+  { key: "all", en: "All", sw: "Zote" },
+  { key: "cv", en: "CV", sw: "CV" },
+  { key: "letter", en: "Cover letter", sw: "Barua ya maombi" },
+];
+
+const THUMB_W = 56;
+const THUMB_H = 72;
+
+/**
+ * The row's 56 × 72 document thumbnail, drawn from theme tokens only.
+ *
+ * It is a schematic — the SHAPE of a page, never invented content — and it is
+ * warm: `bgSunken` (#EFEEEA) with a hairline, no `#ffffff` anywhere. The
+ * gallery's own grid cell used to paint pure white behind the real render
+ * (`template-gallery.tsx`, §1 violation), which is exactly the hole in a warm
+ * palette the guide forbids.
+ */
+function DocThumb({ kind, c }: { kind: DocKind; c: ThemeColors }) {
+  const line = (w: DimensionValue, mt = 3, col = c.border) => (
+    <View style={{ width: w, height: 2, borderRadius: 1, backgroundColor: col, marginTop: mt }} />
+  );
+  return (
+    <View
+      style={{
+        width: THUMB_W,
+        height: THUMB_H,
+        borderRadius: 8,
+        backgroundColor: c.bgSunken,
+        borderWidth: 1,
+        borderColor: c.border,
+        padding: 6,
+        overflow: "hidden",
+      }}
+    >
+      {kind === "cv" ? (
+        <>
+          <View style={{ width: "70%", height: 3, borderRadius: 1.5, backgroundColor: c.accent }} />
+          {line("100%")}
+          {line("80%")}
+          {line("60%")}
+        </>
+      ) : (
+        /* A letter: the date block sits right, the signature block left. */
+        <>
+          <View style={{ alignSelf: "flex-end", width: "33%", height: 2, borderRadius: 1, backgroundColor: c.border }} />
+          {line("100%", 6)}
+          {line("100%")}
+          {line("75%")}
+          <View style={{ width: "33%", height: 3, borderRadius: 1.5, backgroundColor: c.accent, marginTop: 6 }} />
+        </>
+      )}
+    </View>
+  );
+}
+
+/** One row: thumbnail, title, meta line, state chip, `more_vert` overflow. */
+function DocRow({
+  doc,
+  c,
+  t,
+  busy,
+  onOpen,
+  onMenu,
+}: {
+  doc: Doc;
+  c: ThemeColors;
+  t: (en: string, sw: string) => string;
+  busy: boolean;
+  onOpen: () => void;
+  onMenu: () => void;
+}) {
+  // The chip's colour comes from the derived state, not from a stored flag —
+  // see `cvStatusOf` (components/home/home-labels.ts), which is the one place
+  // that decides what Rasimu / Tayari / Imekamilika mean.
+  const chip = doc.status === "draft" ? { bg: c.bgSunken, fg: c.textMuted } : { bg: c.successTint, fg: c.success };
+  return (
+    <Card
+      padded={false}
+      style={{ flexDirection: "row", alignItems: "center", gap: 12, padding: 12, backgroundColor: c.bgElevated }}
+    >
+      <Pressable
+        onPress={onOpen}
+        accessibilityRole="button"
+        accessibilityLabel={`${doc.title}. ${doc.meta}. ${doc.statusLabel}`}
+        style={{ flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 12, minHeight: 44 }}
+      >
+        <DocThumb kind={doc.kind} c={c} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          {/* Not clamped to one line: §8 holds the layout at 200 % text scale,
+              and a clamped line is what breaks there. */}
+          <Text style={{ color: c.text, fontSize: 15, fontWeight: "700", lineHeight: 20 }} numberOfLines={2}>
+            {doc.title}
+          </Text>
+          <Text style={{ color: c.textMuted, fontSize: 12, lineHeight: 17, marginTop: 2 }} numberOfLines={1}>
+            {busy ? t("Working…", "Inaendelea…") : doc.meta}
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 5,
+                backgroundColor: chip.bg,
+                borderRadius: 999,
+                paddingHorizontal: 9,
+                paddingVertical: 3,
+              }}
+            >
+              {doc.status === "complete" ? <Icon name="check" size={10} color={chip.fg} /> : null}
+              <Text style={{ color: chip.fg, fontSize: 11, fontWeight: "700" }}>{doc.statusLabel}</Text>
+            </View>
+            {doc.offline ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 4,
+                  backgroundColor: c.warning + "1f",
+                  borderRadius: 999,
+                  paddingHorizontal: 9,
+                  paddingVertical: 3,
+                }}
+              >
+                <Icon name="wifi-off" size={11} color={c.warning} />
+                <Text style={{ color: c.warning, fontSize: 11, fontWeight: "700" }}>
+                  {t("On this phone", "Kwenye simu hii")}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </Pressable>
+
+      {/* §8: 44 dp, not the design's 36. */}
+      <Pressable
+        onPress={onMenu}
+        accessibilityRole="button"
+        accessibilityLabel={t(`More options for ${doc.title}`, `Chaguo zaidi za ${doc.title}`)}
+        style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" }}
+      >
+        <Icon name="more-vertical" size={20} color={c.textMuted} />
+      </Pressable>
+    </Card>
+  );
+}
 
 export function CvListScreen({ navigation }: CvListScreenProps) {
   const c = useThemeColors();
   const { t, lang } = useLang();
   const { cvs, loading, error, errorKind, storageBlocked, deleteCV, loadCVs } = useCvs();
+  // Cover letters live on the application that produced them (lib/
+  // applications-store.ts). They are documents like any other, so the library
+  // shows them — that is what makes `Barua ya maombi` a real filter rather
+  // than a chip over an empty set.
+  const { applications, loading: appsLoading, refresh: refreshApplications, remove: removeApplication } = useApplications();
   const { user, signOut } = useAuthContext();
   // GUEST MODE: this list is the device's own CVs, and everything on this screen
   // — build, edit, preview, download, delete — works with no account and no
@@ -44,6 +248,11 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState<DocKind | "all">("all");
+  const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [sort, setSort] = useState<"recent" | "name">("recent");
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   // Export used to live only inside the editor and the preview card — a CV
   // the user just wants to grab a copy of, without editing it, had no path
@@ -129,10 +338,11 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
     haptics.light();
     try {
       await loadCVs?.();
+      await refreshApplications();
     } finally {
       setRefreshing(false);
     }
-  }, [loadCVs]);
+  }, [loadCVs, refreshApplications]);
 
   const confirmDelete = (id: string, title: string) => {
     haptics.warning();
@@ -157,22 +367,344 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
     ]);
   };
 
+  const confirmDeleteLetter = (id: string, title: string) => {
+    haptics.warning();
+    dialog.alert(
+      t("Delete this letter?", "Ufute barua hii?"),
+      t(
+        `The cover letter on "${title}" is deleted with the application it belongs to.`,
+        `Barua ya maombi ya "${title}" inafutwa pamoja na ombi linaloihusu.`,
+      ),
+      [
+        { text: t("Cancel", "Ghairi"), style: "cancel" },
+        {
+          text: t("Delete", "Futa"),
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(id);
+            try {
+              await removeApplication(id);
+              haptics.success();
+            } catch {
+              haptics.error();
+              dialog.alert(
+                t("Couldn't delete", "Imeshindwa kufuta"),
+                t("The letter is still on this phone. Try again.", "Barua bado iko kwenye simu hii. Jaribu tena."),
+              );
+            } finally {
+              setDeleting(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
+  // Every layer of the library: the CVs the device holds, plus the cover
+  // letters it holds. `letterIsEmpty` is the app's own guard (lib/letter-html.ts)
+  // for "this is not a letter yet" — the same test the PDF export refuses on —
+  // so a half-written draft never shows up as a finished document.
+  const letters = useMemo(() => applications.filter((a) => !letterIsEmpty(a.coverLetter)), [applications]);
+
+  const docs = useMemo<Doc[]>(() => {
+    const cvDocs = cvs.map<Doc>((cv) => {
+      const status = cvStatusOf(cv);
+      return {
+        key: `cv:${cv.id}`,
+        kind: "cv",
+        id: cv.id,
+        title: cv.title,
+        meta: cvMetaLine(cv.updatedAt, lang),
+        status,
+        statusLabel: cvStatusLabel(status, lang),
+        offline: !!cv.isOfflineOnly,
+        at: new Date(cv.updatedAt).getTime(),
+      };
+    });
+    // A saved cover letter is written and usable — the app's own `ready` state.
+    const letterDocs = letters.map<Doc>((a) => ({
+      key: `letter:${a.id}`,
+      kind: "letter",
+      id: a.id,
+      title: `${t("Cover letter", "Barua ya maombi")} — ${a.company}`,
+      meta: `${a.role} · ${relativeDate(new Date(a.updatedAt), lang)}`,
+      status: "ready",
+      statusLabel: cvStatusLabel("ready", lang),
+      at: a.updatedAt,
+    }));
+    return [...cvDocs, ...letterDocs];
+  }, [cvs, letters, lang, t]);
+
+  const rows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const list = docs.filter(
+      (d) => (filter === "all" || d.kind === filter) && (!q || d.title.toLowerCase().includes(q)),
+    );
+    return sort === "name" ? [...list].sort((a, b) => a.title.localeCompare(b.title)) : [...list].sort((a, b) => b.at - a.at);
+  }, [docs, filter, query, sort]);
+
+  const templateCount = ALL_TEMPLATES.length;
+  const previewDesigns = ALL_TEMPLATES.slice(0, 3);
+
+  const filtering = filter !== "all" || query.trim().length > 0;
+
+  const openDoc = (doc: Doc) => {
+    if (doc.kind === "cv") {
+      const cv = cvs.find((x) => x.id === doc.id);
+      navigation.navigate("CvEditor", { templateId: cv?.templateId, cvId: doc.id });
+      return;
+    }
+    navigation.navigate("HomeTab", { screen: "ApplicationDetail", params: { id: doc.id } });
+  };
+
+  // The overflow. It replaces the three always-visible buttons the design does
+  // not have, and it is the app's own sheet layer — tab → screen → one sheet,
+  // §8's depth limit.
+  const openMenu = (doc: Doc) => {
+    haptics.light();
+    const cv = doc.kind === "cv" ? cvs.find((x) => x.id === doc.id) : undefined;
+    const buttons = [
+      doc.kind === "cv"
+        ? {
+            text: t("Edit", "Hariri"),
+            onPress: () => navigation.navigate("CvEditor", { templateId: cv?.templateId, cvId: doc.id }),
+          }
+        : {
+            text: t("Open the application", "Fungua ombi"),
+            onPress: () => navigation.navigate("HomeTab", { screen: "ApplicationDetail", params: { id: doc.id } }),
+          },
+      ...(doc.kind === "cv"
+        ? [{ text: t("Download", "Pakua"), onPress: () => cv && void downloadCV(cv) }]
+        : []),
+      {
+        text: t("Delete", "Futa"),
+        style: "destructive" as const,
+        onPress: () =>
+          doc.kind === "cv" ? confirmDelete(doc.id, doc.title) : confirmDeleteLetter(doc.id, doc.title),
+      },
+      { text: t("Cancel", "Ghairi"), style: "cancel" as const },
+    ];
+    dialog.alert(doc.title, doc.meta, buttons);
+  };
+
   return (
-    <Screen scroll keyboardAvoiding={false} refreshing={refreshing} onRefresh={onRefresh}>
+    <Screen
+      scroll
+      keyboardAvoiding={false}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      // The sticky action is the Screen's own footer — in flow above the tab
+      // bar, not a floating overlay (§8: one floating element only). It appears
+      // once there is a list to add to; an empty screen already carries the
+      // build action in its empty state.
+      footer={
+        rows.length > 0 ? (
+          <Button
+            label={t("Build a new CV", "Jenga CV mpya")}
+            leftIcon={<Icon name="plus" size={20} color={c.accentText} />}
+            onPress={() => navigation.navigate("CvEditor", { nonce: String(Date.now()) })}
+          />
+        ) : undefined
+      }
+    >
+      {/* Sub-header: the title, the one line that frames this screen as a safe
+          library, and the two affordances the design puts beside them. The
+          ember count pill that used to sit here is gone — §10 forbids badges,
+          and the design has none. */}
       <ScreenTitle
         trailing={
-          cvs.length > 0 ? (
-            <View style={{ backgroundColor: c.accent, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 4 }}>
-              <Text style={{ color: c.accentText, fontSize: 13, fontWeight: "700" }}>{cvs.length}</Text>
-            </View>
-          ) : undefined
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                setSearchOpen((v) => !v);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: searchOpen }}
+              accessibilityLabel={t("Search documents", "Tafuta nyaraka")}
+              style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" }}
+            >
+              <Icon name="search" size={22} color={searchOpen ? c.accent : c.textMuted} />
+            </Pressable>
+            {/* Two real orders, one control. (The design's `swap_vert` opens a
+                menu; the app's dialog layer paints its LAST button as the
+                primary, so a three-item sheet would have made "Ghairi" the
+                ember action. Tapping cycles the order instead.) */}
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                setSort((s) => (s === "recent" ? "name" : "recent"));
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={
+                sort === "recent"
+                  ? t("Sorted by newest. Tap for A–Z by name.", "Imepangwa kwa mpya kwanza. Gusa kwa jina (A–Z).")
+                  : t("Sorted by name. Tap for newest first.", "Imepangwa kwa jina. Gusa kwa mpya kwanza.")
+              }
+              style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" }}
+            >
+              <Icon name="arrow-up-down" size={22} color={sort === "name" ? c.accent : c.textMuted} />
+            </Pressable>
+          </View>
         }
       >
         {t("My CVs", "CV zako")}
       </ScreenTitle>
 
+      <Text style={{ color: c.textMuted, fontSize: 13.5, lineHeight: 19, marginTop: -14, marginBottom: 14 }}>
+        {t(
+          "All your documents are safe and ready to use",
+          "Nyaraka zako zote ziko salama na tayari kutumika",
+        )}
+      </Text>
+
+      {searchOpen ? (
+        <View style={{ marginBottom: 12 }}>
+          <TextField
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t("Search documents", "Tafuta nyaraka")}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+        </View>
+      ) : null}
+
+      {/* Document-type filter chips. Horizontal, like the design's. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingRight: 8 }}
+        style={{ marginBottom: 16 }}
+      >
+        {FILTERS.map((f) => {
+          const active = filter === f.key;
+          return (
+            <Pressable
+              key={f.key}
+              onPress={() => {
+                haptics.selection();
+                setFilter(f.key);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              // §8: 44 dp, never the design's 32.
+              style={{
+                minHeight: 44,
+                paddingHorizontal: 16,
+                borderRadius: 999,
+                justifyContent: "center",
+                backgroundColor: active ? c.accentFillStrong : c.bgSunken,
+              }}
+            >
+              <Text style={{ color: active ? c.accentText : c.textBody, fontSize: 13, fontWeight: active ? "800" : "600" }}>
+                {lang === "sw" ? f.sw : f.en}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/* The template-gallery entry. This is the route: the CV list owns the
+          gallery as its one sheet (`TemplateGallery`, the same component Home
+          and first-run open), and choosing a design starts a new CV with it.
+          Before this, the gallery was reachable from Home, first-run and the
+          preview card — never from here. */}
+      <Card
+        onPress={() => {
+          haptics.selection();
+          setGalleryOpen(true);
+        }}
+        accessibilityLabel={t(
+          `Designs ${templateCount}. Choose the design for your CV.`,
+          `Miundo ${templateCount}. Chagua muundo wa CV yako.`,
+        )}
+        style={{ marginBottom: 18 }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 9,
+              backgroundColor: c.accent + "1f",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Icon name="layout-template" size={16} color={c.accent} />
+          </View>
+          {/* The count is READ, never typed. Stitch's `Miundo 47` does not
+              match this product: every design the app can render is in
+              ALL_TEMPLATES (lib/cv-html.ts). */}
+          <Text style={{ color: c.text, fontSize: 17, fontWeight: "800" }}>
+            {t(`Designs ${templateCount}`, `Miundo ${templateCount}`)}
+          </Text>
+        </View>
+        <Text style={{ color: c.textMuted, fontSize: 13.5, lineHeight: 19, marginTop: 10 }}>
+          {t(
+            `${templateCount} CV designs. Pick the one that suits you — you can change it any time.`,
+            `Miundo ${templateCount} ya CV. Chagua unaokufaa — unaweza kuubadilisha wakati wowote.`,
+          )}
+        </Text>
+        <View style={{ flexDirection: "row", gap: 8, marginTop: 12 }}>
+          {previewDesigns.map((tpl) => (
+            <View key={tpl.id} style={{ flex: 1 }}>
+              <View
+                style={{
+                  aspectRatio: 3 / 4,
+                  borderRadius: 8,
+                  backgroundColor: c.bgSunken,
+                  borderWidth: 1,
+                  borderColor: c.border,
+                  padding: 6,
+                  overflow: "hidden",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View style={{ gap: 3 }}>
+                  <View style={{ width: "60%", height: 3, borderRadius: 1.5, backgroundColor: c.accent }} />
+                  <View style={{ width: "85%", height: 2, borderRadius: 1, backgroundColor: c.border }} />
+                  <View style={{ width: "70%", height: 2, borderRadius: 1, backgroundColor: c.border }} />
+                </View>
+                <View style={{ gap: 3 }}>
+                  <View style={{ width: "100%", height: 1.5, backgroundColor: c.border }} />
+                  <View style={{ width: "60%", height: 1.5, backgroundColor: c.border }} />
+                </View>
+              </View>
+              <Text
+                numberOfLines={1}
+                style={{ color: c.textMuted, fontSize: 9.5, fontWeight: "700", textAlign: "center", marginTop: 4 }}
+              >
+                {lang === "sw" ? tpl.name.sw : tpl.name.en}
+              </Text>
+            </View>
+          ))}
+          <View style={{ flex: 1 }}>
+            <View
+              style={{
+                aspectRatio: 3 / 4,
+                borderRadius: 8,
+                backgroundColor: c.bgSunken,
+                borderWidth: 1,
+                borderColor: c.border,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: c.accent, fontSize: 15, fontWeight: "800" }}>
+                +{Math.max(0, templateCount - previewDesigns.length)}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 9.5, fontWeight: "700" }}>
+                {t("view", "tazama")}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Card>
+
       {storageBlocked && cvs.length > 0 ? (
-        <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18 }}>
+        <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 12 }}>
           {t(
             "These are the copies from your account. This device couldn't cache them, so offline access may be limited.",
             "Hizi ni nakala kutoka akaunti yako. Kifaa hiki hakikuweza kuzihifadhi, hivyo matumizi bila mtandao yanaweza kuwa machache.",
@@ -180,7 +712,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         </Text>
       ) : null}
 
-      {loading && cvs.length === 0 ? (
+      {(loading || appsLoading) && docs.length === 0 ? (
         <SkeletonList count={3} />
       ) : error && cvs.length === 0 ? (
         /* Never claim the user has no CVs when the real problem is that we
@@ -202,7 +734,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
             }
           />
         </View>
-      ) : cvs.length === 0 ? (
+      ) : docs.length === 0 ? (
         <View style={{ flex: 1, justifyContent: "center", paddingBottom: 40 }}>
           {isGuest ? (
             // A stranger's first screen. No account anywhere in it, and no
@@ -216,9 +748,7 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
                 "CV yako inaandikwa na kuhifadhiwa kwenye simu hii, na unaweza kuipakua kama PDF. Hakuna kinachotoka kwenye simu yako bila wewe kuamua.",
               )}
               actionLabel={t("Build your CV", "Jenga CV yako")}
-              onAction={() =>
-                navigation.navigate("CvEditor", { nonce: String(Date.now()) })
-              }
+              onAction={() => navigation.navigate("CvEditor", { nonce: String(Date.now()) })}
               secondaryLabel={t("Upload a CV", "Pakia CV")}
               onSecondary={() => navigation.navigate("ImportTab")}
             />
@@ -235,78 +765,79 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           )}
         </View>
       ) : (
-        cvs
-          .slice()
-          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-          .map((cv: CV, i) => (
-            <Stagger key={cv.id} index={i}>
-              <Card style={{ marginBottom: 12, gap: 12 }}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                  <View
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      backgroundColor: c.accent + "14",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Icon name="file-text" size={20} color={c.accent} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: c.text, fontSize: 15.5, fontWeight: "700" }} numberOfLines={1}>
-                      {cv.title}
-                    </Text>
-                    <Text style={{ color: c.textMuted, fontSize: 12, marginTop: 2 }}>
-                      {t("Updated", "Ilibadilishwa")} {relativeDate(cv.updatedAt, lang)}
-                    </Text>
-                  </View>
-                  {cv.isOfflineOnly ? (
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: c.warning + "1f", borderRadius: 8, paddingHorizontal: 7, paddingVertical: 3 }}>
-                      <Icon name="wifi-off" size={11} color={c.warning} />
-                      <Text style={{ color: c.warning, fontSize: 10.5, fontWeight: "700" }}>{t("Offline", "Nje ya mtandao")}</Text>
-                    </View>
-                  ) : null}
-                </View>
+        <>
+          {/* The section header, with the design's `Zote →` — here it is a real
+              control: it clears a filter that is hiding documents. */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: c.text, fontSize: 17, fontWeight: "800", flexShrink: 1 }}>
+              {t("Recent documents", "CV za hivi karibuni")}
+            </Text>
+            {filtering ? (
+              <Pressable
+                onPress={() => {
+                  haptics.selection();
+                  setFilter("all");
+                  setQuery("");
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t("Show everything", "Onyesha zote")}
+                style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4, paddingLeft: 8 }}
+              >
+                <Text style={{ color: c.accent, fontSize: 13, fontWeight: "800" }}>{t("All", "Zote")}</Text>
+                <Icon name="arrow-right" size={15} color={c.accent} />
+              </Pressable>
+            ) : null}
+          </View>
 
-                <View style={{ flexDirection: "row", gap: 8 }}>
-                  <View style={{ flex: 1 }}>
-                    <Button
-                      label={t("Edit", "Hariri")}
-                      variant="secondary"
-                      size="sm"
-                      leftIcon={<Icon name="edit" size={15} color={c.text} />}
-                      onPress={() =>
-                        navigation.navigate("CvEditor", { templateId: cv.templateId, cvId: cv.id })
-                      }
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Button
-                      label={t("Download", "Pakua")}
-                      variant="secondary"
-                      size="sm"
-                      loading={downloading === cv.id}
-                      leftIcon={<Icon name="download" size={15} color={c.text} />}
-                      onPress={() => void downloadCV(cv)}
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Button
-                      label={t("Delete", "Futa")}
-                      variant="ghost"
-                      size="sm"
-                      loading={deleting === cv.id}
-                      leftIcon={<Icon name="trash-2" size={15} color={c.error} />}
-                      onPress={() => confirmDelete(cv.id, cv.title)}
-                      haptic="warning"
-                    />
-                  </View>
-                </View>
-              </Card>
-            </Stagger>
-          ))
+          {rows.length === 0 ? (
+            <EmptyState
+              icon="filter"
+              title={t("Nothing matches that", "Hakuna kinacholingana")}
+              body={
+                query.trim()
+                  ? t(
+                      `No document here is called "${query.trim()}".`,
+                      `Hakuna nyaraka hapa inayoitwa "${query.trim()}".`,
+                    )
+                  : t(
+                      "There is no document of this type on this phone yet.",
+                      "Hakuna nyaraka ya aina hii kwenye simu hii bado.",
+                    )
+              }
+              actionLabel={t("Show everything", "Onyesha zote")}
+              onAction={() => {
+                setFilter("all");
+                setQuery("");
+              }}
+            />
+          ) : (
+            <View style={{ gap: 12 }}>
+              {rows.map((doc, i) => (
+                <Stagger key={doc.key} index={i}>
+                  <DocRow
+                    doc={doc}
+                    c={c}
+                    t={t}
+                    busy={downloading === doc.id || deleting === doc.id}
+                    onOpen={() => {
+                      haptics.light();
+                      openDoc(doc);
+                    }}
+                    onMenu={() => openMenu(doc)}
+                  />
+                </Stagger>
+              ))}
+            </View>
+          )}
+        </>
       )}
 
       {/* THE QUIET OFFER — a guest who already has a CV to lose gets one
@@ -314,11 +845,11 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           never interrupts, and the interruption (after a save or a download)
           still happens at most once ever. It disappears the moment they sign
           in, because there is nothing left to offer. */}
-      {isGuest && cvs.length > 0 ? (
+      {isGuest && docs.length > 0 ? (
         <Card
           onPress={() => openAuth()}
           accessibilityLabel={t(GUEST_KEEP_CARD.cta.en, GUEST_KEEP_CARD.cta.sw)}
-          style={{ marginTop: 4, flexDirection: "row", alignItems: "center", gap: 12 }}
+          style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 12 }}
         >
           <View
             style={{
@@ -342,6 +873,16 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
           </View>
         </Card>
       ) : null}
+
+      {/* The gallery itself: searchable, filterable, virtualised — the same
+          sheet every other entry point opens. */}
+      <TemplateGallery
+        visible={galleryOpen}
+        onSelect={(id) => {
+          navigation.navigate("CvEditor", { templateId: id, nonce: String(Date.now()) });
+        }}
+        onClose={() => setGalleryOpen(false)}
+      />
     </Screen>
   );
 }

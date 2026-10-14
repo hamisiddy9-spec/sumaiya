@@ -246,7 +246,12 @@ export function TemplateGallery({
             {cachedUri ? (
               <Image
                 source={{ uri: cachedUri }}
-                style={{ width: thumbW, height: thumbH, borderRadius: 4, backgroundColor: "#fff" }}
+                // `surfaceRaised`, never `#ffffff` (§1): a white surface in a
+                // warm palette reads as a hole. This cell was the app's only
+                // white SURFACE and the audit's §1 finding on this screen. The
+                // render is a page of paper; the fill behind it is the warm
+                // surface every other card uses.
+                style={{ width: thumbW, height: thumbH, borderRadius: 4, backgroundColor: c.bgElevated }}
                 resizeMode="cover"
               />
             ) : (
@@ -317,9 +322,14 @@ export function TemplateGallery({
         onPress();
       }}
       style={{
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 99,
+        // §8: no tap target below 44 dp. These chips were ~27 dp (6 + 12 pt
+        // text + 6), which is under the floor on the surface where a filter is
+        // the only way to find a design among 224.
+        minHeight: 44,
+        justifyContent: "center",
+        paddingHorizontal: 14,
+        paddingVertical: 10,
+        borderRadius: 999,
         borderWidth: 1.5,
         borderColor: active ? c.accent : c.border,
         backgroundColor: active ? c.accent + "18" : "transparent",

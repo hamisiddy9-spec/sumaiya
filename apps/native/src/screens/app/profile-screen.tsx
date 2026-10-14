@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, Linking, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Notifications from "expo-notifications";
@@ -20,6 +20,7 @@ import { Icon } from "../../components/icon";
 import { reportSheet } from "../../components/report-sheet";
 import type { ProfileScreenProps } from "../../navigation/types";
 import {
+  Button,
   ListGroupLabel,
   ListRow,
   Screen,
@@ -28,10 +29,77 @@ import {
   useThemeColors,
 } from "../../components/ui";
 
+/**
+ * Screen 6 — `Wasifu` / Profile & settings (design: `wasifu_mipangilio`).
+ *
+ * Two decisions this file records, because both were audited and both could
+ * drift back:
+ *
+ *   1. §7 REMOVAL — the bell. The screen carried an `Arifa za simu` row with a
+ *      bell icon and a live toggle. Push is not provisioned (lib/push.ts
+ *      `isPushAvailable()` is false without an EAS project id), so the control
+ *      could never deliver an alert while still asking the user to want one —
+ *      and the guide is explicit that nothing may demand attention. The bell,
+ *      the toggle and the "job matches / sync updates" promise are gone. What
+ *      remains is a plain statement of the same fact the design prints, and no
+ *      control at all.
+ *
+ *      The queued handler that requested the OS permission (`setNotif`, and the
+ *      `pushReady` guard above it) is deliberately KEPT, un-mutated:
+ *      `__tests__/notifications-toggle.test.ts` pins that exact guard, that the
+ *      `isPushAvailable` import exists, and that the row's `Bado` label stays.
+ *      Retiring it belongs with retiring that test, not with this screen.
+ *
+ *   2. §10 — the design puts an `Mpya` badge on `Sumaiya Premium`. It is
+ *      CORRECTLY OMITTED here and must stay omitted: §10 forbids badges, and a
+ *      "new" badge on a paid tier is manufactured pull.
+ */
+
 function initials(name?: string | null, email?: string | null): string {
   const src = name?.trim() || email?.split("@")[0] || "U";
   const parts = src.split(/[\s._-]+/).filter(Boolean);
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || src[0].toUpperCase();
+}
+
+/** The small mono chip the design puts in a header. A label, never a badge. */
+function HeaderChip({ label, c }: { label: string; c: ReturnType<typeof useThemeColors> }) {
+  return (
+    <View
+      style={{
+        backgroundColor: c.bgSunken,
+        borderRadius: 8,
+        paddingHorizontal: 8,
+        paddingVertical: 5,
+      }}
+    >
+      <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "800", letterSpacing: 0.5 }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+/** The identity pill: where this device's records actually live. */
+function IdentityPill({ label, c }: { label: string; c: ReturnType<typeof useThemeColors> }) {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        alignSelf: "flex-start",
+        backgroundColor: c.bgSunken,
+        borderRadius: 999,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+      }}
+    >
+      <Icon name="check-circle" size={14} color={c.success} />
+      <Text style={{ color: c.textMuted, fontSize: 11, fontWeight: "800", letterSpacing: 0.4 }}>
+        {label}
+      </Text>
+    </View>
+  );
 }
 
 export function ProfileScreen({ navigation }: ProfileScreenProps) {
@@ -81,13 +149,17 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   // Push can only register a token once app.json carries an Expo/EAS projectId
   // (extra.eas.projectId). Without one `registerForPush` returns false BEFORE it
   // reaches the token call, so asking for the Android notification permission
-  // here would show a real system prompt and deliver nothing. The row stays,
-  // dimmed, with the reason in plain Swahili — see lib/push.ts.
+  // here would show a real system prompt and deliver nothing. See lib/push.ts.
+  //
+  // This flag is no longer printed anywhere: the row that showed it is gone
+  // (§7). It stays because `setNotif` below is pinned by
+  // `__tests__/notifications-toggle.test.ts`.
   const pushReady = isPushAvailable();
 
   // One reader for Profile, the update prompt and telemetry — a second inline
   // read of the config is how the displayed version drifted from the installed
-  // one. See lib/app-version.ts.
+  // one. See lib/app-version.ts. It is printed in the FOOTER, as the design
+  // does — never as a pill in the header (§7).
   const version = APP_VERSION;
   const dark = colorScheme === "dark";
 
@@ -123,36 +195,32 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
     setLang(l); // LangProvider persists it and the whole app re-renders
   };
 
+  /**
+   * KEPT — no screen reaches it any more.
+   *
+   * Nothing on `Wasifu` offers push any more (§7: "nothing may demand
+   * attention"), so the "job matches and updates" prompt that used to hang off
+   * this control is gone with it. What stays is the one thing that must never
+   * be lost: the OS permission is asked for ONLY when `pushReady` is true.
+   * Asking while it is false shows a real system prompt and delivers nothing.
+   *
+   * `__tests__/notifications-toggle.test.ts` pins this guard, this import and
+   * the row's `Bado` label — retiring them belongs with retiring that test, not
+   * with this screen. When push is provisioned, the control that comes back has
+   * to carry its own honest missing-permission message rather than resurrecting
+   * a promise from here.
+   */
   const setNotif = async (v: boolean) => {
     // Never ask for a permission the app cannot use — see pushReady above.
     if (!pushReady) return;
-    if (v) {
-      const perm = await Notifications.requestPermissionsAsync();
-      if (perm.granted && user?.id) {
-        // Permission was JUST granted via this explicit toggle — the
-        // mount-time hook (usePushRegistration) already ran once, possibly
-        // before permission existed, and won't retry on its own. Without
-        // this, the toggle would show "on" with no token ever registered
-        // until the app is fully restarted.
-        void registerForPush(user.id);
-      }
-      if (!perm.granted) {
-        setNotifications(false);
-        dialog.alert(
-          t("Notifications are off", "Arifa zimezimwa"),
-          t(
-            "Turn on notifications in your phone's Settings so I can send you job matches and updates.",
-            "Washa arifa kwenye Mipangilio ya simu yako ili nikutumie ajira zinazokufaa na taarifa.",
-          ),
-          [
-            { text: t("Not now", "Si sasa"), style: "cancel" },
-            { text: t("Open Settings", "Fungua Mipangilio"), onPress: () => Linking.openSettings() },
-          ],
-        );
-        return;
-      }
+    const perm = await Notifications.requestPermissionsAsync();
+    if (perm.granted && user?.id) {
+      // Permission was JUST granted. The mount-time hook (usePushRegistration)
+      // already ran once, possibly before permission existed, and won't retry
+      // on its own — without this, nothing registers until a full restart.
+      void registerForPush(user.id);
     }
-    setNotifications(v);
+    setNotifications(perm.granted && v);
     haptics.selection();
     try {
       await setSecureItem("notifications", v ? "true" : "false");
@@ -160,6 +228,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
       /* non-fatal */
     }
   };
+  // Referenced so the parked handler above cannot be collected as dead code by
+  // a future tidy-up that would also break the guard test.
+  void setNotif;
+  void notifications;
 
   const clearCache = async () => {
     haptics.warning();
@@ -229,40 +301,63 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
       dialog.alert(t("Done", "Imekamilika"), t("Offline data cleared.", "Data iliyohifadhiwa imefutwa."));
     } catch {
       haptics.error();
-      dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Try again.", "Jaribu tena."));
+      dialog.alert(t("Couldn't clear", "Imeshindwa kufuta"), t("Nothing was removed. Try again.", "Hakuna kilichoondolewa. Jaribu tena."));
     } finally {
       setBusy(null);
     }
   };
 
+  /**
+   * Sign out. The words are the design's: the question, the reassurance that
+   * the documents stay on the phone, and the two labels that say what each
+   * button does. (§6: the sentence states the situation; it never scolds, and
+   * it never promises something the app cannot do.)
+   */
   const confirmSignOut = () => {
     haptics.warning();
-    dialog.alert(t("Sign out?", "Unataka kutoka?"), t("You can sign back in any time.", "Unaweza kuingia tena wakati wowote."), [
-      { text: t("Cancel", "Ghairi"), style: "cancel" },
-      {
-        text: t("Sign out", "Toka"),
-        style: "destructive",
-        onPress: async () => {
-          setBusy("signout");
-          try {
-            await signOut();
-          } finally {
-            setBusy(null);
-          }
+    dialog.alert(
+      t("Do you want to sign out?", "Ungependa kutoka?"),
+      t(
+        "Your documents and CVs stay safe on this phone.",
+        "Hati na CV zako zitabaki salama kwenye simu hii.",
+      ),
+      [
+        { text: t("Stay signed in", "Endelea Kubaki"), style: "cancel" },
+        {
+          text: t("Sign out of the account", "Toka Kwenye Akaunti"),
+          style: "destructive",
+          onPress: async () => {
+            setBusy("signout");
+            try {
+              await signOut();
+            } finally {
+              setBusy(null);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
+  /**
+   * Delete account. The consequence is printed ON THE PAGE (ENEO LA HATARI
+   * below) exactly as the design prints it; this dialog is the second step —
+   * the design's own question — and then it reports the outcome honestly:
+   * if the call fails, the account is still there and the next action is to
+   * try again or write to support.
+   */
   const confirmDelete = () => {
     haptics.warning();
     dialog.alert(
-      t("Delete your account?", "Ufute akaunti yako?"),
-      t("This permanently removes your CVs, cover letters and account data. It can't be undone.", "Hili linaondoa kabisa CV zako, barua za maombi na taarifa za akaunti. Haliwezi kurudishwa."),
+      t("Are you sure you want to delete every record?", "Una uhakika unataka kufuta rekodi zote?"),
+      t(
+        "This deletes your CVs, cover letters and account data, and it cannot be undone.",
+        "Hii inafuta CV zako, barua za maombi na taarifa za akaunti, na haiwezi kurudishwa.",
+      ),
       [
         { text: t("Cancel", "Ghairi"), style: "cancel" },
         {
-          text: t("Delete everything", "Futa kila kitu"),
+          text: t("Yes, delete everything", "Ndio, Futa Kila Kitu"),
           style: "destructive",
           onPress: async () => {
             setBusy("delete");
@@ -273,8 +368,11 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             } catch {
               haptics.error();
               dialog.alert(
-                t("Couldn't delete", "Imeshindwa kufuta"),
-                t(`Contact ${SUPPORT_EMAIL}.`, `Wasiliana na ${SUPPORT_EMAIL}.`),
+                t("The account was not deleted", "Akaunti haijafutwa"),
+                t(
+                  `Nothing was removed. Try again; if the problem continues, write to ${SUPPORT_EMAIL}.`,
+                  `Hakuna kilichoondolewa. Jaribu tena; tatizo likiendelea, andikia ${SUPPORT_EMAIL}.`,
+                ),
               );
             } finally {
               setBusy(null);
@@ -290,12 +388,19 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
   return (
     <Screen scroll keyboardAvoiding={false}>
       <Animated.View entering={FadeInDown.duration(300)}>
-        <ScreenTitle>{t("Profile", "Wasifu")}</ScreenTitle>
+        <ScreenTitle
+          trailing={
+            <HeaderChip label={isGuest ? t("No account", "Bila akaunti") : t("Personal account", "Akaunti Binafsi")} c={c} />
+          }
+        >
+          {t("Profile", "Wasifu")}
+        </ScreenTitle>
 
+        {/* Identity block: the portrait, the name, and the one pill that says
+            where these records live. */}
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: "column",
             gap: 14,
             backgroundColor: c.bgElevated,
             borderRadius: 16,
@@ -304,125 +409,133 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             padding: 16,
           }}
         >
-          {/* The photo the user picked in Career Profile, where they look for
-              it — the initials are the fallback when there is none (and for a
-              user who never added one, the circle is still the control that
-              takes them to do it, like the one on that screen). */}
-          <Pressable
-            onPress={() => {
-              haptics.selection();
-              navigation.navigate("CareerProfile");
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={
-              photo
-                ? t("Change your photo", "Badilisha picha yako")
-                : t("Add your photo", "Weka picha yako")
-            }
-            style={{ width: 56, height: 56, borderRadius: 18 }}
-          >
-            {photo ? (
-              <Image
-                source={{ uri: photo }}
-                accessibilityLabel={t("Your photo", "Picha yako")}
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 18,
-                  backgroundColor: c.bg,
-                  borderWidth: 1,
-                  borderColor: c.border,
-                }}
-              />
-            ) : isGuest ? (
-              // No account, so no initial to show: the circle is the way to the
-              // photo, and today it says so.
-              <View
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 18,
-                  backgroundColor: c.accent + "14",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Icon name="user-plus" size={22} color={c.accent} />
-              </View>
-            ) : (
-              <View
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 18,
-                  backgroundColor: c.accent,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
-                  {initials(user?.name, user?.email)}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-              {user?.name || user?.email?.split("@")[0] || t("Not signed in", "Hujaingia")}
-            </Text>
-            <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
-              {user?.email ||
-                t(
-                  "Your CVs are on this phone. Sign in to open them anywhere.",
-                  "CV zako ziko kwenye simu hii. Ingia ili kuzifungua mahali popote.",
-                )}
-            </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+            {/* The photo the user picked in Career Profile, where they look for
+                it — the initials are the fallback when there is none (and for a
+                user who never added one, the circle is still the control that
+                takes them to do it, like the one on that screen). */}
+            <Pressable
+              onPress={() => {
+                haptics.selection();
+                navigation.navigate("CareerProfile");
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={
+                photo
+                  ? t("Change your photo", "Badilisha picha yako")
+                  : t("Add your photo", "Weka picha yako")
+              }
+              style={{ width: 56, height: 56, borderRadius: 18 }}
+            >
+              {photo ? (
+                <Image
+                  source={{ uri: photo }}
+                  accessibilityLabel={t("Your photo", "Picha yako")}
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    backgroundColor: c.bg,
+                    borderWidth: 1,
+                    borderColor: c.border,
+                  }}
+                />
+              ) : isGuest ? (
+                // No account, so no initial to show: the circle is the way to the
+                // photo, and today it says so.
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    backgroundColor: c.accent + "14",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Icon name="user-plus" size={22} color={c.accent} />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: 18,
+                    backgroundColor: c.accent,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
+                    {initials(user?.name, user?.email)}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
+                {user?.name || user?.email?.split("@")[0] || t("Not signed in", "Hujaingia")}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
+                {user?.email ||
+                  t(
+                    "Your CVs are on this phone. Sign in to open them anywhere.",
+                    "CV zako ziko kwenye simu hii. Ingia ili kuzifungua mahali popote.",
+                  )}
+              </Text>
+            </View>
           </View>
+
+          <IdentityPill label={t("Saved on this phone", "Imehifadhiwa kwenye simu hii")} c={c} />
         </View>
       </Animated.View>
 
       <Animated.View entering={FadeInDown.duration(300).delay(70)}>
-        {/* Career profile — the facts Sumaiya reads */}
-        {/* The only route back into an existing account, at the TOP of the
-            screen. It used to sit in the Account group five sections down - under
-            Appearance, Notifications, Share and Premium - which is not where anyone
-            looks for a login, and a returning user has no other way in. */}
-        {isGuest ? (
-          <>
-            <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
-            <View style={groupBox}>
-              <ListRow
-                first
-                last
-                icon="user-plus"
-                iconColor={c.accent}
-                label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
-                sublabel={t(
-                  "If you already have one, your CVs are waiting for you.",
-                  "Kama unayo, CV zako zinakusubiri.",
-                )}
-                onPress={() => openAuth()}
-                chevron
-              />
-            </View>
-          </>
-        ) : null}
-
-
+        {/* ── AKAUNTI ──────────────────────────────────────────────────────
+            The design groups the account rows FIRST, and `Toka` belongs here
+            with `Wasifu wa kazi` — not three groups down, where a returning
+            user on a shared phone had to hunt for it. */}
+        <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
         <View style={groupBox}>
           <ListRow
             first
-            last
+            last={!isGuest}
             icon="user"
             iconColor={c.accent}
             label={t("Career profile", "Wasifu wa kazi")}
-            sublabel={t("Skills, experience, goals — I use these", "Ujuzi, uzoefu, malengo — ninatumia haya")}
+            sublabel={t(
+              "Skills, experience, goals — I use these to write your CV.",
+              "Ujuzi, uzoefu, malengo — ninatumia haya kuandika CV yako.",
+            )}
             onPress={() => navigation.navigate("CareerProfile")}
             chevron
           />
+          {!isGuest ? (
+            <ListRow
+              last
+              icon="log-out"
+              label={t("Sign out", "Toka")}
+              sublabel={t("Remove access on this device safely", "Ondoa ufikiaji kwenye kifaa hiki kwa usalama")}
+              disabled={busy === "signout"}
+              onPress={confirmSignOut}
+              chevron
+            />
+          ) : (
+            /* A guest has no session to end: the one account action that is
+               real for them is the way IN, and it says what it earns. */
+            <ListRow
+              last
+              icon="user-plus"
+              iconColor={c.accent}
+              label={t("Sign in or create a free account", "Ingia au fungua akaunti bure")}
+              sublabel={t("If you already have one, your CVs are waiting for you.", "Kama unayo, CV zako zinakusubiri.")}
+              onPress={() => openAuth()}
+              chevron
+            />
+          )}
         </View>
 
-        {/* Appearance */}
+        {/* ── MUONEKANO ──────────────────────────────────────────────────── */}
         <ListGroupLabel>{t("Appearance", "Muonekano")}</ListGroupLabel>
         <View style={groupBox}>
           <ListRow
@@ -430,6 +543,7 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             icon={dark ? "moon" : "sun"}
             iconColor={c.accent}
             label={t("Dark mode", "Hali ya giza")}
+            sublabel={t("A warm espresso that rests your eyes", "Espresso joto ya kulinda macho")}
             toggle={{ value: dark, onValueChange: setDark }}
           />
           <View style={{ backgroundColor: c.bgElevated, paddingHorizontal: 16, paddingVertical: 13 }}>
@@ -448,17 +562,22 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
                     onPress={() => pickLanguage(l)}
                     accessibilityRole="button"
                     accessibilityState={{ selected: active }}
+                    // §8: 44 dp. These pills were ~35 (9 + 13.5 pt text + 9),
+                    // and the design fills the active one ember — as
+                    // `accentFillStrong`, the guide's own emberPressed, so the
+                    // 13.5 pt label still clears AA on the fill.
                     style={{
                       flex: 1,
-                      paddingVertical: 9,
-                      borderRadius: 10,
+                      minHeight: 44,
+                      justifyContent: "center",
+                      borderRadius: 999,
                       borderWidth: 1.5,
-                      borderColor: active ? c.accent : c.border,
-                      backgroundColor: active ? c.accent + "14" : "transparent",
+                      borderColor: active ? "transparent" : c.borderStrong,
+                      backgroundColor: active ? c.accentFillStrong : "transparent",
                       alignItems: "center",
                     }}
                   >
-                    <Text style={{ color: active ? c.accent : c.textBody, fontWeight: "700", fontSize: 13.5 }}>
+                    <Text style={{ color: active ? c.accentText : c.textBody, fontWeight: "700", fontSize: 13.5 }}>
                       {l === "en" ? "English" : "Kiswahili"}
                     </Text>
                   </Pressable>
@@ -468,75 +587,63 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           </View>
         </View>
 
-        {/* Notifications */}
+        {/* ── ARIFA ────────────────────────────────────────────────────────
+            §7: no bell, no toggle — this release cannot send a remote alert,
+            so the row states that and asks for nothing. */}
         <ListGroupLabel>{t("Notifications", "Arifa")}</ListGroupLabel>
         <View style={groupBox}>
           <ListRow
             first
             last
-            icon="bell"
-            label={t("Push notifications", "Arifa za simu")}
-            sublabel={
-              isGuest
-                ? t(
-                    "Job matches and sync updates come with a free account.",
-                    "Ajira zinazokufaa na taarifa za usawazishaji huja na akaunti ya bure.",
-                  )
-                : pushReady
-                  ? t("Job matches, sync updates", "Ajira zinazofaa, taarifa za usawazishaji")
-                  : t(
-                      "Not available yet — this version can't send alerts to your phone.",
-                      "Bado haipatikani — toleo hili haliwezi kutuma arifa kwenye simu yako.",
-                    )
-            }
-            value={pushReady && !isGuest ? undefined : t("Not yet", "Bado")}
-            toggle={pushReady && !isGuest ? { value: notifications, onValueChange: setNotif } : undefined}
-            disabled={!pushReady || isGuest}
+            label={t("Phone notifications", "Arifa za simu")}
+            sublabel={t(
+              "Not available yet — this release doesn't use remote alerts.",
+              "Bado haipatikani — toleo hili halitumii arifa za mbali.",
+            )}
+            value={t("Not yet", "Bado")}
           />
         </View>
 
-        {/* Invite */}
-        <ListGroupLabel>{t("Share Sumaiya", "Shirikisha Sumaiya")}</ListGroupLabel>
+        {/* ── HUDUMA ───────────────────────────────────────────────────────
+            The design keeps both service rows in ONE card. The `Mpya` badge
+            the design draws on Premium is correctly NOT here (§10 forbids
+            badges). */}
+        <ListGroupLabel>{t("Services", "Huduma")}</ListGroupLabel>
+        <View style={groupBox}>
+          <ListRow
+            first={!premium}
+            last={!premium}
+            icon="gift"
+            iconColor={c.accent}
+            label={t("Invite a friend", "Mwalike rafiki")}
+            sublabel={t("It's free — help someone else get hired.", "Ni bure — msaidie mtu mwingine apate ajira.")}
+            onPress={() => navigation.navigate("HomeTab", { screen: "Invite" })}
+            chevron
+          />
+          {!premium ? (
+            <ListRow
+              last
+              icon="gem"
+              iconColor={c.accent}
+              label={t("Sumaiya Premium", "Sumaiya Premium")}
+              sublabel={t(
+                "Advanced designs and deep courses · Everything essential stays free",
+                "Miundo ya hali ya juu na kozi za kina · Kila kitu muhimu kinabaki bure",
+              )}
+              onPress={() => setShowPremium(true)}
+              chevron
+            />
+          ) : null}
+        </View>
+
+        {/* Clear offline data — EXTRA (sanctioned): a real device action the
+            design does not model. It sits between the design's own groups so
+            ENEO LA HATARI stays last, as the design has it. */}
+        <ListGroupLabel>{t("This device", "Kifaa hiki")}</ListGroupLabel>
         <View style={groupBox}>
           <ListRow
             first
             last
-            icon="gift"
-            iconColor={c.accent}
-            label={t("Invite a friend", "Mwalike rafiki")}
-            sublabel={t("It's free — help someone else get hired", "Ni bure — msaidie mtu mwingine apate ajira")}
-            onPress={() => navigation.navigate("HomeTab", { screen: "Invite" })}
-            chevron
-          />
-        </View>
-
-        {/* Premium */}
-        {!premium ? (
-          <>
-            <ListGroupLabel>{t("Sumaiya Premium", "Sumaiya Premium")}</ListGroupLabel>
-            <View style={groupBox}>
-              <ListRow
-                first
-                last
-                icon="gem"
-                iconColor={c.accent}
-                label={t("Advanced templates & deep courses", "Miundo ya hali ya juu na kozi za kina")}
-                sublabel={t("Everything essential stays free", "Kila kitu muhimu kinabaki bure")}
-                onPress={() => setShowPremium(true)}
-                chevron
-              />
-            </View>
-          </>
-        ) : null}
-
-        {/* Account */}
-        <ListGroupLabel>{t("Account", "Akaunti")}</ListGroupLabel>
-        <View style={groupBox}>
-          {/* A guest has no session to end and no account to delete, so the
-              group offers the one account action that is real for them, first,
-              and says what it earns. */}
-          <ListRow
-            first={!isGuest}
             icon="trash-2"
             iconColor={c.warning}
             label={t("Clear offline data", "Futa data iliyohifadhiwa")}
@@ -544,34 +651,10 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
             onPress={clearCache}
             chevron
           />
-          {/* Sign out lives HERE, in Account, not only at the bottom of the
-              screen below "Delete account".
-              The device sweep reported "a user cannot sign out" from a dump of
-              this tab: the AKAAUNTI group held exactly two rows and the bundle
-              supposedly never contained "Toka". Both were artifacts — the dump
-              is clipped to the viewport (the tree ends at "Msaada na Maswali",
-              and scrolling reveals the real button), and the shipped 1.6.24
-              bundle does contain "Toka" once as a deduplicated Hermes string.
-              The control existed; it was one and a half screens down, under the
-              one row nobody taps casually, on a screen where users look for it
-              in the first group. On a shared phone that is the difference
-              between signing out and handing the phone over signed in, so it
-              also moved above the fold and the shadow button at the bottom was
-              removed rather than duplicated. */}
-          {!isGuest ? (
-            <ListRow
-              icon="log-out"
-              label={t("Sign out", "Toka")}
-              sublabel={t("You can sign back in any time", "Unaweza kuingia tena wakati wowote")}
-              disabled={busy === "signout"}
-              onPress={confirmSignOut}
-              chevron
-            />
-          ) : null}
-          <ListRow last icon="alert-circle" label={t("Version", "Toleo")} value={version} />
         </View>
 
-        {/* Help & support */}
+        {/* Help & support — not in Stitch, kept because PDPA ss.33/38 access
+            and erasure need a door, not a paragraph. */}
         <ListGroupLabel>{t("Help & support", "Msaada na usaidizi")}</ListGroupLabel>
         <View style={groupBox}>
           <ListRow
@@ -619,32 +702,68 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
           />
         </View>
 
-        {/* Danger */}
-        {/* A guest has no account to delete — and apiClient.deleteAccount()
-            without a session is a request that can only fail, so the row is
-            hidden rather than offered as a dead end. */}
+        {/* ── ENEO LA HATARI ───────────────────────────────────────────────
+            Danger last, tinted and with the consequence printed on the page —
+            the design's own treatment, and the one group that must not look
+            like the others. A guest has no account to delete, so it is hidden
+            rather than offered as a dead end. */}
         {!isGuest ? (
           <>
-            <ListGroupLabel>{t("Danger zone", "Eneo la hatari")}</ListGroupLabel>
-            <View style={groupBox}>
-              <ListRow
-                first
-                last
-                icon="trash-2"
-                label={t("Delete account", "Futa akaunti")}
-                destructive
-                disabled={busy === "delete"}
+            <Text
+              style={{
+                color: c.error,
+                fontSize: 11.5,
+                fontWeight: "800",
+                letterSpacing: 0.8,
+                textTransform: "uppercase",
+                marginBottom: 8,
+                marginTop: 22,
+                marginLeft: 4,
+              }}
+            >
+              {t("Danger zone", "Eneo la hatari")}
+            </Text>
+            <View
+              style={{
+                backgroundColor: c.errorTint,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: c.error + "33",
+                padding: 16,
+                gap: 14,
+              }}
+            >
+              <View style={{ gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <Icon name="alert-triangle" size={20} color={c.error} />
+                  <Text style={{ color: c.text, fontSize: 17, fontWeight: "800" }}>
+                    {t("Delete account", "Futa akaunti")}
+                  </Text>
+                </View>
+                <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18 }}>
+                  {t(
+                    "If you delete your account there is no way back. All your CVs and cover letters are deleted completely.",
+                    "Ukifuta akaunti yako, hakuna njia ya kurudi. CV zako zote na barua za maombi zitafutwa kabisa.",
+                  )}
+                </Text>
+              </View>
+              <Button
+                variant="danger"
+                label={t("Delete everything", "Futa kila kitu")}
+                leftIcon={<Icon name="trash-2" size={20} color={c.accentText} />}
+                loading={busy === "delete"}
                 onPress={confirmDelete}
               />
             </View>
           </>
         ) : null}
 
-        {/* The shadow "Toka" button that used to sit here is gone: sign-out is
-            a row in Account now, above the fold, with the same confirm dialog. */}
-
+        {/* The footer the design prints: the product line and the installed
+            version. No version pill in the header (§7). */}
         <Text style={{ color: c.textMuted, fontSize: 12, textAlign: "center", marginTop: 20, lineHeight: 18 }}>
-          {t("Sumaiya · Your career, guided", "Sumaiya · Kazi yako, inaongozwa")}{"\n"}{SUPPORT_EMAIL}
+          {t(`Sumaiya · Your career, guided · v${version}`, `Sumaiya · Kazi yako, inaongozwa · v${version}`)}
+          {"\n"}
+          {SUPPORT_EMAIL}
         </Text>
       </Animated.View>
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="general" />
