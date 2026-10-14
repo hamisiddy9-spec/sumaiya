@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sumaiya",
     "slug": "sumaiya",
-    "version": "1.7.0",
+    "version": "1.8.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -19,7 +19,7 @@
     "android": {
       "package": "pro.sumaiya.app",
       "allowBackup": true,
-      "versionCode": 10700,
+      "versionCode": 10800,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#DA4A1C"
@@ -60,7 +60,12 @@
       "./plugins/with-release-signing",
       "expo-font",
       "expo-sharing",
-      ["expo-camera", { "recordAudioAndroid": false }],
+      [
+        "expo-camera",
+        {
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-image-picker",
       "expo-document-picker",
       "@react-native-google-signin/google-signin",

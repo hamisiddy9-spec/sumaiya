@@ -18,7 +18,20 @@ cd /c/Users/hamis/projects/sumaiya/apps/native/android || exit 1
 export JAVA_HOME="C:\\Users\\hamis\\tools\\jdk-17.0.20.1+1"
 export ANDROID_HOME="C:\\Users\\hamis\\tools\\android-sdk"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
-export PATH="/c/Users/hamis/tools/jdk-17.0.20.1+1/bin:$ANDROID_HOME/platform-tools:$PATH"
+# node is NOT on this shell's PATH by default, and gradle needs it: expo's autolinking
+# runs `node` while evaluating settings.gradle, and without it the build dies with
+# "A problem occurred starting process 'command 'node''" — which reads like a gradle
+# fault and is really a missing PATH entry.
+export PATH="/c/Users/hamis/tools/jdk-17.0.20.1+1/bin:/c/Users/hamis/tools/node/node-v22.23.2-win-x64:$ANDROID_HOME/platform-tools:$PATH"
+
+# Preflight: every one of these has failed a build in this project's history. Fail here,
+# with the missing tool named, instead of 90 seconds into a gradle run.
+for tool in node java keytool; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "❌ preflight: $tool is not on PATH"; exit 8; }
+done
+[ -x "$JAVA_HOME/bin/java" ] || { echo "❌ preflight: no java at $JAVA_HOME"; exit 8; }
+[ -d "$ANDROID_HOME" ] || { echo "❌ preflight: no Android SDK at $ANDROID_HOME"; exit 8; }
+echo "   preflight ok — node $(node -v), $(java -version 2>&1 | head -1)"
 
 # The release keystore. The signing block refuses to fall back to the debug keystore, so a
 # missing/mismatched copy fails the build on purpose — which is what we want: the whole
