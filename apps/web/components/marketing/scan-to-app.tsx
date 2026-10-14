@@ -55,7 +55,7 @@ export function ScanToApp() {
           <div className="flex flex-wrap items-center gap-4">
             <a
               href="/downloads/sumaiya.apk"
-              className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-cream shadow-[0_2px_0_#A8330F] transition hover:brightness-110"
+              className="rounded-full bg-ember px-6 py-3 text-sm font-bold text-cream shadow-[0_2px_0_#B93C13] transition hover:brightness-110"
             >
               {sw ? "Pakua app ya Android" : "Download the Android app"}
             </a>

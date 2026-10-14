@@ -153,7 +153,7 @@ export function MobileTabBar() {
                   aria-haspopup="dialog"
                   className="flex flex-1 flex-col items-center justify-end gap-1"
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ember text-cream shadow-[0_2px_0_#A8330F] active:shadow-[0_1px_0_#A8330F] active:translate-y-[1px] transition">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ember text-cream shadow-[0_2px_0_#B93C13] active:shadow-[0_1px_0_#B93C13] active:translate-y-[1px] transition">
                     <TabIcon className="h-5 w-5" strokeWidth={2.4} />
                   </span>
                   <span className="text-[10px] font-medium text-cream/70">

@@ -95,7 +95,7 @@ export default function TemplateDetailPage({ params }: { params: { slug: string;
             <div className="flex flex-wrap gap-3">
               <Link
                 href={`/editor/cv/try?template=${t.id}`}
-                className="inline-flex items-center gap-2 bg-ember text-cream font-semibold text-sm px-6 py-3 rounded-[10px] shadow-[0_3px_0_#A8330F] hover:bg-ember-hover active:translate-y-[2px] active:shadow-[0_1px_0_#A8330F] transition"
+                className="inline-flex items-center gap-2 bg-ember text-cream font-semibold text-sm px-6 py-3 rounded-[10px] shadow-[0_3px_0_#B93C13] hover:bg-ember-hover active:translate-y-[2px] active:shadow-[0_1px_0_#B93C13] transition"
               >
                 Use the {t.name} template →
               </Link>

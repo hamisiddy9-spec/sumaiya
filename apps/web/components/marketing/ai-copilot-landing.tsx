@@ -21,22 +21,22 @@ import { Logo } from "@/components/ui/logo";
 
 // ── Warm Confidence palette (mirrors tailwind.config.ts + the design) ──────────
 const C = {
-  sand: "#EFE7DA",
+  sand: "#EFEEEA",
   espresso: "#211A15",
   espressoLine: "#3A2E25",
   ember: "#DA4A1C",
-  emberDark: "#A8330F",
-  emberHover: "#C13E14",
+  emberDark: "#B93C13",
+  emberHover: "#C2410C",
   pine: "#12433D",
   gold: "#F2A93B",
-  cream: "#FAF5EE",
-  bodyMuted: "#6B5F54",
+  cream: "#FBF9F5",
+  bodyMuted: "#1B1C1A",
   faintMuted: "#9C9186",
-  border: "#E9E0D4",
-  borderStrong: "#DBD1C2",
-  emberTint: "#FBE9E1",
-  panel: "#F4EEE4",
-  green: "#059669",
+  border: "#E2BFB5",
+  borderStrong: "#8E7068", // guide §1 borderStrong
+  emberTint: "rgba(218, 74, 28, 0.12)", // guide §1 emberTint @12%
+  panel: "#F5F3EF",
+  green: "#186A22", // guide §1 success
 };
 
 const FONT_DISPLAY = "var(--font-display), 'Bricolage Grotesque', sans-serif";

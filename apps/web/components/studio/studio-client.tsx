@@ -91,8 +91,8 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
       {/* Top bar */}
       <div className="h-[54px] bg-espresso border-b border-espresso-line flex items-center px-4 gap-4 flex-shrink-0 text-cream">
         <Link href={`/editor/cv/${initialDoc.id}`} className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-ember shadow-[0_2px_0_#A8330F]">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#FAF5EE" strokeWidth="1.75" className="h-4 w-4"><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>
+          <div className="flex h-7 w-7 items-center justify-center rounded-[8px] bg-ember shadow-[0_2px_0_#B93C13]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#FBF9F5" strokeWidth="1.75" className="h-4 w-4"><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>
           </div>
         </Link>
         <span className="text-sm font-medium truncate max-w-[220px]">{initialDoc.title}</span>
@@ -102,7 +102,7 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
         </span>
         <div className="flex flex-col items-end">
           <button onClick={download} disabled={isDownloading}
-            className="inline-flex items-center gap-1.5 bg-ember hover:bg-ember-hover text-cream text-sm font-semibold px-4 py-2 rounded-[9px] shadow-[0_3px_0_#A8330F] active:shadow-[0_1px_0_#A8330F] active:translate-y-[2px] transition disabled:opacity-60">
+            className="inline-flex items-center gap-1.5 bg-ember hover:bg-ember-hover text-cream text-sm font-semibold px-4 py-2 rounded-[9px] shadow-[0_3px_0_#B93C13] active:shadow-[0_1px_0_#B93C13] active:translate-y-[2px] transition disabled:opacity-60">
             {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />} Download
           </button>
           {downloadError && (

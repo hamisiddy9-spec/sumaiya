@@ -23,29 +23,37 @@ function contrast(a: string, b: string): number {
 
 // Keep in sync with tailwind.config.ts — these are the actual token values.
 const EMBER = "#DA4A1C";
-const EMBER_HOVER = "#C13E14";
+const EMBER_PRESSED = "#B93C13"; // the guide's emberPressed — the small-ember-text token
+const EMBER_HOVER = "#C2410C"; // the guide's emberHover — a STATE colour, not a text colour
 const WHITE = "#FFFFFF";
-const TINT = "#FBE9E1";
-const CREAM = "#FAF5EE";
-const SAND2 = "#F4EEE4";
+const TINT = "#F7E2DA"; // emberTint @12% composited over the surface
+const SURFACE = "#FBF9F5";
+const RAISED = "#F5F3EF";
+const SUNKEN = "#EFEEEA";
 
 describe("RF1 ember text token (AA)", () => {
   it("EMBER_TEXT resolves to the dark (AA-passing) ember token", () => {
-    expect(EMBER_TEXT).toContain("ember-hover");
+    expect(EMBER_TEXT).toContain("ember-pressed");
   });
 
-  it("ember-hover passes WCAG AA 4.5:1 on every surface it renders on", () => {
-    for (const bg of [WHITE, TINT, CREAM, SAND2]) {
-      // WCAG's official checker rounds to 2dp — ember-hover on the tint fill
-      // is 4.4987, which rounds to 4.50 and passes.
-      const ratio = Math.round(contrast(EMBER_HOVER, bg) * 100) / 100;
+  it("EMBER_TEXT passes WCAG AA 4.5:1 on every surface it renders on", () => {
+    for (const bg of [WHITE, SURFACE, RAISED, SUNKEN, TINT]) {
+      const ratio = Math.round(contrast(EMBER_PRESSED, bg) * 100) / 100;
       expect(ratio).toBeGreaterThanOrEqual(4.5);
     }
   });
 
-  it("ember DEFAULT fails AA for normal text on white (why the token exists)", () => {
-    // 4.22:1 — above the 3:1 icon/large-text bar, below the 4.5:1 text bar.
-    const ratio = contrast(EMBER, WHITE);
+  it("emberHover is a state colour: it is NOT safe for small text on every surface", () => {
+    // #C2410C is 5.18:1 on white but 4.46:1 on surfaceSunken — which is why the
+    // text token is emberPressed, not emberHover. If this ever starts passing
+    // everywhere, the two tokens have been re-brightened and this test's reason
+    // for existing has changed.
+    expect(Math.round(contrast(EMBER_HOVER, SUNKEN) * 100) / 100).toBeLessThan(4.5);
+  });
+
+  it("ember DEFAULT fails AA for normal text (why the token exists)", () => {
+    // 4.01:1 on the guide's surface — above the 3:1 icon/large-text bar, below 4.5:1.
+    const ratio = contrast(EMBER, SURFACE);
     expect(ratio).toBeGreaterThanOrEqual(3);
     expect(ratio).toBeLessThan(4.5);
   });

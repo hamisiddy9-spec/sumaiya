@@ -49,8 +49,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="hidden md:flex w-[230px] min-w-[230px] bg-espresso h-screen sticky top-0 flex-col">
         <div className="px-5 pt-6 pb-5">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-ember shadow-[0_2px_0_#A8330F]">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#FAF5EE" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" /></svg>
+            <div className="flex h-8 w-8 items-center justify-center rounded-[9px] bg-ember shadow-[0_2px_0_#B93C13]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FBF9F5" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" /></svg>
             </div>
             <span className="font-display font-extrabold text-cream tracking-tight">Admin</span>
           </div>

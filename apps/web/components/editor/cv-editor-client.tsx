@@ -548,7 +548,7 @@ function CvCompletionBar({ cv, onSectionClick }: { cv: CVData; onSectionClick?: 
               key={key}
               className="flex-1 rounded-full transition-all duration-500 cursor-pointer hover:opacity-80"
               style={{
-                backgroundColor: isEmpty ? "#EFE7DA" : isFull ? color : color + "88",
+                backgroundColor: isEmpty ? "#EFEEEA" : isFull ? color : color + "88",
                 transform: isFull ? "scaleY(1)" : "scaleY(0.85)",
               }}
               onClick={() => onSectionClick?.(key)}
@@ -568,7 +568,7 @@ function CvCompletionBar({ cv, onSectionClick }: { cv: CVData; onSectionClick?: 
               onClick={() => onSectionClick?.(key)}
               className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-pill text-[9px] font-semibold transition-all hover:opacity-80"
               style={{
-                backgroundColor: score >= 1 ? color + "18" : score > 0 ? "#FBF3E2" : "#EFE7DA",
+                backgroundColor: score >= 1 ? color + "18" : score > 0 ? "#FBF3E2" : "#EFEEEA",
                 color: score >= 1 ? color : score > 0 ? "#B57A18" : "#9C9186",
                 border: `1px solid ${score >= 1 ? color + "40" : score > 0 ? "#F2A93B" : "#DBD1C2"}`,
               }}
@@ -686,7 +686,7 @@ function CvStrengthMeter({ cv, lang }: { cv: CVData; lang?: "en" | "sw" }) {
         {/* Animated ring */}
         <div className="relative flex-shrink-0">
           <svg width="72" height="72" viewBox="0 0 72 72" className="-rotate-90">
-            <circle cx="36" cy="36" r="28" fill="none" stroke="#EFE7DA" strokeWidth="7" />
+            <circle cx="36" cy="36" r="28" fill="none" stroke="#EFEEEA" strokeWidth="7" />
             <circle
               cx="36" cy="36" r="28" fill="none" stroke={ring} strokeWidth="7"
               strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset}
@@ -1973,7 +1973,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 {/* Label + score micro-bar */}
                 <div className="flex flex-col items-center gap-0.5 mt-0.5">
                   <span className="text-[9px] font-semibold leading-none"
-                    style={{ color: isActive ? stepColor : isDone ? stepColor : hasSomeContent ? "#6B5F54" : "#9C9186" }}>
+                    style={{ color: isActive ? stepColor : isDone ? stepColor : hasSomeContent ? "#1B1C1A" : "#9C9186" }}>
                     {localLabel}
                   </span>
                   {/* Tiny fill bar under each label */}
@@ -1986,7 +1986,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
               {/* Connector */}
               {i < WIZARD_STEPS.length - 1 && (
-                <div className="flex-1 h-0.5 mx-1 mb-4 rounded overflow-hidden" style={{ backgroundColor: "#EFE7DA" }}>
+                <div className="flex-1 h-0.5 mx-1 mb-4 rounded overflow-hidden" style={{ backgroundColor: "#EFEEEA" }}>
                   <div className="h-full rounded transition-all duration-500"
                     style={{
                       width: i < wizardStep ? "100%" : "0%",

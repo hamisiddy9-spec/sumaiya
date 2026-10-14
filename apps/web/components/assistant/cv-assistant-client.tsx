@@ -3544,7 +3544,7 @@ function AtsResultCard({ score, checks, sw, onFix }: { score: number; checks: At
         icon={
           <span className="relative w-9 h-9 flex items-center justify-center">
             <svg width="36" height="36" viewBox="0 0 36 36" className="-rotate-90 absolute inset-0">
-              <circle cx="18" cy="18" r="15" fill="none" stroke="#EFE7DA" strokeWidth="3.5" />
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#EFEEEA" strokeWidth="3.5" />
               <circle cx="18" cy="18" r="15" fill="none" stroke={ringColor} strokeWidth="3.5" strokeLinecap="round"
                 strokeDasharray={C} strokeDashoffset={C * (1 - score / 100)} style={{ transition: "stroke-dashoffset .7s cubic-bezier(.4,0,.2,1)" }} />
             </svg>

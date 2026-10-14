@@ -2,7 +2,7 @@
 // every surface, so contrast + spacing can't drift per-page.
 //
 // Contrast is baked in: the ember variant renders AA-passing text
-// (`text-ember-hover` #C13E14, 5.29:1 on white / 4.50:1 on the tint fill) —
+// (`text-ember-hover` #C2410C, 5.29:1 on white / 4.50:1 on the tint fill) —
 // the old `bg-ember-tint text-ember` pattern was 3.59:1 (sub-AA).
 // Interactive badges get the shared FOCUS_RING + a 24px minimum hit area.
 

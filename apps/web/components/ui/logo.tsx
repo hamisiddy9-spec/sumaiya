@@ -38,7 +38,7 @@ function Mark({ px, animated }: { px: number; animated: boolean }) {
         <path d={BLADE} transform="rotate(120 12 12)" opacity={0.9} />
         <path d={BLADE} transform="rotate(240 12 12)" opacity={0.8} />
       </g>
-      <circle cx="12" cy="12" r="2.1" fill="#FAF5EE" className={animated ? "sumaiya-mark__core" : undefined} />
+      <circle cx="12" cy="12" r="2.1" fill="#FBF9F5" className={animated ? "sumaiya-mark__core" : undefined} />
     </svg>
   );
 }

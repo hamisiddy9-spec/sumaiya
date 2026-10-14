@@ -44,9 +44,9 @@ export function InstallPrompt() {
 
   return (
     <div className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-[100] mx-auto flex max-w-[420px] items-center gap-3 rounded-[14px] bg-espresso px-4 py-3.5 text-cream shadow-[0_12px_30px_-12px_rgba(33,26,21,0.5)] md:bottom-4">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-ember shadow-[0_2px_0_#A8330F]">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-ember shadow-[0_2px_0_#B93C13]">
         {/* download-to-device glyph, Lucide idiom */}
-        <svg viewBox="0 0 24 24" fill="none" stroke="#FAF5EE" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#FBF9F5" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
           <path d="M12 3v11M7.5 10 12 14.5 16.5 10M5 19h14" />
         </svg>
       </div>
