@@ -90,24 +90,24 @@ assert ats in html, "extension badge copy not found"
 html = html.replace(ats, "Kujaza fomu kwa mbofyo mmoja &middot; Ulinganisho wa moja kwa moja")
 log.append("law 1: extension badge reworded in Swahili ('ATS' removed)")
 
-# Law 6 — no version pills. The prototype carried two: a chip in the master chrome
-# and a version string in the rail footer. A version number in a design export is
-# not decorative, it is a claim that goes stale; the mobile rebuild banned them and
-# the web should not reintroduce them. The chip keeps its meaning, not its number.
+# Law 6 — no version pills. The prototype carries exactly two: `v1.7 Web & Ext` in the
+# master chrome and `Sumaiya Web 1.7.0` in the rail footer. The chip's anchor must use a
+# literal `&` (the source is not entity-escaped there) — an `&amp;` anchor silently
+# matched nothing and cost a build. The guard is deliberately NOT a blanket x.y.z test:
+# SVG path data is full of `3.332.477`, which is a coordinate, not a version.
 before = html
-html = html.replace(
-    '>v1.7 Web &amp; Ext</span>', '>Web &middot; Android &middot; Extension</span>')
+html = html.replace('>v1.7 Web & Ext</span>', '>Web &middot; Android &middot; Extension</span>')
 assert html != before, "master-chrome version chip not found"
 html, n = re.subn(r'(<span>)Sumaiya Web \d+\.\d+\.\d+(</span>)', r'\1Sumaiya Web\2', html)
 assert n == 1, "rail version string not found"
-log.append("law 6: two version pills removed (chrome chip, rail footer)")
+assert "v1.7 Web" not in html and not re.search(r"Sumaiya Web \d+\.\d+", html), "a version survived"
+log.append("law 6: both version pills removed (chrome chip + rail footer)")
 
-# A typo in the design's own copy: "Kamil 100%" is missing a vowel - the word is
-# "Kamili". Small, but this is copy a Swahili speaker reads.
-before = html
-html = html.replace("Kamil 100%", "Kamili 100%")
-assert html != before, "the Kamil typo was not found"
-log.append("copy: 'Kamil 100%' -> 'Kamili 100%'")
+# The design's own copy, checked rather than assumed. An earlier pass of this script
+# "fixed" a "Kamil 100%" typo that does not exist: the source already reads "Kamili".
+# So this asserts the copy instead of editing it - a false fix is worse than no fix.
+assert "Kamili 100%" in html, "the completeness label went missing"
+log.append("copy verified: 'Kamili 100%' is already correct in the source")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. THE WIRING LAYER — annotations on the elements that actually exist

@@ -26,6 +26,14 @@ def fetch(url):
 
 html = open(OUT, encoding="utf-8").read()
 
+# Idempotent: strip anything a previous run injected. Without this, re-running appends
+# another full set — three passes left 27 @font-face blocks and a 746 KB file, and the
+# duplication was invisible until the block count was checked.
+html, stripped = re.subn(
+    r"@font-face\{font-family:'[^']+';[^}]*data:font/woff2;base64,[^}]*\}", "", html)
+if stripped:
+    print(f"  removed {stripped} font blocks from an earlier run before re-injecting")
+
 rules, files, missing = [], 0, []
 for family, pkg, weights in FACES:
     for w in weights:
