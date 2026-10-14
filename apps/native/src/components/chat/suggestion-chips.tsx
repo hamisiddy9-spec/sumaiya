@@ -45,7 +45,8 @@ export function SuggestionChips({ suggestions, onSuggestionPress }: Props) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 12, paddingVertical: 8 }}
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 12, paddingVertical: 8, alignItems: "center" }}
+        style={{ flexGrow: 0 }}
         keyboardShouldPersistTaps="handled"
       >
         {shown.map((s) => (

@@ -195,7 +195,7 @@ export function CareerProfileScreen({ navigation }: CareerProfileScreenProps) {
       <Text style={{ color: c.text, fontSize: 14, fontWeight: "700", marginTop: 10 }}>
         {t("Default CV look", "Muundo chaguo-msingi wa CV")}
       </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 6 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingVertical: 6, alignItems: "center" }} style={{ flexGrow: 0 }}>
         {CV_TEMPLATES.filter((tpl) => tpl.tier === "free").map((tpl) => {
           const active = template === tpl.id;
           return (

@@ -191,7 +191,7 @@ export function ChatComposer({
         // keyboardShouldPersistTaps: the chips are tappable WHILE the person is
         // typing, and without this the first tap only dismisses the keyboard — the
         // chip appears dead and they tap it again.
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 8, paddingRight: 12 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 8, paddingRight: 12, alignItems: "center" }} style={{ flexGrow: 0 }}>
           {attachments.map((a, i) => (
             // Move 12 — a chip enters at 300 with a 40 ms stagger and leaves at
             // 140 `ease.in`; both token durations, both instant reduced. The
