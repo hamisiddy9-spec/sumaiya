@@ -5,6 +5,14 @@ import { configureReanimatedLogger, ReanimatedLogLevel } from "react-native-rean
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import * as Font from "expo-font";
+import { BricolageGrotesque_800ExtraBold } from "@expo-google-fonts/bricolage-grotesque";
+import {
+  HankenGrotesk_400Regular,
+  HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold,
+  HankenGrotesk_800ExtraBold,
+} from "@expo-google-fonts/hanken-grotesk";
+import { JetBrainsMono_400Regular, JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
 import { useColorScheme } from "nativewind";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -37,6 +45,49 @@ configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 // there's nothing to fix on our side while the SDK-57 versions stay pinned.
 LogBox.ignoreLogs(["synchronouslyUpdateUIProps"]);
 
+/**
+ * §2 TYPOGRAPHY — three families, three jobs (`docs/DESIGN-GUIDE.md`).
+ *
+ *   display / headings  Bricolage Grotesque (800) — geometric grotesque
+ *   body / UI           Hanken Grotesk            — warm humanist, excellent small
+ *   numeric / eyebrows  JetBrains Mono            — elapsed times, tracked uppercase
+ *
+ * The KEY here is the family name React Native resolves at paint time, so it is
+ * what a style's `fontFamily` must be set to and what `tailwind.config.js`'s
+ * `fontFamily.display/sans/mono` lists first (NativeWind/`react-native-css-interop`
+ * keeps only the first entry of that array — `parseFontFamily` returns
+ * `fontFamily[0]` — so the real name has to lead).
+ *
+ * Every file is a `require()`d asset inside the package: Metro bundles the .ttf
+ * into the binary and `expo-font` loads it from disk. Nothing here is fetched at
+ * runtime, so a cold start with no network still gets the real faces.
+ *
+ * Weights are the ones this app actually asks for (an inline `fontWeight: "700"`
+ * paired with a family whose file is a different weight is how Android silently
+ * falls back to the system font), so the bold body weights are registered too.
+ * `FONT_FAMILIES` just below is the guide's three families; the rest are their
+ * bolder cuts, for a screen that needs one without leaving the family.
+ */
+const FONT_FAMILIES = {
+  display: "BricolageGrotesque_800ExtraBold", // headings, weight 800
+  sans: "HankenGrotesk_400Regular", // body / UI
+  mono: "JetBrainsMono_400Regular", // numerics, eyebrows
+} as const;
+
+const FONT_ASSETS = {
+  // The guide's three families — the key IS the name React Native resolves.
+  [FONT_FAMILIES.display]: BricolageGrotesque_800ExtraBold,
+  [FONT_FAMILIES.sans]: HankenGrotesk_400Regular,
+  [FONT_FAMILIES.mono]: JetBrainsMono_400Regular,
+  // Bolder cuts of the same two families, for the UI's existing 600/700/800
+  // labels: a `fontWeight` whose cut is not registered is how Android drops
+  // silently back to the system font.
+  HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold,
+  HankenGrotesk_800ExtraBold,
+  JetBrainsMono_500Medium,
+};
+
 export default function RootLayout() {
   const { setColorScheme } = useColorScheme();
   const [ready, setReady] = useState(false);
@@ -50,10 +101,35 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepare() {
       try {
-        // Preload fonts
-        await Font.loadAsync({
-          // Add custom fonts if needed
-        });
+        // Preload fonts (§2 TYPOGRAPHY). Bundled assets — see FONT_ASSETS.
+        //
+        // Isolated in its own try/catch, and NOT allowed to throw out to the
+        // outer one: the rest of this effect opens SQLite, applies the saved
+        // theme and starts telemetry, and a missing font must not take those
+        // down with it.
+        try {
+          await Font.loadAsync(FONT_ASSETS);
+
+          // Registering a font is SILENT when it fails: React Native falls back
+          // to the system font and the heading is merely wrong on screen — which
+          // is precisely the state §2 flags in Stitch's own render (every run
+          // serif while the CSS declares two sans families). So read back the
+          // names the loader actually holds and make a miss loud, rather than
+          // letting it look like a typography decision.
+          const loaded = Font.getLoadedFonts();
+          const missing = Object.keys(FONT_ASSETS).filter((name) => !loaded.includes(name));
+          const missingFamilies = Object.values(FONT_FAMILIES).filter((name) => !loaded.includes(name));
+          if (missing.length > 0) {
+            const detail = `not registered: ${missing.join(", ")}${
+              missingFamilies.length > 0 ? ` — §2 families missing: ${missingFamilies.join(", ")}` : ""
+            }`;
+            pushLogEntry("error", "fonts.load", detail);
+            reportError(new Error(`fonts ${detail}`), { scope: "fonts.load" });
+          }
+        } catch (fontError) {
+          pushLogEntry("error", "fonts.load", shortMessage(fontError));
+          reportError(fontError, { scope: "fonts.load" });
+        }
 
         // offlineStorage (SQLite-backed sync queue) was never initialized
         // anywhere in the app — every call to it (addToSyncQueue,
@@ -112,7 +188,9 @@ export default function RootLayout() {
           track(name, props ?? {});
         });
       } catch (e) {
-        console.warn("Font loading error:", e);
+        // Fonts are handled (and reported) in their own try above, so whatever
+        // reaches here is the SQLite open / theme / telemetry group.
+        console.warn("Startup prepare error:", e);
       } finally {
         setReady(true);
         SplashScreen.hideAsync();

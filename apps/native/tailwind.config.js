@@ -86,6 +86,29 @@ module.exports = {
         'input-lg': '12px',
         'card': '16px',
       },
+      // ── §2 TYPOGRAPHY — three families, three jobs ─────────────────────
+      //
+      // ⚠️ NativeWind keeps only the FIRST entry of each array: the interop's
+      // `parseFontFamily` returns `fontFamily[0]`, because React Native takes a
+      // single family name and has no font stack. So the name registered with
+      // expo-font leads, and the web names after it record the intent without
+      // ever reaching RN:
+      //
+      //   display  Bricolage Grotesque 800 — headings
+      //   sans     Hanken Grotesk → Inter  — body / UI
+      //   mono     JetBrains Mono          — numerics, tracked eyebrows
+      //
+      // Those three names are registered (and read back) in
+      // `src/app/_layout.tsx`; `components/ui/typography.test.ts` pins the two
+      // lists together, so a family renamed on one side cannot quietly fall
+      // back to the system font on the other. The bolder cuts of the same
+      // families are registered there too — pair a `fontWeight` with the cut
+      // that carries it (`HankenGrotesk_700Bold`), never with `sans`.
+      fontFamily: {
+        display: ['BricolageGrotesque_800ExtraBold', 'Bricolage Grotesque', 'system-ui', 'sans-serif'],
+        sans: ['HankenGrotesk_400Regular', 'Hanken Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrainsMono_400Regular', 'JetBrains Mono', 'ui-monospace', 'monospace'],
+      },
       fontSize: {
         xs: ['12px', { lineHeight: '16px' }],
         sm: ['14px', { lineHeight: '20px' }],
