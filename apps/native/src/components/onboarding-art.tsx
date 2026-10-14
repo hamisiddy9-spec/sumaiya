@@ -23,10 +23,15 @@ import Animated, {
 const BLADE =
   "M12 2.6 C 15.1 5 15.6 8.6 13.5 10.8 C 12.7 11.7 11.3 11.7 10.5 10.8 C 8.4 8.6 8.9 5 12 2.6 Z";
 
+// Ember is ROOT (guide §1): the guide's "do not keep both palettes" rule means
+// the old pine and gold secondaries are gone. The art is built entirely from
+// ember — depth comes from opacity, which is also how the house mark itself is
+// drawn (three blades at 1.0 / 0.9 / 0.8), so decorative art and the mark now
+// speak the same language instead of two rival ones.
 const EMBER = "#DA4A1C";
-const EMBER_DEEP = "#A8330F";
-const PINE = "#12433D";
-const GOLD = "#F2A93B";
+const EMBER_DEEP = "#B93C13"; // the guide's emberPressed
+const PINE = EMBER;
+const GOLD = EMBER;
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 

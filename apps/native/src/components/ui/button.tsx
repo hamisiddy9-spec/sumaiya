@@ -56,8 +56,13 @@ export function Button({
   const scale = useSharedValue(1);
   const isDisabled = disabled || loading;
 
+  // Primary fills use the guide's `emberPressed` (#B93C13), not ember itself.
+  // White on ember is 4.22:1 — under AA for the 14–16px label every one of
+  // these buttons carries. Nothing new is invented: #B93C13 IS a guide token
+  // (emberPressed, 5.65:1 with onEmber), and ember keeps every other job the
+  // guide gives it (active tab, focus, the mark, large display surfaces).
   const palette = {
-    primary: { bg: c.accentFill, bgPressed: c.accentFillPressed, fg: c.accentText, border: "transparent" },
+    primary: { bg: c.accentFillStrong, bgPressed: c.accentFillPressed, fg: c.accentText, border: "transparent" },
     secondary: { bg: c.bgElevated, bgPressed: c.border, fg: c.text, border: c.borderStrong },
     ghost: { bg: "transparent", bgPressed: c.onAccentMuted, fg: c.accent, border: "transparent" },
     danger: { bg: c.error, bgPressed: c.error, fg: "#fff", border: "transparent" },

@@ -54,7 +54,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
       <View
         style={{
           flex: 1,
-          backgroundColor: "#FAF5EE",
+          backgroundColor: "#FBF9F5",
           alignItems: "center",
           justifyContent: "center",
           padding: 32,
@@ -71,12 +71,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
             justifyContent: "center",
           }}
         >
-          <SumaiyaMark size={40} state="static" color="#FAF5EE" />
+          <SumaiyaMark size={40} state="static" color="#FFFFFF" />
         </View>
         <Text style={{ color: "#211A15", fontSize: 20, fontWeight: "800", textAlign: "center" }}>
           {sw ? "Kuna hitilafu imetokea" : "Something broke"}
         </Text>
-        <Text style={{ color: "#6B5F54", fontSize: 14.5, textAlign: "center", lineHeight: 21, maxWidth: 300 }}>
+        <Text style={{ color: "#1B1C1A", fontSize: 14.5, textAlign: "center", lineHeight: 21, maxWidth: 300 }}>
           {sw
             ? "Nimekutana na tatizo kwenye skrini hii. CV zako na taarifa zako ziko salama — hakuna kilichopotea."
             : "I hit a problem on this screen. Your CVs and data are safe — nothing was lost."}
@@ -84,16 +84,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <Pressable
           accessibilityRole="button"
           onPress={this.reset}
-          style={{ marginTop: 6, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 14, backgroundColor: "#DA4A1C" }}
+          style={{ marginTop: 6, paddingVertical: 13, paddingHorizontal: 28, borderRadius: 12, backgroundColor: "#B93C13" }}
         >
-          <Text style={{ color: "#FAF5EE", fontSize: 15, fontWeight: "800" }}>{sw ? "Jaribu tena" : "Try again"}</Text>
+          <Text style={{ color: "#FFFFFF", fontSize: 15, fontWeight: "800" }}>{sw ? "Jaribu tena" : "Try again"}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
           onPress={() => reportSheet.open("crash")}
           style={{ paddingVertical: 10, paddingHorizontal: 16 }}
         >
-          <Text style={{ color: "#6B5F54", fontSize: 14, fontWeight: "700" }}>
+          <Text style={{ color: "#1B1C1A", fontSize: 14, fontWeight: "700" }}>
             {sw ? "Ripoti tatizo" : "Report a problem"}
           </Text>
         </Pressable>

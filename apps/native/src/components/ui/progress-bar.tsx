@@ -2,6 +2,7 @@ import React from "react";
 import { View, type ViewStyle } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useThemeColors } from "./theme";
+import { useMotionReduced } from "./motion";
 
 type Tone = "accent" | "success" | "warning" | "error" | "muted";
 
@@ -27,6 +28,11 @@ export function ProgressBar({
   style?: ViewStyle;
 }) {
   const c = useThemeColors();
+  // Guide §4: "Reduce Motion switches off every mark animation and every beat".
+  // A bar that grows is motion, so the preference reaches it here rather than
+  // each caller remembering to pass `animated={false}`.
+  const reduceMotion = useMotionReduced();
+  const animate = animated && !reduceMotion;
   const clamped = Math.max(0, Math.min(1, Number.isFinite(value) ? value : 0));
   const fill =
     tone === "success"
@@ -39,16 +45,18 @@ export function ProgressBar({
             ? c.textMuted
             : c.accent;
 
-  const w = useSharedValue(animated ? clamped : clamped);
+  // The bar grows from its LEFT edge (guide §4) because it is a width, not a
+  // scaleX — a centred scale reads as half-done before anything has finished.
+  const w = useSharedValue(clamped);
   React.useEffect(() => {
-    w.value = animated ? withTiming(clamped, { duration: 320 }) : clamped;
-  }, [clamped, animated, w]);
+    w.value = animate ? withTiming(clamped, { duration: 320 }) : clamped;
+  }, [clamped, animate, w]);
   const fillStyle = useAnimatedStyle(() => ({ width: `${w.value * 100}%` }));
 
   return (
     <View
       style={[
-        { height, borderRadius: 999, backgroundColor: track ?? c.border, overflow: "hidden", width: "100%" },
+        { height, borderRadius: 999, backgroundColor: track ?? c.bgSunken, overflow: "hidden", width: "100%" },
         style,
       ]}
     >

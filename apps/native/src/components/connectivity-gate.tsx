@@ -57,7 +57,7 @@ export function ConnectivityGate() {
         backgroundColor: "#211A15",
       }}
     >
-      <Text style={{ color: "#FAF5EE", fontSize: 12, fontWeight: "700" }}>
+      <Text style={{ color: "#FBF9F5", fontSize: 12, fontWeight: "700" }}>
         {t("Offline — changes are saved on your phone", "Nje ya mtandao — mabadiliko yamehifadhiwa kwenye simu")}
       </Text>
     </Animated.View>

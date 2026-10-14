@@ -19,8 +19,12 @@ export function Card({ children, onPress, style, padded = true, accessibilityLab
   const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const inner: ViewStyle = {
+    // `surfaceRaised` — NEVER white (guide §1). The radius is the design's
+    // `--r-card-lg: 20px` rather than `--r-card: 16px`: guide §5 adopts the
+    // 'apple polish' variant as preferred, and its rule is softer radii with a
+    // hairline border instead of a shadow. There is no shadow here on purpose.
     backgroundColor: c.bgElevated,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: c.border,
     padding: padded ? 16 : 0,
