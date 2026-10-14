@@ -25,6 +25,7 @@ import { TemplateGallery } from "../../components/cv/template-gallery";
 import { cvMetaLine, cvStatusLabel, cvStatusOf, type CvStatus } from "../../components/home/home-labels";
 import { ALL_TEMPLATES } from "../../lib/cv-html";
 import { letterIsEmpty } from "../../lib/letter-html";
+import { APPLICATION_STATUS_LABEL } from "../applications-labels";
 import { useLang } from "../../lib/i18n";
 import { relativeDate } from "../../lib/relative-date";
 import { dialog } from "../../components/ui";
@@ -62,7 +63,7 @@ import type { ThemeColors } from "../../components/ui/theme";
  *      The row shows the three types the app really has.
  */
 
-type DocKind = "cv" | "letter";
+type DocKind = "cv" | "letter" | "app";
 
 interface Doc {
   key: string;
@@ -85,6 +86,11 @@ const FILTERS: { key: DocKind | "all"; en: string; sw: string }[] = [
   { key: "all", en: "All", sw: "Zote" },
   { key: "cv", en: "CV", sw: "CV" },
   { key: "letter", en: "Cover letter", sw: "Barua ya maombi" },
+  // The applications themselves, including the ones with no cover letter yet —
+  // the shape the advert's Save button produces. Without this they were written
+  // to the store and rendered nowhere, because a document only existed here if
+  // it was a CV or an application that already carried a letter.
+  { key: "app", en: "Applications", sw: "Maombi" },
 ];
 
 const THUMB_W = 56;
@@ -367,6 +373,45 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
     ]);
   };
 
+  /**
+   * Deleting a saved application that has no letter yet. A separate dialog from
+   * the letter one on purpose: that copy promises the letter goes with the
+   * application, which would be a strange thing to say about an application that
+   * never had one.
+   */
+  const confirmDeleteApp = (id: string, title: string) => {
+    haptics.warning();
+    dialog.alert(
+      t("Delete this application?", "Ufute ombi hili?"),
+      t(
+        `"${title}" and everything saved with it is removed from this phone.`,
+        `"${title}" pamoja na kila kilichohifadhiwa nacho vinaondolewa kwenye simu hii.`,
+      ),
+      [
+        { text: t("Cancel", "Ghairi"), style: "cancel" },
+        {
+          text: t("Delete", "Futa"),
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(id);
+            try {
+              await removeApplication(id);
+              haptics.success();
+            } catch {
+              haptics.error();
+              dialog.alert(
+                t("Couldn't delete", "Imeshindwa kufuta"),
+                t("The application is still on this phone. Try again.", "Ombi bado liko kwenye simu hii. Jaribu tena."),
+              );
+            } finally {
+              setDeleting(null);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const confirmDeleteLetter = (id: string, title: string) => {
     haptics.warning();
     dialog.alert(
@@ -432,13 +477,35 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
       statusLabel: cvStatusLabel("ready", lang),
       at: a.updatedAt,
     }));
-    return [...cvDocs, ...letterDocs];
-  }, [cvs, letters, lang, t]);
+    // Applications that have no cover letter yet — a job saved from an advert.
+    // These were the invisible ones: the write succeeded and the library showed
+    // nothing, because `letters` above keeps only the applications whose letter
+    // is non-empty and there was no other way to be a document here.
+    const appDocs = applications
+      .filter((a) => letterIsEmpty(a.coverLetter))
+      .map<Doc>((a) => ({
+        key: `app:${a.id}`,
+        kind: "app",
+        id: a.id,
+        title: `${a.role} — ${a.company}`,
+        meta: `${APPLICATION_STATUS_LABEL[a.status][lang]} · ${relativeDate(new Date(a.updatedAt), lang)}`,
+        status: "ready",
+        statusLabel: APPLICATION_STATUS_LABEL[a.status][lang],
+        at: a.updatedAt,
+      }));
+    return [...cvDocs, ...letterDocs, ...appDocs];
+  }, [cvs, letters, applications, lang, t]);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
     const list = docs.filter(
-      (d) => (filter === "all" || d.kind === filter) && (!q || d.title.toLowerCase().includes(q)),
+      (d) =>
+        // "Applications" means every application, letter or not: a cover letter
+        // IS an application here (it is stored on one), so filtering by the
+        // letter kind alone would hide the saved jobs this chip exists for.
+        (filter === "all" ||
+          (filter === "app" ? d.kind === "app" || d.kind === "letter" : d.kind === filter)) &&
+        (!q || d.title.toLowerCase().includes(q)),
     );
     return sort === "name" ? [...list].sort((a, b) => a.title.localeCompare(b.title)) : [...list].sort((a, b) => b.at - a.at);
   }, [docs, filter, query, sort]);
@@ -480,7 +547,11 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         text: t("Delete", "Futa"),
         style: "destructive" as const,
         onPress: () =>
-          doc.kind === "cv" ? confirmDelete(doc.id, doc.title) : confirmDeleteLetter(doc.id, doc.title),
+          doc.kind === "cv"
+            ? confirmDelete(doc.id, doc.title)
+            : doc.kind === "app"
+              ? confirmDeleteApp(doc.id, doc.title)
+              : confirmDeleteLetter(doc.id, doc.title),
       },
       { text: t("Cancel", "Ghairi"), style: "cancel" as const },
     ];
