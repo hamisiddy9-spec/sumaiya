@@ -1,69 +1,125 @@
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import Animated, { Easing, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { getSecureItem, setSecureItem } from "@sumaiya/utils";
 import { Icon } from "./icon";
-import { Button, haptics, useThemeColors } from "./ui";
+import { Button, EASE, MOTION, enterDurationMs, exitDurationMs, haptics, useMotionReduced, useThemeColors } from "./ui";
+import { FONT } from "./home";
 import { useLang } from "../lib/i18n";
 
 /**
- * Shown when someone taps a premium template / course.
+ * SCREEN G1 — the Premium sheet ("Kifurushi cha Premium"), rebuilt to the
+ * approved mockup, and shown whenever someone taps a locked premium design,
+ * a deep guide, or the written verdict.
  *
- * The copy has to be TRUE, and it changed the moment the gate became real.
- * Premium is no longer a promise: the premium designs are genuinely locked
- * (tier === "premium"), and Premium is genuinely obtainable TODAY — referrals
- * grant 7 days per friend who builds their first CV.
+ * The copy has to be TRUE. Premium is genuinely locked (tier === "premium"),
+ * genuinely obtainable TODAY — referrals grant 7 days per friend who builds
+ * their first CV — and the paid tier is genuinely NOT open, so nothing on this
+ * sheet may imply it can be bought right now.
  *
- * Two things this used to get wrong, both now fixed:
- *   1. It advertised "the Executive and Compact layouts" as the premium
- *      benefit. Neither is premium — `executive-letter` and `compact-letter`
- *      are free LETTER templates, unrelated to the gated set. Naming them sold
- *      a tier with two designs that were already free.
- *   2. It framed waiting as the only route ("notify me when it's ready"),
- *      hiding the one route that works from the one screen a user reaches by
- *      asking for the thing.
+ * ── NO PRICE IS DRAWN ANYWHERE IN THIS FILE ──────────────────────────────────
+ * The mockup shows no figure, and the project carries two conflicting ones (an
+ * earlier draft's 4,500 / 1,500 against the sales register's 3,000 / 8,000 /
+ * 60,000). Typing either would ship a money claim nobody approved, so the sheet
+ * draws the STRUCTURE only: what Premium unlocks, the honest locked state, and
+ * the mobile-money methods named as methods — never an amount. The figure is
+ * the owner's to set.
  *
+ * ── WHERE THE MOCKUP AND THE TRUTH DISAGREE, THIS FILE SIDES WITH THE TRUTH ──
+ *   • The mockup's subtitle and three benefit rows sell "all the international
+ *     designs", "unlimited job-ad review" and "unlimited CV import from photos".
+ *     None of the three is a Premium benefit. The whole international registry
+ *     (200+ designs) is already FREE, the employer-screening check ("Ukaguzi wa
+ *     CV") is FREE and unmetered, and CV-from-photo import is FREE — premium is
+ *     exactly two extra designs and the deep guides (lib/cv-html.ts tiers,
+ *     lib/guides.ts tiers, lib/entitlements.ts). The rows were rewritten to what
+ *     the tier system actually gates.
+ *   • The mockup's payment tiles are tappable method pickers. There is no
+ *     payment integration on the native side and no amount to charge, so the
+ *     methods ship as information, not as a control that does nothing.
+ *   • The mockup's "payment code or invite?" box (input + "Tumia") has no server
+ *     path — there is no redeem endpoint anywhere in the app (api-client has
+ *     getReferral() and nothing that takes a code). An input whose button cannot
+ *     apply anything is worse than no input, so the box is omitted.
+ *   • The mockup's emerald ticks and its mono surface colours are mockup
+ *     artefacts; the status colours come from the tokens (§1/§6) and every
+ *     surface from useThemeColors().
+ *
+ * The route that works today is the CTA: it earns Premium by inviting friends.
  * The waitlist flag is stored locally and is NOT entitlement — see the warning
  * in src/lib/entitlements.ts.
  */
 type Feature = "templates" | "courses" | "verdict" | "general";
 
-const COPY: Record<Feature, { en: string[]; sw: string[] }> = {
+interface Pair {
+  en: string;
+  sw: string;
+}
+
+/** The mockup's one-line summary, made true per entry point. */
+const SUBTITLE: Record<Feature, Pair> = {
   templates: {
-    en: [
-      "Two extra designs — Executive and Compact",
-      "Earned by inviting friends — 7 days each time one builds a CV",
-      "Everything else stays free",
-    ],
-    sw: [
-      "Miundo miwili ya ziada — Kiongozi na Fupi",
-      "Inapatikana kwa kualika marafiki — siku 7 kila mmoja akijenga CV",
-      "Kila kitu kingine kinabaki bure",
-    ],
+    en: "Unlock the Executive and Compact designs.",
+    sw: "Fungua miundo ya Kiongozi na Fupi.",
   },
   courses: {
-    en: ["Deep guides: negotiation, changing fields, LinkedIn", "Step-by-step, built for East Africa", "The short guides stay free"],
-    sw: ["Miongozo ya kina: majadiliano, kubadili fani, LinkedIn", "Hatua kwa hatua, kwa Afrika Mashariki", "Miongozo mifupi inabaki bure"],
+    en: "Unlock the three deep guides.",
+    sw: "Fungua miongozo mitatu ya kina.",
   },
   verdict: {
-    en: ["A written verdict on your CV, in plain language", "Your 3 highest-impact fixes, ranked", "The deterministic ATS score stays free"],
-    sw: ["Uamuzi ulioandikwa kuhusu CV yako, kwa lugha rahisi", "Marekebisho matatu yenye athari kubwa, yaliyopangwa", "Alama ya CV yako ya uhakika inabaki bure"],
+    en: "Unlock the written review of your CV.",
+    sw: "Fungua mapitio yaliyoandikwa ya CV yako.",
   },
   general: {
-    en: [
-      "Two extra designs — Executive and Compact",
-      "Deep guides: negotiation, changing fields, LinkedIn",
-      "Everything essential stays free",
-    ],
-    sw: [
-      "Miundo miwili ya ziada — Kiongozi na Fupi",
-      "Miongozo ya kina: majadiliano, kubadili fani, LinkedIn",
-      "Kila kitu muhimu kinabaki bure",
-    ],
+    en: "The extra CV designs, the deep guides and the written review.",
+    sw: "Miundo ya ziada ya CV, miongozo ya kina na mapitio yaliyoandikwa.",
   },
 };
+
+/**
+ * What Premium actually gates, per entry point. Each row is a fact the tier
+ * system enforces, not the mockup's claim:
+ *
+ *   templates  — `executive` (Kiongozi) and `compact` (Fupi) are the only
+ *                `tier: "premium"` entries in the registry; every other design
+ *                is free.
+ *   courses    — three guides carry `tier: "premium"` (pay, changing fields,
+ *                LinkedIn); the rest are free.
+ *   verdict    — the written review is premium; the score and the checks above
+ *                it are computed on the device and stay free.
+ */
+const UNLOCKS: Record<Feature, Pair[]> = {
+  templates: [
+    { en: "The Executive and Compact designs", sw: "Miundo ya Kiongozi na Fupi" },
+    { en: "Opened in the same editor as the free designs", sw: "Inafunguliwa kwenye kihariri kile kile cha miundo ya bure" },
+    { en: "Every other design stays free", sw: "Miundo mingine yote inabaki bure" },
+  ],
+  courses: [
+    { en: "The three deep guides: pay, changing fields, LinkedIn", sw: "Miongozo mitatu ya kina: mshahara, kubadili fani, LinkedIn" },
+    { en: "Step by step, written for East Africa", sw: "Hatua kwa hatua, kwa Afrika Mashariki" },
+    { en: "The short guides stay free", sw: "Miongozo mifupi inabaki bure" },
+  ],
+  verdict: [
+    { en: "A written review of your CV, in plain language", sw: "Mapitio yaliyoandikwa ya CV yako, kwa lugha rahisi" },
+    { en: "Your three highest-impact fixes, ranked", sw: "Marekebisho matatu yenye athari kubwa, yaliyopangwa" },
+    { en: "The score and the checks stay free", sw: "Alama inabaki bure, na ukaguzi wa CV pia" },
+  ],
+  general: [
+    { en: "The Executive and Compact designs", sw: "Miundo ya Kiongozi na Fupi" },
+    { en: "Three deep guides: pay, changing fields, LinkedIn", sw: "Miongozo mitatu ya kina: mshahara, kubadili fani, LinkedIn" },
+    { en: "A written review of your CV", sw: "Mapitio yaliyoandikwa ya CV yako" },
+  ],
+};
+
+/**
+ * The mobile-money methods Premium will be payable by — brand names, identical
+ * in both languages, so they are constants and deliberately do NOT go through
+ * t() (the i18n guard rejects an identical pair that is not a product name in
+ * its shared list). No amount is ever drawn beside them.
+ */
+const PAYMENT_METHODS = ["M-Pesa", "Airtel Money", "Tigo Pesa", "Halopesa"] as const;
 
 const WAITLIST_KEY = "sumaiya_premium_waitlist";
 
@@ -85,8 +141,9 @@ export function PremiumSheet({
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const navigation = useNavigation<{ navigate: (a: string, b?: object) => void }>();
+  const reduceMotion = useMotionReduced();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(visible);
   const [onList, setOnList] = useState(false);
@@ -95,11 +152,18 @@ export function PremiumSheet({
     if (visible) {
       setMounted(true);
       getSecureItem(WAITLIST_KEY).then((v) => setOnList(v === "true")).catch(() => {});
-      progress.value = withTiming(1, { duration: 220, easing: Easing.out(Easing.cubic) });
-    } else if (mounted) {
-      progress.value = withTiming(0, { duration: 160, easing: Easing.in(Easing.cubic) }, (done) => {
-        if (done) runOnJS(setMounted)(false);
+      progress.value = withTiming(1, {
+        duration: enterDurationMs(reduceMotion, MOTION.dur.slow),
+        easing: EASE.out,
       });
+    } else if (mounted) {
+      progress.value = withTiming(
+        0,
+        { duration: exitDurationMs(reduceMotion, MOTION.dur.fast), easing: EASE.in },
+        (done) => {
+          if (done) runOnJS(setMounted)(false);
+        },
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
@@ -111,7 +175,8 @@ export function PremiumSheet({
   }));
 
   if (!mounted) return null;
-  const points = COPY[feature][lang === "sw" ? "sw" : "en"];
+  const unlocks = UNLOCKS[feature];
+  const subtitle = SUBTITLE[feature];
 
   // The route that works today. Same nested-navigation call profile-screen uses.
   const earn =
@@ -136,7 +201,9 @@ export function PremiumSheet({
         >
           <Animated.View style={[backdrop, { flex: 1, backgroundColor: c.overlay }]} />
         </Pressable>
+
         <Animated.View
+          accessibilityViewIsModal
           style={[
             sheet,
             {
@@ -146,75 +213,243 @@ export function PremiumSheet({
               bottom: 0,
               left: 0,
               width,
-              backgroundColor: c.bgElevated,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
+              maxHeight: Math.min(height - insets.top - 24, 813),
+              backgroundColor: c.bg,
+              borderTopLeftRadius: 32,
+              borderTopRightRadius: 32,
               paddingTop: 10,
-              paddingBottom: insets.bottom + 18,
+              paddingBottom: insets.bottom + 16,
               paddingLeft: 20 + insets.left,
               paddingRight: 20 + insets.right,
               borderTopWidth: 1,
               borderColor: c.border,
+              overflow: "hidden",
             },
           ]}
         >
-          <View style={{ alignSelf: "center", width: 40, height: 4, borderRadius: 2, backgroundColor: c.border, marginBottom: 16 }} />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: c.accent + "1f", alignItems: "center", justifyContent: "center" }}>
-              <Icon name="gem" size={19} color={c.accent} />
-            </View>
-            <Text style={{ color: c.text, fontSize: 19, fontWeight: "800" }}>{t("Sumaiya Premium", "Sumaiya Premium")}</Text>
-          </View>
+          <View
+            style={{
+              alignSelf: "center",
+              width: 36,
+              height: 5,
+              borderRadius: 2.5,
+              backgroundColor: c.borderStrong,
+              marginBottom: 14,
+            }}
+          />
 
-          <View style={{ gap: 9, marginBottom: 14 }}>
-            {points.map((p) => (
-              <View key={p} style={{ flexDirection: "row", gap: 9, alignItems: "flex-start" }}>
-                <Icon name="check" size={15} color={c.success} />
-                <Text style={{ flex: 1, color: c.textBody, fontSize: 13.5, lineHeight: 20 }}>{p}</Text>
+          <ScrollView
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={{ gap: 16, paddingBottom: 4 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* ── Header: badge · headline · one-line summary ────────────── */}
+            <View style={{ alignItems: "center", gap: 4 }}>
+              <View
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 5,
+                  borderRadius: 999,
+                  backgroundColor: c.accent,
+                }}
+              >
+                <Text
+                  style={{
+                    color: c.accentText,
+                    fontSize: 10,
+                    fontFamily: FONT.mono,
+                    letterSpacing: 1.6,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {t("Sumaiya Premium", "Sumaiya Premium")}
+                </Text>
               </View>
-            ))}
-          </View>
+              <Text
+                style={{
+                  color: c.text,
+                  fontSize: 24,
+                  lineHeight: 29,
+                  fontFamily: FONT.display,
+                  textAlign: "center",
+                  marginTop: 4,
+                }}
+              >
+                {t("Improve your profile", "Boresha Wasifu Wako")}
+              </Text>
+              <Text
+                style={{
+                  color: c.textBody,
+                  fontSize: 12,
+                  lineHeight: 18,
+                  fontFamily: FONT.regular,
+                  textAlign: "center",
+                  maxWidth: 260,
+                }}
+              >
+                {t(subtitle.en, subtitle.sw)}
+              </Text>
+            </View>
 
-          {/* How to actually get it. Paying is not open — saying only that would
-              leave the user with no move when there is one. */}
-          <Text style={{ color: c.textMuted, fontSize: 12.5, lineHeight: 18, marginBottom: 14 }}>
-            {t(
-              "Paying isn't open yet — but you don't have to wait. Premium is earned by inviting friends: 7 days each time one of them builds their first CV.",
-              "Malipo bado hayajafunguliwa — lakini huna haja ya kusubiri. Premium inapatikana kwa kualika marafiki: siku 7 kila mmoja akijenga CV yake ya kwanza.",
-            )}
-          </Text>
+            {/* ── What Premium unlocks (honest per entry point) ──────────── */}
+            <View style={{ gap: 8 }}>
+              {unlocks.map((u) => (
+                <View
+                  key={u.en}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: 10,
+                    borderRadius: 12,
+                    backgroundColor: c.bgElevated,
+                    borderWidth: 1,
+                    borderColor: c.border,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: 11,
+                      backgroundColor: c.successTint,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Icon name="check" size={13} color={c.success} />
+                  </View>
+                  <Text
+                    style={{
+                      flex: 1,
+                      color: c.textBody,
+                      fontSize: 12.5,
+                      lineHeight: 18,
+                      fontFamily: FONT.regular,
+                    }}
+                  >
+                    {t(u.en, u.sw)}
+                  </Text>
+                </View>
+              ))}
+            </View>
 
-          {earn && (
-            <Button
-              label={t("Earn Premium by inviting friends", "Pata Premium kwa kualika marafiki")}
-              onPress={() => {
-                haptics.light();
-                onClose();
-                earn();
-              }}
-            />
-          )}
+            {/* ── The route that works today ─────────────────────────────── */}
+            {earn ? (
+              <Button
+                label={t("Earn Premium by inviting friends", "Pata Premium kwa kualika marafiki")}
+                onPress={() => {
+                  onClose();
+                  earn();
+                }}
+              />
+            ) : null}
 
-          <View style={{ marginTop: earn ? 10 : 0 }}>
+            {/* ── Paying: the methods, named but not open ─────────────────── */}
+            <View style={{ gap: 8 }}>
+              <Text
+                style={{
+                  color: c.textMuted,
+                  fontSize: 11,
+                  fontFamily: FONT.mono,
+                  letterSpacing: 1.1,
+                  textTransform: "uppercase",
+                }}
+              >
+                {t("Pay by mobile money", "Lipa kwa Simu ya Mkononi")}
+              </Text>
+              <Text style={{ color: c.textMuted, fontSize: 12, lineHeight: 17, fontFamily: FONT.regular }}>
+                {t("Paying isn't open yet.", "Malipo bado hayajafunguliwa.")}
+              </Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                {PAYMENT_METHODS.map((m) => (
+                  <View
+                    key={m}
+                    accessibilityRole="text"
+                    style={{
+                      flexBasis: "46%",
+                      flexGrow: 1,
+                      minHeight: 44,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 12,
+                      backgroundColor: c.bgElevated,
+                      borderWidth: 1,
+                      borderColor: c.border,
+                    }}
+                  >
+                    <Text style={{ color: c.text, fontSize: 13, fontFamily: FONT.semibold }}>{m}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            {/* ── The waitlist: the honest state for a tier not yet on sale ── */}
             {onList ? (
-              <View style={{ flexDirection: "row", gap: 8, alignItems: "center", backgroundColor: c.success + "14", borderRadius: 12, padding: 13 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 8,
+                  alignItems: "center",
+                  minHeight: 44,
+                  backgroundColor: c.successTint,
+                  borderRadius: 12,
+                  padding: 12,
+                }}
+              >
                 <Icon name="check-circle" size={16} color={c.success} />
-                <Text style={{ flex: 1, color: c.textBody, fontSize: 13 }}>
+                <Text style={{ flex: 1, color: c.textBody, fontSize: 12.5, lineHeight: 17, fontFamily: FONT.regular }}>
                   {t("We'll tell you when paying opens.", "Tutakujulisha malipo yanapofunguliwa.")}
                 </Text>
               </View>
             ) : (
-              <Pressable accessibilityRole="button" onPress={join} style={{ alignSelf: "center", paddingVertical: 8 }}>
-                <Text style={{ color: c.textMuted, fontSize: 12.5, fontWeight: "700" }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={join}
+                style={{ minHeight: 44, justifyContent: "center", alignSelf: "center", paddingHorizontal: 10 }}
+              >
+                <Text style={{ color: c.textMuted, fontSize: 12.5, fontFamily: FONT.bold }}>
                   {t("Notify me when paying opens", "Nijulishe malipo yanapofunguliwa")}
                 </Text>
               </Pressable>
             )}
-          </View>
 
-          <Pressable accessibilityRole="button" onPress={onClose} style={{ alignSelf: "center", paddingVertical: 10 }}>
-            <Text style={{ color: c.textMuted, fontSize: 13.5, fontWeight: "700" }}>{t("Maybe later", "Baadaye")}</Text>
-          </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onClose}
+              style={{ minHeight: 44, justifyContent: "center", alignSelf: "center", paddingHorizontal: 12 }}
+            >
+              <Text style={{ color: c.textMuted, fontSize: 13.5, fontFamily: FONT.bold }}>
+                {t("Maybe later", "Baadaye")}
+              </Text>
+            </Pressable>
+          </ScrollView>
+
+          {/* ── Footer: the trust line, pinned as the mockup pins it ─────── */}
+          <View
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: c.border,
+              paddingTop: 12,
+              marginTop: 10,
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: c.textMuted,
+                fontSize: 11,
+                fontFamily: FONT.mono,
+                textAlign: "center",
+                lineHeight: 16,
+              }}
+            >
+              {t(
+                "No hidden charges • No automatic deductions",
+                "Bila malipo ya siri • Hakuna makato ya kiotomatiki",
+              )}
+            </Text>
+          </View>
         </Animated.View>
       </View>
     </Modal>
