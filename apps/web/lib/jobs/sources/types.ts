@@ -50,6 +50,23 @@ export interface RawJob {
   postedAt?: Date | null;
   /** True when the source marks this posting as remote. */
   remote?: boolean;
+  /**
+   * Salary EXACTLY as the source reported it. Numeric when the source gives
+   * numbers (jobicy `annualSalaryMin`/`annualSalaryMax`, adzuna `salary_min`/
+   * `salary_max`), free text when it gives words (careerjet/remotive/talent
+   * "KES 80,000 - 100,000"). A source that states nothing leaves these unset —
+   * nothing here is ever estimated.
+   */
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  /** ISO code when the source names a currency; "" when it does not. */
+  salaryCurrency?: string;
+  /** "year" | "month" | "hour" | "day" — the period the numbers are for. */
+  salaryPeriod?: string;
+  /** The source's own salary wording, when it is not a clean range. */
+  salaryText?: string;
+  /** Seniority as the source names it (jobicy `jobLevel`). */
+  jobLevel?: string;
 }
 
 /**
@@ -71,6 +88,13 @@ export interface NormalizedJob {
   externalId: string;
   applicationDeadline?: Date | null;
   postedAt?: Date | null;
+  /** Cleaned salary facts from the source — see `RawJob` for the provenance rule. */
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  salaryCurrency?: string;
+  salaryPeriod?: string;
+  salaryText?: string;
+  jobLevel?: string;
 }
 
 /**

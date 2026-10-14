@@ -330,7 +330,38 @@ export const job = pgTable("job", {
   postedBy: text("posted_by"),                                   // admin/user id, nullable for curated
   status: text("status").notNull().default("published"),          // draft | published | expiring | expired | rejected
   applicationDeadline: timestamp("application_deadline"),         // from source when provided
+  // WHEN THE SOURCE SAYS IT WAS POSTED — not when we ingested it.
+  // `createdAt` below is the row's insert time, so it is the moment the pipeline
+  // first saw the advert, which for a board we sync daily is today even when the
+  // employer posted a month ago. The feed showed `createdAt` under the label
+  // "Imepostiwa", i.e. it reported ingestion as posting. Eleven adapters already
+  // parse a real date (adzuna, ajira, careerjet, greenhouse, jobwebtanzania,
+  // jooble, lever, reliefweb, smartrecruiters, talent, usajobs) and
+  // `normalizeRawJob` carries it as `postedAt`; until this column existed the
+  // write had nowhere to put it and the value was dropped at the upsert.
+  postedAt: timestamp("posted_at"),
   lastVerifiedAt: timestamp("last_verified_at"),                  // when the pipeline last confirmed it's live
+  // SALARY, when a source states one. Kept as the source's own numbers plus its
+  // own wording: a range the source published is a fact, and a range we computed
+  // from it is not. `salaryText` holds free-form source strings ("KES 80,000/mo")
+  // that do not parse into min/max, so nothing is silently discarded.
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  salaryCurrency: text("salary_currency").notNull().default(""),
+  /**
+   * The period the numbers are for: "year" | "month" | "hour" | "day" | "".
+   *
+   * Load-bearing, not decoration: Jobicy's field is literally
+   * `annualSalaryMin` and Adzuna annualises its range, so a numeric salary
+   * printed without its period reads as a monthly figure to a Tanzanian user
+   * and understates the pay twelvefold. Sources that only give loose text keep
+   * it in `salaryText` (where the period is part of the sentence) and leave
+   * this empty.
+   */
+  salaryPeriod: text("salary_period").notNull().default(""),
+  salaryText: text("salary_text").notNull().default(""),
+  // Seniority as the source names it (jobicy `jobLevel`: senior, mid, junior…).
+  jobLevel: text("job_level").notNull().default(""),
   featured: boolean("featured").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

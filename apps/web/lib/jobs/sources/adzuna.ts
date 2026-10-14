@@ -6,7 +6,7 @@
  * Free tier: generous daily quota; we fetch a bounded page (50 results).
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType } from "./shared";
+import { fetchJson, str, companyName, employmentType, salaryNum, dateOrNull } from "./shared";
 import { cleanHtml } from "../text";
 
 const ADZUNA_APP_ID_ENV = "ADZUNA_APP_ID";
@@ -46,7 +46,18 @@ export const adzunaAdapter: JobSourceAdapter = {
         applyUrl: url,
         sourceUrl: url,
         externalId,
-        postedAt: j.created ? new Date(j.created) : null,
+        postedAt: dateOrNull(j.created),
+        // Adzuna returns `salary_is_predicted: "1"` when the figure is THEIR
+        // model's estimate rather than the employer's. An estimate printed as a
+        // salary on a screen where someone decides whether to apply is a
+        // fabricated number, so a predicted figure is dropped entirely.
+        ...(str(j.salary_is_predicted) === "1"
+          ? {}
+          : {
+              salaryMin: salaryNum(j.salary_min),
+              salaryMax: salaryNum(j.salary_max),
+              salaryPeriod: "year", // Adzuna annualises the range it returns
+            }),
         remote: /remote|work from home/i.test(`${loc} ${str(j.description).slice(0, 300)}`),
       });
     }

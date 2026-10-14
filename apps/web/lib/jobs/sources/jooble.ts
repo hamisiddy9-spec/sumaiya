@@ -5,7 +5,7 @@
  * The API is a POST to https://jooble.org/api/{key} with a JSON query.
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { str, companyName } from "./shared";
+import { str, companyName, dateOrNull } from "./shared";
 import { cleanHtml } from "../text";
 
 const JOOBLE_KEY_ENV = "JOOBLE_API_KEY";
@@ -47,7 +47,11 @@ export const joobleAdapter: JobSourceAdapter = {
         applyUrl: url,
         sourceUrl: url,
         externalId,
-        postedAt: j.updated ? new Date(j.updated) : null,
+        postedAt: dateOrNull(j.updated),
+        // Jooble prints pay as its own wording ("TZS 1,500,000 - 2,000,000 a
+        // month"); kept verbatim as text rather than parsed into a number whose
+        // period we would only be guessing at.
+        salaryText: str(j.salary),
         remote: /remote|work from home/i.test(`${str(j.location)} ${str(j.snippet).slice(0, 300)}`),
       });
     }

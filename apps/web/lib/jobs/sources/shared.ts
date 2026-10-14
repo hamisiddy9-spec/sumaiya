@@ -89,6 +89,33 @@ export function employmentType(raw: unknown): string {
   return s || "full-time";
 }
 
+/**
+ * A source's salary as a number, or null.
+ *
+ * Deliberately refuses anything whose SCALE is a guess: `70000` and `"70,000"`
+ * are accepted, while `"70k"` is not, because reading it as 70 would print a
+ * salary wrong by three orders of magnitude on a screen where a person decides
+ * whether they can afford to apply. A source that only offers loose wording
+ * keeps it as text (`salaryText`) instead — that is a quote, not a computation.
+ */
+export function salaryNum(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) && v > 0 ? Math.round(v) : null;
+  if (typeof v === "string") {
+    const cleaned = v.replace(/[,\s]/g, "");
+    if (!/^\d+(\.\d+)?$/.test(cleaned)) return null;
+    const n = Number(cleaned);
+    return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+  }
+  return null;
+}
+
+/** A source timestamp as a Date, or null when absent/unparseable. */
+export function dateOrNull(v: unknown): Date | null {
+  if (v == null || v === "") return null;
+  const d = v instanceof Date ? v : new Date(String(v));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 /* ── RSS/XML support ────────────────────────────────────────────────────────
  * Some regional boards publish a feed instead of an API (JobwebTanzania). RSS
  * is a documented, stable format the site maintains for exactly this purpose,

@@ -174,6 +174,16 @@ export async function ingestJobs(): Promise<IngestResult> {
       corroboratedSources: jsonbParam(corroboratingSources(j, corroboration)),
       status: "published",
       applicationDeadline: j.applicationDeadline ?? null,
+      // The source's own posting date and pay facts. Until these were written,
+      // `postedAt` was computed by eleven adapters and dropped here, and the
+      // feed reported `createdAt` (ingestion) under the label "Imepostiwa".
+      postedAt: j.postedAt ?? null,
+      salaryMin: j.salaryMin ?? null,
+      salaryMax: j.salaryMax ?? null,
+      salaryCurrency: j.salaryCurrency ?? "",
+      salaryPeriod: j.salaryPeriod ?? "",
+      salaryText: j.salaryText ?? "",
+      jobLevel: j.jobLevel ?? "",
       lastVerifiedAt: now,
       featured: false,
     });
@@ -199,6 +209,16 @@ export async function ingestJobs(): Promise<IngestResult> {
           applyUrl: sql`excluded.apply_url`,
           applicationDeadline: sql`excluded.application_deadline`,
           corroboratedSources: sql`excluded.corroborated_sources`,
+          // Refreshed from the source like everything else here: without these
+          // the 806 rows already in the feed would keep a null posting date and
+          // an empty salary forever, and only NEW listings would ever show them.
+          postedAt: sql`excluded.posted_at`,
+          salaryMin: sql`excluded.salary_min`,
+          salaryMax: sql`excluded.salary_max`,
+          salaryCurrency: sql`excluded.salary_currency`,
+          salaryPeriod: sql`excluded.salary_period`,
+          salaryText: sql`excluded.salary_text`,
+          jobLevel: sql`excluded.job_level`,
           lastVerifiedAt: now, updatedAt: now,
           status: sql`CASE WHEN ${job.status} = 'expired' THEN 'published' ELSE ${job.status} END`,
         },

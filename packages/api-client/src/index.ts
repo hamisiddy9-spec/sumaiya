@@ -50,7 +50,31 @@ export interface JobListing {
   applyUrl: string;
   sourceName?: string;
   applicationDeadline?: string | null;
+  /**
+   * When we first ingested the row — NOT when the employer posted it. Prefer
+   * `postedAt` for anything the user reads as "posted"; this is the fallback
+   * for listings whose source publishes no date, and must be labelled as
+   * ingestion when it is used at all.
+   */
   createdAt?: string;
+  /** When the source says the employer posted it (null when it says nothing). */
+  postedAt?: string | null;
+  /** When the aggregator last confirmed the advert is still live. */
+  lastVerifiedAt?: string | null;
+  /** `expiring` = the deadline is within the window; drives the closing-soon badge. */
+  status?: "draft" | "published" | "expiring" | "expired" | "rejected";
+  featured?: boolean;
+  /** The source's own pay numbers, when it published numbers. Never estimated. */
+  salaryMin?: number | null;
+  salaryMax?: number | null;
+  /** ISO code when the source names a currency; "" when it does not. */
+  salaryCurrency?: string;
+  /** "year" | "month" | "hour" | "day" — what the numbers are for. */
+  salaryPeriod?: string;
+  /** The source's own pay wording, when it was not a clean range. */
+  salaryText?: string;
+  /** Seniority as the source names it (Jobicy `jobLevel`). */
+  jobLevel?: string;
 }
 
 export interface JobRecommendation {

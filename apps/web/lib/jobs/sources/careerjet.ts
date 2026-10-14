@@ -6,7 +6,7 @@
  * Optional: CAREERJET_LOCALE (default "en_GB").
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType } from "./shared";
+import { fetchJson, str, companyName, employmentType, dateOrNull } from "./shared";
 import { cleanHtml } from "../text";
 
 const CAREERJET_KEY_ENV = "CAREERJET_API_KEY";
@@ -35,13 +35,17 @@ export const careerjetAdapter: JobSourceAdapter = {
         title: str(j.title),
         company: companyName(j.company),
         location: loc,
-        category: str(j.salary) ? `Salary: ${str(j.salary)}` : "", // CJ has no category; surface salary when present
+        category: "", // CareerJet publishes no category — its salary now has a
+        // real column (`salaryText`) instead of being smuggled in here as
+        // "Salary: …", which is what put an employer's pay offer into a field
+        // the feed renders as a job category.
+        salaryText: str(j.salary),
         employmentType: employmentType(j.contract_type) || str(j.type).toLowerCase() || "full-time",
         description: cleanHtml(str(j.description)),
         applyUrl: url,
         sourceUrl: url,
         externalId,
-        postedAt: j.date ? new Date(j.date) : null,
+        postedAt: dateOrNull(j.date),
         remote: /remote|work from home/i.test(`${loc} ${str(j.description).slice(0, 300)}`),
       });
     }

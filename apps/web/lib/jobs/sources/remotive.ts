@@ -3,7 +3,7 @@
  * https://remotive.com/api-documentation
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType } from "./shared";
+import { fetchJson, str, companyName, employmentType, dateOrNull } from "./shared";
 
 const REMOTIVE_URL = "https://remotive.com/api/remote-jobs";
 
@@ -30,6 +30,10 @@ export const remotiveAdapter: JobSourceAdapter = {
         sourceUrl: url,
         externalId,
         remote: true, // Remotive is a remote-only board
+        // Both were already in the response and unused: the date the employer
+        // published it, and the pay range Remotive prints as free text.
+        postedAt: dateOrNull(j.publication_date),
+        salaryText: str(j.salary),
       });
     }
     return out;

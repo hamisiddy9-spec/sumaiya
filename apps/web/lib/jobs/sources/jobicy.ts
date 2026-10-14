@@ -3,7 +3,7 @@
  * https://jobicy.com/api/v2/remote-jobs
  */
 import type { JobSourceAdapter, RawJob } from "./types";
-import { fetchJson, str, companyName, employmentType, globalSourceCap } from "./shared";
+import { fetchJson, str, companyName, employmentType, globalSourceCap, salaryNum, dateOrNull } from "./shared";
 
 const JOBICY_URL = "https://jobicy.com/api/v2/remote-jobs?count=100";
 
@@ -31,6 +31,16 @@ export const jobicyAdapter: JobSourceAdapter = {
         sourceUrl: url,
         externalId,
         remote: true, // Jobicy is a remote-only board
+        // Four fields Jobicy publishes and this adapter used to drop on the
+        // floor, which is why the phone's advert screen showed no date and no
+        // pay: `pubDate` (when the employer posted it — NOT when we ingested
+        // it), the annual range, its currency, and the seniority level.
+        postedAt: dateOrNull(j.pubDate),
+        salaryMin: salaryNum(j.annualSalaryMin),
+        salaryMax: salaryNum(j.annualSalaryMax),
+        salaryCurrency: str(j.salaryCurrency),
+        salaryPeriod: "year", // the field is `annualSalaryMin`/`annualSalaryMax`
+        jobLevel: str(j.jobLevel),
       });
     }
     return out;

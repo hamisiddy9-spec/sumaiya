@@ -95,7 +95,22 @@ export function normalizeRawJob(adapter: JobSourceAdapter, raw: RawJob): Normali
     externalId: raw.externalId,
     applicationDeadline: raw.applicationDeadline ?? null,
     postedAt: raw.postedAt ?? null,
+    // Salary facts pass through untouched except for bounds: a salary is a
+    // claim about money, so the ONE thing this normalizer does is refuse
+    // nonsense (negative, non-finite, or a max below its min) rather than
+    // "fixing" it into a number the source never printed.
+    salaryMin: salaryBound(raw.salaryMin),
+    salaryMax: salaryBound(raw.salaryMax),
+    salaryCurrency: clean(raw.salaryCurrency ?? "", 8).toUpperCase(),
+    salaryPeriod: clean(raw.salaryPeriod ?? "", 12).toLowerCase(),
+    salaryText: clean(raw.salaryText ?? "", 120),
+    jobLevel: clean(raw.jobLevel ?? "", 40),
   };
+}
+
+/** A source's salary number, or null. Never coerced, never invented. */
+function salaryBound(v: number | null | undefined): number | null {
+  return typeof v === "number" && Number.isFinite(v) && v > 0 ? Math.round(v) : null;
 }
 
 /**

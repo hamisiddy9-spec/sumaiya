@@ -44,7 +44,11 @@ export const talentAdapter: JobSourceAdapter = {
         title: str(j.title),
         company: companyName(j.company),
         location: loc,
-        category: str(j.job_category) || (salary ? `Salary: ${salary}` : ""),
+        category: str(j.job_category),
+        // The publisher's own pay wording, kept as text: this feed mixes
+        // currencies and periods ("KES 80,000/mo", "€70,000 - 90,000") and a
+        // number invented from it would be a salary claim the source never made.
+        salaryText: salary,
         employmentType: employmentType(j.employment_type) || str(j.job_type).toLowerCase(),
         description: cleanHtml(str(j.description)),
         applyUrl: url,

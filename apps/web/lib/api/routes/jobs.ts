@@ -81,6 +81,16 @@ export const jobRoutes = new Hono()
             category: job.category, employmentType: job.employmentType, applyUrl: job.applyUrl,
             status: job.status, featured: job.featured, applicationDeadline: job.applicationDeadline,
             sourceName: job.sourceName, createdAt: job.createdAt,
+            // The facts the advert screen needs to be more than a pasted
+            // description, all of them the source's own: when the employer
+            // posted it, when we last confirmed it is still live, and the pay
+            // range when a source states one. `sourceUrl`/`source`/`externalId`
+            // stay out of this projection on purpose — 0022 locked them down
+            // because they are crawl provenance, not product data.
+            postedAt: job.postedAt, lastVerifiedAt: job.lastVerifiedAt,
+            salaryMin: job.salaryMin, salaryMax: job.salaryMax,
+            salaryCurrency: job.salaryCurrency, salaryPeriod: job.salaryPeriod,
+            salaryText: job.salaryText, jobLevel: job.jobLevel,
             // The description is the expensive column: omitted ONLY for the
             // projected pick-list (`light=1`), and always kept for a single-row
             // lookup, which exists precisely to get the advert text.
@@ -114,7 +124,9 @@ export const jobRoutes = new Hono()
           category: job.category, employmentType: job.employmentType, description: job.description,
           applyUrl: job.applyUrl, status: job.status, featured: job.featured,
           applicationDeadline: job.applicationDeadline, sourceName: job.sourceName,
-          createdAt: job.createdAt,
+          createdAt: job.createdAt, postedAt: job.postedAt, lastVerifiedAt: job.lastVerifiedAt,
+          salaryMin: job.salaryMin, salaryMax: job.salaryMax, salaryCurrency: job.salaryCurrency,
+          salaryPeriod: job.salaryPeriod, salaryText: job.salaryText, jobLevel: job.jobLevel,
         })
         .from(job)
         .where(inArray(job.status, LIVE_STATUSES))
