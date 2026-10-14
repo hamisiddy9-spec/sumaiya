@@ -209,11 +209,20 @@ the first second**. That last part is the whole reason the surface exists — th
 identical whether a request is healthy or dead, and on metered data a user who cannot tell re-sends
 and **pays twice**. Never remove the stop control or the real steps.
 
-**The open decision:** Stitch renders it as a bordered panel. The PRD asked for a **quiet one-line
-default** (`✦ Sumaiya anaandika… 4s — Acha`, no border) that **expands on tap**, and
-**auto-escalates past ~8 s or on first failure**. Either is defensible; the one-line default is
-lighter in a conversation, the panel is more informative at a glance. **Pick one and record it here**
-so it is a decision rather than a drift.
+**DECIDED (2026-10-14): Stitch's panel is the shipped surface — always visible, bordered, with the
+real steps.** Recorded here so it stops being drift:
+
+- The panel is what ships at HEAD and it is what the interface is being built to. The *content* above
+  is preserved exactly: real step states, real results (`herufi 2,340 zimekamilika`), real elapsed
+  time, and **`Acha` in the header row beside the elapsed time, ≥44 dp, live from the first second**.
+  (It was buried at the panel's foot at 40 dp — that is the one placement the guide calls
+  non-negotiable, because a user who cannot stop a metered request re-sends and pays twice.)
+- The quiet one-line default that expands is **not** adopted. It remains a viable future variant and
+  the machinery for it exists on the unmerged branch `feat/progress-rail-proportional`
+  (`e0a86f8`, escalation on ≥8 s or a failed step) — but a branch is not a decision, and shipping two
+  different processing affordances is exactly the drift this section exists to prevent.
+- Missing from the panel at HEAD and now required: the `TAYARI` / `INAKAGUA` / `BAADAYE` state chips,
+  the per-row backgrounds, and the `✦ Sumaiya anaandika…` sentence (the header said only `SUMAIYA`).
 
 ---
 

@@ -26,6 +26,7 @@ import {
 import type { SumaiyaMarkState } from "../components/sumaiya-mark";
 import { MarkWell } from "../components/mark-well";
 import { PortalTransition } from "../components/portal-transition";
+import { Icon } from "../components/icon";
 import { activeDotIndex, settlePage } from "../lib/pager";
 import { useLang, type Lang } from "../lib/i18n";
 import { track } from "../lib/telemetry";
@@ -162,17 +163,23 @@ function Slide({
 function WelcomeStage({
   markState,
   onPick,
+  onSignIn,
 }: {
   markState: SumaiyaMarkState;
   onPick: (l: Lang) => void;
+  onSignIn: () => void;
 }) {
   const c = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { lang: current } = useLang();
   const reduce = useMotionReduced();
 
   const choices: { lang: Lang; label: string; hint: string }[] = [
-    { lang: "sw", label: "Kiswahili", hint: "Endelea kwa Kiswahili" },
-    { lang: "en", label: "English", hint: "Continue in English" },
+    // The design's own sub-labels. "Lugha msingi" tells a first-time user
+    // WHY Kiswahili is listed first (it is the product's primary language), and
+    // the English line states what English support actually covers.
+    { lang: "sw", label: "Kiswahili", hint: "Lugha msingi · Rahisi na ya asili" },
+    { lang: "en", label: "English", hint: "Full English language support" },
   ];
 
   return (
@@ -200,7 +207,7 @@ function WelcomeStage({
         </View>
       </View>
 
-      <View style={{ width: "100%", maxWidth: 360, alignSelf: "center", gap: 12, paddingBottom: insets.bottom + 52 }}>
+      <View style={{ width: "100%", maxWidth: 360, alignSelf: "center", gap: 12 }}>
         {choices.map((ch, i) => (
           // `Reveal`, not an `entering` layout animation: this wrapper holds a
           // Pressable, and a layout-animation intercept on a wrapper has already
@@ -215,23 +222,58 @@ function WelcomeStage({
                 haptics.selection();
                 onPick(ch.lang);
               }}
+              accessibilityLabel={`${ch.label}. ${ch.hint}`}
               style={({ pressed }) => ({
-                borderWidth: 1.5,
-                borderColor: c.accent,
-                backgroundColor: pressed ? c.accent + "12" : "transparent",
-                borderRadius: 18,
-                paddingVertical: 14,
-                paddingHorizontal: 20,
+                // The design's language row: a full-width left-aligned row with a
+                // hairline border, and the row in use tinted with a check on the
+                // right — not two centred ember-outlined buttons, which read as a
+                // pair of primary actions when only one of them is the default.
+                flexDirection: "row",
                 alignItems: "center",
-                gap: 2,
+                gap: 12,
+                borderWidth: 1,
+                borderColor: current ? c.borderStrong : c.border,
+                backgroundColor: current ? c.accentTint : pressed ? c.accentTint : "transparent",
+                borderRadius: 16,
+                paddingVertical: 14,
+                paddingHorizontal: 16,
+                minHeight: 56,
               })}
             >
-              <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
-              <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <Text style={{ color: c.text, fontSize: 17, fontWeight: "800" }}>{ch.label}</Text>
+                <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
+              </View>
+              {current ? <Icon name="check" size={18} color={c.accent} /> : null}
             </Pressable>
           </Reveal>
         ))}
       </View>
+
+      {/* The design puts the sign-in path and the trust note HERE, on the language
+          step: a returning user who just cleared their data should not have to
+          sit through four slides to find a login, and a first-time user should
+          know before choosing that no account is needed to start. */}
+      <View style={{ gap: 14, paddingBottom: insets.bottom + 20, alignItems: "center" }}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Ingia / Sign in"
+          onPress={() => {
+            haptics.selection();
+            onSignIn();
+          }}
+          style={{ paddingVertical: 12, paddingHorizontal: 16, minHeight: 44, justifyContent: "center" }}
+        >
+          <Text style={{ color: c.accent, fontSize: 14, fontWeight: "700" }}>Ingia / Sign in</Text>
+        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 8 }}>
+          <Icon name="check-circle" size={14} color={c.textMuted} />
+          <Text style={{ color: c.textMuted, fontSize: 12.5, textAlign: "center", flexShrink: 1 }}>
+            Huna haja ya akaunti kuanza kuandika CV yako.
+          </Text>
+        </View>
+      </View>
+
     </Animated.View>
   );
 }
@@ -354,7 +396,20 @@ export function OnboardingScreen({ onComplete }: Props) {
     return (
       <>
         <StatusBar style="dark" />
-        <WelcomeStage markState={markState} onPick={pickLanguage} />
+        <WelcomeStage
+            markState={markState}
+            onPick={pickLanguage}
+            onSignIn={() => {
+              // Same path the last slide uses: leave the tour, then present
+              // the auth modal over the app (openAuth is a no-op until the
+              // container is ready, so it retries once rather than failing
+              // silently). `finish` runs first so the guest path is intact.
+              finish("signin");
+              setTimeout(() => {
+                if (!openAuth()) setTimeout(() => openAuth(), 600);
+              }, 400);
+            }}
+          />
       </>
     );
   }
