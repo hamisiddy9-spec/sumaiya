@@ -52,6 +52,20 @@ export function GuideScreen({ route, navigation }: GuideScreenProps) {
         </Text>
       </View>
 
+      {/* The design's eyebrow — the shelf this guide sits on. */}
+      <Text
+        style={{
+          color: c.accent,
+          fontSize: 11.5,
+          fontFamily: FONT.mono,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+          marginBottom: 6,
+        }}
+      >
+        {guide.category[lang]}
+      </Text>
+
       <Text style={{ color: c.text, fontSize: 25, fontWeight: "800", letterSpacing: -0.4, lineHeight: 31 }}>
         {guide.title[lang]}
       </Text>

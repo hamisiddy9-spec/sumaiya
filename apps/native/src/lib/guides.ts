@@ -17,6 +17,8 @@ export interface Guide {
   tier: GuideTier;
   minutes: number;
   icon: string;
+  /** The shelf this guide sits on — the design's eyebrow above the title. */
+  category: { en: string; sw: string };
   title: { en: string; sw: string };
   summary: { en: string; sw: string };
   sections: GuideSection[];
@@ -28,6 +30,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 5,
     icon: "map-pin",
+    category: { en: "Job search", sw: "Kutafuta kazi" },
     title: { en: "Where the vacancies actually are", sw: "Nafasi za kazi ziko wapi hasa" },
     summary: {
       en: "The places that really list Tanzanian jobs — plus the adverts you'll only find on a wall near you.",
@@ -77,6 +80,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 4,
     icon: "shield-check",
+    category: { en: "Writing your CV", sw: "Kuandika CV" },
     title: { en: "Get past the robot that reads your CV first", sw: "Pita mfumo unaosoma CV yako kwanza" },
     summary: {
       en: "Most CVs are read by software before a person sees them. Here's how to not get dropped.",
@@ -111,6 +115,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 6,
     icon: "message-circle",
+    category: { en: "Interviews", sw: "Mahojiano" },
     title: { en: "The six questions you'll almost always get", sw: "Maswali sita utakayoulizwa karibu kila mara" },
     summary: {
       en: "Prepare these once and most interviews stop being scary.",
@@ -166,6 +171,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 3,
     icon: "mail",
+    category: { en: "Following up", sw: "Kufuatilia maombi" },
     title: { en: "Follow up without being annoying", sw: "Fuatilia maombi yako bila kuudhi" },
     summary: {
       en: "The line between \"keen\" and \"pest\" is timing. Here it is.",
@@ -193,6 +199,7 @@ export const GUIDES: Guide[] = [
     tier: "free",
     minutes: 5,
     icon: "trending-up",
+    category: { en: "Building experience", sw: "Kujenga uzoefu" },
     title: { en: "From \"I have no experience\" to \"I have experience\"", sw: "Kutoka \"Sina uzoefu\" hadi \"Nina uzoefu\"" },
     summary: {
       en: "Attachment, coursework, a hustle, volunteering, a family business — none of it is nothing. This is how it becomes experience an employer can read.",
@@ -227,6 +234,7 @@ export const GUIDES: Guide[] = [
     tier: "premium",
     minutes: 9,
     icon: "briefcase",
+    category: { en: "Pay", sw: "Mshahara" },
     title: { en: "Negotiating your first real offer", sw: "Kujadili ofa yako ya kwanza halisi" },
     summary: {
       en: "You can almost always ask for more — here's how to do it without losing the offer.",
@@ -247,6 +255,7 @@ export const GUIDES: Guide[] = [
     tier: "premium",
     minutes: 12,
     icon: "target",
+    category: { en: "Changing fields", sw: "Kubadili fani" },
     title: { en: "Changing fields without starting from zero", sw: "Kubadili fani bila kuanza chini" },
     summary: {
       en: "Map what you have to what the new field wants, and tell a story that makes the switch obvious.",
@@ -267,6 +276,7 @@ export const GUIDES: Guide[] = [
     tier: "premium",
     minutes: 8,
     icon: "globe",
+    category: { en: "Online profile", sw: "Wasifu mtandaoni" },
     title: { en: "A LinkedIn recruiters actually open", sw: "LinkedIn ambayo waajiri wanafungua kweli" },
     summary: {
       en: "The headline, the About, and the three settings that get you found.",
