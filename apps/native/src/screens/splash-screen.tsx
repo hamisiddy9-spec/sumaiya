@@ -43,11 +43,13 @@ export function SplashScreen() {
   const word = useSharedValue(0);
   // The mark spins up as she "arrives" and settles into her resting drift — the
   // same thinking → idle beat the language stage opens with, so the hand-off to
-  // it is the mark already mid-beat rather than a new one starting.
+  // it is the mark already mid-beat rather than a new one starting. §3 pins this
+  // entrance at **1600 ms** (the shared brand greeting, identical on Nuru,
+  // Faraja and Sumaiya) — the value the language stage already uses.
   const [markState, setMarkState] = useState<SumaiyaMarkState>("thinking");
 
   useEffect(() => {
-    const id = setTimeout(() => setMarkState("idle"), 1200);
+    const id = setTimeout(() => setMarkState("idle"), 1600);
     return () => clearTimeout(id);
   }, []);
 

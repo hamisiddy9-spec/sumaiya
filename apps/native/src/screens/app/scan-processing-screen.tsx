@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Text, View } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -14,6 +15,7 @@ import { apiClient } from "../../lib/api-client";
 import { friendlyImportError, isTransportError } from "../../lib/app-errors";
 import type { CV, CVData } from "@sumaiya/types";
 import { Button, Screen, haptics, useThemeColors } from "../../components/ui";
+import { EASE, MOTION, useMotionReduced } from "../../components/ui/motion";
 import { Icon } from "../../components/icon";
 import { useLang } from "../../lib/i18n";
 import { CvPreviewCard } from "../../components/cv/cv-preview-card";
@@ -24,40 +26,60 @@ interface Props {
   route: RouteProp<ScanStackParamList, "ScanProcessing">;
 }
 
-const STEPS_EN = ["Reading the text…", "Finding your experience…", "Structuring your CV…"];
-const STEPS_SW = ["Ninasoma maandishi…", "Ninatafuta uzoefu wako…", "Ninapanga CV yako…"];
+/**
+ * §10 — NO fabricated progress. This screen makes a SINGLE OCR call; it has no
+ * real staged steps, so it no longer pretends to. The old `setInterval` cycled
+ * "Reading → Finding → Structuring…" every 1.8 s — a fake ramp untied to what
+ * the request was actually doing. What ships is one true, indeterminate line,
+ * and the sweep below is a BOUNDED beat, off entirely under Reduce Motion (§4).
+ */
+const SCAN_SWEEP_MS = 1200;
+const SCAN_SWEEP_CYCLES = 2;
 
 export function ScanProcessingScreen({ route }: Props) {
   const c = useThemeColors();
   const { t, lang } = useLang();
-  const STEPS = lang === "sw" ? STEPS_SW : STEPS_EN;
   const navigation = useAppNavigation();
   const { photoUri } = route.params;
   const [data, setData] = useState<Partial<CVData> | null>(null);
   const [phase, setPhase] = useState<"scanning" | "done" | "error">("scanning");
   const [errorMsg, setErrorMsg] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const [step, setStep] = useState(0);
+  const reduce = useMotionReduced();
 
+  // §4 — the surface's entrance is 300 ms rise 12 (instant reduced), and the
+  // sweep over the photo is a BOUNDED beat: 2 cycles then still, and not
+  // rendered at all under Reduce Motion. Nothing here loops forever.
   const sweep = useSharedValue(0);
+  const rise = useSharedValue(reduce ? 1 : 0);
   useEffect(() => {
-    sweep.value = withRepeat(withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.quad) }), -1, true);
-  }, []);
+    rise.value = reduce ? 1 : withTiming(1, { duration: MOTION.dur.slow, easing: EASE.out });
+    if (reduce) {
+      sweep.value = 0;
+    } else {
+      sweep.value = withRepeat(
+        withTiming(1, { duration: SCAN_SWEEP_MS, easing: Easing.inOut(Easing.quad) }),
+        SCAN_SWEEP_CYCLES,
+        true,
+      );
+    }
+    return () => {
+      cancelAnimation(sweep);
+      cancelAnimation(rise);
+    };
+  }, [reduce, rise, sweep]);
   const sweepStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: sweep.value * 220 }],
     opacity: 0.5 + sweep.value * 0.5,
   }));
-
-  const stepTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const riseStyle = useAnimatedStyle(() => ({
+    opacity: rise.value,
+    transform: [{ translateY: (1 - rise.value) * MOTION.rise }],
+  }));
 
   useEffect(() => {
     let cancelled = false;
     setPhase("scanning");
-    setStep(0);
-    stepTimer.current = setInterval(
-      () => setStep((s) => (s + 1) % STEPS.length),
-      1800,
-    );
 
     (async () => {
       try {
@@ -90,14 +112,11 @@ export function ScanProcessingScreen({ route }: Props) {
               : t("I couldn't read this photo. Try again.", "Sikuweza kusoma picha hii. Jaribu tena."),
         );
         setPhase("error");
-      } finally {
-        if (stepTimer.current) clearInterval(stepTimer.current);
       }
     })();
 
     return () => {
       cancelled = true;
-      if (stepTimer.current) clearInterval(stepTimer.current);
     };
   }, [photoUri, attempt]);
 
@@ -142,7 +161,7 @@ export function ScanProcessingScreen({ route }: Props) {
   if (phase === "scanning") {
     return (
       <Screen scroll={false} keyboardAvoiding={false}>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", gap: 24 }}>
+        <Animated.View style={[riseStyle, { flex: 1, alignItems: "center", justifyContent: "center", gap: 24 }]}>
           <View
             style={{
               width: 200,
@@ -155,30 +174,35 @@ export function ScanProcessingScreen({ route }: Props) {
           >
             <Image source={{ uri: photoUri }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
             <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.25)" }} />
-            <Animated.View
-              style={[
-                sweepStyle,
-                {
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  height: 3,
-                  backgroundColor: c.accent,
-                  shadowColor: c.accent,
-                  shadowOpacity: 0.8,
-                  shadowRadius: 8,
-                },
-              ]}
-            />
+            {reduce ? null : (
+              <Animated.View
+                style={[
+                  sweepStyle,
+                  {
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    backgroundColor: c.accent,
+                    shadowColor: c.accent,
+                    shadowOpacity: 0.8,
+                    shadowRadius: 8,
+                  },
+                ]}
+              />
+            )}
           </View>
 
           <View style={{ alignItems: "center", gap: 6 }}>
             <Text style={{ color: c.text, fontSize: 19, fontWeight: "700" }}>{t("Scanning your CV", "Inapiga CV yako")}</Text>
-            <Animated.Text key={step} entering={FadeIn.duration(300)} style={{ color: c.textMuted, fontSize: 14 }}>
-              {STEPS[step]}
-            </Animated.Text>
+            {/* One true line — there is a SINGLE OCR call behind this screen,
+                so any "steps" would be fabricated progress (§10). The words
+                stay under Reduce Motion (§4). */}
+            <Text style={{ color: c.textMuted, fontSize: 14, textAlign: "center", maxWidth: 280 }}>
+              {t("Reading the text in your photo…", "Ninasoma maandishi kwenye picha yako…")}
+            </Text>
           </View>
-        </View>
+        </Animated.View>
       </Screen>
     );
   }
@@ -197,7 +221,7 @@ export function ScanProcessingScreen({ route }: Props) {
 
   return (
     <Screen scroll keyboardAvoiding={false}>
-      <Animated.View entering={FadeIn.duration(300)} style={{ marginTop: 8, marginBottom: 16 }}>
+      <Animated.View entering={reduce ? FadeIn.duration(MOTION.dur.instant) : FadeIn.duration(MOTION.dur.slow)} style={{ marginTop: 8, marginBottom: 16 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 }}>
           <Icon name="check-circle" size={20} color={c.success} />
           <Text style={{ color: c.text, fontSize: 24, fontWeight: "800", letterSpacing: -0.4 }}>
@@ -209,7 +233,7 @@ export function ScanProcessingScreen({ route }: Props) {
         </Text>
       </Animated.View>
 
-      <Animated.View entering={FadeIn.duration(300).delay(80)}>
+      <Animated.View entering={reduce ? FadeIn.duration(MOTION.dur.instant) : FadeIn.duration(MOTION.dur.slow).delay(80)}>
         <CvPreviewCard
           cv={previewCv}
           onOpenEditor={() => navigation.navigate("CvEditor", { initialData: data, nonce: String(Date.now()) })}

@@ -30,7 +30,7 @@ import {
 import { TemplateThumb } from "../components/cv/template-thumb";
 import { TemplateGallery } from "../components/cv/template-gallery";
 import { PremiumSheet } from "../components/premium-sheet";
-import { SumaiyaMark } from "../components/sumaiya-mark";
+import { MarkWell } from "../components/mark-well";
 import { Button, ProgressBar, TextField, dialog, haptics, toast, useThemeColors } from "../components/ui";
 import { Icon } from "../components/icon";
 import { useLang } from "../lib/i18n";
@@ -282,9 +282,9 @@ export function FirstRunScreen({ onDone }: Props) {
       case "intro":
         return (
           <View style={{ alignItems: "center", gap: 18, marginTop: 12 }}>
-            <View style={{ width: 116, height: 116, borderRadius: 36, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
-              <SumaiyaMark size={62} state="idle" color={c.accent} />
-            </View>
+            {/* The shared well — MARK_WELL's size/radius/mark and the accent
+                tint, not a locally-invented 116/r36/mark-62 container (§3). */}
+            <MarkWell state="idle" />
           </View>
         );
       case "name":

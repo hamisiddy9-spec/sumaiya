@@ -3,12 +3,13 @@ import Svg, { Circle, Defs, G, LinearGradient, Path, RadialGradient, Stop } from
 import Animated, {
   Easing,
   FadeIn,
+  cancelAnimation,
   useAnimatedProps,
   useReducedMotion,
   useSharedValue,
-  withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { BLADE_OPACITY } from "./sumaiya-mark";
 
 /**
  * Branded onboarding art — no stock icons.
@@ -69,25 +70,16 @@ function Rosette({
   const spin = useSharedValue(phase);
   useEffect(() => {
     if (reduce) return;
-    // "Just a little" faster than the original 4–11 s per turn — one knob, so
-    // the whole scene speeds up together and the phases stay staggered.
+    // §4 — nothing repeats forever. Each rosette turns exactly ONE full, slow
+    // revolution on mount and then rests; `phase` staggers the start so the
+    // scene does not read as one wheel. Linear easing keeps the per-frame
+    // motion identical to the old continuous drift, and there is no loop
+    // boundary left to observe, because there is no loop.
     const duration = (360 / (speed * 1.25)) * 1000;
-    // withRepeat(withTiming(phase + 1, ...)) resets spin.value back to the
-    // ORIGINAL `phase` at the start of every lap. The angle itself doesn't
-    // jump (phase and phase+1 land on the same rotation mod 360°), but this
-    // was reported live as "a little tiny cycle between them" — a visible
-    // catch at each loop boundary. Animating many turns per lap (with a
-    // proportionally longer duration — linear easing keeps the per-frame
-    // motion identical either way) instead of one just pushes the reset out
-    // to roughly once every ~45min at the slowest configured speed, well
-    // past any realistic time on this screen — same safe withRepeat/
-    // withTiming APIs already proven crash-free here, no new animation
-    // pattern introduced.
-    const TURNS_PER_LAP = 200;
-    spin.value = withRepeat(
-      withTiming(phase + TURNS_PER_LAP, { duration: duration * TURNS_PER_LAP, easing: Easing.linear }),
-      -1,
-    );
+    spin.value = withTiming(phase + 1, { duration, easing: Easing.linear });
+    return () => {
+      cancelAnimation(spin);
+    };
   }, [reduce, spin, speed, phase]);
 
   // Rotation only, shaped exactly like the logo's live spin: an array of
@@ -108,8 +100,8 @@ function Rosette({
       <AnimatedG animatedProps={animatedProps}>
         <G transform="translate(-12 -12)">
           <Path d={BLADE} fill={fill} />
-          <Path d={BLADE} fill={fill} opacity={0.94} transform="rotate(120 12 12)" />
-          <Path d={BLADE} fill={fill} opacity={0.88} transform="rotate(240 12 12)" />
+          <Path d={BLADE} fill={fill} opacity={BLADE_OPACITY[1]} transform="rotate(120 12 12)" />
+          <Path d={BLADE} fill={fill} opacity={BLADE_OPACITY[2]} transform="rotate(240 12 12)" />
           {/* The logo's own centre dot (sumaiya-mark r=2.1 in the same 24x24
               blade grid). It used to be added per scene at (mid, mid), so any
               rosette offset from the scene centre rendered as bare blades. */}

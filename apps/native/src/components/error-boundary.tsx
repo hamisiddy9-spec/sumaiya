@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { SumaiyaMark } from "./sumaiya-mark";
+import { MARK_WELL } from "./ui/mark-well-tokens";
 import { reportError } from "../lib/reporting";
 import { getLastKnownLang } from "../lib/i18n";
 import { reportSheet } from "./report-sheet";
@@ -63,15 +64,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
       >
         <View
           style={{
-            width: 76,
-            height: 76,
-            borderRadius: 24,
+            // §3 — the house well, from the one source of its geometry. This
+            // screen is deliberately theme-free (it paints before/independent
+            // of the theme providers), so it keeps literal hexes — but the
+            // SIZE/RADIUS/MARK come from `MARK_WELL`, not a locally-invented
+            // 76/r24/mark-40 container. It stays dependency-free: the tokens
+            // module is pure data with no React and no theme.
+            width: MARK_WELL.size,
+            height: MARK_WELL.size,
+            borderRadius: MARK_WELL.radius,
             backgroundColor: "#DA4A1C",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <SumaiyaMark size={40} state="static" color="#FFFFFF" />
+          <SumaiyaMark size={MARK_WELL.mark} state="static" color="#FFFFFF" />
         </View>
         <Text style={{ color: "#211A15", fontSize: 20, fontWeight: "800", textAlign: "center" }}>
           {sw ? "Kuna hitilafu imetokea" : "Something broke"}

@@ -14,6 +14,14 @@ import { useThemeColors } from "./theme";
 import { MOTION, exitDurationMs, useMotionReduced } from "./motion";
 import { useLang } from "../../lib/i18n";
 
+/**
+ * §4 — "Nothing repeats forever. Every loop is bounded." The shimmer pulses a
+ * fixed number of times (2 cycles ≈ 2.8 s) and then holds one steady tint, so
+ * a placeholder that sits on screen through a slow load never keeps moving —
+ * an unbounded `withRepeat(…, -1)` is a WCAG 2.2.2 Level-A failure.
+ */
+const SKELETON_PULSE_CYCLES = 2;
+
 export function Skeleton({
   width,
   height = 16,
@@ -41,7 +49,7 @@ export function Skeleton({
         withTiming(1, { duration: 700, easing: Easing.inOut(Easing.quad) }),
         withTiming(0.5, { duration: 700, easing: Easing.inOut(Easing.quad) }),
       ),
-      -1,
+      SKELETON_PULSE_CYCLES,
       true,
     );
     // Cancel on unmount. An uncancelled infinite `withRepeat` keeps queueing
