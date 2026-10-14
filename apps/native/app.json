@@ -19,7 +19,7 @@
     "android": {
       "package": "pro.sumaiya.app",
       "allowBackup": true,
-      "versionCode": 10630,
+      "versionCode": 10700,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#DA4A1C"
