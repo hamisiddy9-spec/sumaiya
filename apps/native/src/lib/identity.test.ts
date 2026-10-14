@@ -26,11 +26,13 @@ describe("identityFor — one answer for every surface", () => {
     expect(
       identityFor({ authName: "Redmi Note 10", email: "asha@example.com", fallback: "there" }).name,
     ).toBe("asha");
-    // A token of four characters or fewer is a username, not a name to greet
-    // someone with. Five characters ("hamis") is left alone on purpose: it is
-    // also a perfectly ordinary name, and the rule would rather greet a real
-    // person by their short name than replace a real one with an email prefix.
+    // A short token is junk only when it carries a digit (A125, G50, sm-a1).
+    // "Ali" and "Juma" are real Tanzanian names, and an earlier rule that threw
+    // those away made people retype a name their account already had.
     expect(identityFor({ authName: "ab7", email: "h@example.com", fallback: "there" }).name).toBe("h");
+    expect(identityFor({ authName: "A125", email: "h@example.com", fallback: "there" }).name).toBe("h");
+    expect(identityFor({ authName: "Ali", email: "h@example.com", fallback: "there" }).name).toBe("Ali");
+    expect(identityFor({ authName: "Juma", email: "h@example.com", fallback: "there" }).name).toBe("Juma");
     expect(identityFor({ authName: "hamis", email: "h@example.com", fallback: "there" }).name).toBe("hamis");
   });
 

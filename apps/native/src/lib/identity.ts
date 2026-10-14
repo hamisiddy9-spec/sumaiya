@@ -35,7 +35,15 @@ export function looksLikeDeviceName(name: string): boolean {
   return (
     /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(
       name,
-    ) || /^[a-z0-9]{1,4}$/i.test(name)
+    ) ||
+    // A short device-model code (A125, G50, SM-A) almost always carries a digit.
+    // A short PURE-LETTER string is far more likely a real Tanzanian first name
+    // (Ali, Juma, Zena, Iddi) than junk — flagging those discarded a name the
+    // account had given CORRECTLY and made the person retype their own name.
+    // First-run learned this the hard way and carried the better rule; Home
+    // carried the cruder one, and lifting Home's would have re-broken it. The
+    // better rule now lives here so all three screens share it.
+    (/^[a-z0-9]{1,4}$/i.test(name) && /\d/.test(name))
   );
 }
 

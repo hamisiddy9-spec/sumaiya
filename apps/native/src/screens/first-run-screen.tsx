@@ -13,6 +13,7 @@ import Animated, { FadeInRight, FadeOutLeft } from "react-native-reanimated";
 import { setSecureItem } from "@sumaiya/utils";
 import { useAuthContext } from "../contexts/auth-context";
 import { saveProfile, EMPTY_PROFILE, type CareerProfile } from "../lib/profile-store";
+import { looksLikeDeviceName } from "../lib/identity";
 import { keyboardAvoidingBehavior } from "../lib/keyboard-avoiding";
 import { fieldLabels } from "../lib/career-fields";
 import { Button, haptics, useThemeColors } from "../components/ui";
@@ -179,18 +180,11 @@ export function FirstRunScreen({ onDone }: Props) {
   const { user } = useAuthContext();
 
   // ── Prefill from the account (Google gives a name; every path gives an email).
+  // The junk test lives in lib/identity.ts now: Home, Profile and this screen were
+  // each carrying their own, and Home's was the cruder one — it discarded real
+  // short names. One rule, three screens.
   const rawName = user?.name?.trim() ?? "";
-  const looksLikeJunk =
-    !rawName ||
-    /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
-    // A short device-model code (A125, G50, SM-A) almost always has a digit;
-    // a short PURE-LETTER string this length is far more likely a real,
-    // common Tanzanian first name (Ali, Juma, Zena, Toto, Iddi...) than
-    // junk. This used to flag all of those as junk and silently discard a
-    // name Google had already given correctly, forcing a real user to
-    // retype their own name.
-    (/^[a-z0-9]{1,4}$/i.test(rawName) && /\d/.test(rawName));
-  const prefillName = looksLikeJunk ? "" : rawName;
+  const prefillName = looksLikeDeviceName(rawName) ? "" : rawName;
   const email = user?.email ?? "";
 
   const [i, setI] = useState(0);
