@@ -31,13 +31,13 @@ export function AuthenticWritingPanel({ data, sw = false }: AuthenticWritingPane
       <div className="mt-3 border-t border-cream/10 pt-3">
         <p className="text-[10px] font-semibold uppercase tracking-widest text-pine-light/80">
           {L("Authentic writing", "Uandishi halisi")}
-          <span className="ml-2 text-emerald-300">✓ {L("clean", "safi")}</span>
+          <span className="ml-2 text-success/40">✓ {L("clean", "safi")}</span>
         </p>
       </div>
     );
   }
 
-  const tone = report.score >= 80 ? "text-emerald-300" : report.score >= 60 ? "text-gold" : "text-red-300";
+  const tone = report.score >= 80 ? "text-success/40" : report.score >= 60 ? "text-gold" : "text-red-300";
 
   return (
     <div className="mt-3 border-t border-cream/10 pt-3">

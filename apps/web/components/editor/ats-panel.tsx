@@ -79,7 +79,7 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
           <span className="font-display text-5xl font-extrabold leading-none text-cream">{score}</span>
           <span className="font-display text-lg font-semibold opacity-60">/100</span>
           {prevScore !== null && prevScore !== score && (
-            <span className={`ml-2 text-[11px] font-bold ${score > prevScore ? "text-green-400" : "text-red-400"}`}>
+            <span className={`ml-2 text-[11px] font-bold ${score > prevScore ? "text-success/60" : "text-red-400"}`}>
               {score > prevScore ? "↑" : "↓"} {Math.abs(score - prevScore)}
             </span>
           )}

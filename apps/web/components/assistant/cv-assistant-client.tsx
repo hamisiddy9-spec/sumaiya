@@ -2810,7 +2810,7 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
               } catch { /* ignore */ }
             })();
           }}
-          className="mx-4 mt-2 inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100 transition self-start"
+          className="mx-4 mt-2 inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/10 px-3 py-1.5 text-[11px] font-semibold text-warning/90 hover:bg-warning/15 transition self-start"
           aria-label={sw ? "Thibitisha taarifa" : "Confirm facts"}
         >
           <AlertTriangle className="w-3.5 h-3.5" />
@@ -3299,8 +3299,8 @@ export function CvAssistantClient({ lang, firstName, profile, guest = false, use
                 </div>
               )}
               {micError && (
-                <div role="status" aria-live="polite" className="mb-2 flex items-start gap-1.5 text-[11px] font-medium text-amber-900 bg-amber-50 border border-amber-300 rounded-input px-3 py-2">
-                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px text-amber-700" />
+                <div role="status" aria-live="polite" className="mb-2 flex items-start gap-1.5 text-[11px] font-medium text-warning/90 bg-warning/10 border border-warning/40 rounded-input px-3 py-2">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-px text-warning" />
                   <span>{micError}</span>
                 </div>
               )}
@@ -3723,15 +3723,15 @@ function TailorPreviewCard({ summary, count, applied, sw, onApply, onDismiss, ap
       {/* Anti-fabrication gate: claims not in the user's CV are flagged and
           must be confirmed before the rewrite can be applied. */}
       {unconfirmed.length > 0 && (
-        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
-          <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
+        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-warning/40 bg-warning/10"}`}>
+          <p className="text-[10px] font-semibold text-warning flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
             {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
               <li key={i} className="text-[11px] text-espresso flex items-start gap-1.5">
-                <span className="text-amber-500 mt-px">•</span>
+                <span className="text-warning mt-px">•</span>
                 <span>
                   <strong>{c.claim}</strong>{" "}
                   <span className="text-text-muted">({sw ? "katika" : "in"} {c.location})</span>
@@ -3741,7 +3741,7 @@ function TailorPreviewCard({ summary, count, applied, sw, onApply, onDismiss, ap
           </ul>
           {!confirmed && onConfirm && (
             <button onClick={onConfirm} disabled={applyBusy}
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 bg-warning hover:bg-warning text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
               <Check className="w-3.5 h-3.5" />
               {sw ? "Ndiyo, haya ni kweli — endelea" : "Yes, these are true — continue"}
             </button>
@@ -3814,15 +3814,15 @@ function SummaryPreviewCard({ summary, applied, sw, onApply, applyBusy, editHref
         {summary}
       </div>
       {unconfirmed.length > 0 && (
-        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
-          <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
+        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-warning/40 bg-warning/10"}`}>
+          <p className="text-[10px] font-semibold text-warning flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
             {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
               <li key={i} className="text-[11px] text-espresso flex items-start gap-1.5">
-                <span className="text-amber-500 mt-px">•</span>
+                <span className="text-warning mt-px">•</span>
                 <span>
                   <strong>{c.claim}</strong>{" "}
                   <span className="text-text-muted">({sw ? "katika" : "in"} {c.location})</span>
@@ -3832,7 +3832,7 @@ function SummaryPreviewCard({ summary, applied, sw, onApply, applyBusy, editHref
           </ul>
           {!confirmed && onConfirm && (
             <button onClick={onConfirm} disabled={applyBusy}
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 bg-warning hover:bg-warning text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
               <Check className="w-3.5 h-3.5" />
               {sw ? "Ndiyo, haya ni kweli — endelea" : "Yes, these are true — continue"}
             </button>
@@ -3974,15 +3974,15 @@ function DocIntelCard({ op, text, section, target, applied, savedId, sw, onApply
       {section && <p className="text-[10px] font-medium text-ember-hover">{section}</p>}
       <p className="text-[12.5px] text-espresso leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto">{text}</p>
       {unconfirmed.length > 0 && (
-        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
-          <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
+        <div className={`border rounded-input px-3 py-2 space-y-1.5 ${confirmed ? "border-pine/30 bg-pine-tint/30" : "border-warning/40 bg-warning/10"}`}>
+          <p className="text-[10px] font-semibold text-warning flex items-center gap-1.5">
             <AlertTriangle className="w-3 h-3" />
             {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
           </p>
           <ul className="space-y-0.5">
             {unconfirmed.map((c, i) => (
               <li key={i} className="text-[11px] text-espresso flex items-start gap-1.5">
-                <span className="text-amber-500 mt-px">•</span>
+                <span className="text-warning mt-px">•</span>
                 <span>
                   <strong>{c.claim}</strong>{" "}
                   <span className="text-text-muted">({sw ? "katika" : "in"} {c.location})</span>
@@ -3992,7 +3992,7 @@ function DocIntelCard({ op, text, section, target, applied, savedId, sw, onApply
           </ul>
           {!confirmed && onConfirm && (
             <button onClick={onConfirm} disabled={applyBusy}
-              className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 bg-warning hover:bg-warning text-white text-xs font-semibold py-2 rounded-input transition disabled:opacity-50">
               <Check className="w-3.5 h-3.5" />
               {sw ? "Ndiyo, haya ni kweli — endelea" : "Yes, these are true — continue"}
             </button>

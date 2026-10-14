@@ -364,15 +364,15 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                     </p>
                   )}
                   {tailorEvidence && tailorEvidence.length > 0 && (
-                    <div className={`border rounded-input px-3 py-2 space-y-1.5 ${tailorConfirmed ? "border-pine/30 bg-pine-tint/30" : "border-amber-300 bg-amber-50"}`}>
-                      <p className="text-[10px] font-semibold text-amber-700 flex items-center gap-1.5">
+                    <div className={`border rounded-input px-3 py-2 space-y-1.5 ${tailorConfirmed ? "border-pine/30 bg-pine-tint/30" : "border-warning/40 bg-warning/10"}`}>
+                      <p className="text-[10px] font-semibold text-warning flex items-center gap-1.5">
                         <Icon name="alert-triangle" size={11} className="shrink-0" />
                         {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
                       </p>
                       <ul className="space-y-0.5">
                         {tailorEvidence.map((c, i) => (
                           <li key={i} className="text-[11px] text-espresso flex items-start gap-1.5">
-                            <span className="text-amber-500 mt-px">•</span>
+                            <span className="text-warning mt-px">•</span>
                             <span>
                               <strong>{c.claim}</strong>{" "}
                               <span className="text-text-muted">({sw ? "katika" : "in"} {c.location})</span>
@@ -382,7 +382,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                       </ul>
                       {!tailorConfirmed && (
                         <button onClick={() => setTailorConfirmed(true)}
-                          className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold py-2 rounded-input transition">
+                          className="w-full flex items-center justify-center gap-2 bg-warning hover:bg-warning text-white text-xs font-semibold py-2 rounded-input transition">
                           <Icon name="check" size={13} />
                           {sw ? "Ndiyo, haya ni kweli — endelea" : "Yes, these are true — continue"}
                         </button>

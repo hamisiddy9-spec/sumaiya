@@ -99,7 +99,7 @@ export default async function SnapSharePage({ params }: { params: { token: strin
           </div>
         ) : (
           <div className="bg-card rounded-card-lg shadow-card border border-border p-6 sm:p-8 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 border border-warning/25 px-3 py-1 text-xs font-semibold text-warning">
               <Sparkles className="w-3.5 h-3.5" />
               {s.badge}
             </span>

@@ -2167,10 +2167,10 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <div
             role="note"
             data-testid="photo-not-printed-notice"
-            className="mt-2 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2"
+            className="mt-2 flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2"
           >
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-700 mt-0.5 flex-shrink-0" />
-            <p className="text-[11px] text-amber-900 leading-relaxed">
+            <AlertTriangle className="w-3.5 h-3.5 text-warning mt-0.5 flex-shrink-0" />
+            <p className="text-[11px] text-warning/90 leading-relaxed">
               {photoNotPrintedNotice(
                 TEMPLATES.find((tpl) => tpl.id === templateId)?.name ?? String(templateId),
                 uiLang === "sw" ? "sw" : "en",
@@ -2237,7 +2237,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           {uiLang === "sw" ? "Muhtasari Wako" : "Professional Summary"}
           {pendingKeySet.has("summary") && (
             <button onClick={() => setShowConfirmPanel(true)}
-              className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2 py-0.5 hover:bg-amber-200 transition align-middle"
+              className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
               aria-label={uiLang === "sw" ? "Thibitisha muhtasari" : "Confirm summary"}>
               <AlertTriangle className="w-3 h-3" />
               {uiLang === "sw" ? "Haijathibitishwa" : "Unconfirmed"}
@@ -2321,7 +2321,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       {uiLang === "sw" ? "Maelezo" : "Description"}
                       {pendingKeySet.has(`${exp.id}.description`) && (
                         <button onClick={() => setShowConfirmPanel(true)}
-                          className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 bg-amber-100 border border-amber-300 rounded-full px-2 py-0.5 hover:bg-amber-200 transition align-middle"
+                          className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
                           aria-label={uiLang === "sw" ? "Thibitisha maelezo" : "Confirm description"}>
                           <AlertTriangle className="w-3 h-3" />
                           {uiLang === "sw" ? "Haijathibitishwa" : "Unconfirmed"}
@@ -2961,9 +2961,9 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <span className="hidden sm:inline">{uiLang === "sw" ? "Hijahifadhiwa bado — gusa kujaribu tena" : "Not saved yet — tap to retry"}</span>
             </button>
           ) : everSaved ? (
-            <span className={`flex items-center gap-1.5 text-[10px] font-semibold flex-shrink-0 transition-colors ${savedFlash ? "text-green-400" : "text-cream/60"}`}
+            <span className={`flex items-center gap-1.5 text-[10px] font-semibold flex-shrink-0 transition-colors ${savedFlash ? "text-success/60" : "text-cream/60"}`}
               title={guestMode ? (uiLang === "sw" ? "Imehifadhiwa kwenye kifaa hiki" : "Saved on this device") : (uiLang === "sw" ? "Mabadiliko yote yamehifadhiwa" : "All changes saved")}>
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-success/60" />
               <span className="hidden sm:inline">
                 {guestMode ? (uiLang === "sw" ? "Imehifadhiwa" : "Saved locally") : (uiLang === "sw" ? "Imehifadhiwa" : "Saved")}
               </span>
@@ -3015,7 +3015,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               share. Previously a single tap opened a 5-option jargon menu. */}
           <span className="relative flex items-stretch rounded-input shadow-ember-hard overflow-hidden">
             {completionPct >= 60 && !isDownloading && !isDocx && !isSharing && (
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full ring-2 ring-espresso animate-pulse z-10" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-success/60 rounded-full ring-2 ring-espresso animate-pulse z-10" />
             )}
             <button
               onClick={() => handleDownloadRef.current("topbar")}

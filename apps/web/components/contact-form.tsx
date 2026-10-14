@@ -43,8 +43,8 @@ export function ContactForm() {
   if (status === "success") {
     return (
       <div className="bg-cream border border-border rounded-card-lg p-8 flex flex-col items-center justify-center text-center min-h-[320px]">
-        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
-          <CheckCircle className="w-8 h-8 text-emerald-600" />
+        <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mb-4">
+          <CheckCircle className="w-8 h-8 text-success" />
         </div>
         <h3 className="font-display font-extrabold tracking-tight text-espresso text-xl mb-2">
           {sw ? "Ujumbe umetumwa!" : "Message sent!"}

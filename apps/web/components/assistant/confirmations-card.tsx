@@ -64,22 +64,22 @@ export function ConfirmationsCard({
   // or the user resolved everything) — show the all-done state, not a shell.
   if (resolved || (!remaining.length && resolvedKeys.length > 0)) {
     return (
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 flex items-start gap-2.5">
-        <CheckCircle2 className="w-4.5 h-4.5 mt-0.5 shrink-0 text-emerald-600" />
+      <div className="rounded-2xl border border-success/25 bg-success/10 p-4 text-sm text-success/90 flex items-start gap-2.5">
+        <CheckCircle2 className="w-4.5 h-4.5 mt-0.5 shrink-0 text-success" />
         <span>{sw ? "Imethibitishwa — asante! Hakuna taarifa zilizosubiri." : "Confirmed — thank you! Nothing is waiting."}</span>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+    <div className="rounded-2xl border border-warning/25 bg-warning/10 p-4 space-y-3">
       <div className="flex items-start gap-2.5">
-        <AlertTriangle className="w-4.5 h-4.5 mt-0.5 shrink-0 text-amber-600" />
+        <AlertTriangle className="w-4.5 h-4.5 mt-0.5 shrink-0 text-warning" />
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-amber-900">
+          <p className="text-sm font-semibold text-warning/90">
             {sw ? "Niliandika hizi kutokana na mazungumzo yetu — thibitisha kila moja" : "I drafted these from our chat — confirm each is accurate"}
           </p>
-          <p className="text-xs text-amber-700 mt-0.5">
+          <p className="text-xs text-warning mt-0.5">
             {sw
               ? "Taarifa hizi bado hazijathibitishwa — hazitaonyeshwa kama ukweli uliothibitishwa hadi uzithibitishe."
               : "These are still tentative — they won't count as established facts until you confirm them."}
@@ -89,14 +89,14 @@ export function ConfirmationsCard({
 
       <div className="space-y-2">
         {remaining.map((item) => (
-          <div key={item.key} className="rounded-xl bg-white border border-amber-200/70 p-3 space-y-1.5">
+          <div key={item.key} className="rounded-xl bg-white border border-warning/25/70 p-3 space-y-1.5">
             <p className="text-xs font-semibold text-espresso">{sw ? item.label.sw : item.label.en}</p>
             <p className="text-[12px] text-text-body leading-relaxed line-clamp-3 whitespace-pre-wrap">{item.value}</p>
             <div className="flex items-center gap-2 pt-0.5">
               <button
                 onClick={() => resolve([item.key], "accept")}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-[11px] font-semibold px-2.5 py-1.5 transition"
+                className="inline-flex items-center gap-1 rounded-lg bg-success hover:bg-success disabled:opacity-50 text-white text-[11px] font-semibold px-2.5 py-1.5 transition"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {sw ? "Ni sahihi" : "It's correct"}
@@ -104,7 +104,7 @@ export function ConfirmationsCard({
               <button
                 onClick={() => resolve([item.key], "reject")}
                 disabled={busy}
-                className="inline-flex items-center gap-1 rounded-lg border border-amber-300 text-amber-800 hover:bg-amber-100 disabled:opacity-50 text-[11px] font-semibold px-2.5 py-1.5 transition"
+                className="inline-flex items-center gap-1 rounded-lg border border-warning/40 text-warning/90 hover:bg-warning/15 disabled:opacity-50 text-[11px] font-semibold px-2.5 py-1.5 transition"
               >
                 <XCircle className="w-3.5 h-3.5" />
                 {sw ? "Ondoa" : "Remove"}
@@ -118,7 +118,7 @@ export function ConfirmationsCard({
         <button
           onClick={() => resolve(remaining.map((i) => i.key), "accept")}
           disabled={busy}
-          className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-semibold px-3 py-2 transition"
+          className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-warning hover:bg-warning disabled:opacity-50 text-white text-xs font-semibold px-3 py-2 transition"
         >
           {busy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
           {sw ? "Thibitisha zote" : "Confirm all"}

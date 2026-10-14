@@ -325,7 +325,7 @@ function SignInForm({ lang }: { lang: string }) {
               )}
 
               {callbackErrorMsg && status !== "error" && (
-                <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-card-lg px-3 py-2.5 mb-6">
+                <p className="text-sm text-warning/90 bg-warning/10 border border-warning/25 rounded-card-lg px-3 py-2.5 mb-6">
                   {callbackErrorMsg}
                 </p>
               )}
@@ -340,7 +340,7 @@ function SignInForm({ lang }: { lang: string }) {
                 {googleLoading ? (sw ? "Inasubiri Google..." : "Waiting for Google...") : (sw ? "Endelea na Google" : "Continue with Google")}
               </button>
               {googleError && (
-                <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-input-lg px-3 py-2 -mt-4 mb-6">
+                <p className="text-sm text-warning bg-warning/10 border border-warning/25 rounded-input-lg px-3 py-2 -mt-4 mb-6">
                   {googleErrorMessage || (sw ? "Kuingia kwa Google kumeshindikana." : "Google sign-in failed.")}
                 </p>
               )}

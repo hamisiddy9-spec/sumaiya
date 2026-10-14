@@ -118,7 +118,7 @@ export function TemplateSelectionModal({
                       onClick={() => setSelectedFamily(family)}
                       className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                         selectedFamily?.id === family.id
-                          ? 'bg-blue-500 text-white'
+                          ? 'bg-ember text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -144,7 +144,7 @@ export function TemplateSelectionModal({
                       key={template.id}
                       className={`border-2 rounded-lg overflow-hidden cursor-pointer transition-all ${
                         currentTemplateId === template.id
-                          ? 'border-blue-500 bg-blue-50'
+                          ? 'border-ember bg-ember/10'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => {
@@ -169,7 +169,7 @@ export function TemplateSelectionModal({
                           {template.name}
                         </h4>
                         {template.tier === 'premium' && (
-                          <p className="text-xs text-amber-600 mt-1">Premium</p>
+                          <p className="text-xs text-warning mt-1">Premium</p>
                         )}
                       </div>
                     </div>

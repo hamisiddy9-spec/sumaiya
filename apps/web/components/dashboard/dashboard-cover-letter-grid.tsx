@@ -39,8 +39,8 @@ function CLCard({ doc, lang, onDelete }: { doc: CoverLetter; lang: "en" | "sw"; 
   return (
     <div className="group relative bg-card border border-border rounded-card-lg p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
       <Link href={`/editor/cover-letter/${doc.id}`} className="block">
-        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-          <File className="w-5 h-5 text-emerald-600" />
+        <div className="w-10 h-10 bg-success/10 rounded-xl flex items-center justify-center mb-4">
+          <File className="w-5 h-5 text-success" />
         </div>
         <p className="font-semibold text-espresso truncate mb-1 pr-8 text-sm">{doc.title}</p>
         {doc.companyName && (
@@ -111,12 +111,12 @@ export function DashboardCoverLetterGrid({ coverLetters, lang }: Props) {
         docType="cover-letter"
         lang={lang}
         as="div"
-        className="group border-2 border-dashed border-border hover:border-emerald-400 rounded-card-lg hover:bg-emerald-50 transition-colors flex flex-col items-center justify-center gap-3 min-h-[140px] cursor-pointer"
+        className="group border-2 border-dashed border-border hover:border-success/60 rounded-card-lg hover:bg-success/10 transition-colors flex flex-col items-center justify-center gap-3 min-h-[140px] cursor-pointer"
       >
-        <div className="w-12 h-12 bg-sand group-hover:bg-emerald-100 rounded-xl flex items-center justify-center transition">
-          <Plus className="w-6 h-6 text-text-muted group-hover:text-emerald-600 transition" />
+        <div className="w-12 h-12 bg-sand group-hover:bg-success/15 rounded-xl flex items-center justify-center transition">
+          <Plus className="w-6 h-6 text-text-muted group-hover:text-success transition" />
         </div>
-        <span className="text-sm font-medium text-text-body group-hover:text-emerald-600 transition">
+        <span className="text-sm font-medium text-text-body group-hover:text-success transition">
           {lang === "sw" ? "Barua Mpya ya Maombi" : "New Cover Letter"}
         </span>
       </CreateEntryButton>

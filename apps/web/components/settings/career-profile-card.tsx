@@ -177,7 +177,7 @@ export function CareerProfileCard({ lang }: Props) {
           </a>
 
           {doneMsg && (
-            <p className="text-xs text-emerald-700 flex items-center gap-1.5">
+            <p className="text-xs text-success flex items-center gap-1.5">
               <Check className="w-3.5 h-3.5" /> {doneMsg}
             </p>
           )}

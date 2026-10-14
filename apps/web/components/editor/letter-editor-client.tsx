@@ -720,7 +720,7 @@ export function LetterEditorClient({
                           {tpl.name}
                         </span>
                         {tpl.popular && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-warning/15 text-warning">
                             {sw ? "Maarufu" : "Popular"}
                           </span>
                         )}

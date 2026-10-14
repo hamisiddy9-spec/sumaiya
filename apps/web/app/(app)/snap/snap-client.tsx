@@ -709,12 +709,12 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 )}
 
                 {photoError && (
-                  <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5" role="alert">
-                    <p className="flex items-start gap-2 text-sm font-semibold text-amber-800">
+                  <div className="mt-3 rounded-xl border border-warning/25 bg-warning/10 p-3.5" role="alert">
+                    <p className="flex items-start gap-2 text-sm font-semibold text-warning/90">
                       <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                       {s.ocrNoTextTitle}
                     </p>
-                    <p className="mt-1 text-sm text-amber-700">{photoError}</p>
+                    <p className="mt-1 text-sm text-warning">{photoError}</p>
                   </div>
                 )}
               </div>
@@ -764,14 +764,14 @@ export function SnapClient({ lang }: { lang: Lang }) {
           )}
 
           {softError && (
-            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5" role="alert">
-              <p className="flex items-start gap-2 text-sm font-semibold text-amber-800">
+            <div className="mt-3 rounded-xl border border-warning/25 bg-warning/10 p-3.5" role="alert">
+              <p className="flex items-start gap-2 text-sm font-semibold text-warning/90">
                 <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                 {softError.code === "NOT_A_JOB" ? s.notJobTitle : s.noProfileTitle}
               </p>
-              <p className="mt-1 text-sm text-amber-700">{softError.message}</p>
+              <p className="mt-1 text-sm text-warning">{softError.message}</p>
               {softError.code === "NOT_A_JOB" && (
-                <p className="mt-1 text-xs text-amber-600">{s.notJobHint}</p>
+                <p className="mt-1 text-xs text-warning">{s.notJobHint}</p>
               )}
               {softError.code === "NO_PROFILE" && (
                 <a
@@ -820,12 +820,12 @@ export function SnapClient({ lang }: { lang: Lang }) {
             {snapResultsLiveMessage(sw, match.after.score)}
           </p>
           {result.warnings.length > 0 && (
-            <div className="snap-rise rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm text-amber-800 flex items-start gap-2" role="status">
+            <div className="snap-rise rounded-xl border border-warning/25 bg-warning/10 p-3.5 text-sm text-warning/90 flex items-start gap-2" role="status">
               <Info className="w-4 h-4 mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold">{s.aiOffline}</p>
                 {result.warnings.map((w, i) => (
-                  <p key={i} className="mt-0.5 text-amber-700">{w}</p>
+                  <p key={i} className="mt-0.5 text-warning">{w}</p>
                 ))}
               </div>
             </div>
@@ -868,7 +868,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">{s.matched}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {match.after.matched.slice(0, 18).map((t) => (
-                    <span key={t} className="rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                    <span key={t} className="rounded-full bg-success/10 border border-success/25 px-2.5 py-1 text-xs font-medium text-success">
                       {t}
                     </span>
                   ))}
@@ -880,7 +880,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">{s.missing}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {match.after.missing.slice(0, 18).map((t) => (
-                    <span key={t} className="rounded-full bg-amber-50 border border-amber-200 px-2.5 py-1 text-xs font-medium text-amber-700">
+                    <span key={t} className="rounded-full bg-warning/10 border border-warning/25 px-2.5 py-1 text-xs font-medium text-warning">
                       {t}
                     </span>
                   ))}
@@ -924,19 +924,19 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 </div>
               )}
               {evidence && evidence.count > 0 && (
-                <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3.5">
-                  <p className="flex items-start gap-2 text-sm font-semibold text-amber-800">
+                <div className="mt-4 rounded-xl border border-warning/25 bg-warning/10 p-3.5">
+                  <p className="flex items-start gap-2 text-sm font-semibold text-warning/90">
                     <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                     {s.evidenceTitle} ({evidence.count})
                   </p>
-                  <p className="mt-1 text-xs text-amber-700">{s.evidenceHint}</p>
+                  <p className="mt-1 text-xs text-warning">{s.evidenceHint}</p>
                   <ul className="mt-2 space-y-1">
                     {evidence.unconfirmed.slice(0, 8).map((c, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
-                        <span className="mt-1 h-1 w-1 rounded-full bg-amber-500 shrink-0" />
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-warning/90">
+                        <span className="mt-1 h-1 w-1 rounded-full bg-warning shrink-0" />
                         <span>
                           <span className="font-medium">&quot;{c.claim}&quot;</span>{" "}
-                          <span className="text-amber-600">({s.claimKinds[c.kind as keyof typeof s.claimKinds] ?? c.kind})</span>
+                          <span className="text-warning">({s.claimKinds[c.kind as keyof typeof s.claimKinds] ?? c.kind})</span>
                         </span>
                       </li>
                     ))}
@@ -969,11 +969,11 @@ export function SnapClient({ lang }: { lang: Lang }) {
                     aria-live="polite"
                     className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition active:scale-95 ${
                       copied
-                        ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                        ? "border-success/40 bg-success/10 text-success"
                         : "border-border bg-white text-espresso hover:bg-sand"
                     }`}
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? s.copied : s.copyLetter}
                   </button>
                 </div>
@@ -989,7 +989,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
               <div className="flex flex-col gap-2">
                 <a
                   href={`/editor/cv/${savedId}`}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white shadow hover:bg-emerald-700"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-success px-5 py-3.5 text-sm font-semibold text-white shadow hover:bg-success"
                 >
                   <Check className="w-4.5 h-4.5" />
                   {s.saved}
@@ -999,7 +999,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 {appId && (
                   <a
                     href={`/applications/${appId}`}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-emerald-600/40 px-5 py-2.5 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-success/40 px-5 py-2.5 text-sm font-medium text-success transition hover:bg-success/10"
                   >
                     {s.openApplication}
                   </a>
@@ -1035,7 +1035,7 @@ export function SnapClient({ lang }: { lang: Lang }) {
                 onClick={() => void shareResult()}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-ember/30 bg-ember-tint/50 px-5 py-3 text-sm font-semibold text-ember-hover transition hover:bg-ember-tint"
               >
-                {shareCopied ? <Check className="w-4.5 h-4.5 text-emerald-600" /> : <Share2 className="w-4.5 h-4.5" />}
+                {shareCopied ? <Check className="w-4.5 h-4.5 text-success" /> : <Share2 className="w-4.5 h-4.5" />}
                 {shareCopied ? s.shareCopied : s.shareButton}
               </button>
               <p className="mt-2 text-center text-[11px] text-text-muted">{s.shareLinkHint}</p>

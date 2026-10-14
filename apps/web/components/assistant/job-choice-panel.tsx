@@ -247,7 +247,7 @@ export function JobChoicePanel({ sw, onPickOurJob, onOwnSource, onClose }: Props
               </button>
             ))}
           </div>
-          {notice && <p className="mt-1 px-1 text-[11px] font-medium text-amber-900">{notice}</p>}
+          {notice && <p className="mt-1 px-1 text-[11px] font-medium text-warning/90">{notice}</p>}
         </div>
       )}
     </section>

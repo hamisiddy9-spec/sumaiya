@@ -54,7 +54,7 @@ function num(v: number | null): string {
 
 function SampleNote({ n }: { n: number }) {
   if (n === 0) return <span className="text-xs text-text-muted">Hakuna data bado — inakusanywa kwa matumizi halisi.</span>;
-  if (n < SMALL_SAMPLE_N) return <span className="text-xs text-amber-700">Sample ndogo ({n}) — takwimu zinaweza kubadilika.</span>;
+  if (n < SMALL_SAMPLE_N) return <span className="text-xs text-warning">Sample ndogo ({n}) — takwimu zinaweza kubadilika.</span>;
   return <span className="text-xs text-text-muted">{n} tukio</span>;
 }
 
@@ -127,7 +127,7 @@ export default async function AdminInsightsPage() {
                   <span>Ofa: {b.offer} ({b.offerRate === null ? "—" : `${b.offerRate}%`})</span>
                 </div>
                 {b.n > 0 && b.n < SMALL_SAMPLE_N && (
-                  <p className="text-[11px] text-amber-700 pl-2">Sample ndogo — takwimu zinaweza kubadilika.</p>
+                  <p className="text-[11px] text-warning pl-2">Sample ndogo — takwimu zinaweza kubadilika.</p>
                 )}
               </div>
             ))}
@@ -143,7 +143,7 @@ export default async function AdminInsightsPage() {
                   <span className="text-espresso">{n.signalType}</span>
                   <span className="text-text-muted">
                     {n.actedOn}/{n.shown} ({n.actRate === null ? "—" : `${n.actRate}%`})
-                    {n.smallSample && <span className="text-amber-700 ml-1">*</span>}
+                    {n.smallSample && <span className="text-warning ml-1">*</span>}
                   </span>
                 </div>
               ))}

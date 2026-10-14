@@ -468,7 +468,7 @@ export function BusinessCardEditorClient({ initialDoc, accessToken, isPremium: i
                         {tpl.name}
                       </span>
                       {tpl.popular && (
-                        <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full leading-none -mt-0.5">
+                        <span className="text-[9px] font-semibold text-warning bg-warning/10 px-1.5 py-0.5 rounded-full leading-none -mt-0.5">
                           {lang === "sw" ? "Maarufu" : "Popular"}
                         </span>
                       )}

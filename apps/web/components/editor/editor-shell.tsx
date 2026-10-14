@@ -100,7 +100,7 @@ export function EditorShell({
 
         <div className="flex items-center gap-2">
           {saved && (
-            <span className="text-xs text-green-400 flex items-center gap-1">
+            <span className="text-xs text-success/60 flex items-center gap-1">
               <Check className="w-3 h-3" /> {t(lang, "editor.saved")}
             </span>
           )}

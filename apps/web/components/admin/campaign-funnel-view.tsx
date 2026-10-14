@@ -102,7 +102,7 @@ function SourceCard({ source }: { source: CampaignSourceFunnel }) {
         </span>
         <span className="text-text-body">
           <strong className="text-espresso text-sm">{count(source.newAccounts)}</strong> akaunti
-          mpya <span className="text-amber-700">*</span>
+          mpya <span className="text-warning">*</span>
         </span>
       </div>
 
@@ -129,7 +129,7 @@ function SourceCard({ source }: { source: CampaignSourceFunnel }) {
               <p className="text-right w-24 text-sm text-text-body tabular-nums">
                 {rate(step.dropOffRate)}
                 {step.incomplete && (
-                  <span className="block text-[10px] text-amber-700">
+                  <span className="block text-[10px] text-warning">
                     hatua ya awali haijakamilika
                   </span>
                 )}
@@ -219,7 +219,7 @@ export function CampaignFunnelView({ report }: { report: CampaignFunnelReport })
           the same zeros mean "we could not look" — so the two can never be
           rendered from the same condition. */}
       {report.coverage.readFailed && (
-        <div className="bg-amber-50 border border-amber-300 rounded-xl p-5">
+        <div className="bg-warning/10 border border-warning/40 rounded-xl p-5">
           <h2 className="text-sm font-semibold text-espresso mb-2">
             Hatukuweza kusoma data · Could not read the campaign data
           </h2>
@@ -275,7 +275,7 @@ export function CampaignFunnelView({ report }: { report: CampaignFunnelReport })
 
       <div className="space-y-1 text-xs text-text-muted">
         {report.coverage.truncated && (
-          <p className="text-amber-700">
+          <p className="text-warning">
             Rows zilizosomwa zimefika kikomo cha ukurasa — namba hizi ni za chini kabisa (floor),
             si jumla. Punguza dirisha (siku) au ongeza kikomo.
           </p>
@@ -287,13 +287,13 @@ export function CampaignFunnelView({ report }: { report: CampaignFunnelReport })
           </p>
         )}
         {report.totals.unusableRows > 0 && (
-          <p className="text-amber-700">
+          <p className="text-warning">
             Rows {count(report.totals.unusableRows)} hazikuwa na src/visitorId halali —
             hazijahesabiwa.
           </p>
         )}
         {report.totals.unrecognizedEvents > 0 && (
-          <p className="text-amber-700">
+          <p className="text-warning">
             Rows {count(report.totals.unrecognizedEvents)} zina jina la tukio lisilotambulika —
             hazijahesabiwa kwenye hatua.
           </p>

@@ -102,7 +102,7 @@ export function TemplatePicker({ onSelectTemplate, isLoading = false }: Template
               onClick={() => setSelectedFamily(family)}
               className={`rounded-lg border-2 p-4 text-left transition-all ${
                 selectedFamily?.id === family.id
-                  ? 'border-blue-500 bg-blue-50'
+                  ? 'border-ember bg-ember/10'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
@@ -158,7 +158,7 @@ export function TemplatePicker({ onSelectTemplate, isLoading = false }: Template
                       <div className="mt-2">
                         <span className={`inline-block px-2 py-1 text-xs font-medium rounded ${
                           template.tier === 'premium'
-                            ? 'bg-amber-100 text-amber-800'
+                            ? 'bg-warning/15 text-warning/90'
                             : 'bg-gray-100 text-gray-700'
                         }`}>
                           {template.tier === 'premium' ? 'Premium' : 'Core'}

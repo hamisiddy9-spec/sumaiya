@@ -292,7 +292,7 @@ export function SettingsForm({
         <div
           className={`rounded-input-lg px-4 py-3 text-sm font-medium ${
             message.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+              ? "bg-success/10 text-success border border-success/25"
               : "bg-red-50 text-red-700 border border-red-200"
           }`}
         >
@@ -305,7 +305,7 @@ export function SettingsForm({
 
         {/* Avatar + name + email + plan pill row */}
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-amber-900 text-xl font-bold flex-shrink-0">
+          <div className="w-14 h-14 rounded-full bg-warning/15 flex items-center justify-center text-warning/90 text-xl font-bold flex-shrink-0">
             {userInitial}
           </div>
           <div className="flex-1 min-w-0">

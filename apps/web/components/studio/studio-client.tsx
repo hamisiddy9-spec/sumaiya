@@ -98,7 +98,7 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
         <span className="text-sm font-medium truncate max-w-[220px]">{initialDoc.title}</span>
         <div className="flex-1" />
         <span className="text-xs text-cream/50 flex items-center gap-1.5">
-          {saving ? <><Loader2 className="w-3 h-3 animate-spin" /> Saving…</> : saved ? <><Check className="w-3 h-3 text-green-400" /> All changes saved</> : "Unsaved"}
+          {saving ? <><Loader2 className="w-3 h-3 animate-spin" /> Saving…</> : saved ? <><Check className="w-3 h-3 text-success/60" /> All changes saved</> : "Unsaved"}
         </span>
         <div className="flex flex-col items-end">
           <button onClick={download} disabled={isDownloading}

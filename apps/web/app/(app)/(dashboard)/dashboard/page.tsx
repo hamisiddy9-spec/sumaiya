@@ -436,10 +436,10 @@ export default async function DashboardPage({ searchParams }: Props) {
             unified context, linking to the Settings confirm card. */}
         {!dbError && unconfirmedCount > 0 && (
           <Link href="/settings" className="group block mb-8">
-            <div className="bg-amber-50 border border-amber-300 rounded-card-lg p-4 flex items-center justify-between gap-4 hover:border-amber-400 transition-colors">
+            <div className="bg-warning/10 border border-warning/40 rounded-card-lg p-4 flex items-center justify-between gap-4 hover:border-warning/60 transition-colors">
               <div className="flex items-start gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                  <Icon name="spark" size={18} className="text-amber-700" />
+                <div className="w-9 h-9 rounded-lg bg-warning/15 flex items-center justify-center flex-shrink-0">
+                  <Icon name="spark" size={18} className="text-warning" />
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-espresso text-sm">

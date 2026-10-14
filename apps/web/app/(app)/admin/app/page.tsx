@@ -203,7 +203,7 @@ export default async function AdminAppPage() {
                 <span className="text-text-muted">
                   {p.installs} install{p.installs === 1 ? "" : "s"}
                   {p.dropFromPrevious !== null && p.dropFromPrevious > 0 ? (
-                    <span className="text-amber-700 ml-2">−{p.dropFromPrevious}</span>
+                    <span className="text-warning ml-2">−{p.dropFromPrevious}</span>
                   ) : null}
                 </span>
               </div>
