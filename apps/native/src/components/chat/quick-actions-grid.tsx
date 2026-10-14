@@ -52,7 +52,8 @@ export function QuickActionsRow({ actions, onActionPress, onSelect, loading = fa
       horizontal
       showsHorizontalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
+      contentContainerStyle={{ gap: 8, paddingVertical: 8, alignItems: "center" }}
+      style={{ flexGrow: 0 }}
     >
       {actions.map((a, i) => {
         const label = lang === "sw" && a.labelSw ? a.labelSw : a.label;

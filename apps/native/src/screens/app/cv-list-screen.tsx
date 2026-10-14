@@ -570,12 +570,18 @@ export function CvListScreen({ navigation }: CvListScreenProps) {
         </View>
       ) : null}
 
-      {/* Document-type filter chips. Horizontal, like the design's. */}
+      {/* Document-type filter chips. Horizontal, like the design's.
+          `flexGrow: 0` + `alignItems: "center"` are LOAD-BEARING, not style
+          preferences: a horizontal ScrollView left to itself expands to fill the
+          vertical space the screen has spare, and its content container's default
+          `stretch` then inflates every chip into a tall blob. The space only
+          exists when the list is empty or filtered empty — which is why this
+          showed up on an empty CV library and never on a full jobs feed. */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingRight: 8 }}
-        style={{ marginBottom: 16 }}
+        contentContainerStyle={{ gap: 8, paddingRight: 8, alignItems: "center" }}
+        style={{ flexGrow: 0, marginBottom: 16 }}
       >
         {FILTERS.map((f) => {
           const active = filter === f.key;

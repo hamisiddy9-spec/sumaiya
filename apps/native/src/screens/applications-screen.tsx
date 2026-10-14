@@ -333,8 +333,8 @@ export function ApplicationsScreen({ navigation }: ApplicationsScreenProps) {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, paddingRight: 8 }}
-          style={{ marginBottom: 16 }}
+          contentContainerStyle={{ gap: 8, paddingRight: 8, alignItems: "center" }}
+          style={{ flexGrow: 0, marginBottom: 16 }}
         >
           <Pressable
             onPress={() => {

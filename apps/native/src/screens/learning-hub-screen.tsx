@@ -922,7 +922,7 @@ export function LearningHubScreen({ navigation }: LearningHubScreenProps) {
       <View style={{ gap: 12 }}>
         <SectionLabel>{t("All available courses", "Kozi Zote Zilizopo")}</SectionLabel>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8, alignItems: "center" }} style={{ flexGrow: 0 }}>
           {FILTERS.map((f) => (
             <FilterChip
               key={f.key}

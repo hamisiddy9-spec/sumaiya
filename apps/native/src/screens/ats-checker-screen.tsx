@@ -917,7 +917,8 @@ export function AtsCheckerScreen({ route, navigation }: AtsCheckerScreenProps) {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 8, paddingRight: 8 }}
+                  contentContainerStyle={{ gap: 8, paddingRight: 8, alignItems: "center" }}
+                  style={{ flexGrow: 0 }}
                 >
                   {cvs.map((cv) => {
                     const active = (picked?.id ?? cvs[0].id) === cv.id;

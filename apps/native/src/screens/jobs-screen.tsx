@@ -210,7 +210,8 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: JOBS_SPACING.chipGap }}
+              contentContainerStyle={{ gap: JOBS_SPACING.chipGap, alignItems: "center" }}
+              style={{ flexGrow: 0 }}
             >
               {JOB_FILTERS.map((f) => {
                 const active = f.key === filter;

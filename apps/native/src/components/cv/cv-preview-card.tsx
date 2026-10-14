@@ -150,7 +150,8 @@ export function CvPreviewCard({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: 12, paddingHorizontal: 2, paddingVertical: 2 }}
+      contentContainerStyle={{ gap: 12, paddingHorizontal: 2, paddingVertical: 2, alignItems: "center" }}
+      style={{ flexGrow: 0 }}
     >
       {CV_TEMPLATES.map((tpl) => {
         const locked = tpl.tier === "premium" && !premium;
