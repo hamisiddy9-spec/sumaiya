@@ -241,7 +241,11 @@ function WelcomeStage({
               })}
             >
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={{ color: c.text, fontSize: 17, fontWeight: "800" }}>{ch.label}</Text>
+                {/* 18/800, not a rounded scale step: the welcome spec pins the
+                    choice title (lib/welcome-spec.ts CHOICE_TITLE) and
+                    lib/welcome-spec.test.ts fails the build if this screen and
+                    the web spec ever disagree. */}
+                <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
               </View>
               {current ? <Icon name="check" size={18} color={c.accent} /> : null}
