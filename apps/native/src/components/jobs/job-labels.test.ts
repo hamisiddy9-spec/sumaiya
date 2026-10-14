@@ -27,7 +27,9 @@ import {
   matchesQuery,
   matchViewFor,
   postedAgo,
+  postedLine,
   recommendationMatch,
+  salaryView,
   scoreBand,
 } from "./job-labels";
 
@@ -291,5 +293,101 @@ describe("no screen may hand-roll a score", () => {
       expect(source).not.toMatch(/serverScore\s*(\?\?|\|\|)\s*0/);
       expect(source).not.toMatch(/score:\s*\d/);
     }
+  });
+});
+
+describe("the date line never reports ingestion as posting", () => {
+  const now = new Date("2026-10-14T12:00:00Z");
+  const ago = (h: number) => new Date(now.getTime() - h * 3600_000).toISOString();
+
+  it("says `Imepostiwa` only when the SOURCE published a posting date", () => {
+    expect(postedLine({ postedAt: ago(4), createdAt: ago(1) }, SW, now)).toEqual({
+      label: "Imepostiwa",
+      ago: "masaa 4 yaliyopita",
+      fromSource: true,
+    });
+  });
+
+  it("says `Imeingizwa` when the only date is our own crawl", () => {
+    // The row was created today, so `createdAt` no longer reads "posted 4 hours
+    // ago" for an advert the employer published last month.
+    expect(postedLine({ createdAt: ago(4) }, SW, now)).toEqual({
+      label: "Imeingizwa",
+      ago: "masaa 4 yaliyopita",
+      fromSource: false,
+    });
+  });
+
+  it("falls back to the crawl date when the source's date is unusable", () => {
+    expect(postedLine({ postedAt: "not a date", createdAt: ago(2) }, SW, now)).toEqual({
+      label: "Imeingizwa",
+      ago: "masaa 2 yaliyopita",
+      fromSource: false,
+    });
+  });
+
+  it("returns null when there is no date at all — never a guess", () => {
+    expect(postedLine({}, SW, now)).toBeNull();
+    expect(postedLine({ postedAt: null, createdAt: null }, SW, now)).toBeNull();
+  });
+
+  it("speaks English to an English reader", () => {
+    expect(postedLine({ postedAt: ago(24) }, EN, now)).toEqual({
+      label: "Posted",
+      ago: "yesterday",
+      fromSource: true,
+    });
+    expect(postedLine({ createdAt: ago(24) }, EN, now)).toEqual({
+      label: "Added",
+      ago: "yesterday",
+      fromSource: false,
+    });
+  });
+});
+
+describe("a salary is the source's own, and never printed without its period", () => {
+  it("formats the source's range with its currency and period", () => {
+    expect(
+      salaryView({ salaryMin: 70000, salaryMax: 90000, salaryCurrency: "usd", salaryPeriod: "year" }, SW),
+    ).toEqual({ text: "USD 70,000 – 90,000 kwa mwaka", numeric: true });
+    expect(
+      salaryView({ salaryMin: 70000, salaryMax: 90000, salaryCurrency: "USD", salaryPeriod: "year" }, EN),
+    ).toEqual({ text: "USD 70,000 – 90,000 a year", numeric: true });
+  });
+
+  it("REFUSES a number whose period is unknown", () => {
+    // Jobicy and Adzuna publish ANNUAL figures. Printing one of them bare would
+    // read as a monthly wage and understate the pay twelvefold, so the numbers
+    // are withheld — not guessed at.
+    expect(salaryView({ salaryMin: 1800000, salaryMax: 2500000, salaryCurrency: "TZS" }, SW)).toBeNull();
+    // ...and the source's own words are used instead when it gave any.
+    expect(
+      salaryView({ salaryMin: 1800000, salaryPeriod: "", salaryText: "TZS 1,800,000 kwa mwezi" }, SW),
+    ).toEqual({ text: "TZS 1,800,000 kwa mwezi", numeric: false });
+  });
+
+  it("keeps the source's wording when it published words instead of numbers", () => {
+    expect(salaryView({ salaryText: "KES 80,000 - 100,000 kwa mwezi" }, SW)).toEqual({
+      text: "KES 80,000 - 100,000 kwa mwezi",
+      numeric: false,
+    });
+  });
+
+  it("handles a single figure and an identical range", () => {
+    expect(salaryView({ salaryMin: 1800000, salaryPeriod: "month" }, SW)?.text).toBe("1,800,000 kwa mwezi");
+    expect(
+      salaryView({ salaryMin: 500000, salaryMax: 500000, salaryCurrency: "TZS", salaryPeriod: "month" }, SW)
+        ?.text,
+    ).toBe("TZS 500,000 kwa mwezi");
+  });
+
+  it("ignores nonsense bounds rather than passing them on", () => {
+    expect(salaryView({ salaryMin: -5, salaryMax: 0, salaryPeriod: "year" }, SW)).toBeNull();
+    expect(salaryView({ salaryMin: Number.NaN, salaryPeriod: "year" }, SW)).toBeNull();
+  });
+
+  it("returns nothing when the source stated no pay at all", () => {
+    expect(salaryView({}, SW)).toBeNull();
+    expect(salaryView({ salaryText: "   " }, SW)).toBeNull();
   });
 });

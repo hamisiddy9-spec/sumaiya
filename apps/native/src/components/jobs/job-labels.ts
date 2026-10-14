@@ -166,6 +166,89 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
+ * The advert's date line, from the right date.
+ *
+ * `postedAt` is when the SOURCE says the employer posted it; `createdAt` is
+ * when our pipeline first saw the row. They are different facts and B4's line
+ * is about the first one, so a listing whose source publishes no date gets a
+ * different verb (`Imeingizwa` / "Added") rather than being told the advert
+ * went up the moment we happened to crawl it.
+ *
+ * `fromSource` is returned so a caller can show the exact date (the advert
+ * screen does) without re-deciding which date it is looking at.
+ */
+export function postedLine(
+  job: { postedAt?: string | null; createdAt?: string | null },
+  lang: Lang,
+  now: Date = new Date(),
+): { label: string; ago: string; fromSource: boolean } | null {
+  if (job.postedAt) {
+    const ago = postedAgo(job.postedAt, lang, now);
+    if (ago) return { label: lang === "sw" ? "Imepostiwa" : "Posted", ago, fromSource: true };
+  }
+  const ago = postedAgo(job.createdAt ?? null, lang, now);
+  if (!ago) return null;
+  return { label: lang === "sw" ? "Imeingizwa" : "Added", ago, fromSource: false };
+}
+
+/**
+ * The pay the source stated, or null.
+ *
+ * Only ever the source's own figure: the numeric range when it published
+ * numbers, its own wording when it published words. NOTHING is derived — no
+ * "salary not disclosed", no average, no conversion.
+ *
+ * A NUMERIC salary is withheld until its period is known. "TZS 1,800,000" with
+ * no period reads as a monthly wage to the person deciding whether they can
+ * afford to apply, and Jobicy/Adzuna both publish ANNUAL figures — that
+ * misreading understates the pay twelvefold. Both adapters that produce numbers
+ * set `salaryPeriod`, so this guards a source that forgets, not a live case.
+ */
+export function salaryView(
+  job: {
+    salaryMin?: number | null;
+    salaryMax?: number | null;
+    salaryCurrency?: string;
+    salaryPeriod?: string;
+    salaryText?: string;
+  },
+  lang: Lang,
+): { text: string; numeric: boolean } | null {
+  const min = typeof job.salaryMin === "number" && job.salaryMin > 0 ? job.salaryMin : null;
+  const max = typeof job.salaryMax === "number" && job.salaryMax > 0 ? job.salaryMax : null;
+  const period = periodWord(job.salaryPeriod, lang);
+  const text = (job.salaryText ?? "").trim();
+
+  if ((min !== null || max !== null) && period) {
+    const fmt = (n: number) => n.toLocaleString("en-US");
+    const range =
+      min !== null && max !== null
+        ? min === max
+          ? fmt(min)
+          : `${fmt(min)} – ${fmt(max)}`
+        : fmt((min ?? max) as number);
+    const currency = (job.salaryCurrency ?? "").trim().toUpperCase();
+    return { text: [currency, range, period].filter(Boolean).join(" "), numeric: true };
+  }
+
+  // Numeric but no period: the numbers exist and cannot be safely printed, so
+  // the source's own words are used when it gave any. Silence otherwise.
+  return text ? { text, numeric: false } : null;
+}
+
+/** The words for a pay period, or "" when the source's period is unknown. */
+function periodWord(period: string | undefined, lang: Lang): string {
+  const p = (period ?? "").trim().toLowerCase();
+  const tableSw: Record<string, string> = {
+    year: "kwa mwaka", month: "kwa mwezi", week: "kwa wiki", day: "kwa siku", hour: "kwa saa",
+  };
+  const tableEn: Record<string, string> = {
+    year: "a year", month: "a month", week: "a week", day: "a day", hour: "an hour",
+  };
+  return (lang === "sw" ? tableSw : tableEn)[p] ?? "";
+}
+
+/**
  * When the advert went up, in the words B4 uses (`Imepostiwa masaa 4
  * yaliyopita`, `Imepostiwa jana`).
  *

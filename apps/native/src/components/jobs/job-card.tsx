@@ -4,7 +4,7 @@ import type { JobListing } from "@sumaiya/api-client";
 import { Card, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
 import { FONT, JOBS_SPACING } from "./tokens";
-import { bandColor, postedAgo, scoreBand, type JobMatch } from "./job-labels";
+import { bandColor, postedLine, salaryView, scoreBand, type JobMatch } from "./job-labels";
 
 /**
  * One card in the Jobs feed — B4.
@@ -39,7 +39,12 @@ export function JobCard({
   const c = useThemeColors();
   const { t, lang } = useLang();
   const where = [job.company, job.location].filter(Boolean).join(" · ");
-  const posted = postedAgo(job.createdAt, lang);
+  const when = postedLine(job, lang);
+  const pay = salaryView(job, lang);
+  // The lifecycle flag the DB already computes (deadline inside the window).
+  // Nothing read it until now, so a listing about to close looked identical to
+  // one posted this morning.
+  const closingSoon = job.status === "expiring";
   const tone = match ? bandColor(scoreBand(match.score), c) : null;
   // A strong match gets the design's ember-tinted reason block; anything below
   // the app's strong band gets the neutral one. One rule, both themes.
@@ -82,6 +87,36 @@ export function JobCard({
           >
             {where}
           </Text>
+          {/* The pay the source stated, and the flag the schema's lifecycle says
+              to surface (`expiring` = deadline inside the window). Both are
+              facts from the listing; when a source states neither, this row is
+              simply absent. */}
+          {pay || closingSoon ? (
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+              {pay ? (
+                <Text style={{ color: c.textBody, fontSize: 11.5, fontFamily: FONT.mono }}>
+                  {pay.text}
+                </Text>
+              ) : null}
+              {closingSoon ? (
+                <Text
+                  style={{
+                    color: c.accent,
+                    fontSize: 11,
+                    fontFamily: FONT.mono,
+                    borderWidth: 1,
+                    borderColor: c.accent + "40",
+                    borderRadius: 6,
+                    paddingHorizontal: 6,
+                    paddingVertical: 1,
+                    overflow: "hidden",
+                  }}
+                >
+                  {t("Closing soon", "Inaisha hivi karibuni")}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
         </View>
 
         {match && tone ? (
@@ -140,11 +175,12 @@ export function JobCard({
           paddingTop: 2,
         }}
       >
-        {/* No `createdAt` = the app does not know when it was posted, and this
-            line is a fact, not decoration. */}
-        {posted ? (
+        {/* No date at all = the app does not know when it went up, and this
+            line is a fact, not decoration. `Imepostiwa` only for a date the
+            source published; `Imeingizwa` when all we have is our own crawl. */}
+        {when ? (
           <Text style={{ color: c.textMuted, fontSize: 11, fontFamily: FONT.mono }}>
-            {t("Posted", "Imepostiwa")} {posted}
+            {when.label} {when.ago}
           </Text>
         ) : (
           <View />

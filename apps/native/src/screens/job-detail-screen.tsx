@@ -19,6 +19,8 @@ import {
   JobMatchCard,
   advertBullets,
   matchViewFor,
+  postedLine,
+  salaryView,
 } from "../components/jobs";
 import type { JobDetailScreenProps } from "../navigation/types";
 
@@ -109,7 +111,19 @@ export function JobDetailScreen({ navigation, route }: JobDetailScreenProps) {
     }
   }, [saved, saving, job, cvData, t]);
 
-  const meta = [job.employmentType, job.category, job.sourceName].filter(Boolean) as string[];
+  const meta = [job.employmentType, job.category, job.jobLevel].filter(Boolean) as string[];
+  // The source's pay, and when it says the advert went up. Both render only
+  // when the listing actually carries them.
+  const pay = salaryView(job, lang);
+  const when = postedLine(job, lang);
+  const closingSoon = job.status === "expiring";
+  const postedFull = job.postedAt
+    ? new Date(job.postedAt).toLocaleDateString(lang === "sw" ? "sw-TZ" : "en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <Screen
@@ -172,10 +186,39 @@ export function JobDetailScreen({ navigation, route }: JobDetailScreenProps) {
           {meta.map((m) => (
             <Chip key={m} label={m} />
           ))}
+          {/* The pay chip the design draws — now carrying the source's real
+              range instead of the fragment's sample advert text. */}
+          {pay ? <Chip label={pay.text} /> : null}
           {closing ? (
-            <Chip label={`${t("Closes", "Inaisha")} ${closing}`} tone={closed ? c.error : undefined} />
+            <Chip label={`${t("Closes", "Inaisha")} ${closing}`} tone={closed ? c.error : c.accent} />
+          ) : null}
+          {closingSoon && !closed ? (
+            <Chip label={t("Closing soon", "Inaisha hivi karibuni")} tone={c.accent} />
           ) : null}
         </View>
+
+        {/* The facts this screen used to omit entirely: when the advert went up,
+            where it came from, and when it was last confirmed live. A seeker
+            deciding whether to spend an afternoon on an application reads these
+            first, and every one of them was already in the response. */}
+        <Card style={{ marginBottom: 16, gap: 8 }}>
+          {when ? (
+            <Fact
+              label={when.fromSource ? t("Posted", "Imechapishwa") : t("Added to Sumaiya", "Imeingizwa Sumaiya")}
+              value={postedFull ? `${postedFull} · ${when.ago}` : when.ago}
+            />
+          ) : null}
+          {job.sourceName ? <Fact label={t("Source", "Chanzo")} value={job.sourceName} /> : null}
+          {job.lastVerifiedAt ? (
+            <Fact
+              label={t("Last checked", "Ilithibitishwa")}
+              value={new Date(job.lastVerifiedAt).toLocaleDateString(
+                lang === "sw" ? "sw-TZ" : "en-GB",
+                { day: "numeric", month: "short", year: "numeric" },
+              )}
+            />
+          ) : null}
+        </Card>
 
         {/* The match, with the engine's own term rows. It is one component on
             purpose: score, reason and findings are one claim, and a screen
@@ -239,6 +282,17 @@ export function JobDetailScreen({ navigation, route }: JobDetailScreenProps) {
         ) : null}
       </Animated.View>
     </Screen>
+  );
+}
+
+/** One "label — value" row in the advert's facts card. */
+function Fact({ label, value }: { label: string; value: string }) {
+  const c = useThemeColors();
+  return (
+    <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+      <Text style={{ color: c.textMuted, fontSize: 11.5, minWidth: 116 }}>{label}</Text>
+      <Text style={{ flex: 1, color: c.text, fontSize: 12.5, fontFamily: FONT.mono }}>{value}</Text>
+    </View>
   );
 }
 
