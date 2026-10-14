@@ -9,11 +9,11 @@ import { cvToHtml, isRenderable, templateMeta, CV_TEMPLATES, type CvTemplateId }
 import { useEntitlements } from "../../lib/entitlements";
 import { getDefaultTemplate } from "../../lib/prefs";
 import { exportCVAsPDF } from "../../services/pdf-export";
-import { shareCV } from "../../services/share";
 import { Icon } from "../icon";
 import { Button, ScreenTitle, haptics, toast, useThemeColors } from "../ui";
 import { useLang } from "../../lib/i18n";
 import { PremiumSheet } from "../premium-sheet";
+import { ExportSheet } from "./export-sheet";
 import { TemplateThumb } from "./template-thumb";
 import { TemplateGallery } from "./template-gallery";
 
@@ -69,6 +69,12 @@ export function CvPreviewCard({
   const [showPremium, setShowPremium] = useState(false);
   const [thumbReady, setThumbReady] = useState(false);
   const [dlError, setDlError] = useState(false);
+  // Screen 8 — the export/share sheet. `exportUri` is the freshly printed PDF
+  // the sheet acts on; `sheetOpen` drives it. They are two states so that
+  // closing the sheet keeps the real file name on screen through the exit
+  // animation instead of flashing a placeholder.
+  const [exportUri, setExportUri] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   // cvToHtml() renders a bare "&nbsp;" name line and skips every section
   // with no data — a CV this sparse (a short chat that gave Sumaiya little
@@ -124,7 +130,13 @@ export function CvPreviewCard({
     haptics.light();
     try {
       const uri = await exportCVAsPDF(cv, { accent: color, lang, template });
-      await shareCV(cv, uri);
+      // Screen 8: the print no longer hands the file straight to the OS share
+      // sheet. It opens the designed export/share sheet, which owns the share,
+      // save-to-device and print actions (services/share.ts +
+      // services/save-to-device.ts). The OS share sheet is still the mechanism
+      // the sheet's share tiles run, so the old path is intact.
+      setExportUri(uri);
+      setSheetOpen(true);
       haptics.success();
     } catch {
       haptics.error();
@@ -425,6 +437,16 @@ export function CvPreviewCard({
         onClose={() => setGalleryOpen(false)}
       />
       <PremiumSheet visible={showPremium} onClose={() => setShowPremium(false)} feature="templates" />
+      {/* Screen 8 — the designed export / share sheet (Stitch
+          `export_shiriki_modal_sheet`). */}
+      <ExportSheet
+        visible={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        cv={cv}
+        pdfUri={exportUri}
+        docLang={lang}
+        documentSaved={saved}
+      />
     </View>
   );
 }
