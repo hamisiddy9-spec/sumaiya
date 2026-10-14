@@ -37,6 +37,11 @@ function TabItem({
   onLongPress: () => void;
 }) {
   const c = useThemeColors();
+  // 40dp disc inside the 30dp icon box. Absolutely positioned like the flat shade, so it
+  // cannot shift the bar's measured height — which `tab-bar-metrics` publishes for the
+  // floating update pill.
+  const DISC = 40;
+  const centre = icon === "sumaiya";
   const progress = useDerivedValue(() => withSpring(focused ? 1 : 0, { damping: 20, stiffness: 180, mass: 0.8 }));
 
   // No translateY here. The shade (pillStyle) is absolutely positioned and does
@@ -67,21 +72,33 @@ function TabItem({
       accessibilityLabel={label}
     >
       <View style={{ width: 44, height: 30, alignItems: "center", justifyContent: "center" }}>
+        {/* The design makes ONE tab special: Sumaiya sits at the centre of the bar as
+            a FILLED ember disc with the mark in onEmber white. The other four keep the
+            flat tint — giving them a disc "for symmetry" would delete the only thing
+            that says which tab this product is. */}
         <Animated.View
           style={[
             pillStyle,
-            {
-              position: "absolute",
-              width: 44,
-              height: 30,
-              borderRadius: 15,
-              backgroundColor: c.accent + "1f",
-            },
+            centre
+              ? {
+                  position: "absolute",
+                  width: DISC,
+                  height: DISC,
+                  borderRadius: DISC / 2,
+                  backgroundColor: c.accentFill,
+                }
+              : {
+                  position: "absolute",
+                  width: 44,
+                  height: 30,
+                  borderRadius: 15,
+                  backgroundColor: c.accent + "1f",
+                },
           ]}
         />
         <Animated.View style={iconStyle}>
-          {icon === "sumaiya" ? (
-            <SumaiyaMark size={22} color={focused ? c.accent : c.textBody} state={focused ? "idle" : "static"} />
+          {centre ? (
+            <SumaiyaMark size={22} color={c.accentText} state={focused ? "idle" : "static"} />
           ) : (
             <Icon name={icon} size={22} color={focused ? c.accent : c.textBody} strokeWidth={focused ? 2.5 : 2.1} />
           )}

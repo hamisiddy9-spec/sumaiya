@@ -96,6 +96,9 @@ describe("the source guard — no screen writes its own well", () => {
     "components/mark-well.tsx",
     "screens/first-run-screen.tsx",
     "components/error-boundary.tsx",
+    // The sign-in brand block carried its own 92/r28/mark-48 well until 2026-10-14;
+    // the tree-walk could not see it because it drew a plain View, not `MarkWell`.
+    "screens/auth/sign-in-screen.tsx",
   ];
 
   // The sizes and containers the flow used to carry, AND the two invented wells
@@ -112,6 +115,9 @@ describe("the source guard — no screen writes its own well", () => {
     { name: "first-run well 116/r36", re: /width:\s*116,\s*height:\s*116,\s*borderRadius:\s*36/ },
     { name: "first-run well radius 36", re: /borderRadius:\s*36\b/ },
     { name: "first-run mark 62", re: /SumaiyaMark\s+size=\{62\}/ },
+    // sign-in-screen.tsx — its own 92 / r28 / mark-48 well.
+    { name: "sign-in well 92/r28", re: /width:\s*92,\s*height:\s*92,\s*borderRadius:\s*28/ },
+    { name: "sign-in mark 48", re: /SumaiyaMark\s+size=\{48\}/ },
     // error-boundary.tsx — a locally-invented 76 / r24 / mark-40 well.
     { name: "error-boundary well 76/r24", re: /width:\s*76,\s*height:\s*76,\s*borderRadius:\s*24/ },
     { name: "error-boundary well radius 24", re: /borderRadius:\s*24\b/ },
@@ -152,7 +158,7 @@ describe("the source guard — no screen writes its own well", () => {
     // A file that draws the mark at one of the retired sizes is a second
     // container treatment wherever it lives. This catches the *next* invented
     // well even if nobody remembers to add the file to WELL_FILES.
-    const RETIRED_MARK_SCALES = new Set([40, 52, 62, 64, 78]);
+    const RETIRED_MARK_SCALES = new Set([40, 48, 52, 62, 64, 78]);
     const offenders: string[] = [];
     for (const rel of tsxSources()) {
       const src = read(rel);

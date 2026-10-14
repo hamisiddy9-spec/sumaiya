@@ -39,7 +39,9 @@ export function SectionHeader({
             haptics.selection();
             onAction();
           }}
-          style={{ flexDirection: "row", alignItems: "center", gap: 2 }}
+          // §8: no tap target below 44dp. This action was ~34dp with an 8dp hitSlop;
+          // hitSlop is a tolerance, not a target.
+          style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 2, minHeight: 44, paddingHorizontal: 8 }}
         >
           <Text style={{ color: c.accent, fontSize: 13.5, fontWeight: "700" }}>{actionLabel}</Text>
           <Icon name="chevron-right" size={15} color={c.accent} />

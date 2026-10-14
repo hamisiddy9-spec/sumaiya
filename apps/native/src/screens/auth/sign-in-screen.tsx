@@ -8,7 +8,7 @@ import { useAuthContext } from "../../contexts/auth-context";
 import { canDismissAuth, dismissAuth } from "../../navigation/root-nav";
 import { track } from "../../lib/telemetry";
 import { Button, Screen, TextField, haptics, useThemeColors } from "../../components/ui";
-import { SumaiyaMark } from "../../components/sumaiya-mark";
+import { MarkWell } from "../../components/mark-well";
 import { Icon } from "../../components/icon";
 import { GoogleButton } from "./google-button";
 import { AuthErrorBanner } from "./auth-error-banner";
@@ -154,9 +154,11 @@ export function SignInScreen(_props: Props) {
   // screen, not a smaller, top-pinned afterthought.
   const brand = (
     <View style={{ alignItems: "center", gap: 12, marginBottom: 8 }}>
-      <View style={{ width: 92, height: 92, borderRadius: 28, backgroundColor: c.accent + "14", alignItems: "center", justifyContent: "center" }}>
-        <SumaiyaMark size={48} state="static" color={c.accent} />
-      </View>
+      {/* The shared well, not a locally-invented one. This screen is part of the
+          cold start, which is exactly the flow whose four different wells
+          `ui/mark-well-tokens` exists to stop — and the guard now knows about this
+          file, so a fifth cannot appear here again. */}
+      <MarkWell state="static" />
       <Text style={{ color: c.text, fontSize: 20, fontWeight: "800", letterSpacing: -0.3 }}>Sumaiya</Text>
     </View>
   );
