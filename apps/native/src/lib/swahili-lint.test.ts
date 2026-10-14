@@ -341,6 +341,11 @@ const FIRST_PERSON_EXEMPT: VoiceExemption[] = [
     contains: "Nisaidie kutengeneza CV yangu.",
     why: "the message the user sends when they tap the Build-my-CV chip",
   },
+  {
+    file: "screens/guide-screen.tsx",
+    contains: "Nimesoma mwongozo",
+    why: "the prompt the reader sends to Sumaiya from the foot of a guide, naming the guide they just read",
+  },
 ];
 
 const voiceHits = walk(SRC_ROOT).flatMap((file) => {
