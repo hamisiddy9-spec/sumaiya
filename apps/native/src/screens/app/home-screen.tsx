@@ -34,6 +34,7 @@ import type { HomeScreenProps } from "../../navigation/types";
 // The greeting lives in lib/greeting.ts so its new-vs-returning rule is
 // unit-testable on its own (see __tests__/onboarding-greeting.test.ts).
 import { greeting } from "../../lib/greeting";
+import { identityFor } from "../../lib/identity";
 // Home's own building blocks. They are Home-local on purpose: the greeting
 // hierarchy, the section header's tap target, the 44 dp icon wells and the
 // status chips are all things the shared components get wrong for THIS screen,
@@ -353,14 +354,21 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
-  const rawName = user?.name?.trim();
-  const looksLikeDevice = rawName
-    ? /^(hisense|samsung|xiaomi|infinix|tecno|itel|oppo|vivo|realme|nokia|huawei|redmi|android|iphone|ipad|roku|tv)\b/i.test(rawName) ||
-      /^[a-z0-9]{1,4}$/i.test(rawName)
-    : false;
-  const name = rawName && !looksLikeDevice ? rawName : user?.email?.split("@")[0] || t("there", "rafiki");
+  // Who this is — resolved by the SAME rule Profile uses (lib/identity.ts), so
+  // the two screens can never disagree about the name or the face. They did:
+  // Home drew the Google account photo while Profile drew initials, for the same
+  // person, because Profile never looked at the account photo.
+  const id = identityFor({
+    profileName: profile?.fullName,
+    profilePhoto: profile?.photo,
+    authName: user?.name,
+    authPhoto: user?.photoUrl,
+    email: user?.email,
+    fallback: t("there", "rafiki"),
+  });
+  const name = id.name;
   const role = profile?.headline?.trim() || undefined;
-  const photoUri = user?.photoUrl || profile?.photo || undefined;
+  const photoUri = id.photoUri;
 
   // NEW vs RETURNING for the greeting. `nextMoves === undefined` means the
   // profile has not loaded yet — treated as "new" on purpose: saying "Karibu"

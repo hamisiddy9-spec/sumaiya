@@ -13,6 +13,7 @@ import { apiClient } from "../../lib/api-client";
 import { APP_VERSION } from "../../lib/app-version";
 import { SUPPORT_EMAIL } from "../../lib/app-hosts";
 import { loadProfile } from "../../lib/profile-store";
+import { identityFor } from "../../lib/identity";
 import { useLang } from "../../lib/i18n";
 import { dialog } from "../../components/ui";
 import { getSecureItem, setSecureItem, offlineStorage } from "@sumaiya/utils";
@@ -130,12 +131,15 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
    * shows it immediately instead of after an app restart.
    */
   const [photo, setPhoto] = useState("");
+  const [profileName, setProfileName] = useState("");
   useFocusEffect(
     useCallback(() => {
       let alive = true;
       loadProfile()
         .then((p) => {
-          if (alive) setPhoto(p.photo || "");
+          if (!alive) return;
+          setPhoto(p.photo || "");
+          setProfileName(p.fullName || "");
         })
         .catch(() => {
           /* no local profile yet — the initials stand in */
@@ -145,6 +149,20 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
       };
     }, []),
   );
+
+  // The same identity rule Home uses (lib/identity.ts): the name and photo the
+  // user gave us first, then the account's, then what the screen can honestly
+  // show. Before this, this screen alone ignored the account photo, so the two
+  // screens drew a different face for the same person.
+  const id = identityFor({
+    profileName,
+    profilePhoto: photo,
+    authName: user?.name,
+    authPhoto: user?.photoUrl,
+    email: user?.email,
+    fallback: t("Not signed in", "Hujaingia"),
+  });
+  const photoUri = id.photoUri;
 
   // Push can only register a token once app.json carries an Expo/EAS projectId
   // (extra.eas.projectId). Without one `registerForPush` returns false BEFORE it
@@ -421,15 +439,15 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               }}
               accessibilityRole="button"
               accessibilityLabel={
-                photo
+                photoUri
                   ? t("Change your photo", "Badilisha picha yako")
                   : t("Add your photo", "Weka picha yako")
               }
               style={{ width: 56, height: 56, borderRadius: 18 }}
             >
-              {photo ? (
+              {photoUri ? (
                 <Image
-                  source={{ uri: photo }}
+                  source={{ uri: photoUri }}
                   accessibilityLabel={t("Your photo", "Picha yako")}
                   style={{
                     width: 56,
@@ -467,14 +485,14 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
                   }}
                 >
                   <Text style={{ color: c.accentText, fontSize: 20, fontWeight: "800" }}>
-                    {initials(user?.name, user?.email)}
+                    {initials(id.name, null)}
                   </Text>
                 </View>
               )}
             </Pressable>
             <View style={{ flex: 1 }}>
               <Text style={{ color: c.text, fontSize: 17, fontWeight: "700" }} numberOfLines={1}>
-                {user?.name || user?.email?.split("@")[0] || t("Not signed in", "Hujaingia")}
+                {id.name}
               </Text>
               <Text style={{ color: c.textMuted, fontSize: 13, marginTop: 2 }} numberOfLines={2}>
                 {user?.email ||

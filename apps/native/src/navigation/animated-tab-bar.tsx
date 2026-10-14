@@ -58,9 +58,6 @@ function TabItem({
     opacity: progress.value,
     transform: [{ scale: 0.7 + progress.value * 0.3 }],
   }));
-  const labelStyle = useAnimatedStyle(() => ({
-    color: interpolateColor(progress.value, [0, 1], [c.textBody, c.accent]),
-  }));
 
   return (
     <Pressable
@@ -104,9 +101,23 @@ function TabItem({
           )}
         </Animated.View>
       </View>
-      <Animated.Text style={[labelStyle, { fontSize: 11, fontWeight: focused ? "700" : "600", letterSpacing: 0.1 }]}>
+      <Text
+        style={{
+          fontSize: 11,
+          fontWeight: focused ? "700" : "600",
+          letterSpacing: 0.1,
+          // NOT an animated colour. This label used `interpolateColor` over a
+          // spring, and on the device the previous tab's label stayed ember after
+          // switching away — two tabs lit at once, seen on a screenshot of the
+          // Import tab with "My CVs" still orange. The icons have always taken
+          // their colour from `focused` directly; the label now does too, so it is
+          // the same boolean the accessibility state reports. The pill and the
+          // scale still animate; a colour that has to be correct does not.
+          color: focused ? c.accent : c.textBody,
+        }}
+      >
         {label}
-      </Animated.Text>
+      </Text>
     </Pressable>
   );
 }
