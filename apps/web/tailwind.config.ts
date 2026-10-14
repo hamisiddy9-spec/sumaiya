@@ -31,9 +31,11 @@ const config: Config = {
         // Warm Confidence by Sumaiya
         ember: {
           DEFAULT: "#DA4A1C",
-          shadow: "#A8330F",
-          hover: "#C13E14",
-          tint: "#FBE9E1",
+          // Guide §1: emberPressed / emberHover / emberTint.
+          shadow: "#B93C13",
+          pressed: "#B93C13",
+          hover: "#C2410C",
+          tint: "rgba(218, 74, 28, 0.12)",
         },
         pine: {
           DEFAULT: "#12433D",
@@ -51,24 +53,32 @@ const config: Config = {
           2: "#2C231C",
           line: "#3A2E25",
         },
+        // Guide §1 warm scale. `cream` is the legacy name for surface.
+        surface: "#FBF9F5",
+        "surface-raised": "#F5F3EF",
+        "surface-sunken": "#EFEEEA",
+        "on-ember": "#FFFFFF", // text/icons ON ember only
         cream: {
-          DEFAULT: "#FAF5EE",
+          DEFAULT: "#FBF9F5",
         },
         sand: {
-          DEFAULT: "#EFE7DA",
-          2: "#F4EEE4",
+          DEFAULT: "#EFEEEA",
+          2: "#F5F3EF",
         },
-        card: "#FFFFFF",
+        card: "#F5F3EF", // NOT white: the guide forbids a #ffffff surface
         border: {
-          DEFAULT: "#E9E0D4",
+          DEFAULT: "#E2BFB5",
           // Darkened #DBD1C2 → #9C8D7B so input boundaries reach WCAG 3:1 on
           // white (was 1.51:1) while staying in the warm sand family.
-          input: "#9C8D7B",
+          input: "#8E7068",
         },
-        "text-body": "#6B5F54",
+        "text-body": "#1B1C1A",
         // Darkened #9C9186 → #756A5E so muted text hits WCAG AA 4.5:1 on cream
         // (4.86:1) and sand-2 (4.57:1) while keeping the warm taupe identity.
-        "text-muted": "#756A5E",
+        "text-muted": "#5A413A",
+        success: "#186A22",
+        warning: "#B45309",
+        error: "#BA1A1A",
         purple: {
           tint: "#EDE7F5",
           glow: "#7C3AED",

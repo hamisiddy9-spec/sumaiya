@@ -12,9 +12,9 @@ export const colors = {
 
   // Accent
   ember: "#DA4A1C",
-  ember_hover: "#C13E14",
-  ember_shadow: "#A8330F",
-  ember_tint: "#FBE9E1",
+  ember_hover: "#C2410C",
+  ember_shadow: "#B93C13",
+  ember_tint: "rgba(218, 74, 28, 0.12)",
 
   // Secondary
   pine: "#12433D",
@@ -26,23 +26,29 @@ export const colors = {
   gold_tint: "#FBF3E2",
 
   // Neutral
-  cream: "#FAF5EE",
-  sand: "#EFE7DA",
-  sand_2: "#F4EEE4",
+  // Guide §1 warm scale — cream/sand are legacy names for the surfaces.
+  surface: "#FBF9F5",
+  surface_raised: "#F5F3EF",
+  surface_sunken: "#EFEEEA",
+  on_ember: "#FFFFFF",
+  cream: "#FBF9F5",
+  sand: "#EFEEEA",
+  sand_2: "#F5F3EF",
 
   // Text
-  text_body: "#6B5F54",
-  text_muted: "#756A5E",
+  text_body: "#1B1C1A",
+  text_muted: "#5A413A",
 
   // UI
-  border: "#E9E0D4",
-  border_input: "#9C8D7B",
-  card: "#FFFFFF",
+  border: "#E2BFB5",
+  border_input: "#8E7068",
+  border_strong: "#8E7068",
+  card: "#F5F3EF", // NOT white — no #ffffff surface, per the guide
 
   // States
-  success: "#12766A",
-  warning: "#96630F",
-  error: "#C13E14",
+  success: "#186A22",
+  warning: "#B45309",
+  error: "#BA1A1A",
 } as const;
 
 export const spacing = {

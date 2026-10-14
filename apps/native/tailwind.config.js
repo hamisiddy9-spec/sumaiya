@@ -12,30 +12,56 @@ module.exports = {
         // ~20 screens) resolved to an undefined Tailwind color, i.e. no
         // background at all, which is why dark mode never actually darkened
         // and error/success banners rendered with no fill.
-        // Exact values from apps/web/tailwind.config.ts — keep in lockstep.
+        //
+        // VALUES: `docs/DESIGN-GUIDE.md` §1 (the guide's warm scale, derived
+        // from ember). Stitch's own palette is rejected — its `primary`
+        // `#ab2e00` came from a Material tonal algorithm and ember appeared
+        // zero times in its eight screens. The legacy keys below (cream, sand,
+        // card, espresso) are kept as NAMES for the ~20 screens still using
+        // them, but they now resolve to the guide's values, so a screen renders
+        // the guide's palette whether or not it has been migrated to the new
+        // key names yet. `theme-tokens.test.ts` pins these literals.
+        //
+        // ⚠️ There is deliberately NO `#ffffff` surface here. The guide: "In a
+        // warm palette a white card reads as a hole" — the lightest surface is
+        // #FBF9F5, and white is permitted only as on-ember text.
+        //
+        // ── The guide's names ──────────────────────────────────────────────
+        surface: '#FBF9F5',
+        'surface-raised': '#F5F3EF',
+        'surface-sunken': '#EFEEEA',
+        'border-strong': '#8E7068',
+        'on-ember': '#FFFFFF', // text/icons ON ember only
+        'ember-pressed': '#B93C13',
+        'success-tint': 'rgba(24, 106, 34, 0.10)',
+        'error-tint': 'rgba(186, 26, 26, 0.10)',
+        // ── Legacy names, guide values ─────────────────────────────────────
         espresso: '#211A15',
-        espresso_dark: '#171009',
-        espresso_line: '#3A2E25',
+        espresso_dark: '#1B1C1A',
+        espresso_line: 'rgba(226, 191, 181, 0.24)',
         // Hyphenated alias some screens use instead of the underscore key.
-        'espresso-dark': '#171009',
+        'espresso-dark': '#1B1C1A',
         ember: '#DA4A1C',
-        'ember-tint': '#FBE9E1',
-        'ember-hover': '#C13E14',
-        'ember-shadow': '#A8330F',
+        'ember-tint': 'rgba(218, 74, 28, 0.12)',
+        'ember-hover': '#C2410C',
+        'ember-shadow': '#B93C13',
+        cream: '#FBF9F5', // legacy name for `surface`
+        sand: '#EFEEEA', // legacy name for `surface-sunken`
+        'sand-2': '#F5F3EF', // legacy name for `surface-raised`
+        card: '#F5F3EF', // NOT white, per the guide's surface rule
+        border: '#E2BFB5',
+        'border-input': '#8E7068',
+        'text-body': '#1B1C1A',
+        'text-muted': '#5A413A',
+        error: '#BA1A1A',
+        success: '#186A22',
+        warning: '#B45309',
+        // ── Off-guide legacy accents, kept until their screens are migrated ──
+        // The guide's "do not keep both palettes" rule means these should go;
+        // they stay only so no screen silently loses a fill in the meantime.
         pine: '#12433D',
         gold: '#F2A93B',
         'gold-text': '#96630F',
-        cream: '#FAF5EE',
-        sand: '#EFE7DA',
-        'sand-2': '#F4EEE4',
-        card: '#FFFFFF',
-        border: '#E9E0D4',
-        'border-input': '#9C8D7B',
-        'text-body': '#6B5F54',
-        'text-muted': '#756A5E',
-        error: '#C13E14',
-        success: '#12766A',
-        warning: '#96630F',
       },
       spacing: {
         0.5: '2px',
