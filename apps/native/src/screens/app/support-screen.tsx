@@ -141,7 +141,10 @@ export function SupportScreen({ navigation }: SupportScreenProps) {
         </View>
         {[
           { label: t("App", "Programu"), value: `Sumaiya ${version}${build ? ` (Build ${build})` : ""}` },
-          { label: "OS", value: `${Platform.OS} ${Platform.Version}` },
+          // No separate OS row: `Platform.Version` is the bare API level, so it
+          // printed "android 37" — lowercase, unexplained, and right beside a
+          // device line already saying "Pixel 8 Pro · Android 17". One row that a
+          // person can read beats two that disagree on how to spell the same fact.
           ...(device ? [{ label: t("Device", "Kifaa"), value: device }] : []),
           { label: t("Log entries", "Kumbukumbu"), value: String(logCount) },
         ].map((r) => (
