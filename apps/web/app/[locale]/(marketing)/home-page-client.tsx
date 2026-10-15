@@ -256,8 +256,8 @@ const PRODUCTS_EN: ProductItem[] = [
     desc: "Application, reference and resignation letters in the format employers expect.",
     count: "17 looks",
     href: "/editor/letter/try",
-    bgColor: "bg-purple-tint",
-    iconColor: "text-purple-glow",
+    bgColor: "bg-ember-tint",
+    iconColor: "text-ember-glow",
   },
 ];
 
@@ -295,8 +295,8 @@ const PRODUCTS_SW: ProductItem[] = [
     desc: "Barua za maombi, mapendekezo na kujiuzulu — kwa muundo unaotarajiwa na waajiri.",
     count: "Miundo 17",
     href: "/editor/letter/try",
-    bgColor: "bg-purple-tint",
-    iconColor: "text-purple-glow",
+    bgColor: "bg-ember-tint",
+    iconColor: "text-ember-glow",
   },
 ];
 

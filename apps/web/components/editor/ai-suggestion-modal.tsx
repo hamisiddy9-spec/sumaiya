@@ -55,7 +55,7 @@ export function AiSuggestionModal({ open, subtitle, original, suggested, busy, l
       >
         <div className="px-5 pt-4 pb-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-glow" />
+            <Sparkles className="w-4 h-4 text-ember-glow" />
             <span id="ai-suggestion-title" className="text-sm font-bold text-espresso">{sw ? "Pendekezo langu" : "My suggestion"}</span>
             <button onClick={onClose} aria-label={label(sw, "close")} className="ml-auto w-9 h-9 flex items-center justify-center rounded-lg text-text-muted hover:text-espresso hover:bg-sand transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember/60 focus-visible:ring-offset-1"><X className="w-4 h-4" /></button>
           </div>
@@ -72,7 +72,7 @@ export function AiSuggestionModal({ open, subtitle, original, suggested, busy, l
             <WhatChanged before={original} after={suggested} sw={sw} />
           ) : (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
               <div className="text-xs leading-relaxed text-espresso bg-ember-tint/30 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">{suggested}</div>
             </div>
           )}

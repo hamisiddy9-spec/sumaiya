@@ -624,7 +624,7 @@ export function LetterEditorClient({
                 <button
                   onClick={() => void handleEnhance()}
                   disabled={isEnhancing || !letterData.body.trim()}
-                  className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium"
+                  className="flex items-center gap-1 text-xs text-ember hover:text-ember disabled:opacity-50 transition font-medium"
                 >
                   <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Ninaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                 </button>

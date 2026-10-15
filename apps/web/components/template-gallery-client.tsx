@@ -107,7 +107,7 @@ const STYLE_CHIP: Record<string, { label: string; className: string }> = {
   sidebar:  { label: "Easy to read", className: "bg-pine-tint text-pine" },
   minimal:  { label: "Minimal",      className: "bg-sand text-text-body" },
   header:   { label: "Header",       className: "bg-pine-tint text-pine" },
-  creative: { label: "Creative",     className: "bg-purple-tint text-purple-glow" },
+  creative: { label: "Creative",     className: "bg-ember-tint text-ember-glow" },
   classic:  { label: "Classic",      className: "bg-gold-tint text-gold-text" },
 };
 

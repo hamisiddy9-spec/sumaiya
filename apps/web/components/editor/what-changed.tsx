@@ -38,7 +38,7 @@ export function WhatChanged({ before, after, sw, isLocal, needsConfirm }: Props)
     return (
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow">
             {sw ? "Pendekezo" : "Suggested"}
           </p>
           <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
@@ -71,7 +71,7 @@ export function WhatChanged({ before, after, sw, isLocal, needsConfirm }: Props)
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-purple-glow">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow">
           {sw ? "Kimebadilika nini" : "What changed"}
         </p>
         <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>

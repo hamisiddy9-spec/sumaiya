@@ -225,9 +225,9 @@ export default async function DashboardPage({ searchParams }: Props) {
       icon: "letter" as const,
       label: lang === "sw" ? "Barua Rasmi" : "Formal Letters",
       count: letCount,
-      bgColor: "bg-purple-tint",
-      iconColor: "text-purple-glow",
-      hoverBorder: "hover:border-purple-glow/30",
+      bgColor: "bg-ember-tint",
+      iconColor: "text-ember-glow",
+      hoverBorder: "hover:border-ember-glow/30",
     },
   ];
 
@@ -573,7 +573,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                 { docType: "cv" as const,             icon: "cv" as const,  label: lang === "sw" ? "CV" : "CV",             bgColor: "bg-ember-tint",     iconColor: "text-ember" },
                 { docType: "cover-letter" as const,   icon: "mail" as const, label: lang === "sw" ? "Barua ya Maombi" : "Cover Letter",  bgColor: "bg-pine-tint",     iconColor: "text-pine" },
                 { docType: "business-card" as const,  icon: "card" as const, label: lang === "sw" ? "Kadi ya Biashara" : "Business Card",  bgColor: "bg-gold-tint",     iconColor: "text-gold" },
-                { docType: "letter" as const,         icon: "letter" as const, label: lang === "sw" ? "Barua Rasmi" : "Formal Letter", bgColor: "bg-purple-tint", iconColor: "text-purple-glow" },
+                { docType: "letter" as const,         icon: "letter" as const, label: lang === "sw" ? "Barua Rasmi" : "Formal Letter", bgColor: "bg-ember-tint", iconColor: "text-ember-glow" },
               ].map(({ docType, icon, label, bgColor, iconColor }) => (
                 <CreateEntryButton
                   key={docType}

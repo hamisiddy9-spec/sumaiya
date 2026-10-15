@@ -528,7 +528,7 @@ export function CoverLetterEditorClient({ initialDoc, accessToken, isPremium: is
                     <Sparkles className="w-3 h-3" /> {isGenerating ? (sw ? "Ninatengeneza…" : "Generating…") : (sw ? "Niandikie" : "Write it for me")}
                   </button>
                   <button onClick={() => void handleEnhance()} disabled={isEnhancing || !content.trim()}
-                    className="flex items-center gap-1 text-xs text-purple-600 hover:text-purple-700 disabled:opacity-50 transition font-medium">
+                    className="flex items-center gap-1 text-xs text-ember hover:text-ember disabled:opacity-50 transition font-medium">
                     <Wand2 className="w-3 h-3" /> {isEnhancing ? (sw ? "Ninaboresha…" : "Enhancing…") : (sw ? "Boresha" : "Improve")}
                   </button>
                 </div>

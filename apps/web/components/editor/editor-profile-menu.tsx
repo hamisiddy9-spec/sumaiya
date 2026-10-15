@@ -316,7 +316,7 @@ export function EditorProfileMenu({
                 confirmFresh ? "bg-red-50" : "hover:bg-sand/60"
               }`}
             >
-              <FilePlus size={15} className={`mt-0.5 shrink-0 ${confirmFresh ? "text-red-600" : "text-purple-glow"}`} />
+              <FilePlus size={15} className={`mt-0.5 shrink-0 ${confirmFresh ? "text-red-600" : "text-ember-glow"}`} />
               <span>
                 <span className={`block text-xs font-semibold ${confirmFresh ? "text-red-600" : "text-espresso"}`}>
                   {confirmFresh

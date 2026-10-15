@@ -238,7 +238,7 @@ function UpgradeModal({ onClose, sw }: { onClose: () => void; sw: boolean }) {
         <button onClick={onClose} aria-label={label(sw, "close")} className="absolute top-4 right-4 text-text-muted hover:text-espresso transition p-1.5 -m-1.5">
           <Icon name="chevron-right" className="rotate-45" size={16} />
         </button>
-        <div className="w-14 h-14 bg-gradient-to-br from-ember to-purple-glow rounded-card flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 bg-gradient-to-br from-ember to-ember-glow rounded-card flex items-center justify-center mx-auto mb-4">
           <Icon name="download" className="text-cream" size={22} />
         </div>
         <h2 className="text-xl font-bold text-espresso mb-2">{sw ? "Boresha ili kupakua" : "Upgrade to download"}</h2>
@@ -2060,11 +2060,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         <Link
           href="/assistant"
           onClick={() => posthog.capture('editor_guided_intake_click', { guest: !!guestMode })}
-          className="flex items-start gap-3 rounded-card border border-purple-glow/25 bg-purple-tint/50 p-3 hover:border-purple-glow/50 transition group"
+          className="flex items-start gap-3 rounded-card border border-ember-glow/25 bg-ember-tint/50 p-3 hover:border-ember-glow/50 transition group"
         >
           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: "rgba(124,58,237,0.12)", boxShadow: "0 0 12px rgba(124,58,237,0.2)" }}>
-            <SumaiyaMark size={15} state="idle" className="text-purple-glow" />
+            <SumaiyaMark size={15} state="idle" className="text-ember-glow" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-semibold text-espresso">
@@ -2075,7 +2075,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 ? "Jibu maswali machache kwa maneno yako mwenyewe — nami ninaandika kila sehemu. Unarudi hapa kuhariri."
                 : "Answer a few questions in your own words — I write every section. You come back here to edit."}
             </p>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-glow mt-1.5 group-hover:gap-1.5 transition-all">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ember-glow mt-1.5 group-hover:gap-1.5 transition-all">
               {uiLang === "sw" ? "Anza nami" : "Start with me"} →
             </span>
           </div>
@@ -2250,7 +2250,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           placeholder={uiLang === "sw" ? "Muhtasari mfupi wa historia yako ya kikazi na uwezo wako muhimu..." : "Brief overview of your professional background and key strengths..."} />
         <div className="flex items-center justify-between mt-1">
           <button onClick={handleEnhance} disabled={isEnhancing || !cvData.summary.trim()}
-            className="flex items-center gap-1.5 text-xs font-medium text-purple-glow hover:text-purple-glow/80 disabled:opacity-40 transition">
+            className="flex items-center gap-1.5 text-xs font-medium text-ember-glow hover:text-ember-glow/80 disabled:opacity-40 transition">
             {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Icon name="spark" className="w-3 h-3" />}
             {uiLang === "sw" ? "Boresha" : "Improve"}
           </button>
@@ -2341,7 +2341,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                           onApply: (v) => { updateExperience(exp.id, { description: v }); triggerAutoSave(); },
                         })}
                         disabled={isEnhancing}
-                        className="mt-1 flex items-center gap-1 text-[10px] font-medium text-purple-glow hover:text-purple-glow/80 disabled:opacity-40 transition">
+                        className="mt-1 flex items-center gap-1 text-[10px] font-medium text-ember-glow hover:text-ember-glow/80 disabled:opacity-40 transition">
                         {isEnhancing ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Icon name="spark" size={10} />}
                         {uiLang === "sw" ? "Boresha" : "Improve"}
                       </button>
@@ -2834,7 +2834,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           <div className="bg-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90dvh]" onClick={(e) => e.stopPropagation()}>
             <div className="px-5 pt-4 pb-3 border-b border-border flex-shrink-0">
               <div className="flex items-center gap-2">
-                <Icon name="spark" size={16} className={enhancePreview.source === "local" ? "text-text-muted" : "text-purple-glow"} />
+                <Icon name="spark" size={16} className={enhancePreview.source === "local" ? "text-text-muted" : "text-ember-glow"} />
                 <span className="text-sm font-bold text-espresso">
                   {enhancePreview.source === "local"
                     ? (uiLang === "sw" ? "Usafishaji wa msingi" : "Basic cleanup")
@@ -3402,8 +3402,8 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 {/* AI Enhance */}
                 <div>
                   <button onClick={handleEnhance} disabled={isEnhancing}
-                    className="w-full flex items-center justify-center gap-2 bg-purple-tint text-purple-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-purple-tint/80 disabled:opacity-50 border border-purple-glow/20">
-                    {isEnhancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="spark" size={16} className="text-purple-glow" />}
+                    className="w-full flex items-center justify-center gap-2 bg-ember-tint text-ember-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-ember-tint/80 disabled:opacity-50 border border-ember-glow/20">
+                    {isEnhancing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Icon name="spark" size={16} className="text-ember-glow" />}
                     {isEnhancing ? (uiLang === "sw" ? "Ninaboresha..." : "Enhancing...") : (uiLang === "sw" ? "Boresha" : "Improve")}
                   </button>
                   <p className="text-xs text-text-muted text-center mt-2">{uiLang === "sw" ? "Nitakuandikia muhtasari wako upya" : "I'll rewrite your summary"}</p>
@@ -3416,8 +3416,8 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     which is both clearer and safer. Each entry jumps to its tool. */}
                 <div className="bg-card border border-border rounded-card p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-7 h-7 rounded-lg bg-purple-tint flex items-center justify-center">
-                      <Icon name="spark" size={14} className="text-purple-glow" />
+                    <div className="w-7 h-7 rounded-lg bg-ember-tint flex items-center justify-center">
+                      <Icon name="spark" size={14} className="text-ember-glow" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-espresso leading-tight">{uiLang === "sw" ? "Nikusaidie nini?" : "What can I help with?"}</p>
@@ -3511,17 +3511,17 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 />
 
                 {/* AI Assistant */}
-                <div id="ai-tool-rewrite" className="bg-purple-tint border border-purple-glow/15 rounded-card p-4 scroll-mt-4">
+                <div id="ai-tool-rewrite" className="bg-ember-tint border border-ember-glow/15 rounded-card p-4 scroll-mt-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center"
                         style={{ background: "rgba(124,58,237,0.12)", boxShadow: "0 0 12px rgba(124,58,237,0.25)" }}>
-                        <Icon name="spark" size={16} className="text-purple-glow" />
+                        <Icon name="spark" size={16} className="text-ember-glow" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-semibold text-purple-glow">{uiLang === "sw" ? "Sumaiya" : "Sumaiya"}</p>
-                          <span className="text-[8px] font-bold uppercase tracking-wider bg-purple-glow text-white px-1.5 py-0.5 rounded-pill leading-none">PRO</span>
+                          <p className="text-xs font-semibold text-ember-glow">{uiLang === "sw" ? "Sumaiya" : "Sumaiya"}</p>
+                          <span className="text-[8px] font-bold uppercase tracking-wider bg-ember-glow text-white px-1.5 py-0.5 rounded-pill leading-none">PRO</span>
                         </div>
                         <p className="text-[10px] text-text-body">{uiLang === "sw" ? "Boresha maandishi yako" : "Rewrite to be more impactful"}</p>
                       </div>
@@ -3545,7 +3545,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <button
                     onClick={handleTranslate}
                     disabled={translateProgress !== null}
-                    className="mt-2 w-full flex items-center justify-center gap-2 border border-purple-glow/25 text-purple-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-purple-tint/60 disabled:opacity-50"
+                    className="mt-2 w-full flex items-center justify-center gap-2 border border-ember-glow/25 text-ember-glow text-sm font-semibold py-2.5 rounded-input transition hover:bg-ember-tint/60 disabled:opacity-50"
                   >
                     {translateProgress !== null
                       ? <><Loader2 className="w-3 h-3 animate-spin" /> {uiLang === "sw" ? "Ninatafsiri" : "Translating"} {translateProgress}…</>

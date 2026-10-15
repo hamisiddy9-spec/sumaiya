@@ -65,7 +65,7 @@ export default async function AdminDashboard() {
           <Stat label="Cover letters" value={m.coverLetters} />
           <Stat label="Business cards" value={m.cards} />
           <Stat label="Formal letters" value={m.letters} />
-          <Stat label="AI calls" value={m.ai} accent="text-purple-glow" />
+          <Stat label="AI calls" value={m.ai} accent="text-ember-glow" />
         </div>
       </div>
 
