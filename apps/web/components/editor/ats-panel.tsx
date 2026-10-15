@@ -70,8 +70,8 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
       {/* Score card — pine bg */}
       <div className="bg-pine rounded-card p-5 text-cream">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80">{sw ? "Alama ya CV" : "ATS Score"}</span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cream/15 text-cream">
+          <span className="text-[11px] font-semibold uppercase tracking-widest opacity-80">{sw ? "Alama ya CV" : "ATS Score"}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cream/15 text-cream">
             {statusLabel}
           </span>
         </div>
@@ -92,9 +92,9 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
           />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[10px] opacity-50">0</span>
-          <span className="text-[10px] font-semibold text-gold">{score}%</span>
-          <span className="text-[10px] opacity-50">100</span>
+          <span className="text-[11px] opacity-50">0</span>
+          <span className="text-[11px] font-semibold text-gold">{score}%</span>
+          <span className="text-[11px] opacity-50">100</span>
         </div>
       </div>
 
@@ -113,9 +113,9 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
                 {isPass ? (
                   <Icon name="check" className="text-pine" size={12} />
                 ) : isWarn ? (
-                  <span className="text-[10px] font-bold text-gold-text">!</span>
+                  <span className="text-[11px] font-bold text-gold-text">!</span>
                 ) : (
-                  <span className="text-[10px] font-bold text-red-500">x</span>
+                  <span className="text-[11px] font-bold text-red-500">x</span>
                 )}
               </div>
               <div className="min-w-0">
@@ -125,7 +125,7 @@ export function AtsPanel({ data, documentId, accessToken, lang = "en", onScore }
                   {c.label}
                 </p>
                 {!c.pass && (
-                  <p className="text-[10px] text-cream/60 mt-0.5 leading-tight">{c.tip}</p>
+                  <p className="text-[11px] text-cream/60 mt-0.5 leading-tight">{c.tip}</p>
                 )}
               </div>
             </div>

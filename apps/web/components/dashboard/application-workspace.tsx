@@ -311,11 +311,11 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
 
         {/* Header: job + company */}
         <div className={`${cardCls} mb-4`}>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">{sw ? "Cheo cha kazi" : "Job title"}</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1">{sw ? "Cheo cha kazi" : "Job title"}</label>
           <input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} onBlur={() => patch({ jobTitle })}
             placeholder={sw ? "mf. Mhandisi wa Programu" : "e.g. Software Engineer"}
             className={`${inputCls} text-base font-semibold mb-3`} />
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1">{sw ? "Kampuni" : "Company"}</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1">{sw ? "Kampuni" : "Company"}</label>
           <input value={companyName} onChange={(e) => setCompanyName(e.target.value)} onBlur={() => patch({ companyName })}
             placeholder={sw ? "mf. Safaricom" : "e.g. Safaricom"} className={inputCls} />
         </div>
@@ -422,7 +422,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
 
         {/* Status pipeline */}
         <div className={`${cardCls} mb-4`}>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-2.5">{sw ? "Hatua" : "Stage"}</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-text-muted mb-2.5">{sw ? "Hatua" : "Stage"}</label>
           <div className="flex flex-wrap gap-1.5">
             {STAGES.map((s) => {
               const active = status === s;
@@ -500,7 +500,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
               </div>
               {shown.missing.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
                     {sw ? "Vinavyokosekana kwenye CV" : "Missing from your CV"}
                     {aiMatch && aiMatch.missMust.length > 0 && (
                       <span className="ml-1.5 text-red-600 normal-case">· {aiMatch.missMust.length} {sw ? "yanayohitajika" : "required"}</span>
@@ -521,7 +521,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
               {/* M2 — per-requirement evidence from the snap (persisted, REAL data) */}
               {snapEvidence.length > 0 && (
                 <div className="mt-4 border-t border-border pt-3">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1.5">
                     {sw ? "Mahitaji ya kazi — ushahidi" : "Job requirements — evidence"}
                     {snapSummary.missing + snapSummary.partial > 0 && (
                       <span className="ml-1.5 normal-case">
@@ -534,7 +534,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                       const lbl = EVIDENCE_LABELS[ev.status];
                       return (
                         <li key={ev.requirement} className="flex items-start gap-2 text-xs">
-                          <span className={`shrink-0 mt-px text-[10px] font-bold px-1.5 py-0.5 rounded-pill ${lbl.cls}`}>
+                          <span className={`shrink-0 mt-px text-[11px] font-bold px-1.5 py-0.5 rounded-pill ${lbl.cls}`}>
                             {sw ? lbl.sw : lbl.en}
                           </span>
                           <span className="font-medium text-espresso leading-snug">{ev.requirement}</span>
@@ -548,7 +548,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
                   {/* Real learning resources for the concrete gaps (deterministic KB — never invented) */}
                   {snapEvidence.some((ev) => ev.resources.length > 0) && (
                     <div className="mt-2.5 rounded-input bg-gold-tint/50 border border-gold/20 px-3 py-2">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-gold-text mb-1">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-gold-text mb-1">
                         {sw ? "Njia za kujifunza (rasilimali halisi)" : "Ways to close the gap (real resources)"}
                       </p>
                       <ul className="space-y-1">
@@ -679,7 +679,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
 
         {/* Job description */}
         <div className={`${cardCls} mb-4`}>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Maelezo ya kazi" : "Job description"}</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Maelezo ya kazi" : "Job description"}</label>
           <AutoTextarea value={jobDescription} onChange={(e) => { setJobDescription(e.target.value); setAiKw(null); setAiError(""); }} onBlur={() => patch({ jobDescription, matchScore: (aiMatch ?? match)?.score ?? null })}
             maxHeight={320} rows={3} placeholder={sw ? "Bandika maelezo ya kazi hapa — hutumika kulenga CV yako." : "Paste the job description here — used to tailor your CV."}
             className={`${inputCls} min-h-[72px]`} />
@@ -690,7 +690,7 @@ export function ApplicationWorkspace({ lang = "en", app, linkedCv, linkedCl, ats
 
         {/* Notes */}
         <div className={`${cardCls} mb-4`}>
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Maelezo yako" : "Notes"}</label>
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Maelezo yako" : "Notes"}</label>
           <AutoTextarea value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={() => patch({ notes })}
             rows={3} placeholder={sw ? "Mtu wa kuwasiliana naye, hatua zinazofuata, tarehe za mahojiano…" : "Contact person, next steps, interview dates…"}
             className={`${inputCls} min-h-[72px]`} />

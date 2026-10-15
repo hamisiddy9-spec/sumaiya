@@ -369,7 +369,7 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
                           )}
                           <span>{timeAgo(j.createdAt, sw)}</span>
                           {j.sourceName && (
-                            <span className="text-[10px] text-text-muted/70">via {j.sourceName}</span>
+                            <span className="text-[11px] text-text-muted/70">via {j.sourceName}</span>
                           )}
                         </div>
                       </div>
@@ -393,12 +393,12 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
                     {(j.category || j.employmentType) && (
                       <div className="flex flex-wrap gap-1.5 mt-2.5">
                         {j.employmentType && (
-                          <span className="text-[10px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
+                          <span className="text-[11px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
                             {j.employmentType}
                           </span>
                         )}
                         {j.category && (
-                          <span className="text-[10px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
+                          <span className="text-[11px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
                             {j.category}
                           </span>
                         )}
@@ -416,12 +416,12 @@ export function JobsFeed({ lang, jobs, signedIn, hasCv, latestCvId }: JobsFeedPr
                     {/* Missing keywords (only when we scored it) */}
                     {j.matchScore !== null && j.missing.length > 0 && (
                       <div className="mt-2.5">
-                        <p className="text-[10px] text-text-muted mb-1">
+                        <p className="text-[11px] text-text-muted mb-1">
                           {sw ? "Maneno yanayokosekana kwenye CV yako:" : "Missing from your CV:"}
                         </p>
                         <div className="flex flex-wrap gap-1">
                           {j.missing.slice(0, 6).map((m) => (
-                            <span key={m} className="text-[10px] bg-ember-tint/40 border border-ember-tint text-espresso rounded-pill px-2 py-0.5 font-medium">
+                            <span key={m} className="text-[11px] bg-ember-tint/40 border border-ember-tint text-espresso rounded-pill px-2 py-0.5 font-medium">
                               {m}
                             </span>
                           ))}

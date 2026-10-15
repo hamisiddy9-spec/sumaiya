@@ -19,7 +19,7 @@ function Catalog({ title, items }: { title: string; items: { id: string; name: s
                 {t.popular && <span className="text-[9px] font-bold uppercase tracking-wider bg-ember-tint text-ember-hover px-1.5 py-0.5 rounded-pill">Popular</span>}
               </div>
               {t.description && <p className="text-[11px] text-text-muted leading-snug mt-0.5 line-clamp-2">{t.description}</p>}
-              <p className="font-mono text-[10px] text-text-muted/70 mt-1">{t.id}</p>
+              <p className="font-mono text-[11px] text-text-muted/70 mt-1">{t.id}</p>
             </div>
           </div>
         ))}

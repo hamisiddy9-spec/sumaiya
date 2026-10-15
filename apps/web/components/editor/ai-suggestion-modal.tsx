@@ -64,7 +64,7 @@ export function AiSuggestionModal({ open, subtitle, original, suggested, busy, l
         <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto">
           {original.trim() && (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">{sw ? "Ya sasa" : "Current"}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1">{sw ? "Ya sasa" : "Current"}</p>
               <div className="text-xs leading-relaxed text-text-body bg-sand-2 border border-border rounded-input px-3 py-2 whitespace-pre-wrap">{original}</div>
             </div>
           )}
@@ -72,13 +72,13 @@ export function AiSuggestionModal({ open, subtitle, original, suggested, busy, l
             <WhatChanged before={original} after={suggested} sw={sw} />
           ) : (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-ember-glow mb-1">{sw ? "Pendekezo" : "Suggested"}</p>
               <div className="text-xs leading-relaxed text-espresso bg-ember-tint/30 border border-ember/20 rounded-input px-3 py-2 whitespace-pre-wrap">{suggested}</div>
             </div>
           )}
           {onRefine && (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{sw ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>
               <div className="flex flex-wrap gap-1.5">
                 {REFINE_OPTIONS.map((opt) => (
                   <button key={opt.id} onClick={() => onRefine(opt.id)} disabled={busy}

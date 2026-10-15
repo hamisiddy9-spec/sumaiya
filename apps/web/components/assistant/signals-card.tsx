@@ -39,7 +39,7 @@ export function SignalsCard({
               <ArrowRight className="w-3.5 h-3.5 text-ember shrink-0 group-hover:translate-x-0.5 transition-transform" />
             </div>
             <p className="text-[12px] text-text-body leading-relaxed mt-0.5">{sw ? s.detail.sw : s.detail.en}</p>
-            <p className="text-[10px] text-text-muted mt-1 font-mono truncate">{s.trigger}</p>
+            <p className="text-[11px] text-text-muted mt-1 font-mono truncate">{s.trigger}</p>
           </button>
         ))}
       </div>

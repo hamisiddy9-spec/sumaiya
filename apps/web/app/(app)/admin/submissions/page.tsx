@@ -79,7 +79,7 @@ export default async function AdminSubmissions() {
                     {s.description && <p className="text-xs text-text-body mt-1 line-clamp-2">{s.description}</p>}
                   </div>
                 </div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-pill capitalize whitespace-nowrap ${STATUS_STYLE[s.status] ?? "bg-sand text-text-muted"}`}>{s.status}</span>
+                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-pill capitalize whitespace-nowrap ${STATUS_STYLE[s.status] ?? "bg-sand text-text-muted"}`}>{s.status}</span>
               </div>
               <form action={moderate} className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-border">
                 <input type="hidden" name="id" value={s.id} />

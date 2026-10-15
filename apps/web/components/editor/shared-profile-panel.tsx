@@ -116,7 +116,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
           <div className="w-6 h-6 rounded-full bg-pine-tint flex items-center justify-center flex-shrink-0">
             <Icon name="user" size={12} className="text-pine" />
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-espresso">
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-espresso">
             {sw ? "Taarifa za Pamoja" : "Shared Identity"}
           </span>
         </div>
@@ -138,7 +138,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
       </p>
 
       {loading ? (
-        <div className="text-[10px] text-text-muted animate-pulse">{sw ? "Ninapakia wasifu..." : "Loading profile..."}</div>
+        <div className="text-[11px] text-text-muted animate-pulse">{sw ? "Ninapakia wasifu..." : "Loading profile..."}</div>
       ) : editing ? (
         /* Edit mode */
         <div className="space-y-2">
@@ -223,7 +223,7 @@ export function SharedProfilePanel({ accessToken, onProfileChange, lang = "en" }
             <p className="text-[11px] font-bold text-espresso truncate">{profile.fullName}</p>
           )}
           {profile?.jobTitle && (
-            <p className="text-[10px] text-text-body truncate">{profile.jobTitle}</p>
+            <p className="text-[11px] text-text-body truncate">{profile.jobTitle}</p>
           )}
           {profile?.email && (
             <div className="flex items-center gap-1.5">

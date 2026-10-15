@@ -125,13 +125,13 @@ function CVCard({ doc, lang, onDelete }: { doc: CVRecord; lang: "en" | "sw"; onD
           </div>
         </div>
         {isPublic && (
-          <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-pine text-cream text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm">
+          <span className="absolute top-2 left-2 inline-flex items-center gap-1 bg-pine text-cream text-[11px] font-bold uppercase tracking-wide px-2 py-1 rounded-full shadow-sm">
             <Globe className="w-3 h-3" /> {sw ? "Inaonekana" : "Live"}
           </span>
         )}
         {ats !== null && (
           <span
-            className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm ${
+            className={`absolute top-2 right-2 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full shadow-sm ${
               ats >= 80 ? "bg-pine text-cream" : ats >= 55 ? "bg-gold text-espresso" : "bg-red-500 text-white"
             }`}
           >

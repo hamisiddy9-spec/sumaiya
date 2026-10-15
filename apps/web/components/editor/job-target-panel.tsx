@@ -231,7 +231,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
           </div>
           <div>
             <p className="text-xs font-semibold text-espresso">{sw ? "Lengo la Kazi" : "Job Target"}</p>
-            <p className="text-[10px] text-text-muted">{sw ? "Weka maelezo ya kazi uone kama CV yako inafaa" : "Paste a job description to analyze fit"}</p>
+            <p className="text-[11px] text-text-muted">{sw ? "Weka maelezo ya kazi uone kama CV yako inafaa" : "Paste a job description to analyze fit"}</p>
           </div>
         </div>
         <AutoTextarea
@@ -263,7 +263,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
             {aiLoading ? (sw ? "Ninachambua…" : "Analyzing…") : (sw ? "Linganisha" : "Smart match")}
           </Button>
         </div>
-        {aiError && <p className="text-[10px] text-gold-text mt-1.5">{aiError}</p>}
+        {aiError && <p className="text-[11px] text-gold-text mt-1.5">{aiError}</p>}
       </div>
 
       {result && (
@@ -278,7 +278,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-ember-tint text-ember-hover uppercase tracking-wide">Sumaiya</span>
                 )}
               </div>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${matchTone(result.score).tintBg} ${matchTone(result.score).text}`}>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${matchTone(result.score).tintBg} ${matchTone(result.score).text}`}>
                 {matchLabel(result.score, sw)}
               </span>
             </div>
@@ -294,7 +294,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
               <span className="text-[9px] text-text-muted">
                 {result.matched.length} / {result.matched.length + result.missing.length} {sw ? "maneno muhimu" : "keywords"}
               </span>
-              <span className="text-[10px] font-semibold text-text-body">{result.score}%</span>
+              <span className="text-[11px] font-semibold text-text-body">{result.score}%</span>
             </div>
           </div>
 
@@ -308,14 +308,14 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
               <ol className="space-y-2.5">
                 {recommendations.map((r, i) => (
                   <li key={r.id} className="flex items-start gap-2.5">
-                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-ember-tint text-ember-hover text-[10px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
+                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-ember-tint text-ember-hover text-[11px] font-bold flex items-center justify-center mt-0.5">{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p className="text-[11px] text-espresso leading-snug">{sw ? r.label.sw : r.label.en}</p>
                       {r.cta && r.action && (
                         <button
                           onClick={r.action}
                           disabled={r.busy}
-                          className="mt-1 text-[10px] font-semibold text-ember-hover hover:underline disabled:opacity-50"
+                          className="mt-1 text-[11px] font-semibold text-ember-hover hover:underline disabled:opacity-50"
                         >
                           {r.busy ? (sw ? "Inafanya…" : "Working…") : (sw ? r.cta.sw : r.cta.en)}
                         </button>
@@ -339,7 +339,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
               </div>
               {!tailorCvResult ? (
                 <>
-                  <p className="text-[10px] text-text-muted mb-2.5">
+                  <p className="text-[11px] text-text-muted mb-2.5">
                     {sw
                       ? "Nitaandika upya muhtasari wako na sehemu za uzoefu kuangazia yanayolingana na kazi hii — kwa ukweli, kutoka ulichonacho. Sitabuni kitu."
                       : "I rewrite your summary and experience bullets to match this job — truthfully, from what you already have. I invent nothing."}
@@ -356,7 +356,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                     {tailorCvResult.summary}
                   </div>
                   {tailorCvResult.experience.length > 0 && (
-                    <p className="text-[10px] text-pine font-medium flex items-center gap-1">
+                    <p className="text-[11px] text-pine font-medium flex items-center gap-1">
                       <Icon name="check" size={11} className="text-pine" />
                       {sw
                         ? `Pamoja na sehemu ${tailorCvResult.experience.length} za uzoefu zilizoandikwa upya`
@@ -365,7 +365,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   )}
                   {tailorEvidence && tailorEvidence.length > 0 && (
                     <div className={`border rounded-input px-3 py-2 space-y-1.5 ${tailorConfirmed ? "border-pine/30 bg-pine-tint/30" : "border-warning/40 bg-warning/10"}`}>
-                      <p className="text-[10px] font-semibold text-warning flex items-center gap-1.5">
+                      <p className="text-[11px] font-semibold text-warning flex items-center gap-1.5">
                         <Icon name="alert-triangle" size={11} className="shrink-0" />
                         {sw ? "Haya hayapo kwenye CV yako — nimeyaongeza mimi. Thibitisha kama ni kweli:" : "These aren't in your CV — I added them. Confirm if true:"}
                       </p>
@@ -408,12 +408,12 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                       {sw ? "Acha" : "Discard"}
                     </Button>
                   </div>
-                  <button onClick={handleTailorCv} disabled={tailorCvBusy} className="w-full text-[10px] text-text-muted hover:text-ember transition">
+                  <button onClick={handleTailorCv} disabled={tailorCvBusy} className="w-full text-[11px] text-text-muted hover:text-ember transition">
                     {tailorCvBusy ? (sw ? "Ninatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
                   </button>
                 </div>
               )}
-              {tailorCvError && <p className="text-[10px] text-red-600 mt-2">{tailorCvError}</p>}
+              {tailorCvError && <p className="text-[11px] text-red-600 mt-2">{tailorCvError}</p>}
             </div>
           )}
 
@@ -425,10 +425,10 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                 <span className="text-xs font-semibold text-espresso">{sw ? "Boresha muhtasari" : "Tailor summary"}</span>
               </div>
               {!data.summary.trim() ? (
-                <p className="text-[10px] text-text-muted">{sw ? "Andika muhtasari wa kitaalamu kwanza, kisha nitaandika upya kulenga kazi hii." : "Write a professional summary first, then I can rewrite it to target this job."}</p>
+                <p className="text-[11px] text-text-muted">{sw ? "Andika muhtasari wa kitaalamu kwanza, kisha nitaandika upya kulenga kazi hii." : "Write a professional summary first, then I can rewrite it to target this job."}</p>
               ) : (
                 <>
-                  <p className="text-[10px] text-text-muted mb-2.5">{sw ? "Andika upya muhtasari wako kujumuisha mahitaji muhimu ya kazi hii — kwa ukweli, kutoka ulichonacho." : "Rewrite your summary to weave in this job’s key requirements — truthfully, from what you already have."}</p>
+                  <p className="text-[11px] text-text-muted mb-2.5">{sw ? "Andika upya muhtasari wako kujumuisha mahitaji muhimu ya kazi hii — kwa ukweli, kutoka ulichonacho." : "Rewrite your summary to weave in this job’s key requirements — truthfully, from what you already have."}</p>
                   {!tailored ? (
                     <Button onClick={handleTailor} disabled={tailoring} size="sm" className="w-full">
                       <Icon name="magic" size={14} />
@@ -447,12 +447,12 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                           {sw ? "Acha" : "Discard"}
                         </Button>
                       </div>
-                      <button onClick={handleTailor} disabled={tailoring} className="w-full text-[10px] text-text-muted hover:text-ember transition">
+                      <button onClick={handleTailor} disabled={tailoring} className="w-full text-[11px] text-text-muted hover:text-ember transition">
                         {tailoring ? (sw ? "Ninatengeneza tena…" : "Regenerating…") : (sw ? "Tengeneza tena" : "Regenerate")}
                       </button>
                     </div>
                   )}
-                  {tailorError && <p className="text-[10px] text-red-600 mt-2">{tailorError}</p>}
+                  {tailorError && <p className="text-[11px] text-red-600 mt-2">{tailorError}</p>}
                 </>
               )}
             </div>
@@ -466,7 +466,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                 <Icon name="mail" size={14} className="text-pine" />
                 <span className="text-xs font-semibold text-espresso">{sw ? "Barua ya maombi inayolingana" : "Matching cover letter"}</span>
               </div>
-              <p className="text-[10px] text-text-muted mb-2.5">
+              <p className="text-[11px] text-text-muted mb-2.5">
                 {sw ? "Tengeneza barua ya maombi iliyolengwa kwa kazi hii — imeandikwa kutoka kwa CV yako." : "Create a cover letter tailored to this job, written from your CV."}
               </p>
               <Button onClick={() => onGenerateCoverLetter(jd)} disabled={coverLetterBusy} size="sm" className="w-full">
@@ -497,7 +497,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
                   return (
                     <div key={term}
                       className={`flex items-center gap-1 rounded-pill px-2 py-0.5 border ${isMust ? "border-red-300 bg-red-50" : "border-ember-tint bg-ember-tint/40"}`}>
-                      <span className="text-[10px] font-medium text-espresso">{term}</span>
+                      <span className="text-[11px] font-medium text-espresso">{term}</span>
                       {!alreadySkill && (
                         <button
                           onClick={() => { onAddSkill(term); setDismissed(prev => new Set([...prev, term])); }}
@@ -534,12 +534,12 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
               <div className="flex flex-wrap gap-1">
                 {result.matched.slice(0, 15).map(term => (
                   <span key={term}
-                    className="text-[10px] bg-pine-tint border border-pine-tint text-pine rounded-pill px-2 py-0.5 font-medium">
+                    className="text-[11px] bg-pine-tint border border-pine-tint text-pine rounded-pill px-2 py-0.5 font-medium">
                     {term}
                   </span>
                 ))}
                 {result.matched.length > 15 && (
-                  <span className="text-[10px] text-text-muted">+{result.matched.length - 15} {sw ? "zaidi" : "more"}</span>
+                  <span className="text-[11px] text-text-muted">+{result.matched.length - 15} {sw ? "zaidi" : "more"}</span>
                 )}
               </div>
             </div>
@@ -548,7 +548,7 @@ export function JobTargetPanel({ data, onAddSkill, defaultJd, onApplySummary, on
           {result.missing.length === 0 && (
             <div className="bg-pine-tint border border-pine/20 rounded-card px-4 py-3 text-center">
               <p className="text-xs font-semibold text-pine">{sw ? "Ulinganifu bora!" : "Excellent match!"}</p>
-              <p className="text-[10px] text-pine/70 mt-0.5">{sw ? "CV yako ina maneno yote muhimu ya kazi hii." : "Your CV covers all key terms from this job description."}</p>
+              <p className="text-[11px] text-pine/70 mt-0.5">{sw ? "CV yako ina maneno yote muhimu ya kazi hii." : "Your CV covers all key terms from this job description."}</p>
             </div>
           )}
         </>

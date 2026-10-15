@@ -291,7 +291,7 @@ export function CareerInterviewClient({ lang }: Props) {
 
       {/* Question card */}
       <div className="bg-card rounded-card border border-border p-5 sm:p-6">
-        <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted mb-1">
+        <p className="text-[11px] font-bold uppercase tracking-wide text-text-muted mb-1">
           {q.optional ? (sw ? "Hiari" : "Optional") : (sw ? "Muhimu" : "Required")}
         </p>
         <div className="flex items-start justify-between gap-3">

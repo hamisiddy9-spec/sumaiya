@@ -307,7 +307,7 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
           <button
             key={s.key}
             onClick={() => setFilter(s.key)}
-            className={`text-[10px] font-semibold px-2.5 py-1 rounded-pill transition ${
+            className={`text-[11px] font-semibold px-2.5 py-1 rounded-pill transition ${
               filter === s.key
                 ? "bg-ember text-cream"
                 : "bg-sand text-text-muted hover:bg-sand-2"
@@ -363,10 +363,10 @@ export function ApplicationsGrid({ lang = "en" }: Props) {
                 </div>
 
                 {app.jobTitle && (
-                  <p className="text-[10px] text-text-muted mb-2">{app.jobTitle}</p>
+                  <p className="text-[11px] text-text-muted mb-2">{app.jobTitle}</p>
                 )}
 
-                <div className="flex items-center gap-3 text-[10px] text-text-muted">
+                <div className="flex items-center gap-3 text-[11px] text-text-muted">
                   {app.matchScore !== null && (
                     <span className="font-semibold">
                       {lang === "sw" ? "Ulinganifu" : "Match"}: <span className={app.matchScore >= 70 ? "text-pine" : app.matchScore >= 50 ? "text-gold-text" : "text-red-600"}>{app.matchScore}%</span>

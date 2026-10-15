@@ -75,7 +75,7 @@ function Metric({
 }) {
   return (
     <div className="bg-card border border-border rounded-card px-4 py-3">
-      <p className="font-mono text-[10px] uppercase tracking-[1.5px] text-text-muted">
+      <p className="font-mono text-[11px] uppercase tracking-[1.5px] text-text-muted">
         {label} · {sw}
       </p>
       <p className={`font-display font-extrabold text-3xl mt-1 tracking-tight ${accent ?? "text-espresso"}`}>
@@ -107,7 +107,7 @@ function SourceCard({ source }: { source: CampaignSourceFunnel }) {
       </div>
 
       <div className="mt-4 divide-y divide-border">
-        <div className="grid grid-cols-[1fr_auto_auto] gap-3 pb-2 text-[10px] font-mono uppercase tracking-[1.5px] text-text-muted">
+        <div className="grid grid-cols-[1fr_auto_auto] gap-3 pb-2 text-[11px] font-mono uppercase tracking-[1.5px] text-text-muted">
           <span>Hatua · Step</span>
           <span className="text-right">Wageni · Visitors</span>
           <span className="text-right w-24">Kupungua · Drop-off</span>
@@ -129,12 +129,12 @@ function SourceCard({ source }: { source: CampaignSourceFunnel }) {
               <p className="text-right w-24 text-sm text-text-body tabular-nums">
                 {rate(step.dropOffRate)}
                 {step.incomplete && (
-                  <span className="block text-[10px] text-warning">
+                  <span className="block text-[11px] text-warning">
                     hatua ya awali haijakamilika
                   </span>
                 )}
                 {!step.incomplete && step.comparedTo && step.comparedTo !== prevStep && (
-                  <span className="block text-[10px] text-text-muted">
+                  <span className="block text-[11px] text-text-muted">
                     vs {STEP_LABELS[step.comparedTo].sw}
                   </span>
                 )}

@@ -38,10 +38,10 @@ export function WhatChanged({ before, after, sw, isLocal, needsConfirm }: Props)
     return (
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-ember-glow">
             {sw ? "Pendekezo" : "Suggested"}
           </p>
-          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
+          <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
             {label}
           </span>
         </div>
@@ -71,17 +71,17 @@ export function WhatChanged({ before, after, sw, isLocal, needsConfirm }: Props)
   return (
     <div>
       <div className="flex items-center gap-2 mb-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-ember-glow">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-ember-glow">
           {sw ? "Kimebadilika nini" : "What changed"}
         </p>
-        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
+        <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded-full border ${toneCls}`}>
           {label}
         </span>
         {before.trim() && after.trim() && (
           <button
             type="button"
             onClick={() => setShowRemoved((v) => !v)}
-            className="ml-auto text-[10px] text-text-muted hover:text-espresso underline decoration-dotted"
+            className="ml-auto text-[11px] text-text-muted hover:text-espresso underline decoration-dotted"
           >
             {showRemoved
               ? sw ? "Ficha yaliyoondolewa" : "Hide removed"

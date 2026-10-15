@@ -552,7 +552,7 @@ export default function LandingPage() {
             </div>
 
             {/* Eyebrow pill */}
-            <div className="hero-reveal-1 inline-flex items-center gap-1.5 bg-ember-tint text-ember-hover font-mono text-[10px] font-semibold uppercase tracking-[2px] px-3 py-1 rounded-pill mb-6">
+            <div className="hero-reveal-1 inline-flex items-center gap-1.5 bg-ember-tint text-ember-hover font-mono text-[11px] font-semibold uppercase tracking-[2px] px-3 py-1 rounded-pill mb-6">
               <Icon name="bolt" size={12} className="text-ember" />
               {lang === "sw" ? "KWA WATAFUTA KAZI — TANZANIA" : "FOR JOB SEEKERS — TANZANIA"}
             </div>

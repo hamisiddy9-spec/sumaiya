@@ -58,7 +58,7 @@ export function AtsExplain({ data, sw = false, onApplyFix }: AtsExplainProps) {
       {/* Line-level findings */}
       {findings.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-gold">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold">
             {L("Line-level fixes", "Marekebisho ya mistari")}
           </p>
           {findings.slice(0, 8).map((f, i) => (
@@ -69,7 +69,7 @@ export function AtsExplain({ data, sw = false, onApplyFix }: AtsExplainProps) {
                 </span>
                 <p className="text-[11px] font-semibold text-cream">{f.issue}</p>
               </div>
-              <p className="text-[10px] text-cream/50 italic line-clamp-1">{f.line}</p>
+              <p className="text-[11px] text-cream/50 italic line-clamp-1">{f.line}</p>
               <p className="text-[9.5px] text-cream/60 leading-tight">{f.why}</p>
               <p className="text-[9.5px] text-gold leading-tight">
                 {L("Fix", "Suluhisho")}: {f.fix}
@@ -85,7 +85,7 @@ export function AtsExplain({ data, sw = false, onApplyFix }: AtsExplainProps) {
       {/* AutoFix — user-approved, evidence-backed only */}
       {fixes.length > 0 && onApplyFix && (
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-gold">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-gold">
             {L("One-tap fixes (safe)", "Marekebisho ya haraka (salama)")}
           </p>
           {fixes.map((id) => {

@@ -156,7 +156,7 @@ export function MobileTabBar() {
                   <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ember text-cream shadow-[0_2px_0_#B93C13] active:shadow-[0_1px_0_#B93C13] active:translate-y-[1px] transition">
                     <TabIcon className="h-5 w-5" strokeWidth={2.4} />
                   </span>
-                  <span className="text-[10px] font-medium text-cream/70">
+                  <span className="text-[11px] font-medium text-cream/70">
                     {tab.label}
                   </span>
                 </button>
@@ -178,7 +178,7 @@ export function MobileTabBar() {
                   strokeWidth={active ? 2.2 : 1.75}
                 />
                 <span
-                  className={`text-[10px] ${active ? "font-semibold" : "font-medium"}`}
+                  className={`text-[11px] ${active ? "font-semibold" : "font-medium"}`}
                 >
                   {tab.label}
                 </span>

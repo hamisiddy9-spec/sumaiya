@@ -71,7 +71,7 @@ export function CrossSellBanner({ cvId, cvTitle, cvData, accessToken, atsScore, 
           <p className="text-[11px] font-bold text-espresso">
             {sw ? "Tengeneza Barua ya Maombi Inayolingana" : "Generate Matching Cover Letter"}
           </p>
-          <p className="text-[10px] text-text-body mt-0.5 leading-snug">
+          <p className="text-[11px] text-text-body mt-0.5 leading-snug">
             {sw
               ? "CV yako iko tayari. Iunganishe na barua ya maombi yenye jina, cheo na mtindo ule ule kwa seti kamili ya maombi."
               : "Your CV is ready. Pair it with a tailored cover letter using the same name, job title, and style for a complete application kit."}

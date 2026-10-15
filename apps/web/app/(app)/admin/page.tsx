@@ -36,7 +36,7 @@ async function getMetrics() {
 function Stat({ label, value, accent }: { label: string; value: number; accent?: string }) {
   return (
     <div className="bg-card border border-border rounded-card p-5">
-      <p className="font-mono text-[10px] uppercase tracking-[1.5px] text-text-muted">{label}</p>
+      <p className="font-mono text-[11px] uppercase tracking-[1.5px] text-text-muted">{label}</p>
       <p className={`font-display font-extrabold text-4xl mt-1 tracking-tight ${accent ?? "text-espresso"}`}>{value.toLocaleString()}</p>
     </div>
   );

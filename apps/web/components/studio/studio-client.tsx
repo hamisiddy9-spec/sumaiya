@@ -117,7 +117,7 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
           {RAIL.map((label, i) => (
             <div key={label} className={`w-[68px] flex flex-col items-center gap-1 py-2.5 rounded-[10px] ${i === 0 ? "bg-espresso-2 text-gold" : "text-cream/50"}`}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-5 w-5"><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
-              <span className="text-[10px]">{label}</span>
+              <span className="text-[11px]">{label}</span>
             </div>
           ))}
         </div>
@@ -160,7 +160,7 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
           {/* Floating themes panel */}
           <div className="absolute top-6 right-6 w-[176px] bg-card border border-border rounded-card shadow-[0_12px_30px_-12px_rgba(33,26,21,0.25)] p-3.5 space-y-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[1.5px] text-text-muted mb-2">Color theme</p>
+              <p className="font-mono text-[11px] uppercase tracking-[1.5px] text-text-muted mb-2">Color theme</p>
               <div className="grid grid-cols-5 gap-1.5">
                 {COLOR_THEMES.map((c) => (
                   <button key={c} onClick={() => setPrimaryColor(c)} aria-label={c}
@@ -170,7 +170,7 @@ export function StudioClient({ initialDoc, accessToken }: { initialDoc: CV; acce
               </div>
             </div>
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[1.5px] text-text-muted mb-2">Font pair</p>
+              <p className="font-mono text-[11px] uppercase tracking-[1.5px] text-text-muted mb-2">Font pair</p>
               <div className="space-y-1.5">
                 {FONT_PAIRS.map((f) => (
                   <button key={f.value} onClick={() => setFontFamily(f.value)}

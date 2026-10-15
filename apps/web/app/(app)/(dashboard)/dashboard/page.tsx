@@ -410,7 +410,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <div className="mb-8 space-y-3">
             <div className="flex items-center gap-2">
               <Icon name="spark" size={16} className="text-ember" />
-              <span className="text-[10px] font-bold text-ember-hover uppercase tracking-[2px]">
+              <span className="text-[11px] font-bold text-ember-hover uppercase tracking-[2px]">
                 {sw ? "Hatua Zinazofuata" : "Next Steps"}
               </span>
             </div>
@@ -420,7 +420,7 @@ export default async function DashboardPage({ searchParams }: Props) {
                   <div className="min-w-0">
                     <p className="font-semibold text-espresso text-sm">{sw ? sig.title.sw : sig.title.en}</p>
                     <p className="text-text-body text-[13px] mt-0.5">{sw ? sig.detail.sw : sig.detail.en}</p>
-                    <p className="text-[10px] text-text-muted mt-1 font-mono truncate">{sig.trigger}</p>
+                    <p className="text-[11px] text-text-muted mt-1 font-mono truncate">{sig.trigger}</p>
                   </div>
                   <span className="shrink-0 flex items-center gap-1 text-sm font-semibold text-ember-hover group-hover:translate-x-0.5 transition-transform">
                     {sw ? "Endelea" : "Go"}
@@ -513,7 +513,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <div className="mb-8 bg-card border border-border rounded-card-lg shadow-card p-6">
             <div className="flex items-center gap-2 mb-4">
               <Icon name="spark" size={16} className="text-ember" />
-              <span className="text-[10px] font-bold text-ember-hover uppercase tracking-[2px]">
+              <span className="text-[11px] font-bold text-ember-hover uppercase tracking-[2px]">
                 {lang === "sw" ? "Kuanza" : "Start Here"}
               </span>
             </div>
@@ -562,7 +562,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
             <div className="relative flex items-center gap-3 mb-3">
               <div className="h-px flex-1 bg-border" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
                 {lang === "sw" ? "au anza mpya" : "or start fresh"}
               </span>
               <div className="h-px flex-1 bg-border" />
@@ -633,7 +633,7 @@ export default async function DashboardPage({ searchParams }: Props) {
               {access.cta.label} →
             </Link>
           )}
-          <span className="ml-auto text-[10px] text-text-muted whitespace-nowrap">
+          <span className="ml-auto text-[11px] text-text-muted whitespace-nowrap">
             {docCount} {lang === "sw" ? "hati" : "docs"} · {totalDownloads} {lang === "sw" ? "pakuliwa" : "downloads"}
           </span>
         </div>

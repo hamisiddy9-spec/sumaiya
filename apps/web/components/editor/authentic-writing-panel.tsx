@@ -29,7 +29,7 @@ export function AuthenticWritingPanel({ data, sw = false }: AuthenticWritingPane
   if (!report.hasIssues) {
     return (
       <div className="mt-3 border-t border-cream/10 pt-3">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-pine-light/80">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-pine-light/80">
           {L("Authentic writing", "Uandishi halisi")}
           <span className="ml-2 text-success/40">✓ {L("clean", "safi")}</span>
         </p>
@@ -46,7 +46,7 @@ export function AuthenticWritingPanel({ data, sw = false }: AuthenticWritingPane
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center justify-between text-left"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-pine-light/80">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-pine-light/80">
           {L("Authentic writing", "Uandishi halisi")}
           <span className={`ml-2 font-display text-[13px] font-extrabold ${tone}`}>{report.score}</span>
         </p>

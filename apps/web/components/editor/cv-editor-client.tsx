@@ -413,14 +413,14 @@ function ExportOverlay({ state, stepIdx, onClose, onRetry, name, sw, detail, onG
               {/* Shimmer sweep */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_1.5s_ease-in-out_infinite]" />
             </div>
-            <p className="text-[10px] text-text-muted mb-5 font-medium">{sw ? `${pct}% imekamilika` : `${pct}% complete`}</p>
+            <p className="text-[11px] text-text-muted mb-5 font-medium">{sw ? `${pct}% imekamilika` : `${pct}% complete`}</p>
 
             {/* Step dots — each colored when reached */}
             <div className="flex items-center justify-center gap-2">
               {EXPORT_STEPS.map((step, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
                   <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] transition-all duration-400"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] transition-all duration-400"
                     style={i <= stepIdx
                       ? { backgroundColor: step.color, color: "#fff", transform: "scale(1.1)" }
                       : { backgroundColor: "#F3F4F6", color: "#9CA3AF" }
@@ -533,7 +533,7 @@ function CvCompletionBar({ cv, onSectionClick }: { cv: CVData; onSectionClick?: 
   return (
     <div className="px-4 py-3 bg-card border-b border-border flex-shrink-0">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wide">CV Completion</span>
+        <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wide">CV Completion</span>
         <span className="text-xs font-bold" style={{ color: barColor }}>{pct}% — {label}</span>
       </div>
 
@@ -702,7 +702,7 @@ function CvStrengthMeter({ cv, lang }: { cv: CVData; lang?: "en" | "sw" }) {
         {/* Right side */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{sw ? "Nguvu ya CV" : "CV Strength"}</span>
+            <span className="text-[11px] font-bold text-text-muted uppercase tracking-widest">{sw ? "Nguvu ya CV" : "CV Strength"}</span>
             {missing.length === 0 && (
               <span className="text-[9px] font-bold text-pine bg-pine-tint px-1.5 py-0.5 rounded-pill">{sw ? "Kamili!" : "Perfect!"}</span>
             )}
@@ -720,12 +720,12 @@ function CvStrengthMeter({ cv, lang }: { cv: CVData; lang?: "en" | "sw" }) {
           </div>
           {/* Next action */}
           {missing.length > 0 ? (
-            <p className="text-[10px] text-gold-text font-semibold truncate flex items-center gap-1">
+            <p className="text-[11px] text-gold-text font-semibold truncate flex items-center gap-1">
               <Icon name="spark" size={10} className="text-gold" />
               {missing[0]}
             </p>
           ) : (
-            <p className="text-[10px] text-pine font-semibold flex items-center gap-1">
+            <p className="text-[11px] text-pine font-semibold flex items-center gap-1">
               <Icon name="check" size={10} className="text-pine" />
               {sw ? "CV yako imekamilika na iko tayari kwa waajiri" : "Your CV is complete and recruiter-ready"}
             </p>
@@ -940,7 +940,7 @@ function TemplateModal({
                   </div>
                   <div className={`px-3 py-2.5 border-t ${isActive ? "bg-ember-tint/40 border-ember/20" : "border-border bg-card"}`}>
                     <p className={`text-xs font-semibold truncate ${isActive ? "text-ember-hover" : "text-text-body"}`}>{tpl.name}</p>
-                    <p className="text-[10px] text-text-muted mt-0.5 truncate">{tpl.description}</p>
+                    <p className="text-[11px] text-text-muted mt-0.5 truncate">{tpl.description}</p>
                     {(() => {
                       const tip = getPairingTip(tpl.id, tpl.name);
                       return tip ? <p className="text-[8px] text-ember-hover mt-0.5 truncate">{tip}</p> : null;
@@ -2114,7 +2114,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             <img src={cvData.personal.photo} alt={uiLang === "sw" ? "Wasifu" : "Profile"} className="w-14 h-14 rounded-full object-cover border-2 border-ember/30 flex-shrink-0" />
           ) : (
             <div className="w-14 h-14 rounded-full bg-sand border-2 border-dashed border-border-input flex items-center justify-center flex-shrink-0">
-              <span className="text-text-muted text-[10px] text-center leading-tight px-1">{uiLang === "sw" ? "Hakuna picha" : "No photo"}</span>
+              <span className="text-text-muted text-[11px] text-center leading-tight px-1">{uiLang === "sw" ? "Hakuna picha" : "No photo"}</span>
             </div>
           )}
           <div className="flex flex-col gap-1.5">
@@ -2154,7 +2154,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <button onClick={() => { updatePersonal({ photo: undefined }); triggerAutoSave(); }}
                 className="text-xs text-red-500 hover:text-red-600 transition text-left">{uiLang === "sw" ? "Ondoa" : "Remove"}</button>
             )}
-            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? `Hadi ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Huhifadhiwa kwa ukubwa mdogo` : `Up to ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Stored compact`}</span>
+            <span className="text-[11px] text-text-muted">{uiLang === "sw" ? `Hadi ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Huhifadhiwa kwa ukubwa mdogo` : `Up to ${MAX_PHOTO_SOURCE_MB}MB · JPG / PNG / WebP · Stored compact`}</span>
           </div>
         </div>
         {/* Honesty, not silence: some templates have no portrait slot (see
@@ -2182,7 +2182,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             candidate's choice, it is never required, and neither choice is
             penalised. The note exists because a photo request on a CV builder
             otherwise reads as a demand. */}
-        <p className="text-[10px] text-text-muted mt-2 leading-relaxed">
+        <p className="text-[11px] text-text-muted mt-2 leading-relaxed">
           {uiLang === "sw"
             ? "Si lazima kuweka picha. Ukiweka, inabaki kwenye wasifu wako tu na unaweza kuiondoa wakati wowote. Nchi za Ghuba (UAE, Saudia, Qatar) mara nyingi zinatarajia picha, lakini haitahitajika kwako."
             : "Adding a photo is optional. If you add one it stays in your CV, and you can remove it at any time. Gulf countries (UAE, Saudi Arabia, Qatar) often expect one, but it is never required of you."}
@@ -2225,7 +2225,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               placeholder={placeholder}
             />
             {invalid && raw.length > 0 && (
-              <p className="text-[10px] text-red-500 mt-0.5">
+              <p className="text-[11px] text-red-500 mt-0.5">
                 {key === "email" ? (uiLang === "sw" ? "Weka anwani sahihi ya barua pepe" : "Enter a valid email address") : (uiLang === "sw" ? "Weka URL sahihi (https://…)" : "Enter a valid URL (https://…)")}
               </p>
             )}
@@ -2237,7 +2237,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           {uiLang === "sw" ? "Muhtasari Wako" : "Professional Summary"}
           {pendingKeySet.has("summary") && (
             <button onClick={() => setShowConfirmPanel(true)}
-              className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
+              className="ml-2 inline-flex items-center gap-1 text-[11px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
               aria-label={uiLang === "sw" ? "Thibitisha muhtasari" : "Confirm summary"}>
               <AlertTriangle className="w-3 h-3" />
               {uiLang === "sw" ? "Haijathibitishwa" : "Unconfirmed"}
@@ -2254,7 +2254,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             {isEnhancing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Icon name="spark" className="w-3 h-3" />}
             {uiLang === "sw" ? "Boresha" : "Improve"}
           </button>
-          <span className={`text-[10px] ${cvData.summary.length > 300 ? "text-red-500" : cvData.summary.length > 150 ? "text-ember-hover" : "text-text-muted"}`}>
+          <span className={`text-[11px] ${cvData.summary.length > 300 ? "text-red-500" : cvData.summary.length > 150 ? "text-ember-hover" : "text-text-muted"}`}>
             {cvData.summary.length}/300
           </span>
         </div>
@@ -2321,7 +2321,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       {uiLang === "sw" ? "Maelezo" : "Description"}
                       {pendingKeySet.has(`${exp.id}.description`) && (
                         <button onClick={() => setShowConfirmPanel(true)}
-                          className="ml-2 inline-flex items-center gap-1 text-[10px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
+                          className="ml-2 inline-flex items-center gap-1 text-[11px] font-semibold text-warning/90 bg-warning/15 border border-warning/40 rounded-full px-2 py-0.5 hover:bg-warning/25 transition align-middle"
                           aria-label={uiLang === "sw" ? "Thibitisha maelezo" : "Confirm description"}>
                           <AlertTriangle className="w-3 h-3" />
                           {uiLang === "sw" ? "Haijathibitishwa" : "Unconfirmed"}
@@ -2341,7 +2341,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                           onApply: (v) => { updateExperience(exp.id, { description: v }); triggerAutoSave(); },
                         })}
                         disabled={isEnhancing}
-                        className="mt-1 flex items-center gap-1 text-[10px] font-medium text-ember-glow hover:text-ember-glow/80 disabled:opacity-40 transition">
+                        className="mt-1 flex items-center gap-1 text-[11px] font-medium text-ember-glow hover:text-ember-glow/80 disabled:opacity-40 transition">
                         {isEnhancing ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Icon name="spark" size={10} />}
                         {uiLang === "sw" ? "Boresha" : "Improve"}
                       </button>
@@ -2469,7 +2469,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         </button>
         {cvData.skills.length < 8 && (
           <div>
-            <p className="text-[10px] text-text-muted mb-2">{uiLang === "sw" ? "Ujuzi wa kawaida — gusa kuongeza:" : "Common skills — tap to add:"}</p>
+            <p className="text-[11px] text-text-muted mb-2">{uiLang === "sw" ? "Ujuzi wa kawaida — gusa kuongeza:" : "Common skills — tap to add:"}</p>
             <div className="flex flex-wrap gap-1.5">
               {["Microsoft Office", "Project Management", "Data Analysis", "Communication", "Python", "JavaScript", "SQL", "Figma", "Leadership", "Excel", "Marketing", "Customer Service"]
                 .filter(s => !cvData.skills.some(sk => sk.name.toLowerCase() === s.toLowerCase()))
@@ -2480,7 +2480,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     const newSkill = useEditorStore.getState().cv.skills.at(-1);
                     if (newSkill) { updateSkill(newSkill.id, { name: s, level: 3 }); triggerAutoSave(); }
                   }}
-                    className="text-[10px] bg-sand-2 hover:bg-brand-100 hover:text-brand-700 text-text-body px-2.5 py-1 rounded-full transition font-medium">
+                    className="text-[11px] bg-sand-2 hover:bg-brand-100 hover:text-brand-700 text-text-body px-2.5 py-1 rounded-full transition font-medium">
                     + {s}
                   </button>
                 ))}
@@ -2601,7 +2601,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                         className={inputCls(`${BASE_INPUT_SM}`, !isValidUrl(proj.url ?? "") && (proj.url ?? "").length > 0)}
                       />
                       {!isValidUrl(proj.url ?? "") && (proj.url ?? "").length > 0 && (
-                        <p className="text-[10px] text-red-500 mt-0.5">{uiLang === "sw" ? "Weka URL sahihi (https://…)" : "Enter a valid URL (https://…)"}</p>
+                        <p className="text-[11px] text-red-500 mt-0.5">{uiLang === "sw" ? "Weka URL sahihi (https://…)" : "Enter a valid URL (https://…)"}</p>
                       )}
                     </div>
                   </div>
@@ -2667,7 +2667,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                         className={inputCls(`${BASE_INPUT_SM}`, !isValidUrl(cert.url ?? "") && (cert.url ?? "").length > 0)}
                       />
                       {!isValidUrl(cert.url ?? "") && (cert.url ?? "").length > 0 && (
-                        <p className="text-[10px] text-red-500 mt-0.5">{uiLang === "sw" ? "Weka URL sahihi (https://…)" : "Enter a valid URL (https://…)"}</p>
+                        <p className="text-[11px] text-red-500 mt-0.5">{uiLang === "sw" ? "Weka URL sahihi (https://…)" : "Enter a valid URL (https://…)"}</p>
                       )}
                     </div>
                   </div>
@@ -2759,7 +2759,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
         <AutoTextarea value={cvData.hobbies} onChange={(e) => { setHobbies(e.target.value); triggerAutoSave(); }}
           rows={4} className="w-full px-3 py-2 text-sm border border-border-input rounded-input focus:outline-none focus:shadow-focus-ember focus:border-ember bg-sand-2 min-h-[80px]"
           placeholder={uiLang === "sw" ? "mf. Upigaji picha, Open-source, Chess, Kupanda milima..." : "e.g. Photography, Open-source, Chess, Hiking..."} />
-        <p className="text-[10px] text-text-muted">{uiLang === "sw" ? "Tenganisha kwa mkato au mistari mipya" : "Separate with commas or new lines"}</p>
+        <p className="text-[11px] text-text-muted">{uiLang === "sw" ? "Tenganisha kwa mkato au mistari mipya" : "Separate with commas or new lines"}</p>
       </div>
     </div>
   );
@@ -2811,7 +2811,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     <li key={v.id} className="flex items-center gap-2 rounded-input border border-border bg-sand-2 px-3 py-2">
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-semibold text-espresso truncate">{v.title || (uiLang === "sw" ? "CV" : "CV")}</p>
-                        <p className="text-[10px] text-text-muted">{formatTimeAgo(v.createdAt, uiLang)}</p>
+                        <p className="text-[11px] text-text-muted">{formatTimeAgo(v.createdAt, uiLang)}</p>
                       </div>
                       <button
                         onClick={() => restoreVersion(v.id)}
@@ -2855,7 +2855,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             </div>
             <div className="p-5 space-y-3 flex-1 min-h-0 overflow-y-auto">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1">{uiLang === "sw" ? "Ya sasa" : "Current"}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1">{uiLang === "sw" ? "Ya sasa" : "Current"}</p>
                 <div className="text-xs leading-relaxed text-text-body bg-sand-2 border border-border rounded-input px-3 py-2 whitespace-pre-wrap">{enhancePreview.original}</div>
               </div>
               <WhatChanged
@@ -2866,7 +2866,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               />
               {enhancePreview.source !== "local" && enhancePreview.refine && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{uiLang === "sw" ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-text-muted mb-1.5">{uiLang === "sw" ? "Rekebisha kwa mguso mmoja" : "Adjust with one tap"}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {REFINE_OPTIONS.map((opt) => (
                       <button
@@ -2947,21 +2947,21 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
           {/* Save status — visible on mobile too (label collapses on small
               screens), with a persistent resting state and a visible failure. */}
           {isSaving ? (
-            <span className="flex items-center gap-1.5 text-[10px] font-medium text-cream/50 flex-shrink-0" title={uiLang === "sw" ? "Ninahifadhi…" : "Saving…"}>
+            <span className="flex items-center gap-1.5 text-[11px] font-medium text-cream/50 flex-shrink-0" title={uiLang === "sw" ? "Ninahifadhi…" : "Saving…"}>
               <Loader2 className="w-2.5 h-2.5 animate-spin" />
               <span className="hidden sm:inline">{uiLang === "sw" ? "Ninahifadhi…" : "Saving…"}</span>
             </span>
           ) : saveError ? (
             <button
               onClick={() => { guestMode ? triggerAutoSave() : saveCv(initialDoc.id); }}
-              className="flex items-center gap-1.5 text-[10px] font-semibold text-gold flex-shrink-0 hover:text-gold/80 transition"
+              className="flex items-center gap-1.5 text-[11px] font-semibold text-gold flex-shrink-0 hover:text-gold/80 transition"
               title={uiLang === "sw" ? "Sikuweza kuhifadhi — gusa kujaribu tena" : "Save failed — tap to retry"}
             >
               <AlertTriangle className="w-3 h-3 text-gold" />
               <span className="hidden sm:inline">{uiLang === "sw" ? "Hijahifadhiwa bado — gusa kujaribu tena" : "Not saved yet — tap to retry"}</span>
             </button>
           ) : everSaved ? (
-            <span className={`flex items-center gap-1.5 text-[10px] font-semibold flex-shrink-0 transition-colors ${savedFlash ? "text-success/60" : "text-cream/60"}`}
+            <span className={`flex items-center gap-1.5 text-[11px] font-semibold flex-shrink-0 transition-colors ${savedFlash ? "text-success/60" : "text-cream/60"}`}
               title={guestMode ? (uiLang === "sw" ? "Imehifadhiwa kwenye kifaa hiki" : "Saved on this device") : (uiLang === "sw" ? "Mabadiliko yote yamehifadhiwa" : "All changes saved")}>
               <span className="w-1.5 h-1.5 rounded-full bg-success/60" />
               <span className="hidden sm:inline">
@@ -2970,7 +2970,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
             </span>
           ) : null}
           {isOnRoll && (
-            <span className="hidden md:flex items-center gap-1 text-[10px] font-bold text-gold flex-shrink-0 animate-pulse-scale">
+            <span className="hidden md:flex items-center gap-1 text-[11px] font-bold text-gold flex-shrink-0 animate-pulse-scale">
               <Icon name="flame" size={12} className="text-gold" /> {uiLang === "sw" ? "Unaenda vyema!" : "On a roll!"}
             </span>
           )}
@@ -3042,30 +3042,30 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setDownloadMenu(false)} />
                 <div className="absolute right-0 top-full mt-1.5 z-50 bg-card border border-border rounded-xl shadow-card-hover py-1.5 min-w-[248px] text-left overflow-hidden">
-                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">{uiLang === "sw" ? "Pakua" : "Download"}</p>
+                  <p className="px-3 pt-1 pb-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">{uiLang === "sw" ? "Pakua" : "Download"}</p>
                   <button onClick={() => { setDownloadMenu(false); handleDownload("topbar"); }} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left">
                     <Icon name="download" size={15} className="text-ember mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">PDF</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span>
                     </span>
                   </button>
                   <button onClick={handleDownloadDocx} disabled={isDocx} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60">
                     <FileText size={15} className="text-pine mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">Word (.docx)</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span>
                     </span>
                   </button>
                   <button onClick={handleDownloadText} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left">
                     <FileType2 size={15} className="text-text-body mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span>
                     </span>
                   </button>
                   <div className="h-px bg-border my-1.5" />
-                  <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">{uiLang === "sw" ? "Shiriki" : "Share"}</p>
+                  <p className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">{uiLang === "sw" ? "Shiriki" : "Share"}</p>
                   <button
                     onClick={() => { setDownloadMenu(false); if (guestMode) setSignUpPrompt("account"); else setShowShareModal(true); }}
                     className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left"
@@ -3076,14 +3076,14 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                         {uiLang === "sw" ? "Shiriki mtandaoni" : "Share online"}
                         <span className="text-[8px] font-bold uppercase tracking-wide bg-ember-tint text-ember-hover rounded px-1 py-[1px]">{uiLang === "sw" ? "Mpya" : "New"}</span>
                       </span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Pata kiungo cha kushiriki WhatsApp" : "Get a link to share on WhatsApp"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Pata kiungo cha kushiriki WhatsApp" : "Get a link to share on WhatsApp"}</span>
                     </span>
                   </button>
                   <button onClick={handleShare} disabled={isSharing} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60">
                     <Share2 size={15} className="text-ember mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">{isSharing ? (uiLang === "sw" ? "Ninaandaa…" : "Preparing…") : (uiLang === "sw" ? "Shiriki faili…" : "Share file…")}</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Barua pepe, Drive, WhatsApp…" : "Email, Google Drive, WhatsApp…"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Barua pepe, Drive, WhatsApp…" : "Email, Google Drive, WhatsApp…"}</span>
                     </span>
                   </button>
                   <div className="h-px bg-border my-1.5" />
@@ -3091,7 +3091,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     <History size={15} className="text-text-body mt-0.5 shrink-0" />
                     <span>
                       <span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Historia ya matoleo" : "Version history"}</span>
-                      <span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Rejesha toleo la awali la CV yako" : "Restore an earlier version of your CV"}</span>
+                      <span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Rejesha toleo la awali la CV yako" : "Restore an earlier version of your CV"}</span>
                     </span>
                   </button>
                 </div>
@@ -3265,26 +3265,26 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                   <div className="absolute right-0 bottom-full mb-2 z-50 bg-card border border-border rounded-xl shadow-card-hover py-1.5 min-w-[248px] text-left overflow-hidden" role="menu">
                     <button onClick={() => { setCenterMenu(false); handleDownload("preview"); }} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left" role="menuitem">
                       <Icon name="download" size={15} className="text-ember mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">PDF</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">PDF</span><span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Muundo kamili + maandishi kwa mifumo ya kuajiri" : "Pixel-perfect design + invisible ATS text"}</span></span>
                     </button>
                     <button onClick={() => { setCenterMenu(false); handleDownloadDocx(); }} disabled={isDocx} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60" role="menuitem">
                       <FileText size={15} className="text-pine mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">Word (.docx)</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">Word (.docx)</span><span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Toleo la maandishi · si muundo wa template" : "ATS text version · not the template design"}</span></span>
                     </button>
                     <button onClick={() => { setCenterMenu(false); handleDownloadText(); }} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left" role="menuitem">
                       <FileType2 size={15} className="text-text-body mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Maandishi (.txt)" : "Plain text (.txt)"}</span><span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Nyepesi zaidi, rahisi kusomwa na mifumo ya kuajiri" : "Leanest ATS-safe format"}</span></span>
                     </button>
                     <div className="h-px bg-border my-1.5" />
                     <button onClick={() => { setCenterMenu(false); handleShare(); }} disabled={isSharing} className="w-full flex items-start gap-2.5 px-3 py-2 hover:bg-sand transition text-left disabled:opacity-60" role="menuitem">
                       <Share2 size={15} className="text-ember mt-0.5 shrink-0" />
-                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Shiriki…" : "Share…"}</span><span className="block text-[10px] text-text-muted">{uiLang === "sw" ? "Barua pepe, Drive, WhatsApp…" : "Email, Google Drive, WhatsApp…"}</span></span>
+                      <span><span className="block text-xs font-semibold text-espresso">{uiLang === "sw" ? "Shiriki…" : "Share…"}</span><span className="block text-[11px] text-text-muted">{uiLang === "sw" ? "Barua pepe, Drive, WhatsApp…" : "Email, Google Drive, WhatsApp…"}</span></span>
                     </button>
                   </div>
                 </>
               )}
             </div>
-            <span className="text-[10px] text-text-muted">{uiLang === "sw" ? "PDF · Word · Maandishi · Shiriki" : "PDF · Word · Text · Share"}</span>
+            <span className="text-[11px] text-text-muted">{uiLang === "sw" ? "PDF · Word · Maandishi · Shiriki" : "PDF · Word · Text · Share"}</span>
           </div>
         </div>
 
@@ -3321,7 +3321,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 {/* Template */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em]">{uiLang === "sw" ? "Muundo" : "Look"}</h3>
+                    <h3 className="text-[11px] font-medium text-text-muted uppercase tracking-[0.1em]">{uiLang === "sw" ? "Muundo" : "Look"}</h3>
                   </div>
                   <button
                     onClick={() => setShowTemplateModal(true)}
@@ -3336,7 +3336,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
                 {/* Color */}
                 <div>
-                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3 flex items-center gap-1.5">
+                  <h3 className="text-[11px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3 flex items-center gap-1.5">
                     <Icon name="shapes" size={12} className="text-text-muted" /> {uiLang === "sw" ? "Rangi" : "Color"}
                   </h3>
                   <div className="grid grid-cols-4 gap-2 mb-3">
@@ -3360,7 +3360,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
                 {/* Font */}
                 <div>
-                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Herufi" : "Font"}</h3>
+                  <h3 className="text-[11px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Herufi" : "Font"}</h3>
                   <div className="space-y-1.5">
                     {FONTS.map((font) => {
                       const isActive = fontFamily === font.stack || fontFamily === font.name;
@@ -3369,7 +3369,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                           className={`w-full text-left px-3 py-2.5 rounded-lg transition ${isActive ? "bg-ember-tint border border-ember/20" : "hover:bg-cream border border-transparent"}`}>
                           <p className={`text-[11px] font-semibold mb-0.5 ${isActive ? "text-ember-hover" : "text-text-body"}`}
                             style={{ fontFamily: font.stack }}>{font.name}</p>
-                          <p className="text-[10px] text-text-muted" style={{ fontFamily: font.stack }}>{font.blurb}</p>
+                          <p className="text-[11px] text-text-muted" style={{ fontFamily: font.stack }}>{font.blurb}</p>
                         </button>
                       );
                     })}
@@ -3378,7 +3378,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
 
                 {/* Density */}
                 <div>
-                  <h3 className="text-[10px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Ujazo" : "Density"}</h3>
+                  <h3 className="text-[11px] font-medium text-text-muted uppercase tracking-[0.1em] mb-3">{uiLang === "sw" ? "Ujazo" : "Density"}</h3>
                   <div className="grid grid-cols-3 gap-1.5">
                     {([
                       { id: "compact", label: uiLang === "sw" ? "Fupi" : "Compact", desc: uiLang === "sw" ? "Maudhui zaidi" : "More content" },
@@ -3421,7 +3421,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-espresso leading-tight">{uiLang === "sw" ? "Nikusaidie nini?" : "What can I help with?"}</p>
-                      <p className="text-[10px] text-text-muted leading-tight">{uiLang === "sw" ? "Chagua kazi moja — wewe unadhibiti" : "Pick one task — you stay in control"}</p>
+                      <p className="text-[11px] text-text-muted leading-tight">{uiLang === "sw" ? "Chagua kazi moja — wewe unadhibiti" : "Pick one task — you stay in control"}</p>
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -3438,12 +3438,12 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                         <Icon name={t.icon} size={14} className="text-ember flex-shrink-0" />
                         <div className="min-w-0 flex-1">
                           <p className="text-[11px] font-semibold text-espresso leading-tight">{uiLang === "sw" ? t.label.sw : t.label.en}</p>
-                          <p className="text-[10px] text-text-muted leading-tight">{uiLang === "sw" ? t.desc.sw : t.desc.en}</p>
+                          <p className="text-[11px] text-text-muted leading-tight">{uiLang === "sw" ? t.desc.sw : t.desc.en}</p>
                         </div>
                       </button>
                     ))}
                   </div>
-                  <p className="text-[10px] text-text-muted mt-2.5 pt-2.5 border-t border-border">
+                  <p className="text-[11px] text-text-muted mt-2.5 pt-2.5 border-t border-border">
                     {uiLang === "sw" ? "Kidokezo: kila sehemu (Muhtasari, Uzoefu) ina kitufe changu kwenye kichupo cha Yaliyomo." : "Tip: each section (Summary, Experience) has my button in the Content tab."}
                   </p>
                 </div>
@@ -3523,11 +3523,11 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                           <p className="text-xs font-semibold text-ember-glow">{uiLang === "sw" ? "Sumaiya" : "Sumaiya"}</p>
                           <span className="text-[8px] font-bold uppercase tracking-wider bg-ember-glow text-white px-1.5 py-0.5 rounded-pill leading-none">PRO</span>
                         </div>
-                        <p className="text-[10px] text-text-body">{uiLang === "sw" ? "Boresha maandishi yako" : "Rewrite to be more impactful"}</p>
+                        <p className="text-[11px] text-text-body">{uiLang === "sw" ? "Boresha maandishi yako" : "Rewrite to be more impactful"}</p>
                       </div>
                     </div>
                   </div>
-                  <p className="text-[10px] text-text-muted mb-2.5 leading-relaxed">
+                  <p className="text-[11px] text-text-muted mb-2.5 leading-relaxed">
                     {uiLang === "sw"
                       ? "Huchukua muhtasari wako na kuuandika upya uwe wazi, mfupi na wenye nguvu — maneno ya vitendo na matokeo. Utakagua kabla ya kuweka."
                       : "Takes your summary and rewrites it to be clearer, tighter and more impactful — strong verbs and results. You review before it's applied."}
@@ -3559,7 +3559,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                 <div id="ai-tool-jobmatch" className="border-2 border-ember/25 bg-ember-tint/10 rounded-card overflow-hidden scroll-mt-4">
                   <div className="flex items-center gap-1.5 px-3 pt-2.5">
                     <Icon name="bolt" size={12} className="text-ember" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-ember-hover">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-ember-hover">
                       {uiLang === "sw" ? "Inapendekezwa · Lenga kazi" : "Recommended · Tailor to a job"}
                     </span>
                   </div>
@@ -3595,7 +3595,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       <Icon name="bolt" size={16} className="text-text-muted flex-shrink-0" />
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-text-body">{uiLang === "sw" ? "Mipangilio Tayari" : "Mode Presets"}</p>
-                        <p className="text-[10px] text-text-muted">{uiLang === "sw" ? "Salama · Mtendaji · Ubunifu · Mwanafunzi" : "ATS · Executive · Creative · Student"}</p>
+                        <p className="text-[11px] text-text-muted">{uiLang === "sw" ? "Salama · Mtendaji · Ubunifu · Mwanafunzi" : "ATS · Executive · Creative · Student"}</p>
                       </div>
                     </div>
                     <Icon name="chevron-right" className={`text-text-muted transition-transform duration-[300ms] flex-shrink-0 ml-2 ${showPresets ? "rotate-90" : ""}`} size={14} />
@@ -3614,7 +3614,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                             <span className="text-base leading-none">{preset.icon}</span>
                             <div className="min-w-0">
                               <p className={`text-xs font-semibold ${isActive ? "text-ember-hover" : "text-text-body"}`}>{preset.label}</p>
-                              <p className="text-[10px] text-text-muted truncate">{preset.description}</p>
+                              <p className="text-[11px] text-text-muted truncate">{preset.description}</p>
                             </div>
                           </button>
                         );
@@ -3643,7 +3643,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                           <Icon name="list" size={16} className="text-text-muted flex-shrink-0" />
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-text-body">{uiLang === "sw" ? "Mpangilio wa Sehemu" : "Section Order"}</p>
-                            <p className="text-[10px] text-text-muted">{uiLang === "sw" ? "Buruta kupanga upya · jicho kuficha" : "Drag to reorder · eye to hide"}</p>
+                            <p className="text-[11px] text-text-muted">{uiLang === "sw" ? "Buruta kupanga upya · jicho kuficha" : "Drag to reorder · eye to hide"}</p>
                           </div>
                         </div>
                         <Icon name="chevron-right" className={`text-text-muted transition-transform duration-[300ms] flex-shrink-0 ml-2 ${showSectionOrder ? "rotate-90" : ""}`} size={14} />
@@ -3696,7 +3696,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       <Icon name="briefcase" size={14} className="text-ember" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold text-ember-hover">{uiLang === "sw" ? "Hifadhi kama Ombi" : "Save as Application"}</p>
+                      <p className="text-[11px] font-semibold text-ember-hover">{uiLang === "sw" ? "Hifadhi kama Ombi" : "Save as Application"}</p>
                       <p className="text-[9px] text-text-muted">{uiLang === "sw" ? "Fuatilia CV hii dhidi ya kazi" : "Track this CV against a job"}</p>
                     </div>
                   </button>
@@ -3712,7 +3712,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
                       <Icon name="share" size={14} className="text-pine" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold text-pine">{uiLang === "sw" ? "Wasilisha kama templeti" : "Submit as template"}</p>
+                      <p className="text-[11px] font-semibold text-pine">{uiLang === "sw" ? "Wasilisha kama templeti" : "Submit as template"}</p>
                       <p className="text-[9px] text-text-muted">{uiLang === "sw" ? "Shiriki muundo huu na jumuiya" : "Share this design with the community"}</p>
                     </div>
                   </button>
@@ -3810,7 +3810,7 @@ export function CVEditorClient({ initialDoc, userId, accessToken, guestMode, req
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-ember rounded-full" />
             )}
             <Icon className="w-5 h-5" />
-            <span className={`text-[10px] font-medium ${mobileTab === id ? "font-semibold" : ""}`}>{label}</span>
+            <span className={`text-[11px] font-medium ${mobileTab === id ? "font-semibold" : ""}`}>{label}</span>
           </button>
         ))}
       </div>

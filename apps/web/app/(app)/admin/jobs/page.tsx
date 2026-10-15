@@ -144,7 +144,7 @@ export default async function AdminJobs() {
         {["published", "expiring", "draft", "expired", "rejected"].map((s) => (
           <div key={s} className="bg-card border border-border rounded-card px-3 py-2.5">
             <p className="text-xl font-display font-extrabold text-espresso">{count(s)}</p>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">{STATUS_META[s]?.label ?? s}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">{STATUS_META[s]?.label ?? s}</p>
           </div>
         ))}
       </div>
@@ -195,14 +195,14 @@ export default async function AdminJobs() {
                       {[j.company, j.location, j.category, j.employmentType].filter(Boolean).join(" · ") || "—"}
                     </p>
                     {j.description && <p className="text-xs text-text-body mt-1 line-clamp-2">{j.description}</p>}
-                    <p className="text-[10px] text-text-muted/70 mt-1.5">
+                    <p className="text-[11px] text-text-muted/70 mt-1.5">
                       {j.sourceName || j.source || "—"}
                       {j.applicationDeadline ? ` · deadline ${j.applicationDeadline.toISOString().slice(0, 10)}` : ""}
                       {j.lastVerifiedAt ? ` · verified ${j.lastVerifiedAt.toISOString().slice(0, 10)}` : ""}
                       {j.externalId ? ` · ext:${j.externalId}` : ""}
                     </p>
                   </div>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-pill whitespace-nowrap ${meta.cls}`}>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-pill whitespace-nowrap ${meta.cls}`}>
                     {meta.label}
                   </span>
                 </div>

@@ -41,7 +41,7 @@ export default function BlogIndex() {
               className="group flex flex-col bg-card border border-border rounded-card overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all">
               <div className="h-28 bg-espresso relative flex items-end p-4">
                 <div className="absolute inset-0 opacity-[0.12]" style={{ background: "radial-gradient(circle at 70% 30%, #F2A93B 0%, transparent 70%)" }} />
-                <span className="relative font-mono text-[10px] uppercase tracking-[1.5px] text-gold">{p.category}</span>
+                <span className="relative font-mono text-[11px] uppercase tracking-[1.5px] text-gold">{p.category}</span>
               </div>
               <div className="p-5 flex flex-col flex-1">
                 <h2 className="font-display font-bold text-espresso leading-snug group-hover:text-ember transition">{p.title}</h2>

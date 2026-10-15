@@ -247,7 +247,7 @@ export function EditorProfileMenu({
         {busy ? (
           <>
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span className="hidden sm:inline text-[10px]">{uploadDetail || (label(sw, "loading"))}</span>
+            <span className="hidden sm:inline text-[11px]">{uploadDetail || (label(sw, "loading"))}</span>
           </>
         ) : (
           <>
@@ -261,7 +261,7 @@ export function EditorProfileMenu({
         <>
           <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setConfirmFresh(false); }} />
           <div className="absolute right-0 top-full mt-1.5 z-50 bg-white border border-sand/80 rounded-xl shadow-card-hover py-1.5 min-w-[224px] overflow-hidden">
-            <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            <p className="px-3 pt-1 pb-1.5 text-[11px] font-bold uppercase tracking-wider text-text-muted">
               {sw ? "Data ya Wasifu" : "Profile Data"}
             </p>
 
@@ -273,7 +273,7 @@ export function EditorProfileMenu({
               <User size={15} className="text-ember mt-0.5 shrink-0" />
               <span>
                 <span className="block text-xs font-semibold text-espresso">{sw ? "Tumia Wasifu Wako" : "Use My Profile"}</span>
-                <span className="block text-[10px] text-text-muted">{sw ? "Jaza kutoka data ya wasifu iliyohifadhiwa" : "Fill from saved profile data"}</span>
+                <span className="block text-[11px] text-text-muted">{sw ? "Jaza kutoka data ya wasifu iliyohifadhiwa" : "Fill from saved profile data"}</span>
               </span>
             </button>
 
@@ -291,7 +291,7 @@ export function EditorProfileMenu({
                     ? (sw ? "Wasifu umejazwa ✓" : "Profile filled ✓")
                     : (sw ? "Hifadhi kwenye Wasifu" : "Save to my Profile")}
                 </span>
-                <span className="block text-[10px] text-text-muted">
+                <span className="block text-[11px] text-text-muted">
                   {sw ? "Jaza sehemu tupu za wasifu na CV hii" : "Fill blank profile sections from this CV"}
                 </span>
               </span>
@@ -305,7 +305,7 @@ export function EditorProfileMenu({
               <Upload size={15} className="text-pine mt-0.5 shrink-0" />
               <span>
                 <span className="block text-xs font-semibold text-espresso">{sw ? "Pakia Hati" : "Upload Document"}</span>
-                <span className="block text-[10px] text-text-muted">{sw ? "Toa kutoka PDF" : "Extract from PDF"}</span>
+                <span className="block text-[11px] text-text-muted">{sw ? "Toa kutoka PDF" : "Extract from PDF"}</span>
               </span>
             </button>
 
@@ -323,7 +323,7 @@ export function EditorProfileMenu({
                     ? (sw ? "Bonyeza tena kuthibitisha?" : "Click again to confirm?")
                     : (sw ? "Anza Upya" : "Start Fresh")}
                 </span>
-                <span className="block text-[10px] text-text-muted">
+                <span className="block text-[11px] text-text-muted">
                   {confirmFresh
                     ? (sw ? "Hii itafuta maudhui yote ya CV" : "This will clear all current CV content")
                     : (sw ? "Futa yote, anza upya" : "Clear all, blank canvas")}

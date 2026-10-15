@@ -303,22 +303,22 @@ export function TargetedCvDrawer({ lang, job }: Props) {
                     result.analysis.seniority !== "unstated" ||
                     result.analysis.employmentType !== "unstated") && (
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted mb-1.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-text-muted mb-1.5">
                         {s.jobAsksFor}
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {result.analysis.seniority !== "unstated" && (
-                          <span className="text-[10px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
+                          <span className="text-[11px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
                             {s.seniority}: {seniorityLabel(result.analysis.seniority)}
                           </span>
                         )}
                         {result.analysis.employmentType !== "unstated" && (
-                          <span className="text-[10px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
+                          <span className="text-[11px] font-medium bg-sand text-text-body rounded-pill px-2 py-0.5 border border-border">
                             {s.employment}: {result.analysis.employmentType}
                           </span>
                         )}
                         {result.analysis.skills.slice(0, 10).map((sk) => (
-                          <span key={sk} className="text-[10px] font-medium bg-ember-tint/40 border border-ember-tint text-espresso rounded-pill px-2 py-0.5">
+                          <span key={sk} className="text-[11px] font-medium bg-ember-tint/40 border border-ember-tint text-espresso rounded-pill px-2 py-0.5">
                             {sk}
                           </span>
                         ))}
@@ -330,7 +330,7 @@ export function TargetedCvDrawer({ lang, job }: Props) {
                   <div>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 text-center rounded-card border border-border bg-sand/60 px-3 py-3">
-                        <p className="text-[10px] text-text-muted mb-1">{s.scoreBefore}</p>
+                        <p className="text-[11px] text-text-muted mb-1">{s.scoreBefore}</p>
                         <p className={`font-display text-2xl font-extrabold ${toneBefore?.text ?? "text-text-body"}`}>
                           {result.before.score}
                         </p>
@@ -338,7 +338,7 @@ export function TargetedCvDrawer({ lang, job }: Props) {
                       </div>
                       <Icon name="swap" size={16} className="text-text-muted shrink-0" />
                       <div className="flex-1 text-center rounded-card border border-ember/30 bg-ember-tint/40 px-3 py-3">
-                        <p className="text-[10px] text-text-muted mb-1">{s.scoreAfter}</p>
+                        <p className="text-[11px] text-text-muted mb-1">{s.scoreAfter}</p>
                         <p className={`font-display text-2xl font-extrabold ${toneAfter?.text ?? "text-ember"}`}>
                           {result.after.score}
                         </p>
@@ -350,7 +350,7 @@ export function TargetedCvDrawer({ lang, job }: Props) {
                   {/* Explanation */}
                   {result.explanation.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-text-muted mb-1.5">
+                      <p className="text-[11px] font-bold uppercase tracking-wide text-text-muted mb-1.5">
                         {s.whyImproved}
                       </p>
                       <ul className="space-y-1">
@@ -392,7 +392,7 @@ export function TargetedCvDrawer({ lang, job }: Props) {
                         ))}
                       </div>
                       {!allConfirmed && (
-                        <p className="text-[10px] text-gold-text mt-2">{s.allConfirmed}</p>
+                        <p className="text-[11px] text-gold-text mt-2">{s.allConfirmed}</p>
                       )}
                     </div>
                   )}
@@ -403,7 +403,7 @@ export function TargetedCvDrawer({ lang, job }: Props) {
             {/* Footer */}
             {result && (
               <div className="px-5 py-3.5 border-t border-border flex items-center justify-between gap-3">
-                <p className="text-[10px] text-text-muted hidden sm:block">
+                <p className="text-[11px] text-text-muted hidden sm:block">
                   {sw
                     ? "Ukweli wako tu — hakuna kinachobuniwa."
                     : "Your facts only — nothing invented."}

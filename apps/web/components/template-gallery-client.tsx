@@ -125,7 +125,7 @@ function StyleChip({ style }: { style: string }) {
   const chip = STYLE_CHIP[style] ?? { label: style, className: "bg-sand text-text-body" };
   const label = sw ? (STYLE_LABEL_SW[style] ?? chip.label) : chip.label;
   return (
-    <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-pill uppercase tracking-wide ${chip.className}`}>
+    <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-pill uppercase tracking-wide ${chip.className}`}>
       {label}
     </span>
   );
@@ -136,7 +136,7 @@ function StyleChip({ style }: { style: string }) {
 function PopularPill() {
   const sw = useLang() === "sw";
   return (
-    <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-pill uppercase tracking-wide bg-gold-tint text-gold-text">
+    <span className="inline-flex items-center gap-1 shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-pill uppercase tracking-wide bg-gold-tint text-gold-text">
       <Icon name="star" size={9} />
       {sw ? "Maarufu" : "Popular"}
     </span>
@@ -146,7 +146,7 @@ function PopularPill() {
 function PremiumPill() {
   const sw = useLang() === "sw";
   return (
-    <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-pill uppercase tracking-wide bg-espresso text-cream">
+    <span className="inline-flex items-center gap-1 shrink-0 text-[11px] font-bold px-2 py-0.5 rounded-pill uppercase tracking-wide bg-espresso text-cream">
       <Icon name="lock" size={9} />
       {sw ? "Premium" : "Premium"}
     </span>
