@@ -173,7 +173,7 @@ function DesignCard({ id, scale, label }: { id: TemplateId; scale: number; label
   return (
     <Link
       href={`/templates/${id}`}
-      className="group block overflow-hidden rounded-xl border border-[#E2BFB5] bg-white transition-shadow hover:shadow-[0_18px_40px_rgba(33,26,21,0.12)]"
+      className="group block overflow-hidden rounded-xl border border-border bg-white transition-shadow hover:shadow-[0_18px_40px_rgba(33,26,21,0.12)]"
       aria-label={label}
     >
       <div style={{ width: "100%", height: h, overflow: "hidden", position: "relative" }}>
@@ -193,7 +193,7 @@ function DesignCard({ id, scale, label }: { id: TemplateId; scale: number; label
       </div>
       <div className="flex items-center justify-between px-3 py-2.5">
         <span className="text-[13px] font-semibold text-[#211A15]">{meta?.name ?? id}</span>
-        <span className="text-[11px] uppercase tracking-wider text-[#5A413A]">{meta?.style ?? ""}</span>
+        <span className="text-[11px] uppercase tracking-wider text-text-muted">{meta?.style ?? ""}</span>
       </div>
     </Link>
   );
@@ -299,7 +299,7 @@ export function TemplateHubProLanding() {
       ];
 
   return (
-    <main className="bg-[#FBF9F5]">
+    <main className="bg-surface">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-6xl px-5 pt-28 pb-14 sm:pt-36">
         <motion.div
@@ -308,7 +308,7 @@ export function TemplateHubProLanding() {
           transition={{ duration: 0.45 }}
           className="max-w-3xl"
         >
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#DA4A1C]/30 bg-[#DA4A1C]/8 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] text-[#DA4A1C]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-ember/30 bg-ember/8 px-3 py-1 text-[12px] font-bold uppercase tracking-[0.14em] text-ember">
             TemplateHub Pro
           </span>
 
@@ -338,28 +338,28 @@ export function TemplateHubProLanding() {
             <CreateEntryButton
               docType="cv"
               lang={sw ? "sw" : "en"}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-[#DA4A1C] px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_10px_24px_rgba(218,74,28,0.28)] transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-ember px-5 py-3.5 text-[15px] font-bold text-white shadow-[0_10px_24px_rgba(218,74,28,0.28)] transition-transform hover:-translate-y-0.5"
             >
               <Icon name="spark" size={18} />
               {sw ? "Anza mtandaoni — bure" : "Start online — free"}
             </CreateEntryButton>
             <a
               href={APK_HREF}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#E2BFB5] bg-white px-5 py-3.5 text-[15px] font-bold text-[#211A15] transition-colors hover:border-[#DA4A1C]/40"
+              className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-5 py-3.5 text-[15px] font-bold text-[#211A15] transition-colors hover:border-ember/40"
             >
               <Icon name="download" size={17} />
               {sw ? "Pakua app" : "Get the app"}
             </a>
             <a
               href="#designs"
-              className="inline-flex items-center gap-2 px-2 py-3.5 text-[15px] font-bold text-[#DA4A1C]"
+              className="inline-flex items-center gap-2 px-2 py-3.5 text-[15px] font-bold text-ember"
             >
               {sw ? "Ona miundo" : "See the designs"}
               <Icon name="chevron-right" size={16} />
             </a>
           </div>
 
-          <p className="mt-4 text-[13px] text-[#5A413A]">
+          <p className="mt-4 text-[13px] text-text-muted">
             {sw
               ? "Mtandaoni sasa, bila kupakua kitu. App ya Android inapatikana kama APK ya bure; Play Store hivi karibuni."
               : "Online now, nothing to install. The Android app is available as a free APK; Play Store soon."}
@@ -373,7 +373,7 @@ export function TemplateHubProLanding() {
           {paths.map((p) => (
             <div
               key={p.title}
-              className="flex flex-col rounded-2xl border border-[#E2BFB5] bg-white p-6"
+              className="flex flex-col rounded-2xl border border-border bg-white p-6"
             >
               <span className="inline-flex w-fit rounded-full bg-[#211A15]/6 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-[#4A3F36]">
                 {p.badge}
@@ -385,7 +385,7 @@ export function TemplateHubProLanding() {
                   <CreateEntryButton
                     docType="cv"
                     lang={sw ? "sw" : "en"}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#DA4A1C] px-5 py-3 text-[14.5px] font-bold text-white"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-ember px-5 py-3 text-[14.5px] font-bold text-white"
                   >
                     <Icon name="spark" size={16} />
                     {p.label}
@@ -393,7 +393,7 @@ export function TemplateHubProLanding() {
                 ) : (
                   <a
                     href={APK_HREF}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#DA4A1C]/40 bg-[#DA4A1C]/6 px-5 py-3 text-[14.5px] font-bold text-[#DA4A1C]"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-ember/40 bg-ember/6 px-5 py-3 text-[14.5px] font-bold text-ember"
                   >
                     <Icon name="download" size={16} />
                     {p.label}
@@ -420,7 +420,7 @@ export function TemplateHubProLanding() {
           </div>
           <Link
             href="/templates"
-            className="text-[14px] font-bold text-[#DA4A1C] underline underline-offset-4"
+            className="text-[14px] font-bold text-ember underline underline-offset-4"
           >
             {sw ? "Miundo yote" : "All designs"}
           </Link>
@@ -441,7 +441,7 @@ export function TemplateHubProLanding() {
           <button
             type="button"
             onClick={() => setShowAll(true)}
-            className="mt-6 w-full rounded-xl border border-dashed border-[#E2BFB5] py-3.5 text-[14px] font-bold text-[#DA4A1C]"
+            className="mt-6 w-full rounded-xl border border-dashed border-border py-3.5 text-[14px] font-bold text-ember"
           >
             {sw ? "Onyesha miundo zaidi" : "Show more designs"}
           </button>
@@ -449,15 +449,15 @@ export function TemplateHubProLanding() {
       </section>
 
       {/* ── Story ────────────────────────────────────────────────────────── */}
-      <section className="border-y border-[#E2BFB5] bg-white">
+      <section className="border-y border-border bg-white">
         <div className="mx-auto max-w-6xl px-5 py-16">
           <h2 className="text-[27px] font-extrabold tracking-tight text-[#211A15]">
             {sw ? "Inafanyaje kazi" : "How it works"}
           </h2>
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
             {steps.map((s) => (
-              <div key={s.n} className="rounded-2xl bg-[#FBF9F5] p-6">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#DA4A1C] text-[15px] font-extrabold text-white">
+              <div key={s.n} className="rounded-2xl bg-surface p-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ember text-[15px] font-extrabold text-white">
                   {s.n}
                 </span>
                 <h3 className="mt-4 text-[17px] font-bold text-[#211A15]">{s.t}</h3>
@@ -469,8 +469,8 @@ export function TemplateHubProLanding() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f) => (
               <div key={f.t} className="flex gap-3.5">
-                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[#DA4A1C]/10">
-                  <Icon name={f.icon} size={18} className="text-[#DA4A1C]" />
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-ember/10">
+                  <Icon name={f.icon} size={18} className="text-ember" />
                 </span>
                 <div>
                   <h4 className="text-[15px] font-bold text-[#211A15]">{f.t}</h4>
@@ -490,11 +490,11 @@ export function TemplateHubProLanding() {
           </h2>
           <div className="mt-7 grid gap-5 sm:grid-cols-3">
             {TESTIMONIALS.map((t) => (
-              <figure key={t.name} className="rounded-2xl border border-[#E2BFB5] bg-white p-6">
+              <figure key={t.name} className="rounded-2xl border border-border bg-white p-6">
                 <blockquote className="text-[14.5px] leading-relaxed text-[#211A15]">
                   “{sw ? t.quote.sw : t.quote.en}”
                 </blockquote>
-                <figcaption className="mt-4 text-[13px] text-[#5A413A]">
+                <figcaption className="mt-4 text-[13px] text-text-muted">
                   <span className="font-bold text-[#211A15]">{t.name}</span>
                   {" · "}
                   {sw ? t.detail.sw : t.detail.en}
@@ -510,8 +510,8 @@ export function TemplateHubProLanding() {
         <div className="grid gap-5 sm:grid-cols-2">
           {/* Early access. The scarcity here is real: there is no Play Store
               listing yet, so "early" is a statement of fact, not a trick. */}
-          <div className="rounded-2xl border border-[#DA4A1C]/25 bg-[#DA4A1C]/5 p-6">
-            <span className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.13em] text-[#DA4A1C]">
+          <div className="rounded-2xl border border-ember/25 bg-ember/5 p-6">
+            <span className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.13em] text-ember">
               <Icon name="flame" size={14} />
               {sw ? "Ufikiaji wa mapema" : "Early access"}
             </span>
@@ -536,10 +536,10 @@ export function TemplateHubProLanding() {
 
             {seatsPct !== null && early && early.remaining !== null ? (
               <div className="mt-4">
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[#DA4A1C]/15">
-                  <div className="h-full rounded-full bg-[#DA4A1C]" style={{ width: `${seatsPct}%` }} />
+                <div className="h-2 w-full overflow-hidden rounded-full bg-ember/15">
+                  <div className="h-full rounded-full bg-ember" style={{ width: `${seatsPct}%` }} />
                 </div>
-                <p className="mt-2 text-[12.5px] font-semibold text-[#5A413A]">
+                <p className="mt-2 text-[12.5px] font-semibold text-text-muted">
                   {sw
                     ? `Nafasi ${early.remaining} zimebaki kati ya ${early.seats}`
                     : `${early.remaining} of ${early.seats} places left`}
@@ -549,7 +549,7 @@ export function TemplateHubProLanding() {
 
             <a
               href={APK_HREF}
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#DA4A1C] px-5 py-3 text-[14.5px] font-bold text-white"
+              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-ember px-5 py-3 text-[14.5px] font-bold text-white"
             >
               <Icon name="download" size={16} />
               {seatsFull
@@ -563,7 +563,7 @@ export function TemplateHubProLanding() {
           </div>
 
           {/* Referral. Real, already implemented, and paid on activation. */}
-          <div className="rounded-2xl border border-[#E2BFB5] bg-white p-6">
+          <div className="rounded-2xl border border-border bg-white p-6">
             <span className="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.13em] text-[#12433D]">
               <Icon name="user" size={14} />
               {sw ? "Karibisha na upate" : "Invite and earn"}
@@ -578,7 +578,7 @@ export function TemplateHubProLanding() {
                 ? `Karibisha rafiki kwa kiungo chako. Ukisha tengeneza CV yake, unapata siku ${REFERRAL_DAYS_PER_FRIEND} za Sumaiya Pro — na yeye anaipata pia. Rafiki ${REFERRAL_FOREVER_AT} walioamilika wanakupa Pro ya maisha, na kila mtu anaweza kupata hadi marafiki ${REFERRAL_MAX_REWARDED}.`
                 : `Share your link with a friend. Once they build their first CV you get ${REFERRAL_DAYS_PER_FRIEND} days of Sumaiya Pro — and so do they. ${REFERRAL_FOREVER_AT} completed friends converts it to Pro for life, and each person can be rewarded for up to ${REFERRAL_MAX_REWARDED} friends.`}
             </p>
-            <p className="mt-3 rounded-lg bg-[#FBF9F5] px-3.5 py-2.5 text-[12.5px] leading-relaxed text-[#5A413A]">
+            <p className="mt-3 rounded-lg bg-surface px-3.5 py-2.5 text-[12.5px] leading-relaxed text-text-muted">
               {sw
                 ? `Siku zinalipwa rafiki akishatengeneza CV yake ya kwanza — si kwa kujiandikisha tu. Hivyo ndivyo tunavyohakikisha zawadi inaenda kwa watu wa kweli.`
                 : `Days are paid once your friend has built their first CV — not for signing up. That is how we make sure the reward goes to real people.`}
@@ -593,7 +593,7 @@ export function TemplateHubProLanding() {
           </div>
         </div>
 
-        <p className="mt-5 text-[13px] leading-relaxed text-[#5A413A]">
+        <p className="mt-5 text-[13px] leading-relaxed text-text-muted">
           {sw
             ? "Hakuna malipo yanayohitajika kwa sasa. Pro inapatikana kwa ufikiaji wa mapema na kwa kukaribisha rafiki."
             : "No payment is being taken yet. Pro is earned through early access and referrals."}
@@ -603,7 +603,7 @@ export function TemplateHubProLanding() {
       {/* ── Final CTA ────────────────────────────────────────────────────── */}
       <section className="bg-[#211A15]">
         <div className="mx-auto max-w-4xl px-5 py-16 text-center">
-          <h2 className="text-[29px] font-extrabold tracking-tight text-[#FBF9F5] sm:text-[34px]">
+          <h2 className="text-[29px] font-extrabold tracking-tight text-surface sm:text-[34px]">
             {sw ? "Anza na muundo wako leo" : "Start with your design today"}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-[15.5px] leading-relaxed text-[#C9BDB2]">
@@ -615,14 +615,14 @@ export function TemplateHubProLanding() {
             <CreateEntryButton
               docType="cv"
               lang={sw ? "sw" : "en"}
-              className="inline-flex items-center gap-2.5 rounded-xl bg-[#DA4A1C] px-6 py-4 text-[16px] font-bold text-white transition-transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2.5 rounded-xl bg-ember px-6 py-4 text-[16px] font-bold text-white transition-transform hover:-translate-y-0.5"
             >
               <Icon name="spark" size={19} />
               {sw ? "Anza mtandaoni — bure" : "Start online — free"}
             </CreateEntryButton>
             <a
               href={APK_HREF}
-              className="inline-flex items-center gap-2.5 rounded-xl border border-[#FBF9F5]/25 px-6 py-4 text-[16px] font-bold text-[#FBF9F5] transition-colors hover:border-[#FBF9F5]/50"
+              className="inline-flex items-center gap-2.5 rounded-xl border border-surface/25 px-6 py-4 text-[16px] font-bold text-surface transition-colors hover:border-surface/50"
             >
               <Icon name="download" size={19} />
               {sw ? "Pakua app ya Android" : "Get the Android app"}

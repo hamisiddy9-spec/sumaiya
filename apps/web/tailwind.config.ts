@@ -76,6 +76,7 @@ const config: Config = {
         // Darkened #9C9186 → #756A5E so muted text hits WCAG AA 4.5:1 on cream
         // (4.86:1) and sand-2 (4.57:1) while keeping the warm taupe identity.
         "text-muted": "#5A413A",
+        "text-faint": "#8E7068", // the lightest of the three text tones
         success: "#186A22",
         warning: "#B45309",
         error: "#BA1A1A",
