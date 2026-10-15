@@ -40,4 +40,15 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NODE_PATH: ${{ github.workspace }}/node_modules
-        run: node scripts/assert-rls.mjs
+        # Trust a real chain instead of disabling verification. The pooler's cert is
+        # signed by a CA the runner may not carry, which is what produced
+        # SELF_SIGNED_CERT_IN_CHAIN before the script could check anything. If the
+        # secret is absent the step behaves exactly as it did before.
+        env:
+          SUPABASE_CA_CERT: ${{ secrets.SUPABASE_CA_CERT }}
+        run: |
+          if [ -n "$SUPABASE_CA_CERT" ]; then
+            echo "$SUPABASE_CA_CERT" > "$RUNNER_TEMP/supabase-ca.crt"
+            echo "NODE_EXTRA_CA_CERTS=$RUNNER_TEMP/supabase-ca.crt" >> "$GITHUB_ENV"
+          fi
+          node scripts/assert-rls.mjs
