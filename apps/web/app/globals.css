@@ -186,13 +186,17 @@
   /* ── The Sumaiya Mark ─────────────────────────────────────────────────
      Custom AI signature (components/ui/sumaiya-mark.tsx). The <g> and <circle>
      animate around the 24×24 viewBox centre. */
-  .sumaiya-mark__blades {
-    transform-box: fill-box;
-    transform-origin: center;
-  }
+  /* The <g> and <circle> animate around the 24x24 viewBox centre - which is what the
+     comment above has always claimed, and what fill-box does NOT guarantee. fill-box
+     means "this element's own bounding box centre", and for a <g> that is
+     browser-dependent (WebKit has been wrong about it), so a spin can end up very
+     slightly off-centre: it reads as unsettled motion with the fixed core appearing to
+     drift against the blades. view-box + the literal centre is exact, and it matches the
+     coordinate the SVG's own rotate(120 12 12) transforms already use. */
+  .sumaiya-mark__blades,
   .sumaiya-mark__core {
-    transform-box: fill-box;
-    transform-origin: center;
+    transform-box: view-box;
+    transform-origin: 12px 12px;
   }
   .sumaiya-mark--idle .sumaiya-mark__blades {
     animation: sumaiya-drift 7s ease-in-out infinite;
