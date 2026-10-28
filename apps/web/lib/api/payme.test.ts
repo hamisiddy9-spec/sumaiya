@@ -69,6 +69,18 @@ describe("payme config", () => {
     expect(c).toMatchObject({ appId: "x", secret: "s", baseUrl: "https://portal.paymeafrica.com/api/v1", sandbox: false, sigMode: "body_ts" });
   });
 
+  it("uses a valid PAYME_BASE_URL override (trailing slash trimmed)", () => {
+    const c = readPaymeConfig({ PAYME_APP_ID: "x", PAYME_APP_SECRET: "s", PAYME_BASE_URL: " https://sandbox.example.com/api/v1/ " });
+    expect(c?.baseUrl).toBe("https://sandbox.example.com/api/v1");
+  });
+
+  it("ignores a blank or non-URL PAYME_BASE_URL instead of building '/transact'", () => {
+    for (const bad of [" ", "/", "//", "portal.paymeafrica.com/api/v1", "null"]) {
+      const c = readPaymeConfig({ PAYME_APP_ID: "x", PAYME_APP_SECRET: "s", PAYME_BASE_URL: bad });
+      expect(c?.baseUrl).toBe("https://portal.paymeafrica.com/api/v1");
+    }
+  });
+
   it("honours sandbox flag and a valid sig mode, ignores an invalid one", () => {
     expect(readPaymeConfig({ PAYME_APP_ID: "x", PAYME_APP_SECRET: "s", PAYME_SANDBOX: "1" })?.sandbox).toBe(true);
     expect(readPaymeConfig({ PAYME_APP_ID: "x", PAYME_APP_SECRET: "s", PAYME_SIG_MODE: "ts_body" })?.sigMode).toBe("ts_body");
