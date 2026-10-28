@@ -10,6 +10,8 @@ import {
   debugSignatures,
   verifyWebhook,
   safeEqual,
+  parseCollectionResponse,
+  parseWebhook,
   type PaymeConfig,
 } from "./payme";
 import { planAmount, normalizeTzMsisdn, PLANS, isPlanId } from "@/lib/payments/plans";
@@ -103,6 +105,60 @@ describe("webhook verification", () => {
   it("safeEqual is false on length mismatch without throwing", () => {
     expect(safeEqual("a", "aa")).toBe(false);
     expect(safeEqual("abc", "abc")).toBe(true);
+  });
+});
+
+describe("response parsing (real sandbox shapes)", () => {
+  // The exact body the sandbox /transact returned.
+  const sandboxResponse = {
+    status: "success",
+    transaction_id: "7WSL7MW9",
+    payment_status: "PENDING",
+    checkout_url: null,
+    financials: null,
+    provider_response: {
+      result: "SUCCESS",
+      resultcode: "000",
+      reference: "SUM-TEST-002",
+      transid: "SBFL1T2N",
+      message: "[Sandbox] Simulation Successful",
+      order_id: "SUM-TEST-002",
+    },
+    provider_request: null,
+  };
+
+  it("parseCollectionResponse reads the accept + pending shape", () => {
+    const p = parseCollectionResponse(sandboxResponse);
+    expect(p.accepted).toBe(true);
+    expect(p.paymentStatus).toBe("PENDING");
+    expect(p.providerTxnId).toBe("7WSL7MW9");
+  });
+
+  it("parseWebhook treats a PENDING callback as neither paid nor failed", () => {
+    // If the collection-style body arrived as a webhook, it must NOT settle.
+    const e = parseWebhook(sandboxResponse);
+    expect(e.paid).toBe(false);
+    expect(e.failed).toBe(false);
+    expect(e.reference).toBe("SUM-TEST-002");
+  });
+
+  it("parseWebhook settles on a SUCCESS payment_status", () => {
+    const e = parseWebhook({ reference: "SUM-9", payment_status: "SUCCESS", transaction_id: "TX1" });
+    expect(e.paid).toBe(true);
+    expect(e.failed).toBe(false);
+    expect(e.reference).toBe("SUM-9");
+    expect(e.providerTxnId).toBe("TX1");
+  });
+
+  it("parseWebhook marks failure states", () => {
+    expect(parseWebhook({ reference: "r", payment_status: "FAILED" }).failed).toBe(true);
+    expect(parseWebhook({ reference: "r", payment_status: "CANCELLED" }).failed).toBe(true);
+  });
+
+  it("parseWebhook finds the reference under order_id / provider_response", () => {
+    expect(parseWebhook({ order_id: "SUM-A", payment_status: "SUCCESS" }).reference).toBe("SUM-A");
+    expect(parseWebhook({ provider_response: { reference: "SUM-B" }, payment_status: "SUCCESS" }).reference).toBe("SUM-B");
+    expect(parseWebhook({ payment_status: "SUCCESS" }).reference).toBeNull();
   });
 });
 

@@ -26,6 +26,8 @@ import {
   paymentsEnabled,
   collection,
   verifyWebhook,
+  parseCollectionResponse,
+  parseWebhook,
 } from "@/lib/api/payme";
 
 const initiateSchema = z.object({
@@ -101,6 +103,13 @@ export const paymentRoutes = new Hono()
       return c.json({ error: "Payment couldn't be started. Please try again." }, 502);
     }
 
+    // Record PayMe's own transaction id against the pending row, so it is
+    // traceable even before the settlement webhook arrives.
+    const parsed = parseCollectionResponse(result.raw);
+    if (parsed.providerTxnId) {
+      await db.update(payment).set({ providerTxnId: parsed.providerTxnId, updatedAt: new Date() }).where(eq(payment.providerRef, reference));
+    }
+
     captureServer(userId, "payment_initiated", { plan, amount, currency: "TZS" });
     await flushAnalytics();
     // The push is on its way to the user's phone; the webhook settles it.
@@ -129,34 +138,36 @@ export const paymentRoutes = new Hono()
       return c.json({ error: "bad json" }, 400);
     }
 
-    const reference = String(payload.reference ?? payload.reference_id ?? payload.ref ?? "");
-    if (!reference) return c.json({ ok: true }); // nothing to settle
+    const evt = parseWebhook(payload);
+    if (!evt.reference) return c.json({ ok: true }); // nothing to settle
 
     const [row] = await db
       .select({ id: payment.id, userId: payment.userId, status: payment.status, amount: payment.amount, currency: payment.currency, metadata: payment.metadata })
       .from(payment)
-      .where(eq(payment.providerRef, reference))
+      .where(eq(payment.providerRef, evt.reference))
       .limit(1);
     if (!row) return c.json({ ok: true });
     if (row.status === "completed") return c.json({ ok: true }); // idempotent replay
 
-    const statusStr = String(payload.status ?? "").toLowerCase();
-    const paid = statusStr === "success" || statusStr === "completed" || statusStr === "paid";
-    const txnId = payload.transaction_id ?? payload.txn_id ?? null;
     const plan = (row.metadata as { plan?: PlanId } | null)?.plan;
 
-    if (!paid) {
-      await db.update(payment).set({ status: "failed", providerTxnId: txnId ? String(txnId) : null, updatedAt: new Date() }).where(eq(payment.id, row.id));
-      captureServer(row.userId, "payment_failed", { plan: plan ?? null, stage: "callback", status: statusStr || "unknown" });
+    if (evt.paid) {
+      const days = plan ? PLANS[plan].days : 30;
+      await db.update(payment).set({ status: "completed", providerTxnId: evt.providerTxnId, updatedAt: new Date() }).where(eq(payment.id, row.id));
+      await grantPremiumDays(row.userId, days);
+      captureServer(row.userId, "payment_completed", { plan: plan ?? null, amount: row.amount, currency: row.currency, days });
       await flushAnalytics();
       return c.json({ ok: true });
     }
 
-    const days = plan ? PLANS[plan].days : 30;
-    await db.update(payment).set({ status: "completed", providerTxnId: txnId ? String(txnId) : null, updatedAt: new Date() }).where(eq(payment.id, row.id));
-    await grantPremiumDays(row.userId, days);
-    captureServer(row.userId, "payment_completed", { plan: plan ?? null, amount: row.amount, currency: row.currency, days });
-    await flushAnalytics();
+    if (evt.failed) {
+      await db.update(payment).set({ status: "failed", providerTxnId: evt.providerTxnId, updatedAt: new Date() }).where(eq(payment.id, row.id));
+      captureServer(row.userId, "payment_failed", { plan: plan ?? null, stage: "callback", status: "failed" });
+      await flushAnalytics();
+      return c.json({ ok: true });
+    }
+
+    // PENDING / unknown — acknowledge without changing state; a later webhook settles it.
     return c.json({ ok: true });
   })
 

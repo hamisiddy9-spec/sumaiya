@@ -10,8 +10,12 @@
  *   headers   : X-App-ID, X-Signature, X-Timestamp
  *   signature : HMAC-SHA256(secret, <base>) as base64, where <base> combines the
  *               minified JSON body and the unix timestamp.
- *   collection: POST /collection with { action:"collection", amount, msisdn,
+ *   collection: POST /transact with { action:"collection", amount, msisdn,
  *               reference, currency, callback_url }
+ *               (endpoint + response shape confirmed against the sandbox:
+ *                201, top-level status:"success" = request accepted,
+ *                payment_status:"PENDING" = settle later via webhook,
+ *                transaction_id at top level, our ref in provider_response).
  *
  * THE ONE UNKNOWN — how PayMe orders the signature base — is kept behind
  * PAYME_SIG_MODE so confirming it against the portal's Integration Lab is a
@@ -144,7 +148,7 @@ export async function collection(
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const signature = signRequest(cfg, minified, timestamp);
 
-  const res = await fetch(`${cfg.baseUrl}/collection`, {
+  const res = await fetch(`${cfg.baseUrl}/transact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -191,4 +195,60 @@ export function verifyWebhook(
 ): boolean {
   if (!signatureHeader) return false;
   return safeEqual(hmac(cfg.secret, rawBody), signatureHeader.trim());
+}
+
+// ─── Response parsing (shapes confirmed against the sandbox) ─────────────────
+
+export interface ParsedCollection {
+  /** The provider accepted the request (top-level status:"success"). */
+  accepted: boolean;
+  /** PENDING / SUCCESS / FAILED — uppercase, as the provider sends it. */
+  paymentStatus: string;
+  /** PayMe's transaction id (top-level transaction_id, else provider transid). */
+  providerTxnId: string | null;
+}
+
+/** Reads the /transact response. The sandbox returns 201 with
+ *  `{ status:"success", payment_status:"PENDING", transaction_id,
+ *     provider_response:{ result, transid, reference, order_id } }`. */
+export function parseCollectionResponse(raw: unknown): ParsedCollection {
+  const o = (raw ?? {}) as Record<string, unknown>;
+  const pr = (o.provider_response ?? {}) as Record<string, unknown>;
+  const accepted = String(o.status ?? "").toLowerCase() === "success";
+  const paymentStatus = String(o.payment_status ?? pr.result ?? "").toUpperCase();
+  const txn = o.transaction_id ?? pr.transid ?? null;
+  return { accepted, paymentStatus, providerTxnId: txn != null ? String(txn) : null };
+}
+
+export interface ParsedWebhook {
+  reference: string | null;
+  paid: boolean;
+  failed: boolean;
+  providerTxnId: string | null;
+}
+
+const PAID_STATES = new Set(["SUCCESS", "COMPLETED", "PAID"]);
+const FAILED_STATES = new Set(["FAILED", "FAILURE", "CANCELLED", "CANCELED", "DECLINED", "REVERSED"]);
+
+/**
+ * Reads a settlement webhook. The state lives in `payment_status` (or the
+ * provider block's `result`); the top-level `status` is only "request accepted"
+ * on the collection response, so it is the last fallback. A PENDING state is
+ * neither paid nor failed — the caller must leave the payment untouched, not
+ * mark it failed.
+ */
+export function parseWebhook(payload: Record<string, unknown>): ParsedWebhook {
+  const pr = (payload.provider_response ?? {}) as Record<string, unknown>;
+  const reference =
+    String(
+      payload.reference ?? payload.order_id ?? payload.reference_id ?? payload.ref ?? pr.reference ?? pr.order_id ?? "",
+    ) || null;
+  const state = String(payload.payment_status ?? pr.result ?? payload.status ?? "").toUpperCase();
+  const txn = payload.transaction_id ?? pr.transid ?? payload.transid ?? null;
+  return {
+    reference,
+    paid: PAID_STATES.has(state),
+    failed: FAILED_STATES.has(state),
+    providerTxnId: txn != null ? String(txn) : null,
+  };
 }
