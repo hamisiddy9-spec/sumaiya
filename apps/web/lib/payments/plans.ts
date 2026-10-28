@@ -14,7 +14,7 @@
  * wiring.
  */
 
-export type PlanId = "monthly" | "annual";
+export type PlanId = "monthly" | "annual" | "test";
 
 /** The currency PayMe mobile-money collections settle in. */
 export type PayCurrency = "TZS";
@@ -44,12 +44,22 @@ export const PLANS: Record<PlanId, PlanDef> = {
     labelEn: "Annual Premium",
     labelSw: "Premium ya Mwaka",
   },
+  // A minimal real-money plan for a live end-to-end test on a real phone
+  // (TSh 1,000, 1 day). Not shown on the pricing page — reach it directly at
+  // /checkout?plan=test. Refund it in the PayMe portal after testing.
+  test: {
+    id: "test",
+    days: 1,
+    amount: { TZS: 1000 },
+    labelEn: "Test payment",
+    labelSw: "Jaribio la malipo",
+  },
 };
 
 export const PLAN_IDS = Object.keys(PLANS) as PlanId[];
 
 export function isPlanId(value: string): value is PlanId {
-  return value === "monthly" || value === "annual";
+  return value === "monthly" || value === "annual" || value === "test";
 }
 
 /** Price for a plan in a currency, or null when the pair is not offered. */

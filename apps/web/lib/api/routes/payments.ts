@@ -31,7 +31,7 @@ import {
 } from "@/lib/api/payme";
 
 const initiateSchema = z.object({
-  plan: z.enum(["monthly", "annual"]),
+  plan: z.enum(["monthly", "annual", "test"]),
   phone: z.string().min(9).max(20),
 });
 
