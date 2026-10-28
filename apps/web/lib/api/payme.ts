@@ -56,9 +56,13 @@ export function readPaymeConfig(env: Env = process.env): PaymeConfig | null {
   const secret = (env.PAYME_APP_SECRET || "").trim();
   if (!appId || !secret) return null;
 
-  const baseUrl = (env.PAYME_BASE_URL || "https://portal.paymeafrica.com/api/v1")
-    .trim()
-    .replace(/\/+$/, "");
+  // An override only counts when it is a real http(s) URL: a blank or "/" value
+  // in the host env would otherwise yield "/transact" (no host) and every charge
+  // would die with "Failed to parse URL".
+  const override = (env.PAYME_BASE_URL || "").trim().replace(/\/+$/, "");
+  const baseUrl = /^https?:\/\/[^/]/i.test(override)
+    ? override
+    : "https://portal.paymeafrica.com/api/v1";
   const sandbox = env.PAYME_SANDBOX === "1" || env.PAYME_SANDBOX === "true";
   const mode = (env.PAYME_SIG_MODE || "").trim() as SigMode;
   const sigMode = SIG_MODES.includes(mode) ? mode : "body_ts";
