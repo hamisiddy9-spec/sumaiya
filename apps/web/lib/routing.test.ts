@@ -46,6 +46,12 @@ describe("route classification", () => {
     }
   });
 
+  it("checkout (and its success page) are app routes, not rewritten into [locale]", () => {
+    expect(isAppPath("/checkout")).toBe(true);
+    expect(isAppPath("/checkout/success")).toBe(true);
+    expect(classifyRoute("/checkout", "sw")).toEqual({ kind: "passthrough" });
+  });
+
   it("prefix matching is boundary-safe (no /assistantx false positive)", () => {
     expect(isAppPath("/assistantx")).toBe(false);
     expect(isAppPath("/assistant")).toBe(true);

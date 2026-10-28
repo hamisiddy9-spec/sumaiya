@@ -68,6 +68,7 @@ export const APP_PREFIXES = [
   "/applications",
   "/brief",
   "/career-interview",
+  "/checkout",
   "/dashboard",
   "/import-cv",
   "/settings",
