@@ -107,6 +107,14 @@ describe("webhook verification", () => {
     expect(verifyWebhook(cfg, raw, ` ${good} `)).toBe(true);
   });
 
+  it("accepts the documented signature over body + X-Timestamp", () => {
+    const ts = "1793213886";
+    const withTs = createHmac("sha256", cfg.secret).update(raw + ts).digest("base64");
+    expect(verifyWebhook(cfg, raw, withTs, ts)).toBe(true);
+    expect(verifyWebhook(cfg, raw, withTs, "1793213887")).toBe(false);
+    expect(verifyWebhook(cfg, raw, withTs)).toBe(false);
+  });
+
   it("rejects a missing, empty, or wrong signature", () => {
     expect(verifyWebhook(cfg, raw, null)).toBe(false);
     expect(verifyWebhook(cfg, raw, "")).toBe(false);

@@ -149,16 +149,30 @@ export async function collection(
     ...(input.callbackUrl ? { callback_url: input.callbackUrl } : {}),
   };
   const minified = minifyBody(body);
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const signature = signRequest(cfg, minified, timestamp);
 
+  // The docs don't say whether X-Timestamp is unix seconds or milliseconds. Send
+  // seconds first; if PayMe rejects the signature (401 — nothing is charged),
+  // retry once in milliseconds and log which one it accepted.
+  const first = await postCollection(cfg, minified, Math.floor(Date.now() / 1000).toString());
+  if (first.status !== 401) return first;
+  const second = await postCollection(cfg, minified, Date.now().toString());
+  if (second.status !== 401) console.warn("[payme] accepted a millisecond X-Timestamp; the seconds form was rejected");
+  return second.status === 401 ? first : second;
+}
+
+async function postCollection(
+  cfg: PaymeConfig,
+  minified: string,
+  timestamp: string,
+): Promise<CollectionResult> {
   const res = await fetch(`${cfg.baseUrl}/transact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-App-ID": cfg.appId,
-      "X-Signature": signature,
+      "X-Signature": signRequest(cfg, minified, timestamp),
       "X-Timestamp": timestamp,
+      ...(cfg.sandbox ? { "X-Sandbox": "1" } : {}),
     },
     body: minified,
   });
@@ -185,10 +199,10 @@ export function safeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Verify a webhook. PayMe signs the raw callback body with the same secret; the
- * header is `X-Middleware-Signature` (falling back to `X-Signature`). Like the
- * request signature, the exact construction is confirmed in the lab — this
- * checks the body alone, which is the documented default. Returns false for a
+ * Verify a webhook. Per PayMe's docs the signature is
+ * Base64(HMAC-SHA256(rawBody + X-Timestamp, secret)) in `X-Middleware-Signature`
+ * (falling back to `X-Signature`). When the callback carries no timestamp the
+ * body alone is checked, the earlier assumption. Returns false for a
  * missing/mismatched signature so an unverified callback can never provision
  * Premium.
  */
@@ -196,9 +210,13 @@ export function verifyWebhook(
   cfg: PaymeConfig,
   rawBody: string,
   signatureHeader: string | null | undefined,
+  timestamp?: string | null,
 ): boolean {
   if (!signatureHeader) return false;
-  return safeEqual(hmac(cfg.secret, rawBody), signatureHeader.trim());
+  const sig = signatureHeader.trim();
+  const ts = (timestamp ?? "").trim();
+  if (ts && safeEqual(hmac(cfg.secret, rawBody + ts), sig)) return true;
+  return safeEqual(hmac(cfg.secret, rawBody), sig);
 }
 
 // ─── Response parsing (shapes confirmed against the sandbox) ─────────────────
