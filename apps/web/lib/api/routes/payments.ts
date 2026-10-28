@@ -130,7 +130,7 @@ export const paymentRoutes = new Hono()
     const sig =
       c.req.raw.headers.get("X-Middleware-Signature") ||
       c.req.raw.headers.get("X-Signature");
-    if (!verifyWebhook(cfg, rawBody, sig)) {
+    if (!verifyWebhook(cfg, rawBody, sig, c.req.raw.headers.get("X-Timestamp"))) {
       console.warn("[payme] callback rejected: bad signature");
       return c.json({ error: "invalid signature" }, 401);
     }
