@@ -138,6 +138,19 @@ export interface AnalyticsEventMap {
   enhance_diff_reverted: { section: string };
   import_confidence_pass_completed: { confirmed: number; total: number };
 
+  // ─── Monetization funnel (PayMe Africa mobile money) ──────────────────────
+  // The paid-conversion instrument. checkout_started fires when a user picks a
+  // plan and submits their phone; payment_initiated once PayMe has accepted the
+  // collection request (the push is on its way to the phone); payment_completed
+  // server-side from the verified webhook; payment_failed at whichever stage
+  // broke. amount is in minor units of `currency` (TZS has none, so whole
+  // shillings). These are the numbers the Priority-3 "prove paid conversion"
+  // goal reads back — never invented; each fires at a real code point.
+  checkout_started: { plan: string; amount: number; currency: string };
+  payment_initiated: { plan: string; amount: number; currency: string };
+  payment_completed: { plan: string | null; amount: number; currency: string; days: number };
+  payment_failed: { plan: string | null; stage: "initiate" | "callback"; status: string };
+
   // ─── Outcomes & growth loops ─────────────────────────────────────────────
   outcome_recorded: { stage: "interview" | "offer" | "hired" | "no" };
   referral_sent: { channel: "whatsapp" | "link" | "copy" };
@@ -175,6 +188,10 @@ export const EVENTS = Object.freeze(
       "daily_brief_opened",
       "application_logged",
       "application_status_changed",
+      "checkout_started",
+      "payment_initiated",
+      "payment_completed",
+      "payment_failed",
       "sign_in_started",
       "sign_in_completed",
       "guest_data_migrated",

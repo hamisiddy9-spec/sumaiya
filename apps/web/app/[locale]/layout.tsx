@@ -109,7 +109,11 @@ export async function generateMetadata({ params }: { params: { locale: string } 
     verification: { google: "EEvmVYFA7uKRmaktnH0hmFFnLMp6VPYq1Gux5c4g35E" },
     openGraph: {
       type: "website",
-      siteName: "Sumaiya",
+      // Brand + descriptor: "Sumaiya" alone is a personal name and says nothing
+      // about the product. Pairing it with "CV & Careers" (matching the localized
+      // <title>s and the Organization/WebSite alternateName below) is the keyword
+      // association we want crawlers and share cards to carry.
+      siteName: "Sumaiya — CV & Careers",
       title,
       description,
       locale: sw ? "sw_TZ" : "en_US",
@@ -162,6 +166,7 @@ export default function LocaleRootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "Sumaiya",
+              alternateName: "Sumaiya — CV & Careers",
               url: "https://sumaiya.app",
               description: "Create ATS-optimized CVs, cover letters, business cards and professional letters with a career-writing assistant that helps you get hired.",
               potentialAction: {
@@ -179,6 +184,7 @@ export default function LocaleRootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Sumaiya",
+              alternateName: "Sumaiya — CV & Careers",
               url: "https://sumaiya.app",
               logo: "https://sumaiya.app/icon.svg",
               sameAs: [],

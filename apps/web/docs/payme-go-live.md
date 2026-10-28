@@ -1,199 +1,141 @@
 # PayMe Africa — go-live runbook
 
-The integration is built, merged, and deployed. Payments are **OFF** behind two
-switches. This is the ordered checklist to turn them on safely.
+**Status (2026-10-28): integration BUILT in this repo, shipped dark.** The
+Sumaiya-side PayMe code is live in the tree and gated off behind two switches,
+so it does nothing until you turn it on. This is the ordered checklist to turn
+it on safely.
 
-Current verified state (2026-09-06):
-- `GET https://templatehub.pro/api/payments` → `{"provider":"payme"}` — code is live
-- `POST /api/payments/initiate` → `403 "Payments are currently disabled."` — switch is off
-- No `PAYME_*` vars in the stale local env snapshots
+> History: an earlier PayMe integration lived only in the old TemplateHub
+> product and was never in this repo. The payment stack was retired 2026-09-08.
+> The code below is a **fresh** integration built for Sumaiya (not the retired
+> one), so ignore any older "built, merged, deployed" claims.
 
-Reference values used throughout:
-- API base: `https://portal.paymeafrica.com/api/v1`
-- Callback (webhook) URL: `https://templatehub.pro/api/payments/callback`
-- Redirect (after card) URL: `https://templatehub.pro/checkout/success`
-- Signature code: `lib/api/payme.ts` → `sign()` / `signRaw()`
-- Plan prices: `PLAN_AMOUNTS` in `lib/api/routes/payments.ts` (minor units)
+What's in the tree now:
+- `lib/api/payme.ts` — HMAC signing, Collection (mobile-money) call, webhook verification
+- `lib/api/routes/payments.ts` — `GET /api/payments`, `POST /api/payments/initiate`, `POST /api/payments/callback`, `GET /api/payments/status/:ref`
+- `lib/payments/plans.ts` — plans + prices + TZ phone normalization
+- `app/(app)/checkout/` + `components/checkout/` — the checkout UI
+- analytics: `checkout_started` / `payment_initiated` / `payment_completed` / `payment_failed`
 
----
+Two switches, both default **off**:
+- `PAYMENTS_ENABLED` (server) — lets `/api/payments/initiate` run. Off → `403`.
+- `NEXT_PUBLIC_PAYMENTS_ENABLED` (UI) — reveals `/checkout` and pricing links.
 
-## Phase 1 — Get API credentials
-
-1. Log in to `portal.paymeafrica.com`.
-2. Open the ☰ menu and find **Developers / API Keys / Apps / Integrations**
-   (whatever it's called). **"Payment Links" is NOT it** — that's the no-code
-   product and can't provision subscriptions.
-3. Create an app / generate **sandbox** credentials. You need two values:
-   - `X-App-ID`  → goes in env as `PAYME_APP_ID`
-   - App secret  → goes in env as `PAYME_APP_SECRET`
-4. If there is no developer section at all, email PayMe support and ask them to
-   enable API access for your account. Until then you cannot go live (the
-   payment-link product would mean upgrading each customer by hand).
-
-- [ ] Sandbox `PAYME_APP_ID` obtained
-- [ ] Sandbox `PAYME_APP_SECRET` obtained
+Keeping them separate lets you test the API while checkout stays hidden.
 
 ---
 
-## Phase 2 — Verify the HMAC signature (the one real unknown)
+## Plans (lib/payments/plans.ts)
 
-The code signs requests as `HMAC-SHA256(secret, minifiedJSONBody + unixTimestamp)`,
-base64. The docs don't spell out the exact byte order, so this must be confirmed.
+| Plan | Price | Grants |
+|---|---|---|
+| `monthly` | TSh 5,000 | 30 days Premium |
+| `annual` | TSh 50,000 | 365 days Premium |
 
-1. Go to `portal.paymeafrica.com/labs` (the signature tester / live console).
-2. Build a `collection` request body and have the labs tool show you the
-   **expected `X-Signature`** for a known body + timestamp + secret.
-3. Compare with what our code produces. Quick local check:
-
-   ```bash
-   node -e '
-     const {createHmac}=require("crypto");
-     const body=JSON.stringify({action:"collection",amount:100,msisdn:"255700000000",channel:"CASHIN",reference:"TH-TEST",callback_url:"https://templatehub.pro/api/payments/callback"});
-     const ts="1725600000";
-     const secret="PASTE_SANDBOX_SECRET";
-     console.log("body+ts :", createHmac("sha256",secret).update(body+ts).digest("base64"));
-     console.log("ts+body :", createHmac("sha256",secret).update(ts+body).digest("base64"));
-     console.log("body.ts :", createHmac("sha256",secret).update(body+"."+ts).digest("base64"));
-   '
-   ```
-
-4. Whichever line matches the labs tool is the correct construction.
-   - `body+ts`  → already what `sign()` does, no change.
-   - `ts+body`  → in `lib/api/payme.ts`, change `sign()` to `signRaw(timestamp + minifiedBody)`.
-   - `body.ts`  → change to `signRaw(minifiedBody + "." + timestamp)`.
-5. If the labs tool signs the **webhook** differently (it's `X-Middleware-Signature`),
-   adjust `verifyWebhook()` the same way.
-
-- [ ] Sandbox signature construction confirmed
-- [ ] `sign()` / `verifyWebhook()` updated if needed, committed, pushed
+Premium rides `profile.premiumUntil` (the same window referrals grant), so a
+paid user needs no new entitlement wiring.
 
 ---
 
-## Phase 3 — Set sandbox env vars in Vercel
+## Environment variables (what the code actually reads)
 
+| Var | Value | Read by |
+|---|---|---|
+| `PAYME_APP_ID` | the **Sumaiya** app's X-App-ID (e.g. `SUMAIYA_PROD_01`) | `lib/api/payme.ts` |
+| `PAYME_APP_SECRET` | 🔒 the Sumaiya app secret | `lib/api/payme.ts` |
+| `PAYME_SANDBOX` | `1` while testing | `lib/api/payme.ts` |
+| `PAYME_CALLBACK_URL` | `https://sumaiya.app/api/payments/callback` | `routes/payments.ts` |
+| `PAYME_BASE_URL` | *(optional)* defaults to `https://portal.paymeafrica.com/api/v1` | `lib/api/payme.ts` |
+| `PAYME_SIG_MODE` | *(optional)* `body_ts` (default) / `ts_body` / `body_dot_ts` | `lib/api/payme.ts` |
+| `PAYMENTS_ENABLED` | `true` to arm the server | `lib/api/payme.ts` |
+| `NEXT_PUBLIC_PAYMENTS_ENABLED` | `true` to reveal checkout | `lib/features.ts` |
+
+> ⚠️ The `PAYME_APP_ID`/`PAYME_APP_SECRET` already in Vercel (set Sep 19) are the
+> **old TemplateHub** app's — replace them with the new Sumaiya app's. There is
+> no `PAYME_REDIRECT_URL` in the current flow: Collection is a push-to-phone +
+> poll flow, not a hosted-card redirect, so that var is unused.
+
+---
+
+## Phase 1 — Credentials
+
+1. In `portal.paymeafrica.com` → register/confirm the **Sumaiya** app (Website
+   `https://sumaiya.app`, IP whitelisting **blank** — Vercel egress IPs are
+   dynamic).
+2. Copy its **X-App-ID** and **App Secret**.
+
+- [ ] Sumaiya `PAYME_APP_ID` + `PAYME_APP_SECRET` obtained
+
+## Phase 2 — Set env (server armed, UI still dark)
+
+In Vercel (Production): set the eight vars above, with
+`PAYMENTS_ENABLED=true` but `NEXT_PUBLIC_PAYMENTS_ENABLED=false`, and
+`PAYME_SANDBOX=1`.
+
+## Phase 3 — Deploy
+
+Merge `claude/amazing-noether-w3rzvb` → `main` (or point a preview at the
+branch) and deploy. Env changes only take effect on a new deployment.
+
+Verify the route is live:
 ```bash
-vercel link                      # pick the "templatehub" project (once)
-
-vercel env add PAYME_APP_ID              preview production
-vercel env add PAYME_APP_SECRET          preview production
-vercel env add PAYME_SANDBOX             preview production   # value: 1
-vercel env add PAYME_CALLBACK_URL        preview production   # https://templatehub.pro/api/payments/callback
-vercel env add PAYME_REDIRECT_URL        preview production   # https://templatehub.pro/checkout/success
-
-# Turn the server switch ON but leave the UI switch OFF for now,
-# so you can test the API without exposing checkout to real users:
-vercel env add PAYMENTS_ENABLED          production           # value: true
+curl -s https://sumaiya.app/api/payments
+# → {"provider":"payme","enabled":true,"configured":true,"sandbox":true}
 ```
+- `enabled:false` → `PAYMENTS_ENABLED` not `true` / not redeployed
+- `configured:false` → `PAYME_APP_ID`/`SECRET` missing
 
-Env changes only take effect on a new deployment:
+## Phase 4 — Confirm the signature (the one unknown)
 
-```bash
-vercel --prod          # or: redeploy latest from the Vercel dashboard
-```
+PayMe's exact signature byte-order isn't documented. The client defaults to
+`body_ts` (`HMAC-SHA256(secret, minifiedBody + unixTimestamp)`, base64). Confirm
+empirically:
 
-Verify:
+1. Trigger one sandbox collection as a signed-in test user (POST to
+   `/api/payments/initiate` with a body like `{"plan":"monthly","phone":"0712345678"}`,
+   using a browser session or an auth token).
+2. If PayMe **accepts** it → `body_ts` is correct, done.
+3. If it rejects with a signature error → set `PAYME_SIG_MODE=ts_body`,
+   redeploy, retry; then `body_dot_ts`. One of the three is right.
 
-```bash
-curl -s -X POST https://templatehub.pro/api/payments/initiate \
-  -H 'Content-Type: application/json' -d '{"plan":"trial","currency":"TZS","phone":"0700000000"}'
-```
+> To compare offline, `debugSignatures(secret, minifiedBody, timestamp)` in
+> `lib/api/payme.ts` prints all three candidates for a given body — match
+> against the expected `X-Signature` the portal's Integration Lab shows.
 
-- `401 Unauthorized`  → good: creds are set, it got past the config check (needs a logged-in user)
-- `503 "Payment provider is not configured"` → `PAYME_APP_ID`/`SECRET` missing or not redeployed
-- `403 "Payments are currently disabled"` → `PAYMENTS_ENABLED` not `true` yet
+- [ ] `/initiate` returns `{reference, status:"pending"}` and the phone gets a push
 
-- [ ] Vars set, redeployed, `initiate` returns 401 (not 503 / 403)
+## Phase 5 — Webhook
 
----
+1. In the portal, set the transaction webhook to
+   `https://sumaiya.app/api/payments/callback`.
+2. The callback verifies `X-Middleware-Signature` (falling back to
+   `X-Signature`) over the raw body. A `401 invalid signature` in the logs means
+   the webhook signs differently than `verifyWebhook()` assumes — adjust it the
+   same way as Phase 4.
+3. Complete one sandbox payment end-to-end. Expect: `payment` row flips to
+   `completed`, `grantPremiumDays` extends `profile.premiumUntil`, and the
+   checkout page redirects to `/checkout/success`.
 
-## Phase 4 — Register the webhook
-
-1. In the PayMe portal, set the transaction webhook / callback URL to:
-   `https://templatehub.pro/api/payments/callback`
-2. Note whether they send a test ping. If they do, tail the logs:
-   `vercel logs https://templatehub.pro --follow` and look for
-   `PayMe callback:` lines. A `401 Invalid signature` there means Phase 2 isn't
-   right for webhooks yet.
-
-- [ ] Webhook URL registered
-- [ ] A signed test callback verifies (no "signature verification failed" in logs)
-
----
-
-## Phase 5 — End-to-end sandbox test
-
-Do this as a real signed-in test user on the live site (switch still UI-off, so
-reach it directly):
-
-1. Go to `https://templatehub.pro/checkout?plan=trial` while logged in.
-   (UI is off, so you may need to temporarily set `NEXT_PUBLIC_PAYMENTS_ENABLED=true`
-   + redeploy, or test via curl with a real auth token.)
-2. **Mobile money path:** pick TZS, enter the sandbox test MSISDN, pay. Approve
-   the push with the sandbox PIN. Expect: "Check your phone" screen → within
-   ~30s it flips to `/checkout/success` → account shows Premium.
-3. **Card path:** pick USD, pay. Expect: redirect to PayMe's hosted page → pay
-   with a sandbox test card → back to `/checkout/success` → Premium.
-4. Check the DB: one `payment` row `status=completed`, one `subscription` row
-   `status=trialing/active`, `provider=payme`.
-5. Check the confirmation email arrived.
-
-- [ ] Mobile-money push → subscription provisioned
-- [ ] Card checkout → subscription provisioned
-- [ ] Webhook and `/verify` both idempotent (no double provisioning)
-
----
+- [ ] Sandbox payment → Premium provisioned, webhook idempotent on replay
 
 ## Phase 6 — Go live
 
-Only after Phase 5 passes **and** the AI provider is restored (the plans sell AI
-features — see `lib/env.ts` warning about `DEEPSEEK_API_KEY`).
-
-```bash
-# Swap sandbox creds for production ones:
-vercel env rm PAYME_APP_ID production && vercel env add PAYME_APP_ID production
-vercel env rm PAYME_APP_SECRET production && vercel env add PAYME_APP_SECRET production
-vercel env rm PAYME_SANDBOX production            # remove it (production mode)
-
-# Turn on the checkout UI:
-vercel env add NEXT_PUBLIC_PAYMENTS_ENABLED production   # value: true
-
-vercel --prod
 ```
+# swap sandbox creds for production, then:
+PAYME_SANDBOX                 → remove
+NEXT_PUBLIC_PAYMENTS_ENABLED  → true
+```
+Redeploy. Confirm `/checkout?plan=monthly` renders the form and a small real
+payment completes, then refund it.
 
-Then confirm the pricing page CTAs now go to `/checkout?plan=…` and the checkout
-page renders the real form (not the "all free" view).
-
-- [ ] Production credentials in
-- [ ] `PAYME_SANDBOX` removed
-- [ ] `NEXT_PUBLIC_PAYMENTS_ENABLED=true`
-- [ ] One real small live payment tested and refunded
+- [ ] Production creds in, `PAYME_SANDBOX` removed, checkout visible, one real payment tested + refunded
 
 ---
 
-## Rollback
+## Rollback (instant)
 
-Instant, no deploy needed for the UI; one redeploy for the server:
-
-```bash
-vercel env rm NEXT_PUBLIC_PAYMENTS_ENABLED production   # hides checkout UI
-vercel env rm PAYMENTS_ENABLED production               # /initiate → 403 again
-vercel --prod
 ```
-
-Existing subscriptions are untouched; no new charges can start.
-
----
-
-## If PayMe's API stays unavailable
-
-Fallback with the no-code Payment Links (manual, low volume only):
-
-1. In the portal, create one **Fixed Payment** link per plan — set the amount
-   (TZS/KES), title ("TemplateHub — 7-Day Access"), and Redirect URL to
-   `https://templatehub.pro/checkout/success`.
-2. Point the checkout/pricing CTAs at those hosted links instead of `/initiate`.
-3. **Upgrades are manual:** watch the PayMe dashboard, match each payment to a
-   user by the email/name they paid with, and set their subscription by hand
-   (SQL insert into `subscription`, or a small admin action).
-4. This does not scale past the first ~20 customers — treat it as a bridge while
-   API access is sorted.
+NEXT_PUBLIC_PAYMENTS_ENABLED  → remove   # hides checkout UI
+PAYMENTS_ENABLED              → remove   # /initiate → 403
+```
+Redeploy. Existing Premium windows are untouched; no new charges can start.
