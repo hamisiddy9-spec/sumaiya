@@ -97,6 +97,10 @@ export const paymentRoutes = new Hono()
     }
 
     if (!result.ok) {
+      // PayMe's reply carries the reason (bad signature, unknown app, wallet
+      // balance…). It holds no secrets; cap it so a huge body can't flood logs.
+      const detail = typeof result.raw === "string" ? result.raw : JSON.stringify(result.raw);
+      console.error(`[payme] collection rejected: HTTP ${result.status} sigMode=${cfg.sigMode} body=${(detail ?? "").slice(0, 500)}`);
       await db.update(payment).set({ status: "failed", updatedAt: new Date() }).where(eq(payment.providerRef, reference));
       captureServer(userId, "payment_failed", { plan, stage: "initiate", status: String(result.status) });
       await flushAnalytics();
