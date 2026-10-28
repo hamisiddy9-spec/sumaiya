@@ -24,6 +24,9 @@ const securityHeaders = [
   { key: "Content-Security-Policy", value: buildCsp(process.env.NODE_ENV !== "production") },
 ];
 
+// Same switch as lib/features.ts (strictly the string "true").
+const PAYMENTS_UI_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Monorepo: the @sumaiya/* workspace packages ship TS source, so Next must
@@ -54,12 +57,17 @@ const nextConfig = {
       // CV Yako") instead.
       { source: "/ajira", destination: "/jobs", permanent: true },
       { source: "/:locale(en|sw)/ajira", destination: "/:locale/jobs", permanent: true },
-      // Pricing / checkout were removed (2026-09 — everything is free). Send
-      // stale links home rather than 404.
-      { source: "/pricing", destination: "/", permanent: false },
-      { source: "/:locale(en|sw)/pricing", destination: "/:locale", permanent: false },
-      { source: "/checkout", destination: "/dashboard", permanent: false },
-      { source: "/:locale(en|sw)/checkout", destination: "/dashboard", permanent: false },
+      // While payments are dark (everything is free) pricing / checkout send
+      // stale links home rather than 404. Once NEXT_PUBLIC_PAYMENTS_ENABLED is
+      // "true" the real pages must be reachable, so the redirects drop out.
+      ...(PAYMENTS_UI_ENABLED
+        ? []
+        : [
+            { source: "/pricing", destination: "/", permanent: false },
+            { source: "/:locale(en|sw)/pricing", destination: "/:locale", permanent: false },
+            { source: "/checkout", destination: "/dashboard", permanent: false },
+            { source: "/:locale(en|sw)/checkout", destination: "/dashboard", permanent: false },
+          ]),
       // The native-app download page was retired (PWA is the mobile experience
       // for now). Send stale /app links and bookmarks home.
       { source: "/app", destination: "/", permanent: false },
