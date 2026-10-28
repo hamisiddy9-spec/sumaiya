@@ -1,5 +1,35 @@
 # PayMe Africa — go-live runbook
 
+> ⚠️ **STATUS — STALE (as of 2026-10-28).** This runbook is NOT currently
+> actionable. The payment stack was **retired on 2026-09-08** — PayMe Africa
+> never went live and the code was removed. `lib/features.ts` pins
+> `PAYMENTS_ENABLED = false` with that history, and there is **no payment code
+> in the tree**: no `lib/api/payme.ts`, no `lib/api/routes/payments.ts`, no
+> `/checkout` route. Do **not** provision PayMe credentials or set `PAYME_*`
+> env vars against this document — there is nothing for them to switch on.
+>
+> **Today, every feature is free.** The only "Premium" grant is the referral
+> reward (`profile.premiumUntil`, 7 days per activated friend — see
+> `lib/referral.ts`), gating exactly one capability (`template.premium`) through
+> the entitlements system (`lib/entitlements.ts`). That system is the clean
+> seam payments would plug back into.
+>
+> **To bring paid packages back** (the Priority-3 "prove paid conversion" goal):
+> 1. Rebuild the payment route + checkout UI (this doc's Phases 1–6 below are the
+>    PayMe-specific knowledge to reuse — signature construction especially).
+> 2. Decide the canonical checkout domain (sumaiya.app, not the old
+>    templatehub.pro URLs quoted below).
+> 3. Add the monetization funnel events to `lib/analytics/events.ts`
+>    (`checkout_started`, `plan_selected`, `payment_completed`, `payment_failed`)
+>    so paid conversion is measurable from day one.
+> 4. Then follow the phases below.
+>
+> Everything beneath this banner is the ORIGINAL runbook, preserved for whoever
+> rebuilds the integration. Its claims of "live"/"deployed" and its
+> `templatehub.pro` URLs describe the retired code, not the current tree.
+
+---
+
 The integration is built, merged, and deployed. Payments are **OFF** behind two
 switches. This is the ordered checklist to turn them on safely.
 
