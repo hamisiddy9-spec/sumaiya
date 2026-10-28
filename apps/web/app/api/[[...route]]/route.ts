@@ -25,6 +25,7 @@ import { mobileRoutes } from "@/lib/api/routes/mobile";
 import { appTelemetryRoutes } from "@/lib/api/routes/app-telemetry";
 import { appReportRoutes } from "@/lib/api/routes/app-report";
 import { campaignEventRoutes } from "@/lib/api/routes/campaign-events";
+import { paymentRoutes } from "@/lib/api/routes/payments";
 import { rateLimitDurable, clientIp } from "@/lib/api/rate-limit";
 import { reportError } from "@/lib/observability/report-error";
 
@@ -102,6 +103,9 @@ app.route("/app", appReportRoutes);
 // Printed-poster campaign funnel — client-reported, anonymous, unsigned-in
 // scans included (they are the scans that matter). See lib/campaign/ingest.ts.
 app.route("/campaign", campaignEventRoutes);
+// PayMe Africa mobile-money checkout. State-changing routes self-gate on the
+// PAYMENTS_ENABLED env switch, so this is inert until that is flipped on.
+app.route("/payments", paymentRoutes);
 
 app.get("/health", (c) => c.json({ ok: true, ts: Date.now() }));
 
