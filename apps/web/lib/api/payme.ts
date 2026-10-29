@@ -140,41 +140,69 @@ export async function collection(
   cfg: PaymeConfig,
   input: CollectionInput,
 ): Promise<CollectionResult> {
-  const body: Record<string, unknown> = {
+  const bodyWith = (withCallback: boolean): Record<string, unknown> => ({
     action: "collection",
     amount: input.amount,
     msisdn: input.msisdn,
     reference: input.reference,
     currency: input.currency,
-    ...(input.callbackUrl ? { callback_url: input.callbackUrl } : {}),
-  };
-  const minified = minifyBody(body);
+    ...(withCallback && input.callbackUrl ? { callback_url: input.callbackUrl } : {}),
+  });
 
-  // The docs don't say whether X-Timestamp is unix seconds or milliseconds. Send
-  // seconds first; if PayMe rejects the signature (401 — nothing is charged),
-  // retry once in milliseconds and log which one it accepted.
-  const first = await postCollection(cfg, minified, Math.floor(Date.now() / 1000).toString());
-  if (first.status !== 401) return first;
-  const second = await postCollection(cfg, minified, Date.now().toString());
-  if (second.status !== 401) console.warn("[payme] accepted a millisecond X-Timestamp; the seconds form was rejected");
-  return second.status === 401 ? first : second;
+  // PayMe documents the formula (HMAC-SHA256(minifiedBody + timestamp), base64,
+  // timestamp in unix SECONDS — milliseconds come back "Request Expired") but not
+  // what "minified" means byte-for-byte. Their examples are PHP, whose
+  // json_encode escapes "/" as "\/", and our callback_url is full of slashes. So
+  // when PayMe answers 401 (signature rejected — nothing is charged) try the
+  // plausible variants in turn, stop at the first accepted one, and log it so it
+  // can be pinned.
+  const others = SIG_MODES.filter((m) => m !== cfg.sigMode);
+  const variants: SignVariant[] = [
+    { name: "plain", mode: cfg.sigMode, escapeSlashes: false, sendEscaped: false, withCallback: true },
+    { name: "sign-escaped-slashes", mode: cfg.sigMode, escapeSlashes: true, sendEscaped: false, withCallback: true },
+    { name: "send+sign-escaped-slashes", mode: cfg.sigMode, escapeSlashes: true, sendEscaped: true, withCallback: true },
+    { name: "no-callback-url", mode: cfg.sigMode, escapeSlashes: false, sendEscaped: false, withCallback: false },
+    ...others.map((mode): SignVariant => ({ name: `mode-${mode}`, mode, escapeSlashes: false, sendEscaped: false, withCallback: true })),
+  ];
+
+  let last: CollectionResult = { ok: false, status: 0, raw: null };
+  for (const v of variants) {
+    last = await postCollection({ ...cfg, sigMode: v.mode }, v, minifyBody(bodyWith(v.withCallback)));
+    if (last.status !== 401) {
+      if (last.ok && v.name !== "plain") console.warn(`[payme] signature variant "${v.name}" accepted — pin it (configured mode: ${cfg.sigMode})`);
+      return last;
+    }
+  }
+  return last;
+}
+
+interface SignVariant {
+  name: string;
+  mode: SigMode;
+  escapeSlashes: boolean;
+  sendEscaped: boolean;
+  withCallback: boolean;
 }
 
 async function postCollection(
   cfg: PaymeConfig,
+  v: SignVariant,
   minified: string,
-  timestamp: string,
 ): Promise<CollectionResult> {
+  const escaped = minified.replace(/\//g, "\\/");
+  const signed = v.escapeSlashes ? escaped : minified;
+  const sent = v.sendEscaped ? escaped : minified;
+  const timestamp = Math.floor(Date.now() / 1000).toString();
   const res = await fetch(`${cfg.baseUrl}/transact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-App-ID": cfg.appId,
-      "X-Signature": signRequest(cfg, minified, timestamp),
+      "X-Signature": signRequest(cfg, signed, timestamp),
       "X-Timestamp": timestamp,
       ...(cfg.sandbox ? { "X-Sandbox": "1" } : {}),
     },
-    body: minified,
+    body: sent,
   });
 
   let raw: unknown = null;
