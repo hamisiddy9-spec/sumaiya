@@ -171,7 +171,7 @@ export function TemplateGallery({
     if (premiumRows.length) {
       out.push({
         key: "premium",
-        title: t("TemplateHub Premium", "TemplateHub Premium"),
+        title: t("Sumaiya Premium", "Sumaiya Premium"),
         subtitle: t(
           "Distinct designs for when your documents need to stand out",
           "Miundo bora kwa nyaraka zinazohitaji kuvutia",

@@ -208,7 +208,9 @@ function WelcomeStage({
       </View>
 
       <View style={{ width: "100%", maxWidth: 360, alignSelf: "center", gap: 12 }}>
-        {choices.map((ch, i) => (
+        {choices.map((ch, i) => {
+          const selected = ch.lang === current;
+          return (
           // `Reveal`, not an `entering` layout animation: this wrapper holds a
           // Pressable, and a layout-animation intercept on a wrapper has already
           // left a Button non-interactive on Fabric once in this app
@@ -232,8 +234,8 @@ function WelcomeStage({
                 alignItems: "center",
                 gap: 12,
                 borderWidth: 1,
-                borderColor: current ? c.borderStrong : c.border,
-                backgroundColor: current ? c.accentTint : pressed ? c.accentTint : "transparent",
+                borderColor: selected ? c.borderStrong : c.border,
+                backgroundColor: selected ? c.accentTint : pressed ? c.accentTint : "transparent",
                 borderRadius: 16,
                 paddingVertical: 14,
                 paddingHorizontal: 16,
@@ -248,10 +250,11 @@ function WelcomeStage({
                 <Text style={{ color: c.text, fontSize: 18, fontWeight: "800" }}>{ch.label}</Text>
                 <Text style={{ color: c.textMuted, fontSize: 13 }}>{ch.hint}</Text>
               </View>
-              {current ? <Icon name="check" size={18} color={c.accent} /> : null}
+              {selected ? <Icon name="check" size={18} color={c.accent} /> : null}
             </Pressable>
           </Reveal>
-        ))}
+          );
+        })}
       </View>
 
       {/* The design puts the sign-in path and the trust note HERE, on the language

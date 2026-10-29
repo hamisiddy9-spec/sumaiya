@@ -300,7 +300,7 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
 
     out.push({
       key: "templatehub",
-      eyebrow: "TemplateHub",
+      eyebrow: "Sumaiya",
       title: t("A design that fits your document", "Muundo unaofaa nyaraka yako"),
       detail: t(
         "See each design's real preview, and pick the one that suits your work.",
