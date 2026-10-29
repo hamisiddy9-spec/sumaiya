@@ -10,7 +10,7 @@ import { alternatesFor } from "@/lib/seo";
 // file at apps/web/public/sumaiya.apk so it is served at /sumaiya.apk. Bump the
 // version label when you ship a new build.
 const APK_URL = "/sumaiya.apk";
-const APK_VERSION = "1.6.23";
+const APK_VERSION = "1.8.2";
 
 export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
   const sw = params.locale !== "en";
