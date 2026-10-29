@@ -4,7 +4,7 @@
 :root{
   --panel:#1C1510;--gold:#F2A93B;--gold2:#FFC46B;--cream:#FBF5EC;--sand:#F3E7D4;--muted:#C2AF9A;
   --fd:"Bricolage Grotesque",system-ui,sans-serif;--fb:"Hanken Grotesk",system-ui,sans-serif;
-  --appbg:#FBF5EC;--appink:#231A12;--appmut:#8A7A68;--appline:#ECE0CE;--green:#1E9E5A;
+  --appbg:#FBF5EC;--appink:#231A12;--appmut:#8A7A68;--appline:#ECE0CE;--green:#1E9E5A;--blue:#2E7DBE;
   --eo:cubic-bezier(.16,.84,.3,1);--ei:cubic-bezier(.5,0,.75,.3);
 }
 *{box-sizing:border-box;margin:0;-webkit-font-smoothing:antialiased}
@@ -18,14 +18,11 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .grain{position:absolute;inset:-40%;opacity:.045;pointer-events:none;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");animation:gr 1.1s steps(3) infinite}
 @keyframes gr{0%{transform:translate(0,0)}33%{transform:translate(-16px,10px)}66%{transform:translate(12px,-8px)}}
 .vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 280px 70px rgba(0,0,0,.5)}
-
 .layer{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .4s ease}
 .layer.on{opacity:1;visibility:visible}
-
-/* HOOK */
 #hook{display:flex;flex-direction:column;justify-content:center;padding:120px 96px;gap:36px}
 .kick{font-family:var(--fd);font-weight:700;font-size:33px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
-.hl{font-family:var(--fd);font-weight:800;font-size:130px;line-height:.98;letter-spacing:-.035em;text-wrap:balance}
+.hl{font-family:var(--fd);font-weight:800;font-size:128px;line-height:.98;letter-spacing:-.035em;text-wrap:balance}
 .hl em{color:var(--gold);font-style:normal}
 .hooksub{font-size:49px;color:var(--sand);line-height:1.28}
 .rise{opacity:0;transform:translateY(34px);animation:rise .5s var(--eo) forwards}
@@ -34,15 +31,11 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .strike{position:relative;display:inline-block}
 .strike::after{content:"";position:absolute;left:-4%;right:-4%;top:52%;height:9px;border-radius:9px;background:var(--gold);transform:scaleX(0);transform-origin:left;animation:sx .4s .55s cubic-bezier(.6,0,.2,1) forwards}
 @keyframes sx{to{transform:scaleX(1)}}
-
-/* CAPTIONS */
-.caps{position:absolute;left:0;right:0;top:112px;padding:0 90px;text-align:center}
-.cap{position:absolute;left:90px;right:90px;top:0;opacity:0;transform:translateY(18px);transition:opacity .35s ease,transform .4s var(--eo)}
+.caps{position:absolute;left:0;right:0;top:112px;padding:0 80px;text-align:center}
+.cap{position:absolute;left:80px;right:80px;top:0;opacity:0;transform:translateY(18px);transition:opacity .35s ease,transform .4s var(--eo)}
 .cap.show{opacity:1;transform:none}
 .cap .eb{font-family:var(--fd);font-weight:700;font-size:29px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-.cap .ct{font-family:var(--fd);font-weight:800;font-size:72px;line-height:1.02;letter-spacing:-.028em;text-wrap:balance}
-
-/* DEVICE */
+.cap .ct{font-family:var(--fd);font-weight:800;font-size:70px;line-height:1.02;letter-spacing:-.028em;text-wrap:balance}
 #device{display:flex;align-items:flex-end;justify-content:center;padding-bottom:140px}
 .phone{position:relative;width:500px;height:1016px;border-radius:66px;background:linear-gradient(160deg,#3a2c20,#17110c);padding:16px;box-shadow:0 56px 110px -28px rgba(0,0,0,.72),0 0 0 2px rgba(255,196,107,.1),inset 0 0 0 2px rgba(0,0,0,.4);transform-origin:center}
 .phone.in{animation:pin .7s var(--eo) both,pfloat 6s .7s ease-in-out infinite}
@@ -51,8 +44,7 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .screenwrap{position:relative;width:100%;height:100%;border-radius:52px;overflow:hidden;background:var(--appbg)}
 .island{position:absolute;top:20px;left:50%;transform:translateX(-50%);width:128px;height:34px;border-radius:20px;background:#0c0906;z-index:60}
 .statusbar{position:absolute;top:0;left:0;right:0;height:62px;display:flex;align-items:center;justify-content:space-between;padding:22px 34px 0;font-size:24px;font-weight:700;color:var(--appink);z-index:50}
-.sb-r{display:flex;gap:8px;align-items:center}
-.sb-r i{display:block;width:24px;height:16px;border-radius:4px;background:var(--appink);opacity:.9}
+.sb-r{display:flex;gap:8px;align-items:center}.sb-r i{display:block;width:24px;height:16px;border-radius:4px;background:var(--appink);opacity:.9}
 .sb-r .bat{width:34px;border:3px solid var(--appink);background:none;position:relative;border-radius:5px}
 .sb-r .bat::after{content:"";position:absolute;inset:3px;right:9px;background:var(--appink);border-radius:1px}
 .homebar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:148px;height:8px;border-radius:8px;background:rgba(0,0,0,.26);z-index:50}
@@ -64,10 +56,8 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .screen{position:absolute;inset:0;padding:20px 30px;opacity:0;transform:translateX(64px);transition:opacity .4s ease,transform .45s var(--eo)}
 .screen.active{opacity:1;transform:none;z-index:2}
 .screen.past{opacity:0;transform:translateX(-52px);transition:opacity .3s ease,transform .35s var(--ei);z-index:1}
-
-/* AI editor */
+/* CV editor */
 .doc{background:#fff;border-radius:22px;padding:24px 26px;box-shadow:0 16px 36px -22px rgba(60,40,16,.5);border:1px solid var(--appline);max-height:560px;overflow:hidden;position:relative}
-.docscroll{transition:transform .6s var(--eo)}
 .doc h4{font-family:var(--fd);font-weight:800;font-size:38px;color:var(--appink)}
 .doc .role{font-size:24px;color:var(--gold);font-weight:800;margin-top:2px}
 .doc .rule{height:3px;background:var(--appline);border-radius:3px;margin:16px 0}
@@ -79,71 +69,64 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .bul p .w{opacity:0;filter:blur(3px);transition:opacity .22s ease,filter .22s ease}
 .bul p .w.on{opacity:1;filter:none}
 .aibar{position:absolute;left:30px;right:30px;bottom:4px;display:flex;align-items:center;gap:13px;background:#201509;color:#fff;border-radius:999px;padding:19px 24px;box-shadow:0 18px 36px -16px rgba(0,0,0,.6);z-index:3}
-.aibar .spark{font-size:29px;color:var(--gold2)}
-.aibar .txt{font-size:24px;font-weight:600;color:#f3e7d4;white-space:nowrap;overflow:hidden}
-.aibar .dots{margin-left:auto;display:flex;gap:6px}
-.aibar .dots i{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:blink 1s infinite}
+.aibar .spark{font-size:29px;color:var(--gold2)}.aibar .txt{font-size:24px;font-weight:600;color:#f3e7d4;white-space:nowrap;overflow:hidden}
+.aibar .dots{margin-left:auto;display:flex;gap:6px}.aibar .dots i{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:blink 1s infinite}
 .aibar .dots i:nth-child(2){animation-delay:.2s}.aibar .dots i:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
 .btn-ai{position:absolute;left:30px;right:30px;bottom:4px;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--gold);color:#201509;border-radius:999px;padding:20px;font-family:var(--fd);font-weight:800;font-size:28px;z-index:4;transition:transform .15s ease,opacity .3s ease}
-.btn-ai.tapped{transform:scale(.95)}
-.btn-ai.gone{opacity:0;pointer-events:none}
-
-/* ATS */
+.btn-ai.tapped{transform:scale(.95)}.btn-ai.gone{opacity:0;pointer-events:none}
+/* Cover letter */
+.letter{background:#fff;border-radius:22px;padding:30px 30px;box-shadow:0 16px 36px -22px rgba(60,40,16,.5);border:1px solid var(--appline);height:100%}
+.letter .lh{font-family:var(--fd);font-weight:800;font-size:34px;color:var(--appink)}
+.letter .lmeta{font-size:21px;color:var(--appmut);font-weight:600;margin-top:4px}
+.letter .lrule{height:3px;background:var(--appline);margin:20px 0}
+.lline{height:16px;border-radius:8px;background:#EEE3D2;margin-bottom:17px;opacity:0;transform:translateY(10px)}
+.lline.in{animation:rise .45s var(--eo) forwards}
+.lline.w1{width:92%}.lline.w2{width:100%}.lline.w3{width:78%}.lline.w4{width:96%}.lline.w5{width:64%}
+.lstamp{margin-top:24px;display:inline-flex;align-items:center;gap:12px;background:#E7F6EC;color:#157A43;font-weight:800;font-size:24px;padding:12px 22px;border-radius:999px;opacity:0;transform:scale(.85)}
+.lstamp.in{animation:pin2 .4s var(--eo) forwards}@keyframes pin2{to{opacity:1;transform:none}}
+/* Tailor / match ring */
 .scrtitle{text-align:center;margin-top:4px;font-family:var(--fd);font-weight:800;font-size:38px;color:var(--appink)}
-.ring{position:relative;width:286px;height:286px;margin:22px auto 8px}
+.jdchip{margin:14px auto 0;width:max-content;max-width:88%;background:#F4ECDF;border:1px dashed #D8C3A2;border-radius:16px;padding:14px 22px;font-size:23px;font-weight:700;color:#6b543a;text-align:center}
+.ring{position:relative;width:270px;height:270px;margin:18px auto 8px}
 .ring svg{transform:rotate(-90deg)}
 .ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring .num{font-family:var(--fd);font-weight:800;font-size:88px;color:var(--appink);line-height:.9}
-.ring .pc{font-size:26px;font-weight:800;color:var(--gold)}
-.chk{display:flex;align-items:center;gap:15px;background:#fff;border:1px solid var(--appline);border-radius:18px;padding:16px 20px;margin-bottom:12px;opacity:0;transform:translateX(-14px)}
+.ring .num{font-family:var(--fd);font-weight:800;font-size:84px;color:var(--appink);line-height:.9}
+.ring .pc{font-size:25px;font-weight:800;color:var(--gold)}
+.chk{display:flex;align-items:center;gap:15px;background:#fff;border:1px solid var(--appline);border-radius:18px;padding:15px 20px;margin-bottom:12px;opacity:0;transform:translateX(-14px)}
 .chk.in{animation:cin .4s var(--eo) forwards}@keyframes cin{to{opacity:1;transform:none}}
-.chk .ck{flex:none;width:42px;height:42px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:800}
-.chk p{font-size:26px;font-weight:700;color:var(--appink)}
-.pass{margin:12px auto 0;width:max-content;background:#E7F6EC;color:#157A43;font-weight:800;font-size:24px;padding:11px 26px;border-radius:999px;letter-spacing:.04em;opacity:0;transform:scale(.8)}
-.pass.in{animation:pin2 .45s var(--eo) forwards}@keyframes pin2{to{opacity:1;transform:none}}
-
-/* Templates */
-.preview{position:relative;height:452px;border-radius:20px;overflow:hidden;background:#fff;border:1px solid var(--appline);box-shadow:0 16px 36px -22px rgba(60,40,16,.45);margin-top:4px}
-.tpl{position:absolute;inset:0;padding:28px;opacity:0;transform:scale(1.04);transition:opacity .4s ease,transform .5s var(--eo)}
-.tpl.on{opacity:1;transform:none}
-.tpl .tname{font-family:var(--fd);font-weight:800;font-size:42px;letter-spacing:-.01em}
-.tpl .tsub{font-size:22px;font-weight:700;margin-top:3px}
-.tpl .bar{height:12px;border-radius:12px;margin-top:20px;opacity:.9}
-.tpl .ln{height:10px;border-radius:10px;background:#E7DDCC;margin-top:15px}
-.tpl .ln.s{width:60%}.tpl .ln.m{width:84%}
-.tpl .side{position:absolute;top:28px;bottom:28px;width:8px;border-radius:8px}
-.t-rift{background:#fff}.t-rift .tname{color:#1d2733}.t-rift .tsub{color:#C2703A}.t-rift .bar{background:#1d2733}.t-rift .side{left:0;background:#C2703A}
-.t-zah{background:#1A130D}.t-zah .tname{color:#FFC46B}.t-zah .tsub{color:#E7D7BC}.t-zah .bar{background:#F2A93B}.t-zah .ln{background:#3a2e20}.t-zah .side{right:0;background:#F2A93B}
-.t-nuru{background:#F4F7FB}.t-nuru .tname{color:#143E66}.t-nuru .tsub{color:#2E7DBE}.t-nuru .bar{background:#2E7DBE}.t-nuru .ln{background:#D8E4F0}
-.thumbs{display:flex;gap:15px;margin-top:20px;justify-content:center}
-.thumb{width:148px;height:90px;border-radius:14px;border:3px solid transparent;overflow:hidden;position:relative;transition:border-color .3s,transform .3s var(--eo)}
-.thumb.sel{border-color:var(--gold);transform:translateY(-5px)}
-.thumb span{position:absolute;left:12px;top:12px;font-family:var(--fd);font-weight:800;font-size:19px}
-.th-rift{background:#fff}.th-rift span{color:#1d2733}.th-zah{background:#1A130D}.th-zah span{color:#FFC46B}.th-nuru{background:#F4F7FB}.th-nuru span{color:#143E66}
-.tplcount{text-align:center;margin-top:14px;font-size:25px;font-weight:800;color:var(--gold)}
-
-/* WIN / outcome */
-#sc-win{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
-.wcheck{width:150px;height:150px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:86px;font-weight:800;opacity:0;transform:scale(.4)}
+.chk .ck{flex:none;width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
+.chk p{font-size:25px;font-weight:700;color:var(--appink)}
+/* Download */
+.dlwrap{display:flex;flex-direction:column;gap:20px;margin-top:40px}
+.dlcard{background:#fff;border:1px solid var(--appline);border-radius:22px;padding:26px;box-shadow:0 16px 36px -22px rgba(60,40,16,.45)}
+.dlrow{display:flex;align-items:center;gap:18px}
+.dlic{flex:none;width:72px;height:88px;border-radius:12px;background:#E9453B;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:12px}
+.dlic b{color:#fff;font-family:var(--fd);font-weight:800;font-size:24px}
+.dlic::before{content:"";position:absolute;top:0;right:0;border-width:0 22px 22px 0;border-style:solid;border-color:#fff #fff #E9453B #E9453B;border-radius:0 0 0 6px}
+.dlmeta b{display:block;font-family:var(--fd);font-weight:800;font-size:30px;color:var(--appink)}
+.dlmeta span{font-size:22px;color:var(--appmut);font-weight:600}
+.pbar{height:16px;border-radius:10px;background:#EFE4D2;margin-top:24px;overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:10px;transition:width 1.6s cubic-bezier(.3,.8,.3,1)}
+.dldone{margin-top:20px;display:none;align-items:center;gap:14px;justify-content:center;color:#157A43;font-weight:800;font-size:28px}
+.dldone.in{display:flex;animation:pin2 .4s var(--eo)}
+.sendbtn{margin-top:26px;background:#201509;color:#fff;border-radius:999px;padding:22px;text-align:center;font-family:var(--fd);font-weight:800;font-size:30px}
+/* Win */
+#sc-send{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+.wcheck{width:148px;height:148px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:84px;font-weight:800;opacity:0;transform:scale(.4)}
 .wcheck.in{animation:wc .55s var(--eo) forwards}@keyframes wc{60%{transform:scale(1.12)}100%{opacity:1;transform:scale(1)}}
-.wtitle{font-family:var(--fd);font-weight:800;font-size:46px;color:var(--appink);opacity:0;transform:translateY(14px)}
+.wtitle{font-family:var(--fd);font-weight:800;font-size:44px;color:var(--appink);opacity:0;transform:translateY(14px)}
 .wtitle.in{animation:cin .45s .15s var(--eo) forwards}
 .notif{width:100%;background:#fff;border:1px solid var(--appline);border-radius:22px;padding:22px 24px;display:flex;gap:16px;align-items:center;text-align:left;box-shadow:0 20px 44px -20px rgba(60,40,16,.5);opacity:0;transform:translateY(-70px)}
 .notif.in{animation:ndrop .6s cubic-bezier(.2,.9,.25,1.1) forwards}@keyframes ndrop{to{opacity:1;transform:none}}
 .notif .ni{flex:none;width:58px;height:58px;border-radius:16px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:32px}
 .notif .nt b{display:block;font-family:var(--fd);font-weight:800;font-size:27px;color:var(--appink)}
 .notif .nt span{font-size:23px;color:var(--appmut);font-weight:600}
-
-/* TAP cue */
 .tap{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;z-index:80;pointer-events:none;opacity:0}
 .tap.go{animation:tapgo .7s ease-out}
 .tap::before,.tap::after{content:"";position:absolute;inset:0;border-radius:50%}
-.tap::before{background:rgba(242,169,59,.5)}
-.tap::after{border:4px solid rgba(255,196,107,.9)}
+.tap::before{background:rgba(242,169,59,.5)}.tap::after{border:4px solid rgba(255,196,107,.9)}
 @keyframes tapgo{0%{opacity:0;transform:scale(.2)}20%{opacity:1}100%{opacity:0;transform:scale(1.5)}}
-
-/* PRICE */
 #price{display:flex;flex-direction:column;justify-content:center;padding:120px 96px;gap:24px}
 .peb{font-family:var(--fd);font-weight:700;font-size:31px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 .tier{display:flex;align-items:baseline;justify-content:space-between;gap:22px;padding:34px 42px;border-radius:28px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.12)}
@@ -153,37 +136,30 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
 .tier .p small{font-size:.46em;font-weight:700}
 .tier .bdg{font-size:23px;font-weight:800;color:#201509;background:var(--gold);padding:7px 15px;border-radius:999px;align-self:center}
 .freeline{margin-top:8px;font-size:48px;color:var(--sand)}.freeline b{color:var(--cream)}
-
-/* END */
 #end{display:flex;flex-direction:column;justify-content:space-between;padding:150px 96px 150px}
 .wordmark{font-family:var(--fd);font-weight:800;font-size:166px;letter-spacing:-.03em;color:var(--cream);line-height:.9}
 .brandtag{font-family:var(--fd);font-weight:800;font-size:63px;color:var(--gold);margin-top:16px}
 .endrow{display:flex;align-items:center;gap:44px}
 .qrtile{flex:none;background:var(--cream);border-radius:28px;padding:24px;line-height:0}
-.qrtile canvas{display:block!important;width:240px!important;height:240px!important}
-.qrtile img{display:none!important}
+.qrtile canvas{display:block!important;width:240px!important;height:240px!important}.qrtile img{display:none!important}
 .cta{align-self:flex-start;font-family:var(--fd);font-weight:800;font-size:49px;color:#201509;background:var(--gold);padding:25px 50px;border-radius:999px}
 .url{font-family:var(--fd);font-weight:700;font-size:64px;color:var(--gold)}
-.endcard .rise{animation-duration:.55s}
-
 .bar-prog{position:absolute;left:0;bottom:0;height:9px;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0;z-index:90;box-shadow:0 0 16px rgba(242,169,59,.6)}
 </style></head><body>
 <div class="stage">
   <div class="bg"></div><div class="orb"></div><div class="orb2"></div><div class="grain"></div><div class="vig"></div>
-
   <section class="layer on" id="hook">
     <div class="kick rise d1">Stationery &middot; 2,000/=</div>
     <div class="hl rise d2">Bado unalipa <em>kuandika</em> CV <span class="strike">tu</span>?</div>
     <div class="hooksub rise d3">Maudhui ni yako. Wewe ndiye unafikiri. Wanachapa tu.</div>
   </section>
-
   <div class="caps" id="caps">
-    <div class="cap" id="c1"><div class="eb">Mhariri wa AI</div><div class="ct">AI inakuandikia CV&mdash;Kiswahili au Kiingereza.</div></div>
-    <div class="cap" id="c2"><div class="eb">Ukaguzi wa ATS</div><div class="ct">Inashinda mfumo wa ATS.</div></div>
-    <div class="cap" id="c3"><div class="eb">Templates 47+</div><div class="ct">Mitindo ya kitaalamu, mguso mmoja.</div></div>
-    <div class="cap" id="c4"><div class="eb">Matokeo</div><div class="ct">Unapata usaili wa kazi.</div></div>
+    <div class="cap" id="c-cv"><div class="eb">Mhariri wa AI</div><div class="ct">Inakuandikia CV yako.</div></div>
+    <div class="cap" id="c-letter"><div class="eb">Si CV tu</div><div class="ct">Pia barua ya kazi.</div></div>
+    <div class="cap" id="c-tailor"><div class="eb">Imelengwa</div><div class="ct">Kuendana na kazi unayoomba.</div></div>
+    <div class="cap" id="c-dl"><div class="eb">Tayari</div><div class="ct">Download PDF &mdash; kwa mguso mmoja.</div></div>
+    <div class="cap" id="c-send"><div class="eb">Tuma</div><div class="ct">Mtumie mwajiri. Omba haraka zaidi.</div></div>
   </div>
-
   <section class="layer" id="device">
     <div class="phone" id="phone">
       <div class="screenwrap">
@@ -191,9 +167,8 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
         <div class="statusbar"><span>9:41</span><div class="sb-r"><i style="width:20px"></i><i style="width:22px"></i><i class="bat"></i></div></div>
         <div class="appbar"><span class="wm">Sumaiya</span><div class="lang"><span class="a">SW</span><span>EN</span></div></div>
         <div class="screens">
-          <!-- AI editor -->
-          <div class="screen active" id="sc-ai">
-            <div class="doc"><div class="docscroll" id="docscroll">
+          <div class="screen active" id="sc-cv">
+            <div class="doc"><div id="docscroll">
               <h4>Juma Hassan</h4><div class="role">Meneja wa Mauzo</div><div class="rule"></div>
               <div class="sec">Uzoefu</div>
               <div class="bul" id="b1"><span class="dot"></span><p data-text="Niliongoza timu ya wauzaji sita; mauzo +40% kwa mwaka."></p></div>
@@ -203,35 +178,38 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
             <button class="btn-ai" id="btnai"><span>&#10022;</span>Tengeneza kwa AI</button>
             <div class="aibar" id="aibar" style="opacity:0"><span class="spark">&#10022;</span><span class="txt" id="aitxt">Sumaiya inafikiri</span><span class="dots"><i></i><i></i><i></i></span></div>
           </div>
-          <!-- ATS -->
-          <div class="screen" id="sc-ats">
-            <div class="scrtitle">Alama ya ATS</div>
-            <div class="ring"><svg width="286" height="286" viewBox="0 0 286 286">
-              <circle cx="143" cy="143" r="124" fill="none" stroke="#ECE0CE" stroke-width="25"/>
-              <circle id="ringfg" cx="143" cy="143" r="124" fill="none" stroke="#1E9E5A" stroke-width="25" stroke-linecap="round" stroke-dasharray="779.1" stroke-dashoffset="779.1"/></svg>
-              <div class="val"><div class="num" id="atsnum">54</div><div class="pc">kati ya 100</div></div></div>
-            <div class="chk" id="k1"><span class="ck">&#10003;</span><p>Maneno muhimu yamo</p></div>
-            <div class="chk" id="k2"><span class="ck">&#10003;</span><p>Muundo unaosomeka na ATS</p></div>
-            <div class="chk" id="k3"><span class="ck">&#10003;</span><p>Urefu na mpangilio sahihi</p></div>
-            <div class="pass" id="atspass">IMEPITA &middot; TAYARI KUTUMA</div>
-          </div>
-          <!-- Templates -->
-          <div class="screen" id="sc-tpl">
-            <div class="scrtitle">Chagua mtindo</div>
-            <div class="preview">
-              <div class="tpl t-rift on" id="tp0"><div class="side"></div><div class="tname">Juma Hassan</div><div class="tsub">Meneja wa Mauzo</div><div class="bar" style="width:70%"></div><div class="ln m"></div><div class="ln s"></div><div class="ln m"></div><div class="ln s"></div></div>
-              <div class="tpl t-zah" id="tp1"><div class="side"></div><div class="tname">Juma Hassan</div><div class="tsub">Meneja wa Mauzo</div><div class="bar" style="width:70%"></div><div class="ln m"></div><div class="ln s"></div><div class="ln m"></div><div class="ln s"></div></div>
-              <div class="tpl t-nuru" id="tp2"><div class="tname">Juma Hassan</div><div class="tsub">Meneja wa Mauzo</div><div class="bar" style="width:70%"></div><div class="ln m"></div><div class="ln s"></div><div class="ln m"></div><div class="ln s"></div></div>
+          <div class="screen" id="sc-letter">
+            <div class="letter">
+              <div class="lh">Barua ya Maombi</div><div class="lmeta">Kwa: Meneja wa Rasilimali Watu</div>
+              <div class="lrule"></div>
+              <div class="lline w2" id="l1"></div><div class="lline w1" id="l2"></div>
+              <div class="lline w4" id="l3"></div><div class="lline w3" id="l4"></div>
+              <div class="lline w4" id="l5"></div><div class="lline w5" id="l6"></div>
+              <div class="lstamp" id="lstamp"><span>&#10022;</span> Imeandikwa na AI</div>
             </div>
-            <div class="thumbs">
-              <div class="thumb th-rift sel" id="th0"><span>Rift</span></div>
-              <div class="thumb th-zah" id="th1"><span>Zahabu</span></div>
-              <div class="thumb th-nuru" id="th2"><span>Nuru</span></div>
-            </div>
-            <div class="tplcount">+ templates 44 zaidi</div>
           </div>
-          <!-- WIN -->
-          <div class="screen" id="sc-win">
+          <div class="screen" id="sc-tailor">
+            <div class="scrtitle">Imelengwa kwa kazi</div>
+            <div class="jdchip" id="jdchip">&#128221; Tangazo: &ldquo;Meneja wa Mauzo &middot; Uzoefu 3+&rdquo;</div>
+            <div class="ring"><svg width="270" height="270" viewBox="0 0 270 270">
+              <circle cx="135" cy="135" r="116" fill="none" stroke="#ECE0CE" stroke-width="24"/>
+              <circle id="ringfg" cx="135" cy="135" r="116" fill="none" stroke="#1E9E5A" stroke-width="24" stroke-linecap="round" stroke-dasharray="728.8" stroke-dashoffset="728.8"/></svg>
+              <div class="val"><div class="num" id="matchnum">61</div><div class="pc">ulinganifu</div></div></div>
+            <div class="chk" id="k1"><span class="ck">&#10003;</span><p>Maneno muhimu ya tangazo</p></div>
+            <div class="chk" id="k2"><span class="ck">&#10003;</span><p>Inapita mfumo wa ATS</p></div>
+          </div>
+          <div class="screen" id="sc-dl">
+            <div class="scrtitle">Nyaraka zako</div>
+            <div class="dlwrap">
+              <div class="dlcard">
+                <div class="dlrow"><div class="dlic"><b>PDF</b></div><div class="dlmeta"><b>CV_Juma_Hassan.pdf</b><span>A4 &middot; kurasa 1 &middot; ATS-safe</span></div></div>
+                <div class="pbar"><i id="pbar"></i></div>
+                <div class="dldone" id="dldone"><span style="color:#1E9E5A">&#10003;</span> Imepakuliwa</div>
+              </div>
+              <div class="sendbtn">Tuma kwa mwajiri &rarr;</div>
+            </div>
+          </div>
+          <div class="screen" id="sc-send">
             <div class="wcheck" id="wcheck">&#10003;</div>
             <div class="wtitle" id="wtitle">Maombi yametumwa!</div>
             <div class="notif" id="notif"><div class="ni">&#128233;</div><div class="nt"><b>Umealikwa kwa usaili</b><span>Meneja wa Mauzo &middot; Kesho 10:00</span></div></div>
@@ -242,95 +220,91 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#0E0A07}
       </div>
     </div>
   </section>
-
   <section class="layer" id="price">
-    <div class="peb">Bei nafuu kuliko stationery</div>
+    <div class="peb">Anza bure &middot; lipia ukiridhika</div>
     <div class="tier"><b>Siku</b><span class="p" data-to="1000">0<small>/=</small></span></div>
     <div class="tier hot"><b>Wiki</b><span class="bdg">POPULAR</span><span class="p" data-to="3000">0<small>/=</small></span></div>
     <div class="tier"><b>Mwezi</b><span class="p" data-to="7000">0<small>/=</small></span></div>
-    <div class="freeline"><b>Anza BURE.</b> Tengeneza &amp; pakua PDF bila kulipa.</div>
+    <div class="freeline"><b>Anza BURE.</b> Jaribu, kisha ulipie ukiridhika.</div>
   </section>
-
   <section class="layer endcard" id="end">
     <div><div class="kick rise d1" style="margin-bottom:20px">Pakua app &middot; bure</div>
       <div class="rise d2"><div class="wordmark">Sumaiya</div><div class="brandtag">AI ya CV na Kazi</div></div></div>
     <div class="endrow rise d3"><div class="qrtile"><div id="qr"></div></div>
       <div style="display:flex;flex-direction:column;gap:22px"><span class="cta">Pakua app</span><span class="url">sumaiya.app/pakua</span></div></div>
   </section>
-
   <div class="bar-prog" id="prog"></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 try{ if(window.QRCode) new QRCode(document.getElementById("qr"),{text:"https://sumaiya.app/pakua",width:240,height:240,colorDark:"#1C1510",colorLight:"#FBF5EC",correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
 var $=function(id){return document.getElementById(id);};
-var T={p1:4700,p2:10000,p3:14300,p4:18800,price:22300,end:26700,total:31700};
+var T={cv:2800,letter:9500,tailor:14300,dl:19000,send:23000,price:27200,end:36800,total:40200};
 window.__done=false;
 function on(id){$(id).classList.add("on");}function off(id){$(id).classList.remove("on");}
 function at(ms,fn){setTimeout(fn,ms);}
-
-// split bullet text into word spans
 function prep(id){var p=$(id).querySelector("p");var ws=p.getAttribute("data-text").split(" ");p.innerHTML=ws.map(function(w){return '<span class="w">'+w+'</span>';}).join(" ");}
-function stream(id,done){ $(id).classList.add("lit"); var ws=$(id).querySelectorAll(".w"); ws.forEach(function(w,i){at(i*85,function(){w.classList.add("on");});}); if(done)at(ws.length*85+120,done); }
-// tap cue at element center (within phone coords)
+function stream(id){ $(id).classList.add("lit"); $(id).querySelectorAll(".w").forEach(function(w,i){at(i*80,function(){w.classList.add("on");});}); }
 function tap(target){ var ph=$("phone").getBoundingClientRect(); var r=$(target).getBoundingClientRect();
   var t=$("tap"); t.style.left=(r.left-ph.left+r.width/2)+"px"; t.style.top=(r.top-ph.top+r.height/2)+"px";
   t.classList.remove("go"); void t.offsetWidth; t.classList.add("go"); }
 function goScreen(fromId,toId){ var f=$(fromId); f.classList.remove("active"); f.classList.add("past"); var n=$(toId); n.classList.remove("past"); n.classList.add("active"); }
+function capShow(id){ ["c-cv","c-letter","c-tailor","c-dl","c-send"].forEach(function(c){$(c).classList.toggle("show",c===id);}); }
 
 function run(){
   $("prog").style.transition="width "+T.total+"ms linear"; $("prog").style.width="100%";
   ["b1","b2","b3"].forEach(prep);
-
-  // P1 — AI editor
-  at(T.p1,function(){
-    off("hook"); on("device"); $("phone").classList.add("in"); $("c1").classList.add("show");
-    at(650,function(){ tap("btnai"); $("btnai").classList.add("tapped"); });
-    at(850,function(){ $("btnai").classList.add("gone"); $("aibar").style.transition="opacity .3s"; $("aibar").style.opacity="1"; });
-    at(1650,function(){ $("aitxt").textContent="Inaandika CV yako"; });
-    at(1750,function(){ stream("b1"); });
-    at(2550,function(){ stream("b2"); $("docscroll").style.transform="translateY(-14px)"; });
-    at(3350,function(){ stream("b3",function(){ $("aitxt").textContent="Imekamilika ✓"; }); $("docscroll").style.transform="translateY(-30px)"; });
+  // CV
+  at(T.cv,function(){
+    off("hook"); on("device"); $("phone").classList.add("in"); capShow("c-cv");
+    at(700,function(){ tap("btnai"); $("btnai").classList.add("tapped"); });
+    at(900,function(){ $("btnai").classList.add("gone"); $("aibar").style.transition="opacity .3s"; $("aibar").style.opacity="1"; });
+    at(1750,function(){ $("aitxt").textContent="Inaandika CV yako"; });
+    at(1850,function(){ stream("b1"); });
+    at(2750,function(){ stream("b2"); });
+    at(3650,function(){ stream("b3"); $("aitxt").textContent="Imekamilika ✓"; });
   });
-  // P2 — ATS
-  at(T.p2,function(){
-    $("c1").classList.remove("show"); goScreen("sc-ai","sc-ats"); $("c2").classList.add("show");
-    at(520,function(){
-      var fg=$("ringfg"),numEl=$("atsnum"),C=779.1,from=54,to=96,start=null,dur=1400;
+  // Letter
+  at(T.letter,function(){
+    goScreen("sc-cv","sc-letter"); capShow("c-letter");
+    ["l1","l2","l3","l4","l5","l6"].forEach(function(id,i){ at(300+i*230,function(){$(id).classList.add("in");}); });
+    at(1900,function(){ $("lstamp").classList.add("in"); });
+  });
+  // Tailor
+  at(T.tailor,function(){
+    goScreen("sc-letter","sc-tailor"); capShow("c-tailor");
+    at(500,function(){
+      var fg=$("ringfg"),numEl=$("matchnum"),C=728.8,from=61,to=97,start=null,dur=1300;
       fg.style.transition="stroke-dashoffset "+dur+"ms cubic-bezier(.3,.8,.3,1)";
       fg.style.strokeDashoffset=(C*(1-to/100)).toFixed(1);
       function step(ts){if(!start)start=ts;var p=Math.min(1,(ts-start)/dur);numEl.textContent=Math.round(from+(to-from)*p);if(p<1)requestAnimationFrame(step);}
       requestAnimationFrame(step);
     });
-    at(800,function(){$("k1").classList.add("in");});
-    at(1150,function(){$("k2").classList.add("in");});
-    at(1500,function(){$("k3").classList.add("in");});
-    at(2050,function(){$("atspass").classList.add("in");});
+    at(850,function(){$("k1").classList.add("in");});
+    at(1250,function(){$("k2").classList.add("in");});
   });
-  // P3 — Templates
-  at(T.p3,function(){
-    $("c2").classList.remove("show"); goScreen("sc-ats","sc-tpl"); $("c3").classList.add("show");
-    function pick(i){for(var j=0;j<3;j++){$("tp"+j).classList.toggle("on",j===i);$("th"+j).classList.toggle("sel",j===i);}}
-    at(850,function(){ tap("th1"); pick(1); });
-    at(2100,function(){ tap("th2"); pick(2); });
-    at(3300,function(){ tap("th0"); pick(0); });
+  // Download
+  at(T.dl,function(){
+    goScreen("sc-tailor","sc-dl"); capShow("c-dl");
+    at(450,function(){ $("pbar").style.width="100%"; });
+    at(2150,function(){ $("dldone").classList.add("in"); });
   });
-  // P4 — Win / outcome
-  at(T.p4,function(){
-    $("c3").classList.remove("show"); goScreen("sc-tpl","sc-win"); $("c4").classList.add("show");
+  // Send
+  at(T.send,function(){
+    goScreen("sc-dl","sc-send"); capShow("c-send");
     at(350,function(){$("wcheck").classList.add("in");});
     at(600,function(){$("wtitle").classList.add("in");});
     at(1150,function(){$("notif").classList.add("in");});
   });
   // Price
   at(T.price,function(){
-    off("device"); $("c4").classList.remove("show"); on("price");
+    off("device"); capShow("");
+    on("price");
     at(220,function(){ document.querySelectorAll("#price .p").forEach(function(el){
       var to=+el.getAttribute("data-to"),start=null,dur=850;
       function step(ts){if(!start)start=ts;var p=Math.min(1,(ts-start)/dur);var v=Math.round(to*p/50)*50;el.innerHTML=v.toLocaleString("en-US")+"<small>/=</small>";if(p<1)requestAnimationFrame(step);}
       requestAnimationFrame(step);}); });
   });
-  // End
   at(T.end,function(){ off("price"); on("end"); });
   at(T.total+900,function(){ window.__done=true; });
 }
