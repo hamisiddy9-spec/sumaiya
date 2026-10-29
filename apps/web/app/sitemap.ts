@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: baseUrl, priority: 1.0, changeFrequency: "weekly" },
     { url: `${baseUrl}/templates`, priority: 0.9, changeFrequency: "weekly" },
     { url: `${baseUrl}/pricing`, priority: 0.7, changeFrequency: "monthly" },
+    { url: `${baseUrl}/pakua`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${baseUrl}/tools`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${baseUrl}/ats-checker`, priority: 0.8, changeFrequency: "monthly" },
     { url: `${baseUrl}/snap-to-apply`, priority: 0.8, changeFrequency: "weekly" },
