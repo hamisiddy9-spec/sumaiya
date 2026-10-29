@@ -72,17 +72,17 @@ export default function PricingPage({ params }: { params: { locale: string } }) 
               </Link>
             </section>
 
-            {/* Premium */}
+            {/* Premium — access passes */}
             <section className="rounded-2xl bg-espresso text-cream p-7 shadow-sm relative overflow-hidden">
-              <h2 className="font-display font-bold mb-1">{sw ? "Premium" : "Premium"}</h2>
+              <h2 className="font-display font-bold mb-1">Premium</h2>
               <p className="font-display font-extrabold text-3xl mb-1">
-                {formatTzs(PLANS.monthly.amount.TZS)}
-                <span className="text-cream/70 text-base font-normal">{sw ? " / mwezi" : " / month"}</span>
+                {sw ? "Kuanzia " : "From "}{formatTzs(PLANS.day.amount.TZS)}
+                <span className="text-cream/70 text-base font-normal">{sw ? " / siku" : " / day"}</span>
               </p>
               <p className="text-cream/70 text-sm mb-5">
                 {sw
-                  ? `au ${formatTzs(PLANS.annual.amount.TZS)} kwa mwaka (miezi 2 bure)`
-                  : `or ${formatTzs(PLANS.annual.amount.TZS)} a year (2 months free)`}
+                  ? "Lipa unapotafuta kazi. Ukipata, unaacha."
+                  : "Pay while you job-hunt. Get hired, you stop."}
               </p>
               <ul className="space-y-2.5 mb-6">
                 {premiumPerks.map((p) => (
@@ -96,16 +96,22 @@ export default function PricingPage({ params }: { params: { locale: string } }) 
               {PAYMENTS_ENABLED ? (
                 <div className="space-y-2.5">
                   <Link
-                    href="/checkout?plan=monthly"
+                    href="/checkout?plan=day"
                     className="block text-center rounded-xl bg-cream px-4 py-3 font-semibold text-espresso hover:opacity-90 transition-opacity"
                   >
-                    {sw ? `Lipa kwa mwezi — ${formatTzs(PLANS.monthly.amount.TZS)}` : `Go monthly — ${formatTzs(PLANS.monthly.amount.TZS)}`}
+                    {sw ? `Siku moja — ${formatTzs(PLANS.day.amount.TZS)}` : `Day — ${formatTzs(PLANS.day.amount.TZS)}`}
                   </Link>
                   <Link
-                    href="/checkout?plan=annual"
+                    href="/checkout?plan=week"
                     className="block text-center rounded-xl border border-cream/30 px-4 py-3 font-semibold text-cream hover:bg-cream/10 transition-colors"
                   >
-                    {sw ? `Lipa kwa mwaka — ${formatTzs(PLANS.annual.amount.TZS)}` : `Go annual — ${formatTzs(PLANS.annual.amount.TZS)}`}
+                    {sw ? `Wiki — ${formatTzs(PLANS.week.amount.TZS)}` : `Week — ${formatTzs(PLANS.week.amount.TZS)}`}
+                  </Link>
+                  <Link
+                    href="/checkout?plan=month"
+                    className="block text-center rounded-xl border border-cream/30 px-4 py-3 font-semibold text-cream hover:bg-cream/10 transition-colors"
+                  >
+                    {sw ? `Mwezi — ${formatTzs(PLANS.month.amount.TZS)}` : `Month — ${formatTzs(PLANS.month.amount.TZS)}`}
                   </Link>
                 </div>
               ) : (

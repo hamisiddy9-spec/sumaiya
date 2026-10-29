@@ -15,7 +15,7 @@ export default async function CheckoutPage({
   searchParams: Promise<{ plan?: string }>;
 }) {
   const { plan: planParam } = await searchParams;
-  const plan: PlanId = isPlanId(planParam ?? "") ? (planParam as PlanId) : "monthly";
+  const plan: PlanId = isPlanId(planParam ?? "") ? (planParam as PlanId) : "week";
 
   const supabase = await createSupabaseServerClient();
   const {
