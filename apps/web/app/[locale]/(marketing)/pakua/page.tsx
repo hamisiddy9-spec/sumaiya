@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Download, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { MarketingNav } from "@/components/ui/marketing-nav";
 import { Footer } from "@/components/ui/footer";
+import { DownloadApkButton } from "@/components/marketing/download-apk-button";
 import { alternatesFor } from "@/lib/seo";
 
 // Where the signed release APK is served from. Build it with EAS, then drop the
@@ -74,14 +75,10 @@ export default function PakuaPage({ params }: { params: { locale: string } }) {
           </header>
 
           <div className="flex flex-col items-center gap-3 mb-12">
-            <a
+            <DownloadApkButton
               href={APK_URL}
-              download
-              className="inline-flex items-center gap-2.5 rounded-2xl bg-espresso px-8 py-4 font-display font-bold text-lg text-cream shadow-sm hover:opacity-90 transition-opacity"
-            >
-              <Download className="h-5 w-5" aria-hidden="true" />
-              {sw ? "Pakua app — ni bure" : "Download app — free"}
-            </a>
+              label={sw ? "Pakua app — ni bure" : "Download app — free"}
+            />
             <p className="text-xs text-text-muted">
               Android · APK · v{APK_VERSION} ·{" "}
               <span>{sw ? "haina gharama" : "no cost"}</span>
