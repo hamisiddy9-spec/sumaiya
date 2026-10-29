@@ -158,6 +158,8 @@ export interface AnalyticsEventMap {
   referral_premium_granted: { days: number; premiumUntil: string };
   pwa_installed: void;
   web_push_subscribed: void;
+  /** The APK download button on /pakua was tapped — the ad → install step. */
+  app_download_clicked: void;
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventMap;
@@ -206,6 +208,7 @@ export const EVENTS = Object.freeze(
       "referral_premium_granted",
       "pwa_installed",
       "web_push_subscribed",
+      "app_download_clicked",
     ] as const satisfies readonly AnalyticsEventName[]
   ).reduce(
     (acc, name) => {

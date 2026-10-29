@@ -183,17 +183,17 @@ describe("response parsing (real sandbox shapes)", () => {
 });
 
 describe("plans", () => {
-  it("prices monthly at TSh 5,000, annual at TSh 50,000, test at TSh 1,000", () => {
-    expect(planAmount("monthly", "TZS")).toBe(5000);
-    expect(planAmount("annual", "TZS")).toBe(50000);
-    expect(planAmount("test", "TZS")).toBe(1000);
-    expect(PLANS.monthly.days).toBe(30);
-    expect(PLANS.annual.days).toBe(365);
-    expect(PLANS.test.days).toBe(1);
+  it("prices day 1,000 / week 3,000 / month 7,000", () => {
+    expect(planAmount("day", "TZS")).toBe(1000);
+    expect(planAmount("week", "TZS")).toBe(3000);
+    expect(planAmount("month", "TZS")).toBe(7000);
+    expect(PLANS.day.days).toBe(1);
+    expect(PLANS.week.days).toBe(7);
+    expect(PLANS.month.days).toBe(30);
   });
 
   it("isPlanId guards unknown plans", () => {
-    expect(isPlanId("monthly")).toBe(true);
+    expect(isPlanId("day")).toBe(true);
     expect(isPlanId("lifetime")).toBe(false);
   });
 });

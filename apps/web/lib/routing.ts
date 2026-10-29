@@ -39,6 +39,7 @@ export const MARKETING_PREFIXES = [
   "/ats-checker",
   "/snap-to-apply",
   "/preview",
+  "/pakua",
   "/app",
 ];
 
